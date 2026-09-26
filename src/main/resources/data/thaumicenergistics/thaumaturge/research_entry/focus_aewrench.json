@@ -1,0 +1,34 @@
+{
+  "category": "thaumicenergistics:thaumicenergistics",
+  "name": "tc.research_name.FOCUS_AEWRENCH",
+  "parents": [
+    "thaumicenergistics:base_energistics"
+  ],
+  "column": 2,
+  "row": 2,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics:focus_aewrench"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.FOCUS_AEWRENCH",
+      "required_knowledge": [
+        {
+          "type": "observation",
+          "category": "thaumicenergistics:thaumicenergistics",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.FOCUS_AEWRENCH",
+      "recipes": [
+        "thaumicenergistics:focus_aewrench"
+      ]
+    }
+  ],
+  "complexity": 1
+}

@@ -1,0 +1,46 @@
+{
+  "category": "thaumicenergistics:thaumicenergistics",
+  "name": "tc.research_name.INFUSIONMONITOR",
+  "parents": [
+    "thaumicenergistics:infusion_provider",
+    "thaumaturge:infusion"
+  ],
+  "column": 2,
+  "row": -6,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics:infusion_monitor"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.INFUSIONMONITOR.stage.1",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics:thaumicenergistics",
+          "amount": 1
+        },
+        {
+          "type": "theory",
+          "category": "thaumicenergistics:thaumicenergistics",
+          "amount": 1
+        },
+        {
+          "type": "theory",
+          "category": "thaumicenergistics:thaumicenergistics",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.INFUSIONMONITOR.stage.2",
+      "recipes": [
+        "thaumicenergistics:infusion_monitor"
+      ],
+      "warp": 1
+    }
+  ],
+  "complexity": 3
+}

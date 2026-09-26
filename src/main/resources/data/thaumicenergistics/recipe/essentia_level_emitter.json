@@ -1,0 +1,25 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "_note": "The reference build's ESSENTIA_LEVEL_EMITTER: a calculation processor, a redstone torch and salis mundus, at four ignis. Written shaped rather than shapeless so the ingredients read as the thing they build.",
+  "crystals": [],
+  "key": {
+    "P": {
+      "item": "ae2:calculation_processor"
+    },
+    "R": {
+      "item": "minecraft:redstone_torch"
+    },
+    "S": {
+      "item": "thaumaturge:salis_mundus"
+    }
+  },
+  "pattern": [
+    "PS",
+    "R "
+  ],
+  "vis": 40,
+  "result": {
+    "id": "thaumicenergistics:essentia_level_emitter",
+    "count": 1
+  }
+}

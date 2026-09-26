@@ -1,0 +1,28 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "_note": "The 1.12.2 build's ESSENTIA_IMPORT_BUS: salis mundus, a diffusion core, two iron ingots and an essentia tube. The newer reference adds a jar of essentia, which Thaumaturge has no item for.",
+  "crystals": [],
+  "key": {
+    "S": {
+      "item": "thaumaturge:salis_mundus"
+    },
+    "C": {
+      "item": "thaumicenergistics:diffusion_core"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "T": {
+      "item": "thaumaturge:tube"
+    }
+  },
+  "pattern": [
+    "SCS",
+    "ITI"
+  ],
+  "vis": 20,
+  "result": {
+    "id": "thaumicenergistics:essentia_import_bus",
+    "count": 1
+  }
+}

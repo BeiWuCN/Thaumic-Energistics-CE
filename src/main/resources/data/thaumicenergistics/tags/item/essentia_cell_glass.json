@@ -1,0 +1,8 @@
+{
+  "_note": "The glass a storage casing is built from. Both are real: AE2 registers quartz_glass and Thaumaturge warded_glass.",
+  "replace": false,
+  "values": [
+    "ae2:quartz_glass",
+    "thaumaturge:warded_glass"
+  ]
+}

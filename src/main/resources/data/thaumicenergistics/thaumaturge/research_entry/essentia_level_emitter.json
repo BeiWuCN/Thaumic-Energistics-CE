@@ -1,0 +1,34 @@
+{
+  "category": "thaumicenergistics:thaumicenergistics",
+  "name": "tc.research_name.ESSENTIALEVELEMITTER",
+  "parents": [
+    "thaumicenergistics:essentia_buses"
+  ],
+  "column": 6,
+  "row": -2,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics:essentia_level_emitter"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.ESSENTIALEVELEMITTER",
+      "required_knowledge": [
+        {
+          "type": "observation",
+          "category": "thaumicenergistics:thaumicenergistics",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.ESSENTIALEVELEMITTER",
+      "recipes": [
+        "thaumicenergistics:essentia_level_emitter"
+      ]
+    }
+  ],
+  "complexity": 2
+}

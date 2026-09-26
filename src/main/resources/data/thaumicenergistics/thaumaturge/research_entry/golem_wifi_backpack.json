@@ -1,0 +1,45 @@
+{
+  "category": "thaumicenergistics:thaumicenergistics",
+  "name": "tc.research_name.GOLEMWIFI",
+  "parents": [
+    "thaumicenergistics:essentia_terminal",
+    "thaumicenergistics:essentia_provider"
+  ],
+  "column": 4,
+  "row": -4,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics:golem_wifi_backpack"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.GOLEMWIFI",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics:thaumicenergistics",
+          "amount": 1
+        },
+        {
+          "type": "theory",
+          "category": "thaumicenergistics:thaumicenergistics",
+          "amount": 1
+        },
+        {
+          "type": "theory",
+          "category": "thaumicenergistics:thaumicenergistics",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.GOLEMWIFI",
+      "recipes": [
+        "thaumicenergistics:golem_wifi_backpack"
+      ]
+    }
+  ],
+  "complexity": 3
+}

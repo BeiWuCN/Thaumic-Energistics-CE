@@ -1,0 +1,188 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'idea'
+    id 'net.neoforged.moddev' version '2.0.141'
+}
+
+version = mod_version
+group = mod_group_id
+base {
+    archivesName = "${mod_id}-${minecraft_version}-neoforge"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    withSourcesJar()
+}
+
+repositories {
+    // Every mod dependency is a flat file in libs/, so no mod maven is needed. These entries exist
+    // only for build plugins plus the optional offline mirror described in settings.gradle.
+    mavenLocal()
+    mavenCentral()
+    // maven { url = 'file:///F:/local-maven' }
+}
+
+neoForge {
+    version = project.neo_version
+
+    // Makes Slot's position fields writable, so a screen of ours can place an AE2 fake slot - which has
+    // no coordinate parameter of its own. See src/main/resources/META-INF/accesstransformer.cfg.
+    accessTransformers.from 'src/main/resources/META-INF/accesstransformer.cfg'
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    // Thaumaturge publishes no maven artifact, so it is a flat-file dependency. ModDevGradle
+    // inspects the jar, derives the run config from it, and the loader finds its neoforge.mods.toml
+    // on the runtime classpath like any other mod.
+    //
+    // Declare OUR source set and nothing else. This block used to also map "thaumaturge" onto
+    // sourceSets.main, which is wrong: a mod entry contributes its source set's class folders to the
+    // run, so that entry handed the loader this project's own output under Thaumaturge's name - the
+    // mod was reported loaded twice, once as ours and once as Thaumaturge's. Thaumaturge needs no
+    // entry here at all. It resolves from libs/ like every other dependency, and this project does
+    // not build it.
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+
+    runs {
+        client {
+            client()
+            // There is no switch to run without this mod, and there cannot be one here. Both the
+            // environment variable (MOD_CLASSES) and RunModel.loadedMods were tried: the first leaves
+            // the mod's class output on the run classpath, where its neoforge.mods.toml is discovered
+            // regardless of the coordinates; the second does remove the mod, but then its datapack
+            // still loads through the pack finder while none of its items, blocks or aspect keys are
+            // ever registered. Every research entry naming one of them then fails to resolve:
+            //
+            //     Failed to parse .../research_entry/arcane_assembler.json from pack mod/thaumicenergistics
+            //     Caused by: Failed to get element thaumicenergistics:essentia_terminal
+            //
+            // and the world refuses to load. A run that produces a broken world is worse than no switch.
+            // To see the mod absent, build a jar and drop it into a separate profile with no libs/.
+            //
+            // Quick-play into the existing dev world when asked. `MenuSelfTest` needs a player to exist -
+            // every menu takes an Inventory, and an Inventory needs one - so it skips on a dedicated server
+            // nobody has joined, which is the only way it can otherwise be run here. With this it runs on
+            // world load:
+            //
+            //     ./gradlew runClient -PquickPlay="New World"
+            //
+            // Left out by default so the plain run still stops at the title screen.
+            if (project.hasProperty('quickPlay')) {
+                programArguments.addAll '--quickPlaySingleplayer', project.property('quickPlay')
+            }
+        }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+        data {
+            data()
+            programArguments.addAll '--mod', project.mod_id, '--all',
+                    '--output', file('src/generated/resources/').getAbsolutePath(),
+                    '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+
+            // The self-tests and the trace switches are turned on by environment variables, and a forked
+            // run does not inherit the shell's. Passing them through is what makes the documented
+            //
+            //     THAUMICENERGISTICS_INSCRIBER_SELFTEST=true ./gradlew runClient -PquickPlay="New World"
+            //
+            // actually run anything: without this the variable is set in the shell, silently dropped by
+            // the fork, and every test reports nothing at all - which looks exactly like a pass.
+            //
+            // By prefix, not by a list. The list this replaces had to be extended for every new switch,
+            // and did not always get extended: the encoder self-test and the whole vis-relay switch were
+            // in the code and absent from it, so both reported nothing and that read as a pass.
+            System.getenv().each { name, value ->
+                if (name.startsWith('THAUMICENERGISTICS_')) {
+                    environment name, value
+                }
+            }
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+dependencies {
+    compileOnly "org.jspecify:jspecify:1.0.0"
+
+    // ---- Every mod dependency is a flat file in libs/ ----------------------
+    // See libs/README.md. Neither the mods nor the run environment are reliably resolvable from
+    // public maven repositories, and a flat file always resolves to exactly the jar the addon was
+    // written and tested against. That includes the runtime-only mods, which are staged from the
+    // `samples/` directory at the workspace root.
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+}
+
+tasks.named('compileJava') {
+    options.compilerArgs << '-Xmaxerrs' << '2000'
+}
+
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [minecraft_version      : minecraft_version,
+                             minecraft_version_range: minecraft_version_range,
+                             neo_version            : neo_version,
+                             neo_version_range      : neo_version_range,
+                             loader_version_range   : loader_version_range,
+                             mod_id                 : mod_id,
+                             mod_name               : mod_name,
+                             mod_license            : mod_license,
+                             mod_version            : mod_version,
+                             mod_authors            : mod_authors,
+                             mod_description        : mod_description]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+// The default test task is off: the checks that matter here need a running game, and are a diagnostic
+// inside the mod rather than a unit test - see ThaumicEnergistics.recipeSelfTest.
+tasks.named('test') {
+    enabled = false
+}
+
+jar {
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_name,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : mod_name,
+                'Implementation-Version'  : mod_version,
+                'Implementation-Vendor'   : mod_authors
+        ])
+    }
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifactId = mod_id
+            from components.java
+        }
+    }
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}

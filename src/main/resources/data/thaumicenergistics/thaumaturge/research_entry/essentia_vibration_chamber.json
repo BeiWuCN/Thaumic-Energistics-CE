@@ -1,0 +1,39 @@
+{
+  "category": "thaumicenergistics:thaumicenergistics",
+  "name": "tc.research_name.ESSENTIAVIBRATIONCHAMBER",
+  "parents": [
+    "thaumicenergistics:essentia_storage_64k"
+  ],
+  "column": -6,
+  "row": 2,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics:essentia_vibration_chamber"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.ESSENTIAVIBRATIONCHAMBER",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics:thaumicenergistics",
+          "amount": 1
+        },
+        {
+          "type": "theory",
+          "category": "thaumicenergistics:thaumicenergistics",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.ESSENTIAVIBRATIONCHAMBER",
+      "recipes": [
+        "thaumicenergistics:essentia_vibration_chamber"
+      ]
+    }
+  ],
+  "complexity": 3
+}

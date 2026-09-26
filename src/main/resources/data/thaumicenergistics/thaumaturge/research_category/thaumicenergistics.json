@@ -1,0 +1,32 @@
+{
+  "background": "thaumicenergistics:textures/research/research_background.png",
+  "overlay_background": "thaumaturge:textures/gui/gui_research_back_over.png",
+  "icon": "thaumicenergistics:textures/research/tab_icon.png",
+  "index": 7,
+  "formula": [
+    {
+      "aspect": "thaumaturge:machina",
+      "amount": 15
+    },
+    {
+      "aspect": "thaumaturge:fabrico",
+      "amount": 15
+    },
+    {
+      "aspect": "thaumaturge:potentia",
+      "amount": 20
+    },
+    {
+      "aspect": "thaumaturge:permutatio",
+      "amount": 20
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
+      "amount": 15
+    },
+    {
+      "aspect": "thaumaturge:metallum",
+      "amount": 5
+    }
+  ]
+}

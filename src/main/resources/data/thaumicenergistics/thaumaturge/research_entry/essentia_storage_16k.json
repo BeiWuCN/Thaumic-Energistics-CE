@@ -1,0 +1,68 @@
+{
+  "category": "thaumicenergistics:thaumicenergistics",
+  "name": "tc.research_name.ESSENTIASTORAGE16k",
+  "parents": [
+    "thaumicenergistics:essentia_storage_4k"
+  ],
+  "column": -6,
+  "row": 0,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics:storage_component_16k",
+    "thaumicenergistics:essentia_cell_16k"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.ESSENTIASTORAGE16k.stage.1",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics:thaumicenergistics",
+          "amount": 1
+        }
+      ],
+      "obtain": [
+        {
+          "items": [
+            "thaumaturge:salis_mundus"
+          ],
+          "amount": 4
+        },
+        {
+          "items": [
+            "thaumicenergistics:storage_component_4k"
+          ],
+          "amount": 3
+        },
+        {
+          "items": [
+            "ae2:quartz_vibrant_glass"
+          ],
+          "amount": 1
+        },
+        {
+          "items": [
+            "ae2:engineering_processor"
+          ],
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.ESSENTIASTORAGE16k.stage.2",
+      "recipes": [
+        "thaumicenergistics:storage_component_16k",
+        "thaumicenergistics:essentia_cell_16k"
+      ],
+      "knowledge": [
+        {
+          "type": "observation",
+          "category": "thaumicenergistics:thaumicenergistics",
+          "amount": 1
+        }
+      ]
+    }
+  ]
+}

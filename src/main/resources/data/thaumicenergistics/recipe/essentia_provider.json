@@ -1,0 +1,29 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "_note": "The Essentia Provider. Built on the same line as the other essentia machines in the 1.12.2 build - a diffusion core to move essentia between the network and the world, thaumium for the casing, tubes for the plumbing - with salis mundus binding it. 40 vis: it is the piece that lets the network feed a contraption on its own, so it sits above the buses.",
+  "crystals": [],
+  "key": {
+    "S": {
+      "item": "thaumaturge:salis_mundus"
+    },
+    "T": {
+      "item": "thaumaturge:ingot_thaumium"
+    },
+    "D": {
+      "item": "thaumicenergistics:diffusion_core"
+    },
+    "U": {
+      "item": "thaumaturge:tube"
+    }
+  },
+  "pattern": [
+    "TUT",
+    "SDS",
+    "TUT"
+  ],
+  "vis": 40,
+  "result": {
+    "id": "thaumicenergistics:essentia_provider",
+    "count": 1
+  }
+}

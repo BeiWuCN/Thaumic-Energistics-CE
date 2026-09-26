@@ -1,0 +1,73 @@
+modLoader = "javafml"
+loaderVersion = "${loader_version_range}"
+license = "${mod_license}"
+issueTrackerURL = "https://github.com/Leclowndu93150/ThaumicEnergistics/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+authors = "${mod_authors}"
+description = '''${mod_description}'''
+
+[[dependencies."${mod_id}"]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neo_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+# Thaumaturge supplies the arcane recipes, aspects and aura this addon builds on.
+[[dependencies."${mod_id}"]]
+modId = "thaumaturge"
+type = "required"
+versionRange = "[0.4.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+# Applied Energistics 2 supplies the ME network, crafting jobs and pattern format.
+[[dependencies."${mod_id}"]]
+modId = "ae2"
+type = "required"
+versionRange = "[19.2.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+# GuideME is a hard dependency of AE2 itself.
+[[dependencies."${mod_id}"]]
+modId = "guideme"
+type = "required"
+versionRange = "[21.1.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+# Thaumaturge hard-depends on both of these, so they are required here transitively.
+[[dependencies."${mod_id}"]]
+modId = "curios"
+type = "required"
+versionRange = "[9.0.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "terrablender"
+type = "required"
+versionRange = "[4.1.0.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+# Jade draws the Arcane Assembler's tooltip. Optional, and safe to leave out: the tooltip plugin is only
+# ever loaded by Jade's own annotation scan, so without Jade the class is simply never read.
+[[dependencies."${mod_id}"]]
+modId = "jade"
+type = "optional"
+versionRange = "[15.0.0,)"
+ordering = "AFTER"
+side = "BOTH"

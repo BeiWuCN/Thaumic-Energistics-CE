@@ -1,0 +1,20 @@
+# Gradle / build output
+build/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Dev run directory (worlds, logs, configs)
+run/
+logs/
+
+# IDE
+.idea/
+*.iml
+
+# Vendored dependency jars (see libs/README.md for where to get them)
+libs/*.jar
+
+# JVM crash logs
+hs_err_pid*.log
+replay_pid*.log
+*.log

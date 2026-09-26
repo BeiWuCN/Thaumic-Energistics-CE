@@ -1,0 +1,35 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "_note": "The Vis Interface. An essentia crystal to resonate with the aura, a diffusion core to carry what it takes, thaumium for the fitting and salis mundus to bind it to the network. 50 vis - it is the piece that lets a machine stop caring where its vis comes from.",
+  "crystals": [],
+  "key": {
+    "C": {
+      "type": "neoforge:components",
+      "items": "thaumaturge:essentia_crystal",
+      "components": {
+        "thaumaturge:crystal_aspect": {
+          "aspect": "thaumaturge:auram"
+        }
+      }
+    },
+    "D": {
+      "item": "thaumicenergistics:diffusion_core"
+    },
+    "T": {
+      "item": "thaumaturge:ingot_thaumium"
+    },
+    "S": {
+      "item": "thaumaturge:salis_mundus"
+    }
+  },
+  "pattern": [
+    "TST",
+    "CDC",
+    "TST"
+  ],
+  "vis": 50,
+  "result": {
+    "id": "thaumicenergistics:vis_interface",
+    "count": 1
+  }
+}

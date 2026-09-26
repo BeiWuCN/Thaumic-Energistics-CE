@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "_note": "The reference build's essentia_cell_4k: a storage casing and a 4k component, shapeless.",
+  "ingredients": [
+    {
+      "item": "thaumicenergistics:storage_casing"
+    },
+    {
+      "item": "thaumicenergistics:storage_component_4k"
+    }
+  ],
+  "result": {
+    "id": "thaumicenergistics:essentia_cell_4k",
+    "count": 1
+  }
+}
