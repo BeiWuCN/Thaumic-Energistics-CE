@@ -45,8 +45,13 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
 
     public static final int BOOK_SLOT = 0;
 
-    /** The network cost of watching. High, because watching an altar is the whole function. */
-    private static final double IDLE_POWER = 40.0;
+    /**
+     * What the network pays per tick for the watch, whether or not an altar is in range: 256 AE, which is the
+     * price of the function rather than a courtesy fee. A monitor that draws nothing is a monitor that can be
+     * left running on a dead network for free, and the reading it shows is only worth what it costs to keep
+     * current.
+     */
+    private static final double IDLE_POWER = 256.0;
 
     /**
      * How far the monitor looks for an altar, in blocks. Twelve reaches the matrix from anywhere in the
@@ -241,6 +246,15 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
             return TickRateModulation.IDLE;
         }
         updateNetworkState();
+        // Offline is not a state to keep watching in. With no power, no channel or a grid that has not
+        // booted, the monitor surveys nothing and reports nothing - the work it skips is the energy it does
+        // not spend, and IDLE_POWER is what that work costs. SAME rather than IDLE on purpose: the node has
+        // to keep being ticked, or nothing would notice the grid coming back.
+        if (!getMainNode().isActive()) {
+            syncBubble();
+            trace(node);
+            return TickRateModulation.SAME;
+        }
         scanAltar();
         syncBubble();
         trace(node);
@@ -674,7 +688,9 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     }
 
     public boolean canReport() {
-        return hasBook() && report.foundAltar();
+        // Online as well as book and altar: a reading taken while the machine was powered is not a reading
+        // of the altar now, and a bubble left on screen after the network went down says otherwise.
+        return hasBook() && report.foundAltar() && getMainNode().isActive();
     }
 
     // Persistence

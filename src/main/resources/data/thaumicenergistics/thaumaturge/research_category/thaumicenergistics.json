@@ -3,6 +3,7 @@
   "overlay_background": "thaumaturge:textures/gui/gui_research_back_over.png",
   "icon": "thaumicenergistics:textures/research/tab_icon.png",
   "index": 7,
+  "required_research": "thaumaturge:unlock_infusion",
   "formula": [
     {
       "aspect": "thaumaturge:machina",

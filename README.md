@@ -7,7 +7,7 @@
 | --- | --- |
 | Minecraft | 1.21.1 |
 | 加载器 / Loader | NeoForge 21.1.250+ |
-| 版本 / Version | 1.4.156.2039 |
+| 版本 / Version | 1.4.157.2068 |
 | 前置 / Requires | Applied Energistics 2 19.2.x · Thaumaturge 0.4.4+ · GuideME 21.1.x |
 | 许可 / License | MIT（见下方说明 / see the note at the end） |
 
