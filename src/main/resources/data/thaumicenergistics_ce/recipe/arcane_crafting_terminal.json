@@ -1,0 +1,32 @@
+{
+  "type": "thaumaturge:arcane_workbench_shapeless",
+  "_note": "The Arcane Crafting Terminal. An ME terminal to see the network with, a crafting table to lay ingredients on, thaumium for the housing and a salis mundus to bind the halves together. 100 vis - the most capable thing this addon builds, and the 1.12.2 tree prices it above the assembly chamber.",
+  "_crystals": "aer, declared rather than placed: a crystal in the pattern shows in JEI as an unknown crystal, because the aspect is a component. See focus_aewrench.json. Only a PRIMAL aspect is accepted here - fabrico was tried first and the recipe failed to load with ''thaumaturge:fabrico is not a primal aspect''. The six are aer, ignis, aqua, terra, ordo and perditio.",
+  "crystals": [
+    {
+      "aspect": "thaumaturge:aer"
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "thaumicenergistics_ce:essentia_terminal"
+    },
+    {
+      "item": "minecraft:crafting_table"
+    },
+    {
+      "item": "thaumaturge:salis_mundus"
+    },
+    {
+      "item": "thaumaturge:ingot_thaumium"
+    },
+    {
+      "item": "thaumaturge:ingot_thaumium"
+    }
+  ],
+  "vis": 100,
+  "result": {
+    "id": "thaumicenergistics_ce:arcane_crafting_terminal",
+    "count": 1
+  }
+}

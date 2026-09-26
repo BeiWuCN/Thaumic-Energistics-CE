@@ -1,0 +1,410 @@
+package thaumicenergistics_ce.menu;
+
+import appeng.api.crafting.IPatternDetails;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.leclowndu93150.thaumaturge.api.recipe.IArcaneRecipe;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import org.jspecify.annotations.Nullable;
+import thaumicenergistics_ce.ThaumicEnergistics;
+import thaumicenergistics_ce.arcane.ThEArcanePattern;
+import thaumicenergistics_ce.blockentity.ArcanePatternDetails;
+import thaumicenergistics_ce.blockentity.BlockEntityArcaneAssembler;
+import thaumicenergistics_ce.init.ModBlocks;
+import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
+
+/**
+ * Checks the Arcane Assembler's craft bookkeeping against the live recipe list and against a save/load round
+ * trip. Off unless {@code THAUMICENERGISTICS_ASSEMBLER_SELFTEST=true}.
+ *
+ * <p><b>It puts nothing into the world and takes nothing out of it.</b> An earlier version built a machine
+ * beside the player and drove crafts through it; one run built over a machine the player had made and then
+ * removed it, taking its knowledge core with it.
+ *
+ * <p>It checks that the machine can bank the priciest arcane recipe in the pack (1728 vis, five times the
+ * buffer's own target - a machine that cannot pay holds the job for ever and AE2's CPU skips it as busy), and
+ * that a craft interrupted by a save comes back <em>able to finish</em>.
+ */
+public final class AssemblerCraftSelfTest {
+
+    /** One run per server: the checks do not depend on the player and are cheap. */
+    private static boolean hasRun;
+
+    private AssemblerCraftSelfTest() {}
+
+    public static void run(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!"true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_ASSEMBLER_SELFTEST"))) {
+            return;
+        }
+        if (hasRun || !(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        hasRun = true;
+
+        ServerLevel level = player.serverLevel();
+        ThEArcanePattern priciest = priciestRecipe(level);
+        if (priciest == null) {
+            ThaumicEnergistics.LOG.info(
+                    "[asmtest] FAIL no arcane recipe could be read, so nothing was checked");
+            return;
+        }
+
+        // Two machines that are never added to a level: a block entity is an ordinary object until something
+        // puts it somewhere, and loadWithComponents is the same call the game makes when a chunk loads.
+        BlockPos pos = player.blockPosition();
+        BlockEntityArcaneAssembler machine =
+                new BlockEntityArcaneAssembler(pos, ModBlocks.ARCANE_ASSEMBLER.get().defaultBlockState());
+        machine.forcePatternForTest(priciest);
+
+        CompoundTag saved = machine.saveWithoutMetadata(level.registryAccess());
+        BlockEntityArcaneAssembler reloaded =
+                new BlockEntityArcaneAssembler(pos, ModBlocks.ARCANE_ASSEMBLER.get().defaultBlockState());
+        reloaded.loadWithComponents(saved, level.registryAccess());
+
+        ThaumicEnergistics.LOG.info(
+                "[asmtest] save/load round trip: saved [{}] reloaded [{}]",
+                machine.resumeReportForTest(),
+                reloaded.resumeReportForTest());
+
+        // The round trip above only showed that the craft state survived, and it did - which is why the bug it
+        // was written for outlived it: the pattern did not survive, and an AE2 crafting CPU will not push a job
+        // to a machine that offers none. The core goes in directly, as the game's own load does.
+        reloaded.setItemForTest(BlockEntityArcaneAssembler.coreSlotForTest(), knowledgeCoreHolding(priciest, level));
+        reloaded.recoverForTest(level);
+        ThaumicEnergistics.LOG.info(
+                "[asmtest] after a reload the machine offers {} pattern(s), and the craft in its well is {}",
+                reloaded.getAvailablePatterns().size(),
+                reloaded.resumeReportForTest());
+
+        checkCoreSurvivesTheRoundTrip(level);
+        sweepEveryRecipe(level);
+        checkCpuTaskRoundTrip(level);
+        checkTooltipReasonsTranslated();
+    }
+
+    /**
+     * The core has to come back out of a save with every pattern it went in with - the same pair of calls a
+     * chunk unload and a server restart make.
+     *
+     * <p>The core goes in <em>before</em> the save, unlike the one the run above drives: a core inserted after
+     * the load proves only that the slot takes one, never that the round trip kept what was inside it.
+     */
+    private static void checkCoreSurvivesTheRoundTrip(ServerLevel level) {
+        ThEArcanePattern pattern = priciestRecipe(level);
+        if (pattern == null) {
+            ThaumicEnergistics.LOG.warn("[asmtest] no arcane recipe to put in a core, so the core round trip"
+                    + " is unchecked");
+            return;
+        }
+        ItemStack core = knowledgeCoreHolding(pattern, level);
+        if (core.isEmpty()) {
+            ThaumicEnergistics.LOG.warn("[asmtest] the core could not be written, so the core round trip is"
+                    + " unchecked");
+            return;
+        }
+        BlockPos pos = BlockPos.ZERO;
+        BlockEntityArcaneAssembler machine =
+                new BlockEntityArcaneAssembler(pos, ModBlocks.ARCANE_ASSEMBLER.get().defaultBlockState());
+        machine.setItemForTest(BlockEntityArcaneAssembler.coreSlotForTest(), core);
+        CompoundTag saved = machine.saveWithoutMetadata(level.registryAccess());
+
+        BlockEntityArcaneAssembler reloaded =
+                new BlockEntityArcaneAssembler(pos, ModBlocks.ARCANE_ASSEMBLER.get().defaultBlockState());
+        reloaded.loadWithComponents(saved, level.registryAccess());
+        // A level only because offering patterns reads the core through one; the tag itself needed none.
+        reloaded.setLevel(level);
+
+        ItemStack back = reloaded.getInventory().getItem(BlockEntityArcaneAssembler.coreSlotForTest());
+        HandlerKnowledgeCore handler = HandlerKnowledgeCore.of(back, level.registryAccess());
+        int stored = handler == null ? -1 : handler.size();
+        int offered = reloaded.getAvailablePatterns().size();
+        // The whole stack, not just the item and count: a core that came back with its custom data stripped
+        // still holds the right item at the right count, and that is the loss this check exists for.
+        if (!ItemStack.isSameItemSameComponents(core, back)) {
+            ThaumicEnergistics.LOG.warn(
+                    "[asmtest] FAIL the core did not survive the round trip: saved {} [{}], reloaded {} [{}]",
+                    core,
+                    core.getComponentsPatch(),
+                    back,
+                    back.getComponentsPatch());
+            return;
+        }
+        ThaumicEnergistics.LOG.info(
+                "[asmtest] core round trip: {} pattern(s) after the reload, {} offered, stack identical to the"
+                        + " one saved",
+                stored,
+                offered);
+        if (offered != stored) {
+            ThaumicEnergistics.LOG.warn(
+                    "[asmtest] FAIL the reloaded machine offers {} of the {} pattern(s) the reloaded core holds",
+                    offered,
+                    stored);
+        }
+    }
+
+    /**
+     * Checks that every reason the tooltip can show is translated in each shipped language file. A missing key
+     * does not crash and does not lose a craft - it just shows a Chinese player an English sentence - and the
+     * files are read from the mod's own resources rather than {@code Language.getInstance()}, which only ever
+     * holds the language the game is running in.
+     */
+    private static void checkTooltipReasonsTranslated() {
+        List<String> keys = tooltipKeys();
+        for (String lang : List.of("en_us", "zh_cn")) {
+            Set<String> translated = langKeys(lang);
+            if (translated == null) {
+                ThaumicEnergistics.LOG.warn("[asmtest] tooltip reasons: could not read {}.json", lang);
+                continue;
+            }
+            List<String> missing = new ArrayList<>();
+            for (String key : keys) {
+                if (!translated.contains(key)) {
+                    missing.add(key.replace("jade.thaumicenergistics_ce.arcane_assembler.", ""));
+                }
+            }
+            if (missing.isEmpty()) {
+                ThaumicEnergistics.LOG.info(
+                        "[asmtest] tooltip reasons: all {} key(s) present in {}", keys.size(), lang);
+            } else {
+                ThaumicEnergistics.LOG.warn(
+                        "[asmtest] tooltip reasons: {} of {} key(s) MISSING from {}: {}",
+                        missing.size(),
+                        keys.size(),
+                        lang,
+                        missing);
+            }
+        }
+        checkLanguageFilesAgree();
+    }
+
+    /**
+     * Every key the assembler's Jade tooltip can ask for, fully qualified. The reason keys come from the machine
+     * itself; the fixed labels cannot, because {@code ArcaneAssemblerProvider} lives in an optional-Jade package
+     * and the self-test runs whether or not Jade is installed.
+     */
+    private static List<String> tooltipKeys() {
+        List<String> keys = new ArrayList<>(BlockEntityArcaneAssembler.tooltipReasonKeys());
+        for (String label : List.of(
+                "crafting", "discount", "patterns", "produces", "speed", "vis", "waiting", "refused")) {
+            keys.add("jade.thaumicenergistics_ce.arcane_assembler." + label);
+        }
+        return keys;
+    }
+
+    /**
+     * Checks that the two shipped language files have the same keys: a string added to one and not the other
+     * falls back to English, or to the raw key, and is invisible on the server.
+     */
+    private static void checkLanguageFilesAgree() {
+        Set<String> english = langKeys("en_us");
+        Set<String> chinese = langKeys("zh_cn");
+        if (english == null || chinese == null) {
+            return;
+        }
+        List<String> onlyEnglish = new ArrayList<>();
+        for (String key : english) {
+            if (!chinese.contains(key)) {
+                onlyEnglish.add(key);
+            }
+        }
+        // Only one direction is a defect. A key in en_us with no Chinese falls back to English or to the raw
+        // key, and on a server nobody sees it. A key in zh_cn with no English is normally this file
+        // translating another mod's keys - Thaumaturge's blocks, messages and research entries among them -
+        // which is what a language file shipped alongside the mod it names is for; warning about all 42 of
+        // those is how a check stops being read.
+        int overlay = 0;
+        List<String> oursOnly = new ArrayList<>();
+        for (String key : chinese) {
+            if (english.contains(key)) {
+                continue;
+            }
+            overlay++;
+            if (key.contains("thaumicenergistics_ce") || key.startsWith("tc.")) {
+                oursOnly.add(key);
+            }
+        }
+        if (!onlyEnglish.isEmpty()) {
+            ThaumicEnergistics.LOG.warn(
+                    "[asmtest] {} key(s) in en_us have no zh_cn translation: {}", onlyEnglish.size(), onlyEnglish);
+        }
+        if (!oursOnly.isEmpty()) {
+            ThaumicEnergistics.LOG.warn(
+                    "[asmtest] {} key(s) in zh_cn look like ours but are in no en_us: {}", oursOnly.size(), oursOnly);
+        }
+        if (onlyEnglish.isEmpty() && oursOnly.isEmpty()) {
+            ThaumicEnergistics.LOG.info(
+                    "[asmtest] language files agree: {} key(s) in en_us, all of them in zh_cn, plus {} key(s) "
+                            + "in zh_cn that translate other mods",
+                    english.size(), overlay);
+        }
+    }
+
+    /** The key set of one shipped language file, or {@code null} if it cannot be read. */
+    private static @Nullable Set<String> langKeys(String lang) {
+        String path = "/assets/thaumicenergistics_ce/lang/" + lang + ".json";
+        try (var stream = AssemblerCraftSelfTest.class.getResourceAsStream(path)) {
+            if (stream == null) {
+                return null;
+            }
+            JsonObject json = JsonParser.parseString(new String(stream.readAllBytes(), StandardCharsets.UTF_8))
+                    .getAsJsonObject();
+            return json.keySet();
+        } catch (IOException | RuntimeException e) {
+            ThaumicEnergistics.LOG.warn("[asmtest] could not read {}: {}", path, e.toString());
+            return null;
+        }
+    }
+
+    /**
+     * Reproduces what an AE2 crafting CPU does to a task when the world is saved and reloaded: the job persists
+     * each pending task as {@code getDefinition().toTag(...)} and rebuilds it with
+     * {@code PatternDetailsHelper.decodePattern}. If that returns null the task is dropped from the map
+     * silently, with the job's output and waiting-for list left intact - the plan survives, the work does not.
+     */
+    private static void checkCpuTaskRoundTrip(ServerLevel level) {
+        ThEArcanePattern recipe = priciestRecipe(level);
+        if (recipe == null) {
+            ThaumicEnergistics.LOG.warn("[asmtest] no arcane recipe to test the CPU task round trip with");
+            return;
+        }
+        ArcanePatternDetails details = ArcanePatternDetails.of(recipe, level.registryAccess());
+        if (details == null) {
+            ThaumicEnergistics.LOG.warn("[asmtest] the priciest recipe has no AE2 view to test with");
+            return;
+        }
+
+        // Exactly what ExecutingCraftingJob writes, and exactly what it reads back.
+        CompoundTag asCpuSavesIt = details.getDefinition().toTag(level.registryAccess());
+        var decoded = appeng.api.crafting.PatternDetailsHelper.decodePattern(
+                appeng.api.stacks.AEItemKey.fromTag(level.registryAccess(), asCpuSavesIt), level);
+
+        // Decoding successfully is only half of it: AE2 finds the machine for a task through a HashMap keyed by
+        // IPatternDetails equals/hashCode, so a decoded task that is not *equal* to the one this machine
+        // registered matches no machine - the same dead end by another road.
+        ThaumicEnergistics.LOG.info(
+                "[asmtest] CPU task round trip: definition={} isEncodedPattern={} decodedBack={} equalToOffered={}",
+                details.getDefinition(),
+                appeng.api.crafting.PatternDetailsHelper.isEncodedPattern(
+                        details.getDefinition().getReadOnlyStack()),
+                decoded == null ? "NULL - the CPU drops this task on load" : decoded.getClass().getSimpleName(),
+                decoded == null ? "n/a" : String.valueOf(details.equals(decoded)));
+
+        // When they differ it is a difference in the definition tags and nothing else - equals() compares exactly
+        // that one field - so printing both names the field that differs.
+        if (decoded instanceof IPatternDetails other) {
+            CompoundTag offered = details.getDefinition().toTag(level.registryAccess());
+            CompoundTag decodedTag = other.getDefinition().toTag(level.registryAccess());
+            if (!offered.equals(decodedTag)) {
+                ThaumicEnergistics.LOG.warn("[asmtest] offered task tag: {}", offered);
+                ThaumicEnergistics.LOG.warn("[asmtest] decoded task tag: {}", decodedTag);
+            }
+        }
+    }
+
+    /**
+     * Encodes, saves, reloads and re-recognises every arcane recipe in the pack, and counts what is lost.
+     *
+     * <p>One pattern surviving says nothing about the next one, and each failure removes a single recipe while
+     * the rest keep working, so the shortfall has to be counted rather than noticed. The three stages are
+     * counted separately because they point at different files: lost between the core and the reload is an
+     * encoding fault, lost at recognition an adapter fault.
+     */
+    private static void sweepEveryRecipe(ServerLevel level) {
+        int recipes = 0;
+        int unencodable = 0;
+        int lostInReload = 0;
+        int unrecognised = 0;
+        String firstUnrecognised = null;
+
+        for (RecipeHolder<?> holder : level.getRecipeManager().getRecipes()) {
+            if (!(holder.value() instanceof IArcaneRecipe arcane)) {
+                continue;
+            }
+            ItemStack output = holder.value().getResultItem(level.registryAccess());
+            if (output.isEmpty()) {
+                continue;
+            }
+            ThEArcanePattern pattern = ThEArcanePattern.fromRecipe(arcane, output);
+            if (pattern == null) {
+                unencodable++;
+                continue;
+            }
+            recipes++;
+
+            // Exactly what a knowledge core does: the pattern as the core writes it, read back by a fresh
+            // handler against the same registries a real load uses.
+            CompoundTag saved = pattern.save(level.registryAccess());
+            ThEArcanePattern reloaded = ThEArcanePattern.load(level.registryAccess(), saved);
+            if (reloaded == null) {
+                lostInReload++;
+                continue;
+            }
+
+            // And then exactly what the assembler asks of it when deciding whether to offer it.
+            StringBuilder refusal = new StringBuilder();
+            if (ArcanePatternDetails.of(reloaded, level.registryAccess(), refusal::append) == null) {
+                unrecognised++;
+                if (firstUnrecognised == null) {
+                    firstUnrecognised = output.getHoverName().getString() + " - " + refusal;
+                }
+            }
+        }
+
+        ThaumicEnergistics.LOG.info(
+                "[asmtest] pattern sweep: {} arcane recipe(s); {} unencodable; {} lost in save/load; "
+                        + "{} refused by the AE2 adapter. First refusal: {}",
+                recipes,
+                unencodable,
+                lostInReload,
+                unrecognised,
+                firstUnrecognised == null ? "(none)" : firstUnrecognised);
+    }
+
+    /**
+     * A knowledge core holding {@code pattern}, built through the mod's own API so the encoding checked is the
+     * one a real save reads back.
+     */
+    private static ItemStack knowledgeCoreHolding(ThEArcanePattern pattern, ServerLevel level) {
+        ItemStack core = new ItemStack(ModItems.KNOWLEDGE_CORE.get());
+        HandlerKnowledgeCore handler = HandlerKnowledgeCore.of(core, level.registryAccess());
+        if (handler == null) {
+            return ItemStack.EMPTY;
+        }
+        handler.store(pattern);
+        return core;
+    }
+
+    /**
+     * The priciest arcane recipe the pack has, read from the recipe manager: a check against an invented number
+     * proves nothing about what players actually order.
+     */
+    private static @Nullable ThEArcanePattern priciestRecipe(ServerLevel level) {
+        ThEArcanePattern priciest = null;
+        for (RecipeHolder<?> holder : level.getRecipeManager().getRecipes()) {
+            if (!(holder.value() instanceof IArcaneRecipe arcane)) {
+                continue;
+            }
+            ItemStack output = holder.value().getResultItem(level.registryAccess());
+            if (output.isEmpty()) {
+                continue;
+            }
+            ThEArcanePattern candidate = ThEArcanePattern.fromRecipe(arcane, output);
+            if (candidate != null && (priciest == null || candidate.chargedVis() > priciest.chargedVis())) {
+                priciest = candidate;
+            }
+        }
+        return priciest;
+    }
+}

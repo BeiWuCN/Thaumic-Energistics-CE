@@ -1,0 +1,62 @@
+{
+  "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+  "name": "tc.research_name.ESSENTIASTORAGE1k",
+  "parents": [
+    "thaumicenergistics_ce:base_energistics"
+  ],
+  "column": -2,
+  "row": 0,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics_ce:storage_component_1k",
+    "thaumicenergistics_ce:essentia_cell_1k"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.ESSENTIASTORAGE1k.stage.1",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
+      ],
+      "obtain": [
+        {
+          "items": [
+            "thaumaturge:salis_mundus"
+          ],
+          "amount": 4
+        },
+        {
+          "items": [
+            "ae2:quartz_vibrant_glass"
+          ],
+          "amount": 4
+        },
+        {
+          "items": [
+            "ae2:calculation_processor"
+          ],
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.ESSENTIASTORAGE1k.stage.2",
+      "recipes": [
+        "thaumicenergistics_ce:storage_component_1k",
+        "thaumicenergistics_ce:essentia_cell_1k"
+      ],
+      "knowledge": [
+        {
+          "type": "observation",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
+      ]
+    }
+  ]
+}

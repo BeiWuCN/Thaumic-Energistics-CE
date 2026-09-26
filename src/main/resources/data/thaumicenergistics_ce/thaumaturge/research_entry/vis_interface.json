@@ -1,0 +1,39 @@
+{
+  "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+  "name": "tc.research_name.VISINTERFACE",
+  "parents": [
+    "thaumicenergistics_ce:essentia_terminal"
+  ],
+  "column": 2,
+  "row": -2,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics_ce:vis_interface"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.VISINTERFACE",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        },
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.VISINTERFACE",
+      "recipes": [
+        "thaumicenergistics_ce:vis_interface"
+      ]
+    }
+  ],
+  "complexity": 2
+}

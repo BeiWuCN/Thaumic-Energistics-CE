@@ -1,0 +1,32 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "_note": "The Distillation Encoder. Diffusion core to reduce items to essentia, an essentia terminal to see what it holds, thaumium casing, and salis mundus to bind it. 50 vis - it belongs with the terminal and the assembler at the top of the tree, since it is what makes essentia production craftable rather than something a player does by hand.",
+  "crystals": [],
+  "key": {
+    "S": {
+      "item": "thaumaturge:salis_mundus"
+    },
+    "T": {
+      "item": "thaumaturge:ingot_thaumium"
+    },
+    "D": {
+      "item": "thaumicenergistics_ce:diffusion_core"
+    },
+    "E": {
+      "item": "thaumicenergistics_ce:essentia_terminal"
+    },
+    "U": {
+      "item": "thaumaturge:tube"
+    }
+  },
+  "pattern": [
+    "TUT",
+    "SDS",
+    "TET"
+  ],
+  "vis": 50,
+  "result": {
+    "id": "thaumicenergistics_ce:distillation_encoder",
+    "count": 1
+  }
+}

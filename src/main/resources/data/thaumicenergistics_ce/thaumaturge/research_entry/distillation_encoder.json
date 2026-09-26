@@ -1,0 +1,40 @@
+{
+  "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+  "name": "tc.research_name.DISTILLATIONENCODER",
+  "parents": [
+    "thaumicenergistics_ce:digisentia",
+    "thaumicenergistics_ce:essentia_provider"
+  ],
+  "column": -2,
+  "row": 4,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics_ce:distillation_encoder"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.DISTILLATIONENCODER",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        },
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.DISTILLATIONENCODER",
+      "recipes": [
+        "thaumicenergistics_ce:distillation_encoder"
+      ]
+    }
+  ],
+  "complexity": 3
+}

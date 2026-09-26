@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "thaumicenergistics_ce:block/arcane_assembler", "y": 180 },
+    "facing=east":  { "model": "thaumicenergistics_ce:block/arcane_assembler", "y": 270 },
+    "facing=south": { "model": "thaumicenergistics_ce:block/arcane_assembler" },
+    "facing=west":  { "model": "thaumicenergistics_ce:block/arcane_assembler", "y": 90 }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "_note": "The AE2 wrench as a wand focus. The 1.7.10 original was 'ANF'/'NWN'/'FNA' with an air shard, a fire shard, nether quartz and a certus quartz wrench, at aer 10 + ignis 10. Nether quartz is quartz nuggets and the wrench carries over; the two shards are the crystal cost, which is the whole lesson here.",
+  "_why": "An earlier version of this file put essentia crystals in the pattern as well, with a 'C' key. That is wrong twice over. Thaumaturge's own arcane recipes never do it - all 72 that want crystals declare them in 'crystals' and put nothing crystal-shaped in the key - and the workbench's crystal slots are a separate band (InventoryArcaneWorkbench: crafting 0-8, crystals 9-14, wand 15) that the grid never touches. availableCrystals() is what a crystal requirement is paid from, so a crystal in the pattern is an ordinary ingredient that merely happens to satisfy it, and JEI draws it as a component ingredient with nothing to show, which is the 'unknown crystal' a player sees. Declaring the cost and leaving the grid alone is both what the mod does and what reads correctly in JEI.",
+  "crystals": [
+    {
+      "aspect": "thaumaturge:aer"
+    },
+    {
+      "aspect": "thaumaturge:ignis"
+    }
+  ],
+  "key": {
+    "N": {
+      "item": "thaumaturge:nugget_quartz"
+    },
+    "W": {
+      "item": "ae2:certus_quartz_wrench"
+    }
+  },
+  "pattern": [
+    "N N",
+    " W ",
+    "N N"
+  ],
+  "vis": 10,
+  "result": {
+    "id": "thaumicenergistics_ce:focus_aewrench",
+    "count": 1
+  }
+}
