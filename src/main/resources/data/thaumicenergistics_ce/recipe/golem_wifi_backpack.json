@@ -1,0 +1,37 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "_note": "The golem's wireless link to the ME network. The 1.7.10 original was 'TIT'/'NWC'/'FIF' - thaumium, an ME interface part, nitor, a wireless receiver, fluix crystal and an ME charger - at aer 6 + ignis 4 + ordo 3. Thaumium, fluix and the interface carry over (ae2:interface is what that part is called now), and the wireless receiver stands in for the charger. Nitor has no equivalent here, so the two cells it filled are left empty and the aer/ignis it stood for are declared as the crystal cost, which is what nitor was: a vis-bearing reagent rather than a component.",
+  "_crystals": "Declared, not placed. See focus_aewrench.json for why a crystal never belongs in the pattern.",
+  "crystals": [
+    {
+      "aspect": "thaumaturge:aer"
+    },
+    {
+      "aspect": "thaumaturge:ignis"
+    }
+  ],
+  "key": {
+    "F": {
+      "item": "ae2:fluix_crystal"
+    },
+    "I": {
+      "item": "ae2:interface"
+    },
+    "T": {
+      "item": "thaumaturge:ingot_thaumium"
+    },
+    "W": {
+      "item": "ae2:wireless_receiver"
+    }
+  },
+  "pattern": [
+    "TIT",
+    " W ",
+    "FIF"
+  ],
+  "vis": 13,
+  "result": {
+    "id": "thaumicenergistics_ce:golem_wifi_backpack",
+    "count": 1
+  }
+}

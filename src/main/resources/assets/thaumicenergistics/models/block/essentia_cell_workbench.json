@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/cube_bottom_top",
-  "textures": {
-    "top": "thaumicenergistics:block/essentia_cell_workbench_top",
-    "bottom": "thaumicenergistics:block/essentia_cell_workbench_bottom",
-    "side": "thaumicenergistics:block/essentia_cell_workbench_side"
-  }
-}

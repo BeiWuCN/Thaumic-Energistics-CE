@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber" },
+    "facing=south": { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber", "y": 180 },
+    "facing=west":  { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber", "y": 270 },
+    "facing=east":  { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber", "y": 90 }
+  }
+}

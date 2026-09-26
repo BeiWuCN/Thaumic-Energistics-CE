@@ -1,0 +1,47 @@
+{
+  "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+  "name": "tc.research_name.KNOWLEDGEINSCRIBER",
+  "parents": [
+    "thaumicenergistics_ce:arcane_assembler"
+  ],
+  "column": 4,
+  "row": 4,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics_ce:knowledge_inscriber"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.KNOWLEDGEINSCRIBER.stage.1",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        },
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
+      ],
+      "craft": [
+        {
+          "items": [
+            "thaumicenergistics_ce:knowledge_core"
+          ],
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.KNOWLEDGEINSCRIBER.stage.2",
+      "recipes": [
+        "thaumicenergistics_ce:knowledge_inscriber"
+      ]
+    }
+  ],
+  "complexity": 2
+}

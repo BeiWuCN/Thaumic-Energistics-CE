@@ -63,7 +63,7 @@ neoForge {
             // ever registered. Every research entry naming one of them then fails to resolve:
             //
             //     Failed to parse .../research_entry/arcane_assembler.json from pack mod/thaumicenergistics
-            //     Caused by: Failed to get element thaumicenergistics:essentia_terminal
+            //     Caused by: Failed to get element thaumicenergistics_ce:essentia_terminal
             //
             // and the world refuses to load. A run that produces a broken world is worse than no switch.
             // To see the mod absent, build a jar and drop it into a separate profile with no libs/.

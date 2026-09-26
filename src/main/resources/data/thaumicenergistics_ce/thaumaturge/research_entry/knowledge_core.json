@@ -1,0 +1,58 @@
+{
+  "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+  "name": "tc.research_name.KNOWLEDGECORE",
+  "parents": [
+    "thaumicenergistics_ce:arcane_assembler"
+  ],
+  "column": 4,
+  "row": 2,
+  "meta": [
+    "round",
+    "spiky",
+    "hidden"
+  ],
+  "icons": [
+    "thaumicenergistics_ce:knowledge_core"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.KNOWLEDGECORE",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        },
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        },
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
+      ],
+      "craft": [
+        {
+          "items": [
+            "thaumicenergistics_ce:arcane_assembler"
+          ],
+          "amount": 1
+        }
+      ],
+      "required_research": [
+        "thaumicenergistics_ce:arcane_assembler"
+      ],
+      "warp": 1
+    },
+    {
+      "text": "tc.research_text.KNOWLEDGECORE",
+      "recipes": [
+        "thaumicenergistics_ce:knowledge_core"
+      ]
+    }
+  ],
+  "complexity": 3
+}

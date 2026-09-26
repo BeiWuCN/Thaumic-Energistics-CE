@@ -1,0 +1,69 @@
+{
+  "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+  "name": "tc.research_name.DIGISENTIA",
+  "parents": [
+    "thaumicenergistics_ce:base_energistics"
+  ],
+  "column": 0,
+  "row": -2,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics_ce:coalescence_core",
+    "thaumicenergistics_ce:diffusion_core"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.DIGISENTIA.stage.1",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
+      ],
+      "obtain": [
+        {
+          "items": [
+            "ae2:calculation_processor"
+          ],
+          "amount": 2
+        },
+        {
+          "items": [
+            "ae2:logic_processor"
+          ],
+          "amount": 2
+        },
+        {
+          "items": [
+            "ae2:printed_silicon"
+          ],
+          "amount": 1
+        },
+        {
+          "items": [
+            "minecraft:quartz"
+          ],
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.DIGISENTIA.stage.2",
+      "recipes": [
+        "thaumicenergistics_ce:coalescence_core",
+        "thaumicenergistics_ce:diffusion_core"
+      ],
+      "knowledge": [
+        {
+          "type": "observation",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
+      ]
+    }
+  ],
+  "complexity": 1
+}
