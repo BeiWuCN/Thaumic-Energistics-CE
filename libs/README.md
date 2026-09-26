@@ -18,8 +18,8 @@ implementation fileTree(dir: 'libs', include: ['*.jar'])
 
 ## Where to get them
 
-- **Thaumaturge** - build it from the Thaumaturge source tree with `gradlew jar`, then copy
-  `build/libs/thaumaturge-1.21.1-NeoForge-BETA-<version>.jar` here.
+- **Thaumaturge** - <https://github.com/Leclowndu93150/Thaumaturge/>. Build it with `gradlew jar` or
+  take a release from there and put the jar here; it is not redistributed with this mod.
 - **AE2 19.2.17** - <https://cdn.modrinth.com/data/XxWD5pD3/versions/kfyIqgJ6/appliedenergistics2-19.2.17.jar>
 - **GuideME 21.1.17** - <https://modrinth.com/mod/guideme/versions> (any 21.1.x; the file vendored
   here is `guideme-21.1.17.jar`)
