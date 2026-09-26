@@ -1,14 +1,14 @@
 # Thaumic Energistics: CE
 
-Thaumaturge 的源质接进 AE2 的 ME 网络，1.21.1 / NeoForge 上的社区版。
+把 Thaumaturge 的源质系统接进 AE2 的 ME 网络，1.21.1 / NeoForge 上的社区版。
 
 原版 Thaumic Energistics 停在 1.12.2，这个是在 Thaumaturge（1.21.1 的神秘时代移植）上重做的版本：配方、研究、机器界面基本都是重写的。CE 是 Community Edition，本来只是自己和朋友在整合包里用，顺手发出来。
 
-跑起来需要：Minecraft 1.21.1、NeoForge 21.1.250 以上、Applied Energistics 2 19.2.x、Thaumaturge 0.4.4 以上（以及它的前置 GuideME）。jar 丢进 mods 目录就行。
+需要：Minecraft 1.21.1、NeoForge 21.1.250 以上、Applied Energistics 2 19.2.x、Thaumaturge 0.4.4 以上（以及它的前置 GuideME）。jar 丢进 mods 目录就行。
 
-## 有什么
+## 内容
 
-**存储和总线**：ME 源质存储元件 1k / 4k / 16k / 64k（另有一个创造元件）、源质存储总线、输入总线、输出总线、等级发射器、源质终端和无线源质终端。
+**存储和总线**：ME 源质存储元件 1k / 4k / 16k / 64k（另有一个创造元件）、源质存储总线、输入总线、输出总线、源质终端和无线源质终端。
 
 **机器**：
 
@@ -16,13 +16,13 @@ Thaumaturge 的源质接进 AE2 的 ME 网络，1.21.1 / NeoForge 上的社区�
 - 蒸馏编码器 —— 把某个物品的要素组成编成样板
 - 知识铭刻器 + 知识核心 —— 配方写在核心上，一台机器最多记 21 条
 - 注魔供应器 / 注魔监视器 —— 前者自动给 `thaumaturge:infusion` 供料，后者挂在祭坛旁边报风险
-- 源质振动室 —— 把多余的源质烧成 AE
+- 源质谐振仓 —— 把多余的源质烧成 AE
 
 **无线**：源质供应器配无线源质接收器，另外有个傀儡无线背包，装在傀儡身上，它搬的东西会直接进网络。
 
-**奥术这边**：奥术合成终端（在终端里做奥术合成，缺的魔力由网络补）、AE 扳手法杖核心、Vis 中继接口。
+**奥术**：奥术合成终端（在终端里做奥术合成，缺的魔力由网络补）、AE 扳手法杖核心、Vis 中继接口。
 
-还有一本完整的神秘时代研究书，24 条，中英文都有。
+以及完整的 Thaumaturge 研究树。
 
 ## 编译
 
@@ -54,7 +54,7 @@ You need Minecraft 1.21.1, NeoForge 21.1.250+, Applied Energistics 2 19.2.x and 
 
 ## What's in it
 
-**Storage and buses**: ME essentia storage components in 1k / 4k / 16k / 64k (plus a creative one), essentia storage bus, import bus, export bus, level emitter, and the essentia terminal including the wireless one.
+**Storage and buses**: ME essentia storage components in 1k / 4k / 16k / 64k (plus a creative one), essentia storage bus, import bus, export bus and the essentia terminal including the wireless one.
 
 **Machines**:
 
