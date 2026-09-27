@@ -1,11 +1,14 @@
 package thaumicenergistics_ce.menu;
 
 import appeng.api.storage.ITerminalHost;
+import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftCost;
+import com.leclowndu93150.thaumaturge.content.workbench.MenuArcaneWorkbench;
 import appeng.menu.me.common.MEStorageMenu;
 import appeng.helpers.ICraftingGridMenu;
 import appeng.menu.slot.AppEngSlot;
 import appeng.menu.SlotSemantics;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
 import java.util.List;
@@ -13,6 +16,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.menu.slot.ArcaneCraftingResultSlot;
+import thaumicenergistics_ce.menu.slot.CrystalSlot;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
@@ -140,15 +144,17 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
         //    What makes a crystal-cost recipe craftable at all: a crystal in the grid counts twice, as an
         //    ingredient and as payment, which breaks ArcaneShapedRecipePattern.matches. Positions here are
         //    placeholders - the screen style lays them out from the json, each column VERTICAL.
+        //
+        //    Each slot is pinned to one primal aspect, in Thaumaturge's own order, because that is what the
+        //    arcane workbench these six slots stand in for does. See CrystalSlot.
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_COLUMN; i++) {
-            Slot slot = addSlot(new AppEngSlot(part.crystalInventory(), i), CRYSTALS_LEFT);
+            Slot slot = addSlot(new CrystalSlot(part.crystalInventory(), i, aspectOf(i)), CRYSTALS_LEFT);
             slot.x = CRYSTALS_LEFT_X;
             slot.y = GRID_Y + i * GRID_PITCH;
         }
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_COLUMN; i++) {
-            Slot slot = addSlot(
-                    new AppEngSlot(part.crystalInventory(), PartArcaneCraftingTerminal.CRYSTAL_COLUMN + i),
-                    CRYSTALS_RIGHT);
+            int index = PartArcaneCraftingTerminal.CRYSTAL_COLUMN + i;
+            Slot slot = addSlot(new CrystalSlot(part.crystalInventory(), index, aspectOf(index)), CRYSTALS_RIGHT);
             slot.x = CRYSTALS_RIGHT_X;
             slot.y = GRID_Y + i * GRID_PITCH;
         }
@@ -247,6 +253,16 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
      */
     public @Nullable ArcaneCraftingResultSlot resultSlot() {
         return resultSlot;
+    }
+
+    /**
+     * The primal aspect a crystal slot holds, by container index - left column first, then right.
+     *
+     * <p>Thaumaturge's own order, read from the workbench rather than copied into a second list: if their
+     * six ever reorder, these reorder with them and the two machines keep agreeing about which slot is Aer.
+     */
+    public static ResourceKey<IAspect> aspectOf(int crystalIndex) {
+        return MenuArcaneWorkbench.PRIMAL_ORDER.get(crystalIndex);
     }
 
     /** The six crystal slots, left column first. Empty when the host was not our part. */

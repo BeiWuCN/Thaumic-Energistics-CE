@@ -2,11 +2,14 @@ package thaumicenergistics_ce.menu;
 
 import appeng.api.implementations.menuobjects.IPortableTerminal;
 import appeng.menu.locator.ItemMenuHostLocator;
+import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
+import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftingTransaction;
 import com.leclowndu93150.thaumaturge.api.recipe.IArcaneRecipe;
 import com.leclowndu93150.thaumaturge.content.taint.item.EssentiaCrystalFactory;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
@@ -24,6 +27,7 @@ import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
 import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.init.ModMenuTypes;
+import thaumicenergistics_ce.menu.slot.CrystalSlot;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartEssentiaTerminal;
 
@@ -162,6 +166,37 @@ public final class MenuSelfTest {
                 return;
             }
         }
+
+        // Each crystal slot is pinned to one primal aspect, the way the arcane workbench's six are. Asked of
+        // the slot rather than read off a field: the defect was that the slots were plain AppEngSlots and the
+        // rule existed only in the shape of the data, so anything short of mayPlace() would have passed while
+        // the slot went on accepting six Aer crystals.
+        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
+            var slot = menu.crystalSlots().get(i);
+            if (!(slot instanceof CrystalSlot crystalSlot)) {
+                failures.add("crystal slot " + i + " is not aspect-pinned, so it accepts any crystal");
+                continue;
+            }
+            ResourceKey<IAspect> aspect = MenuArcaneCraftingTerminal.aspectOf(i);
+            if (!crystalSlot.requiredAspect().equals(aspect)) {
+                failures.add("crystal slot " + i + " is pinned to " + crystalSlot.requiredAspect()
+                        + ", expected " + aspect);
+            }
+            if (!slot.mayPlace(EssentiaCrystalFactory.of(
+                    Aspects.resolve(level.registryAccess(), aspect), 1))) {
+                failures.add("crystal slot " + i + " refuses a crystal of its own aspect " + aspect);
+            }
+            ResourceKey<IAspect> other = MenuArcaneCraftingTerminal.aspectOf(
+                    (i + 1) % PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
+            if (slot.mayPlace(EssentiaCrystalFactory.of(
+                    Aspects.resolve(level.registryAccess(), other), 1))) {
+                failures.add("crystal slot " + i + " accepts a " + other
+                        + " crystal - the six slots are not pinned to their aspects");
+            }
+        }
+        System.out.println("[menu] crystal slots: " + PartArcaneCraftingTerminal.CRYSTAL_SLOTS
+                + " pinned, one primal aspect each");
+
         if (menu.wandSlot() == null) {
             failures.add("the ACT menu offers no wand slot after being built with its part");
             dumpSlots(menu);

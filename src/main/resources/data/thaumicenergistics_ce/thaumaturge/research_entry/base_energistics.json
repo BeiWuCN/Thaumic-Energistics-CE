@@ -2,7 +2,7 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.BASEENERGISTICS",
   "parents": [
-    "thaumaturge:unlock_artifice"
+    "thaumaturge:unlock_infusion"
   ],
   "column": 0,
   "row": 0,

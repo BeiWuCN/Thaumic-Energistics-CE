@@ -3,6 +3,7 @@ package thaumicenergistics_ce.research;
 import com.leclowndu93150.thaumaturge.api.research.IResearchCategory;
 import com.leclowndu93150.thaumaturge.api.research.IResearchEntry;
 import com.leclowndu93150.thaumaturge.api.research.IResearchStage;
+import com.leclowndu93150.thaumaturge.api.research.ResearchParent;
 import com.leclowndu93150.thaumaturge.api.research.ResearchRequirement;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,6 +109,8 @@ public final class ResearchSelfTest {
             failures.add("the category exists but no entries were loaded under it");
         }
 
+        checkFirstPageReachable(category, byId, entries, failures);
+
         RecipeManager recipes = server.getRecipeManager();
         for (Map.Entry<ResourceLocation, IResearchEntry> e : byId.entrySet()) {
             ours++;
@@ -115,6 +118,87 @@ public final class ResearchSelfTest {
         }
 
         report(ours, failures);
+    }
+
+    /**
+     * The tab's gate and its first entry have to agree, or the tab opens onto a page nobody can start.
+     *
+     * <p>Both gates are real research the player completes, and they are independent: the category waits for
+     * its own {@code required_research} while each entry waits for its parents. Nothing forces the two to
+     * name the same thing, and a mismatch fails silently in the worst way - the tab appears, and every node
+     * on it is refused. That is exactly what shipped: the category waited for
+     * {@code thaumaturge:unlock_infusion} while the root waited for {@code thaumaturge:unlock_artifice}, so a
+     * player who had just finished the infusion branch got a tab full of dead nodes.
+     *
+     * <p>The rule is the one the player experiences: once the category's gate is complete, at least one entry
+     * must be startable. Each entry with no parent of ours is such a candidate; it is startable when every one
+     * of its parents is already done at that moment, which is the gate itself or anything the gate needed.
+     * Requiring this of *every* such entry would be wrong - an entry gated on a later research is a legitimate
+     * thing to have, and {@code infusion_provider} is one.
+     */
+    private static void checkFirstPageReachable(
+            IResearchCategory category,
+            Map<ResourceLocation, IResearchEntry> ours,
+            HolderLookup.RegistryLookup<IResearchEntry> allEntries,
+            List<String> failures) {
+
+        ResourceLocation gate = category.requiredResearch().orElse(null);
+        if (gate == null) {
+            // An ungated tab is visible from the start and cannot disagree with anything.
+            return;
+        }
+
+        Set<ResourceLocation> doneAtGate = new HashSet<>();
+        collectAncestors(gate, allEntries, doneAtGate);
+
+        boolean anyStartable = false;
+        List<String> refused = new ArrayList<>();
+        for (Map.Entry<ResourceLocation, IResearchEntry> e : ours.entrySet()) {
+            IResearchEntry entry = e.getValue();
+            boolean hangsOffOurs = entry.parents().stream().anyMatch(parent -> ours.containsKey(parent.id()));
+            if (hangsOffOurs) {
+                continue;
+            }
+            List<String> unmet = new ArrayList<>();
+            for (ResearchParent parent : entry.parents()) {
+                if (!doneAtGate.contains(parent.id())) {
+                    unmet.add(parent.id().toString());
+                }
+            }
+            if (unmet.isEmpty()) {
+                anyStartable = true;
+            } else {
+                refused.add(e.getKey() + " needs " + unmet);
+            }
+        }
+
+        if (!anyStartable) {
+            failures.add("the category waits for " + gate + ", but no entry of ours is startable once that is"
+                    + " done - the tab would open onto nothing the player can research. Entries with no parent"
+                    + " of ours and what they are still waiting for: " + refused);
+        }
+    }
+
+    /**
+     * Every research that is complete once {@code id} is, by walking parents in Thaumaturge's own registry.
+     *
+     * <p>Returns as soon as an id repeats, so a cycle in the data stops the walk instead of the recursion.
+     */
+    private static void collectAncestors(
+            ResourceLocation id,
+            HolderLookup.RegistryLookup<IResearchEntry> allEntries,
+            Set<ResourceLocation> into) {
+
+        if (!into.add(id)) {
+            return;
+        }
+        allEntries.get(ResourceKey.create(IResearchEntry.REGISTRY_KEY, id))
+                .map(Holder.Reference::value)
+                .ifPresent(entry -> {
+                    for (ResearchParent parent : entry.parents()) {
+                        collectAncestors(parent.id(), allEntries, into);
+                    }
+                });
     }
 
     /** The tab itself: its position in the category bar, and the three textures it draws. */
