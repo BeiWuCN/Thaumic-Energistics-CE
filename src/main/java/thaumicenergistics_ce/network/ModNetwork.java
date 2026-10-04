@@ -74,7 +74,7 @@ public final class ModNetwork {
         registrar.playToClient(
                 ArcaneCraftCostPayload.TYPE,
                 ArcaneCraftCostPayload.CODEC,
-                (payload, context) -> thaumicenergistics_ce.client.ScreenArcaneCraftingTerminal
+                (payload, context) -> thaumicenergistics_ce.client.gui.ScreenArcaneCraftingTerminal
                         .acceptCost(payload));
     }
 }

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.client;
+package thaumicenergistics_ce.client.gui;
 
 import java.util.ArrayList;
 import java.util.List;

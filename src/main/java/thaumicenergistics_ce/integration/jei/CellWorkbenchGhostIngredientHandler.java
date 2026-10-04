@@ -11,7 +11,7 @@ import mezz.jei.api.ingredients.ITypedIngredient;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.client.ScreenEssentiaCellWorkbench;
+import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 

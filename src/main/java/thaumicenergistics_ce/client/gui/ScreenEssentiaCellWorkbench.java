@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.client;
+package thaumicenergistics_ce.client.gui;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;

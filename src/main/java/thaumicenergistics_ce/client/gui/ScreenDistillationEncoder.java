@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.client;
+package thaumicenergistics_ce.client.gui;
 
 import com.leclowndu93150.thaumaturge.api.aspect.AspectComponents;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;

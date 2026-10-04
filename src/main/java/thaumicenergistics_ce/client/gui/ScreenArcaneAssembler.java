@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.client;
+package thaumicenergistics_ce.client.gui;
 
 import appeng.client.gui.Icon;
 import net.minecraft.client.gui.GuiGraphics;

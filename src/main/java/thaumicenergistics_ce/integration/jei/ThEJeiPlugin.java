@@ -8,7 +8,7 @@ import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.resources.ResourceLocation;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.ThaumicEnergistics;
-import thaumicenergistics_ce.client.ScreenKnowledgeInscriber;
+import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 
 /**
  * Thaumic Energistics' JEI plugin.
@@ -44,24 +44,24 @@ public class ThEJeiPlugin implements IModPlugin {
         // Buses take essentia, not items, so their drag targets accept Thaumaturge's aspect ingredient.
         // One handler per concrete screen class: JEI pairs a Class with a handler of that same type.
         registration.addGhostIngredientHandler(
-                thaumicenergistics_ce.client.ScreenEssentiaImportBus.class,
-                new EssentiaBusGhostIngredientHandler<thaumicenergistics_ce.client.ScreenEssentiaImportBus>());
+                thaumicenergistics_ce.client.gui.ScreenEssentiaImportBus.class,
+                new EssentiaBusGhostIngredientHandler<thaumicenergistics_ce.client.gui.ScreenEssentiaImportBus>());
         registration.addGhostIngredientHandler(
-                thaumicenergistics_ce.client.ScreenEssentiaExportBus.class,
-                new EssentiaBusGhostIngredientHandler<thaumicenergistics_ce.client.ScreenEssentiaExportBus>());
+                thaumicenergistics_ce.client.gui.ScreenEssentiaExportBus.class,
+                new EssentiaBusGhostIngredientHandler<thaumicenergistics_ce.client.gui.ScreenEssentiaExportBus>());
         // The storage bus too: while its screen was AE2's UpgradeableScreen there was no class to register
         // against, so an aspect could not be dragged into its config grid.
         registration.addGhostIngredientHandler(
-                thaumicenergistics_ce.client.ScreenEssentiaStorageBus.class,
-                new EssentiaBusGhostIngredientHandler<thaumicenergistics_ce.client.ScreenEssentiaStorageBus>());
+                thaumicenergistics_ce.client.gui.ScreenEssentiaStorageBus.class,
+                new EssentiaBusGhostIngredientHandler<thaumicenergistics_ce.client.gui.ScreenEssentiaStorageBus>());
         // And the cell workbench's partition wells: the same kind of grid holding the same kind of key.
         registration.addGhostIngredientHandler(
-                thaumicenergistics_ce.client.ScreenEssentiaCellWorkbench.class,
+                thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench.class,
                 new CellWorkbenchGhostIngredientHandler());
         // And the Distillation Encoder's source well, so the item to distil can be dragged in rather than
         // fetched from a terminal by hand.
         registration.addGhostIngredientHandler(
-                thaumicenergistics_ce.client.ScreenDistillationEncoder.class,
+                thaumicenergistics_ce.client.gui.ScreenDistillationEncoder.class,
                 new DistillationEncoderGhostIngredientHandler());
     }
 
