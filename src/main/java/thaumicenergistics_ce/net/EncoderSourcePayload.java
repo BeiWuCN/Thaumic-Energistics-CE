@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.network;
+package thaumicenergistics_ce.net;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -8,7 +8,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 
 /**
  * The Distillation Encoder's source template, set from the client. It travels although the well is a
@@ -36,8 +35,9 @@ public record EncoderSourcePayload(int containerId, ItemStack stack) implements 
     }
 
     public void handle(Player player) {
-        if (player.containerMenu instanceof MenuDistillationEncoder menu && menu.containerId == containerId) {
-            menu.applySourceTemplate(stack);
+        if (player.containerMenu instanceof DistillationEncoderReceiver receiver
+                && receiver.containerId() == containerId) {
+            receiver.applySourceTemplate(stack);
         }
     }
 }

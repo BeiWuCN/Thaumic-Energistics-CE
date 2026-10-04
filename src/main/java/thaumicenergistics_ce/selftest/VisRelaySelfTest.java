@@ -14,11 +14,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.part.PartVisInterface;
 import thaumicenergistics_ce.part.VisReservation;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Measures whether the Assembler beside the player can draw vis along the relay chain; read-only.
@@ -48,14 +48,14 @@ public final class VisRelaySelfTest {
 
         ServerLevel level = player.serverLevel();
         BlockPos origin = player.blockPosition();
-        ThaumicEnergistics.LOG.info("[vistest] scanning {} blocks around {} in {}", SCAN, origin, level.dimension().location());
+        ThELog.LOG.info("[vistest] scanning {} blocks around {} in {}", SCAN, origin, level.dimension().location());
 
         List<BlockPos> assemblers = find(level, origin,
                 pos -> level.getBlockEntity(pos) instanceof BlockEntityArcaneAssembler);
         List<BlockPos> relays = find(level, origin, pos -> TcAura.isRelay(level, pos));
         List<BlockPos> interfaces = find(level, origin, pos -> partAt(level, pos) != null);
 
-        ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[vistest] found {} arcane assembler(s), {} vis relay block(s), {} vis interface part(s)",
                 assemblers.size(), relays.size(), interfaces.size());
 
@@ -65,7 +65,7 @@ public final class VisRelaySelfTest {
                 continue;
             }
             TcAura.RelayEnd end = TcAura.chainEnd(level, relayPos);
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[vistest] relay at {} linked={} depth={} parent={} resolvesTo={}",
                     relayPos, link.linked(), link.depth(), link.parent(),
                     end == null ? "NOTHING" : end.description());
@@ -84,7 +84,7 @@ public final class VisRelaySelfTest {
                             .append(" rate=").append(entry.rate()).append("c/s")
                             .append(" stored=").append(entry.stored());
                 }
-                ThaumicEnergistics.LOG.info(
+                ThELog.LOG.info(
                         "[vistest]   node at {} energized={} palette[{}]",
                         resolved.pos(), resolved.energized(),
                         palette.length() == 0 ? "empty" : palette);
@@ -120,7 +120,7 @@ public final class VisRelaySelfTest {
                     carries.append(primal.location().getPath()).append('=').append(amount);
                 }
             }
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[vistest] interface at {} {} upstream={} wouldCarry[{}] nearestAssembler={}",
                     interfacePos, flags, upstream,
                     carries.length() == 0 ? "not asked" : carries,
@@ -128,7 +128,7 @@ public final class VisRelaySelfTest {
         }
 
         if (assemblers.isEmpty()) {
-            ThaumicEnergistics.LOG.info("[vistest] no assembler in range, so the chain was not measured from one");
+            ThELog.LOG.info("[vistest] no assembler in range, so the chain was not measured from one");
         }
 
         for (BlockPos assemblerPos : assemblers) {
@@ -144,23 +144,23 @@ public final class VisRelaySelfTest {
                 }
                 draws.append(primal.location().getPath()).append('=').append(drawn);
             }
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[vistest] assembler at {}: aura={} relayBlockWithin8={} simulatedDraw[{}] total={} centivis",
                     assemblerPos,
                     TcAura.vis(level, assemblerPos),
                     reach, draws, total);
             if (!reach) {
-                ThaumicEnergistics.LOG.info(
+                ThELog.LOG.info(
                         "[vistest]   -> no relay BLOCK within 8. A vis interface part cannot be reached from here"
                                 + " on its own: place a Thaumaturge vis relay block within 8 of the machine and"
                                 + " wire the interface TO THAT BLOCK (they link up to 8 apart, 16 hops).");
             } else if (total <= 0) {
-                ThaumicEnergistics.LOG.info(
+                ThELog.LOG.info(
                         "[vistest]   -> a relay block is in range but gave nothing for any of the six aspects."
                                 + " Either the relay's parent chain reaches no source at all, or the source at"
                                 + " the end of it is empty.");
             } else {
-                ThaumicEnergistics.LOG.info(
+                ThELog.LOG.info(
                         "[vistest]   -> the chain answers, in the aspects listed above and no others.");
             }
         }

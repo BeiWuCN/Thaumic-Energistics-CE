@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.network;
+package thaumicenergistics_ce.net;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -8,7 +8,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
 
 /**
  * "Empty this essentia container into the network", sent by the Essentia Terminal's right-click.
@@ -39,8 +38,9 @@ public record EssentiaDepositPayload(int containerId, int where, ItemStack stack
     }
 
     public void handle(Player player) {
-        if (player.containerMenu instanceof MenuEssentiaTerminal menu && menu.containerId == containerId) {
-            menu.deposit(player, where, stack);
+        if (player.containerMenu instanceof EssentiaTerminalReceiver receiver
+                && receiver.containerId() == containerId) {
+            receiver.deposit(player, where, stack);
         }
     }
 }

@@ -20,7 +20,6 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
@@ -36,6 +35,7 @@ import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 import thaumicenergistics_ce.menu.slot.CrystalSlot;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartEssentiaTerminal;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Builds every menu this mod registers, once, and reports any that throw.
@@ -277,7 +277,7 @@ public final class MenuSelfTest {
                 return;
             }
         }
-        ThaumicEnergistics.LOG.info("[menu] DISTILLATION_ENCODER wells accept a server write");
+        ThELog.LOG.info("[menu] DISTILLATION_ENCODER wells accept a server write");
     }
 
     private static void check(List<String> failures, String name, Builder builder) {
@@ -308,17 +308,17 @@ public final class MenuSelfTest {
             failures.add(name + " has the player's slots and none of its own");
             return;
         }
-        ThaumicEnergistics.LOG.info("[menu] {} built with {} slot(s)", name, menu.slots.size());
+        ThELog.LOG.info("[menu] {} built with {} slot(s)", name, menu.slots.size());
     }
 
     private static void report(List<String> failures) {
         if (failures.isEmpty()) {
-            ThaumicEnergistics.LOG.info("[menu] self-test passed");
+            ThELog.LOG.info("[menu] self-test passed");
             return;
         }
         for (String failure : failures) {
-            ThaumicEnergistics.LOG.error("[menu] FAIL {}", failure);
+            ThELog.LOG.error("[menu] FAIL {}", failure);
         }
-        ThaumicEnergistics.LOG.error("[menu] self-test failed with {} problem(s)", failures.size());
+        ThELog.LOG.error("[menu] self-test failed with {} problem(s)", failures.size());
     }
 }

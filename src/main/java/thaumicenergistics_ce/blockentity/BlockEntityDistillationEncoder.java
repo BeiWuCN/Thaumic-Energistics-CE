@@ -28,10 +28,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The Distillation Encoder: writes "this item distils into that essentia" as an ME processing pattern.
@@ -278,7 +278,7 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
             int slot = legacySlotFor(stack);
             if (slot < 0) {
                 // Not reachable with the sizes above; logged rather than written over another entry.
-                ThaumicEnergistics.LOG.error(
+                ThELog.LOG.error(
                         "[encoder] at {} cannot place {} from a pre-fix tag: every well is taken",
                         worldPosition, stack);
                 continue;
@@ -287,7 +287,7 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
             placed.add(slot);
         }
         if (!placed.isEmpty()) {
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[encoder] at {} read a tag saved before slot indices were written: {} entr{} placed at {}",
                     worldPosition, kept, kept == 1 ? "y" : "ies", placed);
         }

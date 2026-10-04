@@ -11,6 +11,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.essentia.EssentiaFillHelper;
 import thaumicenergistics_ce.menu.slot.ContainerSlot;
+import thaumicenergistics_ce.net.EssentiaTerminalReceiver;
 
 /**
  * The Essentia Terminal's menu, shared by the cable part and the wireless item.
@@ -20,7 +21,7 @@ import thaumicenergistics_ce.menu.slot.ContainerSlot;
  *       holds; which key types are offered is the host's {@code KeyTypeSelection}.
  * </ul>
  */
-public class MenuEssentiaTerminal extends MEStorageMenu {
+public class MenuEssentiaTerminal extends MEStorageMenu implements EssentiaTerminalReceiver {
 
     public MenuEssentiaTerminal(MenuType<?> menuType, int id, Inventory playerInventory, ITerminalHost host) {
         super(menuType, id, playerInventory, host);
@@ -30,6 +31,7 @@ public class MenuEssentiaTerminal extends MEStorageMenu {
         return !isClientSide();
     }
 
+    @Override
     public boolean fillFromNetwork(Player player, int where, ResourceLocation aspectId) {
         if (isClientSide()) {
             return false;
@@ -47,6 +49,7 @@ public class MenuEssentiaTerminal extends MEStorageMenu {
         return moved;
     }
 
+    @Override
     public void deposit(Player player, int where, ItemStack claimed) {
         if (isClientSide()) {
             return;
@@ -89,6 +92,11 @@ public class MenuEssentiaTerminal extends MEStorageMenu {
             player.setItemInHand(InteractionHand.MAIN_HAND, left);
         }
         broadcastChanges();
+    }
+
+    @Override
+    public int containerId() {
+        return containerId;
     }
 
     private ItemStack containerAt(Player player, int where) {

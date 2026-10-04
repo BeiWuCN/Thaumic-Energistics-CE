@@ -38,6 +38,7 @@ import thaumicenergistics_ce.block.BlockInfusionMonitor;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 import thaumicenergistics_ce.init.ModBlockEntities;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The Infusion Monitor: watches an Infusion Altar and reports what the ritual will do to the room.
@@ -381,7 +382,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
             return;
         }
         nextTrace = now + 20;
-        thaumicenergistics_ce.ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[mon] at {} node={} book={} network={} altar={} crafting={} problems={} base={} altarRisk={}"
                         + " tier={} stability={} stored={} energyOutput={}",
                 worldPosition, describeNode(node), hasBook(), report.foundAltar(), matrixPos, report.crafting(),
@@ -450,7 +451,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
 
     private void applyBubbleState(CompoundTag tag, HolderLookup.Provider registries) {
         if (level != null && level.isClientSide() && TRACE) {
-            thaumicenergistics_ce.ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[bubble] tag at {} reporting={} tier={} instability={}",
                     worldPosition, tag.getBoolean("Reporting"), tag.getInt("BubbleTier"),
                     tag.getInt("BubbleInstability"));

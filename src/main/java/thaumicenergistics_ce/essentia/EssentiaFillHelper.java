@@ -17,10 +17,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Moving essentia between a container item and the ME network.
@@ -132,7 +132,7 @@ public final class EssentiaFillHelper {
     }
 
     private static void log(String message, Object... args) {
-        ThaumicEnergistics.LOG.info("[essentia-terminal] " + message, args);
+        ThELog.LOG.info("[essentia-terminal] " + message, args);
     }
 
     /**

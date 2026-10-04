@@ -1,9 +1,9 @@
-package thaumicenergistics_ce.network;
+package thaumicenergistics_ce.net;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.ThEIds;
 
 /**
@@ -37,10 +37,11 @@ public record GolemBackpackPayload(int entityId, int status, int skinOrdinal) im
     }
 
     /**
-     * Hands the payload to the client cache on the client thread: the payload arrives mid-tick, and
-     * resolving an entity id against the level from there is not safe.
+     * Hands the payload to whatever the client installed as its receiver. The protocol package names no
+     * client class, and the registrar already runs handlers on the main thread, so this must not enqueue
+     * a second time.
      */
-    public static void handle(GolemBackpackPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> thaumicenergistics_ce.client.GolemBackpackClientData.accept(payload));
+    public void handleOnClient(Player player) {
+        ClientSinks.acceptGolemBackpack(this);
     }
 }

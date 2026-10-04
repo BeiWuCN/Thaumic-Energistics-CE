@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.client;
+package thaumicenergistics_ce.client.render;
 
 import appeng.api.client.AEKeyRenderHandler;
 import appeng.util.Platform;
@@ -15,9 +15,9 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * How AE2 draws an essentia key.
@@ -38,7 +38,7 @@ public class EssentiaKeyRenderHandler implements AEKeyRenderHandler<AEssentiaKey
             // AE2 swallows anything a render handler throws, so an unresolved key vanishes silently:
             // this warning is the only evidence the path ran.
             if (REPORTED.add(key.getId())) {
-                ThaumicEnergistics.LOG.warn(
+                ThELog.LOG.warn(
                         "[essentia-icon] {} has no aspect ({}); drawing the missing chip",
                         key.getId(),
                         AEssentiaKeyType.whyNoAspect(key.getId()));

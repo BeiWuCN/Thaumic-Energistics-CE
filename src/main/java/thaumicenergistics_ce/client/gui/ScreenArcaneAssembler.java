@@ -8,10 +8,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.gui.GuiLayout;
 import thaumicenergistics_ce.menu.MenuArcaneAssembler;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The Arcane Assembler screen: pieces from {@link GuiLayout} composited over the reference's own art.
@@ -146,7 +146,7 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
             float progress = menu.isCrafting() ? menu.getProgress() : 0.0F;
             if (TRACE_PROGRESS && Math.abs(progress - lastTracedProgress) > 0.001F) {
                 lastTracedProgress = progress;
-                ThaumicEnergistics.LOG.info("[asmtest] bar={} {}", progress, menu.progressForTest());
+                ThELog.LOG.info("[asmtest] bar={} {}", progress, menu.progressForTest());
             }
             return progress;
         }

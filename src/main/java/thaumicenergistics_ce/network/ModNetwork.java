@@ -3,6 +3,15 @@ package thaumicenergistics_ce.network;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import thaumicenergistics_ce.net.ArcaneCraftCostPayload;
+import thaumicenergistics_ce.net.EncoderActionPayload;
+import thaumicenergistics_ce.net.EncoderSourcePayload;
+import thaumicenergistics_ce.net.EssentiaBusConfigPayload;
+import thaumicenergistics_ce.net.EssentiaDepositPayload;
+import thaumicenergistics_ce.net.EssentiaFillPayload;
+import thaumicenergistics_ce.net.GolemBackpackPayload;
+import thaumicenergistics_ce.net.InscriberGridFillPayload;
+import thaumicenergistics_ce.net.InscriberGridPayload;
 
 /**
  * Network registration.
@@ -67,7 +76,7 @@ public final class ModNetwork {
         registrar.playToClient(
                 GolemBackpackPayload.TYPE,
                 GolemBackpackPayload.CODEC,
-                GolemBackpackPayload::handle);
+                (payload, context) -> payload.handleOnClient(context.player()));
         // Server to client, and otherwise the only one that travels that way: an arcane recipe's vis cost
         // can only be worked out on the server, and the screen has to draw it.
         registrar.playToClient(

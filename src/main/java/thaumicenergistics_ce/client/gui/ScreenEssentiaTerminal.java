@@ -9,13 +9,13 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.essentia.EssentiaFillHelper;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
 import thaumicenergistics_ce.menu.slot.ContainerSlot;
-import thaumicenergistics_ce.network.EssentiaDepositPayload;
-import thaumicenergistics_ce.network.EssentiaFillPayload;
+import thaumicenergistics_ce.net.EssentiaDepositPayload;
+import thaumicenergistics_ce.net.EssentiaFillPayload;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The Essentia Terminal's screen: AE2's terminal wholesale, plus two gestures of its own.
@@ -92,7 +92,7 @@ public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal
             if (cursorIsContainer() && entry != null && !(entry.getWhat() instanceof AEssentiaKey)) {
                 // Logged only in the surprising case: a container on the cursor over a non-essentia
                 // entry, where the insertion leak used to happen.
-                ThaumicEnergistics.LOG.info(TAG + "entry {} is not essentia ({}), so a held container"
+                ThELog.LOG.info(TAG + "entry {} is not essentia ({}), so a held container"
                         + " cannot be drawn from here", entry.getWhat().getId(),
                         entry.getWhat().getClass().getSimpleName());
             }
@@ -107,7 +107,7 @@ public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal
             // Still a grid entry: AE2 would insert what the cursor holds, one item per click. A jar or
             // a phial goes in only through the two gestures above.
             if (cursorIsContainer()) {
-                ThaumicEnergistics.LOG.info(TAG + "entry click refused: the cursor holds a container,"
+                ThELog.LOG.info(TAG + "entry click refused: the cursor holds a container,"
                         + " which is never inserted into the network");
                 return true;
             }

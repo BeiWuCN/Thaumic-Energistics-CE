@@ -14,9 +14,9 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.network.PacketDistributor;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.menu.MenuEssentiaBus;
-import thaumicenergistics_ce.network.EssentiaBusConfigPayload;
+import thaumicenergistics_ce.net.EssentiaBusConfigPayload;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Lets the player drag an aspect from JEI into an essentia bus's config slots.
@@ -49,7 +49,7 @@ public class EssentiaBusGhostIngredientHandler<T extends UpgradeableScreen<? ext
         // Client and server decide from their own upgrade inventory, and a disagreement silently
         // shows as a target that eats the drop.
         if (!targets.isEmpty()) {
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[bus-config] offering {} target(s) of {} config slot(s); {} capacity card(s) installed",
                     targets.size(), menu.getConfigSlotCount(),
                     menu.getUpgrades().getInstalledUpgrades(AEItems.CAPACITY_CARD));
@@ -92,7 +92,7 @@ public class EssentiaBusGhostIngredientHandler<T extends UpgradeableScreen<? ext
         @Override
         public void accept(I ingredient) {
             if (!(ingredient instanceof AspectInstance aspect)) {
-                ThaumicEnergistics.LOG.warn(
+                ThELog.LOG.warn(
                         "[bus-config] drag produced {} which is not an AspectInstance",
                         ingredient == null ? "null" : ingredient.getClass().getName());
                 return;
@@ -104,10 +104,10 @@ public class EssentiaBusGhostIngredientHandler<T extends UpgradeableScreen<? ext
                     .orElse(null);
             if (id == null) {
                 // An aspect with no id is not one the server could look up either.
-                ThaumicEnergistics.LOG.warn("[bus-config] drag produced an aspect with no registry id");
+                ThELog.LOG.warn("[bus-config] drag produced an aspect with no registry id");
                 return;
             }
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[bus-config] sending slot {} <- {} for menu {}", index, id, menu.containerId);
             PacketDistributor.sendToServer(new EssentiaBusConfigPayload(menu.containerId, index, id));
         }

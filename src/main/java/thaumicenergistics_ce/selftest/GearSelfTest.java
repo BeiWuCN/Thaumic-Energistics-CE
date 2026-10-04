@@ -16,12 +16,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.focus.AEWrench;
 import thaumicenergistics_ce.focus.FocusEffectAEWrench;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.item.ItemFocusAEWrench;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Self-test for the two items that are not machines: the wrench focus and the golem backpack.
@@ -197,12 +197,12 @@ public final class GearSelfTest {
 
     private static void report(List<String> failures) {
         if (failures.isEmpty()) {
-            ThaumicEnergistics.LOG.info("[gear] self-test passed");
+            ThELog.LOG.info("[gear] self-test passed");
             return;
         }
         for (String failure : failures) {
-            ThaumicEnergistics.LOG.error("[gear] FAIL {}", failure);
+            ThELog.LOG.error("[gear] FAIL {}", failure);
         }
-        ThaumicEnergistics.LOG.error("[gear] self-test failed with {} problem(s)", failures.size());
+        ThELog.LOG.error("[gear] self-test failed with {} problem(s)", failures.size());
     }
 }

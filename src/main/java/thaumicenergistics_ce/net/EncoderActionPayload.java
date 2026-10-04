@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.network;
+package thaumicenergistics_ce.net;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -7,7 +7,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 
 /**
  * What the Distillation Encoder screen asks the server to do: instructions, never state, since both
@@ -54,13 +53,14 @@ public record EncoderActionPayload(int containerId, int action, int value) imple
      * server: a screen is a suggestion, and the block entity validates again before anything is spent.
      */
     public void handle(Player player) {
-        if (!(player.containerMenu instanceof MenuDistillationEncoder menu) || menu.containerId != containerId) {
+        if (!(player.containerMenu instanceof DistillationEncoderReceiver receiver)
+                || receiver.containerId() != containerId) {
             return;
         }
         switch (action) {
-            case ACTION_SELECT -> menu.selectAspect(value);
-            case ACTION_ENCODE -> menu.encode();
-            case ACTION_INSERT_BLANK -> menu.insertBlankFromInventory(player);
+            case ACTION_SELECT -> receiver.selectAspect(value);
+            case ACTION_ENCODE -> receiver.encode();
+            case ACTION_INSERT_BLANK -> receiver.insertBlankFromInventory(player);
             default -> {
                 // An action this build does not know: ignore it rather than guess.
             }

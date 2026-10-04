@@ -16,8 +16,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.ThaumicEnergistics;
-import thaumicenergistics_ce.network.GolemBackpackPayload;
+import thaumicenergistics_ce.net.GolemBackpackPayload;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * What a golem does with its backpack: tips it into the ME network and tells nearby clients when reachable.
@@ -71,7 +71,7 @@ public final class GolemBackpackTickHandler {
         GolemWirelessLink connection = GolemWirelessLink.open(golem, link);
         if (connection == null) {
             if (GolemBackpackHandler.TRACE) {
-                ThaumicEnergistics.LOG.info("[pack] golem " + golem.getId() + " cannot reach " + link
+                ThELog.LOG.info("[pack] golem " + golem.getId() + " cannot reach " + link
                         + ": " + GolemWirelessLink.refusal(golem, link));
             }
             return;
@@ -98,7 +98,7 @@ public final class GolemBackpackTickHandler {
             long inserted = connection.insert(carried, rate);
             if (inserted > 0L) {
                 if (name != null) {
-                    ThaumicEnergistics.LOG.info("[pack] golem " + golem.getId() + " put " + inserted + "x "
+                    ThELog.LOG.info("[pack] golem " + golem.getId() + " put " + inserted + "x "
                             + name + " into the network");
                 }
                 // The swing Thaumaturge plays when a golem hands an item over.
@@ -122,7 +122,7 @@ public final class GolemBackpackTickHandler {
             return;
         }
         LAST_ERRAND_TRACE.put(golem.getUUID(), now);
-        ThaumicEnergistics.LOG.info("[pack] golem " + golem.getId()
+        ThELog.LOG.info("[pack] golem " + golem.getId()
                 + " is running an errand, so what it holds is not the network's");
     }
 

@@ -88,6 +88,21 @@ neoForge {
         server {
             server()
             programArgument '--nogui'
+
+            // A client and a dedicated server cannot share a directory. Both used to work in `run/`,
+            // so whichever one started second died on the world lock:
+            //
+            //     java.io.IOException: another process has locked a portion of the file
+            //     [net.minecraft.server.Main/FATAL]: Failed to start the minecraft server
+            //
+            // which is indistinguishable from a real crash and wasted two runs on 2026-10-04. The
+            // server also recycles latest.log on every start, so a client run in between destroys the
+            // previous server's evidence - the Done line a gate reads to call the run a pass.
+            // Separating the two costs one line and removes the whole failure mode.
+            //
+            // The client stays in `run/`, where its world and logs already are. A gate that looks for
+            // server output now reads run/server/logs/latest.log.
+            gameDirectory.set(layout.projectDirectory.dir('run/server'))
         }
         data {
             data()

@@ -20,8 +20,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.jetbrains.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Putting the wireless backpack on a golem, taking it off again, and repainting it.
@@ -49,7 +49,7 @@ public final class GolemBackpackHandler {
 
     private static void trace(String message) {
         if (TRACE) {
-            ThaumicEnergistics.LOG.info("[pack] " + message);
+            ThELog.LOG.info("[pack] " + message);
         }
     }
 

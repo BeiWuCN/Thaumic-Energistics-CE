@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The Vis Interface: lets Thaumaturge machines draw vis out of the ME network's aura.
@@ -170,7 +171,7 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
             return 0;
         }
         if (TRACE) {
-            thaumicenergistics_ce.ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[vis] supplied {} centivis of {} at {} for {} AE against the chain's aspects",
                     offered, primal.location().getPath(), visPos(), paid);
         }

@@ -29,8 +29,6 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.focus.FocusElements;
@@ -55,8 +53,10 @@ import thaumicenergistics_ce.selftest.EssentiaSelfTest;
 import thaumicenergistics_ce.selftest.GearSelfTest;
 import thaumicenergistics_ce.selftest.InscriberSelfTest;
 import thaumicenergistics_ce.selftest.MenuSelfTest;
+import thaumicenergistics_ce.selftest.NetworkSelfTest;
 import thaumicenergistics_ce.selftest.ResearchSelfTest;
 import thaumicenergistics_ce.selftest.VisRelaySelfTest;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Thaumic Energistics - bridges Thaumaturge essentia with Applied Energistics 2 ME networks.
@@ -68,10 +68,8 @@ import thaumicenergistics_ce.selftest.VisRelaySelfTest;
  */
 @Mod(ThEIds.MODID)
 public final class ThaumicEnergistics {
-    public static final Logger LOG = LoggerFactory.getLogger("ThaumicEnergistics");
-
     public ThaumicEnergistics(IEventBus modBus, ModContainer container) {
-        LOG.info("ThaumicEnergistics loading");
+        ThELog.LOG.info("ThaumicEnergistics loading");
 
         ModBlocks.register(modBus);
         ModItems.register(modBus);
@@ -124,6 +122,9 @@ public final class ThaumicEnergistics {
         NeoForge.EVENT_BUS.addListener(AssemblerCraftSelfTest::run);
         // Read-only check that an assembler can reach a relay block; a lone interface cannot.
         NeoForge.EVENT_BUS.addListener(VisRelaySelfTest::run);
+        // The payload codecs: a field dropped while the records moved packages compiles and only shows
+        // up as a client drawing something the server never sent.
+        NeoForge.EVENT_BUS.addListener(NetworkSelfTest::run);
     }
 
     /**
@@ -172,9 +173,9 @@ public final class ThaumicEnergistics {
             }
             failed++;
             boolean fromGrid = ThEArcanePattern.satisfiesGrid(arcane, grid, level);
-            LOG.info("[selftest] FAIL {} gridMatches={} grid={}", holder.id(), fromGrid, pattern.grid());
+            ThELog.LOG.info("[selftest] FAIL {} gridMatches={} grid={}", holder.id(), fromGrid, pattern.grid());
         }
-        LOG.info("[selftest] {} arcane recipes, {} resolved to themselves, {} failed",
+        ThELog.LOG.info("[selftest] {} arcane recipes, {} resolved to themselves, {} failed",
                 total, total - failed, failed);
 
         // JEI round trip: a broken transfer is indistinguishable from a broken matcher.
@@ -204,14 +205,14 @@ public final class ThaumicEnergistics {
             }
             broken++;
             if (broken <= 10) {
-                LOG.info(
+                ThELog.LOG.info(
                         "[selftest] TRANSFER {} -> {} template={}",
                         holder.id(),
                         resolved == null ? "no match" : resolved.result().getItem().toString(),
                         template);
             }
         }
-        LOG.info("[selftest] {} JEI templates, {} read back, {} broken",
+        ThELog.LOG.info("[selftest] {} JEI templates, {} read back, {} broken",
                 transfers, transfers - broken, broken);
 
         // Loading a stored pattern writes only its own cells; the remaining grid cells stay empty.
@@ -242,14 +243,14 @@ public final class ThaumicEnergistics {
             }
             unreadable++;
             if (unreadable <= 10) {
-                LOG.info(
+                ThELog.LOG.info(
                         "[selftest] LOAD {} -> {} cells={}",
                         holder.id(),
                         resolved == null ? "no match" : resolved.result().getItem().toString(),
                         cells);
             }
         }
-        LOG.info("[selftest] {} stored patterns, {} read back, {} unreadable",
+        ThELog.LOG.info("[selftest] {} stored patterns, {} read back, {} unreadable",
                 loads, loads - unreadable, unreadable);
     }
 
@@ -321,7 +322,7 @@ public final class ThaumicEnergistics {
             GridLinkables.register(
                     ModItems.WIRELESS_ESSENTIA_TERMINAL.get(),
                     WirelessTerminalItem.LINKABLE_HANDLER);
-            LOG.info("ThaumicEnergistics common setup complete");
+            ThELog.LOG.info("ThaumicEnergistics common setup complete");
             // Else every terminal craft fails with PAYMENT_UNAVAILABLE - see TerminalWorkbenchVis.
             thaumicenergistics_ce.arcane.TerminalWorkbenchVis.register();
         });
@@ -336,6 +337,6 @@ public final class ThaumicEnergistics {
             return;
         }
         AEKeyTypes.register(AEssentiaKeyType.INSTANCE);
-        LOG.info("Registered the essentia key type with AE2");
+        ThELog.LOG.info("Registered the essentia key type with AE2");
     }
 }

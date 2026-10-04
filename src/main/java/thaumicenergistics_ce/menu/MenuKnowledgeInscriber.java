@@ -15,7 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
 import thaumicenergistics_ce.init.ModItems;
@@ -24,6 +23,9 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.menu.slot.GhostGridSlot;
 import thaumicenergistics_ce.menu.slot.MachineGridSlot;
 import thaumicenergistics_ce.menu.slot.ReadOnlySlot;
+import thaumicenergistics_ce.net.InscriberGridFillPayload;
+import thaumicenergistics_ce.net.KnowledgeInscriberReceiver;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The Knowledge Inscriber's menu: the core slot, the 7x3 read-only grid of patterns, the player's
@@ -32,7 +34,7 @@ import thaumicenergistics_ce.menu.slot.ReadOnlySlot;
  *   <li>No output slot: the core is the pattern store, see {@code BlockEntityKnowledgeInscriber}.
  * </ul>
  */
-public class MenuKnowledgeInscriber extends AbstractContainerMenu {
+public class MenuKnowledgeInscriber extends AbstractContainerMenu implements KnowledgeInscriberReceiver {
 
     /** Geometry from the reference container: a well's interior, not its frame. */
     private static final int FB_CORE_X = 186;
@@ -226,10 +228,10 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
         List<ItemStack> cells = storedGrid(index);
         if (cells == null) {
             // Names the well asked for, so an empty well is distinguishable from the wrong one.
-            ThaumicEnergistics.LOG.info("[inscriber] pattern well {} holds nothing to load", index);
+            ThELog.LOG.info("[inscriber] pattern well {} holds nothing to load", index);
             return;
         }
-        ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[inscriber] loading pattern well {} -> {} ({} cells)",
                 index,
                 cells.isEmpty() ? "empty grid" : cells.getFirst(),
@@ -254,6 +256,16 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
         return index < patterns.size() ? patterns.get(index).grid() : null;
     }
 
+    @Override
+    public int gridSlotStart() {
+        return BlockEntityKnowledgeInscriber.GRID_SLOT_START;
+    }
+
+    @Override
+    public int gridSlotCount() {
+        return BlockEntityKnowledgeInscriber.GRID_SLOT_COUNT;
+    }
+
     private void setGridCell(int cell, ItemStack stack) {
         if (inscriber != null) {
             inscriber.setGridCell(cell, stack);
@@ -266,6 +278,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
      * Applies one grid cell from {@code InscriberGridPayload}, server only: a client write lands in a
      * container the server never sees.
      */
+    @Override
     public void setGridCell(Player player, int cell, ItemStack stack) {
         if (inscriber == null) {
             return;
@@ -280,6 +293,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
      * @param cells the stacks sent; missing entries are treated as empty
      * @param count how many cells the grid has, so a short or long list cannot run past it
      */
+    @Override
     public void applyGridFill(Player player, List<ItemStack> cells, int count) {
         if (inscriber == null) {
             return;
@@ -291,6 +305,11 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
         inscriber.setGrid(full);
         // The client's own copy was already written; the data slots have to catch up this tick.
         broadcastChanges();
+    }
+
+    @Override
+    public int containerId() {
+        return containerId;
     }
 
     /** Whether the player carries a stack that matches: JEI places what the player actually has. */
@@ -326,8 +345,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
         if (inscriber != null) {
             inscriber.setGrid(full);
         } else {
-            PacketDistributor.sendToServer(new thaumicenergistics_ce.network.InscriberGridFillPayload(
-                    containerId, full));
+            PacketDistributor.sendToServer(new InscriberGridFillPayload(containerId, full));
         }
 
         updatePreview();

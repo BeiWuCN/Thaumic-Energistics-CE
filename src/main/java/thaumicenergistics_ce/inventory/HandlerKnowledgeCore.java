@@ -16,9 +16,9 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The arcane patterns stored inside one knowledge core: a value object over the core's item stack.
@@ -163,7 +163,7 @@ public final class HandlerKnowledgeCore {
             list.add(entry.copy());
         }
         if (!unreadable.isEmpty()) {
-            ThaumicEnergistics.LOG.warn(
+            ThELog.LOG.warn(
                     "[core] writing {} pattern(s) and keeping {} entr(ies) this build cannot read; they would"
                             + " otherwise be deleted by this save",
                     patterns.size(),

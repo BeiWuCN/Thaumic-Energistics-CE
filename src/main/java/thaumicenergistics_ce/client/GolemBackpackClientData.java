@@ -6,7 +6,7 @@ import java.util.WeakHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import thaumicenergistics_ce.golem.BackpackSkins;
-import thaumicenergistics_ce.network.GolemBackpackPayload;
+import thaumicenergistics_ce.net.GolemBackpackPayload;
 
 /**
  * The client's copy of which golems are wearing a backpack, and what it looks like.

@@ -23,6 +23,7 @@ import thaumicenergistics_ce.client.gui.ScreenEssentiaTerminal;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaVibrationChamber;
 import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 import thaumicenergistics_ce.client.render.ArcaneAssemblerRenderer;
+import thaumicenergistics_ce.client.render.EssentiaKeyRenderHandler;
 import thaumicenergistics_ce.client.render.MonitorBubbleRenderer;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
@@ -33,6 +34,10 @@ import thaumicenergistics_ce.menu.MenuEssentiaImportBus;
 import thaumicenergistics_ce.menu.MenuEssentiaLevelEmitter;
 import thaumicenergistics_ce.menu.MenuEssentiaStorageBus;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
+import thaumicenergistics_ce.net.ArcaneCraftCostPayload;
+import thaumicenergistics_ce.net.ClientSinks;
+import thaumicenergistics_ce.net.ClientboundReceiver;
+import thaumicenergistics_ce.net.GolemBackpackPayload;
 
 /**
  * Client-only wiring, kept behind {@link Dist#CLIENT} so the dedicated server never loads a screen
@@ -48,6 +53,19 @@ public final class ClientSetup {
      */
     @SubscribeEvent
     public static void registerKeyRendering(FMLClientSetupEvent event) {
+        // The screens and the client cache are the only receivers this side has, so this is where the
+        // protocol package learns about them; on a dedicated server nothing is installed.
+        ClientSinks.install(new ClientboundReceiver() {
+            @Override
+            public void acceptArcaneCraftCost(ArcaneCraftCostPayload payload) {
+                ScreenArcaneCraftingTerminal.acceptCost(payload);
+            }
+
+            @Override
+            public void acceptGolemBackpack(GolemBackpackPayload payload) {
+                GolemBackpackClientData.accept(payload);
+            }
+        });
         event.enqueueWork(() -> {
             AEKeyRendering.register(
                     AEssentiaKeyType.INSTANCE, AEssentiaKey.class, new EssentiaKeyRenderHandler());

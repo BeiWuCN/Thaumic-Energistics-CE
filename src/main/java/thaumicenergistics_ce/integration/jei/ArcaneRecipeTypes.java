@@ -14,8 +14,8 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The recipe type the Knowledge Inscriber encodes for, and how to read a grid out of one.
@@ -150,7 +150,7 @@ public final class ArcaneRecipeTypes {
             if (server != null) {
                 return server.registryAccess();
             }
-            ThaumicEnergistics.LOG.debug("No registry access available for a recipe result: {}", e.toString());
+            ThELog.LOG.debug("No registry access available for a recipe result: {}", e.toString());
             throw e;
         }
     }

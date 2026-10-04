@@ -26,8 +26,10 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.menu.slot.AspectSelectSlot;
 import thaumicenergistics_ce.menu.slot.MachineOutputSlot;
 import thaumicenergistics_ce.menu.slot.TemplateSlot;
-import thaumicenergistics_ce.network.EncoderActionPayload;
-import thaumicenergistics_ce.network.EncoderSourcePayload;
+import thaumicenergistics_ce.net.DistillationEncoderReceiver;
+import thaumicenergistics_ce.net.EncoderActionPayload;
+import thaumicenergistics_ce.net.EncoderSourcePayload;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The Distillation Encoder's menu: the item, its aspects, the picked one and the pattern wells.
@@ -36,7 +38,7 @@ import thaumicenergistics_ce.network.EncoderSourcePayload;
  *   <li>The pick is not synced: an instruction to the server, mirrored only to draw the highlight.
  * </ul>
  */
-public class MenuDistillationEncoder extends AbstractContainerMenu {
+public class MenuDistillationEncoder extends AbstractContainerMenu implements DistillationEncoderReceiver {
 
     public static final int PLAYER_SLOTS = 36;
 
@@ -222,7 +224,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         }
         tracedSource = source.copy();
         tracedRevealed = revealedTotal;
-        thaumicenergistics_ce.ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[encoder] source={} scanned={} itemAspects={} revealed={}",
                 source.isEmpty() ? "empty" : source.getItem(),
                 itemScanned,
@@ -242,7 +244,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
                 : raw >= aspects.size()
                         ? "refused: no aspect at " + raw
                         : !isAspectRevealed(raw) ? "refused: aspect " + raw + " is not revealed" : "accepted";
-        thaumicenergistics_ce.ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[encoder] pick {} of {} -> {} ({}), {} side", raw, aspects.size(), pickedIndex(), why,
                 encoder != null ? "server" : "client");
     }
@@ -341,6 +343,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
     // Actions from the screen
     // ------------------------------------------------------------------
 
+    @Override
     public void selectAspect(int index) {
         if (index < -1 || index >= aspects.size()) {
             return;
@@ -357,6 +360,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         }
     }
 
+    @Override
     public void encode() {
         if (encoder != null) {
             encoder.encode();
@@ -364,6 +368,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         }
     }
 
+    @Override
     public void applySourceTemplate(ItemStack stack) {
         ItemStack wanted = stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1);
         slots.get(MENU_SOURCE).set(wanted);
@@ -379,6 +384,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         PacketDistributor.sendToServer(new EncoderSourcePayload(containerId, wanted));
     }
 
+    @Override
     public void insertBlankFromInventory(Player player) {
         if (!slots.get(MENU_BLANK).getItem().isEmpty()) {
             return;
@@ -395,6 +401,11 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
                 return;
             }
         }
+    }
+
+    @Override
+    public int containerId() {
+        return containerId;
     }
 
     public boolean canEncode() {

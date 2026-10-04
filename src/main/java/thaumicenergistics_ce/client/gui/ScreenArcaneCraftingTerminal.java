@@ -11,8 +11,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Inventory;
 import org.jspecify.annotations.Nullable;
+import thaumicenergistics_ce.client.GolemBackpackClientData;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
-import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
+import thaumicenergistics_ce.net.ArcaneCraftCostPayload;
+import thaumicenergistics_ce.net.ClientboundReceiver;
+import thaumicenergistics_ce.net.GolemBackpackPayload;
 
 /**
  * The Arcane Crafting Terminal's screen.
@@ -21,7 +24,8 @@ import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
  *   <li>The style document is in AE2's namespace: {@code StyleManager} resolves against its own only.
  * </ul>
  */
-public class ScreenArcaneCraftingTerminal extends MEStorageScreen<MenuArcaneCraftingTerminal> {
+public class ScreenArcaneCraftingTerminal extends MEStorageScreen<MenuArcaneCraftingTerminal>
+        implements ClientboundReceiver {
 
     private static final int ICON_SIZE = 14;
 
@@ -51,6 +55,20 @@ public class ScreenArcaneCraftingTerminal extends MEStorageScreen<MenuArcaneCraf
         super.removed();
     }
 
+    @Override
+    public void acceptArcaneCraftCost(ArcaneCraftCostPayload payload) {
+        acceptCost(payload);
+    }
+
+    @Override
+    public void acceptGolemBackpack(GolemBackpackPayload payload) {
+        GolemBackpackClientData.accept(payload);
+    }
+
+    /**
+     * The installed sink is this class, so the receiver is the open screen and the id check below still
+     * decides whether the payload is for it.
+     */
     public static void acceptCost(ArcaneCraftCostPayload payload) {
         ScreenArcaneCraftingTerminal screen = open;
         // The id check matters: a packet can arrive just after the player closed this screen and opened

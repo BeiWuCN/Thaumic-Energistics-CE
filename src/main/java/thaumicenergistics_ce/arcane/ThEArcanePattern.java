@@ -35,8 +35,8 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * One resolved Thaumaturge arcane crafting job: grid layout, vis price, primal crystals.
@@ -628,7 +628,7 @@ public record ThEArcanePattern(
         for (AspectInstance entry : crystals.entries()) {
             Holder<IAspect> holder = lookup.get(entry.aspect().getKey()).orElse(null);
             if (holder == null) {
-                ThaumicEnergistics.LOG.debug(
+                ThELog.LOG.debug(
                         "Arcane pattern references unregistered aspect {}",
                         entry.aspect().getKey().location());
                 continue;

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.integration.jade;
+package thaumicenergistics_ce.client.jade;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -10,6 +10,7 @@ import snownee.jade.api.ui.IElementHelper;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber.BurnState;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
+import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
  * The Essentia Vibration Chamber's Jade tooltip: whether there is a network to burn for, and what it does.
@@ -17,6 +18,8 @@ import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
  * <li><b>Drawn from the client's copy of the machine, not server data</b>: Jade collects a provider's server
  * data once, when the tooltip is first drawn, so its lines would sit still while the tooltip stays open.
  * <li>Deliberately not shown: the burn's countdown and slot energy, because both move every tick or visit.
+ * <li>Lives in the client tree because it is only ever registered from Jade's {@code registerClient}, which
+ * is guarded to the physical client - it never runs on a dedicated server.
  * </ul>
  */
 public class VibrationChamberProvider implements IBlockComponentProvider {

@@ -9,9 +9,9 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Lets the Arcane Crafting Terminal pay an arcane craft's untyped vis cost out of the network.
@@ -31,7 +31,7 @@ public final class TerminalWorkbenchVis {
      */
     public static void register() {
         TcWorkbench.registerAuraSources(List.of(AURA));
-        ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[arcane] registered the arcane crafting terminal as a workbench aura source");
     }
 
@@ -41,7 +41,7 @@ public final class TerminalWorkbenchVis {
      */
     @SubscribeEvent
     public static void onRegisterAuraSources(RegisterWorkbenchAuraSourcesEvent event) {
-        ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[arcane] RegisterWorkbenchAuraSourcesEvent did reach this mod (it is not used to register)");
     }
 

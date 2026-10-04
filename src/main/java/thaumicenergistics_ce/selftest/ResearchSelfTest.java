@@ -25,7 +25,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.ThaumicEnergistics;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Headless check of the Thaumonomicon research this addon contributes.
@@ -57,7 +57,7 @@ public final class ResearchSelfTest {
             entries = registries.lookupOrThrow(IResearchEntry.REGISTRY_KEY);
         } catch (IllegalStateException e) {
             // Thaumaturge absent or registries renamed: report, do not throw out of the handler.
-            ThaumicEnergistics.LOG.error("[research] self-test could not read Thaumaturge's research "
+            ThELog.LOG.error("[research] self-test could not read Thaumaturge's research "
                     + "registries: {}", e.getMessage());
             return;
         }
@@ -72,7 +72,7 @@ public final class ResearchSelfTest {
                 present.add(holder.key().location().toString());
             }
             Collections.sort(present);
-            ThaumicEnergistics.LOG.error("[research] FAIL no research category {} - the tab will not "
+            ThELog.LOG.error("[research] FAIL no research category {} - the tab will not "
                     + "appear at all. The registry holds {} categor{}: {}",
                     CATEGORY_KEY.location(),
                     present.size(),
@@ -414,13 +414,13 @@ public final class ResearchSelfTest {
 
     private static void report(int entries, List<String> failures) {
         if (failures.isEmpty()) {
-            ThaumicEnergistics.LOG.info("[research] self-test passed ({} entries)", entries);
+            ThELog.LOG.info("[research] self-test passed ({} entries)", entries);
             return;
         }
         for (String failure : failures) {
-            ThaumicEnergistics.LOG.error("[research] FAIL {}", failure);
+            ThELog.LOG.error("[research] FAIL {}", failure);
         }
-        ThaumicEnergistics.LOG.error("[research] self-test failed with {} problem(s) across {} entries",
+        ThELog.LOG.error("[research] self-test failed with {} problem(s) across {} entries",
                 failures.size(), entries);
     }
 }

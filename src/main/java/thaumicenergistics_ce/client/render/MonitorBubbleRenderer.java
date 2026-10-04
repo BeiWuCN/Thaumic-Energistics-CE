@@ -25,6 +25,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The bubble the Infusion Monitor floats above itself: how dangerous the altar is, what it is making,
@@ -90,7 +91,7 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
             long now = System.currentTimeMillis();
             if (now - lastTrace > 2000) {
                 lastTrace = now;
-                thaumicenergistics_ce.ThaumicEnergistics.LOG.info(
+                ThELog.LOG.info(
                         "[bubble] at {} reporting={} tier={} instability={} crafting={} essentia={} light={}",
                         monitor.getBlockPos(), monitor.bubbleReporting(), monitor.bubbleTier(),
                         monitor.bubbleInstability(), monitor.bubbleCrafting(), monitor.bubbleEssentia(),

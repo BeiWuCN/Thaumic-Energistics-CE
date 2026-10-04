@@ -58,7 +58,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.arcane.ArcanePatternDetails;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
@@ -71,6 +70,7 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.menu.MenuArcaneAssembler;
 import thaumicenergistics_ce.part.PartVisInterface;
 import thaumicenergistics_ce.part.VisReservation;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * An AE2 crafting machine that runs Thaumaturge arcane recipes on demand, paying in ambient vis.
@@ -101,7 +101,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     private static final int TICKS_PER_SPEED_UPGRADE = 4;
     private static final int MIN_TICKS_PER_CRAFT = 4;
 
-    private static final int DISPLAY_UPDATE_INTERVAL = 4;
     private static final int MAX_SPEED_UPGRADES = 4;
 
     /** Vis reach in chunks, 3x3: one chunk is never enough, Thaumaturge caps an aura's base at 500 vis
@@ -124,7 +123,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     /** The primal aspects, in the fixed order the six vis columns are drawn in. */
     public static final List<ResourceKey<IAspect>> PRIMALS = TCAspects.PRIMALS;
 
-    private final SimpleContainer inventory = new SimpleContainer(SLOT_COUNT) {
+    final SimpleContainer inventory = new SimpleContainer(SLOT_COUNT) {
         @Override
         public boolean canPlaceItem(int slot, ItemStack stack) {
             return switch (slot) {
@@ -158,18 +157,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                     if (state == State.POWER) {
                         owner.active = owner.mainNode.isActive();
                     }
-                    // Trace-only: a grid coming up changes state repeatedly.
-                    if (STATE_TRACE) {
-                        ThaumicEnergistics.LOG.info(
-                                "[assembler] at {}: grid {} changed, now active={} powered={} booted={}{}",
-                                owner.worldPosition,
-                                state,
-                                owner.mainNode.isActive(),
-                                owner.mainNode.isPowered(),
-                                owner.mainNode.hasGridBooted(),
-                                owner.craft.isCrafting() ? ", and it is holding a craft" : "");
-                    }
-                    owner.markForUpdate();
+                    owner.displaySync.markForUpdate();
                     // loadAdditional runs before the node exists; this wake has to cover a resumed craft.
                     owner.updateSleepiness();
                 }
@@ -177,79 +165,12 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
     private boolean active;
 
-    private final AssemblerCraftState craft = new AssemblerCraftState();
+    final AssemblerCraftState craft = new AssemblerCraftState();
 
-    private long lastDisplayUpdate;
-
-    /** Renderer-only copy of the running craft's product, written from the update tag: the real one is
-     * in {@link #TARGET_SLOT}. */
-    private ItemStack previewStack = ItemStack.EMPTY;
-
-    /** Logs a loaded machine's whole state; its own switch, since the self-test's would clobber one. */
-    private static final boolean STATE_TRACE =
-            "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_ASSEMBLER_STATE"));
-
-    private int stateDumpsLeft = 5;
-    private int stateDumpTicks;
-
-    private void dumpState(String when) {
-        List<IPatternDetails> offered = getAvailablePatterns();
-        StringBuilder products = new StringBuilder();
-        for (int i = 0; i < Math.min(4, offered.size()); i++) {
-            if (offered.get(i) instanceof ArcanePatternDetails arcane) {
-                products.append(BuiltInRegistries.ITEM.getKey(arcane.pattern().result().getItem()))
-                        .append(' ');
-            }
-        }
-        ThaumicEnergistics.LOG.info(
-                "[asmstate] {} at {} crafting={} tick={}/{} vis={} want={} crystals={} pattern={} active={}"
-                        + " powered={} booted={} onGrid={} held={} offers={}{} aura={} auraBase={}"
-                        + " relay={} relayCarry={} aspects={}",
-                when,
-                worldPosition,
-                craft.isCrafting(),
-                craft.craftTicks(),
-                ticksPerCraft(),
-                visPool.bufferedVis(),
-                visPool.visTarget(craft.isCrafting(), craft.craftPrice()),
-                craft.craftCrystals().size(),
-                craft.currentPattern() == null ? "none" : craft.currentPattern().result(),
-                mainNode.isActive(),
-                mainNode.isPowered(),
-                mainNode.hasGridBooted(),
-                mainNode.getGrid() != null,
-                craft.heldInputs().size(),
-                offered.size(),
-                offered.isEmpty() ? "" : " [" + products.toString().trim()
-                        + (offered.size() > 4 ? " ..." : "") + "]",
-                // The pool the craft is actually paid out of: see auraAround.
-                auraAround(),
-                auraCapacity(),
-                relayNetworkInReach(),
-                relayCarryTotal(),
-                visPool.aspectVisTrace());
-        IGrid grid = gridOrNull();
-        ICraftingService craftingService = grid == null ? null : grid.getService(ICraftingService.class);
-        if (craftingService != null) {
-            for (ICraftingCPU cpu : craftingService.getCpus()) {
-                CraftingJobStatus status = cpu.getJobStatus();
-                if (status != null) {
-                    // getName() is null for an unnamed CPU; a throw here kills the server mid-craft.
-                    Component cpuName = cpu.getName();
-                    ThaumicEnergistics.LOG.info(
-                            "[asmstate] cpu {}: crafting {} {}/{} for {} s",
-                            cpuName == null ? "(unnamed)" : cpuName.getString(),
-                            status.crafting().what(),
-                            status.progress(),
-                            status.totalItems(),
-                            status.elapsedTimeNanos() / 1_000_000_000L);
-                }
-            }
-        }
-    }
+    private final AssemblerDisplaySync displaySync = new AssemblerDisplaySync(this);
 
     private int speedUpgrades;
-    private final AssemblerVisPool visPool = new AssemblerVisPool(PRIMALS.size());
+    final AssemblerVisPool visPool = new AssemblerVisPool(PRIMALS.size());
     private long nextRelayPoll;
 
     /** Centivis below a whole vis, per aspect: a whole vis goes to the aspect that supplied it. */
@@ -269,27 +190,24 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     private int interfaceMissBackoff = RELAY_POLL_INTERVAL;
     private long nextInterfacePoll;
 
-    /** Whether to log where this machine's vis came from, once a second. Off unless
-     * {@code THAUMICENERGISTICS_VIS_TRACE=true}. */
-    private static final boolean VIS_TRACE =
-            "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_VIS_TRACE"));
-
-    private static final int VIS_TRACE_INTERVAL = 20;
-
     /** Aura vis taken but not yet a whole vis: the aura is a float, the pool is whole vis. */
     private float auraRemainder;
 
-    private int traceRelays;
-    private int traceInterfaces;
-    private int traceAura;
-    private int traceAuraDropped;
+    int gearDiscount;
 
-    private long nextVisTrace;
-    private int gearDiscount;
-    private boolean patternsDirty = true;
-    private boolean suppressNotify;
+    /** The two {@link BlockEntity} members a same-package sibling cannot reach: {@code worldPosition}
+     * and {@code level} are protected, so the helper asks rather than reads. */
+    BlockPos blockPos() {
+        return worldPosition;
+    }
 
-    private List<IPatternDetails> cachedPatterns = List.of();
+    Level level() {
+        return level;
+    }
+    boolean patternsDirty = true;
+    boolean suppressNotify;
+
+    List<IPatternDetails> cachedPatterns = List.of();
 
     public BlockEntityArcaneAssembler(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ARCANE_ASSEMBLER.get(), pos, state);
@@ -412,13 +330,13 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     }
 
     public ItemStack previewStack() {
-        return previewStack;
+        return displaySync.previewStack();
     }
 
     public void forceCraftForTest(boolean crafting, int craftTicks) {
         craft.setCrafting(crafting);
         craft.setCraftTicks(craftTicks);
-        markForUpdate();
+        displaySync.markForUpdate();
     }
 
     /** Holds a real recipe as if pushed, and reports what the machine would bank for it. */
@@ -429,7 +347,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         craft.setCraftCrystals(crystalStacksOf(pattern));
         // Exactly as beginCraft puts it in; the round-trip check is worthless without it.
         this.inventory.setItem(TARGET_SLOT, pattern.result().copy());
-        ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[asmtest] vis target for {} ({} vis) is {}, with {} in the buffer",
                 pattern.result(),
                 craftCost(pattern),
@@ -512,12 +430,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         if (level == null || level.isClientSide()) {
             return TickRateModulation.SLEEP;
         }
-        // A second dump: mainNode.create runs in onLoad, so the load-time dump reads as inactive.
-        if (STATE_TRACE && stateDumpsLeft > 0 && ++stateDumpTicks >= 20) {
-            stateDumpTicks = 0;
-            stateDumpsLeft--;
-            dumpState("ticked");
-        }
         if (patternsDirty) {
             // Settled only on a successful read, so a rebuild with no level yet retries. See rebuildPatterns.
             patternsDirty = !rebuildPatterns();
@@ -561,7 +473,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         craft.clearStall();
         craft.addCraftTicks(ticksSinceLast);
         // URGENT, not SAME: at the idle rate a busy craft runs twenty times too slow.
-        markDisplayForUpdate();
+        displaySync.markDisplayForUpdate();
         return TickRateModulation.URGENT;
     }
 
@@ -570,7 +482,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     private boolean noteStall(Component reason) {
         craft.noteStall(reason);
         if (craft.stalledTicks() == STALLED_CRAFT_REPORT_TICKS) {
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[assembler] at {} a craft is waiting for {} ({} ticks so far); it will finish when it"
                             + " can",
                     worldPosition,
@@ -605,14 +517,14 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
             return TickRateModulation.SAME;
         }
         if (visPool.bufferedVis() < price && stalledOut) {
-            ThaumicEnergistics.LOG.warn(
+            ThELog.LOG.warn(
                     "[assembler] at {} delivers {} after {} ticks of waiting for {} vis: a machine that waits"
                             + " for ever refuses every later job",
                     worldPosition, inventory.getItem(TARGET_SLOT), craft.stalledTicks(), price);
         }
         if (visPool.bufferedVis() < price) {
             // Delivered anyway, the lesser evil: AE2 already took the ingredients and waits with no timeout.
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[assembler] at {} delivers {} without charging its {} vis: this chunk's aura can never hold"
                             + " more than {}",
                     worldPosition,
@@ -738,14 +650,10 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     }
 
     private void finishCraft() {
-        if (craft.isCrafting() && STATE_TRACE) {
-            // Paired with the push line: a push with no matching finish is a craft that never completed.
-            ThaumicEnergistics.LOG.info("[assembler] craft finished at {}", worldPosition);
-        }
         craft.reset();
-        clearDisplay(false);
+        displaySync.clearDisplay(false);
         setChanged();
-        markForUpdate();
+        displaySync.markForUpdate();
         // Nothing left to run, so the grid may stop ticking this machine.
         updateSleepiness();
     }
@@ -805,13 +713,11 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
         // Relays first, then the aura: a node's vis lives in the node, so the aura alone reads as starved.
         int before = visPool.bufferedVis();
-        int fromRelays = drainVisFromRelays(target - visPool.bufferedVis());
-        int fromInterfaces = 0;
+        drainVisFromRelays(target - visPool.bufferedVis());
         if (visPool.bufferedVis() < target) {
             // Asked directly: a relay picks its own parent, preferring a node over an addon source (relink).
-            fromInterfaces = drainVisFromInterfaces(target - visPool.bufferedVis());
+            drainVisFromInterfaces(target - visPool.bufferedVis());
         }
-        int fromAura = 0;
         if (visPool.bufferedVis() < target) {
             // Aura vis has no aspect, so it lands evenly (bankVisEvenly); a drain returns a float.
             int remaining = target - visPool.bufferedVis();
@@ -819,29 +725,11 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
             float drained = thisCall + auraRemainder;
             int whole = Math.min((int) Math.floor(drained), remaining);
             auraRemainder = drained - whole;
-            fromAura = whole;
-            // What the same drain would have banked before the fraction was carried. See VIS_TRACE.
-            traceAuraDropped += Math.min((int) thisCall, remaining);
-            visPool.bankVisEvenly(fromAura);
+            // The whole vis of this drain: the fraction it could not bank is carried above.
+            visPool.bankVisEvenly(whole);
         }
         if (visPool.bufferedVis() > before) {
-            markDisplayForUpdate();
-        }
-        // Summed over the window: relays are polled one call in twenty, so per-call numbers read zero.
-        traceRelays += fromRelays;
-        traceInterfaces += fromInterfaces;
-        traceAura += fromAura;
-        if (VIS_TRACE && level instanceof ServerLevel server && server.getGameTime() >= nextVisTrace) {
-            nextVisTrace = server.getGameTime() + VIS_TRACE_INTERVAL;
-            ThaumicEnergistics.LOG.info(
-                    "[asmvis] at {} relay={} interface={} (inReach={}) aura={} ({} before the carry) over {}"
-                            + " ticks -> buffer={}/{}",
-                    worldPosition, traceRelays, traceInterfaces, interfaceInReach(), traceAura,
-                    traceAuraDropped, VIS_TRACE_INTERVAL, visPool.bufferedVis(), target);
-            traceRelays = 0;
-            traceInterfaces = 0;
-            traceAura = 0;
-            traceAuraDropped = 0;
+            displaySync.markDisplayForUpdate();
         }
     }
 
@@ -1092,15 +980,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                 }
             }
         }
-        // Traced, not announced: on a busy base this would print two lines a second for the whole order.
-        if (STATE_TRACE) {
-            ThaumicEnergistics.LOG.info(
-                    "[assembler] job pushed at {}: {} (vis {}, crystals {})",
-                    worldPosition,
-                    details.pattern().result(),
-                    details.pattern().baseVis(),
-                    details.pattern().crystals().totalAmount());
-        }
         return beginCraft(details.pattern());
     }
 
@@ -1159,7 +1038,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
         craft.setLastRefusal(why);
         // getString() resolves against the server's language; every key carries an English fallback.
-        ThaumicEnergistics.LOG.info("[assembler] at {} turned a job away: {}", worldPosition, why.getString());
+        ThELog.LOG.info("[assembler] at {} turned a job away: {}", worldPosition, why.getString());
     }
 
     /** Builds one of this machine's tooltip reasons. The key and its English fallback go together so
@@ -1266,7 +1145,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
             suppressNotify = false;
         }
         setChanged();
-        markForUpdate();
+        displaySync.markForUpdate();
         // Wake the grid: measured, a craft pushed while asleep ticked once a second rather than twenty.
         ICraftingProvider.requestUpdate(mainNode);
         updateSleepiness();
@@ -1280,7 +1159,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     /** Rebuilds the advertised set from the core, not the live recipe manager: a core needs registry
      * access, so clear {@code patternsDirty} only when this returns {@code true}.
      * @return {@code true} when the core was readable and the cache is complete */
-    private boolean rebuildPatterns() {
+    boolean rebuildPatterns() {
         cachedPatterns = List.of();
         HandlerKnowledgeCore core = knowledgeCore();
         if (core == null) {
@@ -1291,7 +1170,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         List<ThEArcanePattern> stored = core.patterns();
         for (ThEArcanePattern pattern : stored) {
             ArcanePatternDetails detail =
-                    ArcanePatternDetails.of(pattern, level.registryAccess(), why -> ThaumicEnergistics.LOG.warn(
+                    ArcanePatternDetails.of(pattern, level.registryAccess(), why -> ThELog.LOG.warn(
                             "[assembler] at {} is not offering the stored pattern for {}: {}",
                             getBlockPos(),
                             pattern.result(),
@@ -1302,7 +1181,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
         if (details.size() < stored.size()) {
             // Otherwise invisible: the machine just offers fewer recipes than the core holds.
-            ThaumicEnergistics.LOG.warn(
+            ThELog.LOG.warn(
                     "[assembler] at {} offers {} of the {} patterns in its knowledge core",
                     getBlockPos(),
                     details.size(),
@@ -1310,7 +1189,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
         if (core.unreadableCount() > 0) {
             // Entries this build cannot read: kept in the item, not offered; the core would read as empty.
-            ThaumicEnergistics.LOG.warn(
+            ThELog.LOG.warn(
                     "[assembler] at {} cannot read {} entr(ies) in its knowledge core; they are kept in the"
                             + " item and {} pattern(s) are offered",
                     getBlockPos(),
@@ -1340,31 +1219,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
             ICraftingProvider.requestUpdate(mainNode);
         }
         if (level != null && !level.isClientSide()) {
-            refreshPatternSlots();
-        }
-    }
-
-    private void refreshPatternSlots() {
-        if (level == null) {
-            return;
-        }
-        if (patternsDirty) {
-            patternsDirty = !rebuildPatterns();
-        }
-        suppressNotify = true;
-        try {
-            for (int i = 0; i < PATTERN_SLOT_COUNT; i++) {
-                ItemStack stack = ItemStack.EMPTY;
-                if (i < cachedPatterns.size()) {
-                    List<GenericStack> outputs = cachedPatterns.get(i).getOutputs();
-                    if (!outputs.isEmpty() && outputs.getFirst().what() instanceof AEItemKey key) {
-                        stack = key.getReadOnlyStack();
-                    }
-                }
-                inventory.setItem(PATTERN_SLOT_START + i, stack);
-            }
-        } finally {
-            suppressNotify = false;
+            displaySync.refreshPatternSlots();
         }
     }
 
@@ -1387,11 +1242,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
         recalculateGearDiscount();
         patternsDirty = true;
-        // Only the world-free halves here; onDataPacket defaults to this method, so recovery goes to onLoad.
-        if (STATE_TRACE) {
-            // Everything about the node in this dump is a lie: the node is created after this method runs.
-            dumpState("loaded");
-        }
     }
 
     /** Finishes recovering a craft that a save interrupted, once there is a level to read the core with:
@@ -1412,7 +1262,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                 craft.setCraftPrice(craftCost(recovered));
                 craft.setCraftCrystals(crystalStacksOf(recovered));
             }
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[assembler] at {} resumed the craft a save interrupted: {} for {} vis{}",
                     worldPosition,
                     waiting.getHoverName().getString(),
@@ -1426,30 +1276,10 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
             craft.setCraftTicks(0);
             craft.setCraftPrice(0);
             craft.setCraftCrystals(List.of());
-            clearDisplay(true);
+            displaySync.clearDisplay(true);
         }
         // Ask to be ticked rather than assuming a later grid event: with no grid yet this is a no-op.
         updateSleepiness();
-    }
-
-    private void clearDisplay(boolean report) {
-        boolean hadAnything = !inventory.getItem(TARGET_SLOT).isEmpty();
-        suppressNotify = true;
-        try {
-            inventory.setItem(TARGET_SLOT, ItemStack.EMPTY);
-            for (int i = 0; i < PREVIEW_SLOT_COUNT; i++) {
-                if (!inventory.getItem(PREVIEW_SLOT_START + i).isEmpty()) {
-                    hadAnything = true;
-                }
-                inventory.setItem(PREVIEW_SLOT_START + i, ItemStack.EMPTY);
-            }
-        } finally {
-            suppressNotify = false;
-        }
-        if (report && hadAnything) {
-            ThaumicEnergistics.LOG.info(
-                    "[assembler] at {} cleared a leftover craft display: nothing is crafting", worldPosition);
-        }
     }
 
     public static int visBufferTarget() {
@@ -1470,19 +1300,14 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = super.getUpdateTag(registries);
-        craft.writeSync(tag);
-        visPool.writeNbt(tag);
-        tag.putInt("GearDiscount", gearDiscount);
-        if (!craft.isCrafting() || craft.craftTicks() == 0 || craft.craftTicks() % 100 == 0) {
-            tag.put("Preview", inventory.getItem(TARGET_SLOT).saveOptional(registries));
-        }
+        displaySync.writeSync(tag, registries);
         return tag;
     }
 
     @Override
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
         super.handleUpdateTag(tag, registries);
-        applySyncedState(tag, registries);
+        displaySync.applySyncedState(tag, registries);
     }
 
     /** Applies an update tag on the client, the route a per-tick update takes. A packet lands here, its
@@ -1492,50 +1317,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
             Connection net, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider registries) {
         CompoundTag tag = packet.getTag();
         if (tag != null) {
-            applySyncedState(tag, registries);
-        }
-    }
-
-    private void applySyncedState(CompoundTag tag, HolderLookup.Provider registries) {
-        suppressNotify = true;
-        try {
-            craft.readSync(tag);
-            visPool.readSync(tag);
-            gearDiscount = tag.getInt("GearDiscount");
-            // A display: an absent key means "unchanged", the product going out on a slower clock.
-            if (tag.contains("Preview")) {
-                previewStack = ItemStack.parseOptional(registries, tag.getCompound("Preview"));
-            }
-        } finally {
-            suppressNotify = false;
-        }
-    }
-
-    private void markDisplayForUpdate() {
-        if (level == null) {
-            return;
-        }
-        long now = level.getGameTime();
-        if (now - lastDisplayUpdate < DISPLAY_UPDATE_INTERVAL) {
-            return;
-        }
-        lastDisplayUpdate = now;
-        markForUpdate();
-    }
-
-    private void markForUpdate() {
-        if (level == null) {
-            return;
-        }
-        setChanged();
-        if (!(level instanceof ServerLevel server)) {
-            return;
-        }
-        // Only the players watching this chunk, and one packet built once for all of them.
-        ClientboundBlockEntityDataPacket packet = ClientboundBlockEntityDataPacket.create(this);
-        for (ServerPlayer player :
-                server.getChunkSource().chunkMap.getPlayers(new ChunkPos(worldPosition), false)) {
-            player.connection.send(packet);
+            displaySync.applySyncedState(tag, registries);
         }
     }
 
@@ -1545,7 +1327,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-        refreshPatternSlots();
+        displaySync.refreshPatternSlots();
         recalculateGearDiscount();
         return new MenuArcaneAssembler(containerId, playerInventory, this);
     }

@@ -4,7 +4,7 @@ import com.leclowndu93150.thaumaturge.content.misc.TCActionBar;
 import net.minecraft.world.entity.player.Player;
 
 /** The purple action-bar line Thaumaturge shows when a wand cannot pay for a cast. */
-public final class TcActionBar {
+public final class  TcActionBar {
     private TcActionBar() {}
 
     public static void sendPurple(Player player, String key) {

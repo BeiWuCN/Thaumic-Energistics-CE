@@ -11,6 +11,8 @@ import thaumicenergistics_ce.block.BlockInfusionProvider;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
+import thaumicenergistics_ce.client.jade.InfusionProviderTooltip;
+import thaumicenergistics_ce.client.jade.VibrationChamberProvider;
 
 /**
  * Registers this mod's Jade providers.
@@ -40,6 +42,6 @@ public class ThEJadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(
                 InfusionMonitorProvider.INSTANCE, BlockInfusionMonitor.class);
         registration.registerBlockComponent(
-                InfusionProviderProvider.INSTANCE, BlockInfusionProvider.class);
+                InfusionProviderTooltip.INSTANCE, BlockInfusionProvider.class);
     }
 }

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.network;
+package thaumicenergistics_ce.net;
 
 import java.util.List;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -9,8 +9,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
-import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
 /**
  * The Knowledge Inscriber's whole 3x3 grid, written by the client in one go.
@@ -39,8 +37,9 @@ public record InscriberGridFillPayload(int containerId, List<ItemStack> cells) i
     }
 
     public void handle(Player player) {
-        if (player.containerMenu instanceof MenuKnowledgeInscriber menu && menu.containerId == containerId) {
-            menu.applyGridFill(player, cells, BlockEntityKnowledgeInscriber.GRID_SLOT_COUNT);
+        if (player.containerMenu instanceof KnowledgeInscriberReceiver receiver
+                && receiver.containerId() == containerId) {
+            receiver.applyGridFill(player, cells, receiver.gridSlotCount());
         }
     }
 }

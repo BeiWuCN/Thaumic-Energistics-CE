@@ -35,6 +35,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.init.ModBlockEntities;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The Essentia Vibration Chamber burns essentia to generate AE.
@@ -353,7 +354,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
                 sides.append(" storage[").append(container.contents().size()).append(" kinds]");
             }
         }
-        thaumicenergistics_ce.ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[evc] at {} stored={}/{} energy={}/{} state={} pulled={} lastSecond | {}",
                 worldPosition, storedEssentia, MAX_ESSENTIA,
                 Math.round(storedEnergy), (long) MAX_ENERGY_STORAGE,

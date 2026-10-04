@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.network;
+package thaumicenergistics_ce.net;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -8,15 +8,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
-import thaumicenergistics_ce.menu.slot.ContainerSlot;
 
 /**
  * "Draw this aspect out of the network into my container", sent by the Essentia Terminal's left-click.
  * <ul>
  *   <li>{@code aspectId} travels by id, not as a key: a key the client built wrong could not be
  *       matched against server storage.
- *   <li>{@code where} names the container (see {@link ContainerSlot}); {@code stack} is only a hint.
+ *   <li>{@code where} names the container slot; {@code stack} is only a hint on the client side.
  * </ul>
  */
 public record EssentiaFillPayload(int containerId, ResourceLocation aspectId, int where, ItemStack stack)
@@ -43,8 +41,10 @@ public record EssentiaFillPayload(int containerId, ResourceLocation aspectId, in
     }
 
     public void handle(Player player) {
-        if (player.containerMenu instanceof MenuEssentiaTerminal menu && menu.containerId == containerId) {
-            menu.fillFromNetwork(player, where, aspectId);
+        // The stack field of this record is a client-side hint and is not read here.
+        if (player.containerMenu instanceof EssentiaTerminalReceiver receiver
+                && receiver.containerId() == containerId) {
+            receiver.fillFromNetwork(player, where, aspectId);
         }
     }
 }

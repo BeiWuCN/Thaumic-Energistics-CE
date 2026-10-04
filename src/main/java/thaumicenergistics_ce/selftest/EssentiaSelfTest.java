@@ -31,10 +31,10 @@ import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Self-check of the essentia storage layer, off unless {@code THAUMICENERGISTICS_ESSENTIA_SELFTEST=true}.
@@ -499,12 +499,12 @@ public final class EssentiaSelfTest {
 
     private static void report(List<String> failures) {
         if (failures.isEmpty()) {
-            ThaumicEnergistics.LOG.info("[essentia] self-test passed");
+            ThELog.LOG.info("[essentia] self-test passed");
             return;
         }
         for (String failure : failures) {
-            ThaumicEnergistics.LOG.error("[essentia] FAIL {}", failure);
+            ThELog.LOG.error("[essentia] FAIL {}", failure);
         }
-        ThaumicEnergistics.LOG.error("[essentia] self-test failed with {} problem(s)", failures.size());
+        ThELog.LOG.error("[essentia] self-test failed with {} problem(s)", failures.size());
     }
 }

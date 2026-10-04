@@ -10,7 +10,8 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
 import thaumicenergistics_ce.menu.MenuDistillationEncoder;
-import thaumicenergistics_ce.network.EncoderActionPayload;
+import thaumicenergistics_ce.net.EncoderActionPayload;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Lets the player drag an item from JEI into the Distillation Encoder's source well.
@@ -49,7 +50,7 @@ public class DistillationEncoderGhostIngredientHandler
         // Logged only when JEI is really beginning a drag: the hover path calls this every frame the
         // cursor spends over an ingredient, and a line each time would bury the one that matters.
         if (TRACE && doStart) {
-            thaumicenergistics_ce.ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[encoder] JEI is starting a drag; offering one target at {}", targets.get(0).getArea());
         }
         return targets;
@@ -75,7 +76,7 @@ public class DistillationEncoderGhostIngredientHandler
                 PacketDistributor.sendToServer(new EncoderActionPayload(
                         menu.containerId, EncoderActionPayload.ACTION_INSERT_BLANK, 0));
                 if (TRACE) {
-                    thaumicenergistics_ce.ThaumicEnergistics.LOG.info("[encoder] JEI dropped a blank pattern on the blank well");
+                    ThELog.LOG.info("[encoder] JEI dropped a blank pattern on the blank well");
                 }
             }
         }
@@ -100,7 +101,7 @@ public class DistillationEncoderGhostIngredientHandler
                 // The well is the machine's, so the server is told - but the write happens here first,
                 // so the well and the aspect row fill under the cursor instead of a round trip later.
                 if (TRACE) {
-                    thaumicenergistics_ce.ThaumicEnergistics.LOG.info(
+                    ThELog.LOG.info(
                             "[encoder] JEI dropped {} into the source well", stack.getHoverName().getString());
                 }
                 menu.requestSourceTemplate(stack.copyWithCount(1));

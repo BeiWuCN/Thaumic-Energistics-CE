@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Geometry for the Arcane Assembler screen, read from {@code arcane_assembler_gui.json} off the classpath.
@@ -215,13 +215,13 @@ public final class GuiLayout {
     public static @Nullable GuiLayout load() {
         try (InputStream stream = GuiLayout.class.getResourceAsStream(RESOURCE)) {
             if (stream == null) {
-                ThaumicEnergistics.LOG.error("Missing GUI layout {}", RESOURCE);
+                ThELog.LOG.error("Missing GUI layout {}", RESOURCE);
                 return null;
             }
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
             return new GuiLayout(JsonParser.parseReader(reader).getAsJsonObject());
         } catch (Exception e) {
-            ThaumicEnergistics.LOG.error("Could not read GUI layout {}", RESOURCE, e);
+            ThELog.LOG.error("Could not read GUI layout {}", RESOURCE, e);
             return null;
         }
     }
@@ -233,7 +233,7 @@ public final class GuiLayout {
     public ResourceLocation texture() {
         ResourceLocation location = ResourceLocation.tryParse(texture);
         if (location == null) {
-            ThaumicEnergistics.LOG.error("GUI layout declares an invalid texture path: {}", texture);
+            ThELog.LOG.error("GUI layout declares an invalid texture path: {}", texture);
             return ResourceLocation.fromNamespaceAndPath(
                     "thaumicenergistics_ce", "textures/gui/arcane_assembler.png");
         }

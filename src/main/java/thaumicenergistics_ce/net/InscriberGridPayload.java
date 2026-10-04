@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.network;
+package thaumicenergistics_ce.net;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -8,16 +8,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
-import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
 /**
  * One cell of the Knowledge Inscriber's crafting grid, written by the client. The grid is <em>ghost</em>,
  * so the slot cannot be real, and only the slot and stack travel - the server decides what the grid
  * means.
  *
- * @param containerSlot the container index, <em>not</em> the grid index; the offset is
- *     {@code BlockEntityKnowledgeInscriber}'s to define
+ * @param containerSlot the container index, <em>not</em> the grid index; the receiver owns the offset
  */
 public record InscriberGridPayload(int containerId, int containerSlot, ItemStack stack) implements CustomPacketPayload {
 
@@ -40,15 +37,16 @@ public record InscriberGridPayload(int containerId, int containerSlot, ItemStack
     }
 
     public void handle(Player player) {
-        // The payload carries the container index, not the grid position; translating on receipt is what
-        // keeps the two from drifting - reading one as the other drops every cell as out of range.
-        int cell = containerSlot - BlockEntityKnowledgeInscriber.GRID_SLOT_START;
-        if (cell < 0 || cell >= BlockEntityKnowledgeInscriber.GRID_SLOT_COUNT) {
+        if (!(player.containerMenu instanceof KnowledgeInscriberReceiver receiver)
+                || receiver.containerId() != containerId) {
             return;
         }
-        if (player.containerMenu instanceof MenuKnowledgeInscriber menu
-                && menu.containerId == containerId) {
-            menu.setGridCell(player, cell, stack);
+        // The payload carries the container index, not the grid position; translating on receipt is what
+        // keeps the two from drifting - reading one as the other drops every cell as out of range.
+        int cell = containerSlot - receiver.gridSlotStart();
+        if (cell < 0 || cell >= receiver.gridSlotCount()) {
+            return;
         }
+        receiver.setGridCell(player, cell, stack);
     }
 }

@@ -5,7 +5,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
-import thaumicenergistics_ce.network.InscriberGridPayload;
+import thaumicenergistics_ce.net.InscriberGridPayload;
 
 /**
  * One cell of the Knowledge Inscriber's crafting grid, on the side the player is looking at.

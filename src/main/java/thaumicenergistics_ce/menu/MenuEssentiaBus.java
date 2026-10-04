@@ -19,7 +19,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
+import thaumicenergistics_ce.net.EssentiaBusConfigPayload;
+import thaumicenergistics_ce.net.EssentiaBusReceiver;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * What the essentia buses' config screens have in common: the config grid, and how much of it is usable.
@@ -28,7 +30,8 @@ import thaumicenergistics_ce.ThaumicEnergistics;
  *       slot is, and a second copy of the arithmetic would be a second chance to get it wrong.
  * </ul>
  */
-public abstract class MenuEssentiaBus<T extends IUpgradeableObject> extends UpgradeableMenu<T> {
+public abstract class MenuEssentiaBus<T extends IUpgradeableObject> extends UpgradeableMenu<T>
+        implements EssentiaBusReceiver {
 
     protected MenuEssentiaBus(MenuType<?> menuType, int id, Inventory playerInventory, T host) {
         super(menuType, id, playerInventory, host);
@@ -58,22 +61,23 @@ public abstract class MenuEssentiaBus<T extends IUpgradeableObject> extends Upgr
         return CONFIG_SLOTS;
     }
 
+    @Override
     public void setConfigAspect(
             int configSlot,
             ResourceLocation aspectId,
             Player player) {
         if (configSlot < 0 || configSlot >= getConfigSlotCount()) {
-            ThaumicEnergistics.LOG.warn(
+            ThELog.LOG.warn(
                     "[bus-config] slot {} is out of range (grid holds {})", configSlot, getConfigSlotCount());
             return;
         }
         if (!isSlotEnabled(configSlot)) {
-            ThaumicEnergistics.LOG.warn(
+            ThELog.LOG.warn(
                     "[bus-config] slot {} is locked: {} capacity card(s) installed",
                     configSlot, getUpgrades().getInstalledUpgrades(AEItems.CAPACITY_CARD));
             return;
         }
-        if (thaumicenergistics_ce.network.EssentiaBusConfigPayload.CLEAR.equals(aspectId)) {
+        if (EssentiaBusConfigPayload.CLEAR.equals(aspectId)) {
             setConfigSlot(configSlot, null);
             return;
         }
@@ -85,19 +89,19 @@ public abstract class MenuEssentiaBus<T extends IUpgradeableObject> extends Upgr
                                 IAspect.REGISTRY_KEY, aspectId));
         if (aspect == null) {
             // An id the server does not know: dropping it beats a filter entry that can never match anything.
-            ThaumicEnergistics.LOG.warn("[bus-config] the server cannot resolve aspect {}", aspectId);
+            ThELog.LOG.warn("[bus-config] the server cannot resolve aspect {}", aspectId);
             return;
         }
 
         var key = thaumicenergistics_ce.integration.ae2.AEssentiaKey.of(aspect);
         if (key == null) {
             // Not registry-backed: no id, so the filter entry could never match anything.
-            ThaumicEnergistics.LOG.warn("[bus-config] aspect {} is not a registry entry", aspectId);
+            ThELog.LOG.warn("[bus-config] aspect {} is not a registry entry", aspectId);
             return;
         }
         setConfigSlot(configSlot, new GenericStack(key, 1));
         // Read straight back: "wrote" and "now holds" as two separate facts, for the failure being chased.
-        ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[bus-config] wrote {} to slot {}; it now holds {}",
                 key, configSlot, configFor(configSlot));
     }
@@ -119,12 +123,18 @@ public abstract class MenuEssentiaBus<T extends IUpgradeableObject> extends Upgr
         return configSlots.get(configSlot).index;
     }
 
+    @Override
     public String configFor(int configSlot) {
         if (configSlot < 0 || configSlot >= getConfigSlotCount()) {
             return "out-of-range";
         }
         var stack = configInventory().getStack(configSlot);
         return stack == null ? "empty" : stack.what() + " x" + stack.amount();
+    }
+
+    @Override
+    public int containerId() {
+        return containerId;
     }
 
     protected abstract ConfigInventory configInventory();

@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import thaumicenergistics_ce.menu.slot.ArcaneCraftingResultSlot;
 import thaumicenergistics_ce.menu.slot.CrystalSlot;
+import thaumicenergistics_ce.net.ArcaneCraftCostPayload;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
@@ -202,8 +203,8 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
             return;
         }
         sendPacketToClient(cost == null
-                ? thaumicenergistics_ce.network.ArcaneCraftCostPayload.none(containerId)
-                : thaumicenergistics_ce.network.ArcaneCraftCostPayload.of(containerId, cost.wandCentivis()));
+                ? ArcaneCraftCostPayload.none(containerId)
+                : ArcaneCraftCostPayload.of(containerId, cost.wandCentivis()));
     }
 
 

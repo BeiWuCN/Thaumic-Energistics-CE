@@ -21,11 +21,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.arcane.EssentiaCrystals;
 import thaumicenergistics_ce.arcane.NetworkArcaneCraftingStore;
 import thaumicenergistics_ce.arcane.TerminalArcaneCraftingInput;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The Arcane Crafting Terminal's result slot.
@@ -88,7 +88,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         var result = ArcaneCraftingTransaction.preview(workbenchContext(), serverPlayer, input);
         lastFailure = result.failure();
         if (!result.successful()) {
-            ThaumicEnergistics.LOG.info("[arcane] no craft offered for the grid: {}", result.failure());
+            ThELog.LOG.info("[arcane] no craft offered for the grid: {}", result.failure());
         }
         setDisplayedCraftingOutput(result.successful() ? result.output() : ItemStack.EMPTY);
         // Sent with its result, so the screen cannot draw a cost for a grid that changed.
@@ -117,7 +117,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
             var store = new NetworkArcaneCraftingStore(storage, energySource, actionSource);
             var result = ArcaneCraftingTransaction.craft(workbenchContext(), server, input, store, false);
             if (!result.successful()) {
-                ThaumicEnergistics.LOG.info(
+                ThELog.LOG.info(
                         "[arcane] craft click refused: successful={} failure={}",
                         result.successful(), result.failure());
                 break;
@@ -130,7 +130,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
             // Read before handing over: Inventory#add sets the count to what did NOT fit.
             String produced = output.toString();
             boolean placed = deliver(output, action, who);
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[arcane] craft click committed: produced={} placed={} cost={}",
                     produced,
                     placed,

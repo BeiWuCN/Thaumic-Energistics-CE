@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.network;
+package thaumicenergistics_ce.net;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -7,8 +7,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.ThaumicEnergistics;
-import thaumicenergistics_ce.menu.MenuEssentiaBus;
 
 /**
  * "Put this aspect in that config slot", sent by a bus screen when a player drops one out of JEI.
@@ -42,17 +40,11 @@ public record EssentiaBusConfigPayload(int containerId, int configSlot, Resource
     }
 
     public void handle(Player player) {
-        // Logged before any check: "did it arrive" and "was it accepted" look identical to the player.
-        ThaumicEnergistics.LOG.info(
-                "[bus-config] received slot {} <- {} for menu {} (open: {})",
-                configSlot, aspectId, containerId, player.containerMenu.getClass().getSimpleName());
-
-        if (!(player.containerMenu instanceof MenuEssentiaBus<?> menu) || menu.containerId != containerId) {
-            ThaumicEnergistics.LOG.warn("[bus-config] dropped: the open menu is not that bus");
+        if (!(player.containerMenu instanceof EssentiaBusReceiver receiver)
+                || receiver.containerId() != containerId) {
             return;
         }
-        menu.setConfigAspect(configSlot, aspectId, player);
-        ThaumicEnergistics.LOG.info(
-                "[bus-config] slot {} now holds {}", configSlot, menu.configFor(configSlot));
+        // The aspect is resolved and checked on the receiver side, which is where a dropped one can say why.
+        receiver.setConfigAspect(configSlot, aspectId, player);
     }
 }

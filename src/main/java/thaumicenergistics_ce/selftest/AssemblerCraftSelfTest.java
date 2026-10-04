@@ -19,13 +19,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.arcane.ArcanePatternDetails;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.init.ModBlocks;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Checks the Arcane Assembler's craft bookkeeping against the arcane recipe list and a save/load round trip;
@@ -54,7 +54,7 @@ public final class AssemblerCraftSelfTest {
         ServerLevel level = player.serverLevel();
         ThEArcanePattern priciest = priciestRecipe(level);
         if (priciest == null) {
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[asmtest] FAIL no arcane recipe could be read, so nothing was checked");
             return;
         }
@@ -69,7 +69,7 @@ public final class AssemblerCraftSelfTest {
                 new BlockEntityArcaneAssembler(pos, ModBlocks.ARCANE_ASSEMBLER.get().defaultBlockState());
         reloaded.loadWithComponents(saved, level.registryAccess());
 
-        ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[asmtest] save/load round trip: saved [{}] reloaded [{}]",
                 machine.resumeReportForTest(),
                 reloaded.resumeReportForTest());
@@ -78,7 +78,7 @@ public final class AssemblerCraftSelfTest {
         // skips a machine that offers none. The core goes in as the game's own load does.
         reloaded.setItemForTest(BlockEntityArcaneAssembler.coreSlotForTest(), knowledgeCoreHolding(priciest, level));
         reloaded.recoverForTest(level);
-        ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[asmtest] after a reload the machine offers {} pattern(s), and the craft in its well is {}",
                 reloaded.getAvailablePatterns().size(),
                 reloaded.resumeReportForTest());
@@ -96,13 +96,13 @@ public final class AssemblerCraftSelfTest {
     private static void checkCoreSurvivesTheRoundTrip(ServerLevel level) {
         ThEArcanePattern pattern = priciestRecipe(level);
         if (pattern == null) {
-            ThaumicEnergistics.LOG.warn("[asmtest] no arcane recipe to put in a core, so the core round trip"
+            ThELog.LOG.warn("[asmtest] no arcane recipe to put in a core, so the core round trip"
                     + " is unchecked");
             return;
         }
         ItemStack core = knowledgeCoreHolding(pattern, level);
         if (core.isEmpty()) {
-            ThaumicEnergistics.LOG.warn("[asmtest] the core could not be written, so the core round trip is"
+            ThELog.LOG.warn("[asmtest] the core could not be written, so the core round trip is"
                     + " unchecked");
             return;
         }
@@ -122,7 +122,7 @@ public final class AssemblerCraftSelfTest {
         int stored = handler == null ? -1 : handler.size();
         int offered = reloaded.getAvailablePatterns().size();
         if (!ItemStack.isSameItemSameComponents(core, back)) {
-            ThaumicEnergistics.LOG.warn(
+            ThELog.LOG.warn(
                     "[asmtest] FAIL the core did not survive the round trip: saved {} [{}], reloaded {} [{}]",
                     core,
                     core.getComponentsPatch(),
@@ -130,13 +130,13 @@ public final class AssemblerCraftSelfTest {
                     back.getComponentsPatch());
             return;
         }
-        ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[asmtest] core round trip: {} pattern(s) after the reload, {} offered, stack identical to the"
                         + " one saved",
                 stored,
                 offered);
         if (offered != stored) {
-            ThaumicEnergistics.LOG.warn(
+            ThELog.LOG.warn(
                     "[asmtest] FAIL the reloaded machine offers {} of the {} pattern(s) the reloaded core holds",
                     offered,
                     stored);
@@ -152,7 +152,7 @@ public final class AssemblerCraftSelfTest {
         for (String lang : List.of("en_us", "zh_cn")) {
             Set<String> translated = langKeys(lang);
             if (translated == null) {
-                ThaumicEnergistics.LOG.warn("[asmtest] tooltip reasons: could not read {}.json", lang);
+                ThELog.LOG.warn("[asmtest] tooltip reasons: could not read {}.json", lang);
                 continue;
             }
             List<String> missing = new ArrayList<>();
@@ -162,10 +162,10 @@ public final class AssemblerCraftSelfTest {
                 }
             }
             if (missing.isEmpty()) {
-                ThaumicEnergistics.LOG.info(
+                ThELog.LOG.info(
                         "[asmtest] tooltip reasons: all {} key(s) present in {}", keys.size(), lang);
             } else {
-                ThaumicEnergistics.LOG.warn(
+                ThELog.LOG.warn(
                         "[asmtest] tooltip reasons: {} of {} key(s) MISSING from {}: {}",
                         missing.size(),
                         keys.size(),
@@ -213,15 +213,15 @@ public final class AssemblerCraftSelfTest {
             }
         }
         if (!onlyEnglish.isEmpty()) {
-            ThaumicEnergistics.LOG.warn(
+            ThELog.LOG.warn(
                     "[asmtest] {} key(s) in en_us have no zh_cn translation: {}", onlyEnglish.size(), onlyEnglish);
         }
         if (!oursOnly.isEmpty()) {
-            ThaumicEnergistics.LOG.warn(
+            ThELog.LOG.warn(
                     "[asmtest] {} key(s) in zh_cn look like ours but are in no en_us: {}", oursOnly.size(), oursOnly);
         }
         if (onlyEnglish.isEmpty() && oursOnly.isEmpty()) {
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[asmtest] language files agree: {} key(s) in en_us, all of them in zh_cn, plus {} key(s) "
                             + "in zh_cn that translate other mods",
                     english.size(), overlay);
@@ -238,7 +238,7 @@ public final class AssemblerCraftSelfTest {
                     .getAsJsonObject();
             return json.keySet();
         } catch (IOException | RuntimeException e) {
-            ThaumicEnergistics.LOG.warn("[asmtest] could not read {}: {}", path, e.toString());
+            ThELog.LOG.warn("[asmtest] could not read {}: {}", path, e.toString());
             return null;
         }
     }
@@ -250,12 +250,12 @@ public final class AssemblerCraftSelfTest {
     private static void checkCpuTaskRoundTrip(ServerLevel level) {
         ThEArcanePattern recipe = priciestRecipe(level);
         if (recipe == null) {
-            ThaumicEnergistics.LOG.warn("[asmtest] no arcane recipe to test the CPU task round trip with");
+            ThELog.LOG.warn("[asmtest] no arcane recipe to test the CPU task round trip with");
             return;
         }
         ArcanePatternDetails details = ArcanePatternDetails.of(recipe, level.registryAccess());
         if (details == null) {
-            ThaumicEnergistics.LOG.warn("[asmtest] the priciest recipe has no AE2 view to test with");
+            ThELog.LOG.warn("[asmtest] the priciest recipe has no AE2 view to test with");
             return;
         }
 
@@ -264,7 +264,7 @@ public final class AssemblerCraftSelfTest {
         var decoded = PatternDetailsHelper.decodePattern(
                 AEItemKey.fromTag(level.registryAccess(), asCpuSavesIt), level);
 
-        ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[asmtest] CPU task round trip: definition={} isEncodedPattern={} decodedBack={} equalToOffered={}",
                 details.getDefinition(),
                 PatternDetailsHelper.isEncodedPattern(
@@ -277,8 +277,8 @@ public final class AssemblerCraftSelfTest {
             CompoundTag offered = details.getDefinition().toTag(level.registryAccess());
             CompoundTag decodedTag = other.getDefinition().toTag(level.registryAccess());
             if (!offered.equals(decodedTag)) {
-                ThaumicEnergistics.LOG.warn("[asmtest] offered task tag: {}", offered);
-                ThaumicEnergistics.LOG.warn("[asmtest] decoded task tag: {}", decodedTag);
+                ThELog.LOG.warn("[asmtest] offered task tag: {}", offered);
+                ThELog.LOG.warn("[asmtest] decoded task tag: {}", decodedTag);
             }
         }
     }
@@ -325,7 +325,7 @@ public final class AssemblerCraftSelfTest {
             }
         }
 
-        ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[asmtest] pattern sweep: {} arcane recipe(s); {} unencodable; {} lost in save/load; "
                         + "{} refused by the AE2 adapter. First refusal: {}",
                 recipes,

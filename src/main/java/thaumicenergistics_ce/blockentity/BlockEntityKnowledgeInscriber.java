@@ -18,13 +18,13 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The button writes the arcane recipe the grid resolves to straight into the knowledge core.
@@ -229,7 +229,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         refreshResolution();
         ThEArcanePattern pattern = currentPattern();
         if (pattern == null) {
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[inscriber] save at {} found no recipe: status={} cells={}",
                     worldPosition, resolvedStatus, gridCells().stream().filter(s -> !s.isEmpty()).count());
             return lastResult = STATUS_NO_RECIPE;
@@ -239,19 +239,19 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
             return lastResult;
         }
         if (player != null && !passesResearch(player, pattern)) {
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[inscriber] save refused at {}: {} is gated by research this player has not unlocked",
                     worldPosition, pattern.result());
             return lastResult = STATUS_RESEARCH_LOCKED;
         }
         if (!core.store(pattern)) {
-            ThaumicEnergistics.LOG.info(
+            ThELog.LOG.info(
                     "[inscriber] save refused at {}: the core would not take {} (room {} of {})",
                     worldPosition, pattern.result(), core.size(), HandlerKnowledgeCore.MAXIMUM_STORED_PATTERNS);
             return lastResult = STATUS_CORE_FULL;
         }
         // About the success path only, so it must sit after the refusals above.
-        ThaumicEnergistics.LOG.info(
+        ThELog.LOG.info(
                 "[inscriber] save at {} stored {} (status {})", worldPosition, pattern.result(), status());
         resolutionDirty = true;
         clearGrid();
