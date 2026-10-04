@@ -22,10 +22,8 @@ import thaumicenergistics_ce.item.ItemEssentiaCell;
  * The Essentia Cell Workbench's menu: the cell, and the partition being edited.
  * <ul>
  *   <li>The partition grid is 63 wells, as the art draws and AE2's cell workbench uses.
- *   <li>The wells are AE2's {@link FakeSlot}: {@code AEKey}s edited by click or drag, nothing
- *       handed over, wrapping keys for display and syncing edits to the server.
- *   <li>The partition lives on the cell item; the block entity mirrors it into the wells' backing
- *       inventory and writes edits back.
+ *   <li>The wells are AE2's {@link FakeSlot}: {@code AEKey}s edited by click or drag, nothing handed over.
+ *   <li>The partition lives on the cell item; the block entity mirrors it into the wells and writes back.
  * </ul>
  */
 public class MenuEssentiaCellWorkbench extends AbstractContainerMenu {
@@ -94,9 +92,8 @@ public class MenuEssentiaCellWorkbench extends AbstractContainerMenu {
             }
         });
 
-        // 3. The partition wells, positioned by hand: FakeSlot takes an inventory and an index but
-        // no coordinates and places the slot at 0,0, and nothing repositions it here, so all 63
-        // wells would stack in the corner. Writing x and y needs the META-INF access transformer.
+        // 3. The partition wells, positioned by hand: FakeSlot places the slot at 0,0 and nothing
+        // repositions it here, so all 63 would stack. Writing x and y needs the access transformer.
         for (int index = 0; index < BlockEntityEssentiaCellWorkbench.PARTITION_SLOTS; index++) {
             FakeSlot well = new FakeSlot(partition, index);
             well.x = PARTITION_X + (index % PARTITION_COLS) * PITCH;

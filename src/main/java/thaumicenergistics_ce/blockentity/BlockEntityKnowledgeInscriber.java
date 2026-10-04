@@ -27,11 +27,13 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
 /**
- * The button writes the arcane recipe the grid resolves to straight into the knowledge core, no AE2 pattern between.
+ * The button writes the arcane recipe the grid resolves to straight into the knowledge core.
  * <ul>
  *   <li>{@link #status()} is derived from the slots, so the label needs no ticker.
- *   <li>The resolution is cached against the grid <em>and</em> the core: deleting a recipe moves the core, not the grid.
- * </ul> */
+ *   <li>The resolution is cached against the grid <em>and</em> the core: deleting a recipe moves the
+ *       core, not the grid.
+ * </ul>
+ */
 public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
 
     /** Holds the knowledge core patterns are written into. */
@@ -76,8 +78,8 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         }
     };
 
-    /** True while the block writes its own mirror slots: {@code setChanged()} fires on every write, so without
-     * this flag the refresh recurses until the stack runs out. */
+    /** True while the block writes its own mirror slots: {@code setChanged()} fires on every write, so
+     * without this flag the refresh recurses until the stack runs out. */
     private boolean suppressNotify;
 
     /** The last save/delete outcome, shown by the screen; not the button label. See {@link #status()}. */
@@ -128,8 +130,8 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         inventory.setItem(GRID_SLOT_START + cell, wanted);
     }
 
-    /** Cell-by-cell writes re-resolved a half-replaced grid, so the player watched the old recipe's items being
-     * shoved out one cell at a time. */
+    /** Cell-by-cell writes re-resolved a half-replaced grid, so the player watched the old recipe's
+     * items being shoved out one cell at a time. */
     public void setGrid(List<ItemStack> cells) {
         if (level == null || level.isClientSide) {
             return;
@@ -149,8 +151,8 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         refreshResolution();
     }
 
-    /** Empties the grid, after a recipe is stored. The writes are silent: nine of them would each re-resolve a
-     * half-cleared grid. The caller marks the resolution stale once - see {@link #save}. */
+    /** Empties the grid, after a recipe is stored. The writes are silent: nine of them would each
+     * re-resolve a half-cleared grid; the caller marks it stale once - see {@link #save}. */
     public void clearGrid() {
         boolean wasSuppressed = suppressNotify;
         suppressNotify = true;
@@ -329,8 +331,8 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
     // Stored patterns
     // ------------------------------------------------------------------
 
-    /** The core's stored patterns; the menu fills the 7x3 wells from these. Not a mirror slot: a read-only
-     * one only shows what the server synced, and this block has no update tag. */
+    /** The core's stored patterns; the menu fills the 7x3 wells from these. Not a mirror slot: a
+     * read-only one only shows what the server synced, and this block has no update tag. */
     public List<ItemStack> storedOutputs() {
         if (level == null) {
             return List.of();
@@ -369,7 +371,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         // Not SimpleContainer.createTag: that writes only non-empty slots and records no index, so a saved
         // grid came back with its gaps gone and every item shifted forwards.
@@ -378,7 +380,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         if (tag.contains(ContainerHelper.TAG_ITEMS, Tag.TAG_LIST)) {
             ContainerHelper.loadAllItems(tag, inventory.getItems(), registries);

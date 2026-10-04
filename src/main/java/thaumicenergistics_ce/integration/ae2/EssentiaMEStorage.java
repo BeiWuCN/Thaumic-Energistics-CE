@@ -13,12 +13,10 @@ import net.minecraft.network.chat.Component;
 
 /**
  * Presents a Thaumaturge essentia container to the ME network as storage.
- *
  * <ul>
  * <li>A storage bus mounts one of these, and the jar's contents are then listed in the terminal, count
- * towards what the network holds, and insert and extract like any other storage.</li>
- * <li>Amounts are {@code int} on the Thaumaturge side and {@code long} on the ME side; every conversion
- * here narrows and is clamped, since {@code Integer.MAX_VALUE} would otherwise wrap negative.</li>
+ * towards what the network holds, and insert and extract like any other storage.
+ * <li>Amounts are {@code int} on one side and {@code long} on the other; every conversion is clamped.
  * </ul>
  */
 public final class EssentiaMEStorage implements MEStorage {
@@ -83,11 +81,8 @@ public final class EssentiaMEStorage implements MEStorage {
     }
 
     /**
-     * What this storage is, for AE2's diagnostic output.
-     *
-     * <p>A plain description rather than the container's own name: asking the container would mean asking
-     * its block entity, which this adapter deliberately does not hold, so it cannot go stale when the
-     * container is replaced.
+     * What this storage is, for AE2's diagnostic output: a plain description rather than the container's
+     * own name, which would mean asking its block entity, a thing this adapter deliberately does not hold.
      */
     @Override
     public Component getDescription() {

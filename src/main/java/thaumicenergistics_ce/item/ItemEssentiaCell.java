@@ -27,14 +27,10 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
- * A storage component for essentia.
+ * A storage component for essentia: byte accounting, partitioning, upgrades, NBT and the tooltip stay AE2's.
  * <ul>
- * <li>AE2 builds its own {@code BasicCellInventory} from the key type and byte budget this item
- * reports, so byte accounting, partitioning, upgrades, NBT and the tooltip stay AE2's rules.
- * <li>A second implementation would drift from those rules; a parallel storage stack was the
- * alternative.
- * <li>Sizes follow AE2's 1k/4k/16k/64k components: at eight essentia per byte,
- * 8192/32768/131072/524288.
+ * <li>AE2 builds its own {@code BasicCellInventory} from the key type and byte budget this item reports.
+ * <li>Sizes follow AE2's 1k/4k/16k/64k: eight essentia per byte, so 8192/32768/131072/524288.
  * <li>Eight bytes per type and the 63-type ceiling are likewise AE2's own figures.
  * </ul>
  */

@@ -14,7 +14,6 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A minimal {@link IArcaneCraftingInput} for machines and for validating recipes off a workbench.
- *
  * Slot order matches {@code InventoryArcaneWorkbench}: nine grid slots, then six crystal slots,
  * then the wand slot - always empty here, because a machine pays with vis, not with a wand.
  */

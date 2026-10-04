@@ -9,14 +9,10 @@ import thaumicenergistics_ce.network.InscriberGridPayload;
 
 /**
  * One cell of the Knowledge Inscriber's crafting grid, on the side the player is looking at.
- *
  * <ul>
- * <li>A ghost slot: it records what the player wants to encode without taking the item, because the
- * ingredients are paid for later by the crafting job, not when the pattern is written.</li>
- * <li>The item never leaves the player, so vanilla's slot sync has nothing to carry and the write is
- * sent as a payload instead. The server therefore needs its own slot class that looks the same but
- * never sends anything - mixing both roles in one class invites a write in the wrong direction.</li>
- * <li>Picking up is allowed so a cell can be cleared by clicking it.</li>
+ *   <li>A ghost slot: it records what to encode without taking the item, since the job pays later.
+ *   <li>The item never leaves the player, so the write goes as a payload, not through slot sync.
+ *   <li>Picking up is allowed so a cell can be cleared by clicking it.
  * </ul>
  */
 public class GhostGridSlot extends Slot {

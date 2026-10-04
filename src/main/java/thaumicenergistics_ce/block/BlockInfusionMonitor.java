@@ -26,14 +26,9 @@ import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
 /**
  * The Infusion Monitor block.
  * <ul>
- *   <li>Three properties, because the model has three states and none is decorative: {@code facing}
- *       turns the frame, {@code book} is the Thaumonomicon, {@code network} is the ME connection.
- *   <li>The blockstate file selects the off, book and lit models from exactly these, so all three
- *       have to exist and be named as written - a multipart variant no state can match is never
- *       drawn.
- *   <li>{@code book} is the interesting one: a real state, not a stored flag, because the model has
- *       to change when the book is placed, and a player should see whether it is armed without
- *       opening anything.
+ *   <li>Three states, none decorative: {@code facing} turns the frame, {@code book} is the
+ *       Thaumonomicon and a real state rather than a stored flag, {@code network} is the ME connection.
+ *   <li>The blockstate file picks the off, book and lit models from exactly these three names.
  * </ul>
  */
 public class BlockInfusionMonitor extends ThEBaseEntityBlock {
@@ -82,12 +77,8 @@ public class BlockInfusionMonitor extends ThEBaseEntityBlock {
     }
 
     /**
-     * Puts the book on, or takes it off.
-     * Placing still needs no modifier: that is the action with a book in hand, and unambiguous.
-     * Taking it off is <b>sneak-right-click with an empty hand</b>, which cannot happen by
-     * accident while placing, reading or fiddling. It used to be "holding a Thaumonomicon places
-     * it, anything else takes it back"; a player who right-clicked the monitor to <em>look</em>
-     * at it had the book handed straight back.
+     * Puts the book on, or takes it off: taking it off is sneak-right-click with an empty hand, so a
+     * plain right-click to <em>look</em> at the monitor cannot hand the book back.
      */
     @Override
     protected InteractionResult useWithoutItem(

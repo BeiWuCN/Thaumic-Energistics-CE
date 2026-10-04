@@ -1,7 +1,6 @@
 package thaumicenergistics_ce.integration.jade;
 
 import appeng.api.networking.IGridNode;
-import appeng.core.localization.InGameTooltip;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
@@ -28,12 +27,9 @@ import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 /**
  * The Arcane Assembler's Jade tooltip.
  * <ul>
- *   <li>Written against Jade's API, not AE2's tooltip abstraction: AE2 registers its grid-state line
- *       through the internal {@code appeng.integration.modules.igtooltip} package, which an addon
- *       cannot hook.
- *   <li>One provider covers both halves: the server writes the numbers into the data tag and the client
- *       reads them back. The state is genuinely server-side - the craft, the vis buffer and the grid
- *       node all change between block updates.
+ *   <li>Written against Jade's API, not AE2's: AE2 registers its grid-state line through the internal
+ *       {@code appeng.integration.modules.igtooltip} package, which an addon cannot hook.
+ *   <li>One provider covers both halves: the server writes the numbers into the data tag, the client reads.
  * </ul>
  */
 public class ArcaneAssemblerProvider
@@ -181,8 +177,7 @@ public class ArcaneAssemblerProvider
                     Component.translatable("jade.thaumicenergistics_ce.arcane_assembler.crafting")
                             .withStyle(ChatFormatting.WHITE)));
             // The arrow row: what goes in on the left and what comes out on the right, so "what is it
-            // making" and "out of what" need no sentence.
-            // Full-size icons because Jade's arrow sprite is 22x16 and its 10x10 smallItem reads as lesser.
+            // making" and "out of what" need no sentence; full-size icons because Jade's sprite is 22x16.
             ListTag inputs = tag.getList(TAG_INPUTS, Tag.TAG_COMPOUND);
             List<IElement> row = new ArrayList<>();
             var level = accessor.getLevel();

@@ -28,8 +28,7 @@ public final class EssentiaCrystals {
 
     /**
      * Creates a stack of {@code count} crystals configured for {@code aspect}, writing the same data
-     * component Thaumaturge's crystal factory does so the result is interchangeable with workbench or
-     * crucible crystals.
+     * component Thaumaturge's factory does, so the result is interchangeable with workbench crystals.
      */
     public static ItemStack create(Holder<IAspect> aspect, int count) {
         return TcRegistry.crystalStack(aspect, count);

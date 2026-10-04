@@ -24,10 +24,9 @@ import thaumicenergistics_ce.focus.FocusEffectAEWrench;
 /**
  * The AE2 wrench as a wand focus; the item half, {@link FocusEffectAEWrench} is what it does.
  * <ul>
- *   <li>The package is written onto the stack when it is made, not built at a focal manipulator: a wrench is a
- *       utility, so there is nothing to design. {@link #assemble} installs it on every tick.</li>
- *   <li>Not installed from {@code getDefaultInstance}: it returns {@code new ItemStack(this)}, whose constructor
- *       copies that stack's components, so a component set on the {@code super} result never reaches the caller.</li>
+ *   <li>Written onto the stack, not built at a manipulator: {@link #assemble} installs it on every tick.
+ *   <li>Not installed from {@code getDefaultInstance}: it returns {@code new ItemStack(this)}, whose
+ *       constructor copies that stack's components, so a component set on it never reaches the caller.
  * </ul>
  */
 public class ItemFocusAEWrench extends ItemFocus {
@@ -36,15 +35,8 @@ public class ItemFocusAEWrench extends ItemFocus {
      * cast silently does nothing and still costs vis. */
     private static final ResourceLocation ROOT = ResourceLocation.fromNamespaceAndPath("thaumaturge", "root");
 
-    /** The assembled package: root medium, then the wrench effect.
-     * <ul>
-     *   <li>Built fresh each call: {@code FocusPackage} is an immutable record with no caster id, so two calls
-     *       are equal and a static cache would only add something to invalidate.</li>
-     *   <li>{@code complexity} must be set explicitly - {@code FocusPackage.Builder} defaults it to {@code 0},
-     *       and {@link #visCost()} reads it as {@code complexity / 5}. Root 10 plus effect 10 is 20, so one use
-     *       costs 4 vis.</li>
-     * </ul>
-     */
+    /** The assembled package: root medium, then the wrench effect; built fresh each call, as it is an
+     * immutable record, and {@code complexity} must be set because the builder defaults it to 0. */
     public static FocusPackage wrenchPackage() {
         int complexity = rootComplexity() + new FocusEffectAEWrench().complexity(FocusSettings.empty());
         return FocusPackage.builder()

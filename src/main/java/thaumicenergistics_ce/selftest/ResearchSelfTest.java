@@ -159,7 +159,8 @@ public final class ResearchSelfTest {
         }
     }
 
-    /** Every research complete once {@code id} is, walked through Thaumaturge's registry; stops on a repeat. */
+    /** Every research complete once {@code id} is, walked through Thaumaturge's registry; stops on a
+     * repeat. */
     private static void collectAncestors(
             ResourceLocation id,
             HolderLookup.RegistryLookup<IResearchEntry> allEntries,

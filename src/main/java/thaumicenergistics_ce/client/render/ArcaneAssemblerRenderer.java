@@ -18,20 +18,16 @@ import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 /**
  * Draws the product of a running craft inside the Arcane Assembler, as a molecular assembler does.
  * <ul>
- * <li>The stack is the client's copy out of the block entity's update tag; rendering it is all this
- * class does with it, and the machine's real product stays in the server's well.</li>
- * <li>The last product lingers for {@link #LINGER_TICKS} after its craft ends - a craft is twenty
- * ticks, four with speed upgrades, so drawing only while crafting blinked several times a job.</li>
- * <li>Nothing here is a function of craft progress: that number resets every craft, and a position
- * that depends on it jumps. The item turns and bobs on the clock instead.</li>
+ *   <li>The stack comes from the block entity's update tag; the machine's real product stays server-side.
+ *   <li>The last product lingers for {@link #LINGER_TICKS} after its craft ends, and nothing depends on
+ *       craft progress, which resets every craft and would make the item jump.
  * </ul>
  */
 public class ArcaneAssemblerRenderer implements BlockEntityRenderer<BlockEntityArcaneAssembler> {
 
     /**
-     * How far the item is dropped below the block's middle: an item model is drawn upward from its
-     * own feet, and a block model is centred on its origin while an item model is not, so the two
-     * numbers differ. Both are the molecular assembler's.
+     * How far the item is dropped below the block's middle: an item model is drawn upward from its own
+     * feet while a block model is centred on its origin, so the two numbers differ.
      */
     private static final float ITEM_DROP = 0.3F;
     private static final float BLOCK_DROP = 0.2F;

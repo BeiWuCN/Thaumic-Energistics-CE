@@ -5,7 +5,6 @@ import thaumicenergistics_ce.ThEIds;
 
 /**
  * The skins a golem's wireless backpack can wear: the reference build's ten, by material.
- *
  * <ul>
  * <li>Each is a texture at {@code textures/model/golembackpack/<id>.png}, looked up by the id rather than
  * by the enum's name so the files and the constants can be read against each other.</li>
@@ -44,10 +43,8 @@ public enum BackpackSkins {
     }
 
     /**
-     * The skin with this ordinal, or the default when the number is out of range.
-     *
-     * <p>The ordinal travels in the golem's own data, so a golem saved by a build with more skins than this
-     * one comes back wearing the default rather than throwing while it is being loaded.
+     * The skin with this ordinal, or the default when the number is out of range: the ordinal travels
+     * in the golem's own data, so a golem saved by a build with more skins comes back as the default.
      */
     public static BackpackSkins fromOrdinal(int ordinal) {
         return ordinal < 0 || ordinal >= VALUES.length ? Thaumium : VALUES[ordinal];

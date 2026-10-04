@@ -32,7 +32,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
@@ -41,13 +40,9 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 /**
  * The Essentia Import Bus: pulls essentia out of the container it faces and into the ME network.
  * <ul>
- * <li>Extends {@code IOBusPart}, so it inherits AE2's import bus upgrades, power accounting,
- * redstone and scheduling settings, and config GUI - the list filtered to essentia by the key types
- * handed to the parent constructor.
- * <li>Reads the neighbour through {@link EssentiaCapabilities#STORAGE} rather than reflection (the
- * reference build reflected because Thaumcraft 1.12 had no capability), so jars, alembics, the
- * reservoir, or any block another mod adds all work.
- * <li>Extracted essentia is put back if the network will not take it - losing it would be silent.
+ * <li>Extends {@code IOBusPart}, inheriting AE2's upgrades, power accounting, redstone and config GUI.
+ * <li>Reads the neighbour through {@link EssentiaCapabilities#STORAGE}, not reflection: jars, alembics,
+ * the reservoir, or any block another mod adds. Essentia the network will not take is put back, not lost.
  * </ul>
  */
 public class PartEssentiaImportBus extends IOBusPart implements KeyTypeSelectionHost {

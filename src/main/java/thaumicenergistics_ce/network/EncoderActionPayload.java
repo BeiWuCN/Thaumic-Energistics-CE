@@ -10,17 +10,10 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 
 /**
- * What the Distillation Encoder screen asks the server to do.
- * <ul>
- * <li>Instructions travel, no state does: both sides derive the aspect list from the source item,
- * which vanilla's slot sync already carries, using the same lookup - sending it would be a second
- * copy of the same answer, and the two could disagree after the item changed.</li>
- * <li>The selected aspect travels as an <em>index</em> into that derived list, not as an aspect id,
- * so a stale or forged value fails to resolve instead of selecting something impossible.</li>
- * </ul>
+ * What the Distillation Encoder screen asks the server to do: instructions, never state, since both
+ * sides derive the aspect list from the source item the slot sync already carries.
  *
- * @param containerId the menu this applies to, checked on arrival so a packet for a closed screen is
- *     ignored rather than applied to whatever is open now
+ * @param containerId the menu this applies to; a packet for a closed screen is ignored
  * @param action what to do; see the constants
  * @param value the selected aspect index for {@link #ACTION_SELECT}, unused otherwise
  */
@@ -33,9 +26,8 @@ public record EncoderActionPayload(int containerId, int action, int value) imple
     public static final int ACTION_ENCODE = 1;
 
     /**
-     * Moves one blank pattern from the player's inventory into the blank well, for JEI's drag. It must
-     * be a real move: the source well is a template, but what lands in the blank well is consumed by
-     * the next encode and can be taken back out, so a drag that conjured a pattern would mint them.
+     * Moves one blank pattern into the blank well for JEI's drag. A drag that conjured one would mint
+     * patterns, since the next encode consumes what lands there.
      */
     public static final int ACTION_INSERT_BLANK = 2;
 
@@ -59,8 +51,7 @@ public record EncoderActionPayload(int containerId, int action, int value) imple
 
     /**
      * Applies this instruction to the open menu. Every action re-checks its own preconditions on the
-     * server: a screen is a suggestion, and the block entity validates the item, pattern and aspect
-     * again before anything is consumed, which keeps a client from writing patterns it should not.
+     * server: a screen is a suggestion, and the block entity validates again before anything is spent.
      */
     public void handle(Player player) {
         if (!(player.containerMenu instanceof MenuDistillationEncoder menu) || menu.containerId != containerId) {

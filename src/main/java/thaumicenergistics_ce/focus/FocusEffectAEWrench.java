@@ -18,7 +18,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
@@ -33,14 +32,10 @@ import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.item.ItemFocusAEWrench;
 
 /**
- * The AE2 wrench as a focus effect: a right-click with a wand carrying it disassembles the AE2 block
- * or cable part being looked at, exactly as a quartz wrench would, and spends vis doing it.
+ * The AE2 wrench as a focus effect: a wand right-click disassembles the AE2 block being looked at.
  * <ul>
- * <li>No medium, so the cast is a bare root effect - the shape {@code FocusEffectBreak} has -
- * acting at once on what the caster looks at; a projectile would add a travel delay to an aimed
- * tool.
- * <li>The original's flat {@code ignis 10 + aer 10} no longer maps: a focus element carries one
- * aspect.
+ * <li>No medium, so it acts at once on what the caster looks at; a projectile would delay an aimed tool.
+ * <li>The original's flat {@code ignis 10 + aer 10} no longer maps: a focus element carries one aspect.
  * </ul>
  */
 public final class FocusEffectAEWrench implements FocusEffect {
@@ -93,27 +88,23 @@ public final class FocusEffectAEWrench implements FocusEffect {
             return false;
         }
 
-        // Look the target up here rather than take it from the cast: this focus has no medium, so relying
-        // on the engine's hit means a root medium must have produced one - when it has not, apply() is
-        // never called and the cast does nothing at all, with no error (the "AE wrench focus does
-        // nothing" report). An engine-supplied block hit is still used.
+        // Look the target up here rather than rely on the cast: this focus has no medium, so no engine
+        // hit means apply() is never called at all - the "AE wrench focus does nothing" report.
         BlockHitResult target = hit instanceof BlockHitResult blockHit ? blockHit : rayTrace(player, level);
         if (target == null) {
             return false;
         }
 
-        // Vis is settled here, not by the wand: the wand's charge runs before the cast and so cannot tell
-        // a wrench that will happen from one that will not (see ItemFocusAEWrench.getVisCost). Asked for
-        // first, committed only after AE2 has acted, so a caster who cannot pay gets nothing free.
+        // Vis is settled here, not by the wand: its charge runs before the cast and cannot tell a wrench
+        // that will happen from one that will not (see ItemFocusAEWrench.getVisCost). Committed after AE2.
         float cost = ItemFocusAEWrench.visCost();
         if (!pay(player, cost, false)) {
             TcActionBar.sendPurple(player, "tc.wand.notenoughvis");
             return false;
         }
 
-        // The main hand, whichever hand the cast came from: AE2's WrenchHook acts on the main hand alone,
-        // so the borrowed wrench has to go where AE2 looks. Whatever the main hand held is put back by
-        // AEWrench.use.
+        // The main hand, whichever hand the cast came from: AE2's WrenchHook acts on the main hand alone.
+        // Whatever it held is put back by AEWrench.use.
         if (!AEWrench.use(player, level, InteractionHand.MAIN_HAND, target)) {
             return false;
         }
@@ -156,9 +147,8 @@ public final class FocusEffectAEWrench implements FocusEffect {
     }
 
     /**
-     * A beam from the wand to what it just took apart, plus a clunk; without it the block simply
-     * vanishes and the player cannot tell a cast that worked from a click that did nothing. Per
-     * player, not per level, so the beam is private to the caster.
+     * A beam from the wand to what it just took apart, plus a clunk: without it the block just vanishes.
+     * Sent per player, not per level, so the beam is private to the caster.
      */
     private static void effect(Level level, Player player, Vec3 target) {
         level.playSound(null, BlockPos.containing(target), SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.PLAYERS,

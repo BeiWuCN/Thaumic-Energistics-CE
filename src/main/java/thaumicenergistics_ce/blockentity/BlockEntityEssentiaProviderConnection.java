@@ -23,13 +23,11 @@ import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
- * The Essentia Provider Connection: the far end of a wireless essentia link, bound to a provider with the
- * wireless connector and up to {@link BlockEntityEssentiaProvider#MAX_LINK_DISTANCE} blocks from it.
+ * The Essentia Provider Connection: the far end of a wireless essentia link to a provider.
  * <ul>
- *   <li>It carries essentia, never stores it: what arrives goes to the provider on the next tick, what leaves
- *       comes out of the network, so breaking the link loses only the transfer in flight.
- *   <li>Neighbouring containers can be emptied into the network or served from it. The link lives on both
- *       sides, and whichever side sees the other gone clears its own half.
+ *   <li>It carries essentia, never stores it: what arrives goes to the provider on the next tick.
+ *   <li>Bound with the wireless connector up to {@link BlockEntityEssentiaProvider#MAX_LINK_DISTANCE}
+ *       blocks away; whichever side sees the other gone clears its own half.
  * </ul>
  */
 public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity implements IEssentiaStorage {
@@ -228,7 +226,7 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
 
     // --- IEssentiaStorage: the network's view through this link ---
 
-    /** Accepts essentia from a neighbouring container, to be carried to the network. Refuses when unlinked. */
+    /** Accepts essentia from a neighbouring container; refuses when unlinked. */
     @Override
     public int insert(Holder<IAspect> aspect, int amount, boolean simulate) {
         if (aspect == null || amount <= 0 || !isLinked()) {

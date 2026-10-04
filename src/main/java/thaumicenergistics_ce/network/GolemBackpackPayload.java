@@ -7,16 +7,11 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * What a golem's backpack looks like, told to the players watching it as three numbers.
- *
- * <ul>
- *   <li>Needed because a backpack lives in the golem's persistent data, which vanilla never syncs.
- *   <li>Sent on a timer, not on change: entering or leaving an access point's range goes unwatched.
- * </ul>
+ * What a golem's backpack looks like, told to the players watching it: the backpack lives in the
+ * golem's persistent data, which vanilla never syncs, and it is sent on a timer rather than on change.
  *
  * @param entityId the golem
- * @param status {@link #STATUS_NO_BACKPACK}, {@link #STATUS_IN_RANGE} or
- *     {@link #STATUS_OUT_OF_RANGE}
+ * @param status {@link #STATUS_NO_BACKPACK}, {@link #STATUS_IN_RANGE} or {@link #STATUS_OUT_OF_RANGE}
  * @param skinOrdinal the skin's ordinal in {@code BackpackSkins}
  */
 public record GolemBackpackPayload(int entityId, int status, int skinOrdinal) implements CustomPacketPayload {

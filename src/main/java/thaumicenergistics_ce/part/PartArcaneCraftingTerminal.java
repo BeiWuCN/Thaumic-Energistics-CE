@@ -176,7 +176,7 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
 
     /**
      * Offers the aura's vis toward a craft, simulated then committed; without it Thaumaturge refuses with
-     * {@code PAYMENT_UNAVAILABLE}, as the untyped {@code baseVis} comes from a workbench buffer a cable lacks.
+     * {@code PAYMENT_UNAVAILABLE}, since the untyped {@code baseVis} comes from a buffer a cable lacks.
      * @return the centivis supplied, never more than {@code needCentivis}
      */
     public int supplyAura(int needCentivis, boolean simulate) {

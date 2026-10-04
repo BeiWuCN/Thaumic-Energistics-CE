@@ -29,7 +29,7 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
     /** The panel the art draws, at the top-left of the 256-square texture. */
     private static final int WIDTH = 176;
 
-    /** 234 rows, not 229: the art's opaque pixels run y=0..233 and the last five rows are the bottom bevel. */
+    /** 234 rows, not 229: the art's opaque pixels run y=0..233, the last five being the bottom bevel. */
     private static final int HEIGHT = 234;
 
     private static final int TITLE_X = 8;
@@ -40,7 +40,7 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
     /** How large an aspect is drawn in a well. Matches Thaumaturge's own GUI aspect size. */
     private static final int ASPECT_SIZE = 16;
 
-    /** The Encode button's top-left, in panel pixels: the 34x14 band of bare panel between the pattern wells. */
+    /** The Encode button's top-left, in panel pixels: the 34x14 band of bare panel between the wells. */
     private static final int BUTTON_X = 140;
     private static final int BUTTON_Y = 94;
 
@@ -104,8 +104,7 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
 
     /**
      * Draws the aspect icon over each filled well with how much the item carries, marking the picked one.
-     * Called inside {@code super.render}, after the slots: the stack representations those draw exist only
-     * to give each well something to hit-test against, so covering them is the intent.
+     * Called inside {@code super.render}: the slots' own stacks exist only to be hit-tested against.
      */
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {

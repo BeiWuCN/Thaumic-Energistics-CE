@@ -69,11 +69,8 @@ public final class ClientSetup {
         event.register(ModMenuTypes.DISTILLATION_ENCODER.get(), ScreenDistillationEncoder::new);
         // Draws its own window rather than blitting one: the machine's art is a widget, not a panel.
         event.register(ModMenuTypes.ESSENTIA_VIBRATION_CHAMBER.get(), ScreenEssentiaVibrationChamber::new);
-        // AE2's own terminal layout, so the terminal looks like every other AE2 terminal and a player
-        // already knows how to read one.
-        //
-        // The lambda names its parameter types because the event's register method is generic over both
-        // the menu and the screen, and a bare lambda leaves Java nothing to infer them from.
+        // AE2's own terminal layout: the terminal then looks like any other AE2 terminal.
+        // The lambda names its parameter types because register is generic over menu and screen.
         event.register(
                 ModMenuTypes.ESSENTIA_TERMINAL.get(),
                 (MenuEssentiaTerminal menu, Inventory inventory, Component title) ->
@@ -101,11 +98,8 @@ public final class ClientSetup {
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/terminals/wireless_terminal.json")));
-        // AE2's own upgradeable screens and style documents: a style under this mod's assets cannot
-        // be loaded at all, as StyleManager searches AE2's namespace only.
-        //
-        // The import and export buses use named screen classes because JEI's ghost ingredient handler
-        // registers against a screen class, and a generic screen has none to register against.
+        // A style under this mod's assets cannot be loaded: StyleManager searches AE2's namespace only.
+        // The import and export buses are named classes because JEI's handler registers against one.
         event.register(
                 ModMenuTypes.ESSENTIA_IMPORT_BUS.get(),
                 (MenuEssentiaImportBus menu, Inventory inventory, Component title) ->

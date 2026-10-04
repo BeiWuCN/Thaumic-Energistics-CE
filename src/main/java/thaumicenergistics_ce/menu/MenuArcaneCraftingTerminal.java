@@ -19,7 +19,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import thaumicenergistics_ce.menu.slot.ArcaneCraftingResultSlot;
@@ -29,11 +28,9 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 /**
  * The Arcane Crafting Terminal's menu: an ME storage terminal holding an arcane workbench.
  * <ul>
- *   <li>Nine crafting cells, six crystal slots three down each side of the grid, a result and a wand slot.
- *   <li>Modelled on AE2's {@code CraftingTermMenu}, but crafting runs through Thaumaturge's arcane
- *       transaction, as a {@code CraftingRecipe} never matches an arcane recipe.
- *   <li>A crystal in a grid cell counts as an ingredient and as payment, pushing the cell count past what
- *       the pattern allows, so crystals get their own slots. See {@code PartArcaneCraftingTerminal.INV_CRYSTALS}.
+ *   <li>Nine crafting cells, six crystal slots three down each side, a result and a wand slot.
+ *   <li>Modelled on AE2's {@code CraftingTermMenu}; a {@code CraftingRecipe} never matches an arcane one.
+ *   <li>A crystal in a grid cell counts twice, so crystals get their own slots, past the pattern's count.
  * </ul>
  */
 public class MenuArcaneCraftingTerminal extends MEStorageMenu
@@ -114,9 +111,8 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
         wandSlot.x = WAND_X;
         wandSlot.y = WAND_Y;
 
-        // 3. The six crystal slots, three down each side of the grid.
-        //    A crystal in the grid counts twice, as ingredient and as payment.
-        //    Each slot is pinned to one primal aspect in Thaumaturge's own order. See CrystalSlot.
+        // 3. The six crystal slots, three down each side of the grid. Each is pinned to one primal aspect
+        // in Thaumaturge's own order, and a crystal in the grid counts twice. See CrystalSlot.
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_COLUMN; i++) {
             Slot slot = addSlot(new CrystalSlot(part.crystalInventory(), i, aspectOf(i)), CRYSTALS_LEFT);
             slot.x = CRYSTALS_LEFT_X;
@@ -175,7 +171,7 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
     }
 
     /** Signature compare needed, as a refresh is a full recipe scan and this runs every tick. The grid and
-     * crystal slots belong to the part, so neither {@code slotsChanged} nor {@code onChangeInventory} fires. */
+     * crystal slots belong to the part, so {@code slotsChanged} and {@code onChangeInventory} never fire. */
     @Override
     public void broadcastChanges() {
         super.broadcastChanges();
@@ -207,7 +203,8 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
         return part;
     }
 
-    /** The result slot, or {@code null} when the host was not our part. Accessor, because the index is not ours. */
+    /** The result slot, or {@code null} when the host was not our part. An accessor, because the index
+     * is not ours. */
     public @Nullable ArcaneCraftingResultSlot resultSlot() {
         return resultSlot;
     }

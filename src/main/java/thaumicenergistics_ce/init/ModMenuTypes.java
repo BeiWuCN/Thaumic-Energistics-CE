@@ -66,7 +66,7 @@ public final class ModMenuTypes {
     public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneCraftingTerminal>>
             ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
                     "arcane_crafting_terminal",
-                    // A lambda, not a method reference: the two MenuTypeBuilder overloads are equally applicable.
+                    // A lambda, not a method reference: both MenuTypeBuilder overloads are applicable.
                     () -> MenuTypeBuilder.<MenuArcaneCraftingTerminal, ITerminalHost>create(
                                     (menuType, id, playerInventory, host) ->
                                             new MenuArcaneCraftingTerminal(menuType, id, playerInventory, host),

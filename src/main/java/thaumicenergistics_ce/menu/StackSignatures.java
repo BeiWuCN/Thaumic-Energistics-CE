@@ -5,14 +5,10 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * Cheap change-detection keys for stacks and grids.
- *
  * <ul>
- * <li>Each replaced a string built by appending {@code getComponentsPatch()}, whose {@code toString}
- * serialises every component to SNBT - for a knowledge core those components are the stored pattern
- * list, so a once-a-frame path re-serialised it sixty times a second.</li>
- * <li>An int hash walks the same components without allocating or formatting. It can collide, but every
- * caller only decides whether to <em>recompute</em>, and a collision costs one skipped recomputation
- * rather than a wrong answer, because the recomputation itself reads the real stacks.</li>
+ *   <li>Each replaced a string from {@code getComponentsPatch()}, which serialises every component
+ *       to SNBT - a once-a-frame path re-serialised sixty times a second.
+ *   <li>An int hash can collide, but a collision costs one skipped recomputation, not a wrong answer.
  * </ul>
  */
 public final class StackSignatures {

@@ -15,7 +15,7 @@ import thaumicenergistics_ce.part.PartEssentiaStorageBus;
 /**
  * The Essentia Storage Bus's config screen.
  * <ul>
- * <li>The grid is a partition, not a filter: what it lists is what the network may keep in the bus's container.
+ * <li>The grid is a partition, not a filter: it lists what the network may keep in the bus's container.
  * <li>Grid and slot addressing come from {@link MenuEssentiaBus}, which JEI also reads, so player
  *     and bus cannot drift apart.
  * </ul>

@@ -68,7 +68,7 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(graphics, mouseX, mouseY, partialTick);
-        // The grid is a ghost grid, so both it and the answer are this side's own; the server redoes the lookup.
+        // The grid is a ghost grid, so both it and the answer are this side's; the server redoes it.
         menu.updatePreview();
         // The patterns are drawn from the core, and the wells are read-only slots, so this side fills them.
         menu.refreshMirrors();
@@ -105,7 +105,7 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
         if (!menu.hasCore()) {
             return label("no_core");
         }
-        // Save and Delete are the same question asked of the same grid, read from the action, as the click will.
+        // Save and Delete ask the same question of the same grid, read from the action as the click will.
         if (menu.isDelete()) {
             return label("delete");
         }

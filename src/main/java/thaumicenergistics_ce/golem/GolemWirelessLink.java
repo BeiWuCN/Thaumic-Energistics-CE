@@ -20,15 +20,10 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * One golem's resolved route into an ME network: a link to an access point, thrown away after use.
- *
  * <ul>
- *   <li>A backpack holds a {@link GlobalPos} and nothing else, so reaching the network means resolving that
- *       position: the block at the link must be a wireless access point with a grid, in range of the golem.</li>
- *   <li>Resolved per operation rather than cached, because a golem walks and a cached grid would keep
- *       working after it wandered out of range.</li>
- *   <li>Only items move: a Thaumaturge golem has no hold for fluids or essentia.</li>
- *   <li>Energy is not checked here: every transfer goes through AE2's powered helpers, so a network
- *       that cannot pay moves nothing.</li>
+ * <li>A backpack holds a {@link GlobalPos} and nothing else, so the block there must be an access point
+ * with a grid in range of the golem; resolved per operation, so walking away is noticed at once.
+ * <li>Only items move, and a network that cannot pay moves nothing: AE2's powered helpers decide.
  * </ul>
  */
 public final class GolemWirelessLink {
@@ -100,9 +95,8 @@ public final class GolemWirelessLink {
     }
 
     /**
-     * Whether the golem is in range of an active access point on the grid it is linked to.
-     *
-     * <p>The class asked for has to be the concrete one - see the note on {@code owner.getClass()}.
+     * Whether the golem is in range of an active access point on the grid it is linked to. The class
+     * asked for has to be the concrete one - see the note on {@code owner.getClass()}.
      */
     private static boolean inRange(ServerLevel level, IGrid grid, EntityThaumaturgeGolem golem) {
         for (WirelessAccessPointBlockEntity accessPoint : grid.getMachines(WirelessAccessPointBlockEntity.class)) {

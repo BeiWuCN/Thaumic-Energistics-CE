@@ -9,13 +9,7 @@ import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProvider;
 
 /**
  * The Essentia Provider block: a plain cube with one texture on every side, so it has no properties
- * and no facing.
- * <ul>
- * <li>A direction property would be a state that changes nothing, and states that change nothing
- * must still be kept in step for no reason.</li>
- * <li>The blockstate file declares a single unconditional variant, all a block with no properties
- * needs.</li>
- * </ul>
+ * and no facing, and its blockstate declares a single unconditional variant.
  */
 public class BlockEssentiaProvider extends ThEBaseEntityBlock {
 

@@ -9,10 +9,9 @@ import net.minecraft.world.item.ItemStack;
 /**
  * A display-only slot that renders a real stack but refuses all interaction.
  * <ul>
- * <li>Shows the assembler's pattern mirror and target-output preview: real machine state the player
- * must not take, insert into, or have rearranged by a sorting mod.
- * <li>An empty zero-slot container hides {@code slot.index}/{@code slot.container} from automation.
- * <li>Every mutating entry point is a no-op; {@link #getItem()} reads the real source.
+ *   <li>Shows real machine state the player must not take, insert into, or have sorted by a mod.
+ *   <li>An empty zero-slot container hides {@code slot.index}/{@code slot.container} from automation.
+ *   <li>Every mutating entry point is a no-op; {@link #getItem()} reads the real source.
  * </ul>
  */
 public class ReadOnlySlot extends Slot {

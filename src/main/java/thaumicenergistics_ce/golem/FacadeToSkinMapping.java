@@ -13,10 +13,9 @@ import thaumicenergistics_ce.ThEIds;
 
 /**
  * Which backpack skin a block asks for.
- *
  * <ul>
- *   <li>Matched by block id inside Thaumaturge's namespace, by substring on purpose: a block,
- *       a plank, a log and a set of stairs all mean the same material to a player pointing at them.
+ *   <li>Matched by block id inside Thaumaturge's namespace, by substring on purpose: a block, a
+ *       plank, a log and a set of stairs all mean the same material to a player pointing at them.
  *   <li>AE2 facades are unwrapped first; anything not listed returns null, leaving the skin alone.
  * </ul>
  */

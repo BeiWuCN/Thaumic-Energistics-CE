@@ -36,7 +36,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
-import thaumicenergistics_ce.integration.ae2.EssentiaMEStorage;
 
 /**
  * The Essentia Provider: where the ME network puts essentia meant for the world - the opposite half

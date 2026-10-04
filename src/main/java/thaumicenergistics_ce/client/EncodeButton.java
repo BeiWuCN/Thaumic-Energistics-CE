@@ -7,19 +7,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * The Distillation Encoder's Encode button, drawn from the reference build's own two-state sprite: the same
- * 32x32 sheet as the Knowledge Inscriber's button, its two 32x13 frames stacked at v=0 and v=15.
- *
+ * The Distillation Encoder's Encode button, from the reference build's own two-state sprite.
  * <ul>
- *   <li>A disabled button is veiled, where the inscriber's is not. The sheet has no disabled frame; the
- *       inscriber's label spells out the fault ("No Core", "Invalid", "Full"), but this one says only
- *       "Encode" and nothing else on the panel says what is wrong, so without a veil an unpressable button
- *       is indistinguishable from a pressable one and the click reads as the machine ignoring the player.
- *   <li>Drawn 34x14, not the sprite's native 32x13, because the reference stretches it here: the art leaves
- *       a 34x14 band of bare panel between the blank pattern well (ends y=91) and the written one (starts
- *       y=110). At native size it would sit a pixel inside that band on every side and read as misplaced.
- *   <li>The label is centred and drawn 3 pixels from the top, as the inscriber's is: vanilla's centring sits
- *       it too low for a 14-pixel-tall widget.
+ *   <li>Disabled is veiled: the sheet has no disabled frame and "Encode" says nothing on its own.
+ *   <li>Drawn 34x14, not the native 32x13, because the reference stretches it to the panel band.
+ *   <li>The label is centred, 3 pixels from the top, as the inscriber's label is.
  * </ul>
  */
 public class EncodeButton extends Button {

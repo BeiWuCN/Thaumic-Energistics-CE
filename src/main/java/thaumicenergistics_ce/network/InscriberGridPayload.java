@@ -12,14 +12,9 @@ import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
 /**
- * One cell of the Knowledge Inscriber's crafting grid, written by the client.
- *
- * <ul>
- *   <li>The grid is <em>ghost</em>, so the slot cannot be real: a real slot would take the item
- *       from the player and make the pattern cost its ingredients.
- *   <li>Only the slot and stack travel; the server decides what the grid means, so no machine
- *       state is trusted from the client.
- * </ul>
+ * One cell of the Knowledge Inscriber's crafting grid, written by the client. The grid is <em>ghost</em>,
+ * so the slot cannot be real, and only the slot and stack travel - the server decides what the grid
+ * means.
  *
  * @param containerSlot the container index, <em>not</em> the grid index; the offset is
  *     {@code BlockEntityKnowledgeInscriber}'s to define

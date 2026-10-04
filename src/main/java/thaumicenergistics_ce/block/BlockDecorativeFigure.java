@@ -26,11 +26,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 /**
  * The decorative figure block - a plush likeness, not a machine.
  * <ul>
- * <li>Nothing in this mod depends on it; it ships because it is part of the addon.
- * <li>{@code variant} looks pointless (the two models differ by a sub-pixel of height) but the blockstate
- * declares eight variants, four facings times two, so leaving it out would make four unreachable, and a
- * variant no state can match renders as a missing-texture cube.
- * <li>It stays settable: right-click turns the figure to face the player who asked.
+ *   <li>{@code variant} must stay: the blockstate declares four facings times two, so a missing
+ *       variant is unreachable and renders as a missing-texture cube.
+ *   <li>The figure stays settable: right-click turns it to face the player who asked.
  * </ul>
  */
 public class BlockDecorativeFigure extends HorizontalDirectionalBlock {

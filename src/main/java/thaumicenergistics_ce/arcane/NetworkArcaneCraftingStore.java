@@ -14,17 +14,11 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * The ME network, presented to Thaumaturge as the place an arcane craft gets its ingredients.
- *
- * Thaumaturge asks the store to {@link #consume} the grid twice: once with {@code simulate} true to
- * check the network can pay, and once for real when the craft goes through. Only the second call
- * takes anything, which is what makes a failed craft cost nothing.
- *
- * <p>One item leaves the network per occupied grid cell, whatever the cell holds: the terminal's
- * grid is the recipe's shape, not the payment, and {@code TerminalArcaneCraftingInput} already
- * counts each cell as a single ingredient when it matches.
- *
- * <p>Energy is paid through {@link StorageHelper}, as AE2's own crafting terminal does, so a craft
- * that cannot pay for the extraction fails at the check rather than half-completing.
+ * <ul>
+ *   <li>{@link #consume} runs twice, once simulated and once for real: only the second takes anything,
+ *       which is what makes a failed craft cost nothing.
+ *   <li>One item leaves the network per occupied grid cell; energy is paid through {@link StorageHelper}.
+ * </ul>
  */
 public final class NetworkArcaneCraftingStore implements IArcaneCraftingStore {
 
@@ -45,10 +39,7 @@ public final class NetworkArcaneCraftingStore implements IArcaneCraftingStore {
 
     /**
      * Checks that the network can supply one of every item on the grid, and takes them when it can.
-     *
-     * <p>Every extraction is simulated first, each against what the earlier cells left, or a recipe
-     * needing two iron would be accepted by a network holding one. Nothing is taken during the check,
-     * so a craft that fails later costs nothing.
+     * Each extraction is simulated against what the earlier cells left, or two iron would be paid by one.
      *
      * @param consumption what the craft uses up; only {@link Consumption#grid()} concerns the network
      * @param simulate    true to only check that the network holds the items

@@ -7,7 +7,6 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -21,14 +20,11 @@ import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.network.GolemBackpackPayload;
 
 /**
- * What a golem does with its backpack: tips what it carries into the ME network, and tells clients
- * nearby whether the network is reachable.
+ * What a golem does with its backpack: tips it into the ME network and tells nearby clients when reachable.
  * <ul>
- * <li>An errand is the gate: Thaumaturge golems have no cores, so the reference build's core check
- * becomes {@code golem.getTask()}. Without a task a golem holds something nobody asked for, and the
- * backpack would rob every golem-using seal.
- * <li>The client cannot see the link (unsynced persistent data): watchers get the skin and
- * reachability on a different interval from the transfers, so the two never share a tick.
+ * <li>An errand is the gate: Thaumaturge golems have no cores, so the core check becomes {@code getTask()},
+ * without which the backpack would rob every golem-using seal.
+ * <li>The client cannot see the link (unsynced data), so watchers get the skin on its own interval.
  * </ul>
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
@@ -160,9 +156,8 @@ public final class GolemBackpackTickHandler {
     }
 
     /**
-     * Tells a player who has just started watching a golem what is on its back. The heartbeat only
-     * speaks on change and a client that just logged in has never been told anything, so the
-     * backpack went undrawn - which looks exactly like a lost backpack.
+     * Tells a player who has just started watching a golem what is on its back: the heartbeat only
+     * speaks on change, so a client that just logged in was never told and drew no backpack.
      */
     @SubscribeEvent
     public static void onStartTracking(PlayerEvent.StartTracking event) {

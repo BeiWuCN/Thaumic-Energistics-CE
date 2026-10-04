@@ -15,13 +15,11 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThaumicEnergistics;
 
 /**
- * Geometry for the Arcane Assembler screen, read from {@code arcane_assembler_gui.json} off the
- * classpath, so it is available on both sides with no reload listener.
- *
+ * Geometry for the Arcane Assembler screen, read from {@code arcane_assembler_gui.json} off the classpath.
  * <ul>
  * <li>Coordinates are measured off the GUI art's slot wells, so image wells and menu slots land on the
- * same pixels.</li>
- * <li>The file is written by {@code tools/build_assembler_layout.js}.</li>
+ * same pixels.
+ * <li>Read on both sides with no reload listener, and written by {@code tools/build_assembler_layout.js}.
  * </ul>
  */
 public final class GuiLayout {
@@ -182,9 +180,8 @@ public final class GuiLayout {
     }
 
     /**
-     * Reads the vis columns and the craft progress column after them: one {@code [sourceU, x, y]} triple per
-     * entry, with progress appended last so {@code PRIMAL_COLUMNS} indexes straight at it. No fallback to an
-     * older file shape on purpose - an unreadable layout should fail loudly.
+     * Reads the vis columns and the craft progress column after them: one {@code [sourceU, x, y]} triple
+     * per entry, with progress last so {@code PRIMAL_COLUMNS} indexes at it. No fallback on purpose.
      */
     private static VisBars visBars(JsonObject root, String key) {
         List<VisBars.Column> columns = new ArrayList<>();

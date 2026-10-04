@@ -9,10 +9,9 @@ import net.minecraft.network.chat.Component;
 /**
  * The four grid-node states AE2 shows, and how our tooltips draw them.
  * <ul>
- * <li>Cases, words and colours are AE2's; its translation keys are reused on purpose so every machine
- * reporting a network state shares one set of strings.
- * <li>Resolved on the server, where the node lives, and sent to the client as an ordinal under
- * {@link #TAG}.
+ *   <li>Cases, words and colours are AE2's; its translation keys are reused so every machine
+ *       reporting a network state shares one set of strings.
+ *   <li>Resolved on the server, where the node lives, and sent to the client as an ordinal.
  * </ul>
  */
 enum JadeGridState {

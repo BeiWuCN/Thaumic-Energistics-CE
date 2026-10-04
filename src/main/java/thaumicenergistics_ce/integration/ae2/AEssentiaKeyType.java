@@ -2,7 +2,6 @@ package thaumicenergistics_ce.integration.ae2;
 
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.AEKeyType;
-import appeng.api.stacks.AmountFormat;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.mojang.serialization.MapCodec;
 import java.lang.reflect.Field;
@@ -24,12 +23,9 @@ import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 /**
  * The AE2 key type for Thaumaturge essentia.
  * <ul>
- * <li>Registering this makes essentia first-class on an ME network: cells, buses, terminals, level
- * emitters and the crafting planner all dispatch through the key type registry.
- * <li>{@code AMOUNT_PER_BYTE = 8} matches how Thaumaturge counts essentia: a jar holds 250
- * ({@code TcRegistry.jarCapacity()}), a phial 10 ({@code TcRegistry.phialCapacity()}).
- * <li>8 per byte is measured in this build, not the Thaumcraft reference's 64; it makes a 1k
- * component the same size as a 1k item component - 1024 bytes, 8192 essentia.
+ * <li>Registering this makes essentia first-class: cells, buses, terminals and the planner all dispatch.
+ * <li>{@code AMOUNT_PER_BYTE = 8} matches Thaumaturge: a jar holds 250, a phial 10 (see {@code TcRegistry}).
+ * <li>Measured in this build, not the reference's 64: a 1k component is 1024 bytes, 8192 essentia.
  * </ul>
  */
 public final class AEssentiaKeyType extends AEKeyType {
@@ -81,10 +77,8 @@ public final class AEssentiaKeyType extends AEKeyType {
     }
 
     /**
-     * Resolves the aspect a key names against whichever registry access is at hand. Registries, not
-     * a level: the aspect registry is synchronised, so a client resolves an id as the server does,
-     * and it has the server's registries from the moment its connection is configured, before any
-     * level exists.
+     * Resolves the aspect a key names against whichever registry access is at hand: registries, not a
+     * level, because the aspect registry is synchronised and the client has it before any level exists.
      *
      * @return the aspect, or {@code null} when those registries have no such entry
      */
@@ -103,9 +97,8 @@ public final class AEssentiaKeyType extends AEKeyType {
     }
 
     /**
-     * The registries an aspect can be resolved against, asked of whichever side is running. The client's
-     * are reached by reflection, not by naming {@code Minecraft}: that class is absent on a dedicated
-     * server, and a common class mentioning it refuses to load there rather than branch.
+     * The registries an aspect can be resolved against, asked of whichever side is running: the client's
+     * are reached by reflection, since naming {@code Minecraft} refuses to load on a dedicated server.
      *
      * @return the registries, or {@code null} before either side has any
      */

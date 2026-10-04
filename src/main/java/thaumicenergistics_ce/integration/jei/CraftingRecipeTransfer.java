@@ -28,11 +28,9 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 /**
  * Lets JEI fill the Arcane Crafting Terminal's grid from an ordinary crafting recipe.
  * <ul>
- * <li>A second handler beside the arcane one: the grid is nine plain slots, so a missing JEI button reads as broken.</li>
- * <li>Unlike the arcane handler it passes the recipe id, which
- *     {@link FillCraftingGridFromRecipePacket} resolves in the vanilla manager.</li>
- * <li>Written out rather than left to JEI, which only knows the player's inventory; AE2's packet
- *     pulls from the network.</li>
+ * <li>A second handler beside the arcane one: without it a missing JEI button reads as broken.
+ * <li>Unlike the arcane handler it passes the recipe id, which AE2 resolves in the vanilla recipe manager.
+ * <li>Written out rather than left to JEI, which only knows the player's inventory and not the network.
  * </ul>
  */
 public class CraftingRecipeTransfer

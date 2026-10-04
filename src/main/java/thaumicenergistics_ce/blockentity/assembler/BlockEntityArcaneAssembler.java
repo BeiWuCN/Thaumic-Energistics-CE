@@ -45,19 +45,15 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -1033,8 +1029,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         if (relayReach == null || now >= nextRelayReachCheck) {
             nextRelayReachCheck = now + RELAY_POLL_INTERVAL;
             // Resolving is not paying: one simulated centivis settles whether an empty node can pay.
-            // Where the chain ends is not asked separately to a relay any more: a chain has one end,
-            // and a source that is not a node - another addon's, or a vis interface - sells its own.
+            // A chain has one end, and a source that is not a node sells its own.
             relayReach = TcAura.relayResolves(server, worldPosition) && relayCanSupply(server);
         }
         return relayReach;
@@ -1307,7 +1302,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
             return null;
         }
         if (patternsDirty) {
-            // Rebuild without spending the dirty flag: one with no level yields an empty list, making it final.
+            // Rebuild without spending the dirty flag: no level yields an empty list, making it final.
             rebuildPatterns();
         }
         for (IPatternDetails details : cachedPatterns) {
@@ -1370,7 +1365,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
             }
         }
         if (details.size() < stored.size()) {
-            // The shortfall is otherwise invisible: the machine just offers fewer recipes than the core holds.
+            // Otherwise invisible: the machine just offers fewer recipes than the core holds.
             ThaumicEnergistics.LOG.warn(
                     "[assembler] at {} offers {} of the {} patterns in its knowledge core",
                     getBlockPos(),
@@ -1378,7 +1373,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                     stored.size());
         }
         if (core.unreadableCount() > 0) {
-            // Entries this build cannot read: kept in the item, not offered; otherwise the core reads as empty.
+            // Entries this build cannot read: kept in the item, not offered; the core would read as empty.
             ThaumicEnergistics.LOG.warn(
                     "[assembler] at {} cannot read {} entr(ies) in its knowledge core; they are kept in the"
                             + " item and {} pattern(s) are offered",

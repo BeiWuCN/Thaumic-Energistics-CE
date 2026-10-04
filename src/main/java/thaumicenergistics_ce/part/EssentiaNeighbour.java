@@ -14,17 +14,10 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Finds the essentia container on the block a bus faces, and asks it the right question.
- *
  * <ul>
- * <li>A Thaumaturge container exposes {@link EssentiaCapabilities#TRANSPORT} and STORAGE, which answer
- * different questions. {@link IEssentiaTransport#isConnectable(Direction)} takes <b>the container's own
- * face</b>: a bus on the north side sits at that block's {@code SOUTH} face.
- * <li>Wrong face is silent: a jar answers {@code isConnectable} true only at {@code UP} and fills from the
- * top, so inserting on any other face does nothing.
- * <li>Order: transport on the bus's face, to decide whether this is a connection at all; then storage on
- * each face the container accepts; then the transport wrapped as storage, for a pipe.
- * <li>{@link Adapter} makes one interface of the two: {@code insert}/{@code extract} become
- * {@code addEssentia}/{@code takeEssentia} on one face.
+ * <li>{@code isConnectable} takes the container's own face: a bus on the north side sits at its SOUTH face.
+ * <li>Wrong face is silent: a jar answers true only at {@code UP}, so any other face inserts nothing.
+ * <li>Order: transport on the bus's face, then storage on any face accepted, then a transport as storage.
  * </ul>
  */
 final class EssentiaNeighbour {
@@ -73,10 +66,8 @@ final class EssentiaNeighbour {
     }
 
     /**
-     * Presents an {@link IEssentiaTransport} as an {@link IEssentiaStorage} on one face.
-     *
-     * <p>Everything here is directional by necessity: a pipe's contents differ per face, so the adapter is
-     * built for a face rather than for the block.
+     * Presents an {@link IEssentiaTransport} as an {@link IEssentiaStorage} on one face: everything here is
+     * directional by necessity, since a pipe's contents differ per face and the adapter is built for one.
      */
     private record Adapter(IEssentiaTransport transport, Direction face) implements IEssentiaStorage {
 

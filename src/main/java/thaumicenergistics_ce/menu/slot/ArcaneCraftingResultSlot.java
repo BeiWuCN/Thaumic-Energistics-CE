@@ -30,8 +30,8 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 /**
  * The Arcane Crafting Terminal's result slot.
  * <ul>
- *   <li>Extends {@code CraftingTermSlot} because {@code doClick}, the craft entry point, is declared there.</li>
- *   <li>{@code ArcaneCraftingTransaction} matches and charges; only {@code craft} charges, {@link #refresh} previews.</li>
+ *   <li>Extends {@code CraftingTermSlot} because {@code doClick}, the craft entry point, is declared there.
+ *   <li>{@code ArcaneCraftingTransaction} matches and charges; {@link #refresh} previews without paying.
  * </ul>
  */
 public class ArcaneCraftingResultSlot extends CraftingTermSlot {
@@ -184,8 +184,8 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         return false;
     }
 
-    /** Takes {@code crystalsNeeded} - what the wand could not cover and the network store ignores - out of the
-     * six crystal slots, by aspect, clamped to what each stack holds. */
+    /** Takes {@code crystalsNeeded} - what the wand could not cover and the network store ignores - out of
+     * the six crystal slots, by aspect, clamped to what each stack holds. */
     private void consumeCrystals(@Nullable ArcaneCraftCost cost) {
         if (cost == null || part == null) {
             return;
@@ -231,8 +231,8 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         return new TerminalArcaneCraftingInput(cells, serverPlayer, wand, crystals, part);
     }
 
-    /** Hands the player whatever the recipe kept and leaves the grid alone: the network pays, so consuming the
-     * grid too would charge twice. {@code remainders()} is indexed by grid slot, so a catalyst comes back here. */
+    /** Hands the player whatever the recipe kept and leaves the grid alone: the network already paid, so
+     * consuming the grid too would charge twice; {@code remainders()} is per slot, so catalysts return. */
     private void settleRemainders(List<ItemStack> remainders, Player who) {
         for (ItemStack keeps : remainders) {
             if (keeps.isEmpty()) {
@@ -245,7 +245,8 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         }
     }
 
-    /** A virtual workbench owned by this machine and player: a terminal on a cable has no block to point at. */
+    /** A virtual workbench owned by this machine and player: a terminal on a cable has no block to point
+     * at. */
     private ArcaneWorkbenchContext workbenchContext() {
         return ArcaneWorkbenchContext.virtual(
                 serverPlayer, PartArcaneCraftingTerminal.CONTEXT_HOST, serverPlayer.getUUID());

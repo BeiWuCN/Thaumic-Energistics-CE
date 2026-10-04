@@ -35,8 +35,7 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 /**
  * The Infusion Provider's Jade tooltip: what the altar beside it can actually draw.
  * <ul>
- *   <li>{@code getAspects} is empty on purpose: the block is a window, not a container, so essentia
- *       pipes do not pump it. This tooltip is therefore the only view of the network's contents.
+ *   <li>{@code getAspects} is empty on purpose: the block is a window, not a container, so pipes skip it.
  *   <li>One aspect per entry, drawn as a chip with the amount in the corner, abbreviated with
  *       {@link AmountFormat#SLOT} so figures read as they do in a terminal.
  * </ul>

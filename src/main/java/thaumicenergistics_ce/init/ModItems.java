@@ -140,8 +140,7 @@ public final class ModItems {
                     "arcane_crafting_terminal", ItemArcaneCraftingTerminal::new, new Item.Properties());
 
     // ---- Essentia storage components --------------------------------------
-    // Sizes are bytes, as AE2's components are: capacity in essentia is eight times the name, so a 1k
-    // component holds 8192.
+    // Sizes are bytes, as AE2's: capacity in essentia is eight times the name, so 1k holds 8192.
 
     /**
      * The housing half of a storage cell: made from ordinary crafting, unlike the component that carries the
@@ -169,8 +168,7 @@ public final class ModItems {
             new Item.Properties().rarity(Rarity.EPIC));
 
     // ---- The arcane half of a cell ----------------------------------------
-    // Plain items: the capacity lives in the cell they are built into, so a component alone is only an
-    // ingredient. Tiers are the byte figures AE2 uses for its own components.
+    // Plain items: the capacity lives in the cell, so a component is an ingredient; tiers are AE2's bytes.
 
     public static final DeferredItem<Item> STORAGE_COMPONENT_1K = REGISTRY.registerItem(
             "storage_component_1k", Item::new, new Item.Properties().stacksTo(64));

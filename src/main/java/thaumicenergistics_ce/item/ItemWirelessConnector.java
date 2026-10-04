@@ -21,14 +21,9 @@ import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProviderConnection;
 /**
  * The Wireless Essentia Binding Tool: makes and breaks the links an Essentia Provider uses.
  * <ul>
- * <li>A two-ended link needs something to carry the identity of one end to the other, and this is it: the
- * tool holds one coordinate at a time - a receiver selected but not yet bound - and the second click
- * completes the pair.
- * <li>Sneak is the difference between reading and writing, the reference build's arrangement: a plain
- * right-click on either end reports where it is and what it is bound to, and only a deliberate sneak
- * acts. Without that split, walking past an altar with the tool in hand would rebind things.
- * <li>The selection is stored under one key and is only meaningful as a pair of clicks; it expires the
- * next time a different receiver is selected.
+ * <li>A two-ended link needs something to carry the identity of one end to the other: the tool holds one
+ * coordinate - a receiver selected but not yet bound - and the second click completes the pair.
+ * <li>Sneak splits reading from writing: without it, walking past an altar would rebind things.
  * </ul>
  */
 public class ItemWirelessConnector extends Item {
@@ -86,9 +81,8 @@ public class ItemWirelessConnector extends Item {
     }
 
     /**
-     * The receiver this tool is holding, or {@code null}. Read through the custom-data component rather
-     * than a raw NBT tag: 1.21 removed the direct tag accessors from {@link ItemStack}, and the component
-     * is what actually travels with the stack now.
+     * The receiver this tool is holding, or {@code null}: read through the custom-data component, since
+     * 1.21 removed the direct tag accessors from {@link ItemStack} and the component is what travels.
      */
     private static @Nullable CompoundTag selection(ItemStack tool) {
         CustomData data = tool.get(DataComponents.CUSTOM_DATA);
@@ -115,9 +109,8 @@ public class ItemWirelessConnector extends Item {
     }
 
     /**
-     * Binds the remembered receiver to the provider that was clicked. The receiver does the work and
-     * reports why it refused - the provider enforces how many receivers it will serve and how far away
-     * they may be - so the player is told which limit they hit rather than just that nothing happened.
+     * Binds the remembered receiver to the clicked provider. The receiver does the work and reports why
+     * it refused, so the player is told which limit they hit rather than just that nothing happened.
      */
     private static void bind(Level level, BlockPos provider, ItemStack tool, Player player) {
         CompoundTag tag = selection(tool);

@@ -21,20 +21,11 @@ import thaumicenergistics_ce.part.PartVisInterface;
 import thaumicenergistics_ce.part.VisReservation;
 
 /**
- * Diagnostic that measures whether the Arcane Assembler beside the player can draw vis along
- * the relay chain, enabled only by {@code THAUMICENERGISTICS_VIS_RELAY_TEST=true}.
+ * Measures whether the Assembler beside the player can draw vis along the relay chain; read-only.
  * <ul>
- *   <li>Read-only: it scans the loaded blocks around the player and logs what it finds, and
- *       builds, consumes and changes nothing. One run per server.</li>
- *   <li>{@code TcAura.drainCentivis} resolves in two steps. A relay block is found near the
- *       consumer - a cable part is not one - then that relay's parent chain is walked to a
- *       source, which may be a node, another addon's source, or this part.</li>
- *   <li>A relay's relink takes the nearest source and does not rank a node
- *       above an addon source. A vis interface is itself a source, so a relay beside one can
- *       end its chain at the interface; the interface reports {@code canSupply() == false} in
- *       that state, which is how the relay is sent back to the node.</li>
- *   <li>It logs each hop and what each interface would carry, so the answer comes from the
- *       player's world rather than from a tooltip.</li>
+ *   <li>On only with {@code THAUMICENERGISTICS_VIS_RELAY_TEST=true}.
+ *   <li>A relay takes the nearest source and cannot rank an addon source, so it may end at an interface,
+ *       which then answers {@code false} and sends the relay back; every hop is logged.
  * </ul>
  */
 public final class VisRelaySelfTest {
@@ -103,17 +94,15 @@ public final class VisRelaySelfTest {
             }
         }
 
-        // What each interface would carry, aspect by aspect. reserve() only reports - it takes neither
-        // from the chain nor from the network - so this is the interface's own read-only answer.
-        // All six aspects, because the part follows the world rather than the node's palette.
+        // What each interface would carry, aspect by aspect: reserve() only reports, taking neither from the
+        // chain nor the network. All six aspects, as the part follows the world, not the node's palette.
         for (BlockPos interfacePos : interfaces) {
             double nearest = Double.MAX_VALUE;
             for (BlockPos assemblerPos : assemblers) {
                 nearest = Math.min(nearest, Math.sqrt(interfacePos.distSqr(assemblerPos)));
             }
-            // What Thaumaturge asks of a source now: canSupply decides whether a relay may link to it,
-            // and the per-aspect answers decide what it would hand over. A part answering no to the
-            // first is invisible to every relay block, however it is placed.
+            // What Thaumaturge asks of a source: canSupply decides whether a relay may link at all, and the
+            // per-aspect answers what it would hand over. Answering no makes it invisible to every relay.
             StringBuilder flags = new StringBuilder();
             StringBuilder carries = new StringBuilder();
             PartVisInterface part = partAt(level, interfacePos);
@@ -147,9 +136,8 @@ public final class VisRelaySelfTest {
             ThaumicEnergistics.LOG.info("[vistest] no assembler in range, so the chain was not measured from one");
         }
 
-        // The measurement that answers the question: the same call the machine makes, from each assembler,
-        // with simulate=true so nothing is drained.
-        // Every primal is asked: a chain meters per aspect, and a node holds only what it was fed.
+        // The measurement that answers the question: the same call the machine makes, with simulate=true so
+        // nothing drains. Every primal is asked, since a node holds only what it was fed.
         for (BlockPos assemblerPos : assemblers) {
             boolean reach = TcAura.relayWithinReach(level, assemblerPos);
             StringBuilder draws = new StringBuilder();

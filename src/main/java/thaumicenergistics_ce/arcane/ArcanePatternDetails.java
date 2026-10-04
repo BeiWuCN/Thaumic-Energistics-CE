@@ -45,8 +45,7 @@ public final class ArcanePatternDetails implements IPatternDetails {
 
     /**
      * As {@link #of}, but reports why a pattern was refused: otherwise it is simply absent from
-     * {@link BlockEntityArcaneAssembler#getAvailablePatterns()}, which looks the same as a pattern
-     * not recognised after a reload.
+     * {@link BlockEntityArcaneAssembler#getAvailablePatterns()}, which looks the same as a reload failure.
      *
      * @param refusal when non-null, receives one short reason if the pattern is refused
      */
@@ -153,10 +152,7 @@ public final class ArcanePatternDetails implements IPatternDetails {
 
     /**
      * An input satisfied by any one of a set of item keys, the first being the one the AE2 view shows.
-     * <ul>
-     *   <li>More than one key is what an ore dictionary entry means: any member of the tag will do.
-     *   <li>AE2 matches a pushed stack with {@link #isValid} and sends from {@link #getPossibleInputs()}.
-     * </ul>
+     * More than one key is what an ore dictionary entry means: any member of the tag will do.
      */
     private record ItemChoicesInput(List<GenericStack> choices) implements IInput {
 

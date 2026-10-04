@@ -21,14 +21,10 @@ import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProviderConnection;
 
 /**
  * The Essentia Provider Connection: the receiving end of a wireless essentia link.
- *
  * <ul>
  *   <li>{@code facing} points the plug at the surface it is mounted on; the blockstate in this mod's
- *       assets declares all six directions against it, so the property has to exist and be named
- *       {@code facing} or the model is not drawn at all. {@code connected} is whether a link exists,
- *       and draws the lit ring.
- *   <li>Mounts on any surface, including up and down, so it uses the full six-direction property where the
- *       other machines use the horizontal one: a receiver's purpose is to be somewhere awkward.
+ *       assets declares all six directions against it, so both the property and its name are load-bearing.
+ *   <li>{@code connected} is whether a link exists, and it mounts on any surface, up and down included.
  * </ul>
  */
 public class BlockEssentiaProviderConnection extends ThEBaseEntityBlock {
@@ -59,13 +55,8 @@ public class BlockEssentiaProviderConnection extends ThEBaseEntityBlock {
     }
 
     /**
-     * Points the plug into the surface it was placed against.
-     *
-     * <ul>
-     *   <li>The model is built facing north, so {@code FACING} must be the direction the plug points
-     *       <em>away</em> from the block it is mounted on: the clicked face, not where the player stands.
-     *   <li>Getting this backwards would put every receiver inside the wall.
-     * </ul>
+     * Points the plug into the surface it was placed against: the model is built facing north, so
+     * {@code FACING} is the clicked face, not where the player stands.
      */
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {

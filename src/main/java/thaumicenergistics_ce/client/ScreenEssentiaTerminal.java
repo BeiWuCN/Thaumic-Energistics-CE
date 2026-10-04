@@ -20,14 +20,11 @@ import thaumicenergistics_ce.network.EssentiaFillPayload;
 /**
  * The Essentia Terminal's screen: AE2's terminal wholesale, plus two gestures of its own.
  * <ul>
- *   <li>Everything visible is AE2's and driven by the same menu; the gestures exist because essentia does
- *       not travel as an item and AE2 has no "move what I am holding" operation.
- *   <li>Both need a jar or a phial: <b>right-click</b> with a filled one empties it into the network,
- *       <b>left-click</b> an entry with an empty one draws that aspect out.
- *   <li><b>Shift-right-click</b> a container in a player slot empties it where it lies.
- *   <li>A held container is never inserted - AE2's entry click means <em>insert what the cursor holds</em>,
- *       which would pull a phial out of the stack. {@link #slotClicked} covers the drag path.
- * </ul> */
+ *   <li>Right-click with a filled jar or phial empties it into the network, left-click an entry with
+ *       an empty one draws that aspect out, shift-right-click empties a container where it lies.
+ *   <li>A held container is never inserted: AE2's entry click means <em>insert the cursor</em>.
+ * </ul>
+ */
 public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal> {
 
     /** Diagnostic tag: one line per container click, never per tick. */

@@ -13,9 +13,7 @@ import thaumicenergistics_ce.arcane.ThEArcanePattern;
 
 /**
  * The craft an assembler is running: what it makes, what it still owes, and why it is waiting.
- * <p>
- * Split out of {@link BlockEntityArcaneAssembler} so the running craft's state and its save format sit
- * together. The assembler keeps the behaviour; this keeps the numbers.
+ * Split out of {@link BlockEntityArcaneAssembler} so the state and its save format sit together.
  */
 final class AssemblerCraftState {
 

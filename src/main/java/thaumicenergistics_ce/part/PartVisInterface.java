@@ -25,17 +25,9 @@ import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 /**
  * The Vis Interface: lets Thaumaturge machines draw vis out of the ME network's aura.
  * <ul>
- *   <li>An {@link IVisRelaySource} for the block the cable is on, so a machine beside it asks here
- *       instead of the aura; what it hands over is paid out of the network's energy. Thaumaturge
- *       finds sources through a block capability, which {@code TcAura} registers once
- *       for the whole part class: a part is not a block entity and cannot be registered by position.
- *   <li>An offer is the smaller of two answers: which aspects may be sold, from the energized node
- *       on the relay chain this part reaches, and how many centivis the energy service can afford.
- *   <li>Extends {@code P2PTunnelPart} for the model and frequency handling only; one end beside a
- *       machine works with no second end anywhere.
- *   <li>Never asks a relay chain for vis itself. A relay resolves to whichever source is nearest,
- *       and a source draining the network it sits on is a loop Thaumaturge's contract forbids; the
- *       vis here is made out of AE instead, against the chain's aspect list.
+ *   <li>An {@link IVisRelaySource} for the block the cable is on: an offer is the smaller of the aspects
+ *       the reached node may sell and the centivis the energy service can afford.
+ *   <li>Never asks a chain for vis itself - that loop is forbidden - so the vis is made out of AE instead.
  * </ul>
  */
 public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements IVisRelaySource {
@@ -131,13 +123,8 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         return getMainNode().isActive();
     }
 
-    /** Whether relays may link to and drain this part.
-     *
-     * <p>This is {@code false} whenever the chain the part can reach ends at the part itself, and that
-     * is deliberate: relays link to the nearest source, this part is one, and a relay linked to it
-     * would have no node left to read an aspect list from. Reporting {@code false} sends the relay
-     * back to the node beside it, after which this part reports {@code true} and stays reachable
-     * through that relay - a chain of one source that is not this one. */
+    /** Whether relays may link to and drain this part. {@code false} when the reachable chain ends here, so
+     * the relay is sent back to the node beside it: one linked to this source would have no aspect list. */
     @Override
     public boolean canSupply() {
         return isActive() && permit() != null;
@@ -219,10 +206,7 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
     }
 
     /** Where the node this part sells against sits, kept for {@link #UPSTREAM_POLL_INTERVAL} ticks.
-     *
-     * <p>{@code null} when the chain this end can reach ends somewhere else. A chain ending at an
-     * addon source that is not a node has no aspect list to sell against, so that is no permit
-     * either - including when that source is this part. */
+     * {@code null} when the reachable chain ends elsewhere, even at this very part: no aspect list there. */
     private @Nullable BlockPos permit() {
         if (!(visLevel() instanceof ServerLevel server)) {
             return null;

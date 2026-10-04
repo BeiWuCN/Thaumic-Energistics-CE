@@ -21,12 +21,12 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Thaumaturge's aura, vis relay chain and node network.
+ * Thaumaturge's aura, vis relay chains and node network.
  *
- * <p>The relay contract was rewritten in 0.4.6: the reservation API this mod used to register against
- * was deleted, the relay became pull-based, and {@code resolveAddonSource} disappeared. Because the
- * chain is now resolved lazily by the relay itself, nothing here hands out a relay or a node object -
- * callers get positions and answers, so a change to how a chain is walked stays inside this class.
+ * <ul>
+ *   <li>0.4.6 made the relay pull-based and deleted the reservation API and {@code resolveAddonSource}.
+ *   <li>Callers never receive relay or node objects, so walking a chain stays inside this class.
+ * </ul>
  */
 public final class TcAura {
     private TcAura() {}

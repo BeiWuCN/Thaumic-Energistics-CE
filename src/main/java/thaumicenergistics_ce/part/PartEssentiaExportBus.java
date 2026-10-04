@@ -28,7 +28,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
@@ -36,14 +35,10 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
  * The Essentia Export Bus: takes essentia out of the ME network and puts it into the container it faces.
- *
  * <ul>
- * <li>The mirror of {@link PartEssentiaImportBus} - an AE2 {@code IOBusPart} whose config list is
- * filtered to essentia, so it exports exactly what the config list names.</li>
- * <li>Uses Thaumaturge's {@link EssentiaCapabilities#STORAGE} rather than the reference build's
- * reflection, so any block publishing essentia storage works as a target.</li>
- * <li>The step order keeps essentia from being destroyed: take from the network, give to the container,
- * put back what it refused. Asking the container what it wants first would need it to promise.</li>
+ * <li>The mirror of {@link PartEssentiaImportBus}: an AE2 {@code IOBusPart} whose config list is essentia.
+ * <li>Uses Thaumaturge's {@link EssentiaCapabilities#STORAGE}, so any block publishing it works as a target.
+ * <li>Order keeps essentia from being destroyed: take from the network, give, put back what was refused.
  * </ul>
  */
 public class PartEssentiaExportBus extends IOBusPart implements KeyTypeSelectionHost {

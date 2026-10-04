@@ -162,8 +162,7 @@ public final class EssentiaFillHelper {
     /**
      * Empties an essentia container into the network. Simulated first: a stack of jars shares one
      * contents tag, so the whole stack goes in as one amount and a refusal anywhere moves nothing.
-     * @return {@code null} when the stack is not a container the terminal handles, so the caller
-     *     falls back to its own handling; otherwise the stack to put in the container's place
+     * @return the stack to put in the container's place, or {@code null} if it is not a container
      */
     public static @Nullable ItemStack emptyIntoNetwork(
             MEStorage storage,

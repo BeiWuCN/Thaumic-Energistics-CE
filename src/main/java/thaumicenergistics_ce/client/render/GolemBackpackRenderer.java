@@ -27,10 +27,9 @@ import thaumicenergistics_ce.golem.BackpackSkins;
 /**
  * Draws every visible backpack once per frame, from the world stage rather than the golem's renderer.
  * <ul>
- * <li>No hook into that frame: Thaumaturge's golem renderer is not the living kind NeoForge can add a layer to.</li>
- * <li>So the pack is drawn beside the golem, which is why {@link #PACK_HEIGHT} and
- *     {@link #PACK_DEPTH} are placed by eye.</li>
- * <li>Drawn at {@code AFTER_ENTITIES}, before anything transparent; the batch is ended here, not left open.</li>
+ *   <li>No hook into that frame: Thaumaturge's golem renderer is not the living kind NeoForge can add
+ *       a layer to, which is why {@link #PACK_HEIGHT} and {@link #PACK_DEPTH} are placed by eye.
+ *   <li>Drawn at {@code AFTER_ENTITIES}; the batch is ended here, not left open.
  * </ul>
  */
 @EventBusSubscriber(modid = ThEIds.MODID, value = Dist.CLIENT)

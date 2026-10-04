@@ -5,7 +5,6 @@ import appeng.api.upgrades.IUpgradeableObject;
 import appeng.core.definitions.AEItems;
 import appeng.menu.SlotSemantics;
 import appeng.menu.implementations.UpgradeableMenu;
-import appeng.menu.slot.AppEngSlot;
 import appeng.menu.slot.FakeSlot;
 import appeng.util.ConfigInventory;
 import appeng.util.ConfigMenuInventory;

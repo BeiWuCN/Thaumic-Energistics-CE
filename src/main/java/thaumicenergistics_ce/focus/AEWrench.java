@@ -13,9 +13,9 @@ import net.minecraft.world.phys.BlockHitResult;
 /**
  * Everything in AE2 that just needs "a wrench was used here".
  * <ul>
- * <li>AE2 has one entry point, {@link WrenchHook}, and calls a stack a wrench purely by the {@code c:tools/wrench} tag.
+ * <li>AE2 has one entry point, {@link WrenchHook}; a stack is a wrench by the {@code c:tools/wrench} tag.
  * <li>So this swaps a real wrench in, asks AE2 to do the thing, and puts the player's item back.
- * <li>Server-only and always restored, because a client-side {@code setItemInHand} would desync what it predicts.
+ * <li>Server-only and always restored: a client-side {@code setItemInHand} would desync the prediction.
  * </ul>
  */
 public final class AEWrench {

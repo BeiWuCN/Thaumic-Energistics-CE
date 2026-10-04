@@ -99,8 +99,7 @@ public class EssentiaBusGhostIngredientHandler<T extends UpgradeableScreen<? ext
                 return;
             }
             // Sent to the server rather than written into the slot: AE2 config slots unwrap an item stack
-            // through AEItemKey and an essentia key is not an item, so the entry would vanish. See
-            // EssentiaBusConfigPayload.
+            // through AEItemKey and an essentia key is not an item, so the entry would vanish.
             ResourceLocation id = aspect.aspect().unwrapKey()
                     .map(key -> key.location())
                     .orElse(null);

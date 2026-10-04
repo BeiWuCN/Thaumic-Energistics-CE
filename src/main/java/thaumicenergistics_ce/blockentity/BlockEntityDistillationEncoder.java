@@ -36,12 +36,9 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 /**
  * The Distillation Encoder: writes "this item distils into that essentia" as an ME processing pattern.
  * <ul>
- *   <li>A distillation pattern is not a recipe Thaumaturge can look up, so this block is where the
- *       player's statement gets written down.
- *   <li>Only aspects the source item actually holds, in the amounts it holds them, are offered: a
- *       pattern claiming otherwise would be accepted by AE2 and would quietly invent essentia.
- *   <li>The pattern is tagged with the research it belongs to, so a machine or a terminal can refuse
- *       it for a player who has not learned distillation.
+ *   <li>A distillation pattern is no recipe Thaumaturge can look up, so the block writes the statement down.
+ *   <li>Only aspects the source item actually holds are offered, and the pattern is tagged with its
+ *       research, so a terminal can refuse it for a player who has not learned distillation.
  * </ul>
  */
 public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
@@ -260,7 +257,7 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
     // ------------------------------------------------------------------
 
     @Override
-    public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         // ContainerHelper, not createTag: a bare list has no slot index, so gaps are lost.
         ContainerHelper.saveAllItems(tag, inventory.getItems(), registries);
@@ -268,7 +265,7 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         if (tag.contains(ContainerHelper.TAG_ITEMS, Tag.TAG_LIST)) {
             // Every entry names its slot, so an empty source well stays empty.
@@ -281,9 +278,8 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
     }
 
     /**
-     * Reads the pre-fix form: a compact list of non-empty stacks with no slot recorded, so the well is
-     * worked out from the entry. A template that was itself a pattern looks identical to a deposit in
-     * that form, so such a world hands back one more pattern than was handed over.
+     * Reads the pre-fix form: a compact list of non-empty stacks with no slot recorded. A template that
+     * was itself a pattern looks identical to a deposit, so such a world gains one pattern on load.
      */
     private void loadLegacyInventory(ListTag list, HolderLookup.Provider registries) {
         // Only non-empty entries take a slot and entries <= slots, so a free slot always exists.

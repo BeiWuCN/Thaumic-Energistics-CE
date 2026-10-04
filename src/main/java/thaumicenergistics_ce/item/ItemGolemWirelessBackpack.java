@@ -14,10 +14,9 @@ import net.minecraft.world.item.TooltipFlag;
 /**
  * A wireless link to an ME network, in a form a golem can carry.
  * <ul>
- * <li>It is AE2's own link: a {@link GlobalPos} in {@link AEComponents#WIRELESS_LINK_TARGET}, written by a memory card.
- * <li>{@link #LINKABLE_HANDLER} is what the memory card asks for; registering it is the whole linking side.
- * <li>Equipping is a click on the golem ({@code GolemBackpackHandler}); it then tips in what no seal asked for.
- * <li>Not Thaumaturge's accessory registry: {@code ItemGolemAccessory} is final, so the link lives in golem data.
+ * <li>It is AE2's own link: a {@link GlobalPos} in {@link AEComponents#WIRELESS_LINK_TARGET}.
+ * <li>{@link #LINKABLE_HANDLER} is what the memory card asks for; equipping is a click on the golem.
+ * <li>Not Thaumaturge's accessory registry: {@code ItemGolemAccessory} is final, so the link lives in data.
  * </ul>
  */
 public class ItemGolemWirelessBackpack extends Item {

@@ -15,13 +15,7 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
  * Lets the Arcane Crafting Terminal pay an arcane craft's untyped vis cost out of the network.
- * <ul>
- * <li>Without it nothing crafts: {@code baseVis} comes from a workbench block's aura, which a cable has none of.
- * <li>Registered directly: Thaumaturge posts the documented event from its own constructor, before this mod's.
- * <li>{@link #register()} runs exactly once, or two aura sources both promise the same vis.
- * <li>Its entry point lives in Thaumaturge's {@code content} package, not its {@code api} one, so
- * {@code TcWorkbench} reaches it rather than this class naming it.
- * </ul>
+ * Without it nothing crafts: {@code baseVis} comes from a workbench's aura, which a cable has none of.
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class TerminalWorkbenchVis {

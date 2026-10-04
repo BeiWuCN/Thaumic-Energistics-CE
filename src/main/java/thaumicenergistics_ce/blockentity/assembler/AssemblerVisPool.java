@@ -4,11 +4,7 @@ import java.util.Arrays;
 import net.minecraft.nbt.CompoundTag;
 
 /** The vis this machine banks: one scalar that crafts are paid from, and the per-primal split the six
- * bars read. The split is never a second source of truth - prices and stall tests read the pool, and
- * {@link #reconcileAspectVis()} is what keeps the two telling the same story.
- *
- * <p>A collaborator of {@link BlockEntityArcaneAssembler} rather than a part of it: the assembler had
- * grown to carry every one of its own subsystems, and this is one that can be reasoned about alone. */
+ * bars read. Prices read the pool; {@link #reconcileAspectVis()} keeps the two telling one story. */
 final class AssemblerVisPool {
 
     /** Idle vis ceiling; {@link #visTarget} raises it to a craft's price, the aura bounds it. */
@@ -70,10 +66,8 @@ final class AssemblerVisPool {
         if (amount <= 0) {
             return;
         }
-        // Lowest holding first, one vis at a time. Taking the remainder by index instead would hand the
-        // odd units to the same low aspects on every call, and the aura arrives in drips of a few vis --
-        // so the last aspects would never be topped up, and the six bars would sit at two heights. This
-        // also levels a split the relay path left uneven, which is the whole point of banking evenly.
+        // Lowest holding first, one vis at a time. Taking the remainder by index would hand the odd
+        // units to the same low aspects every call, so the last aspects would never be topped up.
         for (int i = 0; i < amount; i++) {
             aspectVis[lowestAspect()]++;
         }

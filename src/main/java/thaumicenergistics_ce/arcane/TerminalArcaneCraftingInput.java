@@ -13,18 +13,10 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
  * The Arcane Crafting Terminal's grid, presented to Thaumaturge as a workbench's input.
- *
  * <ul>
  *   <li><b>The grid stays nine cells, empty ones included.</b> Vanilla's {@code CraftingInput.of} shrinks
- *       the list to the rectangle the non-empty cells occupy, so a grid holding one item in its middle
- *       arrives as a one-element list. Thaumaturge reads nine cells whatever is in it - its shapeless
- *       matcher walks {@code items().subList(0, 9)}, its pattern matcher compares {@code width()} and
- *       {@code height()} with the recipe's - so a shrunk grid throws there, out of a menu constructor
- *       while a right-click is handled, and the terminal does not open.</li>
- *   <li>Adds what a plain grid lacks: the crafting player and the machine's own contributions, the wand
- *       it charges and the crystals it supplies - an arcane recipe is not satisfied by items alone.</li>
- *   <li>The grid is rebuilt from the part's inventory each construction, not held: a terminal's grid
- *       changes constantly and a cached view would be stale the moment anything moved.</li>
+ *       to the non-empty rectangle, which throws out of Thaumaturge's menu constructor.
+ *   <li>Adds what a plain grid lacks: the crafting player, and the wand and crystals a machine supplies.
  * </ul>
  */
 public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
@@ -46,9 +38,8 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
     private final @Nullable PartArcaneCraftingTerminal part;
 
     /**
-     * Collects the crystal payment from the terminal's own crystal slots, never from the grid: a crystal in
-     * the grid also counts towards {@code ingredientCount}, which makes every recipe with a crystal cost
-     * unmatchable. The grid is the recipe's shape, the crystals are payment for it.
+     * Collects the crystal payment from the terminal's own crystal slots, never from the grid: a crystal
+     * in the grid also counts towards {@code ingredientCount}, which makes such recipes unmatchable.
      */
     private static AspectList crystalsIn(List<ItemStack> slots) {
         AspectList found = AspectList.EMPTY;
@@ -89,9 +80,8 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
     }
 
     /**
-     * The part this input came from, or {@code null} when built for something else.
-     * The vis source needs it: Thaumaturge hands it this input alone, and a virtual workbench context has no
-     * position to look the aura up by.
+     * The part this input came from, or {@code null} when built for something else. The vis source needs
+     * it: Thaumaturge hands it this input alone, and a virtual workbench has no position to look up.
      */
     public @Nullable PartArcaneCraftingTerminal part() {
         return part;

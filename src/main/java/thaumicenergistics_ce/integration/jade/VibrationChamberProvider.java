@@ -12,17 +12,11 @@ import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber.Bur
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
 
 /**
- * The Essentia Vibration Chamber's Jade tooltip: whether there is a network to burn for, and what the
- * machine does with it.
- *
+ * The Essentia Vibration Chamber's Jade tooltip: whether there is a network to burn for, and what it does.
  * <ul>
- * <li><b>Drawn from the client's copy of the machine, not server data</b>, because Jade collects a
- * provider's server data once, when the tooltip is first drawn: lines built from it sit still while
- * the tooltip stays open, so the owner removed the machine's only consumer and it went on saying
- * "Device Online". The block entity streams state, burn rate and fuel to the client on change (see its
- * {@code writeToStream}), so these lines follow the machine instead.</li>
- * <li>Deliberately not shown: the burn's countdown and slot energy, because both move every tick or
- * visit. The machine's own screen carries them live through its menu.</li>
+ * <li><b>Drawn from the client's copy of the machine, not server data</b>: Jade collects a provider's server
+ * data once, when the tooltip is first drawn, so its lines would sit still while the tooltip stays open.
+ * <li>Deliberately not shown: the burn's countdown and slot energy, because both move every tick or visit.
  * </ul>
  */
 public class VibrationChamberProvider implements IBlockComponentProvider {

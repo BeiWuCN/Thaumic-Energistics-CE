@@ -25,8 +25,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * One aspect as an ME network sees it: immutable, interned by registry id.
  * <ul>
- * <li>Identity by id makes a key off the network equal one read back from a cell; otherwise a cell holds
- * two of everything.
+ * <li>Identity by id makes a key off the network equal one read back from a cell; else two of everything.
  * <li>Only the id is held: name, colour and discovery state resolve on demand, since keys are built
  * where there is no level (NBT, packet, crafting planner).
  * </ul>
@@ -37,9 +36,8 @@ public final class AEssentiaKey extends AEKey {
     private static final Map<ResourceLocation, AEssentiaKey> CACHE = new ConcurrentHashMap<>();
 
     /**
-     * Decoding goes through {@link #of}, never the constructor: AE2 maps keys on
-     * {@link #getPrimaryKey()} by reference, so a fresh instance is one AE2 cannot find and {@code get}
-     * answers zero, showing only after a restart when the cell is reloaded from NBT.
+     * Decoding goes through {@link #of}, never the constructor: AE2 maps keys on {@link #getPrimaryKey()}
+     * by reference, so a fresh instance answers zero and only shows after a restart from NBT.
      */
     public static final MapCodec<AEssentiaKey> MAP_CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
             ResourceLocation.CODEC.fieldOf("id").forGetter(AEssentiaKey::getId)
@@ -103,8 +101,7 @@ public final class AEssentiaKey extends AEKey {
 
     /**
      * The key as a standalone tag. Written through {@link AEKey#CODEC}: this class's own map codec omits
-     * the {@code #t} type field {@link AEKey#MAP_CODEC} adds, and AE2's reader resolves such a tag to
-     * missing content.
+     * the {@code #t} type field, and AE2's reader resolves such a tag to missing content.
      */
     @Override
     public CompoundTag toTag(HolderLookup.Provider registries) {

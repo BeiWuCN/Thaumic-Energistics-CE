@@ -11,12 +11,9 @@ import org.jspecify.annotations.Nullable;
 /**
  * A machine's block item, carrying the two tooltip lines the rest of this mod's machines have.
  * <ul>
- * <li>Exists because {@code registerSimpleBlockItem} makes a plain {@link BlockItem}, which has no
- * hook for a description.
- * <li>Description and placement hint are separate lines: one says what the block is for, the other
- * where to put it.
- * <li>Keys are passed in, so one item covers every machine; either may be {@code null} for a plain
- * tooltip.
+ * <li>Exists because {@code registerSimpleBlockItem} makes a plain {@link BlockItem}, with no hook for one.
+ * <li>Description and placement hint are separate lines: what the block is for, and where to put it.
+ * <li>Keys are passed in, so one item covers every machine; either may be {@code null} for a plain tooltip.
  * </ul>
  */
 public class ItemMachineBlock extends BlockItem {

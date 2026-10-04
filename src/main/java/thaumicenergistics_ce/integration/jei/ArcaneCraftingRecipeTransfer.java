@@ -2,7 +2,6 @@ package thaumicenergistics_ce.integration.jei;
 
 import appeng.core.network.serverbound.FillCraftingGridFromRecipePacket;
 import appeng.menu.SlotSemantics;
-import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import java.util.List;
 import java.util.Optional;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -27,13 +26,9 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 /**
  * Lets JEI's transfer button fill the Arcane Crafting Terminal's grid from an arcane workbench recipe.
  * <ul>
- *   <li>Handles Thaumaturge's own arcane category, so the button shows where players look. Slots come
- *       from {@link SlotSemantics}, never counted constants, since this menu inherits a terminal's
- *       layout. The six crystal slots stay the player's.
- *   <li>Filling is AE2's: {@link FillCraftingGridFromRecipePacket} takes nine ingredient templates and
- *       pulls what the player lacks from the ME network, which no hand-written fill could reach.
- *   <li>No recipe id is passed deliberately: an arcane recipe is not in the vanilla recipe manager,
- *       so an id would resolve to nothing and fill the grid with empty ingredients.
+ *   <li>Handles Thaumaturge's own category, so the button shows where players look; slots come from
+ *       {@link SlotSemantics}, and the six crystal slots stay the player's.
+ *   <li>No recipe id is passed deliberately: an arcane recipe is not in the vanilla recipe manager.
  * </ul>
  */
 public class ArcaneCraftingRecipeTransfer

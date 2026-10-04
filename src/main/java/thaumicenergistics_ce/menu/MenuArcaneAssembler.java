@@ -18,7 +18,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.gui.GuiLayout;
 import thaumicenergistics_ce.init.ModItems;
@@ -235,11 +234,8 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
             });
         }
 
-        // 6. The craft preview's product, while a craft is running.
-        // Mirrored through a slot: the block sends no item update tag, so this is the product's only
-        // path to the client, and both sides use `machine` - the product is not derivable there.
-        // Added last, as quickMoveStack routes by IDX_GEAR_START. PreviewSlot, at +1 (the well's interior
-        // runs 113..134 by 96..117), so the well does not highlight under the cursor.
+        // 6. The craft preview's product, while a craft is running. Added last, as quickMoveStack routes by
+        // IDX_GEAR_START. A slot, as the block sends no update tag; +1, so the well does not highlight.
         this.targetSlot = addSlot(new PreviewSlot(
                 machine,
                 BlockEntityArcaneAssembler.TARGET_SLOT,
@@ -431,9 +427,8 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
     }
 
     /**
-     * How much one bar column holds, in art order: 0 is air, 5 is earth. Whichever channel has more, as
-     * for the craft progress: the block entity is the machine's own state and the data slot the server's
-     * copy of it, and a channel that has not caught up can only be behind.
+     * How much one bar column holds, in art order: 0 is air, 5 is earth. Whichever channel has more, since
+     * the block entity is the machine's own state and a data slot that has not caught up can only be behind.
      */
     public int getBarVis(int column) {
         if (column < 0 || column >= BAR_ASPECTS.length) {

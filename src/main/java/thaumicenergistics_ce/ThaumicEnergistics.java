@@ -60,7 +60,6 @@ import thaumicenergistics_ce.selftest.VisRelaySelfTest;
 
 /**
  * Thaumic Energistics - bridges Thaumaturge essentia with Applied Energistics 2 ME networks.
- *
  * <ul>
  *   <li>Target: Minecraft 1.21.1, NeoForge 21.1.250, Thaumaturge, AE2 19.2.x.</li>
  *   <li>Arcane autocrafting: the Knowledge Inscriber stores an ingredient grid as an AE2 pattern in a
@@ -93,8 +92,7 @@ public final class ThaumicEnergistics {
 
     /**
      * Registers every part model. The {@code @PartModels} annotation is only a marker in AE2 19, and a
-     * location the renderer cannot find is a crash the moment the part is placed - so each part names
-     * its own set and this just walks them. Adding a part is one line below.
+     * location the renderer cannot find is a crash the moment the part is placed, so this walks them.
      */
     private static void registerPartModels() {
         List<ResourceLocation> models = new ArrayList<>();
@@ -110,9 +108,8 @@ public final class ThaumicEnergistics {
     }
 
     /**
-     * Wires the diagnostic self-tests to the game bus; each self-guards on its own switch. Need
-     * {@code build.gradle} passing the {@code THAUMICENERGISTICS_*} vars to the game JVM: JVM args set
-     * outside that block are dropped silently, so the tests report nothing and look like a pass.
+     * Wires the diagnostic self-tests to the game bus; each self-guards on its own switch.
+     * {@code build.gradle} must pass the {@code THAUMICENERGISTICS_*} vars to the game JVM, else none run.
      */
     private static void registerSelfTests() {
         NeoForge.EVENT_BUS.addListener(ThaumicEnergistics::recipeSelfTest);
@@ -311,11 +308,6 @@ public final class ThaumicEnergistics {
     /**
      * Exposes the Vis Interface part to Thaumaturge's relay network. Parts are not block entities, so
      * they need AE2's own event: the lookup is answered through the cable bus the part sits on.
-     *
-     * <p>Thaumaturge 0.4.6 made this a block capability, replacing a registry that sources were added
-     * to and removed from by position. A source is now whatever the capability answers with, which
-     * means the part carries no registration state and nothing has to be kept in step with the world.
-     * The capability constant is named only in {@code TcAura}, so a rename upstream lands there.
      */
     private void registerPartCapabilities(RegisterPartCapabilitiesEvent event) {
         TcAura.registerVisSource(event, PartVisInterface.class);
@@ -337,9 +329,7 @@ public final class ThaumicEnergistics {
 
     /**
      * Adds the essentia key type to AE2's registry. Not from the mod constructor: an {@code AEKeyType}
-     * is a registry object, so registering before AE2 builds its registry throws
-     * {@code AE2 isn't initialized yet}. The registry key is compared first because this event fires
-     * once per registry in the game.
+     * is a registry object, so registering before AE2 builds its registry throws.
      */
     private void registerKeyTypes(RegisterEvent event) {
         if (event.getRegistryKey() != AEKeyType.REGISTRY_KEY) {

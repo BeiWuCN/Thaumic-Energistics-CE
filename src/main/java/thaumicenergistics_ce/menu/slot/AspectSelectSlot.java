@@ -8,13 +8,11 @@ import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 
 /**
  * One well in the Distillation Encoder's aspect row.
- *
  * <ul>
- * <li>Nothing may be placed or taken: the drawing represents an aspect and a click means "use this one",
- * so {@link MenuDistillationEncoder#clicked} intercepts these slots before vanilla could pull a phantom
- * item out.
- * <li>The slot index is the aspect's position in the row, not an inventory index: slot {@code i} is the
- * i-th aspect the source item offers, and {@code -1} marks the picked-aspect display.</ul>
+ *   <li>Nothing may be placed or taken: a click means "use this one", so the menu intercepts it first.
+ *   <li>The slot index is the aspect's position in the row: slot {@code i} is the i-th aspect the
+ *       source item offers, and {@code -1} marks the picked-aspect display.
+ * </ul>
  */
 public class AspectSelectSlot extends Slot {
 

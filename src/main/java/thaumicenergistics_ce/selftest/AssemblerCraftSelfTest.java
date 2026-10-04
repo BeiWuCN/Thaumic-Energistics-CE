@@ -28,13 +28,11 @@ import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 
 /**
- * Checks the Arcane Assembler's craft bookkeeping against the arcane recipe list and a save/load
- * round trip; off unless {@code THAUMICENERGISTICS_ASSEMBLER_SELFTEST=true}.
+ * Checks the Arcane Assembler's craft bookkeeping against the arcane recipe list and a save/load round trip;
+ * off unless {@code THAUMICENERGISTICS_ASSEMBLER_SELFTEST=true}.
  * <ul>
  *   <li>Puts nothing into the world: the machines it builds are never added to a level.
- *   <li>Checks that the machine can bank the priciest recipe in the pack (1728 vis, five times the
- *       buffer's target - a machine that cannot pay holds the job for ever and AE2's CPU skips it),
- *       and that a craft interrupted by a save comes back <em>able to finish</em>.
+ *   <li>Checks it can bank the priciest recipe (1728 vis) and that a saved craft resumes able to finish.
  * </ul>
  */
 public final class AssemblerCraftSelfTest {
@@ -182,9 +180,8 @@ public final class AssemblerCraftSelfTest {
     }
 
     /**
-     * Every key the assembler's Jade tooltip can ask for, fully qualified. The labels cannot come from the
-     * machine: {@code ArcaneAssemblerProvider} is in an optional-Jade package, and this self-test runs
-     * whether or not Jade is installed.
+     * Every key the assembler's Jade tooltip can ask for, fully qualified: the labels cannot come from the
+     * machine, since {@code ArcaneAssemblerProvider} is in an optional-Jade package and may not be present.
      */
     private static List<String> tooltipKeys() {
         List<String> keys = new ArrayList<>(BlockEntityArcaneAssembler.tooltipReasonKeys());
@@ -297,13 +294,8 @@ public final class AssemblerCraftSelfTest {
     }
 
     /**
-     * Encodes, saves, reloads and re-recognises every arcane recipe in the pack, and counts what is lost.
-     * <ul>
-     *   <li>Counted, not noticed: one pattern surviving says nothing about the next, and each failure removes
-     *       a single recipe while the rest keep working.
-     *   <li>Counted per stage because the stages point at different files - lost between the core and the
-     *       reload is an encoding fault, lost at recognition an adapter fault.
-     * </ul>
+     * Encodes, saves, reloads and re-recognises every arcane recipe in the pack, and counts what is lost:
+     * a lossy step shows up as a count, since one pattern surviving says nothing about the next.
      */
     private static void sweepEveryRecipe(ServerLevel level) {
         int recipes = 0;

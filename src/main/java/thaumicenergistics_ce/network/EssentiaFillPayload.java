@@ -14,10 +14,9 @@ import thaumicenergistics_ce.menu.slot.ContainerSlot;
 /**
  * "Draw this aspect out of the network into my container", sent by the Essentia Terminal's left-click.
  * <ul>
- * <li>{@code aspectId} travels by id, not as a key: the client is sure of the id it clicked, and a
- * key it built wrong could not be matched against server storage.
- * <li>{@code where} names the container (see {@link ContainerSlot}); {@code stack} is only a hint -
- * the server fills the stack it finds there, not the one sent.
+ *   <li>{@code aspectId} travels by id, not as a key: a key the client built wrong could not be
+ *       matched against server storage.
+ *   <li>{@code where} names the container (see {@link ContainerSlot}); {@code stack} is only a hint.
  * </ul>
  */
 public record EssentiaFillPayload(int containerId, ResourceLocation aspectId, int where, ItemStack stack)

@@ -24,10 +24,8 @@ import thaumicenergistics_ce.infusion.InfusionRisk;
 /**
  * The Infusion Monitor's Jade tooltip: whether it can see, and what it sees.
  * <ul>
- *   <li>The server reads the altar and writes the answers into the data tag; stability is server-side
- *       state that moves between block updates, so the client cannot compute it.
- *   <li>The network line comes first and is always there: a monitor off the network is watching
- *       nothing, however healthy the altar looks.
+ *   <li>The server reads the altar and writes the answers into the data tag; stability is server-side.
+ *   <li>The network line comes first and is always there: a monitor off the network watches nothing.
  *   <li>Risk is split as "4 (base 1 + altar 3)" so the player knows which half to fix.
  * </ul>
  */

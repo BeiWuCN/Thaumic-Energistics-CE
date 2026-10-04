@@ -1,7 +1,5 @@
 package thaumicenergistics_ce.menu;
 
-import appeng.api.crafting.PatternDetailsHelper;
-import appeng.core.definitions.AEItems;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.network.RegistryFriendlyByteBuf;

@@ -25,14 +25,11 @@ import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 import thaumicenergistics_ce.init.ModBlocks;
 
 /**
- * Round-trips the Distillation Encoder's slots through NBT and checks that no pattern moves into the source well.
+ * Round-trips the Distillation Encoder's slots through NBT: no pattern may reach the source well.
  * <ul>
- *   <li>Written after a silent bug that destroyed items: entries named no slot and the load read them in order,
- *       but the source well came first, so an empty source well shifted every pattern one well early - into a
- *       ghost slot the player cannot take from, where the next template written discarded it.</li>
- *   <li>Asserts on the stored format, not just a round trip: a lossy writer plus an agreeing loader passes a
- *       round trip on its own. Drives the states that made the bug invisible.</li>
- *   <li>Off unless {@code THAUMICENERGISTICS_ENCODER_SELFTEST=true}.</li>
+ *   <li>Written after a silent bug that destroyed items: entries named no slot and the load read them in
+ *       order, but the source well came first, so an empty source well shifted every pattern one well early.
+ *   <li>Off unless {@code THAUMICENERGISTICS_ENCODER_SELFTEST=true}; asserts on the stored format.
  * </ul>
  */
 public final class EncoderSelfTest {
@@ -75,12 +72,11 @@ public final class EncoderSelfTest {
         }
 
         BlockEntityDistillationEncoder encoder = newEncoder(level);
-        // The source well is left empty on purpose: it is the slot the old form could not record the absence of.
+        // The source well is left empty on purpose: the old form could not record its absence.
         encoder.getInventory().setItem(BlockEntityDistillationEncoder.SLOT_BLANK, newBlankPattern());
         encoder.getInventory().setItem(BlockEntityDistillationEncoder.SLOT_ENCODED, written);
 
-        CompoundTag tag = new CompoundTag();
-        encoder.saveAdditional(tag, level.registryAccess());
+        CompoundTag tag = encoder.saveCustomOnly(level.registryAccess());
         ListTag saved = tag.getList(ContainerHelper.TAG_ITEMS, Tag.TAG_COMPOUND);
         if (saved.size() != 2) {
             failures.add("the save holds " + saved.size() + " item entries for 2 non-empty wells");
@@ -115,7 +111,7 @@ public final class EncoderSelfTest {
     private static void checkAPatternDoesNotMoveIntoTheSourceWell(ServerLevel level, List<String> failures) {
         ItemStack sourceItem = firstDistillableItem(level);
         if (sourceItem == null) {
-            // Not a failure: with no known aspects there is no state to drive. Reported so the silence is a skip.
+            // Not a failure: with no known aspects there is no state to drive, so the silence is a skip.
             System.out.println("[encoder] no item with known aspects, so the encode path is unchecked");
             return;
         }
@@ -155,7 +151,7 @@ public final class EncoderSelfTest {
         expectWell(failures, "the written pattern", written, twice, BlockEntityDistillationEncoder.SLOT_ENCODED);
     }
 
-    /** The migration: a world saved in the old form must come back with its patterns in the pattern wells, not
+    /** The migration: a world saved in the old form must come back with its patterns in the pattern wells,
      * positionally. The old form is produced by {@code SimpleContainer.createTag} itself, not guessed at. */
     private static void checkTheOldFormComesBackToTheRightWells(ServerLevel level, List<String> failures) {
         ItemStack written = writtenPattern();
@@ -164,7 +160,7 @@ public final class EncoderSelfTest {
             return;
         }
 
-        // What the old save held in the state the owner described: both pattern wells full, source well empty.
+        // What the old save held: both pattern wells full, the source well empty.
         BlockEntityDistillationEncoder old = newEncoder(level);
         old.getInventory().setItem(BlockEntityDistillationEncoder.SLOT_BLANK, newBlankPattern());
         old.getInventory().setItem(BlockEntityDistillationEncoder.SLOT_ENCODED, written);
@@ -174,8 +170,8 @@ public final class EncoderSelfTest {
         expectWell(failures, "the blank pattern", newBlankPattern(), reloaded, BlockEntityDistillationEncoder.SLOT_BLANK);
         expectWell(failures, "the written pattern", written, reloaded, BlockEntityDistillationEncoder.SLOT_ENCODED);
 
-        // The world the bug had already moved: a pattern saved from the source well must come back in the encoded
-        // well, the one it can be taken from.
+        // The world the bug had already moved: a pattern saved from the source well must come back in the
+        // encoded well, the one it can be taken from.
         BlockEntityDistillationEncoder shifted = newEncoder(level);
         shifted.getInventory().setItem(BlockEntityDistillationEncoder.SLOT_SOURCE, written);
 
@@ -187,10 +183,9 @@ public final class EncoderSelfTest {
     /** Saves a machine's own tag and reads it back into a fresh one. */
     private static BlockEntityDistillationEncoder roundTrip(
             ServerLevel level, BlockEntityDistillationEncoder from) {
-        CompoundTag tag = new CompoundTag();
-        from.saveAdditional(tag, level.registryAccess());
+        CompoundTag tag = from.saveCustomOnly(level.registryAccess());
         BlockEntityDistillationEncoder reloaded = newEncoder(level);
-        reloaded.loadAdditional(tag, level.registryAccess());
+        reloaded.loadCustomOnly(tag, level.registryAccess());
         return reloaded;
     }
 
@@ -201,12 +196,12 @@ public final class EncoderSelfTest {
         // The old saveAdditional, verbatim: a bare list with no index on any entry.
         legacy.put("Inventory", from.getInventory().createTag(level.registryAccess()));
         BlockEntityDistillationEncoder reloaded = newEncoder(level);
-        reloaded.loadAdditional(legacy, level.registryAccess());
+        reloaded.loadCustomOnly(legacy, level.registryAccess());
         return reloaded;
     }
 
-    /** The heart of it: nothing that is a pattern may sit in the source well after a load. That well is a ghost
-     * slot - the player cannot take anything out and the next template written into it discards what is there. */
+    /** The heart of it: nothing that is a pattern may sit in the source well after a load. That well is a
+     * ghost slot - the player cannot take anything out and the next template discards what is there. */
     private static void expectNoPatternInTheSourceWell(
             BlockEntityDistillationEncoder encoder, List<String> failures) {
         ItemStack source = encoder.getInventory().getItem(BlockEntityDistillationEncoder.SLOT_SOURCE);
@@ -253,8 +248,8 @@ public final class EncoderSelfTest {
                 List.of(new GenericStack(in, 1)), List.of(new GenericStack(out, 1)));
     }
 
-    /** An item the aspect index has a composition for, or {@code null} when the few tried all have none: without
-     * one the machine offers nothing to distil, so the encode path cannot be driven. */
+    /** An item the aspect index has a composition for, or {@code null} when the few tried all have none:
+     * without one the machine offers nothing to distil, so the encode path cannot be driven. */
     private static @Nullable ItemStack firstDistillableItem(ServerLevel level) {
         var items = level.registryAccess().lookupOrThrow(Registries.ITEM);
         for (String id : new String[] {"minecraft:bone", "minecraft:stone", "minecraft:coal"}) {

@@ -6,7 +6,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.ThaumicEnergistics;
@@ -28,7 +27,7 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
     /** Read from the block entity: as a second literal it disagreed with the machine it draws. */
     private static final int VIS_BAR_MAX = BlockEntityArcaneAssembler.visBufferTarget();
 
-    /** A sixth of the shared {@link #VIS_BAR_MAX} pool: scaling against it would show six near-empty columns. */
+    /** A sixth of the shared {@link #VIS_BAR_MAX} pool: scaling against the pool would empty the bars. */
     private static final int VIS_BAR_MAX_PER_ASPECT =
             Math.max(1, VIS_BAR_MAX / GuiLayout.PRIMAL_COLUMNS);
 

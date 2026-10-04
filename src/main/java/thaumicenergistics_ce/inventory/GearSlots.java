@@ -9,9 +9,8 @@ import net.minecraft.world.item.ItemStack;
 /**
  * What may go in the Arcane Assembler's four gear slots.
  * <ul>
- *   <li>Shared by the machine's container and by the menu's slots. Two copies of the rule is how the
- *       menu's slots came to accept anything while the container still refused, since only
- *       {@code mayPlace} sees the player's click.
+ *   <li>Shared by the machine's container and the menu's slots: two copies of the rule is how the menu
+ *       came to accept anything while the container refused: only {@code mayPlace} sees the click.
  *   <li>Ordering mirrors slots 0..3 as head, chest, legs, feet.
  * </ul>
  */
@@ -33,9 +32,8 @@ public final class GearSlots {
     }
 
     /**
-     * Whether {@code stack} belongs in a gear slot at all.
-     * <p>Deliberately looser than {@link #accepts}: the caller of shift-click routing does not yet know
-     * which of the four slots is free, so anything that passes this but no single slot is not gear.
+     * Whether {@code stack} belongs in a gear slot at all. Deliberately looser than {@link #accepts}: the
+     * caller of shift-click routing does not yet know which of the four slots is free.
      */
     public static boolean isGear(ItemStack stack) {
         return !stack.isEmpty()
@@ -43,12 +41,8 @@ public final class GearSlots {
     }
 
     /**
-     * Whether {@code stack} may go in the gear slot {@code index}.
-     * <p>One rule, not two: the item must be vis-discount or warping gear, and it must declare the
-     * equipment slot this gear slot stands for. Waving discount gear through without the slot check put a
-     * helmet in the boots slot.
-     * <p>An item declaring no equipment slot is refused, not accepted everywhere: "accept anywhere" is
-     * how the slot check went missing.
+     * Whether {@code stack} may go in the gear slot {@code index}: it must be vis-discount or warping
+     * gear, and must declare the equipment slot this one stands for. No declared slot is a refusal.
      */
     public static boolean accepts(int index, ItemStack stack) {
         if (stack.isEmpty()) {

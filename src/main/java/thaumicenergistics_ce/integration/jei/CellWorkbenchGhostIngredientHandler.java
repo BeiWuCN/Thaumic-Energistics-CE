@@ -4,7 +4,6 @@ import appeng.api.stacks.GenericStack;
 import appeng.menu.slot.AppEngSlot;
 import appeng.util.ConfigMenuInventory;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
-import com.leclowndu93150.thaumaturge.compat.jei.ingredient.AspectIngredientType;
 import java.util.ArrayList;
 import java.util.List;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
@@ -19,15 +18,9 @@ import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 /**
  * Lets the player drag an aspect from JEI into an Essentia Cell Workbench partition well.
  * <ul>
- *   <li>Partitioning a cell by hand means picking the same aspect out of a terminal once per well;
- *       dragging it from JEI's list is what a player expects from every other filter grid in AE2,
- *       and the wells are the same kind of grid - AE2's fake slots, holding keys rather than items.
- *   <li>Only aspects are offered a target: the wells hold keys, so an item dragged from JEI has
- *       nowhere to go, and drawing a drop target for it would invite a drop that cannot be stored.
- *   <li>The placement goes through {@link Slot#set} with an {@link ItemStack}, AE2's own way of
- *       putting a key into a fake slot: the key rides in the stack as a data component the slot's
- *       inventory unwraps. Writing the inventory directly changes only this side - a fake slot's
- *       {@code set} is what sends the action packet the server applies.
+ *   <li>Dragging is what a player expects from every other filter grid in AE2; these are the same kind.
+ *   <li>Only aspects are offered a target: the wells hold keys, so an item has nowhere to go.
+ *   <li>Writing the inventory directly changes only this side: a fake slot's {@code set} sends the packet.
  * </ul>
  */
 public class CellWorkbenchGhostIngredientHandler
@@ -60,12 +53,8 @@ public class CellWorkbenchGhostIngredientHandler
             implements Target<I> {
 
         /**
-         * Builds a target for a partition well, or {@code null} if that menu index is not a well.
-         * <p>The index arithmetic here happens to be right - this menu is a plain
-         * {@code AbstractContainerMenu} that adds the player's slots first - but happening to be
-         * right is how the buses' grid was wrong, so the well is confirmed instead of trusted. A
-         * config slot is the only kind backed by AE2's {@link ConfigMenuInventory}, so a bad index
-         * yields no target rather than a target drawn in the wrong place.
+         * Builds a target for a partition well, or {@code null} if that menu index is not a well: a config
+         * slot is the only kind backed by AE2's {@link ConfigMenuInventory}, so a bad index yields nothing.
          */
         static <I> WellTarget<I> of(MenuEssentiaCellWorkbench menu, int well, int guiLeft, int guiTop) {
             Slot slot = menu.slots.get(MenuEssentiaCellWorkbench.partitionSlotIndex(well));
@@ -77,10 +66,8 @@ public class CellWorkbenchGhostIngredientHandler
         }
 
         /**
-         * Where JEI draws this target, in <em>screen</em> pixels: the GUI's offset is added
-         * because JEI fills this rectangle with no translation of its own, while a slot's x and
-         * y are relative to the GUI's corner. Without it every target lands a whole GUI up and
-         * to the left of its well.
+         * Where JEI draws this target, in <em>screen</em> pixels: the GUI's offset is added because JEI fills
+         * this rectangle with no translation of its own, while a slot's x and y are relative to the corner.
          */
         @Override
         public Rect2i getArea() {

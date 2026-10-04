@@ -15,14 +15,9 @@ import thaumicenergistics_ce.network.EncoderActionPayload;
 /**
  * Lets the player drag an item from JEI into the Distillation Encoder's source well.
  * <ul>
- *   <li>The well names the item to distil, so this is the whole of setting up a pattern: drag the
- *       item in, click the aspect it should yield, put a blank pattern in and encode.
- *   <li><b>The two wells are not the same kind of drop.</b> The source well takes an instruction:
- *       the item is a template and is never handed over, while the blank well takes a real blank
- *       pattern out of the player's inventory, because what lands there is spent.
- *   <li>The aspect wells hold aspects rather than items, so dragging an item at them means
- *       nothing; the written pattern well is the machine's output. The dragged stack is
- *       <em>not</em> taken from the player: see {@code TemplateSlot}.
+ *   <li>The well names the item to distil; the dragged stack is <em>not</em> taken, per {@code TemplateSlot}.
+ *   <li><b>The two wells are not the same kind of drop:</b> the source well takes an instruction, while
+ *       the blank well takes a real pattern out of the inventory, because what lands there is spent.
  * </ul>
  */
 public class DistillationEncoderGhostIngredientHandler
@@ -52,9 +47,8 @@ public class DistillationEncoderGhostIngredientHandler
                 && menu.slots.get(MenuDistillationEncoder.MENU_BLANK).getItem().isEmpty()) {
             targets.add(new BlankTarget<>(menu, screen.getGuiLeft(), screen.getGuiTop()));
         }
-        // Logged only when JEI is really beginning a drag. The hover path calls this on every
-        // frame the cursor spends over an ingredient, and a line each time would bury the one
-        // that matters.
+        // Logged only when JEI is really beginning a drag: the hover path calls this every frame the
+        // cursor spends over an ingredient, and a line each time would bury the one that matters.
         if (TRACE && doStart) {
             thaumicenergistics_ce.ThaumicEnergistics.LOG.info(
                     "[encoder] JEI is starting a drag; offering one target at {}", targets.get(0).getArea());
@@ -80,9 +74,8 @@ public class DistillationEncoderGhostIngredientHandler
         @Override
         public void accept(I ingredient) {
             if (ingredient instanceof ItemStack stack && AEItems.BLANK_PATTERN.is(stack)) {
-                // A move, not a ghost write, so it goes to the server and nothing is shown locally
-                // first: the pattern has to leave the player's inventory, and only the server may
-                // do that.
+                // A move, not a ghost write: the pattern has to leave the player's inventory, and only
+                // the server may do that, so it goes to the server with nothing shown locally first.
                 PacketDistributor.sendToServer(new EncoderActionPayload(
                         menu.containerId, EncoderActionPayload.ACTION_INSERT_BLANK, 0));
                 if (TRACE) {
@@ -96,9 +89,8 @@ public class DistillationEncoderGhostIngredientHandler
     private record SourceTarget<I>(MenuDistillationEncoder menu, int guiLeft, int guiTop) implements Target<I> {
 
         /**
-         * Where JEI draws this target, in <em>screen</em> pixels: the GUI's offset is added because
-         * JEI fills this rectangle with no translation of its own, while a slot's x and y are
-         * relative to the GUI's corner.
+         * Where JEI draws this target, in <em>screen</em> pixels: the GUI's offset is added because JEI fills
+         * this rectangle with no translation of its own, while a slot's x and y are relative to the corner.
          */
         @Override
         public Rect2i getArea() {
@@ -109,9 +101,8 @@ public class DistillationEncoderGhostIngredientHandler
         @Override
         public void accept(I ingredient) {
             if (ingredient instanceof ItemStack stack && !stack.isEmpty()) {
-                // The well is the machine's, so the server is told - but the write is made here
-                // first so the well and the aspect row fill under the player's cursor instead
-                // of a round trip later.
+                // The well is the machine's, so the server is told - but the write happens here first,
+                // so the well and the aspect row fill under the cursor instead of a round trip later.
                 if (TRACE) {
                     thaumicenergistics_ce.ThaumicEnergistics.LOG.info(
                             "[encoder] JEI dropped {} into the source well", stack.getHoverName().getString());

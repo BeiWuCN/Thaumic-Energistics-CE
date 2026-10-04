@@ -12,13 +12,10 @@ import thaumicenergistics_ce.menu.MenuEssentiaBus;
 
 /**
  * "Put this aspect in that config slot", sent by a bus screen when a player drops one out of JEI.
- *
  * <ul>
- * <li>A slot write cannot work: {@code ConfigMenuInventory} converts through {@code AEItemKey}, so a
- * non-item key is dropped and the mark vanishes as soon as the server answers.</li>
- * <li>The aspect therefore travels as an id, like {@link EssentiaFillPayload}; the client's optimistic
- * write only shows the mark during the round trip, the server's answer is what makes it real.</li>
- * <li>An empty {@link ResourceLocation} clears the slot - the only way to undo a filter with the mouse.</li>
+ *   <li>A slot write cannot work: {@code ConfigMenuInventory} converts through {@code AEItemKey}, so
+ *       a non-item key is dropped and the mark vanishes when the server answers.
+ *   <li>The aspect therefore travels as an id; an empty {@link ResourceLocation} clears the slot.
  * </ul>
  */
 public record EssentiaBusConfigPayload(int containerId, int configSlot, ResourceLocation aspectId)

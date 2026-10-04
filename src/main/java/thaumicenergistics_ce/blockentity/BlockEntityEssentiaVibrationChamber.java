@@ -41,8 +41,7 @@ import thaumicenergistics_ce.init.ModBlockEntities;
  * <ul>
  *   <li>Potentia burns 1.6x duration and power, ignis at the base rate, everything else at half.
  *   <li>The buffer is a count, not an aspect list; the aspect kept is for display only.
- *   <li>{@link BurnState} is the one answer to the burn: a full slot or a grid that refuses holds it back.
- *   <li>AE2 destroys what the grid refuses (VibrationChamberBlockEntity:200-216).
+ *   <li>{@link BurnState} is the one answer to the burn; AE2 destroys what the grid refuses.
  * </ul>
  */
 public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
@@ -611,9 +610,8 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     // What the client is told
 
     /**
-     * The client's copy - state, burn rate and buffered fuel - so Jade's once-per-hover snapshot is not
-     * what the tooltip shows. Sent only by {@link #markForClientUpdate()}, never per tick, or the
-     * countdown and the slot's energy would freeze while watched.
+     * The client's copy - state, burn rate and buffered fuel - sent only by {@link #markForClientUpdate()},
+     * never per tick, or the countdown would freeze while watched.
      */
     @Override
     protected void writeToStream(RegistryFriendlyByteBuf data) {

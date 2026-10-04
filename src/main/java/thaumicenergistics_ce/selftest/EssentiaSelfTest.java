@@ -35,12 +35,11 @@ import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
-import thaumicenergistics_ce.item.ItemEssentiaCell;
 
 /**
- * Headless self-check of the essentia storage layer, off unless {@code THAUMICENERGISTICS_ESSENTIA_SELFTEST=true}.
+ * Self-check of the essentia storage layer, off unless {@code THAUMICENERGISTICS_ESSENTIA_SELFTEST=true}.
  * <ul>
- * <li>Everything it checks fails silently at runtime rather than at compile time: key type registration, AE2's
+ * <li>Everything it checks fails silently at runtime, not at compile time: key type registration, AE2's
  * cell logic for a non-item key type, the byte budget and the NBT round trip.
  * <li>Runs on {@code ServerStartedEvent}, which it needs for a level to resolve aspects against.
  * </ul>
@@ -127,8 +126,8 @@ public final class EssentiaSelfTest {
         }
     }
 
-    /** A misspelt tag, or a convention like {@code c:ingots/iron} that nothing declares, loads fine, appears in
-     * JEI, and matches no grid a player can build. */
+    /** A misspelt tag, or a convention like {@code c:ingots/iron} that nothing declares, loads fine, shows
+     * in JEI, and matches no grid a player can build. */
     private static void checkRecipeTagsResolve(Level level, List<String> failures) {
         var items = level.registryAccess().registryOrThrow(Registries.ITEM);
         for (var entry : new String[][] {
@@ -145,8 +144,8 @@ public final class EssentiaSelfTest {
         }
     }
 
-    /** A bare {@code {"item": ...}} naming {@code thaumaturge:essentia_crystal} matches any crystal and draws as
-     * an "unknown" one in JEI, silently. Read off the classpath, which keeps whether the aspect was pinned. */
+    /** A bare {@code {"item": ...}} naming {@code thaumaturge:essentia_crystal} matches any crystal and
+     * draws as an "unknown" one in JEI, silently. Read off the classpath, which keeps the aspect pinned. */
     private static void checkCrystalIngredientsArePinned(List<String> failures) {
         var folder = EssentiaSelfTest.class.getClassLoader()
                 .getResource("data/" + ThEIds.MODID + "/recipe");
@@ -448,7 +447,7 @@ public final class EssentiaSelfTest {
             }
         }
 
-        // The infusion monitor's blockstate needs both properties its model selects on: a missing one does not
+        // The infusion monitor's blockstate needs both properties its model selects on: a missing one does
         // fail, the variants never match and the block renders with no model.
         expectGridHost(
                 AECapabilities.IN_WORLD_GRID_NODE_HOST,
@@ -461,7 +460,7 @@ public final class EssentiaSelfTest {
         var monitor = new thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor(
                 origin, thaumicenergistics_ce.init.ModBlocks.INFUSION_MONITOR.get().defaultBlockState());
         if (!monitor.hasBook()) {
-            // Expected: the slot starts empty. Asking must not throw, and the state must carry the BOOK property.
+            // Expected: the slot starts empty. Asking must not throw, and the state must carry BOOK.
             var state = thaumicenergistics_ce.init.ModBlocks.INFUSION_MONITOR.get().defaultBlockState();
             if (!state.hasProperty(thaumicenergistics_ce.block.BlockInfusionMonitor.BOOK)) {
                 failures.add("the infusion monitor's blockstate is missing its 'book' property - the "
@@ -475,7 +474,7 @@ public final class EssentiaSelfTest {
     }
 
     /** Asks a one-sided capability, recording a null answer as a failure. Capability and side are raw and
-     * {@code null} on purpose: an erased call hands NeoForge's lambda a value it must cast to its context type. */
+     * {@code null} on purpose: an erased call hands NeoForge's lambda a value it must cast itself. */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static void expectGridHost(
             BlockCapability<?, ?> capability,
@@ -491,7 +490,7 @@ public final class EssentiaSelfTest {
     }
 
     /** The Distillation Encoder offers what Thaumaturge's aspect index reports, and that index is bound by
-     * whichever side owns it: unbound, every lookup is empty. Several items are checked, since one would pass. */
+     * whichever side owns it: unbound, every lookup is empty. Several items are checked, not just one. */
     private static void checkAspectIndexResolves(Level level, List<String> failures) {
         var items = level.registryAccess().lookupOrThrow(Registries.ITEM);
         for (String id : new String[] {"minecraft:bone", "minecraft:stone", "minecraft:coal"}) {

@@ -20,7 +20,7 @@ import thaumicenergistics_ce.arcane.ThEArcanePattern;
 /**
  * The recipe type the Knowledge Inscriber encodes for, and how to read a grid out of one.
  * <ul>
- * <li>The type is Thaumaturge's own workbench category, borrowed not mirrored: a second page would disagree.</li>
+ * <li>The type is Thaumaturge's own workbench category, borrowed not mirrored: a second page would disagree.
  * <li>Resolved inside the method, never a static field, so a client without JEI never loads
  * Thaumaturge's JEI classes.</li>
  * </ul>

@@ -14,16 +14,10 @@ import thaumicenergistics_ce.menu.slot.ContainerSlot;
 
 /**
  * The Essentia Terminal's menu, shared by the cable part and the wireless item.
- *
  * <ul>
- * <li>Everything ordinary comes from AE2's {@link MEStorageMenu}: the item list, search and sort, the
- * crafting grid, the upgrade slots. Essentia only needs its key type registered.
- * <li>Moving essentia lives here rather than in the screen, because it does move things:
- * {@link #fillFromNetwork} and {@link #deposit}.
- * <li>Which key types are offered is not decided here but by the host's {@code KeyTypeSelection}, so the
- * cable part can present an essentia-only terminal while AE2 still handles the list.
- * <li>Both directions act only on the container the player holds, refusing anything that is not a jar or a
- * phial.
+ *   <li>Everything ordinary comes from AE2's {@link MEStorageMenu}; essentia only adds its key type.
+ *   <li>Moving essentia lives here, not in the screen, and acts only on the container the player
+ *       holds; which key types are offered is the host's {@code KeyTypeSelection}.
  * </ul>
  */
 public class MenuEssentiaTerminal extends MEStorageMenu {

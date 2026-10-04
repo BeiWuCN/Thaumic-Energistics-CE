@@ -3,7 +3,6 @@ package thaumicenergistics_ce.menu;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -78,10 +77,8 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
 
         this.data = new ContainerData() {
             /**
-             * The server reads the machine; the client reads what the server last sent it.
-             *
-             * <p>A read-only {@code set} breaks this: syncing a slot calls {@code set} on the client, and the
-             * chamber sends the client nothing but this menu, so every bar stayed empty for a full machine.
+             * The server reads the machine; the client reads what the server last sent it. A read-only
+             * {@code set} breaks it: a slot sync calls {@code set} on the client, and no bar ever fills.
              */
             @Override
             public int get(int index) {
@@ -172,9 +169,8 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
     }
 
     /**
-     * Shift-clicking moves stacks between the player's inventory and the hotbar, and nothing else.
-     *
-     * <p>Not an omission: the machine has no slots, so this at least tidies the inventory.
+     * Shift-clicking moves stacks between the player's inventory and the hotbar, and nothing else: the
+     * machine has no slots, so this is not an omission but the most that can be done.
      */
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
@@ -201,9 +197,8 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
     }
 
     /**
-     * Whether the window should stay open.
-     *
-     * <p>The block entity is the whole test; the distance check is vanilla's, in {@code stillValid}.
+     * Whether the window should stay open: the block entity is the whole test, since the distance check
+     * is vanilla's own, in {@code stillValid}.
      */
     @Override
     public boolean stillValid(Player player) {

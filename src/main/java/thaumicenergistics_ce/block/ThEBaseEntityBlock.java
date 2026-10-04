@@ -15,10 +15,9 @@ import net.minecraft.world.phys.BlockHitResult;
 /**
  * Shared shell for Thaumic Energistics blocks that are a machine plus a menu.
  * <ul>
- * <li>Subclasses supply only the block entity; the menu of whatever block entity offers one is opened
- * on use, and the block renders as a plain model.
- * <li>Opening follows the vanilla {@link MenuProvider} contract, not this package's own base type, so
- * a machine built on AE2's block entity base is served the same way with nothing added here.
+ *   <li>Subclasses supply only the block entity; its menu is opened on use, and the block renders as a
+ *       plain model.
+ *   <li>Opening follows the vanilla {@link MenuProvider} contract, so an AE2-based machine is served too.
  * </ul>
  */
 public abstract class ThEBaseEntityBlock extends BaseEntityBlock {

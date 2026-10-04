@@ -69,8 +69,7 @@ public record ThEArcanePattern(
     public static final int GRID_SIDE = 3;
 
     // ----- Candidate narrowing, for the inscriber's grid -----
-    // Indexing each item by its accepting recipes: 308 recipes x 9 cells x 2 mirrors is too slow.
-    // The inverse test - does the grid hold everything a recipe accepts? - dropped 46 of 308 tags.
+    // Indexing each item costs 308 x 9 x 2 lookups, so the grid is tested against the recipe instead.
 
     private static final Map<Item, Set<ResourceLocation>> ITEM_RECIPES = new HashMap<>();
 
@@ -573,8 +572,8 @@ public record ThEArcanePattern(
             if (optional.size() < width * height) {
                 return null;
             }
-            // Ingredients come in the recipe's own rows, width per row, while the grid is three wide: using the
-            // recipe's stride would put a two-wide recipe's second row in the grid's first.
+            // Ingredients come in the recipe's own rows while the grid is three wide: using the recipe's
+            // stride would put a two-wide recipe's second row in the grid's first.
             List<ItemStack> cells = new ArrayList<>(GRID_SIDE * GRID_SIDE);
             List<Ingredient> ingredients = new ArrayList<>(width * height);
             for (int row = 0; row < GRID_SIDE; row++) {
@@ -783,8 +782,7 @@ public record ThEArcanePattern(
         return new ThEArcanePattern(
                 output,
                 grid,
-                // Only the display stacks: the ingredients belong to the recipe, looked up from the live manager
-                // whenever one is needed.
+                // Only the display stacks: the ingredients belong to the recipe, looked up from the manager.
                 List.of(),
                 // Clamped: the width and height come from a saved pattern, and a million-cell grid is a hang.
                 Math.clamp(width, 1, MAX_GRID),
@@ -793,7 +791,7 @@ public record ThEArcanePattern(
                 tag.getInt("BaseVis"),
                 research,
                 stage,
-                // The tags do survive, the exception to the line above: a tag is not recoverable from the recipe.
+                // The tags do survive, the exception above: a tag is not recoverable from the recipe.
                 cellTags);
     }
 }

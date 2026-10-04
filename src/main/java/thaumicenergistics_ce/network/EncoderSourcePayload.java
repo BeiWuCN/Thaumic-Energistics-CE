@@ -11,13 +11,8 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 
 /**
- * The Distillation Encoder's source template, set from the client.
- *
- * <ul>
- * <li>Carries an item where {@link EncoderActionPayload} carries only numbers: the source item is the one
- * argument the server cannot derive.
- * <li>It travels although the well is a slot because the well is a <em>template</em> - the item stays in
- * the player's inventory, so vanilla's slot sync has nothing to carry ({@code TemplateSlot}).</ul>
+ * The Distillation Encoder's source template, set from the client. It travels although the well is a
+ * slot because the item stays in the player's inventory, so vanilla's slot sync has nothing to carry.
  *
  * @param containerId the menu this applies to, so a packet for a closed screen is ignored
  * @param stack the item to distil, one of it, or empty to clear the well

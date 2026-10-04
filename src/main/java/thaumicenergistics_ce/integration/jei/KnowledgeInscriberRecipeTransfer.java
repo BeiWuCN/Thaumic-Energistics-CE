@@ -21,15 +21,11 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
 /**
- * Lets JEI's "transfer recipe" button fill the Knowledge Inscriber's grid from an arcane workbench
- * recipe.
+ * Lets JEI's "transfer recipe" button fill the Knowledge Inscriber's grid from an arcane workbench recipe.
  * <ul>
- * <li>Registered for Thaumaturge's arcane workbench category, so no separate JEI page is needed and
- * no recipe is offered that the machine cannot encode.</li>
- * <li>Handles both halves of the usual pair: {@link IRecipeTransferInfo} says where the recipe's
- * slots and the player's are, and the handler decides and makes the transfer.</li>
- * <li>They stay together because the mapping is not a straight copy - an arcane recipe carries its
- * crystal requirement in extra ingredient slots, so the transfer reads the recipe, not the view.</li>
+ * <li>Registered for Thaumaturge's arcane workbench category, so no recipe is offered it cannot encode.
+ * <li>Both halves: {@link IRecipeTransferInfo} locates the slots, the handler decides and moves them.
+ * <li>They stay together because the mapping is not a straight copy - the crystal requirement is extra slots.
  * </ul>
  */
 public class KnowledgeInscriberRecipeTransfer

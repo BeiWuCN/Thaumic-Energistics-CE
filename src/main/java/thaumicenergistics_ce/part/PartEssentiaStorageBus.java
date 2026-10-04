@@ -18,7 +18,6 @@ import appeng.menu.locator.MenuLocators;
 import appeng.parts.PartModel;
 import appeng.parts.automation.UpgradeablePart;
 import appeng.util.ConfigInventory;
-import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +28,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.phys.Vec3;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.init.ModMenuTypes;
@@ -39,11 +37,9 @@ import thaumicenergistics_ce.integration.ae2.EssentiaMEStorage;
 /**
  * The Essentia Storage Bus: makes the essentia container it faces part of the ME network.
  * <ul>
- *   <li>A provider, not a mover, which is what the reference build got wrong: its version pulled
- *       essentia into the network each tick and never implemented {@code IStorageProvider}, so a
- *       jar behind it was invisible and nothing put back.
- *   <li>Mounted as storage, a jar behind it is listed, counts towards the network's contents, and
- *       both fills and drains; on its own it only announces changes, see {@link #tickingRequest}.
+ *   <li>A provider, not a mover: the reference build never implemented {@code IStorageProvider}.
+ *   <li>Mounted as storage a jar is listed, counts towards the network, and both fills and drains.
+ *   <li>Alone it only announces changes; see {@link #tickingRequest}.
  * </ul>
  */
 public class PartEssentiaStorageBus extends UpgradeablePart

@@ -25,7 +25,6 @@ import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 
 /**
  * Self-test for the two items that are not machines: the wrench focus and the golem backpack.
- *
  * <ul>
  *   <li>These failures are silent, so they need a test: an unregistered focus element casts nothing, and
  *       an item that arrived without its package looks exactly like one that has it.
@@ -148,7 +147,8 @@ public final class GearSelfTest {
         }
     }
 
-    /** The backpack's link is silent when it fails: a memory card that does not recognise the item does not link it. */
+    /** The backpack's link is silent when it fails: a memory card that does not recognise the item does
+     * not link it. */
     private static void checkBackpackLinkHandler(List<String> failures) {
         var registered = GridLinkables.get(ModItems.GOLEM_WIFI_BACKPACK.get());
         if (registered == null) {
@@ -180,8 +180,7 @@ public final class GearSelfTest {
 
     /**
      * Any item of ours meant to bind to a network is linkable, so the next wireless item fails here rather
-     * than in a player's hands. AE2 registers its own terminals with {@code GridLinkables}; an addon's item
-     * gets nothing.
+     * than in a player's hands: AE2 registers its terminals with {@code GridLinkables}, an addon gets none.
      */
     private static void checkEveryWirelessItemIsLinkable(List<String> failures) {
         record Wireless(String what, Item item) {}

@@ -124,8 +124,8 @@ public final class InscriberSelfTest {
     }
 
     /**
-     * An item tag must survive being written into a core, which stores only the first listed member: a network
-     * holding another member could not otherwise craft, so every member must be a valid input.
+     * An item tag must survive being written into a core, which stores only the first listed member: a
+     * network holding another member could not otherwise craft, so every member must be a valid input.
      */
     private static void checkTagPatterns(ServerLevel level, List<String> failures, ServerPlayer player) {
         ThEArcanePattern tagged = null;
@@ -237,8 +237,8 @@ public final class InscriberSelfTest {
     }
 
     /**
-     * An item that is not in the tag, or {@code null} when the registry offered none: the other direction of the
-     * tag check. See the caller for why every other cell is emptied.
+     * An item that is not in the tag, or {@code null} when the registry offered none: the other direction
+     * of the tag check. See the caller for why every other cell is emptied.
      */
     private static @Nullable ItemStack firstItemOutside(TagKey<Item> tag) {
         for (Item item : BuiltInRegistries.ITEM) {
@@ -523,8 +523,7 @@ public final class InscriberSelfTest {
                     .setItem(BlockEntityKnowledgeInscriber.GRID_SLOT_START + cell, placed[cell]);
         }
 
-        CompoundTag tag = new CompoundTag();
-        source.saveAdditional(tag, level.registryAccess());
+        CompoundTag tag = source.saveCustomOnly(level.registryAccess());
 
         // Asserted on the format itself: a loader alone would pass even if the writer matched it. The slot
         // index each entry carries is what a bare list cannot express: the gaps.
@@ -574,7 +573,7 @@ public final class InscriberSelfTest {
         BlockEntityKnowledgeInscriber reloaded = new BlockEntityKnowledgeInscriber(
                 new BlockPos(0, -4096, 0), ModBlocks.KNOWLEDGE_INSCRIBER.get().defaultBlockState());
         reloaded.setLevel(level);
-        reloaded.loadAdditional(tag, level.registryAccess());
+        reloaded.loadCustomOnly(tag, level.registryAccess());
 
         for (int cell = 0; cell < placed.length; cell++) {
             ItemStack got = reloaded.getInventory()

@@ -24,12 +24,9 @@ import thaumicenergistics_ce.item.ItemEssentiaCell;
 /**
  * Where a storage cell is told which aspects it may hold.
  * <ul>
- *   <li>The partition lives on the cell item, as AE2's own cells do, so it survives a drive, a chest or a
- *       player's hand. The workbench edits it, it does not keep it.
- *   <li>The block holds the cell plus a working copy of its partition, because the wells are edited a slot
- *       at a time and a write-back rebuilds a data component.
- *   <li>Load and write-back are guarded by {@code syncing}: writing the cell changes its components, which
- *       a naive reload reads as a new cell.
+ *   <li>The partition lives on the cell item, as AE2's own cells do, so it survives a drive or a chest.
+ *   <li>The block holds the cell plus a working copy, because a write-back rebuilds a data component.
+ *   <li>{@code syncing} guards load and write-back: a write changes components a naive reload misreads.
  * </ul> */
 public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
 

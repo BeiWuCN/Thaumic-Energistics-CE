@@ -35,7 +35,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.block.BlockInfusionMonitor;
-import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 import thaumicenergistics_ce.init.ModBlockEntities;

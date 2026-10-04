@@ -8,25 +8,15 @@ import java.util.Map;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * What the Arcane Crafting Terminal's grid would cost in vis, sent to the screen drawing it.
- * <ul>
- * <li>Only the server can work it out - the cost depends on the recipe matched against the grid and
- * on the discounts the player's wand, equipment and curios apply - and a screen that guessed would
- * show a number the craft then disagrees with, which a player will trust and plan around.</li>
- * <li>The menu sends it whenever the grid changes rather than the screen polling: the cost only
- * changes with the grid, which changes far less often than a screen redraws.</li>
- * <li>Implements AE2's {@link appeng.core.network.ClientboundPacket} rather than only NeoForge's
- * payload interface, because that is what {@code AEBaseMenu.sendPacketToClient} accepts.</li>
- * </ul>
+ * What the Arcane Crafting Terminal's grid would cost in vis, sent to the screen drawing it: only the
+ * server can work it out, and a screen that guessed would show a number the craft then disagrees with.
  *
- * @param containerId the menu this belongs to, checked on arrival so a packet for a closed screen is
- *     ignored rather than applied to whatever is open now
+ * @param containerId the menu this belongs to; a packet for a closed screen is ignored
  * @param aspects each aspect and its cost in centivis, in the order the recipe listed them
  */
 public record ArcaneCraftCostPayload(int containerId, List<AspectCost> aspects)

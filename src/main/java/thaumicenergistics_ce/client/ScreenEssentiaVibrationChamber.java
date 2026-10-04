@@ -12,14 +12,11 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 
 /**
- * The Essentia Vibration Chamber's screen: buffered fuel, energy slot fill, and progress through the
- * current unit of fuel.
+ * The Essentia Vibration Chamber's screen: fuel buffer, energy slot and burn progress.
  * <ul>
- * <li>The machine's texture is a 60x100 widget - its face, not a window - and blitting it as a
- * 176-pixel panel leaves two thirds of the window empty, so this screen draws its own window out of
- * fills in the game's container colours.</li>
- * <li>The tank is tinted by the aspect inside it, the energy slot in AE2's red, and the burn bar in
- * a colour of its own so progress is not read as a third tank.</li>
+ *   <li>The machine's texture is a 60x100 widget - its face, not a window - so this screen draws its
+ *       own window out of fills in the game's container colours.
+ *   <li>The tank is tinted by its aspect, the energy slot in AE2's red, the burn bar in its own colour.
  * </ul>
  */
 public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<MenuEssentiaVibrationChamber> {
