@@ -38,7 +38,6 @@ public record InscriberGridFillPayload(int containerId, List<ItemStack> cells) i
         return TYPE;
     }
 
-    /** Applies the whole grid to the open menu, if it is still the inscriber's. */
     public void handle(Player player) {
         if (player.containerMenu instanceof MenuKnowledgeInscriber menu && menu.containerId == containerId) {
             menu.applyGridFill(player, cells, BlockEntityKnowledgeInscriber.GRID_SLOT_COUNT);

@@ -39,7 +39,6 @@ public record InscriberGridPayload(int containerId, int containerSlot, ItemStack
         return TYPE;
     }
 
-    /** Applies this cell to the open menu, if it is still the inscriber's. */
     public void handle(Player player) {
         // The payload carries the container index, not the grid position; translating on receipt is what
         // keeps the two from drifting - reading one as the other drops every cell as out of range.

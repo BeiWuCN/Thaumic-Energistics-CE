@@ -32,14 +32,12 @@ import thaumicenergistics_ce.init.ModBlockEntities;
  */
 public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity implements IEssentiaStorage {
 
-    /** How much can be in flight per aspect. Small: this is a pipe, not a tank. */
     public static final int TRANSFER_LIMIT = 16;
 
     private static final int TICK_INTERVAL = 10;
 
     private @Nullable BlockPos providerPos;
 
-    /** Essentia taken from a neighbour and waiting for the provider to accept it. Never persisted. */
     private final Map<Holder<IAspect>, Integer> buffer = new HashMap<>();
 
     private long revision;
@@ -49,7 +47,6 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
         super(ModBlockEntities.ESSENTIA_PROVIDER_CONNECTION.get(), pos, state);
     }
 
-    // --- The link ---
 
     public @Nullable BlockPos linkedProvider() {
         return providerPos;
@@ -85,7 +82,6 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
         return null;
     }
 
-    /** Breaks the link, telling the provider so its receiver list does not keep a dead entry. */
     public void unlink() {
         if (level != null && !level.isClientSide() && providerPos != null
                 && level.getBlockEntity(providerPos) instanceof BlockEntityEssentiaProvider provider) {
@@ -97,10 +93,6 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
         updateConnectedState();
     }
 
-    /**
-     * The bound provider, or {@code null}. Clears the link when the provider has gone, or the player could
-     * not tell "linked but idle" from "linked to nothing".
-     */
     public @Nullable BlockEntityEssentiaProvider resolveProvider() {
         if (level == null || level.isClientSide() || providerPos == null) {
             return null;
@@ -118,7 +110,6 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
         return null;
     }
 
-    /** Mirrors the link into the blockstate, which is what selects the lit model. */
     public void updateConnectedState() {
         if (level == null || level.isClientSide()) {
             return;
@@ -133,9 +124,7 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
         }
     }
 
-    // --- Moving essentia ---
 
-    /** Called from the block's ticker. */
     public void serverTick() {
         if (level == null || level.isClientSide()) {
             return;
@@ -224,9 +213,7 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
         }
     }
 
-    // --- IEssentiaStorage: the network's view through this link ---
 
-    /** Accepts essentia from a neighbouring container; refuses when unlinked. */
     @Override
     public int insert(Holder<IAspect> aspect, int amount, boolean simulate) {
         if (aspect == null || amount <= 0 || !isLinked()) {
@@ -262,7 +249,6 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
         return provider.takeForLink(aspect, Math.min(amount, TRANSFER_LIMIT), simulate);
     }
 
-    /** What is in flight towards the network. */
     @Override
     public AspectList contents() {
         if (buffer.isEmpty()) {
@@ -282,7 +268,6 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
         return revision;
     }
 
-    // --- Persistence ---
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
@@ -304,7 +289,6 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
     public AbstractContainerMenu createMenu(
             int containerId, Inventory playerInventory,
             Player player) {
-        // No screen: a link is made with the connector and there is nothing to configure.
         return null;
     }
 }

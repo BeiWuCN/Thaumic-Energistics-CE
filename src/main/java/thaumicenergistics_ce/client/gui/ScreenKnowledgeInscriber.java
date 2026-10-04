@@ -16,7 +16,6 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
     private static final ResourceLocation TEXTURE =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "textures/gui/knowledge_inscriber.png");
 
-    /** Window size, matching the reference screen. */
     private static final int WIDTH = 175;
     private static final int HEIGHT = 244;
 
@@ -28,11 +27,9 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
     private static final int INVENTORY_LABEL_X = 8;
     private static final int INVENTORY_LABEL_Y = 150;
 
-    /** The button's position and size, from the reference screen. */
     private static final int BUTTON_X = 109;
     private static final int BUTTON_Y = 90;
 
-    /** Player inventory slots, which come before the machine's in the menu. */
     private static final int PLAYER_SLOTS = 36;
 
     private InscriberButton saveButton;
@@ -82,12 +79,7 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
         graphics.blit(TEXTURE, leftPos, topPos, 0, 0, PANEL_WIDTH, HEIGHT);
     }
 
-    /**
-     * Pattern clicks go to {@code MenuKnowledgeInscriber.clicked}: writing the grid through the slot is what
-     * makes the payload go out.
-     */
 
-    /** Keeps the button's label and enabled state in step with the machine's last action. */
     private void updateSaveButton() {
         if (saveButton == null) {
             return;

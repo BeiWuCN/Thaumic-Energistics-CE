@@ -9,12 +9,9 @@ package thaumicenergistics_ce.part;
  */
 public interface VisReservation {
 
-    /** How many centivis were offered. Fixed when the reservation was made, not when it is taken. */
     int amount();
 
-    /** Hands the vis over and takes the AE; {@code 0} when the offer no longer stands. */
     int commit();
 
-    /** Releases the claim. Nothing moves before {@link #commit()}, so this is bookkeeping only. */
     void close();
 }

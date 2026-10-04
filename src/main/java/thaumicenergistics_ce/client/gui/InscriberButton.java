@@ -20,11 +20,9 @@ public class InscriberButton extends Button {
             ResourceLocation.fromNamespaceAndPath(
                     thaumicenergistics_ce.ThEIds.MODID, "textures/gui/button.png");
 
-    /** Sprite sheet size, needed so the source rectangle is read in the texture's own pixel space. */
     private static final int SHEET = 32;
     private static final int WIDTH = 32;
     private static final int HEIGHT = 13;
-    /** V of the hovered frame. The idle frame starts at 0. */
     private static final int HOVER_V = 15;
 
     public InscriberButton(int x, int y, Component label, OnPress onPress) {

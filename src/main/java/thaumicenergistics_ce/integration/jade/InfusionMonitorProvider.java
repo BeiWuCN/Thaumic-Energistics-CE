@@ -36,19 +36,17 @@ public class InfusionMonitorProvider implements IBlockComponentProvider, IServer
     private static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "infusion_monitor");
 
-    /** Whether the monitor has its book and has found an altar - without both it says nothing about risk. */
+    /** Whether the monitor has its book and an altar - without both it says nothing about risk. */
     private static final String TAG_REPORTING = "Reporting";
     private static final String TAG_FOUND_ALTAR = "FoundAltar";
     /** Whether the Thaumonomicon is on the machine. Without it the monitor is blind, not idle. */
     private static final String TAG_HAS_BOOK = "HasBook";
     private static final String TAG_CRAFTING = "Crafting";
-    /** The risk, as the tier and the two numbers behind it. */
     private static final String TAG_TIER = "Tier";
     private static final String TAG_BASE = "BaseInstability";
     private static final String TAG_ALTAR = "AltarInstability";
     /** The altar's live stability, times ten. See {@link #appendServerData}. */
     private static final String TAG_STABILITY = "Stability";
-    /** The aspects the ritual is still waiting for, by id path. */
     private static final String TAG_WANTED = "Wanted";
 
     @Override
@@ -161,7 +159,6 @@ public class InfusionMonitorProvider implements IBlockComponentProvider, IServer
         return stability > -25.0F ? "unstable" : "very_unstable";
     }
 
-    /** The five tiers, from reassuring to "do not start this". */
     private static ChatFormatting colourOf(int tier) {
         return switch (tier) {
             case 1 -> ChatFormatting.GREEN;
@@ -172,7 +169,6 @@ public class InfusionMonitorProvider implements IBlockComponentProvider, IServer
         };
     }
 
-    /** "Ignis, Terra", as one component. */
     private static Component join(List<Component> parts) {
         MutableComponent joined = Component.empty();
         for (int i = 0; i < parts.size(); i++) {

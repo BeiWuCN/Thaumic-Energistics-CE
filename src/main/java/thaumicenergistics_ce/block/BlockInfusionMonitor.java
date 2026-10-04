@@ -37,10 +37,8 @@ public class BlockInfusionMonitor extends ThEBaseEntityBlock {
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    /** Whether the Thaumonomicon is in the slot. Lowers the frame's face to show the book. */
     public static final BooleanProperty BOOK = BooleanProperty.create("book");
 
-    /** Whether the monitor is connected to a grid. Lights the model. */
     public static final BooleanProperty NETWORK = BooleanProperty.create("network");
 
     public BlockInfusionMonitor(Properties properties) {
@@ -76,10 +74,6 @@ public class BlockInfusionMonitor extends ThEBaseEntityBlock {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
-    /**
-     * Puts the book on, or takes it off: taking it off is sneak-right-click with an empty hand, so a
-     * plain right-click to <em>look</em> at the monitor cannot hand the book back.
-     */
     @Override
     protected InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {

@@ -177,7 +177,6 @@ public final class EssentiaSelfTest {
         }
     }
 
-    /** Depth-first for any object that names the crystal item without also naming its aspect. */
     private static void scanForBareCrystals(
             com.google.gson.JsonElement node, String file, String where, List<String> failures) {
         if (node == null) {
@@ -229,7 +228,6 @@ public final class EssentiaSelfTest {
         }
     }
 
-    /** Interning: two keys for one aspect must be the same object, because AE2 groups by reference. */
     private static AEssentiaKey checkKeyIdentity(Level level, List<String> failures) {
         Holder<IAspect> aer = AEssentiaKeyType.aspectOf(level, ResourceLocation.fromNamespaceAndPath("thaumaturge", "aer"));
         if (aer == null) {
@@ -263,7 +261,6 @@ public final class EssentiaSelfTest {
         return key;
     }
 
-    /** The documented capacity: 1k bytes at 8 essentia per byte. */
     private static void checkByteBudget(List<String> failures) {
         ItemStack cell = new ItemStack(ModItems.ESSENTIA_CELL_1K.get());
         StorageCell inventory = BasicCellInventory.createInventory(cell, null);
@@ -282,7 +279,6 @@ public final class EssentiaSelfTest {
         }
     }
 
-    /** A key has to survive the trip through the tag a cell is persisted with. */
     private static void checkKeyRoundTripsNbt(AEssentiaKey key, List<String> failures) {
         var provider = dummyProvider();
         var tag = key.toTag(provider);
@@ -299,7 +295,6 @@ public final class EssentiaSelfTest {
         }
     }
 
-    /** Insert, read back, extract - through AE2's own inventory, not a stand-in. */
     private static void checkStoreAndExtract(AEssentiaKey aer, AEssentiaKey ignis, List<String> failures) {
         if (ignis == null) {
             return;
@@ -359,7 +354,6 @@ public final class EssentiaSelfTest {
         return IActionSource.empty();
     }
 
-    /** A registry provider for the tag round trip, taken from the running server. */
     private static HolderLookup.Provider dummyProvider() {
         var server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) {
@@ -373,7 +367,6 @@ public final class EssentiaSelfTest {
     private static void checkMachineCapabilities(List<String> failures) {
         var origin = new BlockPos(0, 0, 0);
 
-        // Both grid machines must be reachable as grid node hosts, or no cable will ever connect.
         expectGridHost(
                 AECapabilities.IN_WORLD_GRID_NODE_HOST,
                 new thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber(
@@ -399,7 +392,6 @@ public final class EssentiaSelfTest {
                 "infusion_provider",
                 failures);
 
-        // The provider is an essentia container, which is how the network puts essentia into it.
         expectGridHost(
                 EssentiaCapabilities.STORAGE,
                 new thaumicenergistics_ce.blockentity.BlockEntityEssentiaProvider(
@@ -409,7 +401,6 @@ public final class EssentiaSelfTest {
                 "essentia_provider as an essentia container",
                 failures);
 
-        // And the infusion provider is an aspect source, which is what an Infusion Altar scans for.
         expectGridHost(
                 AspectCapabilities.CONTAINER,
                 new thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider(
@@ -419,7 +410,6 @@ public final class EssentiaSelfTest {
                 "infusion_provider as an aspect source for the infusion altar",
                 failures);
 
-        // The encoder has no capability of its own - a missing block entity or menu type is a dead block.
         if (thaumicenergistics_ce.init.ModBlockEntities.DISTILLATION_ENCODER.get() == null) {
             failures.add("the distillation encoder's block entity type is not registered");
         }
@@ -427,8 +417,6 @@ public final class EssentiaSelfTest {
             failures.add("the distillation encoder's menu type is not registered");
         }
 
-        // Checks the Arcane Crafting Terminal's model files are on the classpath: an unregistered part model
-        // crashes the renderer, and AE2's registry is package-private, so this is all that is askable here.
         if (thaumicenergistics_ce.init.ModItems.ARCANE_CRAFTING_TERMINAL.get() == null) {
             failures.add("the arcane crafting terminal's item is not registered");
         }
@@ -460,7 +448,6 @@ public final class EssentiaSelfTest {
         var monitor = new thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor(
                 origin, thaumicenergistics_ce.init.ModBlocks.INFUSION_MONITOR.get().defaultBlockState());
         if (!monitor.hasBook()) {
-            // Expected: the slot starts empty. Asking must not throw, and the state must carry BOOK.
             var state = thaumicenergistics_ce.init.ModBlocks.INFUSION_MONITOR.get().defaultBlockState();
             if (!state.hasProperty(thaumicenergistics_ce.block.BlockInfusionMonitor.BOOK)) {
                 failures.add("the infusion monitor's blockstate is missing its 'book' property - the "
@@ -499,7 +486,6 @@ public final class EssentiaSelfTest {
                     ResourceLocation.parse(id));
             var holder = items.get(key);
             if (holder.isEmpty()) {
-                // Not an item in this pack; nothing to learn from it.
                 continue;
             }
             ItemStack stack = new ItemStack(holder.get().value());

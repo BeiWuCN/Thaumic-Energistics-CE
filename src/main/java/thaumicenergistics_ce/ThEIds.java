@@ -13,10 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 public final class ThEIds {
     public static final String MODID = "thaumicenergistics_ce";
 
-    /** Thaumaturge - the Thaumcraft backport this addon extends. */
     public static final String THAUMATURGE = "thaumaturge";
 
-    /** Applied Energistics 2. */
     public static final String AE2 = "ae2";
 
     private ThEIds() {}

@@ -55,7 +55,6 @@ public class PartEssentiaExportBus extends IOBusPart implements KeyTypeSelection
     @PartModels
     public static final ResourceLocation MODEL_HAS_CHANNEL = ThEIds.id("parts/essentia_export_bus_has_channel");
 
-    /** Every model that has to be registered for this part, named once for {@code ThaumicEnergistics}. */
     public static final List<ResourceLocation> MODEL_LOCATIONS =
             List.of(MODEL_BASE, MODEL_OFF, MODEL_ON, MODEL_HAS_CHANNEL);
 
@@ -63,12 +62,10 @@ public class PartEssentiaExportBus extends IOBusPart implements KeyTypeSelection
     private static final PartModel MODELS_ON = new PartModel(MODEL_BASE, MODEL_ON);
     private static final PartModel MODELS_HAS_CHANNEL = new PartModel(MODEL_BASE, MODEL_HAS_CHANNEL);
 
-    /** How much one operation moves, as in the reference build. */
     private static final int TRANSFER_RATE = 8;
 
     private static final double IDLE_POWER = 0.5;
 
-    /** AE drawn per essentia moved. */
     private static final double AE_PER_ESSENTIA = 10.0;
 
     private boolean working;
@@ -84,7 +81,6 @@ public class PartEssentiaExportBus extends IOBusPart implements KeyTypeSelection
         return type == AEssentiaKeyType.INSTANCE;
     }
 
-    /** The same box AE2's export bus uses, which is what the borrowed model is shaped for. */
     @Override
     public void getBoxes(IPartCollisionHelper boxes) {
         boxes.addBox(6, 6, 15, 10, 10, 16);
@@ -114,13 +110,12 @@ public class PartEssentiaExportBus extends IOBusPart implements KeyTypeSelection
         if (!level.isLoaded(target)) {
             return false;
         }
-        // The container's own face: a jar answers isConnectable only for UP. See EssentiaNeighbour.
+        // See EssentiaNeighbour.
         IEssentiaStorage storage = EssentiaNeighbour.find(level, target, side.getOpposite());
         if (storage == null) {
             return false;
         }
 
-        // What the player asked this bus to move: the first configured aspect, one kind per bus.
         AEssentiaKey key = firstConfigured();
         if (key == null) {
             return false;
@@ -140,7 +135,6 @@ public class PartEssentiaExportBus extends IOBusPart implements KeyTypeSelection
 
         int accepted = storage.insert(aspect, (int) Math.min(taken, Integer.MAX_VALUE), false);
         if (accepted < taken) {
-            // The container filled up part way; what it refused goes back or it would cease to exist.
             grid.getStorageService()
                     .getInventory()
                     .insert(key, taken - accepted, Actionable.MODULATE, actionSource());
@@ -154,7 +148,6 @@ public class PartEssentiaExportBus extends IOBusPart implements KeyTypeSelection
         return false;
     }
 
-    /** The first essentia the config list names, or {@code null} when it names none. */
     private AEssentiaKey firstConfigured() {
         for (int slot = 0; slot < getConfig().size(); slot++) {
             AEKey key = getConfig().getKey(slot);

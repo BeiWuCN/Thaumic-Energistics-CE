@@ -46,7 +46,6 @@ public class KnowledgeInscriberGhostIngredientHandler
         // Nothing to release: a grid cell never took an item.
     }
 
-    /** One grid cell, as a drop target. */
     private record GridTarget<I>(MenuKnowledgeInscriber menu, int cell, int guiLeft, int guiTop)
             implements Target<I> {
 

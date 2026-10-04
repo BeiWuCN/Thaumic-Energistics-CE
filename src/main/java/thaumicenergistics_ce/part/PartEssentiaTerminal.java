@@ -41,7 +41,6 @@ public class PartEssentiaTerminal extends AbstractTerminalPart {
     @PartModels
     public static final ResourceLocation MODEL_HAS_CHANNEL = ThEIds.id("parts/essentia_terminal_has_channel");
 
-    /** Every model that has to be registered for this part, named once for {@code ThaumicEnergistics}. */
     public static final List<ResourceLocation> MODEL_LOCATIONS =
             List.of(MODEL_BASE, MODEL_OFF, MODEL_ON, MODEL_HAS_CHANNEL);
 
@@ -50,7 +49,6 @@ public class PartEssentiaTerminal extends AbstractTerminalPart {
     private static final IPartModel MODELS_HAS_CHANNEL =
             new PartModel(MODEL_BASE, MODEL_ON, MODEL_STATUS_HAS_CHANNEL);
 
-    /** Essentia only. Everything else the terminal would list - items, fluids - is filtered out. */
     private final KeyTypeSelection essentiaOnly =
             new KeyTypeSelection(this::saveChanges, keyType -> keyType == AEssentiaKeyType.INSTANCE);
 
@@ -84,14 +82,12 @@ public class PartEssentiaTerminal extends AbstractTerminalPart {
     @Override
     public void readFromNBT(CompoundTag data, HolderLookup.Provider registries) {
         super.readFromNBT(data, registries);
-        // After the parent, so ours is the selection NBT is read into.
         essentiaOnly.readFromNBT(data, registries);
     }
 
     @Override
     public void writeToNBT(CompoundTag data, HolderLookup.Provider registries) {
         super.writeToNBT(data, registries);
-        // After the parent, so ours overwrites what the parent wrote for its own selection.
         essentiaOnly.writeToNBT(data);
     }
 }

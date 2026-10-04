@@ -29,7 +29,6 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
  */
 public class EssentiaKeyRenderHandler implements AEKeyRenderHandler<AEssentiaKey> {
 
-    /** Ids already reported as unresolvable, once each rather than once per slot per frame. */
     private static final Set<ResourceLocation> REPORTED = ConcurrentHashMap.newKeySet();
 
     @Override
@@ -52,7 +51,6 @@ public class EssentiaKeyRenderHandler implements AEKeyRenderHandler<AEssentiaKey
         AspectRendering.renderGui(graphics, minecraft.font, x, y, aspect, 0.0F);
     }
 
-    /** Not drawn on block faces: an essentia key has no in-world display here. */
     @Override
     public void drawOnBlockFace(
             PoseStack poseStack,
@@ -61,7 +59,6 @@ public class EssentiaKeyRenderHandler implements AEKeyRenderHandler<AEssentiaKey
             float scale,
             int packedLight,
             Level level) {
-        // Intentionally nothing.
     }
 
     @Override

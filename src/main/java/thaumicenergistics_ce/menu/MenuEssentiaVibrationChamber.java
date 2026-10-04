@@ -24,10 +24,8 @@ import thaumicenergistics_ce.init.ModMenuTypes;
  */
 public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
 
-    /** The player's inventory, which is every slot this menu has. */
     public static final int PLAYER_SLOTS = 36;
 
-    /** The three inventory rows and the hotbar under them - the standard window's layout. */
     private static final int INV_X = 8;
     private static final int INV_Y = 84;
     private static final int HOTBAR_Y = 142;
@@ -42,9 +40,7 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
     public static final int DATA_BURN_TOTAL = 5;
     /** Power per tick, times ten: the reading has one decimal and ContainerData carries ints. */
     public static final int DATA_AE_PER_TICK = 6;
-    /** The colour of the aspect being burned, or zero when nothing is. */
     public static final int DATA_ASPECT_COLOUR = 7;
-    /** The machine's state, as the ordinal of {@link BlockEntityEssentiaVibrationChamber.BurnState}. */
     public static final int DATA_STATE = 8;
 
     private static final int DATA_COUNT = 9;
@@ -52,10 +48,8 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
     private final BlockEntityEssentiaVibrationChamber chamber;
     private final ContainerData data;
 
-    /** What the server last sent, on the client. See {@link #data}. */
     private final int[] readings = new int[DATA_COUNT];
 
-    /** The client side: the block entity the server named when it opened the window. */
     public MenuEssentiaVibrationChamber(int containerId, Inventory inventory, RegistryFriendlyByteBuf buf) {
         this(containerId, inventory, blockEntity(inventory, buf));
     }
@@ -117,7 +111,6 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
         addDataSlots(data);
     }
 
-    /** The colour of the aspect in the buffer, or zero. */
     private static int aspectColour(BlockEntityEssentiaVibrationChamber chamber) {
         if (chamber == null) {
             return 0;
@@ -135,34 +128,28 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
                 : null;
     }
 
-    /** A reading, for the screen. */
     public int reading(int index) {
         return data.get(index);
     }
 
-    /** The machine's state, as the server last sent it; the screen derives nothing from the readings. */
     public BurnState state() {
         return BurnState.byOrdinal(data.get(DATA_STATE));
     }
 
-    /** Whether the machine is converting essentia right now. */
     public boolean isBurning() {
         return state() == BurnState.BURNING;
     }
 
-    /** How full the energy slot is, from 0 to 1. */
     public float energyFill() {
         int max = data.get(DATA_ENERGY_MAX);
         return max <= 0 ? 0.0F : Math.min(1.0F, (float) data.get(DATA_ENERGY) / max);
     }
 
-    /** How full the essentia buffer is, from 0 to 1. */
     public float essentiaFill() {
         int max = data.get(DATA_ESSENTIA_MAX);
         return max <= 0 ? 0.0F : Math.min(1.0F, (float) data.get(DATA_ESSENTIA) / max);
     }
 
-    /** How far through the current unit of fuel the machine is, from 0 to 1. */
     public float burnProgress() {
         int total = data.get(DATA_BURN_TOTAL);
         return total <= 0 ? 0.0F : 1.0F - (float) data.get(DATA_BURN) / total;
@@ -196,10 +183,6 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
         return moved;
     }
 
-    /**
-     * Whether the window should stay open: the block entity is the whole test, since the distance check
-     * is vanilla's own, in {@code stillValid}.
-     */
     @Override
     public boolean stillValid(Player player) {
         return chamber != null

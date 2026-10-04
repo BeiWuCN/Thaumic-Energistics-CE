@@ -33,49 +33,44 @@ public final class TcAura {
 
     // -- ambient aura --------------------------------------------------------
 
-    /** The vis standing in the aura at {@code pos}. */
     public static float vis(Level level, BlockPos pos) {
         return AuraHelper.getVis(level, pos);
     }
 
-    /** The aura's base vis at {@code pos}, before any of it has been spent. */
     public static int auraBase(Level level, BlockPos pos) {
         return AuraHelper.getAuraBase(level, pos);
     }
 
-    /** Takes {@code want} vis out of the aura at {@code pos}, or reports what it could take. */
+    /** Under {@code simulate} the aura is consulted and left alone, so the return is what the
+     * caller could take rather than what it took. */
     public static float drainVis(Level level, BlockPos pos, float want, boolean simulate) {
         return AuraHelper.drainVis(level, pos, want, simulate);
     }
 
     // -- vis relay chain -----------------------------------------------------
 
-    /** Whether a vis relay block stands within the chain's reach of {@code consumer}. */
     public static boolean relayWithinReach(ServerLevel level, BlockPos consumer) {
         return VisRelayNetwork.findRelayNear(level, consumer) != null;
     }
 
-    /** Whether a relay stands within reach of {@code consumer} <em>and</em> resolves to a source.
-     * A relay whose parent chain leads nowhere can be linked to and still carry nothing, so this is
+    /** A relay whose parent chain leads nowhere can be linked to and still carry nothing, so this is
      * a separate question from {@link #relayWithinReach}: one finds the block, this finds the chain. */
     public static boolean relayResolves(ServerLevel level, BlockPos consumer) {
         BlockEntityVisRelay relay = VisRelayNetwork.findRelayNear(level, consumer);
         return relay != null && relay.resolveSource(level) != null;
     }
 
-    /** The node at the far end of the chain serving {@code consumer}, or null if it ends elsewhere. */
     public static @Nullable BlockPos nodeBehind(ServerLevel level, BlockPos consumer) {
         BlockEntityNode node = nodeAtEnd(level, VisRelayNetwork.findRelayNear(level, consumer));
         return node == null ? null : node.getBlockPos();
     }
 
-    /** Whether the node at {@code nodePos} still holds any of {@code primal}. */
     public static boolean nodeHolds(ServerLevel level, BlockPos nodePos, ResourceKey<IAspect> primal) {
         return level.getBlockEntity(nodePos) instanceof BlockEntityNode node
                 && node.getAspectsBase().amountOf(primal, level.registryAccess()) > 0;
     }
 
-    /** Draws {@code amount} centivis of {@code primal} out of the chain serving {@code consumer}. */
+    /** Centivis are the chain's own unit: 100 of them to a vis. */
     public static int drainCentivis(ServerLevel level, BlockPos consumer,
             ResourceKey<IAspect> primal, int amount, boolean simulate) {
         return VisRelayHelper.drainCentivis(level, consumer, primal, amount, simulate);
@@ -83,12 +78,10 @@ public final class TcAura {
 
     // -- chain inspection, for the self tests --------------------------------
 
-    /** Whether the block at {@code pos} is a vis relay, without naming the class at the call site. */
     public static boolean isRelay(ServerLevel level, BlockPos pos) {
         return level.getBlockEntity(pos) instanceof BlockEntityVisRelay;
     }
 
-    /** A relay's own link state, or null when {@code relayPos} holds no relay. */
     public static @Nullable RelayLink link(ServerLevel level, BlockPos relayPos) {
         if (!(level.getBlockEntity(relayPos) instanceof BlockEntityVisRelay relay)) {
             return null;
@@ -96,9 +89,6 @@ public final class TcAura {
         return new RelayLink(relay.isLinked(), relay.depth(), relay.parentPos());
     }
 
-    /** What a relay's chain ends at, or null when the relay has linked to nothing at all. Separate
-     * from {@link #drainCentivis}, which says whether vis came back, so a linked relay that leads
-     * nowhere is visible as such: this says why not. */
     public static @Nullable RelayEnd chainEnd(ServerLevel level, BlockPos relayPos) {
         if (!(level.getBlockEntity(relayPos) instanceof BlockEntityVisRelay relay)) {
             return null;
@@ -111,11 +101,10 @@ public final class TcAura {
             return new RelayEnd("node", node.node().getBlockPos());
         }
         // Another addon's source, or one of this mod's own vis interfaces. Either way it is not a
-        // node, so there is no aspect list to read here and a drain must ask the source itself.
+        // node, so there is no aspect list to read here.
         return new RelayEnd(linked.source().getClass().getSimpleName(), linked.position());
     }
 
-    /** The node at the end of a relay's chain, reported for the log, or null when it ends elsewhere. */
     public static @Nullable NodeReport nodeReport(ServerLevel level, BlockPos relayPos) {
         if (!(level.getBlockEntity(relayPos) instanceof BlockEntityVisRelay relay)) {
             return null;
@@ -138,7 +127,6 @@ public final class TcAura {
 
     // -- capability registration ---------------------------------------------
 
-    /** Publishes {@code partClass} as a vis relay source, so that relays may link to it. */
     public static <P extends IPart & IVisRelaySource> void registerVisSource(
             RegisterPartCapabilitiesEvent event, Class<P> partClass) {
         event.register(VisRelayCapabilities.SOURCE, (part, context) -> part, partClass);
@@ -166,7 +154,6 @@ public final class TcAura {
 
     /** What a relay's parent chain ends at: the source's class name and where it sits. */
     public record RelayEnd(String kind, BlockPos pos) {
-        /** A one-line description, for the self-test log. */
         public String description() {
             return kind + " at " + pos;
         }

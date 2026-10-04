@@ -26,7 +26,6 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
     private static final ResourceLocation TEXTURE =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "textures/gui/distillation_encoder.png");
 
-    /** The panel the art draws, at the top-left of the 256-square texture. */
     private static final int WIDTH = 176;
 
     /** 234 rows, not 229: the art's opaque pixels run y=0..233, the last five being the bottom bevel. */
@@ -67,7 +66,6 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
                 button -> menu.sendAction(EncoderActionPayload.ACTION_ENCODE, 0)));
     }
 
-    /** Enables the button on the same predicate the machine acts on; the server re-checks. */
     @Override
     public void containerTick() {
         super.containerTick();
@@ -102,10 +100,6 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
         }
     }
 
-    /**
-     * Draws the aspect icon over each filled well with how much the item carries, marking the picked one.
-     * Called inside {@code super.render}: the slots' own stacks exist only to be hit-tested against.
-     */
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
         super.renderLabels(graphics, mouseX, mouseY);
@@ -143,7 +137,6 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
         }
     }
 
-    /** Names the aspect under the cursor; the wells show an icon and nothing else. */
     private void renderAspectTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
         if (hoveredSlot instanceof AspectSelectSlot aspectSlot) {
             int index = aspectSlot.aspectIndex();

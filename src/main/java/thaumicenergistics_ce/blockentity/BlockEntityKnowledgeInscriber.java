@@ -36,31 +36,19 @@ import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
  */
 public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
 
-    /** Holds the knowledge core patterns are written into. */
     public static final int CORE_SLOT = 0;
-    /** Read-only mirror of the core's stored patterns, one per slot. */
     public static final int MIRROR_SLOT_START = 1;
     public static final int MIRROR_SLOT_COUNT = 21;
-    /** The arcane recipe's grid cells, the real input, written from the client; a ghost grid. */
     public static final int GRID_SLOT_START = MIRROR_SLOT_START + MIRROR_SLOT_COUNT;
     public static final int GRID_SLOT_COUNT = 9;
-    /** Everything the block itself owns. */
     public static final int SLOT_COUNT = GRID_SLOT_START + GRID_SLOT_COUNT;
 
-    /** Nothing to do yet: no core, or an empty grid. */
     public static final int STATUS_READY = 0;
-    /** Pressing the button here stores the recipe; kept separate from {@link #STATUS_READY} so the button can
-     * label the two cases differently. */
     public static final int STATUS_ACTIONABLE = 7;
-    /** The recipe was stored. */
     public static final int STATUS_ENCODED = 1;
-    /** The grid does not correspond to any arcane recipe. */
     public static final int STATUS_NO_RECIPE = 2;
-    /** The core already holds the maximum number of patterns. */
     public static final int STATUS_CORE_FULL = 3;
-    /** The core already holds a pattern for that result. */
     public static final int STATUS_ALREADY_STORED = 4;
-    /** The player has not unlocked the recipe's research. */
     public static final int STATUS_RESEARCH_LOCKED = 5;
 
     private final SimpleContainer inventory = new SimpleContainer(SLOT_COUNT) {
@@ -71,9 +59,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
                 return;
             }
             BlockEntityKnowledgeInscriber.this.setChanged();
-            // Any container change - grid cell or core swap - stales the cached resolution.
             BlockEntityKnowledgeInscriber.this.resolutionDirty = true;
-            // Refreshed here, not in the menu: a menu hook would run from the client-side screen.
             BlockEntityKnowledgeInscriber.this.refreshResolution();
         }
     };
@@ -82,17 +68,12 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
      * without this flag the refresh recurses until the stack runs out. */
     private boolean suppressNotify;
 
-    /** The last save/delete outcome, shown by the screen; not the button label. See {@link #status()}. */
     private int lastResult = STATUS_READY;
 
-    /** Set when the grid or core moved, cleared when the resolution is redone. A flag, not a slot signature:
-     * that stringified every stored pattern, and the status is read once a tick. */
     private boolean resolutionDirty = true;
 
-    /** The recipe the grid last resolved to, or {@code null} if it resolved to none. */
     private @Nullable ThEArcanePattern resolvedPattern;
 
-    /** The status computed for {@link #resolvedPattern}. */
     private int resolvedStatus = STATUS_READY;
 
     public BlockEntityKnowledgeInscriber(BlockPos pos, BlockState state) {
@@ -107,7 +88,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         return inventory.getItem(CORE_SLOT).is(ModItems.KNOWLEDGE_CORE.get());
     }
 
-    /** The nine grid cells, in reading order. */
     public List<ItemStack> gridCells() {
         List<ItemStack> cells = new ArrayList<>(GRID_SLOT_COUNT);
         for (int i = 0; i < GRID_SLOT_COUNT; i++) {
@@ -116,7 +96,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         return cells;
     }
 
-    /** Writes one grid cell, from the payload. Server side only. */
     public void setGridCell(int cell, ItemStack stack) {
         if (level == null || level.isClientSide || cell < 0 || cell >= GRID_SLOT_COUNT) {
             return;
@@ -126,7 +105,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         if (ItemStack.matches(current, wanted)) {
             return;
         }
-        // Goes through the container, so setChanged fires and re-resolves the grid there.
         inventory.setItem(GRID_SLOT_START + cell, wanted);
     }
 
@@ -151,8 +129,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         refreshResolution();
     }
 
-    /** Empties the grid, after a recipe is stored. The writes are silent: nine of them would each
-     * re-resolve a half-cleared grid; the caller marks it stale once - see {@link #save}. */
     public void clearGrid() {
         boolean wasSuppressed = suppressNotify;
         suppressNotify = true;
@@ -181,8 +157,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         return resolvedStatus;
     }
 
-    /** Re-resolves the grid if anything moved. Driven by the block's own {@code setChanged}, which is what
-     * makes the machine server-driven. */
     public void refreshResolution() {
         if (level == null || level.isClientSide || !resolutionDirty) {
             return;
@@ -191,12 +165,10 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         recompute();
     }
 
-    /** {@code true} when pressing Save would store a recipe. */
     public boolean canStore() {
         return status() == STATUS_ACTIONABLE;
     }
 
-    /** The arcane recipe the grid currently stands for, or {@code null}. */
     public @Nullable ThEArcanePattern currentPattern() {
         if (level == null) {
             return null;
@@ -205,8 +177,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         return resolvedPattern;
     }
 
-    /** Re-resolves the grid and caches the outcome: this is where the recipe manager is scanned and the core
-     * is walked. Server side only, via {@link #refreshResolution}. */
     private void recompute() {
         resolvedPattern = null;
         resolvedStatus = STATUS_READY;
@@ -253,13 +223,12 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
      * @return the resulting status code, also available from {@link #lastResult()} */
     public int save(@Nullable Player player) {
         lastResult = status();
-        // Re-resolve rather than trust the cache: it is only as fresh as the last change notification, and a
-        // stale one left the button doing nothing with nothing on screen to say why.
+        // The cache is only as fresh as the last change notification, and a stale one left the button
+        // doing nothing with nothing on screen to say why.
         resolutionDirty = true;
         refreshResolution();
         ThEArcanePattern pattern = currentPattern();
         if (pattern == null) {
-            // Say so rather than returning in silence: "Invalid" is the player's only clue.
             ThaumicEnergistics.LOG.info(
                     "[inscriber] save at {} found no recipe: status={} cells={}",
                     worldPosition, resolvedStatus, gridCells().stream().filter(s -> !s.isEmpty()).count());
@@ -281,17 +250,14 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
                     worldPosition, pattern.result(), core.size(), HandlerKnowledgeCore.MAXIMUM_STORED_PATTERNS);
             return lastResult = STATUS_CORE_FULL;
         }
-        // After both refusals, not before: above them it announced a store about to be turned down.
+        // About the success path only, so it must sit after the refusals above.
         ThaumicEnergistics.LOG.info(
                 "[inscriber] save at {} stored {} (status {})", worldPosition, pattern.result(), status());
-        // Neither write announced itself, so one flag covers both.
         resolutionDirty = true;
         clearGrid();
         return lastResult = STATUS_ENCODED;
     }
 
-    /** Removes the stored pattern for the result the grid produces: the core holds at most one per result.
-     * @return the resulting status code */
     public int deleteStored(@Nullable Player player) {
         HandlerKnowledgeCore core = core();
         if (core == null) {
@@ -305,7 +271,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         if (!core.removeByResult(pattern.result())) {
             return lastResult = status();
         }
-        // The core was written in place, so nothing else reports it.
         resolutionDirty = true;
         return lastResult = status();
     }
@@ -331,8 +296,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
     // Stored patterns
     // ------------------------------------------------------------------
 
-    /** The core's stored patterns; the menu fills the 7x3 wells from these. Not a mirror slot: a
-     * read-only one only shows what the server synced, and this block has no update tag. */
     public List<ItemStack> storedOutputs() {
         if (level == null) {
             return List.of();
@@ -373,8 +336,8 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        // Not SimpleContainer.createTag: that writes only non-empty slots and records no index, so a saved
-        // grid came back with its gaps gone and every item shifted forwards.
+        // Not SimpleContainer.createTag: that writes only non-empty slots and records no index, so a grid
+        // came back with its gaps gone and every item shifted forwards.
         ContainerHelper.saveAllItems(tag, inventory.getItems(), registries);
         tag.putInt("LastResult", lastResult);
     }

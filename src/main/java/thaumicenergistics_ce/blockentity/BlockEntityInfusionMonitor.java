@@ -50,21 +50,16 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
 
     public static final int BOOK_SLOT = 0;
 
-    /** Idle draw of the watch, whether or not an altar is in range: 256 AE per tick. */
     private static final double IDLE_POWER = 256.0;
 
-    /** Altar search radius: twelve covers the altar's footprint but not the next altar. */
     private static final int ALTAR_SCAN_RANGE = 12;
 
     private static final int SCAN_INTERVAL = 10;
 
-    /** Retry delay after a fruitless search: the cube below is 15,625 block entity lookups. */
     private static final int ALTAR_MISS_INTERVAL = 100;
 
-    /** Ticks between stability surveys; blocks out of place change only when a player builds. */
     private static final int SURVEY_INTERVAL = 40;
 
-    /** Recipe cache lifetime; short so a datapack reload cannot leave it stale. */
     private static final int RECIPE_CACHE_TICKS = 40;
 
 
@@ -83,31 +78,24 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         }
     };
 
-    /** The altar being watched, or {@code null} when none was found. */
     private @Nullable BlockPos matrixPos;
 
-    /** Game time before which the altar cube is not searched again. */
     private long nextCubeScan;
-    /** Game time before which the survey is not re-run. */
     private long nextSurvey;
 
     /** Wait before the next search; doubles per miss, so a new altar is found within a second. */
     private int altarMissBackoff = SCAN_INTERVAL;
 
-    /** Last survey's blocks out of place. */
     private List<BlockPos> surveyedProblems = List.of();
     /** The altar {@link #surveyedProblems} was taken at. */
     private @Nullable BlockPos surveyedAt;
 
-    /** The last catalyst asked about, the recipe it starts, and when that was worked out. */
     private ItemStack cachedCatalyst = ItemStack.EMPTY;
     private @Nullable InfusionRecipe cachedRecipe;
     private long cachedRecipeAt;
 
-    /** Everything read from the altar on the last scan; kept for the tooltip, which reads it. */
     private Report report = Report.NONE;
 
-    /** Risk as of the last scan: what the recipe costs plus what the room costs. */
     private InfusionRisk risk = InfusionRisk.NONE;
 
     /** One log line a second when {@code THAUMICENERGISTICS_MONITOR_TRACE=true}, because the failure
@@ -126,7 +114,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     private int bubbleStabilityTimesTen = 250;
     private boolean bubbleCrafting;
     private ItemStack bubbleCraft = ItemStack.EMPTY;
-    /** What the altar still wants and can reach, one entry per aspect. See {@link EssentiaLine}. */
     private final List<EssentiaLine> bubbleEssentia = new ArrayList<>();
     private final List<EssentiaLine> essentia = new ArrayList<>();
 
@@ -138,7 +125,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     private long nextSourceScan;
     private ItemStack craftDisplay = ItemStack.EMPTY;
 
-    /** What was last sent, so an unchanged reading does not send a packet every scan. */
     private boolean syncedReporting;
     private int syncedTier = -1;
     private int syncedInstability = -1;
@@ -154,7 +140,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
                 .setFlags(GridFlags.REQUIRE_CHANNEL);
     }
 
-    // The book
 
     public SimpleContainer getInventory() {
         return inventory;
@@ -164,7 +149,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return inventory.getItem(BOOK_SLOT);
     }
 
-    /** Whether a Thaumonomicon is in the slot. Without one the monitor reports nothing. */
     public boolean hasBook() {
         return TcRegistry.isThaumonomicon(getBook());
     }
@@ -189,7 +173,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return null;
     }
 
-    /** Mirrors the book into the blockstate, which selects between the three models. */
     private void updateBookState() {
         if (level == null || level.isClientSide()) {
             return;
@@ -204,7 +187,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         }
     }
 
-    /** Mirrors the grid connection into the blockstate, which is what lights the model up. */
     public void updateNetworkState() {
         if (level == null || level.isClientSide()) {
             return;
@@ -219,7 +201,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         }
     }
 
-    // Watching the altar
 
     @Override
     public TickingRequest getTickingRequest(IGridNode node) {
@@ -330,7 +311,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return risk;
     }
 
-    /** Sends the bubble's numbers to the client, but only when one of them changed. */
     private void syncBubble() {
         boolean reporting = canReport();
         int tier = risk.tier();
@@ -364,12 +344,10 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         }
     }
 
-    /** Whether the bubble should be drawn at all: the book is on and an altar was found. */
     public boolean bubbleReporting() {
         return bubbleReporting;
     }
 
-    /** The risk tier the bubble shows, 1 to 5. */
     public int bubbleTier() {
         return bubbleTier;
     }
@@ -378,7 +356,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return bubbleInstability;
     }
 
-    /** The altar's live stability, to one decimal, as the bubble shows it. */
     public String bubbleStability() {
         return String.format("%.1f", bubbleStabilityTimesTen / 10.0F);
     }
@@ -395,7 +372,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return List.copyOf(bubbleEssentia);
     }
 
-    /** One diagnostic line a second. See {@link #TRACE}. */
     private void trace(IGridNode node) {
         if (!TRACE || level == null || level.isClientSide()) {
             return;
@@ -413,7 +389,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
                 String.format("%.1f", risk.stability()), report.remainingKinds(), risk.instability());
     }
 
-    /** The node's state as one word: "not active" would cover four faults with four different fixes. */
     private String describeNode(IGridNode node) {
         if (node == null) {
             return "none";
@@ -433,7 +408,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return "active";
     }
 
-    // The bubble's half of the sync
 
     /** Client sync payload for the bubble. The book is not here - it travels as a blockstate. */
     @Override
@@ -474,7 +448,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         applyBubbleState(packet.getTag(), registries);
     }
 
-    /** The bubble's numbers, taken off a tag; absent keys mean "nothing to say". */
     private void applyBubbleState(CompoundTag tag, HolderLookup.Provider registries) {
         if (level != null && level.isClientSide() && TRACE) {
             thaumicenergistics_ce.ThaumicEnergistics.LOG.info(
@@ -559,7 +532,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return sourceCache;
     }
 
-    /** What the running ritual is making: the recipe's result, else the catalyst. */
     private ItemStack craftName(ItemStack catalyst, @Nullable InfusionRecipe recipe) {
         if (catalyst.isEmpty()) {
             return ItemStack.EMPTY;
@@ -596,7 +568,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         }
     }
 
-    /** The recipe a catalyst starts, ignoring research. See {@link #readBaseInstability}. */
     private @Nullable InfusionRecipe recipeFor(ItemStack catalyst) {
         if (level == null || catalyst.isEmpty()) {
             return null;
@@ -621,7 +592,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return null;
     }
 
-    /** One aspect of the running ritual: how much has gone in of the recipe's total. */
     public record EssentiaLine(String aspect, int drawn, int total) {
         @Override
         public String toString() {
@@ -638,7 +608,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return hasBook() && report.foundAltar() && getMainNode().isActive();
     }
 
-    // Persistence
 
     @Override
     public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
@@ -672,7 +641,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         }
     }
 
-    /** One reading of an altar: found or not, crafting or not, and what the survey made of it. */
     public record Report(
             boolean foundAltar,
             boolean crafting,
@@ -682,7 +650,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
 
         public static final Report NONE = new Report(false, false, 0.0F, AspectList.EMPTY, List.of());
 
-        /** How many blocks are out of place. Zero while crafting is the good answer. */
         public int symmetryProblems() {
             return problemBlocks.size();
         }

@@ -23,7 +23,6 @@ public final class FacadeToSkinMapping {
 
     private FacadeToSkinMapping() {}
 
-    /** The skin this stack asks for, or null if it does not name one. */
     @Nullable
     public static BackpackSkins skinFor(ItemStack stack) {
         Block block = blockOf(stack);
@@ -69,10 +68,6 @@ public final class FacadeToSkinMapping {
         return null;
     }
 
-    /**
-     * The block behind a stack: the item itself, or the block an AE2 facade pretends to be. The facade
-     * route reads AE2's data component and can throw, so it is caught rather than trusted.
-     */
     @Nullable
     private static Block blockOf(ItemStack stack) {
         if (stack.isEmpty()) {

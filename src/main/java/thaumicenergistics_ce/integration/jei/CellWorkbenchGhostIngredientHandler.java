@@ -48,7 +48,6 @@ public class CellWorkbenchGhostIngredientHandler
         // Nothing to release: a partition well never took an item from the player.
     }
 
-    /** One partition well, as a drop target. */
     private record WellTarget<I>(MenuEssentiaCellWorkbench menu, int well, int guiLeft, int guiTop)
             implements Target<I> {
 

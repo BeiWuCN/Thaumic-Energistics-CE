@@ -69,7 +69,6 @@ public final class GearSelfTest {
         }
     }
 
-    /** The element must be in Thaumaturge's registry, or a wand holds a package naming nothing. */
     private static void checkFocusElementRegistered(ServerStartedEvent event, List<String> failures) {
         var lookup = event.getServer().registryAccess().lookupOrThrow(FocusElementType.REGISTRY_KEY);
         Holder<FocusElementType> holder = lookup
@@ -80,7 +79,6 @@ public final class GearSelfTest {
             for (Holder.Reference<FocusElementType> h : lookup.listElements().toList()) {
                 present.add(h.key().location().toString());
             }
-            // Report the registry's contents, not just the verdict: "none" and "none of ours" differ.
             failures.add("the wrench focus element is not registered; the registry holds " + present.size()
                     + ": " + present);
             return;
@@ -178,10 +176,6 @@ public final class GearSelfTest {
         }
     }
 
-    /**
-     * Any item of ours meant to bind to a network is linkable, so the next wireless item fails here rather
-     * than in a player's hands: AE2 registers its terminals with {@code GridLinkables}, an addon gets none.
-     */
     private static void checkEveryWirelessItemIsLinkable(List<String> failures) {
         record Wireless(String what, Item item) {}
         List<Wireless> wireless = List.of(
@@ -194,7 +188,6 @@ public final class GearSelfTest {
                         + " - a memory card cannot bind it to a wireless access point, and nothing reports it");
                 continue;
             }
-            // A handler that refuses its own item is the same failure one step later.
             ItemStack stack = new ItemStack(w.item());
             if (!GridLinkables.get(w.item()).canLink(stack)) {
                 failures.add("the link handler registered for " + w.what() + " refuses its own item");

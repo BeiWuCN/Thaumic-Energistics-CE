@@ -46,7 +46,6 @@ import thaumicenergistics_ce.part.PartEssentiaTerminal;
  * </ul> */
 public final class MenuSelfTest {
 
-    /** One run per server: the menus do not change between players. */
     private static boolean hasRun;
 
     private MenuSelfTest() {}
@@ -66,8 +65,6 @@ public final class MenuSelfTest {
         Inventory inventory = player.getInventory();
         List<String> failures = new ArrayList<>();
 
-        // Every machine menu here accepts a null host, which is what makes the client half work. The casts
-        // are needed: the classes also have a RegistryFriendlyByteBuf constructor, and null fits both.
         check(failures, "KNOWLEDGE_INSCRIBER", () -> new MenuKnowledgeInscriber(
                 0, inventory, (BlockEntityKnowledgeInscriber) null));
         check(failures, "ESSENTIA_CELL_WORKBENCH", () -> new MenuEssentiaCellWorkbench(
@@ -101,8 +98,6 @@ public final class MenuSelfTest {
                     ModMenuTypes.ESSENTIA_TERMINAL.get(), 0, inventory, host));
         }
 
-        // The wired path is where the layout is: the ACT menu takes its grid from
-        // `host instanceof PartArcaneCraftingTerminal`, so the wireless run never reaches the grid.
         PartArcaneCraftingTerminal actPart =
                 new PartArcaneCraftingTerminal(ModItems.ARCANE_CRAFTING_TERMINAL.get());
         check(failures, "ARCANE_CRAFTING_TERMINAL (with its part)", () -> new MenuArcaneCraftingTerminal(
@@ -112,15 +107,12 @@ public final class MenuSelfTest {
         check(failures, "ESSENTIA_TERMINAL (with its part)", () -> new MenuEssentiaTerminal(
                 ModMenuTypes.ESSENTIA_TERMINAL.get(), 0, inventory, terminalPart));
 
-        // NOT covered: MenuArcaneAssembler needs a level and a loaded chunk for its concrete block entity.
 
         checkCraftReachesTheResult(player.serverLevel(), player, inventory, failures);
 
         report(failures);
     }
 
-    /** Lays a recipe out in the terminal and checks the product appears. The result well is filled by
-     * {@code ArcaneCraftingResultSlot.refresh()}, which nothing used to call. */
     private static void checkCraftReachesTheResult(
             ServerLevel level, ServerPlayer player, Inventory inventory, List<String> failures) {
         ThEArcanePattern pattern = null;
@@ -133,8 +125,6 @@ public final class MenuSelfTest {
                 continue;
             }
             ThEArcanePattern candidate = ThEArcanePattern.fromRecipe(arcane, output);
-            // A *primal* crystal cost is the case to exercise: it can be paid from the slots or from a
-            // wand's vis. Non-primal crystals are unused - see crystalItems.
             if (candidate != null && !candidate.primalCrystals().isEmpty()) {
                 pattern = candidate;
                 break;
@@ -170,8 +160,6 @@ public final class MenuSelfTest {
             }
         }
 
-        // Each crystal slot is pinned to one primal aspect, as the arcane workbench's six are. Asked of
-        // the slot via mayPlace(), not of a field: plain AppEngSlots passed while taking six Aer crystals.
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
             var slot = menu.crystalSlots().get(i);
             if (!(slot instanceof CrystalSlot crystalSlot)) {
@@ -228,8 +216,6 @@ public final class MenuSelfTest {
                 ? ArcaneCraftingTransaction.Failure.NO_RECIPE
                 : resultSlot.lastFailure();
 
-        // NO_RECIPE is the bug this check exists for: a grid laid out as the recipe asks that the terminal
-        // cannot see. PAYMENT_UNAVAILABLE and RESEARCH_LOCKED are acceptance.
         if (failure == ArcaneCraftingTransaction.Failure.NO_RECIPE) {
             failures.add("a grid laid out for " + pattern.result()
                     + " does not resolve in the terminal - the recipe is not being matched");
@@ -255,7 +241,6 @@ public final class MenuSelfTest {
         System.out.println("[menu] craft path: " + pattern.result() + " is offered with its crystals in the"
                 + " slots and none in the grid");
 
-        // Without the crystals the same grid is refused, which proves they paid, not a wand.
         for (int i = 0; i < crystals.length; i++) {
             part.crystalInventory().setItemDirect(i, ItemStack.EMPTY);
         }
@@ -266,7 +251,6 @@ public final class MenuSelfTest {
         }
     }
 
-    /** Prints a menu's slots in index order with the slot type and container slot it actually holds. */
     private static void dumpSlots(AbstractContainerMenu menu) {
         System.out.println("[menu] actual slot layout (" + menu.slots.size() + " slots):");
         for (int i = 0; i < menu.slots.size(); i++) {
@@ -281,8 +265,6 @@ public final class MenuSelfTest {
         AbstractContainerMenu build();
     }
 
-    /** Checks that the Distillation Encoder's written-pattern well can be written to: its {@code set} was
-     * a no-op, so server writes never reached the screen. */
     private static void checkEncoderWellsAreWritable(List<String> failures, Inventory inventory) {
         MenuDistillationEncoder menu = new MenuDistillationEncoder(
                 0, inventory, (BlockEntityDistillationEncoder) null);
@@ -298,7 +280,6 @@ public final class MenuSelfTest {
         ThaumicEnergistics.LOG.info("[menu] DISTILLATION_ENCODER wells accept a server write");
     }
 
-    /** Runs a menu constructor, then checks for the player's 36 slots and at least one slot of its own. */
     private static void check(List<String> failures, String name, Builder builder) {
         AbstractContainerMenu menu;
         try {

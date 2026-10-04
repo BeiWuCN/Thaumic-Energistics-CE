@@ -22,11 +22,9 @@ import org.joml.Vector4f;
  */
 public final class GolemBackpackModel {
 
-    /** Texture size, in the units a layer definition is authored against. */
     private static final int TEXTURE_WIDTH = 16;
     private static final int TEXTURE_HEIGHT = 16;
 
-    /** The pearl's size in blocks: two pixels. */
     private static final float PEARL_SIZE = 0.125F;
 
     /**
@@ -35,7 +33,6 @@ public final class GolemBackpackModel {
      */
     private static final float PEARL_BOTTOM = 2.85F;
 
-    /** Half the antenna's thickness, plus the gap that keeps the pearl's faces clear of it. */
     private static final float PEARL_HALF_WIDTH = 0.55F;
 
     /** The pearl's corner in the skin texture, in sixteenths. */
@@ -50,7 +47,6 @@ public final class GolemBackpackModel {
         this.root = root;
     }
 
-    /** Bakes the model, once, at class load. */
     public static GolemBackpackModel create() {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition parts = mesh.getRoot();
@@ -69,17 +65,10 @@ public final class GolemBackpackModel {
                 LayerDefinition.create(mesh, TEXTURE_WIDTH, TEXTURE_HEIGHT).bakeRoot());
     }
 
-    /** Draws the antenna and the two pack boxes. */
     public void renderPack(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay) {
         root.render(poseStack, buffer, packedLight, packedOverlay);
     }
 
-    /**
-     * Draws the pearl: four double-sided faces around the antenna's tip, green when the golem can reach
-     * its network, red when it cannot - the one thing that changes on a backpack as a player watches.
-     * @param spin the pearl's rotation in degrees, which the caller advances with time
-     * @param inRange whether the linked network is reachable from where the golem is standing
-     */
     public void renderPearl(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
             float spin, boolean inRange) {
         int red = 255;
@@ -105,10 +94,6 @@ public final class GolemBackpackModel {
         poseStack.popPose();
     }
 
-    /**
-     * One face of the pearl, drawn twice: once facing out and once facing in. Vertices are transformed by
-     * hand because the quad is written in the pearl's unit square, which lets one method serve all four.
-     */
     private static void drawPearlFace(PoseStack poseStack, VertexConsumer buffer, int packedLight,
             int packedOverlay, int red, int green, int blue) {
         Matrix4f matrix = poseStack.last().pose();

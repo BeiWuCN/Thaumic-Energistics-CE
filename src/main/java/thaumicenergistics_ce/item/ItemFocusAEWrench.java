@@ -84,10 +84,6 @@ public class ItemFocusAEWrench extends ItemFocus {
         super(properties, 0);
     }
 
-    /** Zero, deliberately: {@code ItemWand.use} charges a focus before the cast runs, when nothing is known
-     * about what the caster is looking at. The real price is {@link #visCost()}, charged by
-     * {@link FocusEffectAEWrench} once a wrench action has happened; the wand's tooltip and the caster HUD
-     * read this method, so they show the up-front price - nothing. */
     @Override
     public float getVisCost(ItemStack focusStack) {
         return 0.0F;

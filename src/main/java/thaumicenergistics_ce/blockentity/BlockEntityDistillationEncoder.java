@@ -46,21 +46,17 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
     /** The item being distilled. A ghost slot on screen: the stack is a template, not a cost. */
     public static final int SLOT_SOURCE = 0;
 
-    /** Blank AE patterns to write into. */
     public static final int SLOT_BLANK = 1;
 
-    /** Where the finished pattern appears. Read-only to the player. */
     public static final int SLOT_ENCODED = 2;
 
     public static final int SLOT_COUNT = 3;
 
-    /** How many of the item's aspects can be offered at once. Six fits the wells in the screen's art. */
     public static final int MAX_ASPECTS = 6;
 
     /** The research that gates using a distillation pattern. Matches the 1.12.2 build's key. */
     public static final String REQUIRED_RESEARCH = "DISTILESSENTIA";
 
-    /** The NBT key the pattern carries its research under. */
     private static final String NBT_RESEARCH = "research";
 
     private final SimpleContainer inventory = new SimpleContainer(SLOT_COUNT) {
@@ -100,19 +96,13 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
     }
 
     // ------------------------------------------------------------------
-    // Aspects of the source item
     // ------------------------------------------------------------------
 
-    /**
-     * Refreshed when the source item changes. Empty when the slot is empty or the item has no indexed
-     * composition.
-     */
     public List<Holder<IAspect>> availableAspects() {
         ItemStack source = inventory.getItem(SLOT_SOURCE);
         if (!ItemStack.matches(source, cachedSource)) {
             cachedSource = source.copy();
             aspects = source.isEmpty() ? List.of() : readAspects(source);
-            // The previous pick referred to the old item's list and means nothing now.
             if (selectedAspect >= aspects.size()) {
                 selectedAspect = -1;
             }
@@ -141,7 +131,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
         return aspect.unwrapKey().map(k -> k.location().toString()).orElse("");
     }
 
-    /** The aspect the player picked, or {@code null}. */
     public @Nullable Holder<IAspect> selectedAspect() {
         List<Holder<IAspect>> list = availableAspects();
         return selectedAspect >= 0 && selectedAspect < list.size() ? list.get(selectedAspect) : null;
@@ -175,7 +164,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
     }
 
     // ------------------------------------------------------------------
-    // Encoding
     // ------------------------------------------------------------------
 
     /**
@@ -230,10 +218,8 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
     }
 
     // ------------------------------------------------------------------
-    // Menu
     // ------------------------------------------------------------------
 
-    /** The source item as the screen's ghost slot sees it. */
     public ItemStack sourceTemplate() {
         return inventory.getItem(SLOT_SOURCE);
     }
@@ -253,7 +239,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
     }
 
     // ------------------------------------------------------------------
-    // Persistence
     // ------------------------------------------------------------------
 
     @Override
@@ -336,7 +321,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
         return SLOT_SOURCE;
     }
 
-    /** Drops the contents when the block is broken. */
     public void dropContents() {
         if (level == null) {
             return;

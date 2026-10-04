@@ -23,7 +23,6 @@ import thaumicenergistics_ce.network.EncoderActionPayload;
 public class DistillationEncoderGhostIngredientHandler
         implements IGhostIngredientHandler<ScreenDistillationEncoder> {
 
-    /** The well's interior, in GUI pixels. */
     private static final int SLOT_SIZE = 16;
 
     /** Whether to log what JEI asks this handler for; off unless named like this mod's other
@@ -61,10 +60,7 @@ public class DistillationEncoderGhostIngredientHandler
         // Nothing to release: the well took an instruction, not an item.
     }
 
-    /** The blank pattern well, as a drop target: the one well that takes a real item, because what
-     * lands there is spent. */
     private record BlankTarget<I>(MenuDistillationEncoder menu, int guiLeft, int guiTop) implements Target<I> {
-        /** Where JEI draws this target, in <em>screen</em> pixels. */
         @Override
         public Rect2i getArea() {
             var slot = menu.slots.get(MenuDistillationEncoder.MENU_BLANK);

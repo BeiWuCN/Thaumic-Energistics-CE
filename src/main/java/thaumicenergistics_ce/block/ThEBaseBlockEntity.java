@@ -20,7 +20,6 @@ public abstract class ThEBaseBlockEntity extends BlockEntity implements MenuProv
         super(type, pos, state);
     }
 
-    /** Override when the machine needs a title other than its block name. */
     @Override
     public Component getDisplayName() {
         return Component.translatable(getBlockState().getBlock().getDescriptionId());

@@ -7,7 +7,6 @@ import net.minecraft.world.entity.player.Player;
 public final class TcActionBar {
     private TcActionBar() {}
 
-    /** Shows {@code key} - a translation key - to {@code player} in Thaumaturge's casting colour. */
     public static void sendPurple(Player player, String key) {
         TCActionBar.sendPurple(player, key);
     }

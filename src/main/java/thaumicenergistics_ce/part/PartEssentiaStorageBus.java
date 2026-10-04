@@ -57,7 +57,6 @@ public class PartEssentiaStorageBus extends UpgradeablePart
     @PartModels
     public static final ResourceLocation MODEL_HAS_CHANNEL = ThEIds.id("parts/essentia_storage_bus_has_channel");
 
-    /** Every model that has to be registered for this part, named once for {@code ThaumicEnergistics}. */
     public static final List<ResourceLocation> MODEL_LOCATIONS =
             List.of(MODEL_BASE, MODEL_OFF, MODEL_ON, MODEL_HAS_CHANNEL);
 
@@ -70,22 +69,15 @@ public class PartEssentiaStorageBus extends UpgradeablePart
     /** AE2 asks a provider for storage only when told to, so this poll notices a jar filled by hand. */
     private static final int POLL_INTERVAL = 20;
 
-    /** The container revision last mounted, so the network is only told when it really moved. */
     private long mountedRevision = Long.MIN_VALUE;
 
-    /** The storage view last handed to the network, or {@code null} when nothing is mounted. */
     private EssentiaMEStorage mounted;
 
-    /**
-     * The config list, for a storage bus a partition: which aspects the network may put in this
-     * container and take out. Here because {@code UpgradeablePart} has no config inventory.
-     */
     private final ConfigInventory config = ConfigInventory.configTypes(63)
             .supportedTypes(Set.of(AEssentiaKeyType.INSTANCE))
             .changeListener(this::onConfigChanged)
             .build();
 
-    /** Only essentia: this bus is for essentia containers, so no other key type is offered. */
     private final KeyTypeSelection essentiaOnly = new KeyTypeSelection(selection -> {}, this::isEssentia);
 
     public PartEssentiaStorageBus(IPartItem<?> partItem) {
@@ -171,7 +163,6 @@ public class PartEssentiaStorageBus extends UpgradeablePart
         return config;
     }
 
-    /** Changing the partition changes what the network may do here, so it has to be told. */
     private void onConfigChanged() {
         savePart();
         if (getMainNode().getNode() != null) {
@@ -179,20 +170,12 @@ public class PartEssentiaStorageBus extends UpgradeablePart
         }
     }
 
-    /**
-     * Persists this part through the part host, where a part's data lives: a part is not a block
-     * entity and has no {@code setChanged} of its own.
-     */
     private void savePart() {
         if (getHost() != null) {
             getHost().markForSave();
         }
     }
 
-    /**
-     * Opens the partition screen when the part is used with an empty hand. {@code UpgradeablePart}
-     * has no menu hook, so this is written out rather than inherited.
-     */
     @Override
     public boolean onUseWithoutItem(Player player, Vec3 pos) {
         if (player.level().isClientSide) {

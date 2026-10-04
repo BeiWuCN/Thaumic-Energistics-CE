@@ -16,7 +16,6 @@ import thaumicenergistics_ce.menu.MenuDistillationEncoder;
  */
 public class AspectSelectSlot extends Slot {
 
-    /** Which aspect this slot stands for, or {@code -1} for the picked-aspect display. */
     private final int aspectIndex;
 
     private final MenuDistillationEncoder menu;
@@ -28,17 +27,14 @@ public class AspectSelectSlot extends Slot {
         this.menu = menu;
     }
 
-    /** The aspect this slot offers, or {@code -1} for the picked display. */
     public int aspectIndex() {
         return aspectIndex;
     }
 
-    /** Whether this well currently stands for an aspect the source item actually has. */
     public boolean isFilled() {
         return aspectIndex >= 0 && aspectIndex < menu.aspectCount();
     }
 
-    /** Whether this is the well the player has picked. */
     public boolean isSelected() {
         return aspectIndex >= 0 && menu.localSelection() == aspectIndex;
     }

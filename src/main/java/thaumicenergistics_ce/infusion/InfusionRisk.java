@@ -12,16 +12,12 @@ public record InfusionRisk(int base, int altar, boolean shortages, float stabili
 
     public static final InfusionRisk NONE = new InfusionRisk(0, 0, false, 25.0F);
 
-    /** Thaumaturge's ceiling on an altar's instability ({@code BlockEntityInfusionMatrix.STABILITY_CAP}). */
     public static final int CAP = 25;
 
-    /** The lowest tier a ritual with an essentia shortage is reported at, however calm the numbers look. */
     public static final int SHORTAGE_TIER = 4;
 
-    /** The highest tier, so callers can size a scale without knowing the bands. */
     public static final int MAX_TIER = 5;
 
-    /** The instability, as the altar would count it: what the recipe costs plus what the room costs. */
     public int instability() {
         return Math.min(CAP, Math.max(0, base) + Math.max(0, altar));
     }

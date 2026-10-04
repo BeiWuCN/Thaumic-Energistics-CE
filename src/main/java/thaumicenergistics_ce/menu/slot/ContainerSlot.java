@@ -10,10 +10,8 @@ package thaumicenergistics_ce.menu.slot;
  */
 public final class ContainerSlot {
 
-    /** The stack on the cursor. */
     public static final int CURSOR = -1;
 
-    /** The player's main hand. */
     public static final int MAIN_HAND = -2;
 
     private ContainerSlot() {}

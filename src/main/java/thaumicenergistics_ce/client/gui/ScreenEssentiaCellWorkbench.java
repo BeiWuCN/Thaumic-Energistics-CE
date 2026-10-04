@@ -21,7 +21,6 @@ public class ScreenEssentiaCellWorkbench extends AbstractContainerScreen<MenuEss
     private static final ResourceLocation TEXTURE =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "textures/gui/essentia_cell_workbench.png");
 
-    /** The panel the art draws. The texture is 256 square; the window shows the top-left of it. */
     private static final int WIDTH = 176;
     private static final int HEIGHT = 253;
 

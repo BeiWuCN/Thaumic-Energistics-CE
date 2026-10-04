@@ -32,44 +32,40 @@ import thaumicenergistics_ce.compat.thaumaturge.TcAura;
  */
 public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements IVisRelaySource {
 
-    /** The P2P model this part draws itself with, and the status models AE2 layers over it. */
     public static final ResourceLocation MODEL_VIS_INTERFACE = ThEIds.id("parts/p2p/p2p_tunnel_vis");
 
     private static final P2PModels MODELS = new P2PModels(MODEL_VIS_INTERFACE);
 
-    /** Every model location this part can be drawn with: AE2's model registry does not discover the
-     * status models on its own, and a missing one is a renderer crash. */
+    /** AE2's model registry does not discover the status models on its own, and a missing one is a
+     * renderer crash, so every location this part can be drawn with has to be listed. */
     public static final List<ResourceLocation> MODEL_LOCATIONS = List.of(
             MODEL_VIS_INTERFACE,
             P2PModels.MODEL_STATUS_OFF,
             P2PModels.MODEL_STATUS_ON,
             P2PModels.MODEL_STATUS_HAS_CHANNEL);
 
-    /** What one vis costs in AE. A rate, not a flat fee: a wand recharge and a craft differ. */
+    /** A rate, not a flat fee: a wand recharge and a craft differ. */
     private static final double AE_PER_VIS = 100.0;
 
-    /** Centivis in one vis: Thaumaturge counts vis in hundredths. */
     private static final int CENTIVIS_PER_VIS = 100;
 
-    /** More AE than any network holds, so a simulated extraction answers with the whole buffer
-     * rather than with the request. Well under {@code Integer.MAX_VALUE} centivis. */
+    /** Above any network's buffer, so a simulated extraction answers with the whole buffer rather
+     * than with the request. Well under {@code Integer.MAX_VALUE} centivis. */
     private static final double AE_SIMULATE_CEILING = 1.0e9;
 
-    /** How long the two lookups below are kept. Finding either scans 17x17x17, same cadence as the
-     * Arcane Assembler's own relay-chain poll, and neither answer changes within a tick. */
+    /** Finding either of the two cached lookups scans 17x17x17, so neither runs every tick.
+     * Twenty ticks is one second. */
     private static final int UPSTREAM_POLL_INTERVAL = 20;
 
     /** Whether to log every vis delivery. Off unless {@code THAUMICENERGISTICS_VIS_TRACE=true}. */
     private static final boolean TRACE = "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_VIS_TRACE"));
 
-    /** The end of this tunnel that can reach a relay chain; recomputed at most once a second. */
     private @Nullable PartVisInterface upstreamEnd;
 
     private long nextUpstreamLookup;
 
     private boolean upstreamKnown;
 
-    /** Where the node this part sells against sits, read off the chain the upstream end reaches. */
     private @Nullable BlockPos permitPos;
 
     private long nextPermitLookup;
@@ -86,7 +82,6 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         return MODELS.getModel(isPowered(), isActive());
     }
 
-    /** A small plug on the mounted face, so it reads as fitted to the cable rather than a block. */
     @Override
     public void getBoxes(IPartCollisionHelper bch) {
         bch.addBox(6, 6, 15, 10, 10, 16);
@@ -104,33 +99,28 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         return node == null ? null : node.getGrid();
     }
 
-    /** The world this part is in, or {@code null} while it is being placed or removed. */
     private @Nullable Level visLevel() {
         return getLevel();
     }
 
-    /** Where this part is, for the aura: the host block's position, not one offset towards the part's
-     * face, so a reservation and its commit name the same place. */
     private BlockPos visPos() {
         return getBlockEntity().getBlockPos();
     }
 
     // ----- IVisRelaySource - what Thaumaturge and the Arcane Assembler see -----
 
-    /** Whether this part is on a powered, connected network. Nothing can be paid for without one. */
     @Override
     public boolean isActive() {
         return getMainNode().isActive();
     }
 
-    /** Whether relays may link to and drain this part. {@code false} when the reachable chain ends here, so
-     * the relay is sent back to the node beside it: one linked to this source would have no aspect list. */
+    /** {@code false} when the reachable chain ends here, so the relay is sent back to the node
+     * beside it: one linked to this source would have no aspect list. */
     @Override
     public boolean canSupply() {
         return isActive() && permit() != null;
     }
 
-    /** How much this part could hand over right now, without taking anything. */
     @Override
     public int availableCentivis(ResourceKey<IAspect> primal) {
         if (primal == null) {
@@ -154,8 +144,8 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         return centivisFor(affordable);
     }
 
-    /** Hands over vis made out of AE, against the chain's aspect list. The vis is not taken from
-     * anywhere: that payment is the whole exchange, so a failed payment hands the price back. */
+    /** The vis is not taken from anywhere: that AE payment is the whole exchange, so a payment that
+     * comes up short hands the price back. */
     @Override
     public int drainCentivis(ResourceKey<IAspect> primal, int amount, boolean simulate) {
         if (amount <= 0) {
@@ -187,8 +177,6 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         return offered;
     }
 
-    /** Offers vis without taking it: what the chain allows and the network can pay for. The energy
-     * is only asked with {@link Actionable#SIMULATE}, and nothing is created before {@code commit}. */
     public @Nullable VisReservation reserve(ResourceKey<IAspect> aspect, int centivis) {
         if (aspect == null || centivis <= 0) {
             return null;
@@ -205,8 +193,6 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         return (int) Math.floor(ae * CENTIVIS_PER_VIS / AE_PER_VIS);
     }
 
-    /** Where the node this part sells against sits, kept for {@link #UPSTREAM_POLL_INTERVAL} ticks.
-     * {@code null} when the reachable chain ends elsewhere, even at this very part: no aspect list there. */
     private @Nullable BlockPos permit() {
         if (!(visLevel() instanceof ServerLevel server)) {
             return null;
@@ -222,7 +208,6 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         return permitPos;
     }
 
-    /** The end of this tunnel that can reach a relay chain, worked out at most once a second. */
     private @Nullable PartVisInterface upstream(ServerLevel server) {
         long now = server.getGameTime();
         if (upstreamKnown && now < nextUpstreamLookup) {
@@ -257,7 +242,6 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         return grid == null ? null : grid.getService(IEnergyService.class);
     }
 
-    /** Where this part draws its vis from, for diagnostics, as named in {@code VisRelaySelfTest}. */
     public @Nullable BlockPos upstreamPosition() {
         if (!(visLevel() instanceof ServerLevel server)) {
             return null;
@@ -266,13 +250,10 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         return source == null ? null : source.visPos();
     }
 
-    /** Where the node this part sells against sits, for diagnostics. See {@code VisRelaySelfTest}. */
     public @Nullable BlockPos permitPosition() {
         return permit();
     }
 
-    /** A claim on a relay chain's aspect list and on the network's energy; nothing is taken before
-     * {@code commit}, so {@code close} releases nothing. */
     private final class PendingVis implements VisReservation {
 
         private final int centivis;
@@ -291,8 +272,7 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
             return centivis;
         }
 
-        /** Pays the AE and hands the vis over in one step: vis handed over against a payment that
-         * then failed would be vis created from nothing. */
+        /** Vis handed over against a payment that then failed would be vis created from nothing. */
         @Override
         public int commit() {
             if (committed) {
@@ -307,7 +287,7 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
 
         @Override
         public void close() {
-            // Nothing was taken on reserve - see the note on PendingVis.
+            // Nothing was taken on reserve - see the note on VisReservation.
         }
     }
 }

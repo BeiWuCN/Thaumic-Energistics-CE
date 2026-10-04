@@ -15,7 +15,6 @@ public final class StackSignatures {
 
     private StackSignatures() {}
 
-    /** {@code 0} for an empty stack; otherwise the item, the count, and a hash of the components. */
     public static int of(ItemStack stack) {
         if (stack.isEmpty()) {
             return 0;

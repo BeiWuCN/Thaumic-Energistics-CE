@@ -47,15 +47,12 @@ public class InfusionProviderProvider implements IBlockComponentProvider, IServe
     private static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "infusion_provider");
 
-    /** Server data keys; Kinds is the full count, before the MAX_ICONS cut. */
     private static final String TAG_ASPECT = "Aspect";
     private static final String TAG_AMOUNT = "Amount";
     private static final String TAG_KINDS = "Kinds";
 
-    /** How many aspects are listed before the tooltip stops drawing them. */
     private static final int MAX_ICONS = 11;
 
-    /** How many icons fit on one row. */
     private static final int PER_ROW = 6;
 
     @Override
@@ -138,7 +135,6 @@ public class InfusionProviderProvider implements IBlockComponentProvider, IServe
                 .withStyle(ChatFormatting.DARK_GRAY)));
     }
 
-    /** The aspect behind an id, or {@code null} when this client's registry has never heard of it. */
     private static Holder<IAspect> resolve(String id) {
         ResourceLocation location = ResourceLocation.tryParse(id);
         if (location == null || Minecraft.getInstance().level == null) {
@@ -154,16 +150,10 @@ public class InfusionProviderProvider implements IBlockComponentProvider, IServe
         return UID;
     }
 
-    /** One aspect the network holds and how much of it, for sorting and for the tag. */
     private record AspectAmount(ResourceLocation aspect, long amount) {}
 
-    /**
-     * An aspect's chip with its amount in the corner, drawn through Thaumaturge's own
-     * {@code AspectRendering.renderGui} so the texture, blend mode and undiscovered-aspect mask are all its.
-     */
     private static final class AspectIcon implements IElement {
 
-        /** Chip, gap, badge: the element is as wide as all three. */
         private static final int CHIP = 16;
         private static final int GAP = 1;
 

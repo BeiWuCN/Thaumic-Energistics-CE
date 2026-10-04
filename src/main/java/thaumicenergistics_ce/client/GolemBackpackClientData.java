@@ -23,7 +23,6 @@ public final class GolemBackpackClientData {
 
     private GolemBackpackClientData() {}
 
-    /** Applies a payload, on the client thread. */
     public static void accept(GolemBackpackPayload payload) {
         if (Minecraft.getInstance().level == null) {
             return;

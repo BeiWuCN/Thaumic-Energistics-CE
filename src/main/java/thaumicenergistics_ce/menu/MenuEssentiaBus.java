@@ -49,21 +49,15 @@ public abstract class MenuEssentiaBus<T extends IUpgradeableObject> extends Upgr
     /** Two rows of nine. */
     public static final int CONFIG_SLOTS = 18;
 
-    /** Every config cell is usable, as in the reference. */
     @Override
     public boolean isSlotEnabled(int index) {
         return index >= 0 && index < CONFIG_SLOTS;
     }
 
-    /** How many config slots the grid has. */
     public int getConfigSlotCount() {
         return CONFIG_SLOTS;
     }
 
-    /**
-     * Sets one config slot to an aspect, or clears it. Server side; called from
-     * {@link thaumicenergistics_ce.network.EssentiaBusConfigPayload}.
-     */
     public void setConfigAspect(
             int configSlot,
             ResourceLocation aspectId,
@@ -108,15 +102,10 @@ public abstract class MenuEssentiaBus<T extends IUpgradeableObject> extends Upgr
                 key, configSlot, configFor(configSlot));
     }
 
-    /**
-     * Writes one config position; {@code ConfigInventory} is the single source of truth and the menu slots
-     * are views onto it. {@link thaumicenergistics_ce.network.EssentiaBusConfigPayload} explains the rest.
-     */
     public void setConfigSlot(int configSlot, GenericStack stack) {
         configInventory().setStack(configSlot, stack);
     }
 
-    /** The menu slot that currently stands for a config position, or null if there is none. */
     public @Nullable Slot menuSlotFor(int configSlot) {
         List<Slot> configSlots = getSlots(SlotSemantics.CONFIG);
         if (configSlot < 0 || configSlot >= configSlots.size()) {
@@ -125,16 +114,11 @@ public abstract class MenuEssentiaBus<T extends IUpgradeableObject> extends Upgr
         return configSlots.get(configSlot);
     }
 
-    /**
-     * Looked up among the slots registered for {@link SlotSemantics#CONFIG}: {@code setupConfig()} runs
-     * before the player inventory slots, so the fixed offset 36 pointed into the player's inventory.
-     */
     public int configSlotIndex(int configSlot) {
         List<Slot> configSlots = getSlots(SlotSemantics.CONFIG);
         return configSlots.get(configSlot).index;
     }
 
-    /** What a config slot currently holds, for diagnostics. */
     public String configFor(int configSlot) {
         if (configSlot < 0 || configSlot >= getConfigSlotCount()) {
             return "out-of-range";
@@ -143,6 +127,5 @@ public abstract class MenuEssentiaBus<T extends IUpgradeableObject> extends Upgr
         return stack == null ? "empty" : stack.what() + " x" + stack.amount();
     }
 
-    /** The host's config inventory, which each bus declares for itself. */
     protected abstract ConfigInventory configInventory();
 }

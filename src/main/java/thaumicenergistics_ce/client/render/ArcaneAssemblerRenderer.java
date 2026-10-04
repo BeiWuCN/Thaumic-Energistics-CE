@@ -32,10 +32,8 @@ public class ArcaneAssemblerRenderer implements BlockEntityRenderer<BlockEntityA
     private static final float ITEM_DROP = 0.3F;
     private static final float BLOCK_DROP = 0.2F;
 
-    /** Degrees a tick. Slow enough to read as a machine turning something over, not as a spinner. */
     private static final float SPIN_PER_TICK = 1.5F;
 
-    /** The rise and fall, in blocks, and how many ticks one full bob takes. */
     private static final float BOB_HEIGHT = 0.03F;
     private static final float BOB_PERIOD = 25.0F;
 
@@ -45,7 +43,6 @@ public class ArcaneAssemblerRenderer implements BlockEntityRenderer<BlockEntityA
      */
     private static final float LINGER_TICKS = 40.0F;
 
-    /** What each block was last seen drawing, and when. Weakly keyed, so an unloaded block is forgotten. */
     private static final class LastDraw {
         ItemStack stack = ItemStack.EMPTY;
         float seenAt;
@@ -54,7 +51,6 @@ public class ArcaneAssemblerRenderer implements BlockEntityRenderer<BlockEntityA
     private final Map<BlockEntityArcaneAssembler, LastDraw> lastDrawn = new WeakHashMap<>();
 
     public ArcaneAssemblerRenderer(BlockEntityRendererProvider.Context context) {
-        // No model to take from the context: the block draws the game's own item models.
     }
 
     @Override
@@ -84,7 +80,6 @@ public class ArcaneAssemblerRenderer implements BlockEntityRenderer<BlockEntityA
         draw(assembler, remembered.stack, age, poses, buffers, packedLight);
     }
 
-    /** One item, in the middle of the block, turning slowly on the clock and nothing else. */
     private static void draw(BlockEntityArcaneAssembler assembler, ItemStack product, float age,
             PoseStack poses, MultiBufferSource buffers, int packedLight) {
         float drop = product.getItem() instanceof BlockItem ? BLOCK_DROP : ITEM_DROP;

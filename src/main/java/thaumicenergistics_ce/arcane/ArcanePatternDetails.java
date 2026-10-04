@@ -38,17 +38,10 @@ public final class ArcanePatternDetails implements IPatternDetails {
         this.outputs = List.of(new GenericStack(AEItemKey.of(pattern.result()), pattern.result().getCount()));
     }
 
-    /** The AE2 view of an arcane pattern, or {@code null} when it has no usable input or output. */
     public static @Nullable ArcanePatternDetails of(ThEArcanePattern pattern, HolderLookup.Provider registries) {
         return of(pattern, registries, null);
     }
 
-    /**
-     * As {@link #of}, but reports why a pattern was refused: otherwise it is simply absent from
-     * {@link BlockEntityArcaneAssembler#getAvailablePatterns()}, which looks the same as a reload failure.
-     *
-     * @param refusal when non-null, receives one short reason if the pattern is refused
-     */
     public static @Nullable ArcanePatternDetails of(
             ThEArcanePattern pattern, HolderLookup.Provider registries, @Nullable Consumer<String> refusal) {
         return of(pattern, registries, refusal, null);
@@ -65,8 +58,6 @@ public final class ArcanePatternDetails implements IPatternDetails {
             HolderLookup.Provider registries,
             @Nullable Consumer<String> refusal,
             @Nullable AEItemKey decodedDefinition) {
-        // The definition is the *pattern item*, not the result: decodePattern only answers an
-        // encoded pattern item; with a result it returns null and ExecutingCraftingJob drops it.
         AEItemKey definition =
                 decodedDefinition != null ? decodedDefinition : AEItemKey.of(pattern.toItem(registries));
         if (definition == null) {
@@ -95,7 +86,6 @@ public final class ArcanePatternDetails implements IPatternDetails {
         for (AspectInstance crystal : pattern.crystalItems().entries()) {
             ItemStack stack = TcRegistry.crystalFor(crystal.aspect(), crystal.amount());
             if (stack.isEmpty()) {
-                // No crystal item for this aspect, so the recipe cannot be automated at all.
                 refuse(refusal, "the crystal " + crystal.aspect().getKey().location() + " has no crystal item");
                 return null;
             }
@@ -136,7 +126,6 @@ public final class ArcanePatternDetails implements IPatternDetails {
 
     @Override
     public boolean supportsPushInputsToExternalInventory() {
-        // The assembler consumes the inputs itself; nothing is forwarded to a neighbour.
         return false;
     }
 
@@ -181,7 +170,6 @@ public final class ArcanePatternDetails implements IPatternDetails {
 
         @Override
         public @Nullable AEKey getRemainingKey(AEKey template) {
-            // Inputs are fully consumed; no container is returned to the network.
             return null;
         }
     }

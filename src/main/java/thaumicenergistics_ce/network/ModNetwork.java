@@ -16,7 +16,6 @@ public final class ModNetwork {
 
     private ModNetwork() {}
 
-    /** The protocol version, bumped whenever a payload's shape changes. */
     private static final String VERSION = "1";
 
     public static void register(IEventBus modBus) {

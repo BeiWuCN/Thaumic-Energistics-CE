@@ -44,10 +44,8 @@ import thaumicenergistics_ce.init.ModMenuTypes;
  */
 public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
 
-    /** The crafting grid under AE2's namespace: AE2 resolves these ids itself and renders the group. */
     public static final ResourceLocation INV_CRAFTING = AppEng.makeId("arcane_crafting_terminal_crafting");
 
-    /** The wand slot, which is ours and has no AE2 meaning. */
     public static final ResourceLocation INV_WAND = ThEIds.id("arcane_crafting_terminal_wand");
 
     /**
@@ -69,7 +67,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
     public static final ResourceLocation MODEL_HAS_CHANNEL =
             ThEIds.id("parts/arcane_crafting_terminal_has_channel");
 
-    /** Every model that has to be registered for this part, named once for {@code ThaumicEnergistics}. */
     public static final List<ResourceLocation> MODEL_LOCATIONS =
             List.of(MODEL_BASE, MODEL_OFF, MODEL_ON, MODEL_HAS_CHANNEL);
 
@@ -82,10 +79,8 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
 
     public static final int WAND_SLOT = 0;
 
-    /** Crystal slots offered: six, in two columns of three; the menu files 0-2 left, 3-5 right. */
     public static final int CRYSTAL_SLOTS = 6;
 
-    /** Crystal slots drawn down the left of the grid. */
     public static final int CRYSTAL_COLUMN = 3;
 
     /**
@@ -102,7 +97,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
 
     public PartArcaneCraftingTerminal(IPartItem<?> partItem) {
         super(partItem);
-        // A terminal costs almost nothing to connect; the work is in the menu, not in ticking.
         getMainNode().setIdlePowerUsage(0.5);
         // Refused at the door: an item briefly present is long enough for a menu to sync it.
         wandInv.setFilter(new IAEItemFilter() {
@@ -146,7 +140,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
         return true;
     }
 
-    /** The grid, for the menu and for the tests. */
     public AppEngInternalInventory craftingGrid() {
         return craftingGrid;
     }
@@ -155,23 +148,17 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
         return wandInv;
     }
 
-    /** The six crystal slots' inventory, flat: 0-2 are the left column, 3-5 the right. */
     public AppEngInternalInventory crystalInventory() {
         return crystalInv;
     }
 
-    /** The grid this part is on, or {@code null} when it is not connected to one. */
     private appeng.api.networking.@Nullable IGrid gridOrNull() {
         IGridNode node = getMainNode().getNode();
         return node == null ? null : node.getGrid();
     }
 
-    /**
-     * AE per vis. Deliberately the rate {@code PartVisInterface} charges: both buy vis from the same network.
-     */
     private static final double AE_PER_VIS = 1_000.0;
 
-    /** Centivis in one vis, as Thaumaturge counts them. */
     private static final int CENTIVIS_PER_VIS = 100;
 
     /**
@@ -206,7 +193,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
         int offered = Math.min(needCentivis, Math.round(available * CENTIVIS_PER_VIS));
         double cost = AE_PER_VIS * offered / CENTIVIS_PER_VIS;
 
-        // A craft is paid in full or not at all: supply only what the network can cover.
         double payable = energy.extractAEPower(cost, Actionable.SIMULATE, PowerMultiplier.CONFIG);
         if (payable < cost) {
             offered = (int) Math.floor(payable / AE_PER_VIS * CENTIVIS_PER_VIS);
@@ -231,7 +217,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
         return offered;
     }
 
-    /** Hands AE2 the inventories by the ids it knows them by: one not returned here is unreachable by id. */
     @Override
     public InternalInventory getSubInventory(ResourceLocation id) {
         if (id.equals(INV_CRAFTING)) {
@@ -246,7 +231,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
         return super.getSubInventory(id);
     }
 
-    /** Drops every inventory when wrenched off: leaving one out loses its contents with the part. */
     @Override
     public void addAdditionalDrops(List<ItemStack> drops, boolean wrenched) {
         super.addAdditionalDrops(drops, wrenched);

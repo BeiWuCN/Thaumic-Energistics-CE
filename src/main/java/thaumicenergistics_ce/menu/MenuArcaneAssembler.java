@@ -54,7 +54,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
     private static final int FB_PREVIEW_X = 26;
     private static final int FB_PREVIEW_Y = 81;
 
-    /** Player inventory slots, which come first in this menu. */
     private static final int PLAYER_SLOTS = 36;
 
     // Slot indices in registration order: player, core, patterns, upgrades, gear.
@@ -85,7 +84,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
 
     private final @Nullable BlockEntityArcaneAssembler assembler;
 
-    /** Its {@code player} is the only level the client menu has: there is no block entity there. */
     private final Inventory playerInventory;
     /**
      * The pattern wells' container on the client: the client derives them from the core slot, and the
@@ -94,15 +92,9 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
     private final SimpleContainer patternDisplay =
             new SimpleContainer(BlockEntityArcaneAssembler.PATTERN_SLOT_COUNT);
 
-    /** Signature of the core the wells were last filled from, so they are only refilled when it changes. */
     private int mirroredCore = -1;
-    /**
-     * The core signature as of {@link #coreSignatureTick}: hashing walks the whole pattern store and the
-     * screen asks once a frame, so it is cached per tick - a tick of staleness is invisible.
-     */
     private int sampledCore = -1;
     private long coreSignatureTick = Long.MIN_VALUE;
-    /** Stand-in for the acceleration cards, mirrored into the block entity on change. */
     private final SimpleContainer upgrades =
             new SimpleContainer(BlockEntityArcaneAssembler.UPGRADE_SLOT_COUNT) {
         @Override
@@ -120,7 +112,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
      */
     private @Nullable BlockPos clientPos;
 
-    /** The client's own view of the machine, resolved from {@link #clientPos} and cached. */
     private @Nullable BlockEntityArcaneAssembler clientMachine;
 
     /**
@@ -129,10 +120,8 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
      */
     private @Nullable Slot targetSlot;
 
-    /** The nine preview wells, held as slots for the same reason as {@link #targetSlot}. */
     private final Slot[] previewSlots = new Slot[BlockEntityArcaneAssembler.PREVIEW_SLOT_COUNT];
 
-    /** Server-side constructor, opened from the block. */
     public MenuArcaneAssembler(int containerId, Inventory playerInventory, BlockEntityArcaneAssembler assembler) {
         // Both sides read the layout from the mod's resources, so their slot positions cannot drift apart.
         this(containerId, playerInventory, assembler, assembler.getInventory(), GuiLayout.load());
@@ -140,7 +129,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         onUpgradesChanged();
     }
 
-    /** Client-side constructor, opened from the network; loads the layout itself. */
     public MenuArcaneAssembler(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
         this(
                 containerId,
@@ -309,10 +297,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         assembler.setSpeedUpgrades(count);
     }
 
-    /**
-     * Rebuilds the read-only pattern mirror from the installed knowledge core; derived on whichever side
-     * is drawing, and called every frame from the screen.
-     */
     public void refreshPatternView() {
         ItemStack core = coreStack();
         // Taken at most once a tick: this is a per-frame call and the hash walks the whole pattern store.
@@ -337,10 +321,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         }
     }
 
-    /**
-     * The 3x3 ingredient preview, nine stacks in row-major order, read from the slots the server syncs the
-     * machine's preview band into.
-     */
     public ItemStack getPreviewSlot(int index) {
         if (index < 0 || index >= previewSlots.length || previewSlots[index] == null) {
             return ItemStack.EMPTY;
@@ -348,15 +328,10 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         return previewSlots[index].getItem();
     }
 
-    /**
-     * The item to paint into the craft preview's result well, read from the mirrored slot the server syncs
-     * the machine's {@code TARGET_SLOT} into.
-     */
     public ItemStack getPreviewResult() {
         return targetSlot == null ? ItemStack.EMPTY : targetSlot.getItem();
     }
 
-    /** An acceleration-card slot; the screen reads these to know which are empty. */
     public Slot getUpgradeSlot(int index) {
         int slot = IDX_UPGRADE_START + index;
         if (index < 0 || slot >= IDX_UPGRADE_END || slot >= slots.size()) {
@@ -365,23 +340,17 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         return slots.get(slot);
     }
 
-    /** Writes a slot of the display-only mirror on the machine's own inventory. Server side only. */
     private void writeMirrorSlot(int machineSlot, ItemStack stack) {
         if (assembler != null) {
             assembler.getInventory().setItem(machineSlot, stack);
         }
     }
 
-    /** The knowledge core as this menu can see it, which is the slot on both sides. */
     private ItemStack coreStack() {
         int index = IDX_CORE;
         return index < slots.size() ? slots.get(index).getItem() : ItemStack.EMPTY;
     }
 
-    /**
-     * The core's patterns, on either side. The level comes from the block entity where there is one and
-     * from the player otherwise, the split the Knowledge Inscriber's menu makes.
-     */
     private @Nullable HandlerKnowledgeCore coreHandler() {
         Level level = assembler != null ? assembler.getLevel() : playerInventory.player.level();
         if (level == null) {
@@ -407,7 +376,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         primalIndex(TCAspects.TERRA)
     };
 
-    /** Where an aspect sits in the block entity's storage order, else 0 when it is not a primal. */
     private static int primalIndex(ResourceKey<IAspect> aspect) {
         int index = BlockEntityArcaneAssembler.PRIMALS.indexOf(aspect);
         return Math.max(0, index);
@@ -439,19 +407,11 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         return Math.max(live, data.get(DATA_ASPECT_AIR + column));
     }
 
-    /**
-     * Whether a craft is running, true if either channel says so: the block entity is the machine's own
-     * state and the data slot the server's copy, and a stale channel can only say 'idle'.
-     */
     public boolean isCrafting() {
         BlockEntityArcaneAssembler machine = machineView();
         return (machine != null && machine.isCrafting()) || data.get(DATA_CRAFTING) != 0;
     }
 
-    /**
-     * Craft progress as a 0..1 fraction, whichever channel has got further; where they disagree, one has
-     * not caught up.
-     */
     public float getProgress() {
         BlockEntityArcaneAssembler machine = machineView();
         float live = machine != null ? machine.getCraftProgress() : 0.0F;
@@ -460,7 +420,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         return Math.max(live, mirrored);
     }
 
-    /** Both channels' own view of the craft, for the self-test: a failure says which one went quiet. */
     public String progressForTest() {
         BlockEntityArcaneAssembler machine = machineView();
         String live = machine == null

@@ -55,12 +55,10 @@ public final class AEssentiaKey extends AEKey {
         this.id = id;
     }
 
-    /** The key for an aspect id, interned. */
     public static AEssentiaKey of(ResourceLocation id) {
         return CACHE.computeIfAbsent(id, AEssentiaKey::new);
     }
 
-    /** The key for an aspect, or {@code null} when the holder is not backed by a registry entry. */
     public static @Nullable AEssentiaKey of(Holder<IAspect> aspect) {
         return aspect.unwrapKey().map(key -> of(key.location())).orElse(null);
     }
@@ -80,15 +78,14 @@ public final class AEssentiaKey extends AEKey {
     }
 
     /**
-     * The object AE2 groups keys by: the id itself, not a wrapper. Its maps key on it by reference, so two
-     * keys for one aspect must hand back the same object - they do, since {@link #of} interns by id.
+     * The object AE2 groups keys by: the id itself. Its maps key on it by reference, so two keys for one
+     * aspect must be one object.
      */
     @Override
     public Object getPrimaryKey() {
         return id;
     }
 
-    /** Essentia has no secondary form to drop. */
     @Override
     public AEKey dropSecondary() {
         return this;
@@ -101,7 +98,7 @@ public final class AEssentiaKey extends AEKey {
 
     /**
      * The key as a standalone tag. Written through {@link AEKey#CODEC}: this class's own map codec omits
-     * the {@code #t} type field, and AE2's reader resolves such a tag to missing content.
+     * the {@code #t} type field, which AE2's reader resolves to missing content.
      */
     @Override
     public CompoundTag toTag(HolderLookup.Provider registries) {
@@ -116,7 +113,7 @@ public final class AEssentiaKey extends AEKey {
 
     /**
      * The true name, not {@code AspectComponents.name}, which says "Unknown" if undiscovered. AE2 caches
-     * the result on the shared key, so an "Unknown" cached first would stick.
+     * it on the shared key, so an "Unknown" cached first would stick.
      */
     @Override
     protected Component computeDisplayName() {
@@ -126,13 +123,11 @@ public final class AEssentiaKey extends AEKey {
                 : AspectComponents.trueName(aspect);
     }
 
-    /** The aspect this key names, or {@code null} when there are no registries to resolve it against. */
     public @Nullable Holder<IAspect> resolveAspect() {
         var registries = AEssentiaKeyType.clientOrServerRegistries();
         return registries == null ? null : AEssentiaKeyType.aspectOf(registries, id);
     }
 
-    /** Essentia does not drop as an item: a spilled cell simply loses its contents. */
     @Override
     public void addDrops(long amount, List<ItemStack> drops, Level level, BlockPos pos) {
         // Intentionally nothing.

@@ -100,9 +100,6 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
         drawVisColumns(graphics);
     }
 
-    /**
-     * AE2's "empty upgrade" icon in each empty slot, so the column reads as slots, not as recesses.
-     */
     private void drawUpgradeIcons(GuiGraphics graphics) {
         GuiLayout.Grid grid = layout.upgradeSlots();
         // Clamped to the slots that exist: the layout is a resource, and a grid taller than the machine
@@ -119,10 +116,6 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
         }
     }
 
-    /**
-     * Fills the vis columns built into the art: the troughs are part of the panel, so only the fill is
-     * drawn, cropped from the strip at the bottom and grown upwards, each column from its own source column.
-     */
     private void drawVisColumns(GuiGraphics graphics) {
         GuiLayout.VisBars bars = layout.visBars();
         for (int i = 0; i < bars.count(); i++) {

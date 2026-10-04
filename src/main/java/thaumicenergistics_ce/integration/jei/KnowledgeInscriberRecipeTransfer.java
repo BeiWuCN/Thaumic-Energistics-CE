@@ -62,7 +62,6 @@ public class KnowledgeInscriberRecipeTransfer
         return ArcaneRecipeTypes.fitsGrid(recipe);
     }
 
-    /** The nine grid cells, in reading order - the order a recipe's cells are written to and read from. */
     @Override
     public List<Slot> getRecipeSlots(MenuKnowledgeInscriber menu, RecipeHolder<?> recipe) {
         List<Slot> slots = new ArrayList<>(BlockEntityKnowledgeInscriber.GRID_SLOT_COUNT);
@@ -120,7 +119,6 @@ public class KnowledgeInscriberRecipeTransfer
         return null;
     }
 
-    /** The variant of an ingredient to place: one the player is carrying, else the first. */
     private static ItemStack pickVariant(List<ItemStack> variants, MenuKnowledgeInscriber menu) {
         if (variants.isEmpty()) {
             return ItemStack.EMPTY;

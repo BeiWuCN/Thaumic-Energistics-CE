@@ -36,7 +36,6 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
     private static final int BURN = 0xFFFFAA00;
     private static final int TANK_EMPTY = 0xFF4B4B4B;
 
-    /** The two gauges and the progress bar, in window coordinates. */
     private static final int GAUGE_Y = 20;
     private static final int GAUGE_H = 46;
     private static final int GAUGE_W = 14;
@@ -133,10 +132,6 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
         graphics.drawString(font, state, x + TEXT_X, y + TEXT_Y + 34, 0x404040, false);
     }
 
-    /**
-     * One bar: a dark frame, a recess, and the fill at the end of the recess - a recess alone is a
-     * dark rectangle whether empty or full. Vertical fills upwards; the progress bar to the right.
-     */
     private static void bar(
             GuiGraphics graphics, int x, int y, int width, int height, float fill, int colour, boolean vertical) {
         graphics.fill(x, y, x + width, y + height, SLOT_DARK);
@@ -153,7 +148,6 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
         }
     }
 
-    /** One player slot, drawn the way the game draws its own: dark top and left, light bottom and right. */
     private static void slot(GuiGraphics graphics, int x, int y) {
         graphics.fill(x, y, x + 18, y + 18, SLOT_DARK);
         graphics.fill(x + 1, y + 1, x + 18, y + 18, PANEL_LIGHT);

@@ -23,7 +23,6 @@ public class CrystalSlot extends AppEngSlot {
         this.required = required;
     }
 
-    /** The aspect this slot holds. */
     public ResourceKey<IAspect> requiredAspect() {
         return required;
     }

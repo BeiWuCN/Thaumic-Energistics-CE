@@ -44,7 +44,6 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
 
     public static final int IDX_BLANK = 1;
 
-    /** The written pattern. Read-only. */
     public static final int IDX_ENCODED = 2;
 
     public static final int IDX_ASPECT_START = 3;
@@ -58,18 +57,14 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
     public static final int MENU_ASPECT_START = PLAYER_SLOTS + IDX_ASPECT_START;
     public static final int MENU_SELECTED = PLAYER_SLOTS + IDX_SELECTED;
 
-    /** Menu index of the source template well, for JEI's drop target and its click handling. */
     public static final int MENU_SOURCE = PLAYER_SLOTS + IDX_SOURCE;
 
-    /** Menu indices of the two pattern wells, for {@link #canEncode()}. */
     public static final int MENU_BLANK = PLAYER_SLOTS + IDX_BLANK;
     public static final int MENU_ENCODED = PLAYER_SLOTS + IDX_ENCODED;
 
     // From the reference build's screen art.
     private static final int SOURCE_X = 15;
     private static final int SOURCE_Y = 69;
-    /** The wells run <b>down</b> the panel, not across it, from the art: six at pitch 18. A row put every
-     * well but the first on bare panel. */
     private static final int ASPECTS_X = 65;
     private static final int ASPECTS_Y = 24;
     private static final int ASPECT_PITCH = 18;
@@ -80,54 +75,41 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
     private static final int ENCODED_X = 146;
     private static final int ENCODED_Y = 113;
 
-    /** The player's rows, from the texture: shadow slots at y=150,168,186, the hotbar's at y=208. */
     private static final int INV_X = 8;
     private static final int INV_Y = 150;
     private static final int HOTBAR_Y = 208;
     private static final int PITCH = 18;
 
-    /** The aspects offered, derived from the source item; empty when nothing can be derived. */
     private List<Holder<IAspect>> aspects = List.of();
 
-    /** Amount of each aspect the source carries, per {@link #aspects}: what {@code yieldFor} writes. */
     private List<Integer> aspectAmounts = List.of();
 
     private boolean[] revealedWells = new boolean[ASPECT_SLOTS];
 
-    /** How many of them there are, for the screen's "nothing revealed yet" notice. */
     private int revealedTotal;
 
     private int tracedPick = -1;
 
-    /** Whether to log what the reveal tests answered. Env-gated, as this mod's other traces. */
     private static final boolean TRACE = System.getenv("THAUMICENERGISTICS_ENCODER_TRACE") != null;
 
-    /** The source the last trace line described, so one item is logged once, not every tick. */
     private ItemStack tracedSource = ItemStack.EMPTY;
 
-    /** The reveal count that line described, so a change without a new item is logged too. */
     private int tracedRevealed = -1;
 
-    /** The source the row was last worked out from, so {@link #ensureAspects} can be a comparison. */
     private ItemStack lastSourceItem = ItemStack.EMPTY;
 
 
 
-    /** Whose knowledge decides whether the source item's aspects may be shown. */
     private final Player owner;
 
-    /** What the client last asked for, for the highlight only. The server re-validates every pick. */
     private int localSelection = -1;
 
     private final @Nullable BlockEntityDistillationEncoder encoder;
 
-    /** The row's backing container. Filled from the source item, emptied when it has none. */
     private final SimpleContainer aspectDisplay = new SimpleContainer(ASPECT_SLOTS);
 
-    /** The picked aspect, shown on its own. */
     private final SimpleContainer selectedDisplay = new SimpleContainer(1);
 
-    /** Client constructor: no block entity, so every display is derived from the synced slots. */
     public MenuDistillationEncoder(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
         this(containerId, playerInventory, (BlockEntityDistillationEncoder) null);
     }
@@ -177,8 +159,6 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         }
     }
 
-    /** Recomputes the offered aspects from the source item and redraws both displays; runs on the
-     * server's tick, or from {@link #ensureAspects} when a reader needs it now. */
     private void refreshAspects() {
         List<Holder<IAspect>> found;
         List<Integer> foundAmounts = new ArrayList<>();
@@ -230,8 +210,6 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         selectedDisplay.setItem(0, ItemStack.EMPTY);
     }
 
-    /** Whether the player scanned this item: the flag Thaumaturge sets when the Thaumometer reads it,
-     * the one its own tooltips check before listing aspects. */
     private boolean sourceIsScanned(ItemStack source) {
         return !source.isEmpty() && KnowledgeAccess.of(owner).isResearchKnown(ScanKeys.item(source.getItem()));
     }
@@ -343,7 +321,6 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         return List.copyOf(sorted);
     }
 
-    /** An aspect's id as a string, for the ordering both sides must agree on. */
     private static String aspectId(Holder<IAspect> aspect) {
         return aspect.unwrapKey().map(k -> k.location().toString()).orElse("");
     }
@@ -356,7 +333,6 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         return aspects.size();
     }
 
-    /** The index the client believes is selected, for drawing the highlight. */
     public int localSelection() {
         return localSelection;
     }
@@ -365,8 +341,6 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
     // Actions from the screen
     // ------------------------------------------------------------------
 
-    /** Records a pick. Runs on both sides: the server writes from it, the client moves the highlight and
-     * sends it on. */
     public void selectAspect(int index) {
         if (index < -1 || index >= aspects.size()) {
             return;
@@ -383,7 +357,6 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         }
     }
 
-    /** Asks the block entity to write a pattern. Server side only; the client asks by payload. */
     public void encode() {
         if (encoder != null) {
             encoder.encode();
@@ -391,8 +364,6 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         }
     }
 
-    /** Sets the source template from the client: where a JEI drag and a well click both arrive; the well
-     * is a template slot, so nothing has to be given back. */
     public void applySourceTemplate(ItemStack stack) {
         ItemStack wanted = stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1);
         slots.get(MENU_SOURCE).set(wanted);
@@ -400,8 +371,6 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         refreshAspects();
     }
 
-    /** Client side: shows a new source template at once, then asks the server to make it so. The local
-     * write is for immediacy, but the server applies the payload and syncs back, and its value wins. */
     public void requestSourceTemplate(ItemStack stack) {
         ItemStack wanted = stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1);
         slots.get(MENU_SOURCE).set(wanted);
@@ -410,8 +379,6 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         PacketDistributor.sendToServer(new EncoderSourcePayload(containerId, wanted));
     }
 
-    /** Moves one blank pattern from inventory into the blank well on a JEI drag. Server side only, and a
-     * real move: the blank is spent by the next encode, so one that appeared would mint patterns. */
     public void insertBlankFromInventory(Player player) {
         if (!slots.get(MENU_BLANK).getItem().isEmpty()) {
             return;
@@ -430,8 +397,6 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         }
     }
 
-    /** Whether {@link #encode()} would do anything, for the Encode button's state; read from the synced
-     * slots on both sides, and the server re-checks everything before anything is consumed. */
     public boolean canEncode() {
         if (slots.get(MENU_SOURCE).getItem().isEmpty()) {
             return false;
@@ -503,7 +468,6 @@ public class MenuDistillationEncoder extends AbstractContainerMenu {
         super.clicked(slotId, dragType, clickType, player);
     }
 
-    /** The machine's real slots, which are the first three after the player's. */
     private static final int MACHINE_START = PLAYER_SLOTS;
     private static final int MACHINE_END = PLAYER_SLOTS + 3;
 

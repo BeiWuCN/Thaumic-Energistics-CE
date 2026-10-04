@@ -28,7 +28,6 @@ import thaumicenergistics_ce.init.ModItems;
  */
 public final class HandlerKnowledgeCore {
 
-    /** Tag key holding the pattern list inside the stack's custom data. */
     private static final String NBT_PATTERNS = "Patterns";
 
     /** Patterns one core holds. Matches the assembler GUI's 7x3 read-only grid. */
@@ -50,10 +49,6 @@ public final class HandlerKnowledgeCore {
         load();
     }
 
-    /**
-     * Wraps a stack if it is a knowledge core.
-     * @return the handler, or {@code null} when the stack is not a core
-     */
     public static @Nullable HandlerKnowledgeCore of(ItemStack stack, HolderLookup.Provider registries) {
         if (stack.isEmpty() || !stack.is(ModItems.KNOWLEDGE_CORE.get())) {
             return null;
@@ -77,7 +72,6 @@ public final class HandlerKnowledgeCore {
         return patterns.size();
     }
 
-    /** The stored pattern producing {@code result}, or {@code null} when the core has none. */
     public @Nullable ThEArcanePattern patternFor(ItemStack result) {
         for (ThEArcanePattern pattern : patterns) {
             if (ItemStack.isSameItemSameComponents(pattern.result(), result)) {
@@ -110,10 +104,6 @@ public final class HandlerKnowledgeCore {
         return removed;
     }
 
-    /**
-     * Removes the entry whose result is {@code result}: a core holds at most one entry per result.
-     * @return {@code false} when the core holds no entry for that result
-     */
     public boolean removeByResult(ItemStack result) {
         ThEArcanePattern stored = patternFor(result);
         if (stored == null) {
@@ -122,7 +112,6 @@ public final class HandlerKnowledgeCore {
         return remove(stored);
     }
 
-    /** One result stack per stored pattern, in storage order. */
     public List<ItemStack> storedOutputs() {
         List<ItemStack> outputs = new ArrayList<>(patterns.size());
         for (ThEArcanePattern pattern : patterns) {
@@ -131,7 +120,6 @@ public final class HandlerKnowledgeCore {
         return outputs;
     }
 
-    /** Total vis the stored patterns would cost, for the tooltip. */
     public int totalVis() {
         int total = 0;
         for (ThEArcanePattern pattern : patterns) {
@@ -185,7 +173,6 @@ public final class HandlerKnowledgeCore {
         core.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
-    /** Entries the core holds that this build cannot read: kept, never offered as patterns. */
     public int unreadableCount() {
         return unreadable.size();
     }
@@ -253,7 +240,6 @@ public final class HandlerKnowledgeCore {
         return mutable;
     }
 
-    /** The aspect's display name, from Thaumaturge's own translation keys. */
     private static Component aspectName(AspectInstance entry) {
         var id = entry.aspect().getKey().location();
         return Component.translatable("aspect." + id.getNamespace() + "." + id.getPath());

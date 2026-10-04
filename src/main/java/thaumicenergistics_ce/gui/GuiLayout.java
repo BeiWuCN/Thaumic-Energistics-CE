@@ -24,14 +24,12 @@ import thaumicenergistics_ce.ThaumicEnergistics;
  */
 public final class GuiLayout {
 
-    /** Path under the mod's assets, matching the generator's output. */
     private static final String RESOURCE = "/assets/thaumicenergistics_ce/gui/arcane_assembler_gui.json";
 
     /** Window size, matching the reference screen; used only when the layout file cannot be read. */
     private static final int FB_WIDTH = 175;
     private static final int FB_HEIGHT = 231;
 
-    /** A position inside the panel, relative to its top-left corner. */
     public record Anchor(int x, int y) {}
 
     public record Grid(int x, int y, int cols, int rows) {
@@ -56,10 +54,8 @@ public final class GuiLayout {
         }
     }
 
-    /** The vis columns, not a regular row: the art parks the primal columns on the panel's left edge. */
     public record VisBars(List<Column> columns) {
 
-        /** One column: where the fill comes from in the texture, and where it lands in the window. */
         public record Column(int sourceU, int x, int y) {}
 
         public int count() {
@@ -106,8 +102,6 @@ public final class GuiLayout {
     private final Grid previewGrid;
     private final Anchor previewResult;
     private final Anchor playerInventory;
-    /** One piece of the background art and where it lands: the destination is not derived from the source
-     * offset, which would shift a cropped side slab twice. */
     public record PanelPiece(Region source, Anchor destination) {}
 
     private final Anchor hotbar;
@@ -203,7 +197,6 @@ public final class GuiLayout {
         return new VisBars(List.copyOf(columns));
     }
 
-    /** One {@code [sourceU, x, y]} triple, padded with zeros if the file is short. */
     private static VisBars.Column column(JsonElement entry) {
         int[] v = new int[3];
         JsonArray triple = entry.getAsJsonArray();
@@ -218,7 +211,6 @@ public final class GuiLayout {
         return new Region(at(v, 0, 0), at(v, 1, 0), at(v, 2, 0), at(v, 3, 0));
     }
 
-    /** @return the parsed layout, or {@code null} when the file is missing or malformed */
 
     public static @Nullable GuiLayout load() {
         try (InputStream stream = GuiLayout.class.getResourceAsStream(RESOURCE)) {
@@ -238,8 +230,6 @@ public final class GuiLayout {
         return imageWidth;
     }
 
-    /** The background art, as a full path including {@code textures/} and {@code .png}; declared beside the
-     * coordinates measured from that image, so the two cannot point at different files. */
     public ResourceLocation texture() {
         ResourceLocation location = ResourceLocation.tryParse(texture);
         if (location == null) {

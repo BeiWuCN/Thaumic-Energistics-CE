@@ -27,7 +27,6 @@ public final class EssentiaMEStorage implements MEStorage {
         this.storage = storage;
     }
 
-    /** The container behind this view, for a caller that needs to talk to it directly. */
     public IEssentiaStorage container() {
         return storage;
     }
@@ -75,7 +74,6 @@ public final class EssentiaMEStorage implements MEStorage {
         return storage.extract(aspect, wanted, simulate);
     }
 
-    /** A version counter the network can watch instead of polling contents. */
     public long contentRevision() {
         return storage.contentRevision();
     }

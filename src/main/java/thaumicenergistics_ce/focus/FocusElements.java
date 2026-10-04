@@ -19,8 +19,7 @@ public final class FocusElements {
     public static final DeferredRegister<FocusElementType> REGISTRY =
             DeferredRegister.create(FocusElementType.REGISTRY_KEY, ThEIds.MODID);
 
-    /** The wrench focus effect; the research page blits {@code icon} directly, hence the
-     * {@code .png}; {@code color} is AE2's wrench tint, as in the original focus. */
+    /** The research page blits {@code icon}, hence the {@code .png}; {@code color} is AE2's wrench tint. */
     public static final DeferredHolder<FocusElementType, FocusElementType> AEWRENCH = REGISTRY.register(
             FocusEffectAEWrench.KEY.getPath(),
             () -> new FocusElementType(

@@ -28,10 +28,8 @@ import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProviderConnection;
  */
 public class ItemWirelessConnector extends Item {
 
-    /** The receiver waiting to be bound, as a packed BlockPos. */
     private static final String NBT_SELECTED = "SelectedReceiver";
 
-    /** The dimension the selection was made in, so a selection does not carry across worlds. */
     private static final String NBT_DIMENSION = "SelectedDimension";
 
     public ItemWirelessConnector(Properties properties) {
@@ -71,7 +69,6 @@ public class ItemWirelessConnector extends Item {
         return InteractionResult.SUCCESS;
     }
 
-    /** Points the tool at a receiver and remembers where it is. */
     private static void select(Level level, BlockPos receiver, ItemStack tool, Player player) {
         setSelection(tool, receiver, level.dimension().location().toString());
         player.displayClientMessage(
@@ -108,10 +105,6 @@ public class ItemWirelessConnector extends Item {
         tool.set(DataComponents.CUSTOM_DATA, CustomData.of(updated));
     }
 
-    /**
-     * Binds the remembered receiver to the clicked provider. The receiver does the work and reports why
-     * it refused, so the player is told which limit they hit rather than just that nothing happened.
-     */
     private static void bind(Level level, BlockPos provider, ItemStack tool, Player player) {
         CompoundTag tag = selection(tool);
         if (tag == null || !tag.contains(NBT_SELECTED)) {
@@ -120,8 +113,6 @@ public class ItemWirelessConnector extends Item {
                     true);
             return;
         }
-        // A selection made in another dimension is not a selection: the coordinates would resolve to a
-        // different block, or to nothing.
         String dimension = level.dimension().location().toString();
         if (!dimension.equals(tag.getString(NBT_DIMENSION))) {
             player.displayClientMessage(
@@ -149,7 +140,6 @@ public class ItemWirelessConnector extends Item {
                 Component.translatable("item.thaumicenergistics_ce.wireless_connector.linked"), true);
     }
 
-    /** Says where this end is and what it is bound to. */
     private static void report(Level level, BlockPos pos, Player player,
             boolean isReceiver, boolean isProvider) {
         if (isReceiver && level.getBlockEntity(pos) instanceof BlockEntityEssentiaProviderConnection receiver) {

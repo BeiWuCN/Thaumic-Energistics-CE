@@ -29,7 +29,6 @@ public final class ItemArcanePattern extends Item {
         return PatternDetailsHelper.encodedPatternItemBuilder(new Decoder()).build();
     }
 
-    /** Reads a pattern back out of its item form, through the assembler's own adapter. */
     private static final class Decoder implements EncodedPatternDecoder<ArcanePatternDetails> {
 
         @Override

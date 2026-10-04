@@ -33,10 +33,8 @@ import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
  */
 public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInfusionMonitor> {
 
-    /** How far above the block the panel floats - clear of the model's own top face. */
     private static final double HEIGHT = 1.7;
 
-    /** Text scale: half a name tag's, since this labels a machine, not a distant entity. */
     private static final float SCALE = 0.0125F;
 
     /** Line spacing in text units; eleven is the floor: glyphs plus a drop shadow overlap at ten. */
@@ -48,7 +46,6 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
 
     private static final int CHIP_ROW_HEIGHT = CHIP + 2;
 
-    /** The panel's fill, the two colours of its border, and how round its corners are. */
     private static final int PANEL_FILL = 0xF0100010;
     private static final int BORDER_TOP = 0x505000FF;
     private static final int BORDER_BOTTOM = 0x5028007F;
@@ -59,7 +56,6 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
     private static final float BORDER_Z = -0.08F;
     private static final float FILL_Z = -0.06F;
 
-    /** How much room the panel leaves around its contents, in pixels of the text's own units. */
     private static final float PADDING_X = 5.0F;
     private static final float PADDING_Y = 4.0F;
 
@@ -160,13 +156,11 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
         pose.popPose();
     }
 
-    /** Rows already built, per monitor, with the state they were built from. Weakly keyed. */
     private final Map<BlockEntityInfusionMonitor, Built> built = new WeakHashMap<>();
 
     private record Built(int tier, String stability, boolean crafting, ItemStack craft,
             List<BlockEntityInfusionMonitor.EssentiaLine> essentia, List<List<Cell>> rows) {}
 
-    /** Rebuilt only when the synced state changes; drawn every frame, so compared by value. */
     private List<List<Cell>> rowsFor(Font font, BlockEntityInfusionMonitor monitor) {
         List<BlockEntityInfusionMonitor.EssentiaLine> essentia = monitor.bubbleEssentia();
         ItemStack craft = monitor.bubbleCraft();
@@ -185,7 +179,6 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
         return rows;
     }
 
-    /** What the bubble says, top to bottom. */
     private static List<List<Cell>> rows(Font font, BlockEntityInfusionMonitor monitor,
             List<BlockEntityInfusionMonitor.EssentiaLine> essentia, ItemStack craft) {
         List<List<Cell>> rows = new ArrayList<>();
@@ -219,7 +212,6 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
         return rows;
     }
 
-    /** The aspect behind an id from the sync tag, or {@code null} when the client has not seen it. */
     private static Holder<IAspect> aspectOf(String id) {
         Minecraft minecraft = Minecraft.getInstance();
         ResourceLocation location = ResourceLocation.tryParse(id);
@@ -287,7 +279,6 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
         }
     }
 
-    /** One line of text. Drawn lit deliberately: the block's own light would leave it dark on dark. */
     private static void drawText(
             Font font,
             Component text,
@@ -334,7 +325,6 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
                 FILL_Z);
     }
 
-    /** A rounded rectangle filled with a vertical gradient; corners are one strip per unit of radius. */
     private static void roundedFill(
             VertexConsumer quads,
             Matrix4f matrix,
@@ -379,7 +369,6 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
         }
     }
 
-    /** A rectangle whose colour is taken from the panel's gradient at its own height. */
     private static void strip(
             VertexConsumer quads,
             Matrix4f matrix,
@@ -405,7 +394,6 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
                 z);
     }
 
-    /** One quad, from the top-left to the bottom-right, coloured from the top edge to the bottom edge. */
     private static void fill(
             VertexConsumer quads,
             Matrix4f matrix,
@@ -422,7 +410,6 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
         quads.addVertex(matrix, x1, y0, z).setColor(topColour);
     }
 
-    /** A colour a fraction of the way from one to the other, alpha included. */
     private static int mix(int from, int to, float t) {
         float f = Math.max(0.0F, Math.min(1.0F, t));
         int a = (int) (((from >>> 24) & 0xFF) + (((to >>> 24) & 0xFF) - ((from >>> 24) & 0xFF)) * f);
@@ -432,7 +419,6 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
-    /** Green through red, the same five colours the tooltip uses. */
     private static int colourOf(int tier) {
         return switch (tier) {
             case 1 -> 0xFF55FF55;

@@ -34,7 +34,6 @@ public class BlockEssentiaProviderConnection extends ThEBaseEntityBlock {
 
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
-    /** Whether a provider is bound. Lights the ring. */
     public static final BooleanProperty CONNECTED = BooleanProperty.create("connected");
 
     public BlockEssentiaProviderConnection(Properties properties) {
@@ -54,10 +53,6 @@ public class BlockEssentiaProviderConnection extends ThEBaseEntityBlock {
         builder.add(FACING, CONNECTED);
     }
 
-    /**
-     * Points the plug into the surface it was placed against: the model is built facing north, so
-     * {@code FACING} is the clicked face, not where the player stands.
-     */
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
         return defaultBlockState().setValue(FACING, context.getClickedFace());

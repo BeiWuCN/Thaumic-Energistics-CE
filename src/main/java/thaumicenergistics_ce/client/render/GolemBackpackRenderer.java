@@ -38,13 +38,10 @@ public final class GolemBackpackRenderer {
     /** How high up the golem's body the pack sits, in blocks above its feet. */
     private static final float PACK_HEIGHT = 0.42F;
 
-    /** How far behind the golem's centre the pack sits, in blocks. */
     private static final float PACK_DEPTH = 0.16F;
 
-    /** The pack's scale. One, because the model is already authored in blocks. */
     private static final float PACK_SCALE = 1.0F;
 
-    /** Degrees per tick the pearl turns. */
     private static final float PEARL_SPIN_PER_TICK = 2.0F;
 
     private static final GolemBackpackModel MODEL = GolemBackpackModel.create();

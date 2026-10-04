@@ -40,20 +40,17 @@ public final class ModMenuTypes {
             REGISTRY.register(
                     "knowledge_inscriber", () -> IMenuTypeExtension.create(MenuKnowledgeInscriber::new));
 
-    /** The Essentia Vibration Chamber's screen: the buffer, the fuel slot, and progress through it. */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaVibrationChamber>>
             ESSENTIA_VIBRATION_CHAMBER =
                     REGISTRY.register(
                             "essentia_vibration_chamber",
                             () -> IMenuTypeExtension.create(MenuEssentiaVibrationChamber::new));
 
-    /** The Essentia Cell Workbench's screen: the cell and the partition being edited. */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaCellWorkbench>> ESSENTIA_CELL_WORKBENCH =
             REGISTRY.register(
                     "essentia_cell_workbench",
                     () -> IMenuTypeExtension.create(MenuEssentiaCellWorkbench::new));
 
-    /** The Distillation Encoder's screen: the item, its aspects, and the pattern being written. */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuDistillationEncoder>> DISTILLATION_ENCODER =
             REGISTRY.register(
                     "distillation_encoder",
@@ -66,7 +63,6 @@ public final class ModMenuTypes {
     public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneCraftingTerminal>>
             ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
                     "arcane_crafting_terminal",
-                    // A lambda, not a method reference: both MenuTypeBuilder overloads are applicable.
                     () -> MenuTypeBuilder.<MenuArcaneCraftingTerminal, ITerminalHost>create(
                                     (menuType, id, playerInventory, host) ->
                                             new MenuArcaneCraftingTerminal(menuType, id, playerInventory, host),
@@ -138,8 +134,6 @@ public final class ModMenuTypes {
                     "essentia_level_emitter",
                     () -> MenuTypeBuilder.create(
                                     MenuEssentiaLevelEmitter::new, PartEssentiaLevelEmitter.class)
-                            // Named as the buses are: left alone the builder captions this with AE2's generic
-                            // level emitter title.
                             .withMenuTitle(host -> Component.translatable(
                                     "gui.thaumicenergistics_ce.essentia_level_emitter"))
                             .withInitialData(

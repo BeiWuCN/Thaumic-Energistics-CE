@@ -59,7 +59,6 @@ public final class AssemblerCraftSelfTest {
             return;
         }
 
-        // Never added to a level; loadWithComponents is the chunk-load call the game makes.
         BlockPos pos = player.blockPosition();
         BlockEntityArcaneAssembler machine =
                 new BlockEntityArcaneAssembler(pos, ModBlocks.ARCANE_ASSEMBLER.get().defaultBlockState());
@@ -116,14 +115,12 @@ public final class AssemblerCraftSelfTest {
         BlockEntityArcaneAssembler reloaded =
                 new BlockEntityArcaneAssembler(pos, ModBlocks.ARCANE_ASSEMBLER.get().defaultBlockState());
         reloaded.loadWithComponents(saved, level.registryAccess());
-        // A level only because offering patterns reads the core through one; the tag needed none.
         reloaded.setLevel(level);
 
         ItemStack back = reloaded.getInventory().getItem(BlockEntityArcaneAssembler.coreSlotForTest());
         HandlerKnowledgeCore handler = HandlerKnowledgeCore.of(back, level.registryAccess());
         int stored = handler == null ? -1 : handler.size();
         int offered = reloaded.getAvailablePatterns().size();
-        // The whole stack: a core back without its custom data is the loss this check exists for.
         if (!ItemStack.isSameItemSameComponents(core, back)) {
             ThaumicEnergistics.LOG.warn(
                     "[asmtest] FAIL the core did not survive the round trip: saved {} [{}], reloaded {} [{}]",
@@ -179,10 +176,6 @@ public final class AssemblerCraftSelfTest {
         checkLanguageFilesAgree();
     }
 
-    /**
-     * Every key the assembler's Jade tooltip can ask for, fully qualified: the labels cannot come from the
-     * machine, since {@code ArcaneAssemblerProvider} is in an optional-Jade package and may not be present.
-     */
     private static List<String> tooltipKeys() {
         List<String> keys = new ArrayList<>(BlockEntityArcaneAssembler.tooltipReasonKeys());
         for (String label : List.of(
@@ -235,7 +228,6 @@ public final class AssemblerCraftSelfTest {
         }
     }
 
-    /** The key set of one shipped language file, or {@code null} if it cannot be read. */
     private static @Nullable Set<String> langKeys(String lang) {
         String path = "/assets/thaumicenergistics_ce/lang/" + lang + ".json";
         try (var stream = AssemblerCraftSelfTest.class.getResourceAsStream(path)) {
@@ -272,8 +264,6 @@ public final class AssemblerCraftSelfTest {
         var decoded = PatternDetailsHelper.decodePattern(
                 AEItemKey.fromTag(level.registryAccess(), asCpuSavesIt), level);
 
-        // Decoding only half of it: AE2 looks the machine up in a HashMap keyed by IPatternDetails
-        // equals/hashCode, so a decoded task unequal to the offered one matches no machine.
         ThaumicEnergistics.LOG.info(
                 "[asmtest] CPU task round trip: definition={} isEncodedPattern={} decodedBack={} equalToOffered={}",
                 details.getDefinition(),
@@ -319,7 +309,6 @@ public final class AssemblerCraftSelfTest {
             }
             recipes++;
 
-            // What a knowledge core does: written by the core, read back by a fresh handler.
             CompoundTag saved = pattern.save(level.registryAccess());
             ThEArcanePattern reloaded = ThEArcanePattern.load(level.registryAccess(), saved);
             if (reloaded == null) {
@@ -327,7 +316,6 @@ public final class AssemblerCraftSelfTest {
                 continue;
             }
 
-            // Then exactly what the assembler asks when deciding whether to offer it.
             StringBuilder refusal = new StringBuilder();
             if (ArcanePatternDetails.of(reloaded, level.registryAccess(), refusal::append) == null) {
                 unrecognised++;
@@ -347,7 +335,6 @@ public final class AssemblerCraftSelfTest {
                 firstUnrecognised == null ? "(none)" : firstUnrecognised);
     }
 
-    /** A knowledge core holding {@code pattern}, built through the mod's own API so the encoding is real. */
     private static ItemStack knowledgeCoreHolding(ThEArcanePattern pattern, ServerLevel level) {
         ItemStack core = new ItemStack(ModItems.KNOWLEDGE_CORE.get());
         HandlerKnowledgeCore handler = HandlerKnowledgeCore.of(core, level.registryAccess());

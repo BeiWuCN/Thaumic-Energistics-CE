@@ -54,17 +54,11 @@ public final class ClientSetup {
         });
     }
 
-    /**
-     * The Infusion Monitor's risk bubble, drawn above the block. A block entity renderer, because the
-     * reference build's {@code TextDisplay} is not the shape this should have been.
-     */
     @SubscribeEvent
     public static void registerRenderers(
             EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(
                 thaumicenergistics_ce.init.ModBlockEntities.INFUSION_MONITOR.get(), MonitorBubbleRenderer::new);
-        // And the assembler's product, drawn inside the block: what a machine is doing should be
-        // legible from outside it.
         event.registerBlockEntityRenderer(
                 thaumicenergistics_ce.init.ModBlockEntities.ARCANE_ASSEMBLER.get(),
                 ArcaneAssemblerRenderer::new);
@@ -74,12 +68,9 @@ public final class ClientSetup {
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenuTypes.ARCANE_ASSEMBLER.get(), ScreenArcaneAssembler::new);
         event.register(ModMenuTypes.KNOWLEDGE_INSCRIBER.get(), ScreenKnowledgeInscriber::new);
-        // Draws its own art rather than using a screen style.
         event.register(ModMenuTypes.ESSENTIA_CELL_WORKBENCH.get(), ScreenEssentiaCellWorkbench::new);
         event.register(ModMenuTypes.DISTILLATION_ENCODER.get(), ScreenDistillationEncoder::new);
-        // Draws its own window rather than blitting one: the machine's art is a widget, not a panel.
         event.register(ModMenuTypes.ESSENTIA_VIBRATION_CHAMBER.get(), ScreenEssentiaVibrationChamber::new);
-        // AE2's own terminal layout: the terminal then looks like any other AE2 terminal.
         // The lambda names its parameter types because register is generic over menu and screen.
         event.register(
                 ModMenuTypes.ESSENTIA_TERMINAL.get(),
@@ -98,8 +89,6 @@ public final class ClientSetup {
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/arcane_crafting_terminal.json")));
-        // The wireless one is the same screen: the two menus differ in how the network is reached, not in
-        // what is drawn. AE2's wireless terminal layout is used so the power bar is where players expect.
         event.register(
                 ModMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get(),
                 (MenuEssentiaTerminal menu, Inventory inventory, Component title) ->
@@ -108,8 +97,6 @@ public final class ClientSetup {
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/terminals/wireless_terminal.json")));
-        // A style under this mod's assets cannot be loaded: StyleManager searches AE2's namespace only.
-        // The import and export buses are named classes because JEI's handler registers against one.
         event.register(
                 ModMenuTypes.ESSENTIA_IMPORT_BUS.get(),
                 (MenuEssentiaImportBus menu, Inventory inventory, Component title) ->

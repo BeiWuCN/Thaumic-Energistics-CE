@@ -34,7 +34,6 @@ import thaumicenergistics_ce.init.ModBlocks;
  */
 public final class EncoderSelfTest {
 
-    /** One run per server, not one per login. */
     private static boolean hasRun;
 
     private EncoderSelfTest() {}
@@ -72,7 +71,6 @@ public final class EncoderSelfTest {
         }
 
         BlockEntityDistillationEncoder encoder = newEncoder(level);
-        // The source well is left empty on purpose: the old form could not record its absence.
         encoder.getInventory().setItem(BlockEntityDistillationEncoder.SLOT_BLANK, newBlankPattern());
         encoder.getInventory().setItem(BlockEntityDistillationEncoder.SLOT_ENCODED, written);
 
@@ -136,7 +134,6 @@ public final class EncoderSelfTest {
             failures.add("encode() reported success and left the written well empty");
             return;
         }
-        // The state the owner described: patterns in the pattern wells, nothing in the source well.
         encoder.setSourceTemplate(ItemStack.EMPTY);
 
         BlockEntityDistillationEncoder reloaded = roundTrip(level, encoder);
@@ -160,7 +157,6 @@ public final class EncoderSelfTest {
             return;
         }
 
-        // What the old save held: both pattern wells full, the source well empty.
         BlockEntityDistillationEncoder old = newEncoder(level);
         old.getInventory().setItem(BlockEntityDistillationEncoder.SLOT_BLANK, newBlankPattern());
         old.getInventory().setItem(BlockEntityDistillationEncoder.SLOT_ENCODED, written);
@@ -180,7 +176,6 @@ public final class EncoderSelfTest {
         expectWell(failures, "the written pattern", written, rescued, BlockEntityDistillationEncoder.SLOT_ENCODED);
     }
 
-    /** Saves a machine's own tag and reads it back into a fresh one. */
     private static BlockEntityDistillationEncoder roundTrip(
             ServerLevel level, BlockEntityDistillationEncoder from) {
         CompoundTag tag = from.saveCustomOnly(level.registryAccess());
@@ -189,11 +184,9 @@ public final class EncoderSelfTest {
         return reloaded;
     }
 
-    /** Saves a machine the way the pre-fix code did and reads that back into a fresh one. */
     private static BlockEntityDistillationEncoder loadLegacy(
             ServerLevel level, BlockEntityDistillationEncoder from) {
         CompoundTag legacy = new CompoundTag();
-        // The old saveAdditional, verbatim: a bare list with no index on any entry.
         legacy.put("Inventory", from.getInventory().createTag(level.registryAccess()));
         BlockEntityDistillationEncoder reloaded = newEncoder(level);
         reloaded.loadCustomOnly(legacy, level.registryAccess());
@@ -226,7 +219,6 @@ public final class EncoderSelfTest {
     }
 
     private static BlockEntityDistillationEncoder newEncoder(ServerLevel level) {
-        // Detached; only its level is set, and only because reading a tag needs the registry access.
         BlockEntityDistillationEncoder encoder = new BlockEntityDistillationEncoder(
                 new BlockPos(0, -4096, 0), ModBlocks.DISTILLATION_ENCODER.get().defaultBlockState());
         encoder.setLevel(level);
@@ -237,7 +229,6 @@ public final class EncoderSelfTest {
         return AEItems.BLANK_PATTERN.stack();
     }
 
-    /** A written AE pattern, of the kind a finished encode leaves in the written well. */
     private static ItemStack writtenPattern() {
         AEItemKey in = AEItemKey.of(new ItemStack(Items.STONE));
         AEItemKey out = AEItemKey.of(new ItemStack(Items.DIAMOND));
@@ -248,8 +239,6 @@ public final class EncoderSelfTest {
                 List.of(new GenericStack(in, 1)), List.of(new GenericStack(out, 1)));
     }
 
-    /** An item the aspect index has a composition for, or {@code null} when the few tried all have none:
-     * without one the machine offers nothing to distil, so the encode path cannot be driven. */
     private static @Nullable ItemStack firstDistillableItem(ServerLevel level) {
         var items = level.registryAccess().lookupOrThrow(Registries.ITEM);
         for (String id : new String[] {"minecraft:bone", "minecraft:stone", "minecraft:coal"}) {

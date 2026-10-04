@@ -26,17 +26,10 @@ public class MenuEssentiaTerminal extends MEStorageMenu {
         super(menuType, id, playerInventory, host);
     }
 
-    /** True on the side that owns the network. */
     public boolean isServerSide() {
         return !isClientSide();
     }
 
-    /**
-     * Takes essentia out of the network and into the player's container. Server side only.
-     * @param where the cursor or the main hand - see {@link ContainerSlot}; {@code stack} is only a hint, so
-     *     the container is looked up on the server rather than taken from the packet
-     * @return whether anything was transferred
-     */
     public boolean fillFromNetwork(Player player, int where, ResourceLocation aspectId) {
         if (isClientSide()) {
             return false;
@@ -54,12 +47,6 @@ public class MenuEssentiaTerminal extends MEStorageMenu {
         return moved;
     }
 
-    /**
-     * Empties an essentia container into the network. Server side only, working from what the server holds:
-     * the payload's stack only locates the container meant, so a moved inventory cannot be handed over.
-     * @param where the cursor, the main hand, or a menu slot id
-     * @param claimed what the client says it was holding, never trusted
-     */
     public void deposit(Player player, int where, ItemStack claimed) {
         if (isClientSide()) {
             return;
@@ -104,10 +91,6 @@ public class MenuEssentiaTerminal extends MEStorageMenu {
         broadcastChanges();
     }
 
-    /**
-     * The stack a place names, or {@code null} when that place is not one this menu will move: the cursor and
-     * the main hand, the only places "the container I am using" can be, and neither is a slot.
-     */
     private ItemStack containerAt(Player player, int where) {
         return switch (where) {
             case ContainerSlot.CURSOR -> getCarried();
@@ -116,10 +99,6 @@ public class MenuEssentiaTerminal extends MEStorageMenu {
         };
     }
 
-    /**
-     * Empties an essentia container into the network.
-     * @return {@code null} when the stack is not a container the terminal handles
-     */
     public ItemStack emptyIntoNetwork(ItemStack stack) {
         if (isClientSide()) {
             return null;

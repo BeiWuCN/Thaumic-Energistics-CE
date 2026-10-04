@@ -36,13 +36,10 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
  */
 public class ItemEssentiaCell extends Item implements IBasicCellItem {
 
-    /** How many upgrade cards a component takes, matching AE2's own cells. */
     private static final int UPGRADE_SLOTS = 3;
 
-    /** Bytes each distinct aspect costs beyond the essentia itself. AE2's own figure. */
     private static final int BYTES_PER_TYPE = 8;
 
-    /** Distinct aspects one component can hold, matching AE2's 63-type ceiling. */
     private static final int MAX_TYPES = 63;
 
     private final String tier;
@@ -130,13 +127,11 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
         return UpgradeInventories.forItem(stack, UPGRADE_SLOTS);
     }
 
-    /** A partition list limited to essentia, so a cell can be told which aspects to accept. */
     @Override
     public ConfigInventory getConfigInventory(ItemStack stack) {
         return CellConfig.create(Set.of(AEssentiaKeyType.INSTANCE), stack);
     }
 
-    /** Not fuzzy. An aspect has no damage or durability for a percentage to describe. */
     @Override
     public FuzzyMode getFuzzyMode(ItemStack stack) {
         return FuzzyMode.IGNORE_ALL;
@@ -144,7 +139,6 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
 
     @Override
     public void setFuzzyMode(ItemStack stack, FuzzyMode mode) {
-        // Nothing to store: the mode is fixed.
     }
 
     @Override
@@ -158,14 +152,11 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
         return getCellTooltipImage(stack);
     }
 
-    // ---- Partitioning, shared with the cell workbench ----------------------
 
-    /** The cell's partition list, or {@code null} when the stack is not one of ours. */
     public static @Nullable ConfigInventory partitionOf(ItemStack stack) {
         return stack.getItem() instanceof ItemEssentiaCell cell ? cell.getConfigInventory(stack) : null;
     }
 
-    /** The aspects a cell is partitioned to, in slot order. */
     public static List<ResourceLocation> partitionedAspects(ItemStack stack) {
         ConfigInventory inventory = partitionOf(stack);
         if (inventory == null) {
@@ -180,7 +171,6 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
         return aspects;
     }
 
-    /** Adds an aspect to the partition. @return false when already present or the list is full */
     public static boolean addPartition(ItemStack stack, ResourceLocation aspectId) {
         ConfigInventory inventory = partitionOf(stack);
         if (inventory == null) {
@@ -201,7 +191,6 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
         return false;
     }
 
-    /** Removes an aspect from the partition. @return false when it was not there */
     public static boolean removePartition(ItemStack stack, ResourceLocation aspectId) {
         ConfigInventory inventory = partitionOf(stack);
         if (inventory == null) {
@@ -216,7 +205,6 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
         return false;
     }
 
-    /** Empties the partition list. */
     public static void clearPartition(ItemStack stack) {
         ConfigInventory inventory = partitionOf(stack);
         if (inventory != null) {
@@ -224,10 +212,6 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
         }
     }
 
-    /**
-     * Partitions a cell to whatever it already holds. The workbench's "partition to contents"; it reads
-     * the cell's own inventory, so it belongs to this item and not to the block the player stands at.
-     */
     public static void partitionToContents(ItemStack stack) {
         ConfigInventory partition = partitionOf(stack);
         if (partition == null) {
@@ -251,7 +235,6 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
         }
     }
 
-    /** The cell's contents, as aspect stacks, for the workbench and the terminal. */
     public static List<GenericStack> contentsOf(ItemStack stack) {
         BasicCellInventory cell = BasicCellInventory.createInventory(stack, null);
         if (cell == null) {

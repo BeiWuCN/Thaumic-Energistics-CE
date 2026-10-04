@@ -41,7 +41,6 @@ public final class GolemWirelessLink {
         this.source = source;
     }
 
-    /** The network behind this golem's link, or null if it cannot be reached from where the golem is. */
     @Nullable
     public static GolemWirelessLink open(EntityThaumaturgeGolem golem, GlobalPos target) {
         Level level = golem.level();
@@ -88,7 +87,6 @@ public final class GolemWirelessLink {
         return inserted;
     }
 
-    /** Items per operation for this golem. */
     public static int itemRate(EntityThaumaturgeGolem golem) {
         int rank = Math.max(0, Math.min(ITEM_RATES.length - 1, golem.getProperties().getRank()));
         return ITEM_RATES[rank];

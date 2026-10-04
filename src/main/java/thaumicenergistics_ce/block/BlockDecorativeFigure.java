@@ -35,13 +35,8 @@ public class BlockDecorativeFigure extends HorizontalDirectionalBlock {
 
     public static final MapCodec<BlockDecorativeFigure> CODEC = simpleCodec(BlockDecorativeFigure::new);
 
-    /** Which of the two models to draw. See the class note for why this exists at all. */
     public static final BooleanProperty VARIANT = BooleanProperty.create("variant");
 
-    /**
-     * The figure's box: smaller than a full cube and off-centre, because a full collision shape would
-     * feel like an invisible wall around a figure sitting on the floor.
-     */
     private static final VoxelShape SHAPE = Shapes.box(0.25, 0.0, 0.25, 0.75, 0.75, 0.75);
 
     public BlockDecorativeFigure(Properties properties) {
@@ -82,10 +77,6 @@ public class BlockDecorativeFigure extends HorizontalDirectionalBlock {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
-    /**
-     * Turning, or picking up: two things on one button would be ambiguous, so shift is the distinction -
-     * a plain click turns the figure to face the player, a shift-click takes it back.
-     */
     @Override
     protected InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {

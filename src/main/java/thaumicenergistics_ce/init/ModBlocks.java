@@ -43,7 +43,6 @@ public final class ModBlocks {
             "arcane_assembler",
             () -> new BlockArcaneAssembler(ASSEMBLER_PROPERTIES));
 
-    /** Properties for the Knowledge Inscriber: a full cube, so it keeps the default occlusion shape. */
     private static final BlockBehaviour.Properties INSCRIBER_PROPERTIES = BlockBehaviour.Properties.of()
             .mapColor(MapColor.WOOD)
             .strength(2.5F, 6.0F)
@@ -54,7 +53,6 @@ public final class ModBlocks {
             "knowledge_inscriber",
             () -> new BlockKnowledgeInscriber(INSCRIBER_PROPERTIES));
 
-    /** Where a storage cell is told which aspects it may hold. */
     public static final DeferredBlock<BlockEssentiaCellWorkbench> ESSENTIA_CELL_WORKBENCH = REGISTRY.register(
             "essentia_cell_workbench",
             () -> new BlockEssentiaCellWorkbench(BlockBehaviour.Properties.of()
@@ -63,20 +61,17 @@ public final class ModBlocks {
                     .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()));
 
-    /** Properties for the Essentia Vibration Chamber: metal and a pickaxe, the same as the other machines. */
     private static final BlockBehaviour.Properties VIBRATION_PROPERTIES = BlockBehaviour.Properties.of()
             .mapColor(MapColor.METAL)
             .strength(3.0F, 7.0F)
             .sound(SoundType.METAL)
             .requiresCorrectToolForDrops();
 
-    /** Burns essentia into AE. */
     public static final DeferredBlock<BlockEssentiaVibrationChamber> ESSENTIA_VIBRATION_CHAMBER =
             REGISTRY.register(
                     "essentia_vibration_chamber",
                     () -> new BlockEssentiaVibrationChamber(VIBRATION_PROPERTIES));
 
-    /** Hands essentia from the network to whatever container it touches. A full cube, like the machines. */
     public static final DeferredBlock<BlockEssentiaProvider> ESSENTIA_PROVIDER = REGISTRY.register(
             "essentia_provider",
             () -> new BlockEssentiaProvider(BlockBehaviour.Properties.of()
@@ -85,7 +80,6 @@ public final class ModBlocks {
                     .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()));
 
-    /** Lets an Infusion Altar draw its essentia from the network instead of from jars. */
     public static final DeferredBlock<BlockInfusionProvider> INFUSION_PROVIDER = REGISTRY.register(
             "infusion_provider",
             () -> new BlockInfusionProvider(BlockBehaviour.Properties.of()
@@ -94,7 +88,6 @@ public final class ModBlocks {
                     .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()));
 
-    /** Writes "this item distils into that essentia" as an ME processing pattern. */
     public static final DeferredBlock<BlockDistillationEncoder> DISTILLATION_ENCODER = REGISTRY.register(
             "distillation_encoder",
             () -> new BlockDistillationEncoder(BlockBehaviour.Properties.of()
@@ -103,7 +96,6 @@ public final class ModBlocks {
                     .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()));
 
-    /** Watches an Infusion Altar and reports what the ritual is about to do. */
     public static final DeferredBlock<BlockInfusionMonitor> INFUSION_MONITOR = REGISTRY.register(
             "infusion_monitor",
             () -> new BlockInfusionMonitor(BlockBehaviour.Properties.of()
@@ -127,7 +119,6 @@ public final class ModBlocks {
                             .requiresCorrectToolForDrops()
                             .noOcclusion()));
 
-    /** A decorative figure: {@code noOcclusion()} and a small shape, so nothing about it is a solid block. */
     public static final DeferredBlock<BlockDecorativeFigure> ALKUSURE86_FUMO = REGISTRY.register(
             "alkusure86fumo",
             () -> new BlockDecorativeFigure(BlockBehaviour.Properties.of()

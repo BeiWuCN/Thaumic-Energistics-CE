@@ -22,35 +22,23 @@ import org.jspecify.annotations.Nullable;
  */
 final class EssentiaNeighbour {
 
-    /** The six faces, so a container accepting several is tried in a stable order. */
     private static final Direction[] FACES = Direction.values();
 
     private EssentiaNeighbour() {}
 
-    /**
-     * The essentia container on {@code target}, reachable from the bus's own face, or null.
-     *
-     * @param from the direction from {@code target} back towards the bus - the container's face the bus is
-     *     standing at. Callers pass {@code getSide().getOpposite()}.
-     */
     static @Nullable IEssentiaStorage find(Level level, BlockPos target, Direction from) {
         if (!(level instanceof ServerLevel server)) {
             return null;
         }
 
-        // Is anything here, and does it consider itself connected to us? A transport that says no does not
-        // want a bus on this face, and an unconnected bus should be inactive rather than fail every tick.
         IEssentiaTransport transport = server.getCapability(EssentiaCapabilities.TRANSPORT, target, from);
         if (transport == null) {
-            // No transport: a plain storage block with no opinion about faces, or nothing at all.
             return server.getCapability(EssentiaCapabilities.STORAGE, target, from);
         }
         if (!transport.isConnectable(from)) {
             return null;
         }
 
-        // Prefer the storage view, on any face the container accepts: a jar taken this way is the same jar
-        // whichever side the bus is on.
         for (Direction accepted : FACES) {
             if (!transport.isConnectable(accepted)) {
                 continue;
@@ -61,14 +49,10 @@ final class EssentiaNeighbour {
             }
         }
 
-        // A pipe, or anything else that only speaks the transport protocol.
         return new Adapter(transport, from);
     }
 
-    /**
-     * Presents an {@link IEssentiaTransport} as an {@link IEssentiaStorage} on one face: everything here is
-     * directional by necessity, since a pipe's contents differ per face and the adapter is built for one.
-     */
+    /** Directional by necessity: a pipe's contents differ per face, so one adapter serves one face. */
     private record Adapter(IEssentiaTransport transport, Direction face) implements IEssentiaStorage {
 
         @Override
@@ -104,7 +88,6 @@ final class EssentiaNeighbour {
 
         @Override
         public long contentRevision() {
-            // Nothing to offer, and 0 is honest: a caller caching on it simply refreshes.
             return 0;
         }
     }

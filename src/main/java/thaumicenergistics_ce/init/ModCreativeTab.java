@@ -32,7 +32,6 @@ public final class ModCreativeTab {
                         output.accept(ModItems.ESSENTIA_PROVIDER_CONNECTION.get());
                         output.accept(ModItems.WIRELESS_CONNECTOR.get());
                         output.accept(ModItems.ALKUSURE86_FUMO.get());
-                        // Essentia storage, smallest first, so the tier order reads down the tab.
                         output.accept(ModItems.STORAGE_CASING.get());
                         output.accept(ModItems.STORAGE_COMPONENT_1K.get());
                         output.accept(ModItems.STORAGE_COMPONENT_4K.get());

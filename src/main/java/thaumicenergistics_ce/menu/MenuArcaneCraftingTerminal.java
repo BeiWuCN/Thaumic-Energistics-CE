@@ -36,15 +36,9 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 public class MenuArcaneCraftingTerminal extends MEStorageMenu
         implements ICraftingGridMenu, InternalInventoryHost {
 
-    /** The nine workbench cells. */
     public static final int GRID_SIZE = PartArcaneCraftingTerminal.GRID_SIZE;
 
-    /**
-     * No index constants deliberately: AE2 adds five upgrade slots first, so a wrong index names another
-     * slot instead of throwing. Ask for a semantic instead.
-     */
 
-    /** The two crystal columns. An AE2 semantic has one anchor, so both circles need their own. */
     public static final SlotSemantic CRYSTALS_LEFT =
             SlotSemantics.register("THAUMICENERGISTICS_CRYSTALS_LEFT", true);
 
@@ -61,28 +55,18 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
     private static final int WAND_X = 116;
     private static final int WAND_Y = 114;
 
-    /** Measured off the screen texture: cell centres at x=35, 53 and 71 give circle centres of 17 and 89,
-     * and a slot 18 wide starts nine pixels left of its centre. */
     private static final int CRYSTALS_LEFT_X = 8;
     private static final int CRYSTALS_RIGHT_X = 80;
 
     private final PartArcaneCraftingTerminal part;
 
-    /**
-     * The menu's own inventory, not the part's: the result is derived from the grid and must not be saved.
-     */
     private final AppEngInternalInventory resultInventory =
             new AppEngInternalInventory(this, 1);
 
     private @Nullable ArcaneCraftingResultSlot resultSlot;
 
-    /** The craft inputs as they stood when the result was last worked out. Nothing tells this menu when
-     * the grid changes, so it polls instead - cheap once a tick, and it cannot miss an update. */
     private int craftInputSignature = -1;
 
-    /** The super call passes {@code createPlayerSlots = false} so our slots come first, and
-     * {@code createPlayerInventorySlots} runs once at the end; calling both throws out of this
-     * constructor, which AE2 logs and suppresses - the terminal simply will not open. */
     public MenuArcaneCraftingTerminal(
             MenuType<?> menuType, int id, Inventory playerInventory, ITerminalHost host) {
         super(menuType, id, playerInventory, host, false);
@@ -146,9 +130,6 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
         resultSlot.refresh();
     }
 
-    // ------------------------------------------------------------------
-    // ICraftingGridMenu - what AE2 needs to treat this as a crafting terminal
-    // ------------------------------------------------------------------
 
     @Override
     public IGridNode getGridNode() {
@@ -160,8 +141,6 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
         return part == null ? null : part.craftingGrid();
     }
 
-    /** AE2's version re-runs its own vanilla recipe lookup, which never matches an arcane recipe; it does
-     * not fire for AE2's inventories, see {@link #craftInputSignature}. */
     @Override
     public void slotsChanged(Container container) {
         super.slotsChanged(container);
@@ -170,8 +149,6 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
         }
     }
 
-    /** Signature compare needed, as a refresh is a full recipe scan and this runs every tick. The grid and
-     * crystal slots belong to the part, so {@code slotsChanged} and {@code onChangeInventory} never fire. */
     @Override
     public void broadcastChanges() {
         super.broadcastChanges();
@@ -185,8 +162,6 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
         }
     }
 
-    /** The nine cells, six crystals and wand as a key that changes when any of them does. An int, because
-     * this runs every tick. See {@link StackSignatures}. */
     private int craftInputSignature() {
         int hash = 1;
         for (int i = 0; i < PartArcaneCraftingTerminal.GRID_SIZE; i++) {
@@ -198,24 +173,18 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
         return 31 * hash + StackSignatures.of(part.wandInventory().getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT));
     }
 
-    /** The part behind this menu, or {@code null} when the host was not ours. */
     public PartArcaneCraftingTerminal part() {
         return part;
     }
 
-    /** The result slot, or {@code null} when the host was not our part. An accessor, because the index
-     * is not ours. */
     public @Nullable ArcaneCraftingResultSlot resultSlot() {
         return resultSlot;
     }
 
-    /** The primal aspect a crystal slot holds, by container index - left column first, then right. Read from
-     * Thaumaturge's own order rather than copied, so a reorder there carries over. */
     public static ResourceKey<IAspect> aspectOf(int crystalIndex) {
         return TcWorkbench.primalAt(crystalIndex);
     }
 
-    /** The six crystal slots, left column first. Empty when the host was not our part. */
     public List<Slot> crystalSlots() {
         List<Slot> slots = new ArrayList<>(PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
         slots.addAll(getSlots(CRYSTALS_LEFT));
@@ -223,15 +192,11 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
         return slots;
     }
 
-    /** The wand slot, or {@code null} when the host was not our part. */
     public @Nullable Slot wandSlot() {
         List<Slot> slots = getSlots(SlotSemantics.STORAGE);
         return slots.isEmpty() ? null : slots.getFirst();
     }
 
-    /** The cost depends on the matched recipe and the wand discounts, so only the server can work it out.
-     * Only the vis is sent; the rest is AE2's business.
-     * @param cost what a craft would charge, or {@code null} for a grid that matches nothing */
     public void sendCraftCost(@Nullable ArcaneCraftCost cost) {
         if (isClientSide()) {
             return;
@@ -241,9 +206,6 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
                 : thaumicenergistics_ce.network.ArcaneCraftCostPayload.of(containerId, cost.wandCentivis()));
     }
 
-    // ------------------------------------------------------------------
-    // InternalInventoryHost - the result inventory needs an owner
-    // ------------------------------------------------------------------
 
     /** Not persisted: the result is derived from the grid, and a saved one would outlive it. */
     @Override

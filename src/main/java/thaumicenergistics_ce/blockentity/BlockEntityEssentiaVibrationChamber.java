@@ -47,75 +47,56 @@ import thaumicenergistics_ce.init.ModBlockEntities;
 public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         implements IGridTickable, IEssentiaStorage, IEssentiaTransport, MenuProvider {
 
-    /** How much essentia the chamber can hold, in units. */
     public static final int MAX_ESSENTIA = 64;
 
-    /** Ticks one unit of ignis burns; a full buffer of 64 is most of an hour. */
     private static final int BASE_BURN_TICKS = 800;
 
-    /** Power per tick while burning ignis. Potentia multiplies this, everything else halves it. */
     private static final double BASE_AE_PER_TICK = 200.0;
 
     /** Energy slot size in AE; AE2 quotes 16 kAE as 32,000 FE at two FE to the AE. */
     public static final double MAX_ENERGY_STORAGE = 16_000.0;
 
-    /** Most of the slot handed out per tick; ten times one ignis unit's output, so it rarely binds. */
     public static final double MAX_OUTPUT_PER_TICK = 2_000.0;
 
     /** Room that must open in the slot before the burn resumes: hysteresis, larger than one potentia tick. */
     private static final double RESUME_MARGIN = 400.0;
 
-    /** How often the chamber looks at the network: while burning, and while idle. */
     private static final int TICK_RATE_BURNING = 10;
     private static final int TICK_RATE_IDLE = 40;
 
-    /** Pull strength on a pipe; wildcard, so any aspect is offered. */
     private static final int SUCTION = 128;
 
-    /** The two aspects that burn better than the rest, by path. */
     private static final String ASPECT_POTENTIA = "potentia";
     private static final String ASPECT_IGNIS = "ignis";
 
-    /**
-     * What the machine is doing, and why when it is not burning: what the burn, the intake, the suction,
-     * the tooltip and the screen all read.
-     */
     public enum BurnState {
-        /** Converting essentia into AE right now. */
         BURNING,
         /** Held back: the energy slot cannot take another tick of the burn. */
         PAUSED_FULL,
         /** Nothing but this machine is on its grid: nowhere for the power to go. */
         NO_NETWORK,
-        /** Nothing loaded to burn, and room for it. */
         IDLE;
 
-        /** Whether the machine may spend fuel, rather than being held back by the slot or the network. */
         public boolean mayBurn() {
             return this == BURNING || this == IDLE;
         }
 
-        /** The state an ordinal names, or {@link #IDLE} for an out-of-range index from a payload. */
         public static BurnState byOrdinal(int ordinal) {
             BurnState[] states = values();
             return ordinal >= 0 && ordinal < states.length ? states[ordinal] : IDLE;
         }
     }
 
-    /** Essentia waiting to be burned. */
     private int storedEssentia;
 
-    /** The aspect burned next, or burned last. Display only. */
     private @Nullable Holder<IAspect> currentAspect;
 
     private int burnTicksRemaining;
     private int totalBurnTicks;
     private double aePerTick;
 
-    /** Power made and not yet handed to the network. */
     private double storedEnergy;
 
-    /** What the machine is doing and why; the one answer every reader and display goes through. */
     private BurnState burnState = BurnState.IDLE;
 
     /**
@@ -229,7 +210,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         return false;
     }
 
-    /** Hands power to the network, up to {@link #MAX_OUTPUT_PER_TICK} a tick; what it refuses stays. */
     private void outputEnergy(IGrid grid, int ticksSinceLast) {
         if (storedEnergy <= 0) {
             return;
@@ -246,10 +226,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         }
     }
 
-    /**
-     * Re-decides {@link #burnState} and announces it only when it changes; not read by callers. Full stays
-     * full until {@link #RESUME_MARGIN} of room opens again.
-     */
     private void updateBurnState(boolean onNetwork) {
         double room = MAX_ENERGY_STORAGE - storedEnergy;
         boolean full = burnState == BurnState.PAUSED_FULL ? room < RESUME_MARGIN : room < burnTickPower();
@@ -294,7 +270,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         }
     }
 
-    /** A jar, a reservoir, another machine: anything that offers essentia as storage. */
     private boolean pullFromContainer(Direction side) {
         IEssentiaStorage storage = level.getCapability(
                 EssentiaCapabilities.STORAGE, worldPosition.relative(side), side.getOpposite());
@@ -343,7 +318,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         return false;
     }
 
-    /** Reports, once a second, one line per side that has anything on it. See {@link #TRACE}. */
     private void traceIntake() {
         if (!TRACE || level == null || !(level instanceof ServerLevel server)) {
             return;
@@ -388,7 +362,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         tracedEssentia = 0;
     }
 
-    /** Puts essentia in the buffer and remembers the aspect, for the tooltip and the screen. */
     private void accept(Holder<IAspect> aspect, int amount) {
         int space = MAX_ESSENTIA - storedEssentia;
         int taken = Math.min(amount, space);
@@ -404,7 +377,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         markForClientUpdate();
     }
 
-    /** Spends one buffered unit and starts its burn; its power is made tick by tick. */
     private void startBurning() {
         int burnTicks = burnTicksFor();
         double power = powerFor();
@@ -443,7 +415,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
                 : currentAspect.unwrapKey().map(key -> key.location().getPath()).orElse("");
     }
 
-    /** The aspect by id, for the NBT tag and the tooltip. */
     public @Nullable ResourceLocation getCurrentAspect() {
         return currentAspect == null
                 ? null
@@ -503,7 +474,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         return true;
     }
 
-    /** Ignored: the pull is wildcard. See {@link #SUCTION}. */
     @Override
     public void setSuction(@Nullable Holder<IAspect> aspect, int amount) {
     }
@@ -576,17 +546,14 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         return totalBurnTicks <= 0 ? 0.0F : 1.0F - (float) burnTicksRemaining / totalBurnTicks;
     }
 
-    /** What the machine is doing and why, for the tooltip and the screen. */
     public BurnState getBurnState() {
         return burnState;
     }
 
-    /** Whether the chamber is converting essentia right now; a held-back burn spends nothing. */
     public boolean isBurning() {
         return burnState == BurnState.BURNING;
     }
 
-    /** Whether the energy slot is full enough to hold the burn back, a unit loaded or not. */
     public boolean isPaused() {
         return burnState == BurnState.PAUSED_FULL;
     }
@@ -684,12 +651,10 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         }
     }
 
-    /** The buffer's aspect as a holder; the screen wants its colour and the tooltip wants its name. */
     public @Nullable Holder<IAspect> currentAspectHolder() {
         return currentAspect;
     }
 
-    /** The screen, opened by right-clicking the machine. See {@code BlockEssentiaVibrationChamber}. */
     @Override
     public AbstractContainerMenu createMenu(
             int containerId, Inventory inventory,
@@ -703,7 +668,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
                 getBlockState().getBlock().getDescriptionId());
     }
 
-    /** The aspects that burn better than the rest, for Jade and the screen. */
     public static List<String> fuelAspectHint() {
         return List.of(ASPECT_POTENTIA, ASPECT_IGNIS);
     }

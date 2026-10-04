@@ -47,35 +47,27 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         implements IStorageProvider, IGridTickable, IEssentiaStorage {
 
-    /** How much of one aspect can be waiting to be pushed. Small on purpose - see the class note. */
     public static final int BUFFER_PER_ASPECT = 16;
 
     /** How many receivers one provider will serve. Each one costs the provider extra idle power. */
     public static final int MAX_LINKED_RECEIVERS = 8;
 
-    /** How far a receiver may be from its provider, in blocks. */
     public static final int MAX_LINK_DISTANCE = 32;
 
-    /** Extra network cost per bound receiver, on top of {@link #IDLE_POWER}. */
     private static final double POWER_PER_RECEIVER = 5.0;
 
-    /** The receivers bound to this provider, kept so it can price its own draw. */
     private final List<BlockPos> linkedReceivers = new ArrayList<>();
 
-    /** Identity for anything taken out of the network on a receiver's behalf. */
     private final IActionSource actionSource =
             IActionSource.ofMachine(this);
 
-    /** The network cost of being connected. A provider does nothing while idle, so this is small. */
     private static final double IDLE_POWER = 1.0;
 
     private static final int TICK_RATE_ACTIVE = 10;
     private static final int TICK_RATE_IDLE = 40;
 
-    /** Essentia waiting to be pushed to a neighbour, by aspect. Never persisted - see the class note. */
     private final Map<Holder<IAspect>, Integer> buffer = new HashMap<>();
 
-    /** Bumped whenever the buffer changes: an unannounced change is one a terminal will not show. */
     private long revision;
 
     public BlockEntityEssentiaProvider(BlockPos pos, BlockState state) {
@@ -86,14 +78,12 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
                 .addService(IGridTickable.class, this);
     }
 
-    // IStorageProvider - the network's view of this block
 
     @Override
     public void mountInventories(IStorageMounts mounts) {
         mounts.mount(new ProviderStorage(this));
     }
 
-    // IGridTickable
 
     @Override
     public TickingRequest getTickingRequest(IGridNode node) {
@@ -118,10 +108,6 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         return moved ? TickRateModulation.URGENT : TickRateModulation.SLOWER;
     }
 
-    /**
-     * Hands the buffer to whatever the block touches; each side is offered all that is left, so none
-     * of them starves.
-     */
     private boolean pushBufferToNeighbours() {
         if (level == null) {
             return false;
@@ -164,9 +150,7 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         return movedAnything;
     }
 
-    // IEssentiaStorage - what the network can put here
 
-    /** Accepts essentia for delivery, or refuses everything when there is nowhere to deliver it. */
     @Override
     public int insert(Holder<IAspect> aspect, int amount, boolean simulate) {
         if (aspect == null || amount <= 0 || !hasAnyTarget()) {
@@ -186,13 +170,11 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         return accepted;
     }
 
-    /** Never gives essentia back: what is in the buffer is already promised to a neighbour. */
     @Override
     public int extract(Holder<IAspect> aspect, int amount, boolean simulate) {
         return 0;
     }
 
-    /** What is waiting to be delivered. */
     @Override
     public AspectList contents() {
         if (buffer.isEmpty()) {
@@ -212,7 +194,6 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         return revision;
     }
 
-    /** Whether any side of this block is touching something that can take essentia. */
     private boolean hasAnyTarget() {
         if (level == null) {
             return false;
@@ -227,20 +208,13 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         return false;
     }
 
-    /** How much of one aspect is waiting, for Jade. */
     public int buffered(Holder<IAspect> aspect) {
         return buffer.getOrDefault(aspect, 0);
     }
 
-    // Wireless receivers
 
-    /**
-     * Registers a receiver as bound to this provider, which pays for it. Returns a refusal reason, or
-     * {@code null} when the link was accepted.
-     */
     public @Nullable String addLinkedReceiver(BlockPos receiver) {
         if (linkedReceivers.contains(receiver)) {
-            // Already bound; not an error.
             return null;
         }
         if (linkedReceivers.size() >= MAX_LINKED_RECEIVERS) {
@@ -276,12 +250,10 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         return List.copyOf(linkedReceivers);
     }
 
-    /** Recomputes what this block costs the network; broken receivers are dropped when the cost is wrong. */
     private void updateIdlePower() {
         getMainNode().setIdlePowerUsage(IDLE_POWER + POWER_PER_RECEIVER * linkedReceivers.size());
     }
 
-    /** Drops receivers whose block has gone, and returns whether any were dropped. */
     public boolean pruneDeadReceivers() {
         if (level == null || linkedReceivers.isEmpty()) {
             return false;
@@ -312,7 +284,6 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
                 : Actionable.MODULATE;
         AEssentiaKey key = AEssentiaKey.of(aspect);
         if (key == null) {
-            // Not registry-backed: no id, so nothing the network could hold it under.
             return 0;
         }
         long moved = storage.extract(key, amount, mode, actionSource);
@@ -322,7 +293,6 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         return (int) Math.min(moved, Integer.MAX_VALUE);
     }
 
-    /** The network's storage, or {@code null} when this block is not on a grid. */
     private MEStorage networkStorage() {
         IGridNode node = getMainNode().getNode();
         if (node == null) {
@@ -337,12 +307,7 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         return service == null ? null : service.getInventory();
     }
 
-    // Persistence
 
-    /**
-     * Saves the receiver list but never the buffer: saving it would make it a place essentia accumulates
-     * across restarts. See the class note.
-     */
     @Override
     public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
@@ -367,7 +332,6 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         buffer.clear();
     }
 
-    /** The network's view of the provider: reports the buffer, accepts inserts, offers no extraction. */
     private static final class ProviderStorage implements MEStorage {
 
         private final BlockEntityEssentiaProvider provider;

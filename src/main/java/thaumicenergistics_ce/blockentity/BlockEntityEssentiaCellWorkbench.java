@@ -30,7 +30,6 @@ import thaumicenergistics_ce.item.ItemEssentiaCell;
  * </ul> */
 public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
 
-    /** The one machine slot: the cell being configured. */
     public static final int CELL_SLOT = 0;
 
     /** Partition entries, matching AE2's own cell workbench and the 7x9 grid in the screen's art. */
@@ -53,13 +52,11 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         }
     };
 
-    /** The partition being edited. Essentia only: the wells must not offer items or fluids. */
     private final ConfigInventory partition = ConfigInventory.configTypes(PARTITION_SLOTS)
             .supportedTypes(Set.of(AEssentiaKeyType.INSTANCE))
             .changeListener(this::storePartitionInCell)
             .build();
 
-    /** True while this block is copying between the cell and the partition, to stop the loop. */
     private boolean syncing;
 
     public BlockEntityEssentiaCellWorkbench(BlockPos pos, BlockState state) {
@@ -70,12 +67,10 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         return inventory;
     }
 
-    /** The partition being edited, for the menu's grid. */
     public ConfigInventory getPartition() {
         return partition;
     }
 
-    /** The cell in the slot, or empty. */
     public ItemStack getCell() {
         return inventory.getItem(CELL_SLOT);
     }
@@ -84,9 +79,7 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         return getCell().getItem() instanceof ItemEssentiaCell;
     }
 
-    // ---- Keeping the partition and the cell in step ----
 
-    /** Replaces the edited partition with whatever the cell holds; an empty slot clears the grid. */
     private void loadPartitionFromCell() {
         syncing = true;
         try {
@@ -111,7 +104,6 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         }
     }
 
-    /** Writes the edited partition back onto the cell's own config inventory: the object AE2 reads. */
     private void storePartitionInCell() {
         if (syncing || !hasCell()) {
             return;
@@ -132,7 +124,6 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         }
     }
 
-    /** Asks the cell whether an aspect is one it will accept. Used by the screen's labels. */
     public boolean accepts(AEKey key) {
         return key != null && key.getType() == AEssentiaKeyType.INSTANCE;
     }
@@ -144,9 +135,7 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         return new thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench(containerId, playerInventory, this);
     }
 
-    // ---- Persistence ----
 
-    /** Only the cell is saved: the partition lives on the cell item, and a second copy here would drift. */
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
@@ -170,7 +159,6 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         loadPartitionFromCell();
     }
 
-    /** Drops the cell when the block is broken. */
     public void dropContents() {
         if (level == null) {
             return;

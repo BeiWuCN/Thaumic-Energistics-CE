@@ -70,7 +70,6 @@ public record ArcaneCraftCostPayload(int containerId, List<AspectCost> aspects)
         return new ArcaneCraftCostPayload(containerId, list);
     }
 
-    /** An empty cost, for a grid that matches nothing. */
     public static ArcaneCraftCostPayload none(int containerId) {
         return new ArcaneCraftCostPayload(containerId, List.of());
     }

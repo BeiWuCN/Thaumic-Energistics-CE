@@ -37,7 +37,6 @@ public final class EssentiaFillHelper {
     /** How much a jar holds. Thaumaturge's own figure - see {@code TcRegistry.jarCapacity()}. */
     public static final int JAR_CAPACITY = TcRegistry.jarCapacity();
 
-    /** How much one phial holds. Thaumaturge's own figure - see {@code TcRegistry.phialCapacity()}. */
     public static final int PHIAL_CAPACITY = TcRegistry.phialCapacity();
 
     /** Not {@code instanceof IEssentiaContainerItem}: the label, crystal and mana bean are not fillable. */
@@ -45,13 +44,10 @@ public final class EssentiaFillHelper {
         return TcRegistry.isEssentiaContainer(stack);
     }
 
-    /** Whether the stack is a container that is currently empty - what a fill wants. */
     public static boolean isContainerEmpty(ItemStack stack) {
         return isSupportedContainer(stack) && contents(stack) == null;
     }
 
-    /** Fills a container from the network. Server side only; {@code level} resolves the aspect, which a
-     * key names but does not carry. */
     public static boolean fillFromNetwork(
             Level level,
             MEStorage storage,
@@ -135,7 +131,6 @@ public final class EssentiaFillHelper {
         return true;
     }
 
-    /** One line per fill attempt, with the number that decided it. Cheap: once per player click. */
     private static void log(String message, Object... args) {
         ThaumicEnergistics.LOG.info("[essentia-terminal] " + message, args);
     }
@@ -231,7 +226,6 @@ public final class EssentiaFillHelper {
         return new ItemStack(stack.getItem(), count);
     }
 
-    /** The aspects a container carries, or {@code null} when it carries none. */
     private static @Nullable AspectList contents(ItemStack stack) {
         if (stack.getItem() instanceof IEssentiaContainerItem container) {
             AspectList aspects = container.getAspects(stack);
@@ -242,7 +236,6 @@ public final class EssentiaFillHelper {
         return null;
     }
 
-    /** Puts a filled container in the player's inventory, or on the ground if there is no room. */
     private static void give(Player player, ItemStack stack) {
         if (!player.getInventory().add(stack)) {
             player.drop(stack, false);

@@ -39,7 +39,6 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
     private final @Nullable ServerPlayer serverPlayer;
     private final @Nullable PartArcaneCraftingTerminal part;
 
-    /** The three objects the parent was handed, kept because the arcane craft reaches the network itself. */
     private final MEStorage storage;
     private final IEnergySource energySource;
     private final IActionSource actionSource;
@@ -68,7 +67,6 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         this.ownerMenu = ownerMenu;
     }
 
-    /** Preview only: writes what the grid would produce, and consumes nothing. */
     @Override
     public boolean mayPickup(Player player) {
         // Every take goes through doClick, which charges; vanilla must not hand the output out first.
@@ -90,7 +88,6 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         var result = ArcaneCraftingTransaction.preview(workbenchContext(), serverPlayer, input);
         lastFailure = result.failure();
         if (!result.successful()) {
-            // The transaction knows which check refused a grid that looks right.
             ThaumicEnergistics.LOG.info("[arcane] no craft offered for the grid: {}", result.failure());
         }
         setDisplayedCraftingOutput(result.successful() ? result.output() : ItemStack.EMPTY);
@@ -98,18 +95,15 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         ownerMenu.sendCraftCost(result.successful() ? result.cost() : null);
     }
 
-    /** Why the grid offers no craft, or {@code NONE} when it does. For diagnostics, not display. */
     public ArcaneCraftingTransaction.Failure lastFailure() {
         return lastFailure;
     }
 
-    /** Performs the craft; every action that means "craft" arrives here, a plain click included. */
     @Override
     public void doClick(InventoryAction action, Player who) {
         if (part == null || !(who instanceof ServerPlayer server)) {
             return;
         }
-        // A full stack for shift / craft-all; the loop ends as soon as the grid stops matching.
         int attempts = switch (action) {
             case CRAFT_SHIFT, CRAFT_ALL -> 64;
             default -> 1;
@@ -123,14 +117,12 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
             var store = new NetworkArcaneCraftingStore(storage, energySource, actionSource);
             var result = ArcaneCraftingTransaction.craft(workbenchContext(), server, input, store, false);
             if (!result.successful()) {
-                // Payment comes later, so a refusal here costs the player nothing.
                 ThaumicEnergistics.LOG.info(
                         "[arcane] craft click refused: successful={} failure={}",
                         result.successful(), result.failure());
                 break;
             }
 
-            // The grid is the template, NOT consumed - the ME network pays the ingredients.
             settleRemainders(result.remainders(), who);
             consumeCrystals(result.cost());
 
@@ -144,22 +136,19 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
                     placed,
                     result.cost());
             if (!placed) {
-                // Nowhere to put it, so it went on the floor; stop rather than repeat for a bulk craft.
                 break;
             }
-            // The grid changed, so the recipe may no longer match; an empty result ends the loop.
             refresh();
         }
     }
 
-    /** A plain click puts the product on the cursor, a bulk craft fills the inventory. Payment is already
-     * taken by the commit, so a product never handed over reads as broken.
+    /** A plain click puts the product on the cursor, a bulk craft fills the inventory; the commit has
+     * already taken payment.
      *
      * @param action the gesture, so a shift-click still fills the inventory as a player expects
      * @return whether the product went to the cursor or inventory; {@code false} when it did not fit */
     private boolean deliver(ItemStack output, InventoryAction action, Player who) {
         if (output.isEmpty()) {
-            // Rare and not an error: a recipe may legitimately assemble to air.
             return true;
         }
         boolean bulk = action == InventoryAction.CRAFT_SHIFT || action == InventoryAction.CRAFT_ALL;
@@ -169,7 +158,6 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
                 this.getMenu().setCarried(output);
                 return true;
             }
-            // Holding something: stack onto it when it matches, else fall through.
             if (ItemStack.isSameItemSameComponents(carried, output)
                     && carried.getCount() + output.getCount() <= carried.getMaxStackSize()) {
                 carried.grow(output.getCount());

@@ -28,7 +28,6 @@ public class ItemGolemWirelessBackpack extends Item {
         super(properties.stacksTo(1));
     }
 
-    /** The network this backpack points at, or null if it has never been linked. */
     public GlobalPos getLinkedPosition(ItemStack stack) {
         return stack.get(AEComponents.WIRELESS_LINK_TARGET);
     }
@@ -46,7 +45,6 @@ public class ItemGolemWirelessBackpack extends Item {
                 : Tooltips.of(GuiText.Unlinked, Tooltips.RED));
     }
 
-    /** Straight from the reference implementation, and the only shape AE2's interface allows. */
     private static final class LinkableHandler implements IGridLinkableHandler {
         @Override
         public boolean canLink(ItemStack stack) {

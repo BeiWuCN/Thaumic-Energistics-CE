@@ -33,7 +33,6 @@ public class BlockEssentiaVibrationChamber extends ThEBaseEntityBlock {
     public static final MapCodec<BlockEssentiaVibrationChamber> CODEC =
             simpleCodec(BlockEssentiaVibrationChamber::new);
 
-    /** Which way the animated front face points. Matches the blockstate variants. */
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public BlockEssentiaVibrationChamber(Properties properties) {
@@ -51,7 +50,6 @@ public class BlockEssentiaVibrationChamber extends ThEBaseEntityBlock {
         builder.add(FACING);
     }
 
-    /** Placed facing the player, so the animated face is the one you see when you put it down. */
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
         return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());

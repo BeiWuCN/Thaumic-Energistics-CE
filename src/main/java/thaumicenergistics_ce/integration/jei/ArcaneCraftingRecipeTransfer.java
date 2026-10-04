@@ -63,7 +63,6 @@ public class ArcaneCraftingRecipeTransfer
         return ArcaneRecipeTypes.fitsGrid(recipe);
     }
 
-    /** The nine workbench cells, asked for by semantic. */
     @Override
     public List<Slot> getRecipeSlots(MenuArcaneCraftingTerminal menu, RecipeHolder<?> recipe) {
         List<Slot> grid = menu.getSlots(SlotSemantics.CRAFTING_GRID);

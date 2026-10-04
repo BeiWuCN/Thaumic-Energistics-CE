@@ -52,7 +52,6 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     private static final int PATTERN_COUNT = PATTERN_COLS * PATTERN_ROWS;
     private static final int CRAFT_SIZE = 9;
 
-    /** Player inventory comes first, as everywhere else in this mod. */
     private static final int PLAYER_SLOTS = 36;
     private static final int IDX_CORE = PLAYER_SLOTS;
     private static final int IDX_PATTERN_START = IDX_CORE + 1;
@@ -65,10 +64,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
         return true;
     }
 
-    /** Slot indices inside the block's own container. */
     private static final int MACHINE_CORE = 0;
 
-    /** Grid the stored patterns are laid out on. */
     public static final int PATTERN_SLOTS = PATTERN_COUNT;
     public static final int CRAFT_SLOTS = CRAFT_SIZE;
 
@@ -79,37 +76,27 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
 
     private final @Nullable BlockEntityKnowledgeInscriber inscriber;
 
-    /** The machine's own slots, held separately so button state can be read from them directly. */
     private final Container machine;
 
-    /** Kept for its {@code player}: the client menu has no block entity. */
     private final Inventory playerInventory;
 
-    /** The result well, client-owned: deriving it from the grid is a round trip sooner than syncing. */
     private final SimpleContainer previewResult = new SimpleContainer(1);
 
-    /** The 7x3 wells, client-side like {@link #previewResult}: derived from the core slot. */
     private final SimpleContainer mirrorDisplay =
             new SimpleContainer(BlockEntityKnowledgeInscriber.MIRROR_SLOT_COUNT);
 
-    /** Signature of the core the wells were last filled from. */
     private int mirroredCore = -1;
 
-    /** The core signature as of {@link #coreSignatureTick}; one hash per tick covers the whole store. */
     private int sampledCore = -1;
     private long coreSignatureTick = Long.MIN_VALUE;
 
-    /** Last grid {@link #updatePreview} resolved; resolving walks every arcane recipe. */
     private int previewedSignature = -1;
 
-    /** The grid signature as of {@link #gridSignatureTick}, sampled once a tick, as above. */
     private int sampledGrid = -1;
     private long gridSignatureTick = Long.MIN_VALUE;
 
-    /** The nine grid cells, one list reused by {@link #gridSignature} rather than one per call. */
     private final List<ItemStack> gridScratch = new ArrayList<>(CRAFT_SIZE);
 
-    // Synced to the client through the menu's data slots.
     public static final int DATA_HAS_CORE = 0;
     public static final int DATA_STATE = 1;
     private static final int DATA_SIZE = 2;
@@ -117,12 +104,10 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     private final int[] clientData = new int[DATA_SIZE];
     private final ContainerData data;
 
-    /** Client constructor: the block entity is already on this side, so nothing is wired here. */
     public MenuKnowledgeInscriber(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
         this(containerId, playerInventory, (BlockEntityKnowledgeInscriber) null);
     }
 
-    /** Server constructor, opened from the block. */
     public MenuKnowledgeInscriber(
             int containerId, Inventory playerInventory, @Nullable BlockEntityKnowledgeInscriber inscriber) {
         super(ModMenuTypes.KNOWLEDGE_INSCRIBER.get(), containerId);
@@ -182,7 +167,6 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
             @Override
             public int get(int index) {
                 if (inscriber == null) {
-                    // Client: the synced values, written by set().
                     return index >= 0 && index < clientData.length ? clientData[index] : 0;
                 }
                 return switch (index) {
@@ -270,7 +254,6 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
         return index < patterns.size() ? patterns.get(index).grid() : null;
     }
 
-    /** Server writes the container directly; the client goes through the slot to send the payload. */
     private void setGridCell(int cell, ItemStack stack) {
         if (inscriber != null) {
             inscriber.setGridCell(cell, stack);
@@ -340,7 +323,6 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
             machine.setItem(BlockEntityKnowledgeInscriber.GRID_SLOT_START + cell, full.get(cell));
         }
 
-        // 2. Tell the other side, once. The server has the block entity; the client sends the lot.
         if (inscriber != null) {
             inscriber.setGrid(full);
         } else {
@@ -348,14 +330,9 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
                     containerId, full));
         }
 
-        // 3. Show the new result now rather than on the next frame's poll.
         updatePreview();
     }
 
-    /**
-     * Resolves the grid and shows its result, on both sides: the client draws the well, and resolving
-     * walks every arcane recipe.
-     */
     public void updatePreview() {
         int signature = gridSignature();
         if (signature == previewedSignature) {
@@ -372,7 +349,6 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
         previewResult.setItem(0, pattern == null ? ItemStack.EMPTY : pattern.result());
     }
 
-    /** True when a knowledge core is in its slot, as the client last heard. */
     public boolean hasCore() {
         return data.get(DATA_HAS_CORE) != 0;
     }
@@ -435,10 +411,6 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
         return cells;
     }
 
-    /**
-     * Signature of what the result well depends on. An int, not a string: this runs once a frame and a
-     * string serialised nine cells' patches - see {@link StackSignatures}.
-     */
     private int gridSignature() {
         long now = playerInventory.player.level().getGameTime();
         if (now != gridSignatureTick) {
@@ -452,7 +424,6 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
         return sampledGrid;
     }
 
-    /** The button's label and usability, from container data, as the client's copy is not filled. */
     public int buttonState() {
         if (data.get(DATA_HAS_CORE) == 0) {
             return BlockEntityKnowledgeInscriber.STATUS_READY;
@@ -469,7 +440,6 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
                 && data.get(DATA_STATE) == BlockEntityKnowledgeInscriber.STATUS_ALREADY_STORED;
     }
 
-    /** True when pressing the button would do something, either way round. Delete counts. */
     public boolean isActionable() {
         if (isDelete()) {
             return true;
@@ -478,10 +448,6 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
                 && data.get(DATA_STATE) == BlockEntityKnowledgeInscriber.STATUS_ACTIONABLE;
     }
 
-    /**
-     * The level recipes resolve against: the block entity's on the server, the player's own on the
-     * client, where the menu is built without a block entity.
-     */
     private @Nullable Level level() {
         if (inscriber != null) {
             return inscriber.getLevel();
@@ -553,7 +519,6 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
                 && player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= 64.0;
     }
 
-    /** The block this menu drives, or {@code null} on the client. */
     public @Nullable BlockEntityKnowledgeInscriber inscriber() {
         return inscriber;
     }

@@ -23,7 +23,6 @@ import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 @WailaPlugin
 public class ThEJadePlugin implements IWailaPlugin {
 
-    /** Server side: the machines' own numbers, read where they are true. */
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(ArcaneAssemblerProvider.INSTANCE, BlockEntityArcaneAssembler.class);
@@ -33,7 +32,6 @@ public class ThEJadePlugin implements IWailaPlugin {
                 InfusionProviderProvider.INSTANCE, BlockEntityInfusionProvider.class);
     }
 
-    /** Client side: the same providers, drawing what the server sent. */
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(ArcaneAssemblerProvider.INSTANCE, BlockArcaneAssembler.class);

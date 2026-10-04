@@ -20,12 +20,10 @@ import net.minecraft.world.item.ItemStack;
 public final class TcWorkbench {
     private TcWorkbench() {}
 
-    /** The primal aspect Thaumaturge's {@code slot}-th crystal slot wants. */
     public static ResourceKey<IAspect> primalAt(int slot) {
         return MenuArcaneWorkbench.PRIMAL_ORDER.get(slot);
     }
 
-    /** The workbench's own rule for a crystal slot, reused so the terminal accepts what it accepts. */
     public static boolean isValidCrystal(ItemStack stack, ResourceKey<IAspect> required) {
         return SlotCrystalEssentia.isValidCrystal(stack, required);
     }

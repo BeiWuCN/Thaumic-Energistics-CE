@@ -63,13 +63,11 @@ public record ThEArcanePattern(
     /** Surcharge for paying with ambient vis instead of a wand, mirroring Thaumaturge. */
     public static final float CRAFT_AURA_SURCHARGE = 1.25F;
 
-    /** Grid cells, matching the workbench's 3x3: the grid is square, {@link #GRID_SIDE} per side. */
     public static final int MAX_GRID = 9;
 
     public static final int GRID_SIDE = 3;
 
     // ----- Candidate narrowing, for the inscriber's grid -----
-    // Indexing each item costs 308 x 9 x 2 lookups, so the grid is tested against the recipe instead.
 
     private static final Map<Item, Set<ResourceLocation>> ITEM_RECIPES = new HashMap<>();
 
@@ -79,7 +77,6 @@ public record ThEArcanePattern(
         result = result.copy();
         grid = List.copyOf(grid);
         ingredients = List.copyOf(ingredients);
-        // Not List.copyOf: cellTags holds nulls and List.copyOf rejects them.
         cellTags = Collections.unmodifiableList(new ArrayList<>(cellTags));
     }
 
@@ -94,7 +91,6 @@ public record ThEArcanePattern(
         return cellTags.get(cell);
     }
 
-    /** Every item satisfying a grid cell: the tag's members, or the cell's own item. */
     public List<ItemStack> cellChoices(int cell) {
         if (cell < 0 || cell >= grid.size()) {
             return List.of();
@@ -106,29 +102,23 @@ public record ThEArcanePattern(
         }
         List<ItemStack> choices = new ArrayList<>();
         BuiltInRegistries.ITEM.getTag(tag).ifPresent(holders -> holders.forEach(holder -> {
-            // The tag names items and its ingredient carries no components, so a plain stack.
             choices.add(new ItemStack(holder.value()));
         }));
         if (choices.isEmpty() && !display.isEmpty()) {
-            // Empty or not-yet-loaded tag: fall back to the stored display item.
             choices.add(display);
         }
         return choices;
     }
 
-    // ----- Price: what a craft costs, and how it is paid -----
 
-    /** Vis for the crystal requirement's primal part, {@link #CRYSTAL_SUBSTITUTE_VIS} per crystal. */
     public int crystalVis() {
         return primalCrystals().totalAmount() * CRYSTAL_SUBSTITUTE_VIS;
     }
 
-    /** Total vis the assembler must supply for one craft, before the surcharge. */
     public int totalVis() {
         return Math.max(0, baseVis) + crystalVis();
     }
 
-    /** Total vis charged: the workbench's aura surcharge applies whenever the recipe wants crystals. */
     public int chargedVis() {
         float modifier = crystals.entries().isEmpty() ? 1.0F : CRAFT_AURA_SURCHARGE;
         return (int) Math.ceil(totalVis() * modifier);
@@ -160,7 +150,6 @@ public record ThEArcanePattern(
         return filtered;
     }
 
-    /** Whether a hand-filled grid has nothing in it; the machine and the menu share this definition. */
     public static boolean isGridEmpty(List<ItemStack> cells) {
         for (ItemStack cell : cells) {
             if (!cell.isEmpty()) {
@@ -170,9 +159,7 @@ public record ThEArcanePattern(
         return true;
     }
 
-    // ----- Matching a grid the player filled in -----
 
-    /** Placed-holder-free empty ingredient, for cells a recipe does not describe. */
     private static final Ingredient EMPTY_INGREDIENT = Ingredient.of();
 
     public boolean isResearchGated() {
@@ -265,7 +252,6 @@ public record ThEArcanePattern(
             if (stored.isEmpty()) {
                 continue;
             }
-            // A tag cell is satisfied by any tag member, not just the displayed item.
             TagKey<Item> tag = cellTag(cell);
             if (tag != null) {
                 if (input.is(tag)) {
@@ -290,7 +276,6 @@ public record ThEArcanePattern(
         return false;
     }
 
-    /** Converts a live arcane recipe into a pattern, or {@code null} when it has no usable grid. */
     public static @Nullable ThEArcanePattern fromRecipe(IArcaneRecipe recipe, ItemStack output) {
         Layout layout = layoutOf(recipe);
         if (layout == null || layout.cells().isEmpty()) {
@@ -475,7 +460,6 @@ public record ThEArcanePattern(
                 int localY = y - originY;
                 boolean covered = localX >= 0 && localX < width && localY >= 0 && localY < height;
                 if (!covered) {
-                    // A cell the recipe does not reach has to be empty, or the wrong corner still fits.
                     if (!cell.isEmpty()) {
                         return false;
                     }
@@ -483,8 +467,6 @@ public record ThEArcanePattern(
                 }
                 int column = mirrored ? width - localX - 1 : localX;
                 Ingredient ingredient = ingredients.get(localY * width + column);
-                // The ingredient decides: a deliberately blank cell carries an empty ingredient that accepts
-                // only emptiness, so testing emptiness here too would refuse such recipes.
                 if (ingredient == null || !ingredient.test(cell)) {
                     return false;
                 }
@@ -660,7 +642,6 @@ public record ThEArcanePattern(
         return crystals.entries().stream().map(entry -> entry.aspect().getKey()).toList();
     }
 
-    // ----- NBT, for the knowledge core -----
 
     /**
      * Wraps a pattern into the item AE2's CPU saves and decodes: the same {@link #save}/{@link #load}
@@ -698,8 +679,6 @@ public record ThEArcanePattern(
         tag.putInt("GridWidth", gridWidth);
         tag.putInt("GridHeight", gridHeight);
 
-        // One tag per cell, an empty string for a plain item. Stored, not derived: a core outlives any one
-        // recipe manager.
         ListTag tagTag = new ListTag();
         for (int cell = 0; cell < MAX_GRID; cell++) {
             TagKey<Item> cellTag = cellTag(cell);

@@ -37,7 +37,6 @@ public class CraftingRecipeTransfer
         implements IRecipeTransferInfo<MenuArcaneCraftingTerminal, RecipeHolder<CraftingRecipe>>,
                 IRecipeTransferHandler<MenuArcaneCraftingTerminal, RecipeHolder<CraftingRecipe>> {
 
-    /** The grid is 3x3, and a recipe that needs more than that cannot be laid out here at all. */
     private static final int GRID_WIDTH = 3;
     private static final int GRID_HEIGHT = 3;
 

@@ -30,20 +30,16 @@ final class AssemblerCraftState {
      * and the CPU waits for ever on a job it already pushed. */
     private int craftPrice;
 
-    /** Crystals the craft must be handed, as vis cannot stand in for them; saved like the price. */
     private List<ItemStack> craftCrystals = List.of();
 
     /** Ingredients AE2 extracted for the pushed craft, kept only to hand back if it never finishes:
      * this machine makes its product from vis and crystals. */
     private final List<ItemStack> heldInputs = new ArrayList<>();
 
-    /** Consecutive ticks this craft has been unable to proceed. */
     private int stalledTicks;
 
-    /** What the running craft is waiting for, or {@code null}. */
     private @Nullable Component lastWait;
 
-    /** Why the last job was turned away, so the same reason is not logged once per push attempt. */
     private @Nullable Component lastRefusal;
 
     boolean isCrafting() {
@@ -98,8 +94,6 @@ final class AssemblerCraftState {
         return stalledTicks;
     }
 
-    /** One more tick unable to proceed, and the reason to show the player for it: the reason is held
-     * from the first stalled tick, while only the caller throttles the log line. */
     void noteStall(Component reason) {
         stalledTicks++;
         lastWait = reason;
@@ -121,8 +115,6 @@ final class AssemblerCraftState {
         this.lastRefusal = lastRefusal;
     }
 
-    /** Clears everything a finished craft owned. The caller has already emptied the well, and what the
-     * craft held really has been spent. */
     void reset() {
         crafting = false;
         craftTicks = 0;
@@ -133,7 +125,6 @@ final class AssemblerCraftState {
         heldInputs.clear();
     }
 
-    /** Starts a fresh job from a clean slate, so nothing is inherited from the one before it. */
     void begin(ThEArcanePattern pattern, int price, List<ItemStack> crystals) {
         crafting = true;
         lastRefusal = null;
@@ -145,7 +136,6 @@ final class AssemblerCraftState {
         craftCrystals = crystals;
     }
 
-    /** The craft's half of a save. Pairs with {@link #writeNbt}. */
     void readNbt(CompoundTag tag, HolderLookup.Provider registries) {
         crafting = tag.getBoolean("Crafting");
         craftTicks = tag.getInt("CraftTicks");
@@ -165,7 +155,6 @@ final class AssemblerCraftState {
         tag.put(TAG_CRAFT_CRYSTALS, crystals);
     }
 
-    /** Reads back what {@link #writeNbt} wrote for the crystals a running craft still owes. */
     private static List<ItemStack> readCrystalStacks(CompoundTag tag, HolderLookup.Provider registries) {
         ListTag saved = tag.getList(TAG_CRAFT_CRYSTALS, Tag.TAG_COMPOUND);
         if (saved.isEmpty()) {
@@ -181,7 +170,6 @@ final class AssemblerCraftState {
         return List.copyOf(stacks);
     }
 
-    /** The craft fields the client's copy carries. Pairs with {@link #writeSync}. */
     void readSync(CompoundTag tag) {
         crafting = tag.getBoolean("Crafting");
         craftTicks = tag.getInt("CraftTicks");

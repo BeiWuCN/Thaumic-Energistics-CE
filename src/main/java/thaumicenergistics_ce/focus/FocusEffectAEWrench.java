@@ -33,10 +33,7 @@ import thaumicenergistics_ce.item.ItemFocusAEWrench;
 
 /**
  * The AE2 wrench as a focus effect: a wand right-click disassembles the AE2 block being looked at.
- * <ul>
- * <li>No medium, so it acts at once on what the caster looks at; a projectile would delay an aimed tool.
- * <li>The original's flat {@code ignis 10 + aer 10} no longer maps: a focus element carries one aspect.
- * </ul>
+ * No medium, so it acts at once on what the caster looks at; a projectile would delay an aimed tool.
  */
 public final class FocusEffectAEWrench implements FocusEffect {
 
@@ -46,7 +43,6 @@ public final class FocusEffectAEWrench implements FocusEffect {
     /** {@code complexity / 5} is the vis price, so this is 2. */
     private static final int COMPLEXITY = 10;
 
-    /** How far the focus looks for something to wrench. Matches a wand's casting reach. */
     private static final double REACH = 24.0;
 
     @Override
@@ -147,8 +143,8 @@ public final class FocusEffectAEWrench implements FocusEffect {
     }
 
     /**
-     * A beam from the wand to what it just took apart, plus a clunk: without it the block just vanishes.
-     * Sent per player, not per level, so the beam is private to the caster.
+     * A beam from the wand to what it just took apart: without it the block just vanishes. Sent per player,
+     * so the beam is private to the caster.
      */
     private static void effect(Level level, Player player, Vec3 target) {
         level.playSound(null, BlockPos.containing(target), SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.PLAYERS,

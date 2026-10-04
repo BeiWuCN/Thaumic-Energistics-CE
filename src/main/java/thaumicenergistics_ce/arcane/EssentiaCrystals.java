@@ -13,12 +13,10 @@ import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 public final class EssentiaCrystals {
     private EssentiaCrystals() {}
 
-    /** Whether {@code stack} is an essentia crystal of any configuration. */
     public static boolean isCrystal(ItemStack stack) {
         return TcRegistry.isCrystal(stack);
     }
 
-    /** The aspect a configured crystal carries, or {@code null} for a plain or malformed crystal. */
     public static @Nullable Holder<IAspect> aspectOf(ItemStack stack) {
         if (!isCrystal(stack)) {
             return null;
@@ -34,7 +32,6 @@ public final class EssentiaCrystals {
         return TcRegistry.crystalStack(aspect, count);
     }
 
-    /** Number of crystals carrying {@code aspect} among the supplied stacks. */
     public static int countOf(Iterable<ItemStack> stacks, Holder<IAspect> aspect) {
         int total = 0;
         for (ItemStack stack : stacks) {

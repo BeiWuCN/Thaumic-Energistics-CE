@@ -25,17 +25,11 @@ public class ScreenArcaneCraftingTerminal extends MEStorageScreen<MenuArcaneCraf
 
     private static final int ICON_SIZE = 14;
 
-    /** Where the cost strip starts, relative to the screen's corner. */
     private static final int COST_X = 108;
     private static final int COST_Y = 96;
 
-    /**
-     * The only open instance, so an incoming cost finds its screen: a player has one menu, so this one
-     * reference is the right screen rather than an approximation of it.
-     */
     private static @Nullable ScreenArcaneCraftingTerminal open;
 
-    /** Each aspect's share of the cost, in centivis, as last sent by the server. */
     private List<ArcaneCraftCostPayload.AspectCost> costs = List.of();
 
     public ScreenArcaneCraftingTerminal(
@@ -57,7 +51,6 @@ public class ScreenArcaneCraftingTerminal extends MEStorageScreen<MenuArcaneCraf
         super.removed();
     }
 
-    /** Called by the network handler when the server sends a new cost. */
     public static void acceptCost(ArcaneCraftCostPayload payload) {
         ScreenArcaneCraftingTerminal screen = open;
         // The id check matters: a packet can arrive just after the player closed this screen and opened
@@ -67,10 +60,6 @@ public class ScreenArcaneCraftingTerminal extends MEStorageScreen<MenuArcaneCraf
         }
     }
 
-    /**
-     * Draws the vis cost beside the grid: one icon per aspect, the cost beneath, as a wand's vis reads.
-     * {@code drawFG} because AE2 makes {@code renderLabels} final; the offsets passed are the same.
-     */
     @Override
     public void drawFG(GuiGraphics graphics, int offsetX, int offsetY, int mouseX, int mouseY) {
         super.drawFG(graphics, offsetX, offsetY, mouseX, mouseY);
@@ -81,7 +70,6 @@ public class ScreenArcaneCraftingTerminal extends MEStorageScreen<MenuArcaneCraf
         int y = topPos + COST_Y;
         for (ArcaneCraftCostPayload.AspectCost cost : costs) {
             if (x + ICON_SIZE > leftPos + imageWidth) {
-                // Out of room: fewer aspects shown beats drawing over the grid.
                 break;
             }
             var aspect = Aspects.resolve(

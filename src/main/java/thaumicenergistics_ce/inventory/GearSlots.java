@@ -16,12 +16,10 @@ import net.minecraft.world.item.ItemStack;
  */
 public final class GearSlots {
 
-    /** Number of gear slots. */
     public static final int COUNT = 4;
 
     private GearSlots() {}
 
-    /** The equipment slot a gear slot stands for. */
     public static EquipmentSlot equipmentSlot(int index) {
         return switch (index) {
             case 0 -> EquipmentSlot.HEAD;
@@ -31,19 +29,11 @@ public final class GearSlots {
         };
     }
 
-    /**
-     * Whether {@code stack} belongs in a gear slot at all. Deliberately looser than {@link #accepts}: the
-     * caller of shift-click routing does not yet know which of the four slots is free.
-     */
     public static boolean isGear(ItemStack stack) {
         return !stack.isEmpty()
                 && (stack.getItem() instanceof IVisDiscountGear || stack.getItem() instanceof IWarpingGear);
     }
 
-    /**
-     * Whether {@code stack} may go in the gear slot {@code index}: it must be vis-discount or warping
-     * gear, and must declare the equipment slot this one stands for. No declared slot is a refusal.
-     */
     public static boolean accepts(int index, ItemStack stack) {
         if (stack.isEmpty()) {
             return false;

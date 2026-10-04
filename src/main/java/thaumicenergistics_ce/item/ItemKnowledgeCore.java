@@ -37,7 +37,6 @@ public class ItemKnowledgeCore extends Item {
         lines.addAll(core.describeUnreadable());
     }
 
-    /** Convenience for callers that only have a stack. */
     public static @Nullable HandlerKnowledgeCore handler(ItemStack stack, Level level) {
         return HandlerKnowledgeCore.of(stack, level.registryAccess());
     }

@@ -30,7 +30,6 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
  */
 public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implements IAspectSource {
 
-    /** Network cost of being connected; the block is idle unless an altar is draining it. */
     private static final double IDLE_POWER = 5.0;
 
     private final IActionSource actionSource = IActionSource.ofMachine(this);
@@ -44,7 +43,6 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
     // IAspectSource
     // ------------------------------------------------------------------
 
-    /** Always empty - see the class note; an altar testing this block asks {@link #containerContains}. */
     @Override
     public AspectList getAspects() {
         return AspectList.EMPTY;
@@ -52,7 +50,6 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
 
     @Override
     public void setAspects(AspectList aspects) {
-        // A window has nothing to set.
     }
 
     @Override
@@ -62,11 +59,9 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
 
     @Override
     public int addToContainer(Holder<IAspect> aspect, int amount) {
-        // Nothing is accepted: essentia enters the network through a bus or a terminal, not here.
         return amount;
     }
 
-    /** All or nothing: a simulate call sizes the move first, and a shortfall is put back, not passed off. */
     @Override
     public boolean takeFromContainer(Holder<IAspect> aspect, int amount) {
         if (aspect == null || amount <= 0 || !getMainNode().isActive()) {
@@ -78,7 +73,6 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
         }
         AEssentiaKey key = AEssentiaKey.of(aspect);
         if (key == null) {
-            // Not registry-backed: no id, so the altar is told there is nothing to take.
             return false;
         }
 
@@ -106,7 +100,6 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
         return containerContains(aspect) >= amount;
     }
 
-    /** How much of one aspect the network holds, for the altar's planning. */
     @Override
     public int containerContains(Holder<IAspect> aspect) {
         if (aspect == null || !getMainNode().isActive()) {
@@ -118,20 +111,17 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
         }
         AEssentiaKey key = AEssentiaKey.of(aspect);
         if (key == null) {
-            // Not registry-backed: the network holds none of it.
             return 0;
         }
         long available = storage.extract(key, Long.MAX_VALUE, Actionable.SIMULATE, actionSource);
         return (int) Math.min(available, Integer.MAX_VALUE);
     }
 
-    /** Never blocked: an empty network already reads as an empty container via {@link #containerContains}. */
     @Override
     public boolean isBlocked() {
         return false;
     }
 
-    /** The network's storage, or {@code null} when this block is not connected to a grid. */
     private MEStorage networkStorage() {
         IGridNode node = getMainNode().getNode();
         if (node == null) {
@@ -145,7 +135,6 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
         return service == null ? null : service.getInventory();
     }
 
-    /** What the altar and Jade can see: a separate method, so {@link #getAspects()} can stay empty. */
     public KeyCounter visibleEssentia() {
         KeyCounter counter = new KeyCounter();
         MEStorage storage = networkStorage();
@@ -167,7 +156,6 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
     // Persistence
     // ------------------------------------------------------------------
 
-    /** Nothing but the grid node: this block holds no essentia and has no state of its own. */
     @Override
     public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);

@@ -30,10 +30,8 @@ import thaumicenergistics_ce.network.GolemBackpackPayload;
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class GolemBackpackTickHandler {
 
-    /** Ticks between network operations. */
     private static final int NETWORK_COOLDOWN = 20;
 
-    /** Ticks between status updates to the client. */
     private static final int SYNC_INTERVAL = 100;
 
     /** The last status and skin sent per golem, so the heartbeat speaks only on change. */
@@ -42,10 +40,8 @@ public final class GolemBackpackTickHandler {
     /** The two countdowns per golem, weakly keyed. Not in saved data: that cost two NBT writes a tick. */
     private static final Map<UUID, int[]> COOLDOWNS = Collections.synchronizedMap(new WeakHashMap<>());
 
-    /** Ticks between two "running an errand" traces for the same golem, so the line does not bury others. */
     private static final long ERRAND_TRACE_INTERVAL = 200L;
 
-    /** Golem UUID to the game time its errand was last reported, weakly held. */
     private static final Map<UUID, Long> LAST_ERRAND_TRACE =
             Collections.synchronizedMap(new WeakHashMap<>());
 
@@ -112,12 +108,10 @@ public final class GolemBackpackTickHandler {
         }
     }
 
-    /** The registry name of a stack, for the transfer line. Only called when tracing. */
     private static String itemName(ItemStack stack) {
         return BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
     }
 
-    /** Reports a golem that is holding something for a seal, at most once every ten seconds each. */
     private static void traceErrand(EntityThaumaturgeGolem golem) {
         if (!GolemBackpackHandler.TRACE || golem.getCarrying().isEmpty()) {
             return;
@@ -146,7 +140,6 @@ public final class GolemBackpackTickHandler {
         PacketDistributor.sendToPlayersTrackingEntity(golem, payload);
     }
 
-    /** What a client should draw on this golem right now. */
     private static GolemBackpackPayload payloadFor(EntityThaumaturgeGolem golem, GlobalPos link) {
         int status = GolemWirelessLink.open(golem, link) != null
                 ? GolemBackpackPayload.STATUS_IN_RANGE
@@ -175,12 +168,6 @@ public final class GolemBackpackTickHandler {
         PacketDistributor.sendToPlayer(player, payloadFor(golem, link));
     }
 
-    /**
-     * Counts a cooldown down.
-     *
-     * @return true while still running, false on the tick it expires, when the caller does the work and
-     *     starts a new one.
-     */
     private static boolean cooling(EntityThaumaturgeGolem golem, int slot, int cooldown) {
         int[] counts = COOLDOWNS.computeIfAbsent(golem.getUUID(), key -> new int[2]);
         if (counts[slot] > 0) {

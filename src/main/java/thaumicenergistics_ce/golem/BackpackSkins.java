@@ -33,7 +33,6 @@ public enum BackpackSkins {
         this.texId = texId;
     }
 
-    /** Where this skin's texture lives. */
     public ResourceLocation texture() {
         if (texture == null) {
             texture = ResourceLocation.fromNamespaceAndPath(
@@ -42,10 +41,6 @@ public enum BackpackSkins {
         return texture;
     }
 
-    /**
-     * The skin with this ordinal, or the default when the number is out of range: the ordinal travels
-     * in the golem's own data, so a golem saved by a build with more skins comes back as the default.
-     */
     public static BackpackSkins fromOrdinal(int ordinal) {
         return ordinal < 0 || ordinal >= VALUES.length ? Thaumium : VALUES[ordinal];
     }

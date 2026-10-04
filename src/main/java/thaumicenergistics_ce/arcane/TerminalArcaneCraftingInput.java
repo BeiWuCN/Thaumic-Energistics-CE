@@ -21,7 +21,6 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
  */
 public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
 
-    /** The workbench grid this stands for: three cells a side, filled or not. */
     private static final int GRID_WIDTH = 3;
     private static final int GRID_HEIGHT = 3;
 
@@ -91,7 +90,6 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
 
     @Override
     public ItemStack getItem(int column, int row) {
-        // x + y * width, which is how Thaumaturge's pattern matcher indexes a grid.
         return grid.get(column + row * GRID_WIDTH);
     }
 

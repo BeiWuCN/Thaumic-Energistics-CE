@@ -37,7 +37,6 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
  */
 public final class InscriberSelfTest {
 
-    /** One run per server, not one per login. */
     private static boolean hasRun;
 
     /**
@@ -73,8 +72,6 @@ public final class InscriberSelfTest {
         checkSavesAndReloads(level, failures);
         checkUnreadableEntriesSurvive(level, failures);
 
-        // A real recipe from the server's own manager: an invented grid that never resolves would pass by
-        // never reaching the states it checks.
         ThEArcanePattern pattern = anyPattern(level);
         if (pattern == null) {
             report(failures);
@@ -168,7 +165,6 @@ public final class InscriberSelfTest {
             failures.add("tag " + tag.location() + " on " + where + " resolves to no items");
         }
         if (choices.size() < 2) {
-            // One member proves nothing: storing the shown member alone satisfies a one-member tag.
             System.out.println("[inscriber] tag " + tag.location() + " on " + where + " has only "
                     + choices.size() + " member(s); the tag path is weakly checked");
         }
@@ -267,7 +263,6 @@ public final class InscriberSelfTest {
         return ThEArcanePattern.resolveGrid(level, cells) == null ? single : null;
     }
 
-    /** A pattern whose grid is a mix of the given cells and emptiness. */
     private static ThEArcanePattern withGrid(ThEArcanePattern pattern, List<ItemStack> cells) {
         return new ThEArcanePattern(
                 pattern.result(),
@@ -369,7 +364,6 @@ public final class InscriberSelfTest {
                             + " instead of no recipe - the tag cell accepts too much");
                 }
             }
-            // Put the real grid back before continuing.
             writeGrid(inscriber, placed);
         }
 
@@ -415,7 +409,6 @@ public final class InscriberSelfTest {
         }
     }
 
-    /** The live recipe that produces a pattern's result; throws when nothing does. */
     private static IArcaneRecipe recipeFor(Level level, ThEArcanePattern pattern) {
         for (RecipeHolder<?> holder : level.getRecipeManager().getRecipes()) {
             if (!(holder.value() instanceof IArcaneRecipe arcane)) {
@@ -760,7 +753,6 @@ public final class InscriberSelfTest {
         return null;
     }
 
-    /** A pattern's grid padded to the workbench's nine cells. */
     private static List<ItemStack> pad(List<ItemStack> cells) {
         List<ItemStack> padded = new ArrayList<>(ThEArcanePattern.MAX_GRID);
         for (int i = 0; i < ThEArcanePattern.MAX_GRID; i++) {
@@ -775,7 +767,6 @@ public final class InscriberSelfTest {
         }
     }
 
-    /** Status codes by name, so a failure says "delete" rather than "4". */
     private static String name(int status) {
         return switch (status) {
             case BlockEntityKnowledgeInscriber.STATUS_READY -> "ready";

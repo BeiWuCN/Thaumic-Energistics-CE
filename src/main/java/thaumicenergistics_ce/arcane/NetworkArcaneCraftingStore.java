@@ -32,7 +32,6 @@ public final class NetworkArcaneCraftingStore implements IArcaneCraftingStore {
         this.source = source;
     }
 
-    /** Whether the network was available at all. */
     public boolean isUsable() {
         return storage != null && energy != null && source != null;
     }
@@ -50,7 +49,6 @@ public final class NetworkArcaneCraftingStore implements IArcaneCraftingStore {
         if (!isUsable()) {
             return false;
         }
-        // What is left to spend, so two cells holding the same item cannot both spend the same unit.
         var remaining = new HashMap<AEItemKey, Long>();
         List<AEItemKey> claimed = new ArrayList<>();
 
@@ -73,8 +71,6 @@ public final class NetworkArcaneCraftingStore implements IArcaneCraftingStore {
         if (simulate) {
             return true;
         }
-        // An extraction that comes up short is not rolled back: the network changed underneath the
-        // check, and losing those items beats duplicating what the craft could not pay for.
         for (AEItemKey key : claimed) {
             StorageHelper.poweredExtraction(energy, storage, key, 1, source);
         }

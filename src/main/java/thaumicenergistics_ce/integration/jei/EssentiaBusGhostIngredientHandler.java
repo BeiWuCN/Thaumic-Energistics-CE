@@ -62,7 +62,6 @@ public class EssentiaBusGhostIngredientHandler<T extends UpgradeableScreen<? ext
         // Nothing to release: a config slot never took an item from the player.
     }
 
-    /** One config slot, as a drop target. */
     private record ConfigTarget<I>(MenuEssentiaBus<?> menu, int index, int guiLeft, int guiTop)
             implements Target<I> {
 

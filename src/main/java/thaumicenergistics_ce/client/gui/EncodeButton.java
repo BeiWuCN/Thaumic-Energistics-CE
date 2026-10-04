@@ -20,7 +20,6 @@ public class EncodeButton extends Button {
             ResourceLocation.fromNamespaceAndPath(
                     thaumicenergistics_ce.ThEIds.MODID, "textures/gui/button.png");
 
-    /** Sheet size, widget size, and one frame inside the sheet: the source rectangle, before the stretch. */
     private static final int SHEET = 32;
     private static final int WIDTH = 34;
     private static final int HEIGHT = 14;
@@ -35,11 +34,8 @@ public class EncodeButton extends Button {
     @Override
     protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         int v = isHovered() && active ? HOVER_V : 0;
-        // The frame is stretched to the widget: the class note says why this one is not at native size.
         graphics.blit(TEXTURE, getX(), getY(), WIDTH, HEIGHT, 0.0F, (float) v, FRAME_W, FRAME_H, SHEET, SHEET);
         if (!active) {
-            // A veil, not a tinted blit: the sprite must keep its own shading, and only the whole thing
-            // needs to read as switched off.
             graphics.fill(getX(), getY(), getX() + WIDTH, getY() + HEIGHT, 0x8A000000);
         }
         renderLabel(graphics);

@@ -21,7 +21,6 @@ enum JadeGridState {
     MISSING_CHANNEL(InGameTooltip.DeviceMissingChannel),
     ONLINE(InGameTooltip.DeviceOnline);
 
-    /** The key both halves use in the tooltip's data tag. */
     static final String TAG = "GridState";
 
     private final InGameTooltip text;

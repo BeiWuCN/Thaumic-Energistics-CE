@@ -27,7 +27,6 @@ import thaumicenergistics_ce.network.EssentiaFillPayload;
  */
 public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal> {
 
-    /** Diagnostic tag: one line per container click, never per tick. */
     private static final String TAG = "[essentia-terminal] ";
 
     public ScreenEssentiaTerminal(
@@ -46,8 +45,6 @@ public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    /** Refuses the drag path into AE2's grid handler, which would scatter the cursor's container over the
-     * list one item at a time. */
     @Override
     protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type) {
         if (slot instanceof RepoSlot && cursorIsContainer()) {
@@ -57,8 +54,6 @@ public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal
         super.slotClicked(slot, slotId, mouseButton, type);
     }
 
-    /** Right-click: empty a filled container into the network.
-     * @return whether the click was ours */
     private boolean handleRightClick() {
         // Shift-right-click on a player slot: empty that slot's container where it lies.
         if (hasShiftDown() && hoveredSlot != null && menu.isPlayerSideSlot(hoveredSlot)) {
@@ -87,7 +82,6 @@ public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal
         return true;
     }
 
-    /** Left-click: draw the clicked aspect out of the network and into the container. */
     private boolean handleLeftClick() {
         ItemStack container = heldContainer();
         if (container == null) {
@@ -123,14 +117,11 @@ public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal
         return false;
     }
 
-    /** Whether the stack on the cursor is a jar or a phial - the one AE2 would insert. */
     private boolean cursorIsContainer() {
         ItemStack carried = menu.getCarried();
         return !carried.isEmpty() && EssentiaFillHelper.isSupportedContainer(carried);
     }
 
-    /** The cursor's stack, or the main hand when the cursor is empty - {@link #whereHeld} picks the same.
-     * @return the container, or {@code null} when neither holds a jar or a phial */
     private ItemStack heldContainer() {
         ItemStack carried = menu.getCarried();
         if (!carried.isEmpty()) {
@@ -140,7 +131,6 @@ public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal
         return EssentiaFillHelper.isSupportedContainer(mainHand) ? mainHand : null;
     }
 
-    /** Which of the two places {@link #heldContainer} took its stack from. */
     private int whereHeld() {
         return menu.getCarried().isEmpty() ? ContainerSlot.MAIN_HAND : ContainerSlot.CURSOR;
     }

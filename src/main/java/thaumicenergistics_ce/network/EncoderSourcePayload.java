@@ -35,7 +35,6 @@ public record EncoderSourcePayload(int containerId, ItemStack stack) implements 
         return TYPE;
     }
 
-    /** Applies the template to the open menu, if it is still this encoder's. */
     public void handle(Player player) {
         if (player.containerMenu instanceof MenuDistillationEncoder menu && menu.containerId == containerId) {
             menu.applySourceTemplate(stack);

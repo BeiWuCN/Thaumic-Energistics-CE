@@ -44,7 +44,6 @@ public class PartEssentiaLevelEmitter extends AbstractLevelEmitterPart {
     public static final ResourceLocation MODEL_STATUS_HAS_CHANNEL =
             ThEIds.id("parts/essentia_level_emitter_status_has_channel");
 
-    /** Every model that has to be registered for this part, named once for {@code ThaumicEnergistics}. */
     public static final List<ResourceLocation> MODEL_LOCATIONS = List.of(
             MODEL_BASE_OFF, MODEL_BASE_ON, MODEL_STATUS_OFF, MODEL_STATUS_ON, MODEL_STATUS_HAS_CHANNEL);
 
@@ -58,19 +57,13 @@ public class PartEssentiaLevelEmitter extends AbstractLevelEmitterPart {
 
     private static final double IDLE_POWER = 0.5;
 
-    /**
-     * The aspect being watched, if any. One slot, as in AE2's own level emitter.
-     * Set through a change listener, so the watcher is only rebuilt when the player changes it.
-     */
     private final ConfigInventory config = ConfigInventory.configTypes(1)
             .supportedTypes(Set.of(AEssentiaKeyType.INSTANCE))
             .changeListener(this::configureWatchers)
             .build();
 
-    /** The grid's watcher, handed to us when the node comes up. */
     private IStackWatcher storageWatcher;
 
-    /** Told by the grid when a watched aspect's stored amount changes. */
     private final IStorageWatcherNode watcherNode = new IStorageWatcherNode() {
         @Override
         public void updateWatcher(IStackWatcher newWatcher) {
@@ -93,18 +86,15 @@ public class PartEssentiaLevelEmitter extends AbstractLevelEmitterPart {
         getMainNode().addService(IStorageWatcherNode.class, watcherNode);
     }
 
-    /** The aspect this emitter watches, or {@code null} when none is configured. */
     public AEssentiaKey getConfiguredKey() {
         AEKey key = config.getKey(0);
         return key instanceof AEssentiaKey essentia ? essentia : null;
     }
 
-    /** The config slot's inventory, for the menu. */
     public ConfigInventory getConfig() {
         return config;
     }
 
-    /** The network's current total for the configured aspect, as last reported to us. */
     public long getCurrentLevel() {
         return lastReportedValue;
     }
@@ -123,7 +113,6 @@ public class PartEssentiaLevelEmitter extends AbstractLevelEmitterPart {
         updateState();
     }
 
-    /** Recounts from the grid's cached inventory, which is what the watcher would have told us. */
     private void updateReportingValue(IGrid grid) {
         AEssentiaKey key = getConfiguredKey();
         if (key == null) {
@@ -144,7 +133,6 @@ public class PartEssentiaLevelEmitter extends AbstractLevelEmitterPart {
         return false;
     }
 
-    /** The models AE2's emitter picks from, chosen by whether it is lit and whether it has a channel. */
     @Override
     public IPartModel getStaticModels() {
         boolean lit = isLevelEmitterOn();

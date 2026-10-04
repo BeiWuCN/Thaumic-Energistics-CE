@@ -59,7 +59,6 @@ public class PartEssentiaImportBus extends IOBusPart implements KeyTypeSelection
     @PartModels
     public static final ResourceLocation MODEL_HAS_CHANNEL = ThEIds.id("parts/essentia_import_bus_has_channel");
 
-    /** Every model that has to be registered for this part, named once for {@code ThaumicEnergistics}. */
     public static final List<ResourceLocation> MODEL_LOCATIONS =
             List.of(MODEL_BASE, MODEL_OFF, MODEL_ON, MODEL_HAS_CHANNEL);
 
@@ -67,22 +66,14 @@ public class PartEssentiaImportBus extends IOBusPart implements KeyTypeSelection
     private static final PartModel MODELS_ON = new PartModel(MODEL_BASE, MODEL_ON);
     private static final PartModel MODELS_HAS_CHANNEL = new PartModel(MODEL_BASE, MODEL_HAS_CHANNEL);
 
-    /**
-     * How much one operation moves: eight, one jar's worth and the reference build's figure. Per tick
-     * this is multiplied by the operations the acceleration cards allow.
-     */
     private static final int TRANSFER_RATE = 8;
 
-    /** Idle draw, as in the reference build. */
     private static final double IDLE_POWER = 0.5;
 
-    /** AE drawn per essentia moved. */
     private static final double AE_PER_ESSENTIA = 10.0;
 
-    /** True while the bus moved something on its last tick, which is what lights the part up. */
     private boolean working;
 
-    /** Essentia only: the config list must not offer items or fluids. */
     private final KeyTypeSelection essentiaOnly = new KeyTypeSelection(selection -> {}, this::isEssentia);
 
     public PartEssentiaImportBus(IPartItem<?> partItem) {
@@ -100,7 +91,6 @@ public class PartEssentiaImportBus extends IOBusPart implements KeyTypeSelection
         builder.registerSetting(Settings.SCHEDULING_MODE, SchedulingMode.DEFAULT);
     }
 
-    /** The same box AE2's import bus uses, which is what the borrowed model is shaped for. */
     @Override
     public void getBoxes(IPartCollisionHelper boxes) {
         boxes.addBox(6, 6, 11, 10, 10, 13);
@@ -131,16 +121,13 @@ public class PartEssentiaImportBus extends IOBusPart implements KeyTypeSelection
         if (!level.isLoaded(target)) {
             return false;
         }
-        // The container's own face towards us; one that does not accept that face is not connected - a
-        // jar only takes essentia from above, so a bus on its side has nothing to do. See EssentiaNeighbour.
+        // See EssentiaNeighbour.
         IEssentiaStorage storage = EssentiaNeighbour.find(level, target, side.getOpposite());
         if (storage == null) {
             return false;
         }
 
         int wanted = Math.max(1, TRANSFER_RATE) * Math.max(1, getOperationsPerTick());
-        // Whatever the container is willing to give, up to what one tick can carry. Asking per aspect
-        // because a container can hold several and the network may only have room for some of them.
         for (AspectInstance entry : storage.contents().sortedByAmount()) {
             Holder<IAspect> aspect = entry.aspect();
             if (aspect == null || entry.amount() <= 0) {
@@ -148,7 +135,6 @@ public class PartEssentiaImportBus extends IOBusPart implements KeyTypeSelection
             }
             AEssentiaKey key = AEssentiaKey.of(aspect);
             if (key == null) {
-                // Not registry-backed: no id to insert under, so nothing is taken from the container.
                 continue;
             }
             int taken = storage.extract(aspect, Math.min(wanted, entry.amount()), false);
@@ -171,7 +157,6 @@ public class PartEssentiaImportBus extends IOBusPart implements KeyTypeSelection
         return false;
     }
 
-    /** The bus's own action source, which is what the network charges and attributes the insert to. */
     private IActionSource actionSource() {
         return IActionSource.ofMachine(this);
     }

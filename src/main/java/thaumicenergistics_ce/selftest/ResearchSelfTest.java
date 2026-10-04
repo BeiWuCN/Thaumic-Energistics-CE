@@ -159,8 +159,6 @@ public final class ResearchSelfTest {
         }
     }
 
-    /** Every research complete once {@code id} is, walked through Thaumaturge's registry; stops on a
-     * repeat. */
     private static void collectAncestors(
             ResourceLocation id,
             HolderLookup.RegistryLookup<IResearchEntry> allEntries,
@@ -178,7 +176,6 @@ public final class ResearchSelfTest {
                 });
     }
 
-    /** The tab itself: its position in the category bar, and the three textures it draws. */
     private static void checkCategory(
             IResearchCategory category,
             HolderLookup.RegistryLookup<IResearchCategory> categories,
@@ -347,7 +344,6 @@ public final class ResearchSelfTest {
         }
     }
 
-    /** {@code thaumaturge:scanned/...} and {@code thaumaturge:unlock_*} are progress flags, not entries. */
     private static boolean isProgressMarker(ResourceLocation id) {
         if (!id.getNamespace().equals("thaumaturge")) {
             return false;
@@ -380,7 +376,6 @@ public final class ResearchSelfTest {
         String path = "assets/" + id.getNamespace() + "/" + id.getPath();
         try (var in = ResearchSelfTest.class.getClassLoader().getResourceAsStream(path)) {
             if (in == null) {
-                // checkTexture already reported it.
                 return;
             }
             // Read by hand: this runs on the server, where the image loader is client-only.
@@ -414,7 +409,6 @@ public final class ResearchSelfTest {
                 failures.add("no translation for key " + key + " - the book would show the raw key");
             }
         } catch (RuntimeException | LinkageError e) {
-            // Skip on a client-only Language class rather than fail the whole run for it.
         }
     }
 

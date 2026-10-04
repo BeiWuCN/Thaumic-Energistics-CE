@@ -16,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
  */
 public class ReadOnlySlot extends Slot {
 
-    /** Placeholder so no external code can reach a real inventory through this slot. */
     private static final Container PLACEHOLDER = new SimpleContainer(0);
 
     private final Container source;
@@ -50,12 +49,10 @@ public class ReadOnlySlot extends Slot {
 
     @Override
     public void set(ItemStack stack) {
-        // Display only.
     }
 
     @Override
     public void setChanged() {
-        // Display only.
     }
 
     @Override

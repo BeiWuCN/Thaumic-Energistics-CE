@@ -28,10 +28,8 @@ import thaumicenergistics_ce.item.ItemEssentiaCell;
  */
 public class MenuEssentiaCellWorkbench extends AbstractContainerMenu {
 
-    /** The cell being configured. */
     public static final int IDX_CELL = 36;
 
-    /** The first partition well. */
     public static final int IDX_PARTITION_START = IDX_CELL + 1;
 
     private static final int PLAYER_SLOTS = 36;
@@ -49,14 +47,10 @@ public class MenuEssentiaCellWorkbench extends AbstractContainerMenu {
 
     private final @Nullable BlockEntityEssentiaCellWorkbench workbench;
 
-    /** The cell's own slot container. On the client this is a scratch copy the server syncs. */
     private final Container cellContainer;
 
-    /** The partition as the wells see it: a wrapper over the block entity on the server, an empty
-     * stand-in the sync fills on the client. */
     private final ConfigMenuInventory partition;
 
-    /** Client constructor: the block entity is not sent, so nothing is wired here. */
     public MenuEssentiaCellWorkbench(
             int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
         // Picks the block-entity constructor: a bare null is ambiguous between two parameters.
@@ -102,18 +96,14 @@ public class MenuEssentiaCellWorkbench extends AbstractContainerMenu {
         }
     }
 
-    /** How many partition wells there are. For JEI, which offers each as a drop target. */
     public static int partitionSlotCount() {
         return BlockEntityEssentiaCellWorkbench.PARTITION_SLOTS;
     }
 
-    /** The menu index of a partition well. Computed in one place, so no call site counts the
-     * layout itself. */
     public static int partitionSlotIndex(int well) {
         return IDX_PARTITION_START + well;
     }
 
-    /** Whether a cell is in the slot. */
     public boolean hasCell() {
         if (workbench != null) {
             return workbench.hasCell();
@@ -121,13 +111,11 @@ public class MenuEssentiaCellWorkbench extends AbstractContainerMenu {
         return slotAt(IDX_CELL).getItem().getItem() instanceof ItemEssentiaCell;
     }
 
-    /** The aspect recorded in a well, or {@code null}. */
     public @Nullable AEKey keyInWell(int well) {
         GenericStack stack = partition.getDelegate().getStack(well);
         return stack == null ? null : stack.what();
     }
 
-    /** Replaces the partition with whatever the cell already holds. */
     public void partitionToContents() {
         if (workbench == null) {
             return;
@@ -137,7 +125,6 @@ public class MenuEssentiaCellWorkbench extends AbstractContainerMenu {
         broadcastChanges();
     }
 
-    /** Empties the partition. */
     public void clearPartition() {
         if (workbench == null) {
             return;

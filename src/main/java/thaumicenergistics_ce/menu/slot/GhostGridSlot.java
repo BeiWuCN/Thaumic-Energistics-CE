@@ -17,7 +17,6 @@ import thaumicenergistics_ce.network.InscriberGridPayload;
  */
 public class GhostGridSlot extends Slot {
 
-    /** The menu id, naming the right menu when the payload arrives. */
     private final int containerId;
 
     public GhostGridSlot(Container container, int index, int x, int y, int containerId) {
@@ -35,7 +34,6 @@ public class GhostGridSlot extends Slot {
         return 1;
     }
 
-    /** Records the cell locally and tells the server, which owns the grid the machine reads. */
     @Override
     public void set(ItemStack stack) {
         super.set(stack);

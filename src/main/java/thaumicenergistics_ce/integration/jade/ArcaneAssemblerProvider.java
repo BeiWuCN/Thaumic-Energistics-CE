@@ -40,28 +40,18 @@ public class ArcaneAssemblerProvider
     private static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "arcane_assembler");
 
-    // ---- Server side: what travels ----------------------------------------
 
-    /** Which grid state the node is in. See {@link JadeGridState}. */
     private static final String TAG_GRID_STATE = JadeGridState.TAG;
-    /** Vis buffered for the next craft. */
     private static final String TAG_VIS = "BufferedVis";
-    /** The vis the machine's 3x3 can be drawn on right now. */
     private static final String TAG_AURA = "AuraAround";
     /** Whole-percent vis discount from the installed gear. */
     private static final String TAG_DISCOUNT = "GearDiscount";
-    /** Acceleration cards installed. */
     private static final String TAG_SPEED = "SpeedUpgrades";
-    /** Patterns advertised from the knowledge core. */
     private static final String TAG_PATTERNS = "Patterns";
-    /** Whether a craft is running, and how far along it is. */
     private static final String TAG_CRAFTING = "Crafting";
     private static final String TAG_PROGRESS = "CraftProgress";
-    /** What the running craft produces, by item id. */
     private static final String TAG_TARGET = "CraftTarget";
-    /** The same product as a saved stack, for the icon the arrow row draws. */
     private static final String TAG_TARGET_STACK = "CraftTargetStack";
-    /** The running craft's ingredients as saved stacks, in grid order. */
     private static final String TAG_INPUTS = "CraftInputs";
     /**
      * Plain sentences, not translation keys: they carry numbers, and they are deliberately the same
@@ -138,7 +128,6 @@ public class ArcaneAssemblerProvider
         }
     }
 
-    /** A component as NBT, or an empty tag when it cannot be written. See {@link #decode}. */
     private static Tag encode(Component component) {
         return ComponentSerialization.CODEC
                 .encodeStart(NbtOps.INSTANCE, component)
@@ -147,8 +136,8 @@ public class ArcaneAssemblerProvider
     }
 
     /**
-     * The component back, or {@code null} when the tag is absent or unreadable. An empty line under
-     * "waiting" would claim the machine waits for nothing.
+     * The component back, or {@code null} when the tag is absent or unreadable: an empty line under
+     * "waiting" claims the machine waits for nothing.
      */
     private static @Nullable Component decode(CompoundTag tag, String key) {
         Tag encoded = tag.get(key);
@@ -158,7 +147,6 @@ public class ArcaneAssemblerProvider
         return ComponentSerialization.CODEC.parse(NbtOps.INSTANCE, encoded).result().orElse(null);
     }
 
-    // ---- Client side: what is drawn ---------------------------------------
 
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
@@ -201,7 +189,6 @@ public class ArcaneAssemblerProvider
             tooltip.add(row);
             String target = tag.getString(TAG_TARGET);
             if (!target.isEmpty()) {
-                // Already a translation key, worked out on the server side. See appendServerData.
                 tooltip.add(helper.text(
                         Component.translatable("jade.thaumicenergistics_ce.arcane_assembler.produces",
                                         Component.translatable(target))

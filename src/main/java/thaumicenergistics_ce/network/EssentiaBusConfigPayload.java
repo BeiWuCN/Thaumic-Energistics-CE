@@ -34,7 +34,6 @@ public record EssentiaBusConfigPayload(int containerId, int configSlot, Resource
                     EssentiaBusConfigPayload::aspectId,
                     EssentiaBusConfigPayload::new);
 
-    /** The id that means "clear this slot". */
     public static final ResourceLocation CLEAR = ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "clear");
 
     @Override

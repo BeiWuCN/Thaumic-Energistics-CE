@@ -33,7 +33,6 @@ public final class VisRelaySelfTest {
     /** One run per server; the scan is a fixed cost and cannot change without a block being placed. */
     private static boolean hasRun;
 
-    /** How far to look for an assembler to report on. Same reach the machine itself uses. */
     private static final int SCAN = 12;
 
     private VisRelaySelfTest() {}
@@ -66,8 +65,6 @@ public final class VisRelaySelfTest {
                 continue;
             }
             TcAura.RelayEnd end = TcAura.chainEnd(level, relayPos);
-            // Where the relay's chain ends: a node, another addon source, or nothing at all. A relay
-            // links to the nearest source, so this says whether the interface is in the running.
             ThaumicEnergistics.LOG.info(
                     "[vistest] relay at {} linked={} depth={} parent={} resolvesTo={}",
                     relayPos, link.linked(), link.depth(), link.parent(),
@@ -94,8 +91,6 @@ public final class VisRelaySelfTest {
             }
         }
 
-        // What each interface would carry, aspect by aspect: reserve() only reports, taking neither from the
-        // chain nor the network. All six aspects, as the part follows the world, not the node's palette.
         for (BlockPos interfacePos : interfaces) {
             double nearest = Double.MAX_VALUE;
             for (BlockPos assemblerPos : assemblers) {
@@ -136,8 +131,6 @@ public final class VisRelaySelfTest {
             ThaumicEnergistics.LOG.info("[vistest] no assembler in range, so the chain was not measured from one");
         }
 
-        // The measurement that answers the question: the same call the machine makes, with simulate=true so
-        // nothing drains. Every primal is asked, since a node holds only what it was fed.
         for (BlockPos assemblerPos : assemblers) {
             boolean reach = TcAura.relayWithinReach(level, assemblerPos);
             StringBuilder draws = new StringBuilder();
@@ -167,14 +160,12 @@ public final class VisRelaySelfTest {
                                 + " Either the relay's parent chain reaches no source at all, or the source at"
                                 + " the end of it is empty.");
             } else {
-                // Any non-zero answer is the chain's own; which aspects answered is the part worth reading.
                 ThaumicEnergistics.LOG.info(
                         "[vistest]   -> the chain answers, in the aspects listed above and no others.");
             }
         }
     }
 
-    /** The vis interface part mounted on the cable bus at {@code pos}, or null when there is none. */
     private static @Nullable PartVisInterface partAt(ServerLevel level, BlockPos pos) {
         if (!(level.getBlockEntity(pos) instanceof IPartHost host)) {
             return null;

@@ -24,17 +24,14 @@ final class AssemblerVisPool {
         return bufferedVis;
     }
 
-    /** Sets the pool to a number of the caller's own choosing, for a hook that needs a known one. */
     void setBufferedVis(int amount) {
         this.bufferedVis = amount;
     }
 
-    /** Banked vis of one primal, for the six vis bars. {@code index} is a primal index. */
     int aspectVis(int index) {
         return index >= 0 && index < aspectVis.length ? aspectVis[index] : 0;
     }
 
-    /** The six holdings as {@code "n n n n n n"}, for the state dump. */
     String aspectVisTrace() {
         StringBuilder text = new StringBuilder();
         for (int value : aspectVis) {
@@ -46,7 +43,6 @@ final class AssemblerVisPool {
         return text.toString();
     }
 
-    /** Vis the machine wants to hold: the idle buffer, raised to a craft's price (up to 1728). */
     int visTarget(boolean crafting, int craftPrice) {
         return crafting ? Math.max(IDLE_TARGET, craftPrice) : IDLE_TARGET;
     }
@@ -86,8 +82,6 @@ final class AssemblerVisPool {
         return lowest;
     }
 
-    /** Fills the six aspects without touching the pool: what {@link #readNbt} falls back to for a save
-     * written before the bars were split, where there is no split to restore. */
     void spreadEvenly(int amount) {
         Arrays.fill(aspectVis, 0);
         int base = amount / aspectVis.length;
@@ -97,7 +91,6 @@ final class AssemblerVisPool {
         }
     }
 
-    /** Takes from pool and aspects in proportion, so the six bars drain together: a craft is one lump. */
     void spendVis(int amount) {
         int spent = Math.min(bufferedVis, Math.max(0, amount));
         if (spent <= 0) {
@@ -126,8 +119,6 @@ final class AssemblerVisPool {
         reconcileAspectVis();
     }
 
-    /** Forces the six aspects to add up to {@link #bufferedVis}: the pool is the real state, the split
-     * only what the bars read. */
     void reconcileAspectVis() {
         int sum = 0;
         for (int value : aspectVis) {
@@ -177,14 +168,11 @@ final class AssemblerVisPool {
         }
     }
 
-    /** Writes the pool and the split it is broken down into, under the keys a save has always used. */
     void writeNbt(CompoundTag tag) {
         tag.putInt("BufferedVis", bufferedVis);
         tag.putIntArray("AspectVis", aspectVis);
     }
 
-    /** Applies a sync tag: the pool and its split, and deliberately no repair of the split, which the
-     * server has already reconciled and which a client has no business second-guessing. */
     void readSync(CompoundTag tag) {
         bufferedVis = tag.getInt("BufferedVis");
         int[] syncedAspects = tag.getIntArray("AspectVis");

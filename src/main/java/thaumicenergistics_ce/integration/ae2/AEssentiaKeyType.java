@@ -91,7 +91,6 @@ public final class AEssentiaKeyType extends AEKeyType {
                         .orElse(null);
     }
 
-    /** The same, for the callers that hold a level and nothing else. */
     public static @Nullable Holder<IAspect> aspectOf(Level level, ResourceLocation id) {
         return aspectOf(level.registryAccess(), id);
     }

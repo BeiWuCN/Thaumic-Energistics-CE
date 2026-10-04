@@ -85,15 +85,11 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     // ---- Inventory layout -------------------------------------------------
     public static final int CORE_SLOT = 0;
     public static final int PATTERN_SLOT_START = 1;
-    /** Three rows of seven, matching the measured GUI layout. */
     public static final int PATTERN_SLOT_COUNT = 21;
     public static final int PATTERN_SLOT_END = PATTERN_SLOT_START + PATTERN_SLOT_COUNT - 1;
-    /** Output preview of the craft currently running. Read-only. */
     public static final int TARGET_SLOT = PATTERN_SLOT_END + 1;
-    /** Worn gear whose vis discount applies to this assembler's crafts. */
     public static final int GEAR_SLOT_START = TARGET_SLOT + 1;
     public static final int GEAR_SLOT_COUNT = 4;
-    /** Display-only mirror of the running craft's 3x3 ingredients; only the server can derive it. */
     // Appended after the gear, never inserted: saved slot indices would move old gear into the preview band.
     public static final int PREVIEW_SLOT_START = GEAR_SLOT_START + GEAR_SLOT_COUNT;
     public static final int PREVIEW_SLOT_COUNT = 9;
@@ -105,7 +101,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     private static final int TICKS_PER_SPEED_UPGRADE = 4;
     private static final int MIN_TICKS_PER_CRAFT = 4;
 
-    /** Ticks between display updates while a craft runs. See {@link #markDisplayForUpdate}. */
     private static final int DISPLAY_UPDATE_INTERVAL = 4;
     private static final int MAX_SPEED_UPGRADES = 4;
 
@@ -116,13 +111,10 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     /** Centivis in one vis: the relay network answers in hundredths of a vis, the aura in whole vis. */
     private static final int CENTIVIS_PER_VIS = 100;
 
-    /** Ticks between relay-network polls: each lookup rescans blocks and walks the relay chain. */
     private static final int RELAY_POLL_INTERVAL = 20;
 
     private static final double ACTIVE_POWER = 1.5;
-    /** Vanilla minimum consumption modifier; a craft can never be free. */
     private static final float MIN_CONSUMPTION_MODIFIER = 0.1F;
-    /** How long a craft may sit unable to pay before the stall is logged: five seconds. */
     private static final int STALLED_CRAFT_REPORT_TICKS = 100;
 
     /** Ticks of unbroken stalling after which the craft is finished anyway: a minute. AE2 has no
@@ -185,10 +177,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
     private boolean active;
 
-    /** The running craft: what it makes, what it still owes, and why it is waiting. */
     private final AssemblerCraftState craft = new AssemblerCraftState();
 
-    /** Game time of the last display update, which is what throttles a running craft's packets. */
     private long lastDisplayUpdate;
 
     /** Renderer-only copy of the running craft's product, written from the update tag: the real one is
@@ -199,11 +189,9 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     private static final boolean STATE_TRACE =
             "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_ASSEMBLER_STATE"));
 
-    /** State dumps still to make from the tick, and ticks since the last one. */
     private int stateDumpsLeft = 5;
     private int stateDumpTicks;
 
-    /** Logs everything that decides whether this machine can do what a crafting CPU is waiting for. */
     private void dumpState(String when) {
         List<IPatternDetails> offered = getAvailablePatterns();
         StringBuilder products = new StringBuilder();
@@ -261,16 +249,12 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     }
 
     private int speedUpgrades;
-    /** The vis this machine banks, and the six bars that break it down. */
     private final AssemblerVisPool visPool = new AssemblerVisPool(PRIMALS.size());
-    /** Game time at which the relay network may be polled again. See {@link #RELAY_POLL_INTERVAL}. */
     private long nextRelayPoll;
 
     /** Centivis below a whole vis, per aspect: a whole vis goes to the aspect that supplied it. */
     private final int[] aspectCentivis = new int[PRIMALS.size()];
-    /** When {@link #relayReach} was last measured. See {@link #relayNetworkInReach}. */
     private long nextRelayReachCheck;
-    /** Whether a usable relay chain was in reach at {@link #nextRelayReachCheck}, else null. */
     private @Nullable Boolean relayReach;
 
     /** How far the machine looks for one of this mod's vis interfaces: the relay's own reach. */
@@ -279,13 +263,10 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     /** How long a fruitless interface scan waits. The cube is 4,913 block entity lookups. */
     private static final int INTERFACE_MISS_MAX = 200;
 
-    /** The vis interface last found beside the machine, and when to look again. */
     private @Nullable PartVisInterface nearbyInterface;
     private long nextInterfaceLookup;
 
-    /** How long the next fruitless interface scan waits. Doubles per miss, resets when one is found. */
     private int interfaceMissBackoff = RELAY_POLL_INTERVAL;
-    /** When the interface may next be asked. Kept apart from the lookup: different cadences. */
     private long nextInterfacePoll;
 
     /** Whether to log where this machine's vis came from, once a second. Off unless
@@ -293,25 +274,19 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     private static final boolean VIS_TRACE =
             "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_VIS_TRACE"));
 
-    /** Ticks between {@code [asmvis]} lines. See {@link #VIS_TRACE}. */
     private static final int VIS_TRACE_INTERVAL = 20;
 
     /** Aura vis taken but not yet a whole vis: the aura is a float, the pool is whole vis. */
     private float auraRemainder;
 
-    /** Totals for the current {@code [asmvis]} window. See {@link #VIS_TRACE}. */
     private int traceRelays;
     private int traceInterfaces;
     private int traceAura;
-    /** What the aura path would have banked with each call's fraction dropped, for the same window. */
     private int traceAuraDropped;
 
-    /** Game time at which the next {@code [asmvis]} line may be written. */
     private long nextVisTrace;
-    /** Cached vis discount in whole percent, recomputed when the gear slots change. */
     private int gearDiscount;
     private boolean patternsDirty = true;
-    /** True while a client update tag or a mirror write is in flight, to suppress cascades. */
     private boolean suppressNotify;
 
     private List<IPatternDetails> cachedPatterns = List.of();
@@ -398,7 +373,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return visPool.bufferedVis();
     }
 
-    /** Banked vis of one primal, for the six vis bars. {@code index} is a {@link #PRIMALS} index. */
     public int getAspectVis(int index) {
         return visPool.aspectVis(index);
     }
@@ -407,12 +381,10 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return visPool.aspectVisTrace();
     }
 
-    /** The vis in the chunks this machine reaches, for anything that reports it to the player. */
     public float getAuraAround() {
         return auraAround();
     }
 
-    /** The ceiling the machine's 3x3 can hold, as reported to the player. See {@link #auraCapacity}. */
     public int getAuraCapacity() {
         return auraCapacity();
     }
@@ -425,7 +397,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return gearDiscount;
     }
 
-    /** Raw crafting ticks so far, which the progress column interpolates between. */
     public int getCraftTicks() {
         return craft.craftTicks();
     }
@@ -440,12 +411,10 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                 : 0.0F;
     }
 
-    /** The product of the running craft, or nothing. Empty on the server: the well is the truth. */
     public ItemStack previewStack() {
         return previewStack;
     }
 
-    /** Forces the craft state, for the assembler's self-test. Never called from the mod's own code. */
     public void forceCraftForTest(boolean crafting, int craftTicks) {
         craft.setCrafting(crafting);
         craft.setCraftTicks(craftTicks);
@@ -468,20 +437,16 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                 visPool.bufferedVis());
     }
 
-    /** What a load recovered of a running craft, for the assembler's self-test. */
     public String resumeReportForTest() {
         return "crafting=" + craft.isCrafting() + " price=" + craft.craftPrice() + " crystals="
                 + craft.craftCrystals().size() + " output=" + inventory.getItem(TARGET_SLOT);
     }
 
-    /** Runs post-load craft recovery against a level, for the self-test: test block entities never reach
-     * a level, so {@code onLoad} never fires. Creates no grid node, deliberately. */
     public void recoverForTest(Level level) {
         setLevel(level);
         recoverInterruptedCraft();
     }
 
-    /** Puts a stack in one of this machine's slots for the self-test, via the real inventory. */
     public void setItemForTest(int slot, ItemStack stack) {
         suppressNotify = true;
         try {
@@ -491,7 +456,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
     }
 
-    /** Exposed for the assembler's self-test. */
     public static int coreSlotForTest() {
         return CORE_SLOT;
     }
@@ -507,7 +471,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return GearSlots.isGear(stack);
     }
 
-    /** Recomputes the cached discount from the gear slots. Server side only. */
     private void recalculateGearDiscount() {
         int percent = 0;
         for (int i = 0; i < GEAR_SLOT_COUNT; i++) {
@@ -617,12 +580,10 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return false;
     }
 
-    /** What the running craft is waiting for, or {@code null}. For the tooltip. */
     public @Nullable Component waitReason() {
         return craft.isCrafting() ? craft.lastWait() : null;
     }
 
-    /** Why the last job was turned away, or {@code null} if none was. For the tooltip. */
     public @Nullable Component refusalReason() {
         return craft.lastRefusal();
     }
@@ -699,7 +660,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return TickRateModulation.URGENT;
     }
 
-    /** Whether the network holds every crystal this craft still needs. */
     private boolean hasCrystals(IStorageService storage) {
         for (ItemStack stack : craft.craftCrystals()) {
             AEItemKey key = AEItemKey.of(stack);
@@ -715,7 +675,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return true;
     }
 
-    /** Removes this craft's crystals from the network. */
     private void takeCrystals(IStorageService storage) {
         for (ItemStack stack : craft.craftCrystals()) {
             AEItemKey key = AEItemKey.of(stack);
@@ -745,7 +704,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return Math.max(1, (int) Math.ceil(pattern.chargedVis() * modifier));
     }
 
-    /** Hands the craft's ingredients back, dropping in the world whatever the network will not take. */
     private void returnHeldInputs() {
         if (craft.heldInputs().isEmpty()) {
             return;
@@ -775,7 +733,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         craft.heldInputs().clear();
     }
 
-    /** The grid this block is on, or {@code null}. */
     private appeng.api.networking.@Nullable IGrid gridOrNull() {
         return mainNode == null ? null : mainNode.getGrid();
     }
@@ -797,8 +754,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return Math.max(MIN_TICKS_PER_CRAFT, BASE_TICKS_PER_CRAFT - TICKS_PER_SPEED_UPGRADE * speedUpgrades);
     }
 
-    /** The vis in the chunks the machine reaches, the pool a craft is paid out of.
-     * @return the total vis around it, or {@code -1} when there is no level to read it from */
     private float auraAround() {
         if (level == null) {
             return -1.0F;
@@ -812,8 +767,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return total;
     }
 
-    /** The most vis the aura can hold, summed over the 3x3: Thaumaturge's base, since remaining
-     * capacity is {@code base - totalAura}. */
     private int auraCapacity() {
         if (level == null) {
             return 0;
@@ -835,7 +788,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return capacity <= 0 || relayNetworkInReach() || interfaceInReach() || craftCost(pattern) <= capacity;
     }
 
-    /** Centivis waiting to become a whole vis, across every aspect. See {@link #aspectCentivis}. */
     private int relayCarryTotal() {
         int total = 0;
         for (int value : aspectCentivis) {
@@ -930,8 +882,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return taken / CENTIVIS_PER_VIS;
     }
 
-    /** Tops the vis buffer up from a vis interface next to it: a part is not a block entity, so it is
-     * found by scanning the cable buses around it, cached for a second. */
     private int drainVisFromInterfaces(int wantVis) {
         if (wantVis <= 0 || !(level instanceof ServerLevel server)) {
             return 0;
@@ -962,7 +912,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return taken / CENTIVIS_PER_VIS;
     }
 
-    /** One reservation against the interface, committed. Zero when it offers nothing for the aspect. */
     private static int reserveFrom(PartVisInterface source, ResourceKey<IAspect> aspect, int centivis) {
         VisReservation reservation = source.reserve(aspect, centivis);
         if (reservation == null) {
@@ -976,8 +925,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
     }
 
-    /** The nearest active vis interface within reach, looked for at most once a second; with none in
-     * sight the wait doubles up to {@link #INTERFACE_MISS_MAX}, so a barren machine stops scanning. */
     private @Nullable PartVisInterface nearbyInterface(ServerLevel server) {
         long now = server.getGameTime();
         if (now < nextInterfaceLookup) {
@@ -991,7 +938,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return nearbyInterface;
     }
 
-    /** The closest active Vis Interface part in {@link #INTERFACE_RANGE}. Scanned, not registered. */
     private @Nullable PartVisInterface findInterface(ServerLevel server) {
         PartVisInterface best = null;
         double bestDistance = Double.MAX_VALUE;
@@ -1067,7 +1013,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return false;
     }
 
-    /** What the grid's tick manager was last told: whether the machine has a craft to be ticked for. */
     private boolean awakeForCraft;
 
     /** Wakes the grid's tick while a craft is held, and lets it sleep when not: a craft restored from a
@@ -1089,8 +1034,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
     }
 
-    /** Draws up to {@code amount} vis from the chunks the machine reaches: an even share each, then a
-     * second pass for the shortfall, so no chunk is emptied while its neighbours are full. */
     private float drainVisAround(int amount) {
         int span = VIS_SOURCE_RADIUS * 2 + 1;
         float share = (float) amount / (span * span);
@@ -1210,8 +1153,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return beginCraft(resolved);
     }
 
-    /** Records why this machine last turned a job away, and says so once per change of reason: a silent
-     * refusal is indistinguishable from a machine that was never asked. */
     private void noteRefusal(Component why) {
         if (why.equals(craft.lastRefusal())) {
             return;
@@ -1228,7 +1169,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                 "jade.thaumicenergistics_ce.arcane_assembler.wait_reason." + key, english, args);
     }
 
-    /** A refusal reason. See {@link #wait}. */
     private static Component refuse(String key, String english, Object... args) {
         return Component.translatableWithFallback(
                 "jade.thaumicenergistics_ce.arcane_assembler.refuse_reason." + key, english, args);
@@ -1248,7 +1188,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     private static final String REFUSE_UNRESOLVED = "unresolved";
     private static final String REFUSE_TOO_EXPENSIVE = "too_expensive";
 
-    /** Every reason key this machine can put in a tooltip, fully qualified. For the self-test. */
     public static List<String> tooltipReasonKeys() {
         List<String> keys = new ArrayList<>();
         for (String key : List.of(
@@ -1266,7 +1205,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return keys;
     }
 
-    /** The refusal for a recipe whose price this machine's aura can never reach. See {@link #wait}. */
     private Component cannotPay(int price) {
         return refuse(
                 REFUSE_TOO_EXPENSIVE,
@@ -1276,7 +1214,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                 auraCapacity());
     }
 
-    /** @return the pattern, or {@code null} when it does not encode an arcane recipe */
     private @Nullable ThEArcanePattern resolveExternal(IPatternDetails details) {
         if (level == null) {
             return null;
@@ -1296,7 +1233,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return ThEArcanePattern.fromEncoded(level, inputs, outputKey.getReadOnlyStack());
     }
 
-    /** The advertised pattern that produces {@code result}, or {@code null}. Used after a reload. */
     private @Nullable ThEArcanePattern patternForResult(ItemStack result) {
         if (result.isEmpty()) {
             return null;
@@ -1385,7 +1321,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return true;
     }
 
-    /** The knowledge core in the core slot, or {@code null} when there is none. */
     private @Nullable HandlerKnowledgeCore knowledgeCore() {
         if (level == null) {
             return null;
@@ -1409,7 +1344,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
     }
 
-    /** Mirrors what this machine can make into the read-only display slots. */
     private void refreshPatternSlots() {
         if (level == null) {
             return;
@@ -1498,9 +1432,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         updateSleepiness();
     }
 
-    /** Empties the running craft's display - product well and ingredient grid - and nothing else:
-     * the core, cards and gear are the player's, and the pattern mirror is derived from the core.
-     * @param report whether a clear is worth a line: from the load path, a stale craft is the bug */
     private void clearDisplay(boolean report) {
         boolean hadAnything = !inventory.getItem(TARGET_SLOT).isEmpty();
         suppressNotify = true;
@@ -1521,7 +1452,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
     }
 
-    /** How much vis this machine banks. Exposed so the tooltip and the machine cannot disagree. */
     public static int visBufferTarget() {
         return AssemblerVisPool.IDLE_TARGET;
     }
@@ -1537,8 +1467,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         ContainerHelper.saveAllItems(tag, inventory.getItems(), registries);
     }
 
-    /** Client sync payload: craft state, vis pool and split, a running craft's product, never the rest
-     * of the inventory; it goes at a craft's ends and once a second, not per tick. */
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = super.getUpdateTag(registries);
@@ -1568,7 +1496,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
     }
 
-    /** The fields the client's copy carries, and the only ones allowed to be set from a tag. */
     private void applySyncedState(CompoundTag tag, HolderLookup.Provider registries) {
         suppressNotify = true;
         try {
@@ -1584,8 +1511,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
     }
 
-    /** Sends the display half of the tag, at most every {@link #DISPLAY_UPDATE_INTERVAL} ticks: a
-     * running craft ticks at the minimum rate, so it would otherwise go per tick to every watcher. */
     private void markDisplayForUpdate() {
         if (level == null) {
             return;
@@ -1598,8 +1523,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         markForUpdate();
     }
 
-    /** Sends this block entity's update tag to everyone watching it. Deliberately not
-     * {@code level.sendBlockUpdated}, which on 1.21 sends no block entity packet. */
     private void markForUpdate() {
         if (level == null) {
             return;
@@ -1627,7 +1550,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return new MenuArcaneAssembler(containerId, playerInventory, this);
     }
 
-    /** Server ticker, registered by the block. Grid work is driven by AE2's tick manager. */
     public static void serverTick(Level level, BlockPos pos, BlockState state, BlockEntityArcaneAssembler be) {
         // Intentionally empty: the AE2 grid tick is the machine's only clock.
     }

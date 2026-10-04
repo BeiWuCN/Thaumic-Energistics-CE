@@ -26,7 +26,6 @@ public final class TcRegistry {
 
     // -- essentia crystals ---------------------------------------------------
 
-    /** Whether {@code stack} is an essentia crystal of any configuration. */
     public static boolean isCrystal(ItemStack stack) {
         return !stack.isEmpty() && stack.is(TCItems.ESSENTIA_CRYSTAL.get());
     }
@@ -36,14 +35,12 @@ public final class TcRegistry {
         return isCrystal(stack) ? ItemEssentiaCrystal.aspectOf(stack) : null;
     }
 
-    /** A crystal stack of {@code count}, configured through the data component by hand. */
     public static ItemStack crystalStack(Holder<IAspect> aspect, int count) {
         ItemStack stack = new ItemStack(TCItems.ESSENTIA_CRYSTAL.get(), Math.max(1, count));
         stack.set(TCDataComponents.CRYSTAL_ASPECT.get(), new AspectInstance(aspect, 1));
         return stack;
     }
 
-    /** Thaumaturge's own crystal factory, for a recipe that names an aspect and an amount. */
     public static ItemStack crystalFor(Holder<IAspect> aspect, int amount) {
         return EssentiaCrystalFactory.of(aspect, amount);
     }
@@ -61,22 +58,18 @@ public final class TcRegistry {
                 && (stack.getItem() instanceof JarItem || stack.getItem() instanceof PhialItem);
     }
 
-    /** Whether {@code stack} is a phial specifically, which is filled whole or not at all. */
     public static boolean isPhial(ItemStack stack) {
         return !stack.isEmpty() && stack.getItem() instanceof PhialItem;
     }
 
-    /** How much essentia a jar holds, as Thaumaturge defines it. */
     public static int jarCapacity() {
         return BlockEntityJar.CAPACITY;
     }
 
-    /** How much essentia one phial holds, as Thaumaturge defines it. */
     public static int phialCapacity() {
         return PhialItem.BASE_AMOUNT;
     }
 
-    /** A phial pre-filled with {@code amount} of {@code aspect}. */
     public static ItemStack filledPhial(Holder<IAspect> aspect, int amount) {
         return PhialItem.makeFilled(aspect, amount);
     }

@@ -31,12 +31,10 @@ public class MenuEssentiaLevelEmitter extends UpgradeableMenu<PartEssentiaLevelE
         registerClientAction(ACTION_SET_REPORTING_VALUE, Long.class, this::setValue);
     }
 
-    /** The value the player has set, on either side. */
     public long getReportingValue() {
         return reportingValue;
     }
 
-    /** The network's total for the watched aspect, for the screen to show. */
     public long getCurrentLevel() {
         return getHost().getCurrentLevel();
     }
@@ -70,7 +68,6 @@ public class MenuEssentiaLevelEmitter extends UpgradeableMenu<PartEssentiaLevelE
         setRedStoneMode(settings.getSetting(Settings.REDSTONE_EMITTER));
     }
 
-    /** The aspect the player picked, for the screen's label. */
     public ResourceLocation getConfiguredAspect() {
         var key = getHost().getConfiguredKey();
         return key == null ? null : key.getId();

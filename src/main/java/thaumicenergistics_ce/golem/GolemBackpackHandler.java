@@ -36,9 +36,7 @@ public final class GolemBackpackHandler {
 
     /** Where the linked network lives. The same shape AE2 stores on the item. */
     static final String KEY_LINK = "ThEWifiBackpackLink";
-    /** The skin's ordinal in {@link BackpackSkins}. */
     static final String KEY_SKIN = "ThEBackpackSkin";
-    /** The block the skin was chosen with, kept so it can be handed back. */
     static final String KEY_FACADE = "ThEBackpackFacade";
 
     /** Golem UUID to decoded link: the tick handler must not re-parse the same NBT twenty times a second. */
@@ -118,7 +116,6 @@ public final class GolemBackpackHandler {
         }
     }
 
-    /** @return whether the golem ended up wearing the backpack. */
     private static boolean equip(EntityThaumaturgeGolem golem, Player player, ItemStack held,
             ItemGolemWirelessBackpack backpack) {
         if (!owns(golem, player) || hasBackpack(golem)) {
@@ -140,7 +137,6 @@ public final class GolemBackpackHandler {
         return true;
     }
 
-    /** @return whether there was a backpack to take off. */
     private static boolean dismantle(EntityThaumaturgeGolem golem, Player player) {
         if (!owns(golem, player)) {
             return false;
@@ -166,7 +162,6 @@ public final class GolemBackpackHandler {
         return true;
     }
 
-    /** @return whether the skin changed. */
     private static boolean repaint(EntityThaumaturgeGolem golem, Player player, ItemStack held,
             BackpackSkins skin) {
         if (!owns(golem, player)) {
@@ -203,13 +198,11 @@ public final class GolemBackpackHandler {
                 SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.NEUTRAL, 0.5F, 1.0F);
     }
 
-    // ==================== the golem's own data ====================
 
     public static boolean hasBackpack(EntityThaumaturgeGolem golem) {
         return golem.getPersistentData().contains(KEY_LINK);
     }
 
-    /** The network this golem's backpack points at, or null if it is not wearing one. */
     @Nullable
     public static GlobalPos getLink(EntityThaumaturgeGolem golem) {
         CompoundTag data = golem.getPersistentData();
@@ -243,7 +236,6 @@ public final class GolemBackpackHandler {
         golem.getPersistentData().putInt(KEY_SKIN, skin.ordinal());
     }
 
-    /** The block the skin came from, or an empty stack. */
     public static ItemStack getFacade(EntityThaumaturgeGolem golem) {
         CompoundTag data = golem.getPersistentData();
         if (!data.contains(KEY_FACADE)) {
@@ -257,7 +249,6 @@ public final class GolemBackpackHandler {
         golem.getPersistentData().put(KEY_FACADE, (CompoundTag) facade.save(golem.level().registryAccess()));
     }
 
-    /** Forgets the backpack entirely: the link, the skin and the block behind it. */
     public static void clear(EntityThaumaturgeGolem golem) {
         CompoundTag data = golem.getPersistentData();
         data.remove(KEY_LINK);
