@@ -3,24 +3,20 @@ package thaumicenergistics_ce.integration.jei;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
-import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.resources.ResourceLocation;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
-import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
-import thaumicenergistics_ce.client.gui.ScreenEssentiaExportBus;
-import thaumicenergistics_ce.client.gui.ScreenEssentiaImportBus;
-import thaumicenergistics_ce.client.gui.ScreenEssentiaStorageBus;
-import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Thaumic Energistics' JEI plugin.
+ * Thaumic Energistics' JEI plugin: the recipe transfer half, which JEI asks for on both sides.
  * <ul>
+ *   <li>Names no screen class, because this is the half a dedicated server also runs. The ghost ingredient
+ *       handlers, which JEI asks for only on a client, live in
+ *       {@code client.jei.ThEJeiClientPlugin} - a second plugin with a UID of its own.</li>
  *   <li>Both registrations use Thaumaturge's arcane recipe category rather than one of our own: the
  *       Knowledge Inscriber encodes exactly what the arcane workbench crafts, so a second page listing
- *       those recipes again would only let the two lists fall out of step.
+ *       those recipes again would only let the two lists fall out of step.</li>
  * </ul>
  */
 @JeiPlugin
@@ -40,34 +36,6 @@ public class ThEJeiPlugin implements IModPlugin {
     @Override
     public ResourceLocation getPluginUid() {
         return UID;
-    }
-
-    @Override
-    public void registerGuiHandlers(IGuiHandlerRegistration registration) {
-        registration.addGhostIngredientHandler(
-                ScreenKnowledgeInscriber.class, new KnowledgeInscriberGhostIngredientHandler());
-        // Buses take essentia, not items, so their drag targets accept Thaumaturge's aspect ingredient.
-        // One handler per concrete screen class: JEI pairs a Class with a handler of that same type.
-        registration.addGhostIngredientHandler(
-                ScreenEssentiaImportBus.class,
-                new EssentiaBusGhostIngredientHandler<ScreenEssentiaImportBus>());
-        registration.addGhostIngredientHandler(
-                ScreenEssentiaExportBus.class,
-                new EssentiaBusGhostIngredientHandler<ScreenEssentiaExportBus>());
-        // The storage bus too: while its screen was AE2's UpgradeableScreen there was no class to register
-        // against, so an aspect could not be dragged into its config grid.
-        registration.addGhostIngredientHandler(
-                ScreenEssentiaStorageBus.class,
-                new EssentiaBusGhostIngredientHandler<ScreenEssentiaStorageBus>());
-        // And the cell workbench's partition wells: the same kind of grid holding the same kind of key.
-        registration.addGhostIngredientHandler(
-                ScreenEssentiaCellWorkbench.class,
-                new CellWorkbenchGhostIngredientHandler());
-        // And the Distillation Encoder's source well, so the item to distil can be dragged in rather than
-        // fetched from a terminal by hand.
-        registration.addGhostIngredientHandler(
-                ScreenDistillationEncoder.class,
-                new DistillationEncoderGhostIngredientHandler());
     }
 
     @Override

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.integration.jei;
+package thaumicenergistics_ce.client.jei;
 
 import appeng.client.gui.implementations.UpgradeableScreen;
 import appeng.core.definitions.AEItems;

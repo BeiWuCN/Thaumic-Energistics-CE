@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.integration.jei;
+package thaumicenergistics_ce.client.jei;
 
 import java.util.ArrayList;
 import java.util.List;
