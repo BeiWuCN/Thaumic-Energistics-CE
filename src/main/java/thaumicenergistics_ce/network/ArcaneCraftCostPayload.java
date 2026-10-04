@@ -10,7 +10,9 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.ThEIds;
+import thaumicenergistics_ce.client.gui.ScreenArcaneCraftingTerminal;
 
 /**
  * What the Arcane Crafting Terminal's grid would cost in vis, sent to the screen drawing it: only the
@@ -51,6 +53,15 @@ public record ArcaneCraftCostPayload(int containerId, List<AspectCost> aspects)
     @Override
     public Type<ArcaneCraftCostPayload> type() {
         return TYPE;
+    }
+
+    /**
+     * AE2's other overload, {@code handleOnClient(IPayloadContext)}, enqueues and forwards to this one, so
+     * the client reference stays inside a method body and off the registration path (ClientboundPacket).
+     */
+    @Override
+    public void handleOnClient(Player player) {
+        ScreenArcaneCraftingTerminal.acceptCost(this);
     }
 
     /**
