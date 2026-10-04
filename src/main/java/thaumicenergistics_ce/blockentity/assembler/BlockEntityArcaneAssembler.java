@@ -30,7 +30,6 @@ import appeng.api.util.AECableType;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.aspect.TCAspects;
-import com.leclowndu93150.thaumaturge.api.items.IVisDiscountGear;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -91,12 +90,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     public static final int SLOT_COUNT = PREVIEW_SLOT_START + PREVIEW_SLOT_COUNT;
 
     // ---- Tuning -----------------------------------------------------------
-    private static final int BASE_TICKS_PER_CRAFT = 20;
-    private static final int TICKS_PER_SPEED_UPGRADE = 4;
-    private static final int MIN_TICKS_PER_CRAFT = 4;
-
-    private static final int MAX_SPEED_UPGRADES = 4;
-
     private static final double ACTIVE_POWER = 1.5;
     private static final float MIN_CONSUMPTION_MODIFIER = 0.1F;
     private static final int STALLED_CRAFT_REPORT_TICKS = 100;
@@ -154,10 +147,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
     final AssemblerDisplaySync displaySync = new AssemblerDisplaySync(this);
 
-    private int speedUpgrades;
     final AssemblerVisSource vis = new AssemblerVisSource(this);
-
-    int gearDiscount;
+    final AssemblerUpgrades upgrades = new AssemblerUpgrades(this);
 
     /** The two {@link BlockEntity} members a same-package sibling cannot reach: {@code worldPosition}
      * and {@code level} are protected, so the helper asks rather than reads. */
@@ -272,12 +263,9 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return vis.auraCapacity();
     }
 
-    public int getSpeedUpgrades() {
-        return speedUpgrades;
-    }
-
-    public int getGearDiscount() {
-        return gearDiscount;
+    /** The speed upgrades and the gear discount, read by the menu and the Jade provider. */
+    public AssemblerUpgrades upgrades() {
+        return upgrades;
     }
 
     public int getCraftTicks() {
@@ -285,11 +273,11 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     }
 
     public int getTicksPerCraft() {
-        return ticksPerCraft();
+        return upgrades.ticksPerCraft();
     }
 
     public float getCraftProgress() {
-        int total = ticksPerCraft();
+        int total = upgrades.ticksPerCraft();
         return craft.isCrafting() && total > 0 ? Math.min(1.0F, (float) craft.craftTicks() / total)
                 : 0.0F;
     }
@@ -343,26 +331,10 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return CORE_SLOT;
     }
 
-    public void setSpeedUpgrades(int count) {
-        this.speedUpgrades = Math.clamp(count, 0, MAX_SPEED_UPGRADES);
-        setChanged();
-    }
-
     /** Whether {@code stack} belongs in a gear slot at all; shift-click routing uses this, while the
      * per-slot check additionally requires the right equipment type. */
     public static boolean isGearItem(ItemStack stack) {
         return GearSlots.isGear(stack);
-    }
-
-    private void recalculateGearDiscount() {
-        int percent = 0;
-        for (int i = 0; i < GEAR_SLOT_COUNT; i++) {
-            ItemStack stack = inventory.getItem(GEAR_SLOT_START + i);
-            if (!stack.isEmpty() && stack.getItem() instanceof IVisDiscountGear gear) {
-                percent += gear.getVisDiscount(stack);
-            }
-        }
-        gearDiscount = Math.max(0, percent);
     }
 
     // ------------------------------------------------------------------
@@ -422,7 +394,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
     private TickRateModulation craftingTick(IGrid grid, int ticksSinceLast) {
         // No test for a missing pattern: a craft is defined by what it produces and what it owes.
-        if (craft.craftTicks() >= ticksPerCraft()) {
+        if (craft.craftTicks() >= upgrades.ticksPerCraft()) {
             return completeCraft(grid);
         }
 
@@ -431,7 +403,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
             double needed = ACTIVE_POWER * ticksSinceLast;
             double extracted = energy.extractAEPower(needed, Actionable.MODULATE, PowerMultiplier.CONFIG);
             if (extracted < needed * 0.9) {
-                noteStall(wait(WAIT_NO_POWER, "no power"));
+                noteStall(AssemblerStatus.wait(AssemblerStatus.WAIT_NO_POWER, "no power"));
                 return TickRateModulation.SAME;
             }
         }
@@ -477,7 +449,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         boolean stalledOut = !unpayableForever && craft.stalledTicks() >= STALL_RELEASE_TICKS;
         if (vis.bufferedVis() < price && !unpayableForever && !stalledOut) {
             // Waiting on vis; the tick handler keeps refilling the buffer.
-            noteStall(wait(WAIT_NO_VIS, "no vis (%s banked of %s needed, target %s)",
+            noteStall(AssemblerStatus.wait(AssemblerStatus.WAIT_NO_VIS, "no vis (%s banked of %s needed, target %s)",
                     vis.bufferedVis(), price, vis.visTarget(craft.isCrafting(), craft.craftPrice())));
             return TickRateModulation.SAME;
         }
@@ -513,20 +485,20 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
         // Crystals vis cannot stand in for; checked before the result is inserted, never after.
         if (!hasCrystals(storage)) {
-            noteStall(wait(WAIT_NO_CRYSTALS, "no crystals"));
+            noteStall(AssemblerStatus.wait(AssemblerStatus.WAIT_NO_CRYSTALS, "no crystals"));
             return TickRateModulation.SAME;
         }
 
         long insertable =
                 storage.getInventory().insert(outputKey, output.getCount(), Actionable.SIMULATE, actionSource);
         if (insertable < output.getCount()) {
-            noteStall(wait(WAIT_NO_ROOM, "no room for %s", output.getHoverName()));
+            noteStall(AssemblerStatus.wait(AssemblerStatus.WAIT_NO_ROOM, "no room for %s", output.getHoverName()));
             return TickRateModulation.SAME;
         }
 
         // Re-check after the simulate: the extraction below is the point of no return for the crystals.
         if (!hasCrystals(storage)) {
-            noteStall(wait(WAIT_NO_CRYSTALS_RECHECK, "no crystals (recheck)"));
+            noteStall(AssemblerStatus.wait(AssemblerStatus.WAIT_NO_CRYSTALS_RECHECK, "no crystals (recheck)"));
             return TickRateModulation.SAME;
         }
         takeCrystals(storage);
@@ -577,7 +549,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     /** The vis charged for {@code pattern}, after the gear discount and floored by Thaumaturge's own
      * {@code MIN_CONSUMPTION_MODIFIER}, so an equipped assembler still pays something. */
     public int craftCost(ThEArcanePattern pattern) {
-        float modifier = Math.max(1.0F - gearDiscount / 100.0F, MIN_CONSUMPTION_MODIFIER);
+        float modifier = Math.max(1.0F - upgrades.gearDiscount() / 100.0F, MIN_CONSUMPTION_MODIFIER);
         return Math.max(1, (int) Math.ceil(pattern.chargedVis() * modifier));
     }
 
@@ -621,10 +593,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         displaySync.markForUpdate();
         // Nothing left to run, so the grid may stop ticking this machine.
         updateSleepiness();
-    }
-
-    private int ticksPerCraft() {
-        return Math.max(MIN_TICKS_PER_CRAFT, BASE_TICKS_PER_CRAFT - TICKS_PER_SPEED_UPGRADE * speedUpgrades);
     }
 
     /** Whether the aura can pay for {@code pattern}. An unpayable job is refused, not held: the CPU
@@ -673,12 +641,12 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputHolder) {
         if (!acceptsPlans() || !mainNode.isActive()) {
             noteRefusal(acceptsPlans()
-                    ? refuse(REFUSE_NODE_INACTIVE, "its grid node is not active")
-                    : refuse(REFUSE_BUSY, "it is already holding a craft"));
+                    ? AssemblerStatus.refuse(AssemblerStatus.REFUSE_NODE_INACTIVE, "its grid node is not active")
+                    : AssemblerStatus.refuse(AssemblerStatus.REFUSE_BUSY, "it is already holding a craft"));
             return false;
         }
         if (!(patternDetails instanceof ArcanePatternDetails details)) {
-            noteRefusal(refuse(REFUSE_NOT_ARCANE, "the pattern is not an arcane pattern this machine can read"));
+            noteRefusal(AssemblerStatus.refuse(AssemblerStatus.REFUSE_NOT_ARCANE, "the pattern is not an arcane pattern this machine can read"));
             return false;
         }
         if (!canEverPay(details.pattern())) {
@@ -724,8 +692,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputs, Direction ejectionDirection) {
         if (!acceptsPlans() || !mainNode.isActive()) {
             noteRefusal(acceptsPlans()
-                    ? refuse(REFUSE_NODE_INACTIVE, "its grid node is not active")
-                    : refuse(REFUSE_BUSY, "it is already holding a craft"));
+                    ? AssemblerStatus.refuse(AssemblerStatus.REFUSE_NODE_INACTIVE, "its grid node is not active")
+                    : AssemblerStatus.refuse(AssemblerStatus.REFUSE_BUSY, "it is already holding a craft"));
             return false;
         }
         if (patternDetails instanceof ArcanePatternDetails details) {
@@ -737,7 +705,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
         ThEArcanePattern resolved = resolveExternal(patternDetails);
         if (resolved == null) {
-            noteRefusal(refuse(REFUSE_UNRESOLVED, "the pattern does not resolve to an arcane recipe"));
+            noteRefusal(AssemblerStatus.refuse(AssemblerStatus.REFUSE_UNRESOLVED, "the pattern does not resolve to an arcane recipe"));
             return false;
         }
         if (!canEverPay(resolved)) {
@@ -756,56 +724,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         ThELog.LOG.info("[assembler] at {} turned a job away: {}", worldPosition, why.getString());
     }
 
-    /** Builds one of this machine's tooltip reasons. The key and its English fallback go together so
-     * they cannot drift: a missing translation would show the player a raw key. */
-    private static Component wait(String key, String english, Object... args) {
-        return Component.translatableWithFallback(
-                "jade.thaumicenergistics_ce.arcane_assembler.wait_reason." + key, english, args);
-    }
-
-    private static Component refuse(String key, String english, Object... args) {
-        return Component.translatableWithFallback(
-                "jade.thaumicenergistics_ce.arcane_assembler.refuse_reason." + key, english, args);
-    }
-
-    // ---- The reason keys, named once --------------------------------------
-    // Constants, not literals: the self-test enumerates them to catch a reason key with no translation.
-
-    private static final String WAIT_NO_POWER = "no_power";
-    private static final String WAIT_NO_VIS = "no_vis";
-    private static final String WAIT_NO_CRYSTALS = "no_crystals";
-    private static final String WAIT_NO_CRYSTALS_RECHECK = "no_crystals_recheck";
-    private static final String WAIT_NO_ROOM = "no_room";
-    private static final String REFUSE_NODE_INACTIVE = "node_inactive";
-    private static final String REFUSE_BUSY = "busy";
-    private static final String REFUSE_NOT_ARCANE = "not_arcane";
-    private static final String REFUSE_UNRESOLVED = "unresolved";
-    private static final String REFUSE_TOO_EXPENSIVE = "too_expensive";
-
-    public static List<String> tooltipReasonKeys() {
-        List<String> keys = new ArrayList<>();
-        for (String key : List.of(
-                WAIT_NO_POWER, WAIT_NO_VIS, WAIT_NO_CRYSTALS, WAIT_NO_CRYSTALS_RECHECK, WAIT_NO_ROOM)) {
-            keys.add("jade.thaumicenergistics_ce.arcane_assembler.wait_reason." + key);
-        }
-        for (String key : List.of(
-                REFUSE_NODE_INACTIVE,
-                REFUSE_BUSY,
-                REFUSE_NOT_ARCANE,
-                REFUSE_UNRESOLVED,
-                REFUSE_TOO_EXPENSIVE)) {
-            keys.add("jade.thaumicenergistics_ce.arcane_assembler.refuse_reason." + key);
-        }
-        return keys;
-    }
-
     private Component cannotPay(int price) {
-        return refuse(
-                REFUSE_TOO_EXPENSIVE,
-                "the recipe costs %s vis and this chunk's aura can never hold more than %s (aura nodes would"
-                        + " raise it)",
-                price,
-                vis.auraCapacity());
+        return AssemblerStatus.tooExpensive(price, vis.auraCapacity());
     }
 
     private @Nullable ThEArcanePattern resolveExternal(IPatternDetails details) {
@@ -927,7 +847,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
             return;
         }
         patternsDirty = true;
-        recalculateGearDiscount();
+        upgrades.recalculateGearDiscount();
         setChanged();
         if (level != null && !level.isClientSide() && mainNode.getGrid() != null) {
             patternsDirty = !rebuildPatterns();
@@ -947,7 +867,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         super.loadAdditional(tag, registries);
         mainNode.loadFromNBT(tag);
         craft.readNbt(tag, registries);
-        speedUpgrades = Math.clamp(tag.getInt("SpeedUpgrades"), 0, MAX_SPEED_UPGRADES);
+        upgrades.readNbt(tag);
         vis.readNbt(tag);
         suppressNotify = true;
         try {
@@ -955,7 +875,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         } finally {
             suppressNotify = false;
         }
-        recalculateGearDiscount();
+        upgrades.recalculateGearDiscount();
         patternsDirty = true;
     }
 
@@ -984,7 +904,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                     craft.craftPrice(),
                     recovered == null ? " (the knowledge core no longer has its pattern)" : "");
             // Deliver on the first tick: the crafting time was served before the save.
-            craft.setCraftTicks(ticksPerCraft());
+            craft.setCraftTicks(upgrades.ticksPerCraft());
             craft.clearStall();
         } else {
             craft.setCrafting(false);
@@ -1005,7 +925,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         mainNode.saveToNBT(tag);
-        tag.putInt("SpeedUpgrades", speedUpgrades);
+        upgrades.writeNbt(tag);
         vis.writeNbt(tag);
         // Saved with the craft, so finishing it after a reload needs nothing but this tag and the well.
         craft.writeNbt(tag, registries);
@@ -1043,7 +963,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
         displaySync.refreshPatternSlots();
-        recalculateGearDiscount();
+        upgrades.recalculateGearDiscount();
         return new MenuArcaneAssembler(containerId, playerInventory, this);
     }
 

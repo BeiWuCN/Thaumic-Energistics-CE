@@ -264,7 +264,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
                     // is twenty packets a second to say what four do.
                     case DATA_CRAFT_TICK -> (assembler.getCraftTicks() / 4) * 4;
                     case DATA_TICKS_PER_CRAFT -> assembler.getTicksPerCraft();
-                    case DATA_GEAR_DISCOUNT -> assembler.getGearDiscount();
+                    case DATA_GEAR_DISCOUNT -> assembler.upgrades().getGearDiscount();
                     default -> 0;
                 };
             }
@@ -294,7 +294,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
                 count++;
             }
         }
-        assembler.setSpeedUpgrades(count);
+        assembler.upgrades().setSpeedUpgrades(count);
     }
 
     public void refreshPatternView() {

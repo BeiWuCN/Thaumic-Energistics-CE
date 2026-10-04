@@ -51,7 +51,7 @@ final class AssemblerDisplaySync {
     void writeSync(CompoundTag tag, HolderLookup.Provider registries) {
         owner.craft.writeSync(tag);
         owner.vis.writeNbt(tag);
-        tag.putInt("GearDiscount", owner.gearDiscount);
+        tag.putInt("GearDiscount", owner.upgrades().gearDiscount());
         if (!owner.craft.isCrafting() || owner.craft.craftTicks() == 0 || owner.craft.craftTicks() % 100 == 0) {
             tag.put("Preview", owner.inventory.getItem(BlockEntityArcaneAssembler.TARGET_SLOT).saveOptional(registries));
         }
@@ -64,7 +64,7 @@ final class AssemblerDisplaySync {
         try {
             owner.craft.readSync(tag);
             owner.vis.readSync(tag);
-            owner.gearDiscount = tag.getInt("GearDiscount");
+            owner.upgrades().setGearDiscount(tag.getInt("GearDiscount"));
             // A display: an absent key means "unchanged", the product going out on a slower clock.
             if (tag.contains("Preview")) {
                 previewStack = ItemStack.parseOptional(registries, tag.getCompound("Preview"));

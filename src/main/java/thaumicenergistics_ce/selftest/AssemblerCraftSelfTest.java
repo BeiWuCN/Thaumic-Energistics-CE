@@ -21,6 +21,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ArcanePatternDetails;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
+import thaumicenergistics_ce.blockentity.assembler.AssemblerStatus;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.init.ModBlocks;
 import thaumicenergistics_ce.init.ModItems;
@@ -177,7 +178,7 @@ public final class AssemblerCraftSelfTest {
     }
 
     private static List<String> tooltipKeys() {
-        List<String> keys = new ArrayList<>(BlockEntityArcaneAssembler.tooltipReasonKeys());
+        List<String> keys = new ArrayList<>(AssemblerStatus.tooltipReasonKeys());
         for (String label : List.of(
                 "crafting", "discount", "patterns", "produces", "speed", "vis", "waiting", "refused")) {
             keys.add("jade.thaumicenergistics_ce.arcane_assembler." + label);

@@ -81,8 +81,8 @@ public class ArcaneAssemblerProvider
         tag.putInt(TAG_VIS, assembler.getBufferedVis());
         // Rounded to whole vis: hundredths are not worth a tooltip line.
         tag.putInt(TAG_AURA, Math.round(assembler.getAuraAround()));
-        tag.putInt(TAG_DISCOUNT, assembler.getGearDiscount());
-        tag.putInt(TAG_SPEED, assembler.getSpeedUpgrades());
+        tag.putInt(TAG_DISCOUNT, assembler.upgrades().getGearDiscount());
+        tag.putInt(TAG_SPEED, assembler.upgrades().getSpeedUpgrades());
         // Available, not stored patterns: the number that answers "why is nothing being crafted for me".
         tag.putInt(TAG_PATTERNS, assembler.getAvailablePatterns().size());
 
