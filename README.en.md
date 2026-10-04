@@ -28,17 +28,24 @@ Plus a full Thaumonomicon tree, in English and Chinese.
 
 ## Building
 
-JDK 21 and `gradlew build`. Dependencies are not resolved from maven; they are read from `libs/` (see `libs/README.md` for all seven):
+JDK 21 and `gradlew build`.
 
-- Thaumaturge: <https://github.com/Leclowndu93150/Thaumaturge/> — get it from their repo or releases rather than redistributing it here
+Eight of the dependencies are ordinary maven coordinates, pinned to exact versions in `gradle.properties` and resolved from the Modrinth maven repository. A fresh clone builds with nothing staged by hand:
+
 - Applied Energistics 2 19.2.17: <https://modrinth.com/mod/ae2>
-- GuideME 21.1.x: <https://modrinth.com/mod/guideme>
+- GuideME 21.1.17: <https://modrinth.com/mod/guideme>
+- JEI 19.57.0.444: <https://modrinth.com/mod/jei> — the recipe transfer button
+- Jade 15.10.6: <https://modrinth.com/mod/jade> — the block info overlay
+- Curios 9.5.1 / TerraBlender 4.1.0.8 / Lithostitched 1.8.0 / Apollib 1.2.0: Thaumaturge's runtime prerequisites; this mod imports none of them
 
-These also live in `libs/`, for the same reason (Thaumaturge is a prerequisite mod that is not on Maven Central, so this mod does not use public maven either):
+**Thaumaturge itself is the one you have to build once.** It is All Rights Reserved: it publishes no maven artifact, and its licence forbids publishing the mod or any binary built from it (§3.1 names "GitHub Releases on a fork" outright), so this repository cannot carry it for you. §2.4 does allow building it for your own use. Run one of these:
 
-- JEI 19.57.x: <https://modrinth.com/mod/jei> — the recipe transfer button
-- Jade 15.10.x: <https://modrinth.com/mod/jade> — the block info overlay
-- Curios 9.5.x + TerraBlender 4.1.x: Thaumaturge's runtime prerequisites
+```sh
+tools/fetch-thaumaturge.sh                      # Linux, macOS, CI
+powershell -File tools/fetch-thaumaturge.ps1    # Windows
+```
+
+It clones <https://github.com/Leclowndu93150/Thaumaturge/> at the commit pinned as `thaumaturge_commit` in `gradle.properties` and leaves the jar it builds in `libs/`. Without that jar `gradlew build` fails the configuration with a pointer to these commands rather than degrading into hundreds of unresolved-symbol errors. **Do not commit the jar and do not pass it on.**
 
 ## Credits
 

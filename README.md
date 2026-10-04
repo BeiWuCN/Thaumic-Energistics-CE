@@ -28,17 +28,24 @@
 
 ## 编译
 
-需要 JDK 21，然后 `gradlew build`。依赖不走公共 maven，放在 `libs/` 目录里（`build.gradle` 直接读这个目录，7 个 jar 见 `libs/README.md`）：
+需要 JDK 21，然后 `gradlew build`。
 
-- Thaumaturge：<https://github.com/Leclowndu93150/Thaumaturge/> —— 去它的仓库或 release 拿，不要从这里转发
+依赖里 8 个走 Modrinth 的 maven 仓库，版本固定在 `gradle.properties`。clone 下来直接就能编，不需要你手工准备任何东西：
+
 - Applied Energistics 2 19.2.17：<https://modrinth.com/mod/ae2>
-- GuideME 21.1.x：<https://modrinth.com/mod/guideme>
+- GuideME 21.1.17：<https://modrinth.com/mod/guideme>
+- JEI 19.57.0.444：<https://modrinth.com/mod/jei> —— 配方转移按钮
+- Jade 15.10.6：<https://modrinth.com/mod/jade> —— 机器顶部信息面板
+- Curios 9.5.1 / TerraBlender 4.1.0.8 / Lithostitched 1.8.0 / Apollib 1.2.0：Thaumaturge 的运行前置，本模组不 import 它们
 
-下面这几个也放在 `libs/` 里，原因同上（其中 Thaumaturge 是前置模组，不在 Maven Central 上，所以本模组也不走公共 maven）：
+**剩下那个 Thaumaturge 得你自己编一次。** 它是 All Rights Reserved：既没有 maven 制品，许可也禁止分发它、以及由它构建出的任何二进制（§3.1 连「fork 上的 GitHub Releases」都点名禁止），所以这个仓库没法替你带上它。许可 §2.4 允许你自己构建、自己使用，跑一次就行：
 
-- JEI 19.57.x：<https://modrinth.com/mod/jei> —— 配方转移按钮
-- Jade 15.10.x：<https://modrinth.com/mod/jade> —— 机器顶部信息面板
-- Curios 9.5.x + TerraBlender 4.1.x：Thaumaturge 的运行前置，装它俩就能跑
+```sh
+tools/fetch-thaumaturge.sh                      # Linux / macOS / CI
+powershell -File tools/fetch-thaumaturge.ps1    # Windows
+```
+
+它把 <https://github.com/Leclowndu93150/Thaumaturge/> 在 `gradle.properties` 里 `thaumaturge_commit` 指定的那个 commit clone 下来、编成 jar 放进 `libs/`。没有这个 jar 时 `gradlew build` 会在配置阶段直接停下并告诉你该跑哪条命令，而不是退化成几百条找不到符号的报错。**别提交这个 jar，也别转发给别人。**
 
 ## 鸣谢
 

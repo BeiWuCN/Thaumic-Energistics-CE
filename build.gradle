@@ -17,8 +17,14 @@ java {
 }
 
 repositories {
-    // Every mod dependency is a flat file in libs/, so no mod maven is needed. These entries exist
-    // only for build plugins plus the optional offline mirror described in settings.gradle.
+    // The mod dependencies are ordinary maven coordinates, pinned to exact versions in
+    // gradle.properties. Scoped by group so this repository can never answer for anything else.
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+    // NeoForge itself arrives through the moddev plugin, which adds maven.neoforged.net over in
+    // settings.gradle. These two cover the build plugins and the optional offline mirror.
     mavenLocal()
     mavenCentral()
     // maven { url = 'file:///F:/local-maven' }
@@ -36,16 +42,13 @@ neoForge {
         minecraftVersion = project.parchment_minecraft_version
     }
 
-    // Thaumaturge publishes no maven artifact, so it is a flat-file dependency. ModDevGradle
-    // inspects the jar, derives the run config from it, and the loader finds its neoforge.mods.toml
-    // on the runtime classpath like any other mod.
+    // Declare OUR source set and nothing else. Thaumaturge needs no entry here: it reaches the run
+    // as an ordinary dependency, and ModDevGradle derives the run config from the jar it finds.
     //
-    // Declare OUR source set and nothing else. This block used to also map "thaumaturge" onto
-    // sourceSets.main, which is wrong: a mod entry contributes its source set's class folders to the
-    // run, so that entry handed the loader this project's own output under Thaumaturge's name - the
-    // mod was reported loaded twice, once as ours and once as Thaumaturge's. Thaumaturge needs no
-    // entry here at all. It resolves from libs/ like every other dependency, and this project does
-    // not build it.
+    // This block used to also map "thaumaturge" onto sourceSets.main, which is wrong: a mod entry
+    // contributes its source set's class folders to the run, so that entry handed the loader this
+    // project's own output under Thaumaturge's name - the mod was reported loaded twice, once as
+    // ours and once as Thaumaturge's.
     mods {
         "${mod_id}" {
             sourceSet(sourceSets.main)
@@ -66,7 +69,9 @@ neoForge {
             //     Caused by: Failed to get element thaumicenergistics_ce:essentia_terminal
             //
             // and the world refuses to load. A run that produces a broken world is worse than no switch.
-            // To see the mod absent, build a jar and drop it into a separate profile with no libs/.
+            // To see the mod absent, build a jar and drop it into a separate profile with no
+            // Thaumaturge - but note that Thaumaturge is a hard dependency, so the loader refuses
+            // before any of this is even reached.
             //
             // Quick-play into the existing dev world when asked. `MenuSelfTest` needs a player to exist -
             // every menu takes an Inventory, and an Inventory needs one - so it skips on a dedicated server
@@ -116,16 +121,48 @@ neoForge {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+// ---- Thaumaturge: built by the builder, never shipped ---------------------
+// It is All Rights Reserved. Its LICENSE forbids publishing the mod or any binary built from it and
+// names "GitHub Releases on a fork" as forbidden, so this repository cannot carry the jar, and it
+// publishes no maven artifact either, so it cannot be resolved. Section 2.4 does allow building it
+// for your own use, which is what tools/fetch-thaumaturge.* does: once, from the canonical
+// repository, at the commit pinned in gradle.properties. See libs/README.md.
+def thaumaturgeJars = fileTree(dir: 'libs', include: ['thaumaturge-*.jar'])
+if (thaumaturgeJars.isEmpty()) {
+    throw new GradleException("""
+        No Thaumaturge jar in libs/.
+
+        Thaumaturge is All Rights Reserved and publishes no maven artifact, so it cannot be
+        downloaded for you - every builder compiles it from the canonical repository themselves.
+        Run one of these once and it will be there:
+
+            tools/fetch-thaumaturge.sh                      (Linux, macOS, CI)
+            powershell -File tools/fetch-thaumaturge.ps1    (Windows PowerShell)
+
+        It clones github.com/Leclowndu93150/Thaumaturge at ${thaumaturge_commit} and leaves the
+        built jar in libs/. Do not commit it or pass it on; the licence forbids both.
+    """.stripIndent())
+}
+
 dependencies {
     compileOnly "org.jspecify:jspecify:1.0.0"
 
-    // ---- Every mod dependency is a flat file in libs/ ----------------------
-    // See libs/README.md. Neither the mods nor the run environment are reliably resolvable from
-    // public maven repositories, and a flat file always resolves to exactly the jar the addon was
-    // written and tested against. That includes the runtime-only mods, which are staged from the
-    // `samples/` directory at the workspace root.
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    // ---- Mod dependencies -------------------------------------------------
+    // Pinned in gradle.properties, resolved from the Modrinth maven repository. `implementation`
+    // rather than a split of compile and runtime on purpose: Thaumaturge's and AE2's public
+    // signatures name GuideME, Curios and Jade types, so every one of these has to be on the compile
+    // classpath for this mod to compile at all, and on the runtime classpath for the dev run.
+    implementation "maven.modrinth:ae2:${ae2_version}"
+    implementation "maven.modrinth:guideme:${guideme_version}"
+    implementation "maven.modrinth:jei:${jei_version}"
+    implementation "maven.modrinth:jade:${jade_version}"
+    implementation "maven.modrinth:curios:${curios_version}"
+    implementation "maven.modrinth:terrablender:${terrablender_version}"
+    implementation "maven.modrinth:lithostitched:${lithostitched_version}"
+    implementation "maven.modrinth:apollib:${apollib_version}"
 
+    // Thaumaturge, from the local build the guard above insists on.
+    implementation thaumaturgeJars
 }
 
 tasks.named('compileJava') {

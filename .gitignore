@@ -11,8 +11,13 @@ logs/
 .idea/
 *.iml
 
-# Vendored dependency jars (see libs/README.md for where to get them)
+# The one dependency that cannot come from maven (see libs/README.md for why, and for how to build
+# it). Its jar is All Rights Reserved and must never be committed.
 libs/*.jar
+
+# Where tools/fetch-thaumaturge.* checks Thaumaturge out. CI keeps it under the workspace so the
+# actions/cache step can carry it between runs.
+.thaumaturge-src/
 
 # JVM crash logs
 hs_err_pid*.log

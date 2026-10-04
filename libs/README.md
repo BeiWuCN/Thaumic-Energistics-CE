@@ -1,39 +1,43 @@
 # libs/
 
-Flat-file mod dependencies. Neither Thaumaturge nor AE2 is reliably resolvable from a public
-maven repository, and a flat file guarantees the addon compiles against exactly the jar it was
-written for. Everything the build needs lives here - `build.gradle` declares no mod maven
-coordinate at all.
+Everything here is excluded from the repository by `.gitignore`. Exactly one dependency is resolved
+from this directory; the rest are maven coordinates pinned in `gradle.properties`.
 
-| File | Why |
-| --- | --- |
-| `thaumaturge-1.21.1-NeoForge-BETA-0.4.7.jar` | Supplies the arcane recipe API, aspects, aura and essentia. 199 imports. Built from git branch `1.21.1` commit `9acb9143a9fb86f1a6cba55f1284ecbd45825fba` ("add essentia priority api"), the newest source at the time of writing; the previous 0.4.6 and 0.4.4 jars are kept in `../build/backup/`. |
-| `appliedenergistics2-19.2.17.jar` | Supplies the ME network, crafting job and pattern APIs. 343 imports. |
-| `jei-1.21.1-neoforge-19.57.0.444.jar` | The `integration.jei` recipe transfers. 33 imports. |
-| `Jade-1.21.1-NeoForge-15.10.6.jar` | The `integration.jade` block-entity tooltip providers. 28 imports. |
-| `guideme-21.1.17.jar` | Hard dependency of AE2 19.2.x; needed on the compile classpath because AE2's API references its types. |
-| `curios-neoforge-9.5.1+1.21.1.jar` | Not imported by this mod. Staged for the dev run because Thaumaturge requires it at runtime. |
-| `TerraBlender-neoforge-1.21.1-4.1.0.8.jar` | Not imported by this mod. Staged for the dev run because Thaumaturge's world generation requires it. |
+**Thaumaturge is the exception, and not by choice.** Its LICENSE is All Rights Reserved: §3.1 forbids
+publishing the mod *or any binary built from it* — naming "GitHub Releases on a fork", file hosts and
+modpacks explicitly — and it publishes no maven artifact, so no build of it can be downloaded,
+committed, or handed to anyone else. §2.4 does allow building it for your own use, which is what lands
+the jar here.
 
-`build.gradle` picks all of these up with:
+`build.gradle` fails the configuration with a pointed message when no `thaumaturge-*.jar` is present.
+Run one of these once to put it there:
 
-```groovy
-implementation fileTree(dir: 'libs', include: ['*.jar'])
+```sh
+tools/fetch-thaumaturge.sh                      # Linux, macOS, CI
+powershell -File tools/fetch-thaumaturge.ps1    # Windows
 ```
 
-## Where to get them
+Both clone <https://github.com/Leclowndu93150/Thaumaturge/> at the `thaumaturge_commit` pinned in
+`gradle.properties` — the commit this addon's 223 Thaumaturge imports were written against — build it
+with its own wrapper, and copy the resulting jar back here. They are idempotent; pass `--force` / `-Force`
+to rebuild.
 
-- **Thaumaturge** - <https://github.com/Leclowndu93150/Thaumaturge/>. Build it with `gradlew jar` or
-  take a release from there and put the jar here; it is not redistributed with this mod.
-- **AE2 19.2.17** - <https://cdn.modrinth.com/data/XxWD5pD3/versions/kfyIqgJ6/appliedenergistics2-19.2.17.jar>
-- **GuideME 21.1.17** - <https://modrinth.com/mod/guideme/versions> (any 21.1.x; the file vendored
-  here is `guideme-21.1.17.jar`)
-- **JEI / Jade / Curios / TerraBlender** - their own Modrinth or CurseForge pages. Curios and
-  TerraBlender are here only so the dev run starts; Thaumaturge requires both.
+**Do not commit the jar and do not pass it on.** `.gitignore` already refuses `libs/*.jar`.
 
-## Why these are not maven dependencies
+## Why a commit and not a version
 
-Curios, TerraBlender and JEI *are* publicly resolvable, and older revisions of this file claimed
-they were therefore declared as normal maven dependencies. They are not, and that claim was wrong:
-`build.gradle` resolves every mod from this directory, including the runtime-only ones. Keeping them
-flat is deliberate - it is the only way the dev run and a built jar see the same versions.
+The upstream repository has no tags and no releases, so there is no version to pin and no artifact to
+name. `thaumaturge_commit` is the newest source at the time of writing, on branch `1.21.1`. Earlier
+builds (0.4.6 and 0.4.4) were used during development and are kept outside the repository; 0.4.6 is
+the revision that first required Lithostitched.
+
+## What is no longer here
+
+AE2, GuideME, JEI, Jade, Curios, TerraBlender, Lithostitched and Apollib used to be flat files in this
+directory too. They are now maven coordinates against `https://api.modrinth.com/maven`, so a fresh clone
+resolves them itself. Lithostitched and Apollib are worth knowing about even so: Thaumaturge 0.4.6
+declared Lithostitched `[1.8.0,)` as a hard dependency and Lithostitched in turn requires Apollib
+`[1.2.0,)`. Lithostitched's Modrinth pom lists no dependencies at all, so Gradle never pulls Apollib in
+transitively — it is declared explicitly for that reason. When a `ModList` looks wrong by hand, note that
+`ModSorter` names only one missing mod per pass, so Lithostitched has to be satisfied before Apollib is
+even mentioned.

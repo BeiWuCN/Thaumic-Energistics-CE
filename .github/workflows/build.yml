@@ -1,0 +1,62 @@
+name: build
+
+# Any branch, plus pull requests. Nothing here publishes a mod: the job builds, checks the tree, and
+# uploads this mod's own jar as a workflow artifact. See the guard near the end for why that
+# distinction is written down rather than assumed.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Cache Gradle and the Thaumaturge build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            .thaumaturge-src
+          key: gradle-${{ runner.os }}-${{ hashFiles('gradle.properties', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      # Thaumaturge is All Rights Reserved: it publishes no maven artifact and its licence forbids
+      # redistributing the mod or a binary built from it, so no public build of it may be downloaded.
+      # Section 2.4 permits building it yourself, which is what this does - once, from the canonical
+      # repository, at the commit gradle.properties pins. The checkout and both Gradle caches are
+      # scoped to this repository's own run; nothing is ever uploaded from libs/.
+      - name: Build Thaumaturge from source
+        run: ./tools/fetch-thaumaturge.sh
+        env:
+          THAUMATURGE_SRC: ${{ github.workspace }}/.thaumaturge-src
+          CI: true
+
+      - name: Build
+        run: ./gradlew build --stacktrace
+
+      # The upload step below hands out build/libs/*.jar. Keep it that way: libs/ holds a build of
+      # Thaumaturge, and publishing that would breach its licence.
+      - name: Assert no Thaumaturge binary is in the artifact set
+        run: |
+          if ls build/libs/*.jar 2>/dev/null | grep -qi 'thaumaturge'; then
+            echo "::error::Thaumaturge is All Rights Reserved and must not be published as an artifact"
+            exit 1
+          fi
+
+      - name: Upload the jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: thaumicenergistics-ce
+          path: build/libs/*.jar
+          if-no-files-found: error
