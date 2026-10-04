@@ -53,4 +53,4 @@ The original Thaumic Energistics is by Nividica and contributors; this CE contin
 
 ## License
 
-MIT, see `LICENSE`. The code derives from Thaumic Energistics, published under LGPL-3.0 — that part is still the original authors' copyright, so honour that license too when redistributing.
+MIT, see `LICENSE`. The code derives from Thaumic Energistics by Nividica, which is MIT as well (the upstream `LICENSE` credits Chris and BrockWS). That part is still the original authors' copyright, so the upstream notice is carried in `LICENSE` too - keep it there when redistributing.

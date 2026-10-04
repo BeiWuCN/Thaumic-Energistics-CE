@@ -24,10 +24,10 @@ repositories {
         content { includeGroup 'maven.modrinth' }
     }
     // NeoForge itself arrives through the moddev plugin, which adds maven.neoforged.net over in
-    // settings.gradle. These two cover the build plugins and the optional offline mirror.
+    // settings.gradle. These two cover the build plugins and the optional local mirror.
     mavenLocal()
     mavenCentral()
-    // maven { url = 'file:///F:/local-maven' }
+    // maven { url = '../local-maven' }
 }
 
 neoForge {

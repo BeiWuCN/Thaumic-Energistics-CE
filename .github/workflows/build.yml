@@ -21,21 +21,27 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Cache Gradle and the Thaumaturge build
+      - name: Cache Gradle
         uses: actions/cache@v6
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-            thaumaturge-src
           key: gradle-${{ runner.os }}-${{ hashFiles('gradle.properties', 'gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
 
       # Thaumaturge is All Rights Reserved: it publishes no maven artifact and its licence forbids
       # redistributing the mod or a binary built from it, so no public build of it may be downloaded.
-      # Section 2.4 permits building it yourself, which is what this does - once, from the canonical
-      # repository, at the commit gradle.properties pins. The checkout and both Gradle caches are
-      # scoped to this repository's own run; nothing is ever uploaded from libs/.
+      # Section 2.4 permits building it yourself, which is what this does - from the canonical
+      # repository, at the commit gradle.properties pins.
+      #
+      # The checkout is deliberately NOT cached. A cache entry belongs to this repository, and a
+      # public repository's caches can be downloaded by anyone who can read it; caching
+      # thaumaturge-src would park a Thaumaturge build (its own build/ directory holds the jar) in
+      # that store, which is the redistribution section 3.1 forbids. The Gradle caches above hold
+      # this mod's own dependencies only: the Thaumaturge jar reaches the build as a libs/ fileTree
+      # dependency (see build.gradle) and is never copied into them. It is therefore rebuilt from
+      # source on every run, which costs a few minutes and is the point.
       #
       # The checkout directory is deliberately not hidden: Gradle refuses to configure a project
       # whose directory name begins with a dot ("The project name '.thaumaturge-src' must not start

@@ -53,4 +53,4 @@ powershell -File tools/fetch-thaumaturge.ps1    # Windows
 
 ## 许可
 
-MIT，见 `LICENSE`。代码源自以 LGPL-3.0 发布的 Thaumic Energistics，那部分的版权仍在原作者手里，再分发的时候记得一并遵守。
+MIT，见 `LICENSE`。代码源自 Nividica 的 Thaumic Energistics，后者同样以 MIT 发布（上游 `LICENSE` 的版权行是 Chris 与 BrockWS）。那部分的版权仍在原作者手里，所以 `LICENSE` 里已一并写上上游的版权声明，再分发时请连着保留。

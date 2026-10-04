@@ -6,9 +6,9 @@ pluginManagement {
     }
 
     // If maven.neoforged.net is unreachable from your network (it resets connections intermittently
-    // in some environments), uncomment the line below and populate F:/local-maven with the NeoForge
-    // artifacts for your `neo_version`. See README.md, "Building offline".
-    // maven { url = 'file:///F:/local-maven' }
+    // in some environments), uncomment the line below and populate ../local-maven with the NeoForge
+    // artifacts for your `neo_version`. This repository does not ship such a mirror.
+    // maven { url = '../local-maven' }
 }
 
 // Note: no foojay toolchain resolver. The build pins Java 21, so the plugin would only add a
