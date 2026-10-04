@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.menu;
+package thaumicenergistics_ce.selftest;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.crafting.PatternDetailsHelper;
@@ -20,9 +20,9 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThaumicEnergistics;
+import thaumicenergistics_ce.arcane.ArcanePatternDetails;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
-import thaumicenergistics_ce.blockentity.ArcanePatternDetails;
-import thaumicenergistics_ce.blockentity.BlockEntityArcaneAssembler;
+import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.init.ModBlocks;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.selftest;
 
 import appeng.api.crafting.PatternDetailsHelper;
 import appeng.api.stacks.AEItemKey;
@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jspecify.annotations.Nullable;
+import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 import thaumicenergistics_ce.init.ModBlocks;
 
 /**

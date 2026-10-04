@@ -32,13 +32,8 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
-import thaumicenergistics_ce.blockentity.EncoderSelfTest;
-import thaumicenergistics_ce.blockentity.InscriberSelfTest;
-import thaumicenergistics_ce.blockentity.VisRelaySelfTest;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
-import thaumicenergistics_ce.essentia.EssentiaSelfTest;
 import thaumicenergistics_ce.focus.FocusElements;
-import thaumicenergistics_ce.focus.GearSelfTest;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.ModBlocks;
 import thaumicenergistics_ce.init.ModCreativeTab;
@@ -46,8 +41,6 @@ import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
-import thaumicenergistics_ce.menu.AssemblerCraftSelfTest;
-import thaumicenergistics_ce.menu.MenuSelfTest;
 import thaumicenergistics_ce.network.ModNetwork;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartEssentiaExportBus;
@@ -56,7 +49,14 @@ import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 import thaumicenergistics_ce.part.PartEssentiaStorageBus;
 import thaumicenergistics_ce.part.PartEssentiaTerminal;
 import thaumicenergistics_ce.part.PartVisInterface;
-import thaumicenergistics_ce.research.ResearchSelfTest;
+import thaumicenergistics_ce.selftest.AssemblerCraftSelfTest;
+import thaumicenergistics_ce.selftest.EncoderSelfTest;
+import thaumicenergistics_ce.selftest.EssentiaSelfTest;
+import thaumicenergistics_ce.selftest.GearSelfTest;
+import thaumicenergistics_ce.selftest.InscriberSelfTest;
+import thaumicenergistics_ce.selftest.MenuSelfTest;
+import thaumicenergistics_ce.selftest.ResearchSelfTest;
+import thaumicenergistics_ce.selftest.VisRelaySelfTest;
 
 /**
  * Thaumic Energistics - bridges Thaumaturge essentia with Applied Energistics 2 ME networks.

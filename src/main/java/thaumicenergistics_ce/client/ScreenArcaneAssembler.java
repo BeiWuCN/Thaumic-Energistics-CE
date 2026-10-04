@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.ThaumicEnergistics;
-import thaumicenergistics_ce.blockentity.BlockEntityArcaneAssembler;
+import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.gui.GuiLayout;
 import thaumicenergistics_ce.menu.MenuArcaneAssembler;
 
@@ -109,7 +109,7 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
         // Clamped to the slots that exist: the layout is a resource, and a grid taller than the machine
         // would throw out of the render loop every frame the screen is open.
         int rows = Math.min(grid.rows(),
-                thaumicenergistics_ce.blockentity.BlockEntityArcaneAssembler.UPGRADE_SLOT_COUNT);
+                thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler.UPGRADE_SLOT_COUNT);
         for (int i = 0; i < rows; i++) {
             if (menu.getUpgradeSlot(i).hasItem()) {
                 continue;

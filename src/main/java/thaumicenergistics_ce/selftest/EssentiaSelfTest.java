@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.essentia;
+package thaumicenergistics_ce.selftest;
 
 import appeng.api.AECapabilities;
 import appeng.api.config.Actionable;

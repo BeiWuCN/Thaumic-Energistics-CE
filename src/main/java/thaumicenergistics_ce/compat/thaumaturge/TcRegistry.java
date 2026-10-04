@@ -79,4 +79,9 @@ public final class TcRegistry {
     public static ItemStack filledPhial(Holder<IAspect> aspect, int amount) {
         return PhialItem.makeFilled(aspect, amount);
     }
+
+    /** A stack of empty phials: an emptied one is spent back into its own item id, not left behind. */
+    public static ItemStack emptyPhials(int count) {
+        return new ItemStack(TCItems.PHIAL.get(), count);
+    }
 }

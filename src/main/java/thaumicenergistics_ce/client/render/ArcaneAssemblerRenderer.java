@@ -13,7 +13,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.blockentity.BlockEntityArcaneAssembler;
+import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
 /**
  * Draws the product of a running craft inside the Arcane Assembler, as a molecular assembler does.

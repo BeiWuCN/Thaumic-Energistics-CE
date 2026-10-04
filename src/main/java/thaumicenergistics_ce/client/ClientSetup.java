@@ -13,6 +13,7 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.client.render.ArcaneAssemblerRenderer;
+import thaumicenergistics_ce.client.render.MonitorBubbleRenderer;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;

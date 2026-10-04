@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.blockentity.assembler;
 
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
@@ -33,8 +33,6 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.aspect.TCAspects;
 import com.leclowndu93150.thaumaturge.api.items.IVisDiscountGear;
-import com.leclowndu93150.thaumaturge.content.aura.relay.BlockEntityVisRelay;
-import com.leclowndu93150.thaumaturge.content.aura.relay.VisRelayNetwork;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -65,8 +63,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThaumicEnergistics;
+import thaumicenergistics_ce.arcane.ArcanePatternDetails;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
+import thaumicenergistics_ce.compat.thaumaturge.TcAura;
+import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.inventory.GearSlots;
@@ -74,8 +75,6 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.menu.MenuArcaneAssembler;
 import thaumicenergistics_ce.part.PartVisInterface;
 import thaumicenergistics_ce.part.VisReservation;
-import thaumicenergistics_ce.compat.thaumaturge.TcAura;
-import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
  * An AE2 crafting machine that runs Thaumaturge arcane recipes on demand, paying in ambient vis.
@@ -1033,11 +1032,10 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         long now = server.getGameTime();
         if (relayReach == null || now >= nextRelayReachCheck) {
             nextRelayReachCheck = now + RELAY_POLL_INTERVAL;
-            BlockEntityVisRelay relay = VisRelayNetwork.findRelayNear(server, worldPosition);
             // Resolving is not paying: one simulated centivis settles whether an empty node can pay.
             // Where the chain ends is not asked separately to a relay any more: a chain has one end,
             // and a source that is not a node - another addon's, or a vis interface - sells its own.
-            relayReach = relay != null && relay.resolveSource(server) != null && relayCanSupply(server);
+            relayReach = TcAura.relayResolves(server, worldPosition) && relayCanSupply(server);
         }
         return relayReach;
     }

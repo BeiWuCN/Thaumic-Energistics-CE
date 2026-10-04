@@ -260,7 +260,7 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
     // ------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         // ContainerHelper, not createTag: a bare list has no slot index, so gaps are lost.
         ContainerHelper.saveAllItems(tag, inventory.getItems(), registries);
@@ -268,7 +268,7 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         if (tag.contains(ContainerHelper.TAG_ITEMS, Tag.TAG_LIST)) {
             // Every entry names its slot, so an empty source well stays empty.

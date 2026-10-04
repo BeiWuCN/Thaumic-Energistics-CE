@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
+import thaumicenergistics_ce.menu.slot.ContainerSlot;
 
 /**
  * "Draw this aspect out of the network into my container", sent by the Essentia Terminal's left-click.

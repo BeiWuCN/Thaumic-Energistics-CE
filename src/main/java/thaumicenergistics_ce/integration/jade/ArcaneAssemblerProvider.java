@@ -23,7 +23,7 @@ import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.IElement;
 import snownee.jade.api.ui.IElementHelper;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.blockentity.BlockEntityArcaneAssembler;
+import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
 /**
  * The Arcane Assembler's Jade tooltip.

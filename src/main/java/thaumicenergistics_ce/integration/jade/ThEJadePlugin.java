@@ -8,9 +8,9 @@ import thaumicenergistics_ce.block.BlockArcaneAssembler;
 import thaumicenergistics_ce.block.BlockEssentiaVibrationChamber;
 import thaumicenergistics_ce.block.BlockInfusionMonitor;
 import thaumicenergistics_ce.block.BlockInfusionProvider;
-import thaumicenergistics_ce.blockentity.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
+import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
 /**
  * Registers this mod's Jade providers.

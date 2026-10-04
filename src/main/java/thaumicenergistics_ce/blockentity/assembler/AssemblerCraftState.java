@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.blockentity.assembler;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.menu;
+package thaumicenergistics_ce.selftest;
 
 import appeng.api.implementations.menuobjects.IPortableTerminal;
 import appeng.menu.locator.ItemMenuHostLocator;
@@ -7,7 +7,6 @@ import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftingTransaction;
 import com.leclowndu93150.thaumaturge.api.recipe.IArcaneRecipe;
-import com.leclowndu93150.thaumaturge.content.taint.item.EssentiaCrystalFactory;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.resources.ResourceKey;
@@ -26,8 +25,14 @@ import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
 import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
+import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.init.ModMenuTypes;
+import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
+import thaumicenergistics_ce.menu.MenuDistillationEncoder;
+import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
+import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
+import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 import thaumicenergistics_ce.menu.slot.CrystalSlot;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartEssentiaTerminal;
@@ -178,13 +183,13 @@ public final class MenuSelfTest {
                 failures.add("crystal slot " + i + " is pinned to " + crystalSlot.requiredAspect()
                         + ", expected " + aspect);
             }
-            if (!slot.mayPlace(EssentiaCrystalFactory.of(
+            if (!slot.mayPlace(TcRegistry.crystalFor(
                     Aspects.resolve(level.registryAccess(), aspect), 1))) {
                 failures.add("crystal slot " + i + " refuses a crystal of its own aspect " + aspect);
             }
             ResourceKey<IAspect> other = MenuArcaneCraftingTerminal.aspectOf(
                     (i + 1) % PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
-            if (slot.mayPlace(EssentiaCrystalFactory.of(
+            if (slot.mayPlace(TcRegistry.crystalFor(
                     Aspects.resolve(level.registryAccess(), other), 1))) {
                 failures.add("crystal slot " + i + " accepts a " + other
                         + " crystal - the six slots are not pinned to their aspects");
@@ -210,7 +215,7 @@ public final class MenuSelfTest {
             if (written >= crystals.length) {
                 break;
             }
-            crystals[written] = EssentiaCrystalFactory.of(entry.aspect(), entry.amount());
+            crystals[written] = TcRegistry.crystalFor(entry.aspect(), entry.amount());
             part.crystalInventory().setItemDirect(written, crystals[written]);
             written++;
         }

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.network;
+package thaumicenergistics_ce.menu.slot;
 
 /**
  * Where the essentia container the player is using sits, for a terminal that must tell the server

@@ -9,7 +9,6 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaContainerItem;
-import com.leclowndu93150.thaumaturge.registry.TCItems;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.Holder;
@@ -19,9 +18,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThaumicEnergistics;
+import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
-import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
  * Moving essentia between a container item and the ME network.
@@ -228,7 +227,7 @@ public final class EssentiaFillHelper {
         // Emptied. A jar survives as an empty jar and a phial is spent, both the same item id as the input
         // (see the class note), so an empty copy of the input is the whole of it.
         if (TcRegistry.isPhial(stack)) {
-            return new ItemStack(TCItems.PHIAL.get(), count);
+            return TcRegistry.emptyPhials(count);
         }
         return new ItemStack(stack.getItem(), count);
     }

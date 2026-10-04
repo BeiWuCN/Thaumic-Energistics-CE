@@ -7,7 +7,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.blockentity.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProvider;
@@ -16,6 +15,7 @@ import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
 import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
+import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
 /** Block entity type registration. */
 public final class ModBlockEntities {

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.research;
+package thaumicenergistics_ce.selftest;
 
 import com.leclowndu93150.thaumaturge.api.research.IResearchCategory;
 import com.leclowndu93150.thaumaturge.api.research.IResearchEntry;

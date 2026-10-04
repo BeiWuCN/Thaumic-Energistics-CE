@@ -21,10 +21,10 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
+import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import thaumicenergistics_ce.menu.slot.ArcaneCraftingResultSlot;
 import thaumicenergistics_ce.menu.slot.CrystalSlot;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
-import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 
 /**
  * The Arcane Crafting Terminal's menu: an ME storage terminal holding an arcane workbench.

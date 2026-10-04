@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.arcane;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.stacks.AEItemKey;
@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
+import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**

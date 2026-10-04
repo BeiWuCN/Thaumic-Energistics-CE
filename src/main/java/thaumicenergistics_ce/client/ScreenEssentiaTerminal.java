@@ -13,7 +13,7 @@ import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.essentia.EssentiaFillHelper;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
-import thaumicenergistics_ce.network.ContainerSlot;
+import thaumicenergistics_ce.menu.slot.ContainerSlot;
 import thaumicenergistics_ce.network.EssentiaDepositPayload;
 import thaumicenergistics_ce.network.EssentiaFillPayload;
 

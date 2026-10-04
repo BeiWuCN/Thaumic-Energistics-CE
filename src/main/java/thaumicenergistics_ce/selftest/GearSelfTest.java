@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.focus;
+package thaumicenergistics_ce.selftest;
 
 import appeng.api.features.GridLinkables;
 import appeng.api.ids.AEComponents;
@@ -17,6 +17,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import thaumicenergistics_ce.ThaumicEnergistics;
+import thaumicenergistics_ce.focus.AEWrench;
+import thaumicenergistics_ce.focus.FocusEffectAEWrench;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.item.ItemFocusAEWrench;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;

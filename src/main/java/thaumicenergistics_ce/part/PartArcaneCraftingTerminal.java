@@ -31,8 +31,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.arcane.EssentiaCrystals;
-import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
+import thaumicenergistics_ce.init.ModMenuTypes;
 
 /**
  * An ME crafting terminal on a cable whose crafting grid is an arcane workbench's; the network supplies

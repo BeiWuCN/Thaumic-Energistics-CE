@@ -4,15 +4,14 @@ import com.leclowndu93150.thaumaturge.api.recipe.ArcaneWorkbenchContext;
 import com.leclowndu93150.thaumaturge.api.recipe.IArcaneWorkbench;
 import com.leclowndu93150.thaumaturge.api.recipe.IWorkbenchAuraSource;
 import com.leclowndu93150.thaumaturge.api.recipe.RegisterWorkbenchAuraSourcesEvent;
-import com.leclowndu93150.thaumaturge.content.workbench.WorkbenchPayment;
 import java.util.List;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.ThaumicEnergistics;
-import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
+import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
  * Lets the Arcane Crafting Terminal pay an arcane craft's untyped vis cost out of the network.
@@ -20,7 +19,8 @@ import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
  * <li>Without it nothing crafts: {@code baseVis} comes from a workbench block's aura, which a cable has none of.
  * <li>Registered directly: Thaumaturge posts the documented event from its own constructor, before this mod's.
  * <li>{@link #register()} runs exactly once, or two aura sources both promise the same vis.
- * <li>{@code WorkbenchPayment} sits in Thaumaturge's {@code content} package, not its {@code api} one.
+ * <li>Its entry point lives in Thaumaturge's {@code content} package, not its {@code api} one, so
+ * {@code TcWorkbench} reaches it rather than this class naming it.
  * </ul>
  */
 @EventBusSubscriber(modid = ThEIds.MODID)

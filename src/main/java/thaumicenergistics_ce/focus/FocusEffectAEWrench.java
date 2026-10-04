@@ -28,9 +28,9 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
+import thaumicenergistics_ce.compat.thaumaturge.TcActionBar;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.item.ItemFocusAEWrench;
-import thaumicenergistics_ce.compat.thaumaturge.TcActionBar;
 
 /**
  * The AE2 wrench as a focus effect: a right-click with a wand carrying it disassembles the AE2 block

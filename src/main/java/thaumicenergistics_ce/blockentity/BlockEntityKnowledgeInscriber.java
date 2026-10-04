@@ -369,7 +369,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         // Not SimpleContainer.createTag: that writes only non-empty slots and records no index, so a saved
         // grid came back with its gaps gone and every item shifted forwards.
@@ -378,7 +378,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         if (tag.contains(ContainerHelper.TAG_ITEMS, Tag.TAG_LIST)) {
             ContainerHelper.loadAllItems(tag, inventory.getItems(), registries);

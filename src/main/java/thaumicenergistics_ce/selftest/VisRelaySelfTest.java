@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.selftest;
 
 import appeng.api.parts.IPartHost;
 import appeng.util.Platform;
@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThaumicEnergistics;
+import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.part.PartVisInterface;
 import thaumicenergistics_ce.part.VisReservation;

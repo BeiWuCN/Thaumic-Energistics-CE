@@ -1,9 +1,6 @@
 package thaumicenergistics_ce.arcane;
 
-import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.registry.TCDataComponents;
-import com.leclowndu93150.thaumaturge.registry.TCItems;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
@@ -35,9 +32,7 @@ public final class EssentiaCrystals {
      * crucible crystals.
      */
     public static ItemStack create(Holder<IAspect> aspect, int count) {
-        ItemStack stack = new ItemStack(TCItems.ESSENTIA_CRYSTAL.get(), Math.max(1, count));
-        stack.set(TCDataComponents.CRYSTAL_ASPECT.get(), new AspectInstance(aspect, 1));
-        return stack;
+        return TcRegistry.crystalStack(aspect, count);
     }
 
     /** Number of crystals carrying {@code aspect} among the supplied stacks. */
