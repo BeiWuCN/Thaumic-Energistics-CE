@@ -27,7 +27,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-            .thaumaturge-src
+            thaumaturge-src
           key: gradle-${{ runner.os }}-${{ hashFiles('gradle.properties', 'gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
 
@@ -36,10 +36,14 @@ jobs:
       # Section 2.4 permits building it yourself, which is what this does - once, from the canonical
       # repository, at the commit gradle.properties pins. The checkout and both Gradle caches are
       # scoped to this repository's own run; nothing is ever uploaded from libs/.
+      #
+      # The checkout directory is deliberately not hidden: Gradle refuses to configure a project
+      # whose directory name begins with a dot ("The project name '.thaumaturge-src' must not start
+      # or end with a '.'"), so a dot-directory here fails before a single line of it compiles.
       - name: Build Thaumaturge from source
         run: ./tools/fetch-thaumaturge.sh
         env:
-          THAUMATURGE_SRC: ${{ github.workspace }}/.thaumaturge-src
+          THAUMATURGE_SRC: ${{ github.workspace }}/thaumaturge-src
           CI: true
 
       - name: Build

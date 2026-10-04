@@ -42,6 +42,17 @@ fi
 src=${THAUMATURGE_SRC:-"$root/build/thaumaturge-src"}
 repo=https://github.com/Leclowndu93150/Thaumaturge.git
 
+# Gradle refuses to configure a project whose directory name begins with a dot, and says so only
+# after the clone, in a message about rootProject.name. Catch it here instead.
+case "$(basename -- "$src")" in
+    .*)
+        echo "fetch-thaumaturge: THAUMATURGE_SRC must not be a dot-directory." >&2
+        echo "fetch-thaumaturge: Gradle will not configure a project named '$(basename -- "$src")'," >&2
+        echo "fetch-thaumaturge: so '$src' fails before a line of it compiles." >&2
+        exit 1
+        ;;
+esac
+
 if [ ! -d "$src/.git" ]; then
     echo "fetch-thaumaturge: cloning $repo"
     mkdir -p "$(dirname -- "$src")"

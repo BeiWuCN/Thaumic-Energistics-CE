@@ -16,8 +16,9 @@ logs/
 libs/*.jar
 
 # Where tools/fetch-thaumaturge.* checks Thaumaturge out. CI keeps it under the workspace so the
-# actions/cache step can carry it between runs.
-.thaumaturge-src/
+# actions/cache step can carry it between runs. Not a dot-directory: Gradle refuses to configure a
+# project whose directory name begins with a dot.
+thaumaturge-src/
 
 # JVM crash logs
 hs_err_pid*.log

@@ -44,6 +44,12 @@ if (-not $Force -and $existing.Count -gt 0) {
 $src = if ($env:THAUMATURGE_SRC) { $env:THAUMATURGE_SRC } else { Join-Path $root 'build\thaumaturge-src' }
 $repo = 'https://github.com/Leclowndu93150/Thaumaturge.git'
 
+# Gradle refuses to configure a project whose directory name begins with a dot, and says so only
+# after the clone, in a message about rootProject.name. Catch it here instead.
+if ((Split-Path -Leaf $src) -like '.*') {
+    throw "fetch-thaumaturge: THAUMATURGE_SRC must not be a dot-directory. Gradle will not configure a project named '$src', so it would fail before a line of it compiles."
+}
+
 if (-not (Test-Path (Join-Path $src '.git'))) {
     Write-Host "fetch-thaumaturge: cloning $repo"
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $src) | Out-Null
