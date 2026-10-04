@@ -1,54 +1,72 @@
 package thaumicenergistics_ce.client.gui;
 
+import appeng.api.config.ActionItems;
+import appeng.client.gui.Icon;
+import appeng.client.gui.implementations.UpgradeableScreen;
+import appeng.client.gui.style.ScreenStyle;
+import appeng.client.gui.widgets.ActionButton;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import thaumicenergistics_ce.ThEIds;
+import net.minecraft.world.inventory.Slot;
+import net.neoforged.neoforge.network.PacketDistributor;
 import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
+import thaumicenergistics_ce.net.PartitionWellPayload;
 
 /**
  * The Essentia Cell Workbench's screen.
  * <ul>
- *   <li>Blits this mod's own art whole; the cell and the 63 partition wells sit where the art draws.
- *   <li>Drawn directly instead of through AE2's screen-style system, which resolves a style document
- *       inside AE2's namespace only and so cannot name an addon's own art.
+ *   <li>An AE2 upgradeable screen: art, slots, title and the upgrades panel all come from the style.
+ *   <li>The cog fills the wells from the cell, the X empties them, and a click takes one mark back out.
+ *   <li>AE2's fuzzy and copy-mode switches are left out: an essentia key has no damage or NBT to match.
  * </ul>
  */
-public class ScreenEssentiaCellWorkbench extends AbstractContainerScreen<MenuEssentiaCellWorkbench> {
+public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaCellWorkbench> {
 
-    private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "textures/gui/essentia_cell_workbench.png");
-
-    private static final int WIDTH = 176;
-    private static final int HEIGHT = 253;
-
-    private static final int TITLE_X = 8;
-    private static final int TITLE_Y = 6;
-    private static final int INVENTORY_LABEL_X = 8;
-    private static final int INVENTORY_LABEL_Y = 157;
+    /** What a well with no cell behind it is tinted with: AE2's own slot art, a little over half lit. */
+    private static final float WELL_DISABLED_TINT = 0.6f;
 
     public ScreenEssentiaCellWorkbench(
-            MenuEssentiaCellWorkbench menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-        this.imageWidth = WIDTH;
-        this.imageHeight = HEIGHT;
-        this.titleLabelX = TITLE_X;
-        this.titleLabelY = TITLE_Y;
-        this.inventoryLabelX = INVENTORY_LABEL_X;
-        this.inventoryLabelY = INVENTORY_LABEL_Y;
+            MenuEssentiaCellWorkbench menu, Inventory inventory, Component title, ScreenStyle style) {
+        super(menu, inventory, title, style);
+        addToLeftToolbar(new ActionButton(ActionItems.COG, items -> menu.partitionToContents()));
+        addToLeftToolbar(new ActionButton(ActionItems.CLOSE, items -> menu.clearPartition()));
     }
 
+    /**
+     * AE2 paints a disabled well at a fifth of its opacity and gives it no icon, which this GUI's own art
+     * swallows: the same slot art in grey keeps the wells looking like wells, saying no mark can go in.
+     */
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
         super.render(graphics, mouseX, mouseY, partialTick);
-        renderTooltip(graphics, mouseX, mouseY);
+        graphics.pose().pushPose();
+        graphics.pose().translate(leftPos, topPos, 0.0f);
+        for (int well = 0; well < MenuEssentiaCellWorkbench.partitionSlotCount(); well++) {
+            if (menu.isPartitionSlotEnabled(well)) {
+                continue;
+            }
+            Slot slot = menu.slots.get(menu.partitionSlotIndex(well));
+            Icon.SLOT_BACKGROUND.getBlitter()
+                    .dest(slot.x - 1, slot.y - 1)
+                    .color(WELL_DISABLED_TINT, WELL_DISABLED_TINT, WELL_DISABLED_TINT, 1.0f)
+                    .blit(graphics);
+        }
+        graphics.pose().popPose();
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.blit(TEXTURE, leftPos, topPos, 0, 0, WIDTH, HEIGHT);
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        Slot hovered = getSlotUnderMouse();
+        int well = hovered == null ? -1 : menu.wellOf(hovered);
+        if (well >= 0) {
+            if (menu.isPartitionSlotEnabled(well)) {
+                PacketDistributor.sendToServer(
+                        new PartitionWellPayload(menu.containerId, well, PartitionWellPayload.CLEAR));
+            }
+            // The click stops here either way, so a carried item cannot land in a well.
+            return true;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 }

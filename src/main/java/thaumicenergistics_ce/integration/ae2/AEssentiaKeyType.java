@@ -4,8 +4,6 @@ import appeng.api.stacks.AEKey;
 import appeng.api.stacks.AEKeyType;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.mojang.serialization.MapCodec;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
@@ -14,7 +12,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
@@ -96,17 +93,16 @@ public final class AEssentiaKeyType extends AEKeyType {
     }
 
     /**
-     * The registries an aspect can be resolved against, asked of whichever side is running: the client's
-     * are reached by reflection, since naming {@code Minecraft} refuses to load on a dedicated server.
+     * The registries an aspect can be resolved against, asked of whichever side is running: the client
+     * installs its own through {@link ClientRegistries}, and on a dedicated server nothing is installed,
+     * so the server's registries are used.
      *
      * @return the registries, or {@code null} before either side has any
      */
     static @Nullable RegistryAccess clientOrServerRegistries() {
-        if (FMLEnvironment.dist.isClient()) {
-            RegistryAccess client = ClientRegistriesHolder.get();
-            if (client != null) {
-                return client;
-            }
+        RegistryAccess client = ClientRegistries.get();
+        if (client != null) {
+            return client;
         }
         var server = ServerLifecycleHooks.getCurrentServer();
         return server == null ? null : server.registryAccess();
@@ -125,59 +121,5 @@ public final class AEssentiaKeyType extends AEKeyType {
             return "no " + IAspect.REGISTRY_KEY.location() + " registry";
         }
         return "no entry for " + id + " in " + IAspect.REGISTRY_KEY.location();
-    }
-
-    /** The one reflective reference to the client's registries; looked up once. */
-    private static final class ClientRegistriesHolder {
-        private static final Method GET_INSTANCE;
-        private static final Field LEVEL;
-        private static final Method GET_CONNECTION;
-        private static final Method CONNECTION_REGISTRIES;
-
-        static {
-            Method instance = null;
-            Field level = null;
-            Method connection = null;
-            Method connectionRegistries = null;
-            try {
-                Class<?> minecraft = Class.forName("net.minecraft.client.Minecraft");
-                instance = minecraft.getMethod("getInstance");
-                // Field, not a getter: this Minecraft has no getLevel, and asking for one throws.
-                level = minecraft.getField("level");
-                // Connection: before a level exists, its registries are already the server's.
-                connection = minecraft.getMethod("getConnection");
-                connectionRegistries = Class.forName("net.minecraft.client.multiplayer.ClientPacketListener")
-                        .getMethod("registryAccess");
-            } catch (ReflectiveOperationException ignored) {
-                // Not a client, or the class is shaped differently: the server path covers it.
-            }
-            GET_INSTANCE = instance;
-            LEVEL = level;
-            GET_CONNECTION = connection;
-            CONNECTION_REGISTRIES = connectionRegistries;
-        }
-
-        static @Nullable RegistryAccess get() {
-            if (GET_INSTANCE == null || LEVEL == null) {
-                return null;
-            }
-            try {
-                Object minecraft = GET_INSTANCE.invoke(null);
-                if (minecraft == null) {
-                    return null;
-                }
-                Object level = LEVEL.get(minecraft);
-                if (level instanceof Level clientLevel) {
-                    return clientLevel.registryAccess();
-                }
-                if (GET_CONNECTION == null || CONNECTION_REGISTRIES == null) {
-                    return null;
-                }
-                Object connection = GET_CONNECTION.invoke(minecraft);
-                return connection == null ? null : (RegistryAccess) CONNECTION_REGISTRIES.invoke(connection);
-            } catch (ReflectiveOperationException | ClassCastException ignored) {
-                return null;
-            }
-        }
     }
 }

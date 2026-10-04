@@ -2,6 +2,9 @@ package thaumicenergistics_ce.blockentity;
 
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
+import appeng.api.upgrades.IUpgradeInventory;
+import appeng.api.upgrades.IUpgradeableObject;
+import appeng.api.upgrades.UpgradeInventories;
 import appeng.util.ConfigInventory;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
@@ -15,6 +18,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.init.ModBlockEntities;
@@ -28,7 +33,7 @@ import thaumicenergistics_ce.item.ItemEssentiaCell;
  *   <li>The block holds the cell plus a working copy, because a write-back rebuilds a data component.
  *   <li>{@code syncing} guards load and write-back: a write changes components a naive reload misreads.
  * </ul> */
-public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
+public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity implements IUpgradeableObject {
 
     public static final int CELL_SLOT = 0;
 
@@ -56,6 +61,63 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
             .supportedTypes(Set.of(AEssentiaKeyType.INSTANCE))
             .changeListener(this::storePartitionInCell)
             .build();
+
+    /** The cell's own upgrade slots, re-read per call so a cell swapped inside a menu cannot go stale. */
+    private final IUpgradeInventory upgrades = new IUpgradeInventory() {
+
+        @Override
+        public int size() {
+            // Three even with no cell, because the client builds its own slots from this number.
+            return ItemEssentiaCell.UPGRADE_SLOTS;
+        }
+
+        @Override
+        public ItemStack getStackInSlot(int slot) {
+            IUpgradeInventory cell = upgradesOfCell();
+            return slot < cell.size() ? cell.getStackInSlot(slot) : ItemStack.EMPTY;
+        }
+
+        @Override
+        public void setItemDirect(int slot, ItemStack stack) {
+            IUpgradeInventory cell = upgradesOfCell();
+            if (slot >= cell.size()) {
+                return;
+            }
+            // Onto the cell item the block holds, which is then saved with it.
+            cell.setItemDirect(slot, stack);
+            BlockEntityEssentiaCellWorkbench.this.setChanged();
+        }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return upgradesOfCell().isItemValid(slot, stack);
+        }
+
+        @Override
+        public ItemLike getUpgradableItem() {
+            return hasCell() ? getCell().getItem() : Items.AIR;
+        }
+
+        @Override
+        public int getInstalledUpgrades(ItemLike item) {
+            return upgradesOfCell().getInstalledUpgrades(item);
+        }
+
+        @Override
+        public int getMaxInstalled(ItemLike item) {
+            return upgradesOfCell().getMaxInstalled(item);
+        }
+
+        @Override
+        public void readFromNBT(CompoundTag tag, String key, HolderLookup.Provider registries) {
+            // Nothing to read: the cards sit in the cell item's own components, saved along with it.
+        }
+
+        @Override
+        public void writeToNBT(CompoundTag tag, String key, HolderLookup.Provider registries) {
+            // Nothing to write, for the same reason.
+        }
+    };
 
     private boolean syncing;
 
@@ -122,6 +184,18 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         } finally {
             syncing = false;
         }
+    }
+
+    @Override
+    public IUpgradeInventory getUpgrades() {
+        return upgrades;
+    }
+
+    private IUpgradeInventory upgradesOfCell() {
+        if (!hasCell() || !(getCell().getItem() instanceof ItemEssentiaCell cell)) {
+            return UpgradeInventories.empty();
+        }
+        return cell.getUpgrades(getCell());
     }
 
     public boolean accepts(AEKey key) {

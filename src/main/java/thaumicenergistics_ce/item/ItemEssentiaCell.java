@@ -36,7 +36,7 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
  */
 public class ItemEssentiaCell extends Item implements IBasicCellItem {
 
-    private static final int UPGRADE_SLOTS = 3;
+    public static final int UPGRADE_SLOTS = 3;
 
     private static final int BYTES_PER_TYPE = 8;
 

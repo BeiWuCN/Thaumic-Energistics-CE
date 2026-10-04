@@ -26,6 +26,7 @@ import thaumicenergistics_ce.net.EssentiaFillPayload;
 import thaumicenergistics_ce.net.GolemBackpackPayload;
 import thaumicenergistics_ce.net.InscriberGridFillPayload;
 import thaumicenergistics_ce.net.InscriberGridPayload;
+import thaumicenergistics_ce.net.PartitionWellPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
@@ -74,7 +75,8 @@ public final class NetworkSelfTest {
                 EncoderSourcePayload.TYPE,
                 EncoderActionPayload.TYPE,
                 ArcaneCraftCostPayload.TYPE,
-                GolemBackpackPayload.TYPE)) {
+                GolemBackpackPayload.TYPE,
+                PartitionWellPayload.TYPE)) {
             expected.put(type.id().getPath(), type.id());
         }
         expected.forEach((path, id) -> {
@@ -91,7 +93,8 @@ public final class NetworkSelfTest {
                 "encoder_source",
                 "encoder_action",
                 "arcane_craft_cost",
-                "golem_backpack");
+                "golem_backpack",
+                "partition_well");
         for (String path : wanted) {
             if (!expected.containsKey(path)) {
                 failures.add("no payload claims the wire id " + path);
@@ -147,6 +150,12 @@ public final class NetworkSelfTest {
                         () -> new EssentiaBusConfigPayload(7, 1, EssentiaBusConfigPayload.CLEAR),
                         EssentiaBusConfigPayload.CODEC,
                         (wrote, read) -> wrote.containerId() == read.containerId() && wrote.configSlot() == read.configSlot()
+                                && wrote.aspectId().equals(read.aspectId())),
+                new Roundtrip<>(
+                        "PartitionWellPayload",
+                        () -> new PartitionWellPayload(7, 1, unknown),
+                        PartitionWellPayload.CODEC,
+                        (wrote, read) -> wrote.containerId() == read.containerId() && wrote.well() == read.well()
                                 && wrote.aspectId().equals(read.aspectId())),
                 new Roundtrip<>(
                         "EncoderSourcePayload",

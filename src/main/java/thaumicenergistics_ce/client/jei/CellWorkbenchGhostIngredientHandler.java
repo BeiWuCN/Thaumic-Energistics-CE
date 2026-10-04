@@ -1,6 +1,5 @@
 package thaumicenergistics_ce.client.jei;
 
-import appeng.api.stacks.GenericStack;
 import appeng.menu.slot.AppEngSlot;
 import appeng.util.ConfigMenuInventory;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
@@ -9,18 +8,19 @@ import java.util.List;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
-import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
+import thaumicenergistics_ce.net.PartitionWellPayload;
 
 /**
  * Lets the player drag an aspect from JEI into an Essentia Cell Workbench partition well.
  * <ul>
  *   <li>Dragging is what a player expects from every other filter grid in AE2; these are the same kind.
  *   <li>Only aspects are offered a target: the wells hold keys, so an item has nowhere to go.
- *   <li>Writing the inventory directly changes only this side: a fake slot's {@code set} sends the packet.
+ *   <li>The mark is sent to the server, not written into the slot - see {@code PartitionWellPayload}.
  * </ul>
  */
 public class CellWorkbenchGhostIngredientHandler
@@ -52,12 +52,13 @@ public class CellWorkbenchGhostIngredientHandler
             implements Target<I> {
 
         /**
-         * Builds a target for a partition well, or {@code null} if that menu index is not a well: a config
-         * slot is the only kind backed by AE2's {@link ConfigMenuInventory}, so a bad index yields nothing.
+         * Builds a target for a partition well, or {@code null} for anything else: AE2's config inventory
+         * backs a well, and a cell in the workbench is what makes one writable.
          */
         static <I> WellTarget<I> of(MenuEssentiaCellWorkbench menu, int well, int guiLeft, int guiTop) {
-            Slot slot = menu.slots.get(MenuEssentiaCellWorkbench.partitionSlotIndex(well));
+            Slot slot = menu.slots.get(menu.partitionSlotIndex(well));
             if (slot instanceof AppEngSlot appEngSlot
+                    && menu.isPartitionSlotEnabled(well)
                     && appEngSlot.getInventory() instanceof ConfigMenuInventory) {
                 return new WellTarget<>(menu, well, guiLeft, guiTop);
             }
@@ -70,7 +71,7 @@ public class CellWorkbenchGhostIngredientHandler
          */
         @Override
         public Rect2i getArea() {
-            Slot slot = menu.slots.get(MenuEssentiaCellWorkbench.partitionSlotIndex(well));
+            Slot slot = menu.slots.get(menu.partitionSlotIndex(well));
             return new Rect2i(guiLeft + slot.x, guiTop + slot.y, 16, 16);
         }
 
@@ -79,15 +80,15 @@ public class CellWorkbenchGhostIngredientHandler
             if (!(ingredient instanceof AspectInstance aspect)) {
                 return;
             }
-            AEssentiaKey key = AEssentiaKey.of(aspect.aspect());
-            if (key == null) {
-                // Not registry-backed: there is no id to partition the cell to.
+            ResourceLocation id = aspect.aspect().unwrapKey().map(key -> key.location()).orElse(null);
+            if (id == null) {
+                // Not registry-backed: there is no id to send, and the server could not store a mark it
+                // cannot name.
                 return;
             }
-            // One, because a partition entry is a type rather than an amount - how much the cell
-            // holds is decided by its size, not by the partition.
-            ItemStack wrapped = GenericStack.wrapInItemStack(key, 1);
-            menu.slots.get(MenuEssentiaCellWorkbench.partitionSlotIndex(well)).set(wrapped);
+            // To the server, because this is the only write that leaves this screen: the well itself would
+            // keep the mark until the server answered with its own, empty partition.
+            PacketDistributor.sendToServer(new PartitionWellPayload(menu.containerId, well, id));
         }
     }
 }

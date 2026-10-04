@@ -7,6 +7,8 @@ import appeng.api.parts.PartModels;
 import appeng.api.parts.RegisterPartCapabilitiesEvent;
 import appeng.api.stacks.AEKeyType;
 import appeng.api.stacks.AEKeyTypes;
+import appeng.api.upgrades.Upgrades;
+import appeng.core.definitions.AEItems;
 import appeng.items.tools.powered.WirelessTerminalItem;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectCapabilities;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspectSource;
@@ -30,6 +32,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
+import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.focus.FocusElements;
 import thaumicenergistics_ce.init.ModBlockEntities;
@@ -48,6 +51,7 @@ import thaumicenergistics_ce.part.PartEssentiaStorageBus;
 import thaumicenergistics_ce.part.PartEssentiaTerminal;
 import thaumicenergistics_ce.part.PartVisInterface;
 import thaumicenergistics_ce.selftest.AssemblerCraftSelfTest;
+import thaumicenergistics_ce.selftest.CellPartitionSelfTest;
 import thaumicenergistics_ce.selftest.EncoderSelfTest;
 import thaumicenergistics_ce.selftest.EssentiaSelfTest;
 import thaumicenergistics_ce.selftest.GearSelfTest;
@@ -118,8 +122,14 @@ public final class ThaumicEnergistics {
         NeoForge.EVENT_BUS.addListener(InscriberSelfTest::run);
         // The Distillation Encoder: the mod's other container whose slots a save can rearrange.
         NeoForge.EVENT_BUS.addListener(EncoderSelfTest::run);
-        // Runs on login against block entities never added to a level; builds nothing.
+        // Runs on login against block entities never added to a level; builds nothing. It answers the
+        // server-starting event too, so a headless gate sees these checks without a player.
         NeoForge.EVENT_BUS.addListener(AssemblerCraftSelfTest::run);
+        NeoForge.EVENT_BUS.addListener(AssemblerCraftSelfTest::onServerStarted);
+        // The cell workbench's partition: a mark has to reach the cell item, survive a save, and then
+        // filter it. None of that is a client's to check, since nothing a client writes to the grid is
+        // ever sent - see PartitionWellPayload.
+        NeoForge.EVENT_BUS.addListener(CellPartitionSelfTest::onServerStarted);
         // Read-only check that an assembler can reach a relay block; a lone interface cannot.
         NeoForge.EVENT_BUS.addListener(VisRelaySelfTest::run);
         // The payload codecs: a field dropped while the records moved packages compiles and only shows
@@ -322,11 +332,50 @@ public final class ThaumicEnergistics {
             GridLinkables.register(
                     ModItems.WIRELESS_ESSENTIA_TERMINAL.get(),
                     WirelessTerminalItem.LINKABLE_HANDLER);
+            registerUpgrades();
             ThELog.LOG.info("ThaumicEnergistics common setup complete");
             // Else every terminal craft fails with PAYMENT_UNAVAILABLE - see TerminalWorkbenchVis.
             thaumicenergistics_ce.arcane.TerminalWorkbenchVis.register();
         });
     }
+
+    /**
+     * Tells AE2 which upgrade cards this mod's machines and cells take; without it their slots show AE2's
+     * "available upgrades" header with nothing under it, since that list comes from AE2's own registry.
+     */
+    private static void registerUpgrades() {
+        // AE2's BasicCellInventory reads all three cards; an essentia aspect carries no NBT, so no fuzzy one.
+        // The name key is AE2's own fourth argument and collapses the five tiers into one tooltip line.
+        for (var cell : List.of(
+                ModItems.ESSENTIA_CELL_1K.get(),
+                ModItems.ESSENTIA_CELL_4K.get(),
+                ModItems.ESSENTIA_CELL_16K.get(),
+                ModItems.ESSENTIA_CELL_64K.get(),
+                ModItems.ESSENTIA_CELL_CREATIVE.get())) {
+            Upgrades.add(AEItems.INVERTER_CARD, cell, 1, CELL_UPGRADE_NAME);
+            Upgrades.add(AEItems.EQUAL_DISTRIBUTION_CARD, cell, 1, CELL_UPGRADE_NAME);
+            Upgrades.add(AEItems.VOID_CARD, cell, 1, CELL_UPGRADE_NAME);
+        }
+        // One card per slot: the number is the machine's own slot count, so the two cannot disagree.
+        Upgrades.add(
+                AEItems.SPEED_CARD,
+                ModItems.ARCANE_ASSEMBLER.get(),
+                BlockEntityArcaneAssembler.UPGRADE_SLOT_COUNT);
+        // The count is the bus's own slot count (PartEssentiaImportBus#getUpgradeSlots); capacity is
+        // deliberately absent because MenuEssentiaBus keeps 18 fixed config slots and never reads the card.
+        for (var bus : List.of(
+                ModItems.ESSENTIA_IMPORT_BUS.get(),
+                ModItems.ESSENTIA_EXPORT_BUS.get())) {
+            Upgrades.add(AEItems.SPEED_CARD, bus, BUS_UPGRADE_SLOTS);
+            Upgrades.add(AEItems.REDSTONE_CARD, bus, 1);
+        }
+    }
+
+    /** The four upgrade slots every essentia bus has; the same number {@code Upgrades.add} should report. */
+    private static final int BUS_UPGRADE_SLOTS = 4;
+
+    /** What a card's tooltip calls the whole essentia cell family, at every size. */
+    private static final String CELL_UPGRADE_NAME = "item.thaumicenergistics_ce.essentia_cell";
 
     /**
      * Adds the essentia key type to AE2's registry. Not from the mod constructor: an {@code AEKeyType}

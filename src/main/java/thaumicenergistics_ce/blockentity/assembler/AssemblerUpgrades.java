@@ -8,7 +8,8 @@ import net.minecraft.world.item.ItemStack;
  * The Arcane Assembler's speed upgrades and the vis discount its worn gear grants.
  * <ul>
  * <li>Both are pure bookkeeping over the machine's own inventory: neither needs the grid, the craft nor
- * the display, so they live here and the block entity asks.
+ * the display, so they live here and the block entity asks. The card count is not a number of its own:
+ * it is counted off the machine's upgrade slots, so it cannot disagree with what those slots hold.
  * <li>Split out of {@link BlockEntityArcaneAssembler}. Public because the menu and the Jade provider
  * read the machine through it; everything else here is package-private.
  * </ul>
@@ -20,7 +21,8 @@ public final class AssemblerUpgrades {
     private static final int MIN_TICKS_PER_CRAFT = 4;
     private static final int MAX_SPEED_UPGRADES = 4;
 
-    /** The saved key. Never renamed: an old world's value would be dropped on load. */
+    /** The saved key. Never renamed: an old world's value would be dropped on load. Read back, then
+     * superseded by {@link #recountSpeedUpgrades()}: the cards in the slots are what count. */
     private static final String TAG_SPEED_UPGRADES = "SpeedUpgrades";
 
     private final BlockEntityArcaneAssembler owner;
@@ -40,9 +42,27 @@ public final class AssemblerUpgrades {
         return gearDiscount;
     }
 
-    public void setSpeedUpgrades(int count) {
-        this.speedUpgrades = Math.clamp(count, 0, MAX_SPEED_UPGRADES);
-        owner.setChanged();
+    /** Counts the cards in the machine's own upgrade slots. The inventory is the truth: the menu writes
+     * the cards into those slots, so a number kept beside them could only drift away from them. */
+    void recountSpeedUpgrades() {
+        int count = 0;
+        for (int i = 0; i < BlockEntityArcaneAssembler.UPGRADE_SLOT_COUNT; i++) {
+            if (!owner.inventory.getItem(BlockEntityArcaneAssembler.UPGRADE_SLOT_START + i).isEmpty()) {
+                count++;
+            }
+        }
+        speedUpgrades = Math.clamp(count, 0, MAX_SPEED_UPGRADES);
+    }
+
+    /** Recounts after the inventory moved, and pushes the display only when the number actually did: an
+     * inserted card has to reach the tooltip, something else moving in the machine must not. */
+    void refreshSpeedUpgrades() {
+        int before = speedUpgrades;
+        recountSpeedUpgrades();
+        if (speedUpgrades != before) {
+            owner.setChanged();
+            owner.displaySync.markDisplayForUpdate();
+        }
     }
 
     int gearDiscount() {

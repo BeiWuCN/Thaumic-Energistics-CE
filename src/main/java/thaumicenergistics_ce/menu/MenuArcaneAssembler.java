@@ -95,14 +95,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
     private int mirroredCore = -1;
     private int sampledCore = -1;
     private long coreSignatureTick = Long.MIN_VALUE;
-    private final SimpleContainer upgrades =
-            new SimpleContainer(BlockEntityArcaneAssembler.UPGRADE_SLOT_COUNT) {
-        @Override
-        public void setChanged() {
-            super.setChanged();
-            MenuArcaneAssembler.this.onUpgradesChanged();
-        }
-    };
     private final int[] clientData = new int[DATA_SIZE];
     private final ContainerData data;
 
@@ -126,7 +118,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         // Both sides read the layout from the mod's resources, so their slot positions cannot drift apart.
         this(containerId, playerInventory, assembler, assembler.getInventory(), GuiLayout.load());
         refreshPatternView();
-        onUpgradesChanged();
     }
 
     public MenuArcaneAssembler(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
@@ -200,12 +191,20 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
                     patternY + (i / patternCols) * 18));
         }
 
-        // 4. Acceleration cards.
+        // 4. Acceleration cards, in the machine's own slots. A menu-local container held them once, and
+        // closing the menu took them with it; these are saved with the machine, so they come back.
         for (int i = 0; i < BlockEntityArcaneAssembler.UPGRADE_SLOT_COUNT; i++) {
-            addSlot(new Slot(upgrades, i, upgradeX, upgradeY + i * 18) {
+            addSlot(new Slot(machine, BlockEntityArcaneAssembler.UPGRADE_SLOT_START + i, upgradeX,
+                    upgradeY + i * 18) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return AEItems.SPEED_CARD.is(stack);
+                }
+
+                @Override
+                public int getMaxStackSize() {
+                    // One card per slot: four slots, four cards, four steps of speed.
+                    return 1;
                 }
             });
         }
@@ -284,18 +283,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         addDataSlots(data);
     }
 
-    private void onUpgradesChanged() {
-        if (assembler == null) {
-            return;
-        }
-        int count = 0;
-        for (int i = 0; i < upgrades.getContainerSize(); i++) {
-            if (!upgrades.getItem(i).isEmpty()) {
-                count++;
-            }
-        }
-        assembler.upgrades().setSpeedUpgrades(count);
-    }
 
     public void refreshPatternView() {
         ItemStack core = coreStack();

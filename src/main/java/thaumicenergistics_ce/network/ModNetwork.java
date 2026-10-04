@@ -12,6 +12,7 @@ import thaumicenergistics_ce.net.EssentiaFillPayload;
 import thaumicenergistics_ce.net.GolemBackpackPayload;
 import thaumicenergistics_ce.net.InscriberGridFillPayload;
 import thaumicenergistics_ce.net.InscriberGridPayload;
+import thaumicenergistics_ce.net.PartitionWellPayload;
 
 /**
  * Network registration.
@@ -58,6 +59,12 @@ public final class ModNetwork {
         registrar.playToServer(
                 EssentiaBusConfigPayload.TYPE,
                 EssentiaBusConfigPayload.CODEC,
+                (payload, context) -> payload.handle(context.player()));
+        // A cell workbench partition well set from JEI. Serverbound like the bus above, and for a second
+        // reason: AE2's grid packet reaches a fake slot only through AEBaseMenu - see PartitionWellPayload.
+        registrar.playToServer(
+                PartitionWellPayload.TYPE,
+                PartitionWellPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
         // The distillation encoder's screen has no item slot for its aspect wells - an aspect is not an
         // item - so picking one and asking for a pattern both travel as instructions.

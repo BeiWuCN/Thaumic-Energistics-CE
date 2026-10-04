@@ -27,6 +27,7 @@ import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.GenericStack;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.util.AECableType;
+import appeng.core.definitions.AEItems;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.aspect.TCAspects;
@@ -86,8 +87,12 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     // Appended after the gear, never inserted: saved slot indices would move old gear into the preview band.
     public static final int PREVIEW_SLOT_START = GEAR_SLOT_START + GEAR_SLOT_COUNT;
     public static final int PREVIEW_SLOT_COUNT = 9;
+    // Appended after the preview, for the preview's own reason: a saved slot index that moved would read
+    // a card as a preview well, or a well as a card.
+    public static final int UPGRADE_SLOT_START = PREVIEW_SLOT_START + PREVIEW_SLOT_COUNT;
+    /** The acceleration-card slots, one card each: four of them are the machine's whole speed ladder. */
     public static final int UPGRADE_SLOT_COUNT = 4;
-    public static final int SLOT_COUNT = PREVIEW_SLOT_START + PREVIEW_SLOT_COUNT;
+    public static final int SLOT_COUNT = UPGRADE_SLOT_START + UPGRADE_SLOT_COUNT;
 
     // ---- Tuning -----------------------------------------------------------
     private static final double ACTIVE_POWER = 1.5;
@@ -104,6 +109,10 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     final SimpleContainer inventory = new SimpleContainer(SLOT_COUNT) {
         @Override
         public boolean canPlaceItem(int slot, ItemStack stack) {
+            if (slot >= UPGRADE_SLOT_START) {
+                // The card band: the slots the menu's four card wells point at.
+                return AEItems.SPEED_CARD.is(stack);
+            }
             return switch (slot) {
                 case CORE_SLOT -> stack.is(ModItems.KNOWLEDGE_CORE.get());
                 // Both are the machine's own display and take nothing from a player.
@@ -150,8 +159,10 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     final AssemblerVisSource vis = new AssemblerVisSource(this);
     final AssemblerUpgrades upgrades = new AssemblerUpgrades(this);
 
-    /** The two {@link BlockEntity} members a same-package sibling cannot reach: {@code worldPosition}
-     * and {@code level} are protected, so the helper asks rather than reads. */
+    /**
+     * The two {@link BlockEntity} members a same-package sibling cannot reach: {@code worldPosition} and
+     * {@code level} are protected, so the helper asks rather than reads.
+     */
     BlockPos blockPos() {
         return worldPosition;
     }
@@ -202,8 +213,9 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         }
     }
 
-    /** Drops what the player owns - the core and the gear - and nothing else: the mirror, target and
-     * preview bands hold copies the machine made, so dropping them would hand out unpaid items. */
+    /** Drops what the player owns - the core, the gear and the cards - and nothing else: the mirror,
+     * target and preview bands hold copies the machine made, so dropping them would hand out unpaid
+     * items. */
     public void dropContents() {
         if (level == null || level.isClientSide()) {
             return;
@@ -214,7 +226,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         try {
             for (int slot = 0; slot < SLOT_COUNT; slot++) {
                 boolean display = slot >= PATTERN_SLOT_START && slot < GEAR_SLOT_START
-                        || slot >= PREVIEW_SLOT_START;
+                        || slot >= PREVIEW_SLOT_START && slot < UPGRADE_SLOT_START;
                 if (display) {
                     // The machine's own display; none of it was ever the player's.
                     continue;
@@ -325,6 +337,12 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         } finally {
             suppressNotify = false;
         }
+    }
+
+    /** Runs the container listener by hand: {@link #setItemForTest} suppresses it, and a card put into the
+     * machine has to move the count before anything is ever saved. */
+    public void onInventoryChangedForTest() {
+        onInventoryChanged();
     }
 
     public static int coreSlotForTest() {
@@ -847,6 +865,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
             return;
         }
         patternsDirty = true;
+        // The cards sit in the machine's own slots now, so their count is read off the inventory.
+        upgrades.refreshSpeedUpgrades();
         upgrades.recalculateGearDiscount();
         setChanged();
         if (level != null && !level.isClientSide() && mainNode.getGrid() != null) {
@@ -876,6 +896,9 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
             suppressNotify = false;
         }
         upgrades.recalculateGearDiscount();
+        // After the items, not before: the count comes from the cards that just loaded, not from the
+        // saved number a menu-local container used to write.
+        upgrades.recountSpeedUpgrades();
         patternsDirty = true;
     }
 

@@ -3,6 +3,7 @@ package thaumicenergistics_ce.selftest;
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.crafting.PatternDetailsHelper;
 import appeng.api.stacks.AEItemKey;
+import appeng.core.definitions.AEItems;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.leclowndu93150.thaumaturge.api.recipe.IArcaneRecipe;
@@ -18,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ArcanePatternDetails;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
@@ -44,15 +46,28 @@ public final class AssemblerCraftSelfTest {
     private AssemblerCraftSelfTest() {}
 
     public static void run(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            runOnce(player.serverLevel());
+        }
+    }
+
+    /**
+     * The same checks when the server comes up, so a headless gate can see them without a player logging in.
+     * Everything here builds its own block entities and never touches a level it was not handed.
+     */
+    public static void onServerStarted(ServerStartedEvent event) {
+        runOnce(event.getServer().overworld());
+    }
+
+    private static void runOnce(ServerLevel level) {
         if (!"true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_ASSEMBLER_SELFTEST"))) {
             return;
         }
-        if (hasRun || !(event.getEntity() instanceof ServerPlayer player)) {
+        if (hasRun || level == null) {
             return;
         }
         hasRun = true;
 
-        ServerLevel level = player.serverLevel();
         ThEArcanePattern priciest = priciestRecipe(level);
         if (priciest == null) {
             ThELog.LOG.info(
@@ -60,7 +75,8 @@ public final class AssemblerCraftSelfTest {
             return;
         }
 
-        BlockPos pos = player.blockPosition();
+        // A position of its own: the checks never put the machine into a level, they only hand it one.
+        BlockPos pos = BlockPos.ZERO;
         BlockEntityArcaneAssembler machine =
                 new BlockEntityArcaneAssembler(pos, ModBlocks.ARCANE_ASSEMBLER.get().defaultBlockState());
         machine.forcePatternForTest(priciest);
@@ -85,6 +101,7 @@ public final class AssemblerCraftSelfTest {
                 reloaded.resumeReportForTest());
 
         checkCoreSurvivesTheRoundTrip(level);
+        checkAccelerationCardsSurviveTheRoundTrip(level);
         sweepEveryRecipe(level);
         checkCpuTaskRoundTrip(level);
         checkTooltipReasonsTranslated();
@@ -142,6 +159,57 @@ public final class AssemblerCraftSelfTest {
                     offered,
                     stored);
         }
+    }
+
+    /**
+     * The bug this exists for: the card slots used to be the menu's own container, so a card went in and was
+     * gone the next time the menu opened. A card has to live in the machine, move its count, and come back out
+     * of a save.
+     */
+    private static void checkAccelerationCardsSurviveTheRoundTrip(ServerLevel level) {
+        BlockPos pos = BlockPos.ZERO;
+        BlockEntityArcaneAssembler machine =
+                new BlockEntityArcaneAssembler(pos, ModBlocks.ARCANE_ASSEMBLER.get().defaultBlockState());
+        machine.setLevel(level);
+        // Two cards, so the count has to follow the slots rather than a floor of one. Two cards off twenty
+        // ticks per craft is twelve.
+        machine.setItemForTest(BlockEntityArcaneAssembler.UPGRADE_SLOT_START, AEItems.SPEED_CARD.stack());
+        machine.setItemForTest(BlockEntityArcaneAssembler.UPGRADE_SLOT_START + 1, AEItems.SPEED_CARD.stack());
+        // The insert above suppresses the container listener, so run what a slot click runs.
+        machine.onInventoryChangedForTest();
+        int before = machine.upgrades().getSpeedUpgrades();
+        int ticksBefore = machine.getTicksPerCraft();
+        CompoundTag saved = machine.saveWithoutMetadata(level.registryAccess());
+
+        BlockEntityArcaneAssembler reloaded =
+                new BlockEntityArcaneAssembler(pos, ModBlocks.ARCANE_ASSEMBLER.get().defaultBlockState());
+        reloaded.loadWithComponents(saved, level.registryAccess());
+        reloaded.setLevel(level);
+
+        int after = reloaded.upgrades().getSpeedUpgrades();
+        int ticksAfter = reloaded.getTicksPerCraft();
+        ItemStack back = reloaded.getInventory().getItem(BlockEntityArcaneAssembler.UPGRADE_SLOT_START);
+        if (before != 2 || ticksBefore != 12 || after != 2 || !AEItems.SPEED_CARD.is(back)) {
+            ThELog.LOG.warn(
+                    "[asmtest] FAIL the acceleration cards do not hold: {} card(s) in the machine at {} ticks"
+                            + " per craft, {} card(s) at {} ticks after a save, slot {} came back holding {}",
+                    before,
+                    ticksBefore,
+                    after,
+                    ticksAfter,
+                    BlockEntityArcaneAssembler.UPGRADE_SLOT_START,
+                    back);
+            return;
+        }
+        ThELog.LOG.info(
+                "[asmtest] card round trip: {} card(s) in the machine at {} ticks per craft, {} card(s) at {}"
+                        + " ticks after a save, slot {} came back holding {}",
+                before,
+                ticksBefore,
+                after,
+                ticksAfter,
+                BlockEntityArcaneAssembler.UPGRADE_SLOT_START,
+                back);
     }
 
     /**
