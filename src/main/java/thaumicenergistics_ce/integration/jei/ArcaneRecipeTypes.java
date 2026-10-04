@@ -139,19 +139,14 @@ public final class ArcaneRecipeTypes {
     }
 
     /**
-     * Registry access for reading a recipe's result: Thaumaturge's client copy when JEI is up, else the
-     * server's. Naming a client type here, even in a catch block, kills a dedicated server: "invalid dist".
+     * Registry access for a recipe's result: the server's, or Thaumaturge's client copy when a client has
+     * no server of its own. Asking Thaumaturge first would load its JEI plugin and log "invalid dist".
      */
     private static HolderLookup.Provider registryAccess() {
-        try {
-            return ThaumaturgeJEIPlugin.clientRegistryAccess();
-        } catch (RuntimeException e) {
-            var server = ServerLifecycleHooks.getCurrentServer();
-            if (server != null) {
-                return server.registryAccess();
-            }
-            ThELog.LOG.debug("No registry access available for a recipe result: {}", e.toString());
-            throw e;
+        var server = ServerLifecycleHooks.getCurrentServer();
+        if (server != null) {
+            return server.registryAccess();
         }
+        return ThaumaturgeJEIPlugin.clientRegistryAccess();
     }
 }

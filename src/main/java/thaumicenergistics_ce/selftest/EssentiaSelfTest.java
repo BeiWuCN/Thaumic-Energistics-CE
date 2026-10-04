@@ -23,12 +23,14 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.init.ModItems;
@@ -41,13 +43,18 @@ import thaumicenergistics_ce.util.ThELog;
  * <ul>
  * <li>Everything it checks fails silently at runtime, not at compile time: key type registration, AE2's
  * cell logic for a non-item key type, the byte budget and the NBT round trip.
- * <li>Runs on {@code ServerStartedEvent}, which it needs for a level to resolve aspects against.
+ * <li>Asked for on {@code ServerStartedEvent}, but run one tick later, once the aspect index is up.
  * </ul>
  */
 public final class EssentiaSelfTest {
 
+    /** The level to check on, armed by {@link #run}; null while nothing is pending. */
+    private static Level pendingLevel;
+    private static int waitedTicks;
+
     private EssentiaSelfTest() {}
 
+    /** Arms the battery; {@link #onServerTick} runs it once the aspect index answers. */
     public static void run(ServerStartedEvent event) {
         if (!"true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_ESSENTIA_SELFTEST"))) {
             return;
@@ -56,10 +63,29 @@ public final class EssentiaSelfTest {
         if (level == null) {
             return;
         }
+        pendingLevel = level;
+        waitedTicks = 0;
+    }
+
+    /** Runs the battery on the first tick with a published aspect index, or at the wait bound without one. */
+    public static void onServerTick(ServerTickEvent.Post event) {
+        Level level = pendingLevel;
+        if (level == null) {
+            return;
+        }
+        if (AspectIndexWait.keepWaiting(level, waitedTicks)) {
+            waitedTicks++;
+            return;
+        }
+        pendingLevel = null;
+        runChecks(event.getServer(), level);
+    }
+
+    private static void runChecks(MinecraftServer server, Level level) {
         List<String> failures = new ArrayList<>();
 
         checkKeyTypeRegistered(failures);
-        checkMyRecipesAreLoaded(event, failures);
+        checkMyRecipesAreLoaded(server, failures);
         checkRecipeTagsResolve(level, failures);
         checkCrystalIngredientsArePinned(failures);
         checkMachineCapabilities(failures);
@@ -77,8 +103,8 @@ public final class EssentiaSelfTest {
     }
 
     /** Checked by name: a recipe JSON that fails to parse is simply absent, with no error anywhere. */
-    private static void checkMyRecipesAreLoaded(ServerStartedEvent event, List<String> failures) {
-        var manager = event.getServer().getRecipeManager();
+    private static void checkMyRecipesAreLoaded(MinecraftServer server, List<String> failures) {
+        var manager = server.getRecipeManager();
         for (String path : new String[] {
             "storage_casing",
             "storage_component_1k",
@@ -479,16 +505,11 @@ public final class EssentiaSelfTest {
     /** The Distillation Encoder offers what Thaumaturge's aspect index reports, and that index is bound by
      * whichever side owns it: unbound, every lookup is empty. Several items are checked, not just one. */
     private static void checkAspectIndexResolves(Level level, List<String> failures) {
-        var items = level.registryAccess().lookupOrThrow(Registries.ITEM);
-        for (String id : new String[] {"minecraft:bone", "minecraft:stone", "minecraft:coal"}) {
-            var key = ResourceKey.create(
-                    Registries.ITEM,
-                    ResourceLocation.parse(id));
-            var holder = items.get(key);
-            if (holder.isEmpty()) {
+        for (String id : AspectIndexWait.PROBE_ITEM_IDS) {
+            ItemStack stack = AspectIndexWait.resolve(level, id);
+            if (stack == null) {
                 continue;
             }
-            ItemStack stack = new ItemStack(holder.get().value());
             var composition = AspectIndexAccess.of(stack);
             if (composition == null || composition.isEmpty()) {
                 failures.add("the aspect index reports no aspects for " + id

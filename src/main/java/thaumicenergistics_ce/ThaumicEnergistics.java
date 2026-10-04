@@ -116,12 +116,16 @@ public final class ThaumicEnergistics {
     private static void registerSelfTests() {
         NeoForge.EVENT_BUS.addListener(ThaumicEnergistics::recipeSelfTest);
         NeoForge.EVENT_BUS.addListener(EssentiaSelfTest::run);
+        // Waits for the tick that can see Thaumaturge's aspect index, which is published a hop late.
+        NeoForge.EVENT_BUS.addListener(EssentiaSelfTest::onServerTick);
         NeoForge.EVENT_BUS.addListener(GearSelfTest::run);
         NeoForge.EVENT_BUS.addListener(MenuSelfTest::run);
         NeoForge.EVENT_BUS.addListener(ResearchSelfTest::run);
         NeoForge.EVENT_BUS.addListener(InscriberSelfTest::run);
         // The Distillation Encoder: the mod's other container whose slots a save can rearrange.
         NeoForge.EVENT_BUS.addListener(EncoderSelfTest::run);
+        // Same wait as the essentia battery: the encoder reads the same aspect index.
+        NeoForge.EVENT_BUS.addListener(EncoderSelfTest::onServerTick);
         // Runs on login against block entities never added to a level; builds nothing. It answers the
         // server-starting event too, so a headless gate sees these checks without a player.
         NeoForge.EVENT_BUS.addListener(AssemblerCraftSelfTest::run);

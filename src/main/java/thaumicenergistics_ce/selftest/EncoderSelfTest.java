@@ -8,18 +8,16 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectIndexAccess;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 import thaumicenergistics_ce.init.ModBlocks;
@@ -36,13 +34,18 @@ public final class EncoderSelfTest {
 
     private static boolean hasRun;
 
+    /** The level to check on, armed by {@link #run}; null while nothing is pending. */
+    private static ServerLevel pendingLevel;
+    private static int waitedTicks;
+
     private EncoderSelfTest() {}
 
+    /** Arms the battery from the first login; {@link #onServerTick} runs it once the aspect index answers. */
     public static void run(PlayerEvent.PlayerLoggedInEvent event) {
         if (!"true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_ENCODER_SELFTEST"))) {
             return;
         }
-        if (hasRun) {
+        if (hasRun || pendingLevel != null) {
             return;
         }
         if (!(event.getEntity() instanceof ServerPlayer player)) {
@@ -52,6 +55,21 @@ public final class EncoderSelfTest {
         if (level == null) {
             return;
         }
+        pendingLevel = level;
+        waitedTicks = 0;
+    }
+
+    /** Runs the battery on the first tick with a published aspect index, or at the wait bound without one. */
+    public static void onServerTick(ServerTickEvent.Post event) {
+        ServerLevel level = pendingLevel;
+        if (level == null) {
+            return;
+        }
+        if (AspectIndexWait.keepWaiting(level, waitedTicks)) {
+            waitedTicks++;
+            return;
+        }
+        pendingLevel = null;
         hasRun = true;
 
         List<String> failures = new ArrayList<>();
@@ -240,14 +258,11 @@ public final class EncoderSelfTest {
     }
 
     private static @Nullable ItemStack firstDistillableItem(ServerLevel level) {
-        var items = level.registryAccess().lookupOrThrow(Registries.ITEM);
-        for (String id : new String[] {"minecraft:bone", "minecraft:stone", "minecraft:coal"}) {
-            var holder = items.get(
-                    ResourceKey.create(Registries.ITEM, ResourceLocation.parse(id)));
-            if (holder.isEmpty()) {
+        for (String id : AspectIndexWait.PROBE_ITEM_IDS) {
+            ItemStack stack = AspectIndexWait.resolve(level, id);
+            if (stack == null) {
                 continue;
             }
-            ItemStack stack = new ItemStack(holder.get().value());
             var composition = AspectIndexAccess.of(stack);
             if (composition == null || composition.isEmpty()) {
                 continue;
