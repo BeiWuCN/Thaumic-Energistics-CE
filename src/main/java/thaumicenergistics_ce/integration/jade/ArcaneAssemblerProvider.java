@@ -1,9 +1,6 @@
 package thaumicenergistics_ce.integration.jade;
 
 import appeng.api.networking.IGridNode;
-import java.util.ArrayList;
-import java.util.List;
-import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -13,52 +10,45 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.jspecify.annotations.Nullable;
 import snownee.jade.api.BlockAccessor;
-import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.IServerDataProvider;
-import snownee.jade.api.ITooltip;
-import snownee.jade.api.config.IPluginConfig;
-import snownee.jade.api.ui.IElement;
-import snownee.jade.api.ui.IElementHelper;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
 /**
- * The Arcane Assembler's Jade tooltip.
+ * The Arcane Assembler's Jade server data: the numbers a tooltip cannot work out for itself.
  * <ul>
  *   <li>Written against Jade's API, not AE2's: AE2 registers its grid-state line through the internal
  *       {@code appeng.integration.modules.igtooltip} package, which an addon cannot hook.
- *   <li>One provider covers both halves: the server writes the numbers into the data tag, the client reads.
+ *   <li>The drawing half is {@code client.jade.ArcaneAssemblerTooltip}, paired by {@link #UID}.
  * </ul>
  */
-public class ArcaneAssemblerProvider
-        implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
+public class ArcaneAssemblerProvider implements IServerDataProvider<BlockAccessor> {
 
     public static final ArcaneAssemblerProvider INSTANCE = new ArcaneAssemblerProvider();
 
-    private static final ResourceLocation UID =
+    /** Shared with {@code client.jade.ArcaneAssemblerTooltip}: Jade pairs the two halves by UID. */
+    public static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "arcane_assembler");
 
-
-    private static final String TAG_GRID_STATE = JadeGridState.TAG;
-    private static final String TAG_VIS = "BufferedVis";
-    private static final String TAG_AURA = "AuraAround";
+    /** Read back by the drawing half, so the wire format below is this class's own public contract. */
+    public static final String TAG_VIS = "BufferedVis";
+    public static final String TAG_AURA = "AuraAround";
     /** Whole-percent vis discount from the installed gear. */
-    private static final String TAG_DISCOUNT = "GearDiscount";
-    private static final String TAG_SPEED = "SpeedUpgrades";
-    private static final String TAG_PATTERNS = "Patterns";
-    private static final String TAG_CRAFTING = "Crafting";
-    private static final String TAG_PROGRESS = "CraftProgress";
-    private static final String TAG_TARGET = "CraftTarget";
-    private static final String TAG_TARGET_STACK = "CraftTargetStack";
-    private static final String TAG_INPUTS = "CraftInputs";
+    public static final String TAG_DISCOUNT = "GearDiscount";
+    public static final String TAG_SPEED = "SpeedUpgrades";
+    public static final String TAG_PATTERNS = "Patterns";
+    public static final String TAG_CRAFTING = "Crafting";
+    public static final String TAG_PROGRESS = "CraftProgress";
+    public static final String TAG_TARGET = "CraftTarget";
+    public static final String TAG_TARGET_STACK = "CraftTargetStack";
+    public static final String TAG_INPUTS = "CraftInputs";
     /**
      * Plain sentences, not translation keys: they carry numbers, and they are deliberately the same
      * sentences the log gets.
      */
-    private static final String TAG_WAIT = "WaitReason";
-    private static final String TAG_REFUSAL = "RefusalReason";
+    public static final String TAG_WAIT = "WaitReason";
+    public static final String TAG_REFUSAL = "RefusalReason";
 
     @Override
     public ResourceLocation getUid() {
@@ -134,110 +124,4 @@ public class ArcaneAssemblerProvider
                 .result()
                 .orElse(new CompoundTag());
     }
-
-    /**
-     * The component back, or {@code null} when the tag is absent or unreadable: an empty line under
-     * "waiting" claims the machine waits for nothing.
-     */
-    private static @Nullable Component decode(CompoundTag tag, String key) {
-        Tag encoded = tag.get(key);
-        if (encoded == null) {
-            return null;
-        }
-        return ComponentSerialization.CODEC.parse(NbtOps.INSTANCE, encoded).result().orElse(null);
-    }
-
-
-    @Override
-    public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-        CompoundTag tag = accessor.getServerData();
-        if (!tag.contains(TAG_GRID_STATE)) {
-            // Only reachable if the block entity was not the assembler. Better nothing than a wrong line.
-            return;
-        }
-        var helper = IElementHelper.get();
-
-        JadeGridState state = JadeGridState.read(tag);
-        tooltip.add(helper.text(state.label().copy().withStyle(state.colour())));
-
-        if (tag.getBoolean(TAG_CRAFTING)) {
-            tooltip.add(helper.text(
-                    Component.translatable("jade.thaumicenergistics_ce.arcane_assembler.crafting")
-                            .withStyle(ChatFormatting.WHITE)));
-            // The arrow row: what goes in on the left and what comes out on the right, so "what is it
-            // making" and "out of what" need no sentence; full-size icons because Jade's sprite is 22x16.
-            ListTag inputs = tag.getList(TAG_INPUTS, Tag.TAG_COMPOUND);
-            List<IElement> row = new ArrayList<>();
-            var level = accessor.getLevel();
-            if (level != null) {
-                var registries = level.registryAccess();
-                for (int i = 0; i < inputs.size(); i++) {
-                    ItemStack input = ItemStack.parseOptional(registries, inputs.getCompound(i));
-                    if (!input.isEmpty()) {
-                        row.add(helper.item(input));
-                    }
-                }
-            }
-            row.add(helper.progress(tag.getFloat(TAG_PROGRESS)));
-            if (level != null) {
-                ItemStack product =
-                        ItemStack.parseOptional(level.registryAccess(), tag.getCompound(TAG_TARGET_STACK));
-                if (!product.isEmpty()) {
-                    row.add(helper.item(product));
-                }
-            }
-            tooltip.add(row);
-            String target = tag.getString(TAG_TARGET);
-            if (!target.isEmpty()) {
-                tooltip.add(helper.text(
-                        Component.translatable("jade.thaumicenergistics_ce.arcane_assembler.produces",
-                                        Component.translatable(target))
-                                .withStyle(ChatFormatting.GRAY)));
-            }
-        }
-
-        // One line, not two: banked and drawable answer the same question, and split they read as two
-        // facts to compare. The first number is a cache, not plain vis.
-        tooltip.add(helper.text(Component.translatable(
-                        "jade.thaumicenergistics_ce.arcane_assembler.vis",
-                        tag.getInt(TAG_VIS),
-                        BlockEntityArcaneAssembler.visBufferTarget(),
-                        tag.getInt(TAG_AURA))
-                .withStyle(ChatFormatting.GRAY)));
-
-        int discount = tag.getInt(TAG_DISCOUNT);
-        if (discount > 0) {
-            tooltip.add(helper.text(Component.translatable(
-                            "jade.thaumicenergistics_ce.arcane_assembler.discount", discount)
-                    .withStyle(ChatFormatting.GRAY)));
-        }
-
-        int speed = tag.getInt(TAG_SPEED);
-        if (speed > 0) {
-            tooltip.add(helper.text(Component.translatable(
-                            "jade.thaumicenergistics_ce.arcane_assembler.speed", speed)
-                    .withStyle(ChatFormatting.GRAY)));
-        }
-
-        tooltip.add(helper.text(Component.translatable(
-                        "jade.thaumicenergistics_ce.arcane_assembler.patterns", tag.getInt(TAG_PATTERNS))
-                .withStyle(ChatFormatting.GRAY)));
-
-        // A waiting machine and an idle one look identical from outside; the CPU waiting on it shows
-        // only a stopped timer.
-        Component wait = decode(tag, TAG_WAIT);
-        if (wait != null) {
-            tooltip.add(helper.text(Component.translatable(
-                            "jade.thaumicenergistics_ce.arcane_assembler.waiting", wait)
-                    .withStyle(ChatFormatting.GOLD)));
-        }
-        Component refusal = decode(tag, TAG_REFUSAL);
-        if (refusal != null) {
-            tooltip.add(helper.text(Component.translatable(
-                            "jade.thaumicenergistics_ce.arcane_assembler.refused", refusal)
-                    .withStyle(ChatFormatting.RED)));
-        }
-    }
-
-
 }
