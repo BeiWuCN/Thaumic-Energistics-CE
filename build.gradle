@@ -184,6 +184,27 @@ tasks.named('compileJava') {
     options.compilerArgs << '-Xmaxerrs' << '2000'
 }
 
+// ---- Source encoding ------------------------------------------------------
+// Every text file in this tree is UTF-8 (no BOM, LF). Without this javac falls back to the platform
+// default charset, which is GBK on a Chinese Windows box: any non-ASCII comment or string literal
+// then either trips "unmappable character" or is silently written into the class file as mojibake.
+// Every source file happens to be pure ASCII today, so nothing is broken yet - this is here so that
+// the first non-ASCII comment someone writes does not become a build failure.
+//
+// `withType` rather than `named('compileJava')` on purpose: the IDE sync and any future source set
+// add their own JavaCompile tasks, and one of them left without the flag is exactly the failure this
+// prevents. Javadoc reads the same files and gets the same flag.
+//
+// This file itself stays pure ASCII on purpose: Gradle reads build scripts with the platform charset,
+// not necessarily UTF-8, so a non-ASCII comment here can turn into mojibake for the next reader.
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+}
+
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
     var replaceProperties = [minecraft_version      : minecraft_version,
                              minecraft_version_range: minecraft_version_range,

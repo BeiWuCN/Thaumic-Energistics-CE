@@ -39,6 +39,9 @@ public class InfusionMonitorProvider implements IBlockComponentProvider, IServer
     /** Whether the monitor has its book and an altar - without both it says nothing about risk. */
     private static final String TAG_REPORTING = "Reporting";
     private static final String TAG_FOUND_ALTAR = "FoundAltar";
+    /** Whether an altar search has run since the monitor's node was last active. "No altar" is a fact
+     * about the room only once the room was searched. */
+    private static final String TAG_SEARCHED = "Searched";
     /** Whether the Thaumonomicon is on the machine. Without it the monitor is blind, not idle. */
     private static final String TAG_HAS_BOOK = "HasBook";
     private static final String TAG_CRAFTING = "Crafting";
@@ -60,6 +63,7 @@ public class InfusionMonitorProvider implements IBlockComponentProvider, IServer
         tag.putBoolean(TAG_REPORTING, monitor.canReport());
         BlockEntityInfusionMonitor.Report report = monitor.report();
         tag.putBoolean(TAG_FOUND_ALTAR, report.foundAltar());
+        tag.putBoolean(TAG_SEARCHED, monitor.hasSearchedAltar());
         tag.putBoolean(TAG_HAS_BOOK, monitor.hasBook());
         tag.putBoolean(TAG_CRAFTING, report.crafting());
 
@@ -90,15 +94,18 @@ public class InfusionMonitorProvider implements IBlockComponentProvider, IServer
         JadeGridState state = JadeGridState.read(tag);
         tooltip.add(helper.text(state.label().copy().withStyle(state.colour())));
 
+        // The two faults behind the state line. No book is the machine's own and the one a player can
+        // fix, so it is named whenever it is missing. "No altar" is a claim about the room, and only a
+        // search may make it: an offline monitor searches nothing, and saying "no altar" for it sent
+        // readers hunting the wrong block.
+        if (!tag.getBoolean(TAG_HAS_BOOK)) {
+            tooltip.add(helper.text(Component.translatable("thaumicenergistics_ce.jade.monitor.no_book")
+                    .withStyle(ChatFormatting.GOLD)));
+        }
         if (!tag.getBoolean(TAG_REPORTING)) {
-            // Two faults, two sentences: no altar is a fact about the room, no book is about the machine and
-            // is the one a player can fix. Reporting both as "no altar" sent readers hunting the wrong block.
-            if (!tag.getBoolean(TAG_FOUND_ALTAR)) {
+            if (tag.getBoolean(TAG_SEARCHED) && !tag.getBoolean(TAG_FOUND_ALTAR)) {
                 tooltip.add(helper.text(Component.translatable("thaumicenergistics_ce.jade.monitor.no_matrix")
                         .withStyle(ChatFormatting.GRAY)));
-            } else if (!tag.getBoolean(TAG_HAS_BOOK)) {
-                tooltip.add(helper.text(Component.translatable("thaumicenergistics_ce.jade.monitor.no_book")
-                        .withStyle(ChatFormatting.GOLD)));
             }
             return;
         }

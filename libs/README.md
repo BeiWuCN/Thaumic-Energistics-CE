@@ -24,6 +24,21 @@ to rebuild.
 
 **Do not commit the jar and do not pass it on.** `.gitignore` already refuses `libs/*.jar`.
 
+## tools/patches, and why a diff is allowed where a jar is not
+
+The licence forbids redistributing the *mod*; it says nothing about a patch that describes a change to
+its source. Local fixes therefore live in `tools/patches/*.patch`, and both scripts apply them with
+`git apply` right after the checkout, before the data generator runs and long before a jar exists. If a
+patch stops applying the script aborts, because an unpatched build and a patched one are the same thing
+once they are jars.
+
+One patch exists today. `aspect-index-performance.patch` moves the aspect index build, cache load and
+cache write off the server thread, replaces the fingerprint's list of strings and its sort with a single
+allocation-free pass, encodes the index once for all recipients instead of once per recipient, and lets a
+client skip rebuilding its JEI aspect pages when the index it just received is identical to the one it
+already had. No public signature changes, no data file changes. Sizes, measurements, the one assumption
+it makes, and the pull request text are in `tools/patches/README.md`.
+
 ## It runs the data generator too, and it has to
 
 Building Thaumaturge with nothing but `gradlew jar` produces a jar that loads and then kills the game.

@@ -95,6 +95,12 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
 
     private Report report = Report.NONE;
 
+    /** Whether the altar has been searched since the node was last active. "No altar" is a fact about the
+     * room only once a search has run; before one - and while the node is offline, when nothing is
+     * searched at all - the machine has not looked, and nothing may claim that it has. Not saved: a
+     * reloaded world starts out not having looked, which is the truth. */
+    private boolean altarSearched;
+
     private InfusionRisk risk = InfusionRisk.NONE;
 
     /** One log line a second when {@code THAUMICENERGISTICS_MONITOR_TRACE=true}, because the failure
@@ -212,8 +218,11 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
             return TickRateModulation.IDLE;
         }
         updateNetworkState();
-        // Offline: skip work, but keep ticking (SAME) so the grid's return is noticed.
+        // Offline: skip work, but keep ticking (SAME) so the grid's return is noticed. Nothing was
+        // searched, so the last altar reading is dropped rather than served as if it were current.
         if (!getMainNode().isActive()) {
+            altarSearched = false;
+            report = Report.NONE;
             syncBubble();
             trace(node);
             return TickRateModulation.SAME;
@@ -233,6 +242,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         if (matrixPos != null) {
             Altar altar = TcInfusion.altarAt(level, matrixPos);
             if (altar != null) {
+                altarSearched = true;
                 report = read(altar, matrixPos);
                 return;
             }
@@ -253,12 +263,15 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
             if (altar != null) {
                 matrixPos = pos.immutable();
                 altarMissBackoff = SCAN_INTERVAL;
+                altarSearched = true;
                 report = read(altar, matrixPos);
                 return;
             }
         }
         nextCubeScan = now + altarMissBackoff;
         altarMissBackoff = Math.min(ALTAR_MISS_INTERVAL, altarMissBackoff * 2);
+        // The cube was searched and came up empty: that is a real reading, unlike an unsearched machine.
+        altarSearched = true;
         report = Report.NONE;
     }
 
@@ -384,11 +397,13 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
             return;
         }
         nextTrace = now + 20;
+        // The labels name what is printed: this line used to say network= and stored= for a boolean and a
+        // list of aspects, which reads as a different machine's trace.
         ThELog.LOG.info(
-                "[mon] at {} node={} book={} network={} altar={} crafting={} problems={} base={} altarRisk={}"
-                        + " tier={} stability={} stored={} energyOutput={}",
-                worldPosition, describeNode(node), hasBook(), report.foundAltar(), matrixPos, report.crafting(),
-                report.symmetryProblems(), risk.base(), risk.altar(), risk.tier(),
+                "[mon] at {} node={} book={} found={} searched={} altar={} crafting={} problems={} base={}"
+                        + " altarRisk={} tier={} stability={} remaining={} instability={}",
+                worldPosition, describeNode(node), hasBook(), report.foundAltar(), altarSearched, matrixPos,
+                report.crafting(), report.symmetryProblems(), risk.base(), risk.altar(), risk.tier(),
                 String.format("%.1f", risk.stability()), report.remainingKinds(), risk.instability());
     }
 
@@ -603,6 +618,12 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
 
     public Report report() {
         return report;
+    }
+
+    /** Whether an altar search has run since the node was last active. Jade says "no altar" only when
+     * this is true, since an unsearched machine knows nothing about the room. */
+    public boolean hasSearchedAltar() {
+        return altarSearched;
     }
 
     public boolean canReport() {

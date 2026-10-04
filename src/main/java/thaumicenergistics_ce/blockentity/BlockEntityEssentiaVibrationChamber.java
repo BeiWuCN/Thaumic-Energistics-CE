@@ -59,8 +59,13 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     public static final double MAX_OUTPUT_PER_TICK = 2_000.0;
 
-    /** Room that must open in the slot before the burn resumes: hysteresis, larger than one potentia tick. */
-    private static final double RESUME_MARGIN = 400.0;
+    /**
+     * Room the energy slot is allowed to keep and still count as full. One tick of the slowest burn is
+     * the least a tick can be worth, and 100 AE is also the step the gauge moves in - 0.1 kAE - so "full"
+     * begins and ends exactly where the reading crosses 15.9 kAE, in both directions. A wider margin
+     * reads as a stuck number: a paused machine said "the slot is full" while its gauge showed 15.7 kAE.
+     */
+    private static final double FULL_MARGIN = BASE_AE_PER_TICK / 2.0;
 
     private static final int TICK_RATE_BURNING = 10;
     private static final int TICK_RATE_IDLE = 40;
@@ -72,7 +77,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     public enum BurnState {
         BURNING,
-        /** Held back: the energy slot cannot take another tick of the burn. */
+        /** Held back: the energy slot is full to its last {@link #FULL_MARGIN}, so nothing fits. */
         PAUSED_FULL,
         /** Nothing but this machine is on its grid: nowhere for the power to go. */
         NO_NETWORK,
@@ -229,7 +234,10 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     private void updateBurnState(boolean onNetwork) {
         double room = MAX_ENERGY_STORAGE - storedEnergy;
-        boolean full = burnState == BurnState.PAUSED_FULL ? room < RESUME_MARGIN : room < burnTickPower();
+        // Read off the room left, never off the state it is already in: "full" is a level, not a latch, so
+        // the state - and the line the screen draws from it - follows the number on the gauge instead of
+        // waiting for a margin twice as wide to open.
+        boolean full = room <= FULL_MARGIN;
 
         BurnState next;
         if (!onNetwork) {
@@ -640,7 +648,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         aePerTick = tag.getDouble("AePerTick");
         storedEnergy = Math.min(tag.getDouble("StoredEnergy"), MAX_ENERGY_STORAGE);
         // Read off the slot, not saved with it: a tag carrying both could carry them disagreeing.
-        burnState = MAX_ENERGY_STORAGE - storedEnergy < burnTickPower()
+        burnState = MAX_ENERGY_STORAGE - storedEnergy <= FULL_MARGIN
                 ? BurnState.PAUSED_FULL
                 : BurnState.IDLE;
         currentAspect = null;

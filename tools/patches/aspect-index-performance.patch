@@ -1,0 +1,390 @@
+diff --git a/src/main/java/com/leclowndu93150/thaumaturge/client/network/AspectIndexClientHandler.java b/src/main/java/com/leclowndu93150/thaumaturge/client/network/AspectIndexClientHandler.java
+index 047d22e..f94f365 100644
+--- a/src/main/java/com/leclowndu93150/thaumaturge/client/network/AspectIndexClientHandler.java
++++ b/src/main/java/com/leclowndu93150/thaumaturge/client/network/AspectIndexClientHandler.java
+@@ -14,11 +14,15 @@ public final class AspectIndexClientHandler {
+ 
+     public static void handle(ClientboundAspectIndexPayload payload, IPayloadContext ctx) {
+         ctx.enqueueWork(() -> {
+-            if (!Minecraft.getInstance().hasSingleplayerServer()) {
+-                AspectIndexHolder.set(payload.index());
+-                if (ModList.get().isLoaded(JEI_MOD_ID)) {
+-                    AspectJeiSync.rebuildAspectStackPages();
+-                }
++            if (Minecraft.getInstance().hasSingleplayerServer()) {
++                return;
++            }
++            if (payload.index().contentEquals(AspectIndexHolder.getConcrete())) {
++                return;
++            }
++            AspectIndexHolder.set(payload.index());
++            if (ModList.get().isLoaded(JEI_MOD_ID)) {
++                AspectJeiSync.rebuildAspectStackPages();
+             }
+         });
+     }
+diff --git a/src/main/java/com/leclowndu93150/thaumaturge/content/aspect/AspectIndex.java b/src/main/java/com/leclowndu93150/thaumaturge/content/aspect/AspectIndex.java
+index ce2f206..c218a5f 100644
+--- a/src/main/java/com/leclowndu93150/thaumaturge/content/aspect/AspectIndex.java
++++ b/src/main/java/com/leclowndu93150/thaumaturge/content/aspect/AspectIndex.java
+@@ -9,9 +9,11 @@ import com.mojang.serialization.Codec;
+ import com.mojang.serialization.codecs.RecordCodecBuilder;
+ import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
+ import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
++import io.netty.buffer.Unpooled;
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
++import net.minecraft.core.RegistryAccess;
+ import net.minecraft.core.component.DataComponentPredicate;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ import net.minecraft.network.RegistryFriendlyByteBuf;
+@@ -80,6 +82,9 @@ public final class AspectIndex implements IAspectIndex {
+ 
+     private final Reference2ObjectMap<Item, ItemEntry> byItem;
+ 
++    /** The wire form of an index never changes once built, so it is encoded once and reused for every receiver. */
++    private volatile byte[] encodedForm;
++
+     private AspectIndex(Map<Item, ItemEntry> source) {
+         Reference2ObjectMap<Item, ItemEntry> map = new Reference2ObjectOpenHashMap<>(source.size());
+         for (Map.Entry<Item, ItemEntry> entry : source.entrySet()) {
+@@ -147,6 +152,56 @@ public final class AspectIndex implements IAspectIndex {
+         return byItem.isEmpty();
+     }
+ 
++    /** Structural comparison, used to skip re-publishing and re-syncing an index that did not actually change. */
++    public boolean contentEquals(AspectIndex other) {
++        if (this == other) {
++            return true;
++        }
++        if (other == null || byItem.size() != other.byItem.size()) {
++            return false;
++        }
++        for (Reference2ObjectMap.Entry<Item, ItemEntry> entry : byItem.reference2ObjectEntrySet()) {
++            if (!entry.getValue().equals(other.byItem.get(entry.getKey()))) {
++                return false;
++            }
++        }
++        return true;
++    }
++
++    /**
++     * Returns the wire form of this index, encoding it on first use. The encoding of an index is fixed once it is
++     * built, so every receiver can share one encoded copy instead of re-encoding the whole index per player.
++     */
++    public byte[] encoded(RegistryAccess registries) {
++        byte[] cached = encodedForm;
++        if (cached != null) {
++            return cached;
++        }
++        RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
++        byte[] encoded;
++        try {
++            STREAM_CODEC.encode(buf, this);
++            encoded = new byte[buf.readableBytes()];
++            buf.readBytes(encoded);
++        } finally {
++            buf.release();
++        }
++        encodedForm = encoded;
++        return encoded;
++    }
++
++    public static AspectIndex fromEncoded(RegistryFriendlyByteBuf buf) {
++        byte[] raw = new byte[buf.readVarInt()];
++        buf.readBytes(raw);
++        RegistryFriendlyByteBuf scratch =
++                new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(raw), buf.registryAccess());
++        try {
++            return STREAM_CODEC.decode(scratch);
++        } finally {
++            scratch.release();
++        }
++    }
++
+     private List<Entry> entries() {
+         List<Entry> list = new java.util.ArrayList<>(byItem.size());
+         byItem.forEach((item, entry) -> list.add(new Entry(BuiltInRegistries.ITEM.getKey(item), entry)));
+diff --git a/src/main/java/com/leclowndu93150/thaumaturge/content/aspect/AspectIndexEvents.java b/src/main/java/com/leclowndu93150/thaumaturge/content/aspect/AspectIndexEvents.java
+index c03338a..7616c40 100644
+--- a/src/main/java/com/leclowndu93150/thaumaturge/content/aspect/AspectIndexEvents.java
++++ b/src/main/java/com/leclowndu93150/thaumaturge/content/aspect/AspectIndexEvents.java
+@@ -1,11 +1,16 @@
+ package com.leclowndu93150.thaumaturge.content.aspect;
+ 
+ import com.leclowndu93150.thaumaturge.TCIds;
++import com.leclowndu93150.thaumaturge.Thaumaturge;
+ import com.leclowndu93150.thaumaturge.network.ClientboundAspectIndexPayload;
++import java.util.concurrent.atomic.AtomicInteger;
++import net.minecraft.Util;
++import net.minecraft.core.HolderLookup;
+ import net.minecraft.core.registries.BuiltInRegistries;
+ import net.minecraft.core.registries.Registries;
+ import net.minecraft.server.MinecraftServer;
+ import net.minecraft.server.level.ServerPlayer;
++import net.minecraft.world.item.crafting.RecipeManager;
+ import net.neoforged.bus.api.SubscribeEvent;
+ import net.neoforged.fml.common.EventBusSubscriber;
+ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+@@ -19,6 +24,12 @@ public final class AspectIndexEvents {
+     private static volatile boolean datamapsReady = false;
+     private static volatile MinecraftServer pendingServer = null;
+ 
++    /** Bumped on every build and on shutdown, so a build that lands too late is dropped instead of published. */
++    private static final AtomicInteger BUILD_GENERATION = new AtomicInteger();
++
++    /** Fingerprint of the index that was last published, so an unchanged rebuild does not re-send the whole index. */
++    private static volatile String publishedFingerprint = null;
++
+     private AspectIndexEvents() {}
+ 
+     @SubscribeEvent
+@@ -50,6 +61,8 @@ public final class AspectIndexEvents {
+     public static void onServerStopped(ServerStoppedEvent event) {
+         datamapsReady = false;
+         pendingServer = null;
++        BUILD_GENERATION.incrementAndGet();
++        publishedFingerprint = null;
+         AspectIndexHolder.set(AspectIndex.EMPTY);
+     }
+ 
+@@ -60,20 +73,48 @@ public final class AspectIndexEvents {
+         }
+     }
+ 
++    /**
++     * Fingerprinting the item and recipe sets, decoding the cache file and rebuilding the index are all pure data
++     * work, so they run off the server thread: a pack with thousands of recipes otherwise stalls the tick loop for
++     * the whole build. Only the publish step touches the holder and the network, and it happens on the server thread.
++     */
+     private static void buildAndBroadcast(MinecraftServer server) {
+-        String fingerprint = AspectIndexFile.fingerprint(server);
+-        AspectIndex index =
+-                AspectIndexFile.load(server.registryAccess(), fingerprint).orElse(null);
+-        if (index == null) {
+-            int itemCount = BuiltInRegistries.ITEM.size();
+-            int recipeCount = server.getRecipeManager().getRecipes().size();
+-            index = AspectIndexBuilder.build(server.getRecipeManager(), server.registryAccess());
+-            AspectIndexFile.write(index, server.registryAccess(), fingerprint, itemCount, recipeCount);
++        HolderLookup.Provider registries = server.registryAccess();
++        RecipeManager recipes = server.getRecipeManager();
++        int generation = BUILD_GENERATION.incrementAndGet();
++        pendingServer = null;
++        Util.backgroundExecutor().execute(() -> {
++            String fingerprint;
++            AspectIndex index;
++            try {
++                fingerprint = AspectIndexFile.fingerprint(recipes);
++                index = AspectIndexFile.load(registries, fingerprint).orElse(null);
++                if (index == null) {
++                    int itemCount = BuiltInRegistries.ITEM.size();
++                    int recipeCount = recipes.getRecipes().size();
++                    index = AspectIndexBuilder.build(recipes, registries);
++                    AspectIndexFile.write(index, registries, fingerprint, itemCount, recipeCount);
++                }
++            } catch (RuntimeException | Error e) {
++                Thaumaturge.LOGGER.error("Failed to build the aspect index, keeping the previously published index", e);
++                return;
++            }
++            AspectIndex built = index;
++            String builtFingerprint = fingerprint;
++            server.execute(() -> publish(server, generation, builtFingerprint, built));
++        });
++    }
++
++    private static void publish(MinecraftServer server, int generation, String fingerprint, AspectIndex index) {
++        if (generation != BUILD_GENERATION.get() || server.isStopped()) {
++            return;
+         }
+         AspectIndexHolder.set(index);
+-        if (!server.getPlayerList().getPlayers().isEmpty()) {
++        boolean firstPublish = publishedFingerprint == null;
++        boolean unchanged = !firstPublish && fingerprint.equals(publishedFingerprint);
++        publishedFingerprint = fingerprint;
++        if ((firstPublish || !unchanged) && !server.getPlayerList().getPlayers().isEmpty()) {
+             PacketDistributor.sendToAllPlayers(new ClientboundAspectIndexPayload(index));
+         }
+-        pendingServer = null;
+     }
+ }
+diff --git a/src/main/java/com/leclowndu93150/thaumaturge/content/aspect/AspectIndexFile.java b/src/main/java/com/leclowndu93150/thaumaturge/content/aspect/AspectIndexFile.java
+index 923d930..5c3ddd4 100644
+--- a/src/main/java/com/leclowndu93150/thaumaturge/content/aspect/AspectIndexFile.java
++++ b/src/main/java/com/leclowndu93150/thaumaturge/content/aspect/AspectIndexFile.java
+@@ -10,16 +10,9 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectDataMaps;
+ import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
+ import com.mojang.serialization.JsonOps;
+ import java.io.IOException;
+-import java.nio.charset.StandardCharsets;
+ import java.nio.file.Files;
+ import java.nio.file.Path;
+-import java.security.MessageDigest;
+-import java.security.NoSuchAlgorithmException;
+-import java.util.ArrayList;
+-import java.util.Collections;
+ import java.util.HashMap;
+-import java.util.HexFormat;
+-import java.util.List;
+ import java.util.Map;
+ import java.util.Optional;
+ import net.minecraft.core.HolderLookup;
+@@ -30,12 +23,28 @@ import net.minecraft.server.MinecraftServer;
+ import net.minecraft.util.GsonHelper;
+ import net.minecraft.world.item.Item;
+ import net.minecraft.world.item.crafting.RecipeHolder;
++import net.minecraft.world.item.crafting.RecipeManager;
+ import net.neoforged.fml.loading.FMLPaths;
+ 
+ public final class AspectIndexFile {
+     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+ 
+-    private static final int FORMAT_VERSION = 3;
++    private static final int FORMAT_VERSION = 4;
++
++    /** FNV-1a 64-bit mixing constants; the fingerprint only needs to be a cheap change detector, not a signature. */
++    private static final long HASH_SEED = 0xcbf29ce484222325L;
++
++    private static final long HASH_PRIME = 0x100000001b3L;
++
++    /** Distinguishes the three kinds of lines that take part in the fingerprint, so kinds cannot alias. */
++    private static final long KIND_ITEM = 1L;
++
++    private static final long KIND_BASE = 2L;
++
++    private static final long KIND_RECIPE = 3L;
++
++    /** Field terminator, so that "ab" and "a" + "b" cannot produce the same element hash. */
++    private static final long FIELD_TERMINATOR = 0x9e3779b97f4a7c15L;
+ 
+     private AspectIndexFile() {}
+ 
+@@ -44,41 +53,67 @@ public final class AspectIndexFile {
+     }
+ 
+     public static String fingerprint(MinecraftServer server) {
+-        List<String> lines = new ArrayList<>();
+-        lines.add("format:" + FORMAT_VERSION);
++        return fingerprint(server.getRecipeManager());
++    }
++
++    /**
++     * Builds the cache fingerprint in a single streaming pass, allocating one short string per element instead of one
++     * string per line plus a sort of every line. The result is order independent, so it stays stable even if the
++     * registry or recipe iteration order changes.
++     */
++    public static String fingerprint(RecipeManager recipes) {
++        long sum = 0L;
++        long xor = 0L;
+         for (ResourceLocation id : BuiltInRegistries.ITEM.keySet()) {
+-            lines.add("item:" + id);
++            long element = startElement(KIND_ITEM);
++            element = mixString(element, id.getNamespace());
++            element = mixString(element, id.getPath());
++            sum += element;
++            xor = Long.rotateLeft(xor, 17) ^ element;
+         }
+         for (Item item : BuiltInRegistries.ITEM) {
+             AspectList declared = item.builtInRegistryHolder().getData(AspectDataMaps.BASE_ASPECTS);
+             if (declared == null || declared.isEmpty()) {
+                 continue;
+             }
+-            List<String> parts = new ArrayList<>(declared.entries().size());
++            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+             for (var entry : declared.entries()) {
+-                parts.add(entry.aspect()
+-                                .unwrapKey()
+-                                .map(key -> key.location().toString())
+-                                .orElse("?") + "=" + entry.amount());
++                long element = startElement(KIND_BASE);
++                element = mixString(element, itemId.getNamespace());
++                element = mixString(element, itemId.getPath());
++                element = mixString(element, entry.aspect().unwrapKey().map(key -> key.location().getNamespace()).orElse("?"));
++                element = mixString(element, entry.aspect().unwrapKey().map(key -> key.location().getPath()).orElse("?"));
++                element = mixLong(element, entry.amount());
++                sum += element;
++                xor = Long.rotateLeft(xor, 17) ^ element;
+             }
+-            Collections.sort(parts);
+-            lines.add("base:" + BuiltInRegistries.ITEM.getKey(item) + ":" + String.join(",", parts));
+         }
+-        for (RecipeHolder<?> holder : server.getRecipeManager().getRecipes()) {
+-            lines.add("recipe:" + holder.id());
++        for (RecipeHolder<?> holder : recipes.getRecipes()) {
++            ResourceLocation id = holder.id();
++            long element = startElement(KIND_RECIPE);
++            element = mixString(element, id.getNamespace());
++            element = mixString(element, id.getPath());
++            sum += element;
++            xor = Long.rotateLeft(xor, 17) ^ element;
+         }
+-        Collections.sort(lines);
+-        MessageDigest digest;
+-        try {
+-            digest = MessageDigest.getInstance("SHA-256");
+-        } catch (NoSuchAlgorithmException e) {
+-            throw new IllegalStateException("SHA-256 is unavailable", e);
+-        }
+-        for (String line : lines) {
+-            digest.update(line.getBytes(StandardCharsets.UTF_8));
+-            digest.update((byte) '\n');
++        sum = mixLong(sum, FORMAT_VERSION);
++        return String.format("%016x%016x", sum, xor);
++    }
++
++    private static long startElement(long kind) {
++        return mixLong(HASH_SEED, kind);
++    }
++
++    private static long mixLong(long hash, long value) {
++        return (hash ^ value) * HASH_PRIME;
++    }
++
++    private static long mixString(long hash, String value) {
++        long result = hash;
++        for (int i = 0; i < value.length(); i++) {
++            result = mixLong(result, value.charAt(i));
+         }
+-        return HexFormat.of().formatHex(digest.digest());
++        return mixLong(result, FIELD_TERMINATOR);
+     }
+ 
+     public static Optional<AspectIndex> load(HolderLookup.Provider registries, String liveFingerprint) {
+diff --git a/src/main/java/com/leclowndu93150/thaumaturge/network/ClientboundAspectIndexPayload.java b/src/main/java/com/leclowndu93150/thaumaturge/network/ClientboundAspectIndexPayload.java
+index 9f3be46..58fd5ec 100644
+--- a/src/main/java/com/leclowndu93150/thaumaturge/network/ClientboundAspectIndexPayload.java
++++ b/src/main/java/com/leclowndu93150/thaumaturge/network/ClientboundAspectIndexPayload.java
+@@ -12,7 +12,19 @@ public record ClientboundAspectIndexPayload(AspectIndex index) implements Custom
+             new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(TCIds.MODID, "aspect_index"));
+ 
+     public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundAspectIndexPayload> STREAM_CODEC =
+-            AspectIndex.STREAM_CODEC.map(ClientboundAspectIndexPayload::new, ClientboundAspectIndexPayload::index);
++            new StreamCodec<>() {
++                @Override
++                public void encode(RegistryFriendlyByteBuf buf, ClientboundAspectIndexPayload payload) {
++                    byte[] raw = payload.index().encoded(buf.registryAccess());
++                    buf.writeVarInt(raw.length);
++                    buf.writeBytes(raw);
++                }
++
++                @Override
++                public ClientboundAspectIndexPayload decode(RegistryFriendlyByteBuf buf) {
++                    return new ClientboundAspectIndexPayload(AspectIndex.fromEncoded(buf));
++                }
++            };
+ 
+     @Override
+     public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+diff --git a/src/main/java/com/leclowndu93150/thaumaturge/network/TCPayloads.java b/src/main/java/com/leclowndu93150/thaumaturge/network/TCPayloads.java
+index 54be99a..29720aa 100644
+--- a/src/main/java/com/leclowndu93150/thaumaturge/network/TCPayloads.java
++++ b/src/main/java/com/leclowndu93150/thaumaturge/network/TCPayloads.java
+@@ -31,7 +31,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+ 
+ @EventBusSubscriber(modid = TCIds.MODID)
+ public final class TCPayloads {
+-    private static final String VERSION = "2";
++    private static final String VERSION = "3";
+ 
+     private TCPayloads() {}
+ 

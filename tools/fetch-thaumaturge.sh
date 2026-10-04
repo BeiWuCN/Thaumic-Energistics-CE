@@ -16,6 +16,10 @@
 # upstream knows this - build.gradle registers a `generateData` task - but nothing depends on it, so
 # it has to be run explicitly. The check at the end refuses to install a jar without the data.
 #
+# Patch files in tools/patches are applied to the checkout before the build. A diff is not a binary,
+# so it can be versioned in this repository and shipped to CI; the jar still cannot. A patch that no
+# longer applies stops the script, because a silently unpatched build looks exactly like a patched one.
+#
 # Idempotent: stops if libs/ already holds a Thaumaturge jar. Pass --force to rebuild.
 #
 #     ./tools/fetch-thaumaturge.sh [--force]
@@ -71,6 +75,20 @@ fi
 echo "fetch-thaumaturge: checking out $commit"
 git -C "$src" fetch --quiet origin
 git -C "$src" checkout --quiet --force "$commit"
+
+# The pinned commit is the base; these diffs are what this project adds on top of it. Applying them
+# is all-or-nothing: a patch that does not apply means the patch and thaumaturge_commit have drifted
+# apart, and continuing would build an unpatched mod that is indistinguishable from a patched one.
+for patch in "$root"/tools/patches/*.patch; do
+    [ -e "$patch" ] || continue
+    if ! git -C "$src" apply --check "$patch"; then
+        echo "fetch-thaumaturge: $(basename -- "$patch") does not apply to $commit" >&2
+        echo "fetch-thaumaturge: the patch and thaumaturge_commit have drifted apart" >&2
+        exit 1
+    fi
+    git -C "$src" apply "$patch"
+    echo "fetch-thaumaturge: applied $(basename -- "$patch")"
+done
 
 # --no-build-cache is not about speed. Upstream turns the Gradle build cache on (its own
 # gradle.properties sets org.gradle.caching=true), so a cached run writes this project's compiled
