@@ -16,7 +16,6 @@ import appeng.parts.PartModel;
 import appeng.parts.reporting.AbstractTerminalPart;
 import appeng.util.inv.AppEngInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
-import com.leclowndu93150.thaumaturge.content.wands.ItemWand;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -32,6 +31,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.arcane.EssentiaCrystals;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
+import thaumicenergistics_ce.compat.thaumaturge.TcWand;
 import thaumicenergistics_ce.init.ModMenuTypes;
 
 /**
@@ -116,10 +116,9 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
         });
     }
 
-    /** Whether a stack is a wand. By item class, not tag, so the dependency stays one-way. */
+    /** Whether a stack is a wand. Recognised by item class, not tag, so the dependency stays one-way. */
     public static boolean isWand(ItemStack stack) {
-        return !stack.isEmpty()
-                && stack.getItem() instanceof ItemWand;
+        return TcWand.isWand(stack);
     }
 
     @Override

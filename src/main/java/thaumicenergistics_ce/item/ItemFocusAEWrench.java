@@ -4,7 +4,6 @@ import com.leclowndu93150.thaumaturge.api.casters.FocusEngine;
 import com.leclowndu93150.thaumaturge.api.casters.FocusPackage;
 import com.leclowndu93150.thaumaturge.api.casters.FocusSettings;
 import com.leclowndu93150.thaumaturge.content.casters.ItemFocus;
-import com.leclowndu93150.thaumaturge.content.wands.ItemWand;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -19,6 +18,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import thaumicenergistics_ce.compat.thaumaturge.TcWand;
 import thaumicenergistics_ce.focus.FocusEffectAEWrench;
 
 /**
@@ -103,10 +103,10 @@ public class ItemFocusAEWrench extends ItemFocus {
                 hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
         ItemStack otherStack = player.getItemInHand(other);
 
-        if (!(otherStack.getItem() instanceof ItemWand wand)) {
+        if (!TcWand.isWand(otherStack)) {
             return InteractionResultHolder.pass(stack);
         }
-        if (!wand.getFocusStack(otherStack).isEmpty()) {
+        if (!TcWand.focus(otherStack).isEmpty()) {
             // Pass rather than succeed: succeeding would swallow the click without installing anything.
             return InteractionResultHolder.pass(stack);
         }
@@ -114,7 +114,7 @@ public class ItemFocusAEWrench extends ItemFocus {
         if (!level.isClientSide()) {
             // Also here, not only on the tick: a stack straight from a recipe result has never been ticked.
             assemble(stack);
-            wand.setFocus(otherStack, stack.copyWithCount(1));
+            TcWand.setFocus(otherStack, stack.copyWithCount(1));
             level.playSound(null, player.blockPosition(), SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.PLAYERS,
                     0.45F, 1.2F);
             if (!player.isCreative()) {

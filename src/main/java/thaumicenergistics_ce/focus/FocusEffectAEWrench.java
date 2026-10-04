@@ -7,7 +7,6 @@ import com.leclowndu93150.thaumaturge.api.casters.FocusEffect;
 import com.leclowndu93150.thaumaturge.api.casters.FocusElement;
 import com.leclowndu93150.thaumaturge.api.casters.FocusSettings;
 import com.leclowndu93150.thaumaturge.api.casters.Trajectory;
-import com.leclowndu93150.thaumaturge.content.wands.ItemWand;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -28,6 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.compat.thaumaturge.TcActionBar;
+import thaumicenergistics_ce.compat.thaumaturge.TcWand;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.item.ItemFocusAEWrench;
 
@@ -117,9 +117,8 @@ public final class FocusEffectAEWrench implements FocusEffect {
     private static boolean pay(Player player, float cost, boolean commit) {
         for (InteractionHand hand : InteractionHand.values()) {
             ItemStack stack = player.getItemInHand(hand);
-            if (stack.getItem() instanceof ItemWand wand
-                    && wand.getFocusStack(stack).is(ModItems.FOCUS_AEWRENCH.get())) {
-                return wand.consumeVis(stack, player, cost, false, !commit);
+            if (TcWand.holdsFocus(stack, ModItems.FOCUS_AEWRENCH.get())) {
+                return commit ? TcWand.payVis(stack, player, cost) : TcWand.canPayVis(stack, player, cost);
             }
         }
         return false;
