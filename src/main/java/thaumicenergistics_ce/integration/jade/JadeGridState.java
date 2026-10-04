@@ -9,12 +9,9 @@ import net.minecraft.network.chat.Component;
 /**
  * The four grid-node states AE2 shows, and how our tooltips draw them.
  * <ul>
- *   <li>Cases, words and colours are AE2's; its translation keys are reused so every machine
- *       reporting a network state shares one set of strings.
+ *   <li>Cases, words and colours are AE2's; its translation keys are reused so every machine shares one.
  *   <li>Resolved on the server, where the node lives, and sent to the client as an ordinal.
- *   <li>Public because the tooltip halves live in {@code client.jade} and read {@link #TAG},
- *       {@link #read}, {@link #label()} and {@link #colour()} from there. The write side
- *       ({@code of} / {@code write}) stays package-private: it is the server's own.
+ *   <li>Public for the tooltip halves in {@code client.jade}; the write side stays package-private.
  * </ul>
  */
 public enum JadeGridState {

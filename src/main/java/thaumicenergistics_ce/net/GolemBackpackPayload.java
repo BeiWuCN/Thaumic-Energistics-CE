@@ -36,11 +36,8 @@ public record GolemBackpackPayload(int entityId, int status, int skinOrdinal) im
         return TYPE;
     }
 
-    /**
-     * Hands the payload to whatever the client installed as its receiver. The protocol package names no
-     * client class, and the registrar already runs handlers on the main thread, so this must not enqueue
-     * a second time.
-     */
+    /** Hands the payload to whatever the client installed as its receiver. The protocol package names no
+     * client class, and the registrar already runs handlers on the main thread - no second enqueue here. */
     public void handleOnClient(Player player) {
         ClientSinks.acceptGolemBackpack(this);
     }

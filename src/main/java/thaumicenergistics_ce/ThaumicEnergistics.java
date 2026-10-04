@@ -131,8 +131,7 @@ public final class ThaumicEnergistics {
         NeoForge.EVENT_BUS.addListener(AssemblerCraftSelfTest::run);
         NeoForge.EVENT_BUS.addListener(AssemblerCraftSelfTest::onServerStarted);
         // The cell workbench's partition: a mark has to reach the cell item, survive a save, and then
-        // filter it. None of that is a client's to check, since nothing a client writes to the grid is
-        // ever sent - see PartitionWellPayload.
+        // filter it. Nothing a client writes to the grid is ever sent - see PartitionWellPayload.
         NeoForge.EVENT_BUS.addListener(CellPartitionSelfTest::onServerStarted);
         // Read-only check that an assembler can reach a relay block; a lone interface cannot.
         NeoForge.EVENT_BUS.addListener(VisRelaySelfTest::run);

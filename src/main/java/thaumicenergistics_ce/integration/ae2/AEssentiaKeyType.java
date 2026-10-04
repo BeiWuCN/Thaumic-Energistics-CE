@@ -92,11 +92,8 @@ public final class AEssentiaKeyType extends AEKeyType {
         return aspectOf(level.registryAccess(), id);
     }
 
-    /**
-     * The registries an aspect can be resolved against, asked of whichever side is running: the client
-     * installs its own through {@link ClientRegistries}, and on a dedicated server nothing is installed,
-     * so the server's registries are used.
-     *
+    /** The registries an aspect can be resolved against, asked of whichever side is running: the client
+     * installs its own through {@link ClientRegistries}, a dedicated server is asked for the server's.
      * @return the registries, or {@code null} before either side has any
      */
     static @Nullable RegistryAccess clientOrServerRegistries() {

@@ -15,11 +15,9 @@ import thaumicenergistics_ce.integration.jade.JadeGridState;
 /**
  * The Essentia Vibration Chamber's Jade tooltip: whether there is a network to burn for, and what it does.
  * <ul>
- * <li><b>Drawn from the client's copy of the machine, not server data</b>: Jade collects a provider's server
- * data once, when the tooltip is first drawn, so its lines would sit still while the tooltip stays open.
- * <li>Deliberately not shown: the burn's countdown and slot energy, because both move every tick or visit.
- * <li>Lives in the client tree because it is only ever registered from Jade's {@code registerClient}, which
- * is guarded to the physical client - it never runs on a dedicated server.
+ * <li><b>Drawn from the client's copy, not server data</b>: Jade collects that data once, so lines freeze.
+ * <li>Deliberately not shown: the burn's countdown and slot energy, because both move every tick.
+ * <li>Client-only: only ever registered from Jade's {@code registerClient}, which a dedicated server skips.
  * </ul>
  */
 public class VibrationChamberProvider implements IBlockComponentProvider {

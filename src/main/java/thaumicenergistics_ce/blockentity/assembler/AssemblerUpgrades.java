@@ -8,10 +8,8 @@ import net.minecraft.world.item.ItemStack;
  * The Arcane Assembler's speed upgrades and the vis discount its worn gear grants.
  * <ul>
  * <li>Both are pure bookkeeping over the machine's own inventory: neither needs the grid, the craft nor
- * the display, so they live here and the block entity asks. The card count is not a number of its own:
- * it is counted off the machine's upgrade slots, so it cannot disagree with what those slots hold.
- * <li>Split out of {@link BlockEntityArcaneAssembler}. Public because the menu and the Jade provider
- * read the machine through it; everything else here is package-private.
+ * the display. The card count is not a number of its own: it is counted off the upgrade slots.
+ * <li>Split out of {@link BlockEntityArcaneAssembler}. Public because the menu and the Jade provider read it.
  * </ul>
  */
 public final class AssemblerUpgrades {

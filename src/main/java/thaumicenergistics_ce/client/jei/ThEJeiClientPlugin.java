@@ -15,16 +15,9 @@ import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 /**
  * The client half of {@link thaumicenergistics_ce.integration.jei.ThEJeiPlugin}: the ghost ingredient
  * handlers, and the screens they drop into.
- *
  * <ul>
- *   <li>A second plugin rather than a method on the first: JEI's {@code registerGuiHandlers} takes an
- *       {@code IGuiHandlerRegistration}, whose own signatures carry {@code Screen}, so the call can only be
- *       written where client classes may be named. Splitting the plugin keeps every screen class out of the
- *       common tree, which a dedicated server never loads.</li>
- *   <li>JEI reaches that call only from its client starter: {@code JustEnoughItemsClient} hands a reload
- *       listener to {@code JeiStarter}, and the starter is what asks {@code PluginLoader} for the screen
- *       helper that calls this method. Nothing on a dedicated server runs it.</li>
- *   <li>Its own UID: the recipe transfer half keeps the one it has always had.</li>
+ *   <li>A second plugin, because the registration {@code registerGuiHandlers} takes names Screen itself.
+ *   <li>JEI reaches it only from its client starter; its UID is its own, separate from the transfer half.
  * </ul>
  */
 @JeiPlugin

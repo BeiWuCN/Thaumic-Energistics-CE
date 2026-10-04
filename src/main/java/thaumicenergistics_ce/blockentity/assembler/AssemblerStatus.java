@@ -7,11 +7,9 @@ import net.minecraft.network.chat.Component;
 /**
  * The Arcane Assembler's reason for waiting or for turning a job away, in one place.
  * <ul>
- * <li>The key and its English fallback sit together so they cannot drift: a missing translation would
- * show the player a raw key.
- * <li>Split out of {@link BlockEntityArcaneAssembler}. The self-test enumerates the keys from another
- * package, which is why this class and {@link #tooltipReasonKeys()} are public; everything else here is
- * package-private, since only the machine and its siblings build a reason.
+ * <li>The key and its English fallback sit together so a missing translation cannot show a raw key.
+ * <li>Split out of {@link BlockEntityArcaneAssembler}; the self-test enumerates the keys from another
+ * package, so this class and {@link #tooltipReasonKeys()} are public and the rest is package-private.
  * </ul>
  */
 public final class AssemblerStatus {

@@ -26,7 +26,7 @@ public class InfusionProviderProvider implements IServerDataProvider<BlockAccess
 
     public static final InfusionProviderProvider INSTANCE = new InfusionProviderProvider();
 
-    /** Shared with {@code client.jade.InfusionProviderTooltip}: Jade pairs server data to a tooltip by UID. */
+    /** Shared with {@code client.jade.InfusionProviderTooltip}: Jade pairs the two halves by UID. */
     public static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "infusion_provider");
 

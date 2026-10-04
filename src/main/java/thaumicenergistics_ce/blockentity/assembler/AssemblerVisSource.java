@@ -16,7 +16,6 @@ import thaumicenergistics_ce.part.VisReservation;
 /**
  * Where the assembler's vis comes from: the surrounding aura, Thaumaturge's relay chain, and this
  * mod's vis interfaces - plus the pool that banks what they give.
- * <p>
  * Same package, so it reaches the machine's state directly instead of through accessors; the
  * machine keeps its public getters and forwards them here.
  */

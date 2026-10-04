@@ -161,11 +161,8 @@ public final class AssemblerCraftSelfTest {
         }
     }
 
-    /**
-     * The bug this exists for: the card slots used to be the menu's own container, so a card went in and was
-     * gone the next time the menu opened. A card has to live in the machine, move its count, and come back out
-     * of a save.
-     */
+    /** The bug this exists for: the card slots used to be the menu's own container, so a card went in and
+     * was gone by the next open. A card has to live in the machine, move its count, and survive a save. */
     private static void checkAccelerationCardsSurviveTheRoundTrip(ServerLevel level) {
         BlockPos pos = BlockPos.ZERO;
         BlockEntityArcaneAssembler machine =

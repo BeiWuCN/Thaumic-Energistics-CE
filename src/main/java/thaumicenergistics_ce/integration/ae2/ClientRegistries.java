@@ -7,8 +7,7 @@ import org.jspecify.annotations.Nullable;
  * Where the client installs the way to reach its registries, so the key type can ask for them without
  * naming a client class - the shape {@code net.ClientSinks} uses, for the same reason.
  * <ul>
- * <li>Installed from {@code ClientSetup} on the client setup event, before anything draws a key; on a
- * dedicated server nothing is installed and the asker falls through to the server's registries.
+ * <li>Installed from {@code ClientSetup} before anything draws a key; a dedicated server installs nothing.
  * <li>The field itself is common: both sides load this class, only one of them sets its value.
  * </ul>
  */

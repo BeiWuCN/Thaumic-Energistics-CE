@@ -59,12 +59,8 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     public static final double MAX_OUTPUT_PER_TICK = 2_000.0;
 
-    /**
-     * Room the energy slot is allowed to keep and still count as full. One tick of the slowest burn is
-     * the least a tick can be worth, and 100 AE is also the step the gauge moves in - 0.1 kAE - so "full"
-     * begins and ends exactly where the reading crosses 15.9 kAE, in both directions. A wider margin
-     * reads as a stuck number: a paused machine said "the slot is full" while its gauge showed 15.7 kAE.
-     */
+    /** Room the energy slot may keep and still count as full. One tick of the slowest burn is the least a
+     * tick can be worth, so "full" begins where the gauge crosses 15.9 kAE, not at a stuck 15.7 kAE. */
     private static final double FULL_MARGIN = BASE_AE_PER_TICK / 2.0;
 
     private static final int TICK_RATE_BURNING = 10;
@@ -235,8 +231,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     private void updateBurnState(boolean onNetwork) {
         double room = MAX_ENERGY_STORAGE - storedEnergy;
         // Read off the room left, never off the state it is already in: "full" is a level, not a latch, so
-        // the state - and the line the screen draws from it - follows the number on the gauge instead of
-        // waiting for a margin twice as wide to open.
+        // the state, and the line the screen draws from it, follows the number on the gauge.
         boolean full = room <= FULL_MARGIN;
 
         BurnState next;

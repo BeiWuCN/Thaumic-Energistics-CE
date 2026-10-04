@@ -12,13 +12,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import thaumicenergistics_ce.util.ThELog;
 
-/** The assembler's display and its network sync, split out of
- * {@link BlockEntityArcaneAssembler}: what the renderer and the menu draw, how often it goes out,
- * and how an update tag is written and read back.
- *
- * <p>Same package, so it reaches the machine's state directly instead of through accessors. The
- * four overrides ({@code getUpdateTag}, {@code handleUpdateTag}, {@code onDataPacket}) stay on the
- * block entity - they are client-visible signatures worth keeping in one place - and delegate here.
+/** The assembler's display and its network sync, split out of {@link BlockEntityArcaneAssembler}: what
+ * the renderer and the menu draw, how often it goes out, and how an update tag goes out and comes back.
+ * Same package, so it reaches the machine's state directly; the four overrides ({@code getUpdateTag},
+ * {@code handleUpdateTag}, {@code onDataPacket}) stay on the block entity and delegate here.
  */
 final class AssemblerDisplaySync {
 

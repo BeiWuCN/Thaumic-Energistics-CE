@@ -31,16 +31,10 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Asserts the wire contract of every payload, because moving a payload between packages cannot be seen by
- * a compiler: a codec that lost a field round trips into a record that lies.
- * <ul>
- *   <li>Each codec must survive a write and a read with nothing left in the buffer, and the result must
- *       carry the same fields back. ItemStack does not override equals, so stacks are compared with
- *       ItemStack.matches rather than with the record's own equals.
- *   <li>Each wire id must still be the namespaced one a client built against the old build looks up.
- *   <li>The protocol package must not name a menu or a screen: handlers reach their receiver through an
- *       interface, and the only class an old scan could see is the receiver's implementation.
- *   <li>Runs on {@code ServerStartedEvent} only with {@code THAUMICENERGISTICS_NETWORK_SELFTEST=true}.
- * </ul>
+ * a compiler: a codec that lost a field round trips into a record that lies. Each codec must survive a
+ * write and a read with nothing left in the buffer, and carry the same fields back - ItemStack has no
+ * equals, so stacks are compared with ItemStack.matches. Each wire id must still be the namespaced one, and
+ * the protocol package must not name a menu or a screen. Runs only behind its own env var.
  */
 public final class NetworkSelfTest {
 

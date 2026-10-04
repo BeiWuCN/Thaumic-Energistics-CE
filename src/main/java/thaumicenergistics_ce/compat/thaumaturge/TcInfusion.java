@@ -13,15 +13,10 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The infusion altar, asked the four questions this mod has about it.
- *
- * <ul>
- *   <li>{@code BlockEntityInfusionMatrix} is the altar itself. Its numbers leave through
- *       {@link Altar}, so the matrix type does not travel with them.
- *   <li>{@code InfusionStabilitySurvey} is the only thing that knows which blocks break symmetry.
- *   <li>The catalyst stands two blocks below the matrix, on a {@code BlockEntityPedestal}.
- *   <li>{@code TCRecipeTypes.INFUSION} is the type the altar looks its recipes up by.
- * </ul>
+ * The infusion altar, asked the four questions this mod has about it. {@code BlockEntityInfusionMatrix}
+ * is the altar, and its numbers leave through {@link Altar}; {@code InfusionStabilitySurvey} knows which
+ * blocks break symmetry; the catalyst stands two blocks below the matrix; the recipe type is
+ * {@code TCRecipeTypes.INFUSION}.
  */
 public final class TcInfusion {
     private TcInfusion() {}
@@ -42,12 +37,8 @@ public final class TcInfusion {
         return null;
     }
 
-    /**
-     * The blocks that break the altar's symmetry, or null when the survey has no answer.
-     *
-     * <p>The survey scans a cube, so callers cache the answer; the copy is made here because the
-     * caller holds the list across ticks.
-     */
+    /** The blocks that break the altar's symmetry, or null when the survey has no answer. The survey scans
+     * a cube, so callers cache it; the copy is made here because the caller holds it across ticks. */
     public static @Nullable List<BlockPos> problemBlocks(Level level, BlockPos matrix) {
         InfusionStabilitySurvey.Result survey = InfusionStabilitySurvey.survey(level, matrix);
         return survey == null ? null : List.copyOf(survey.problemBlocks());
@@ -68,11 +59,8 @@ public final class TcInfusion {
     /** A recipe, flattened to the numbers this mod prints. */
     public record Recipe(int instability, ItemStack result, @Nullable AspectList aspects) {}
 
-    /**
-     * The recipe {@code catalyst} starts, or null when no recipe takes it.
-     *
-     * <p>The walk is linear and the answer is asked for twice a scan, so callers cache this too.
-     */
+    /** The recipe {@code catalyst} starts, or null when no recipe takes it. The walk is linear and the
+     * answer is asked for twice a scan, so callers cache this too. */
     public static @Nullable Recipe recipeFor(Level level, ItemStack catalyst) {
         if (catalyst.isEmpty()) {
             return null;

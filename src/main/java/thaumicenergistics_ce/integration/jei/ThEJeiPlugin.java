@@ -12,11 +12,8 @@ import thaumicenergistics_ce.util.ThELog;
  * Thaumic Energistics' JEI plugin: the recipe transfer half, which JEI asks for on both sides.
  * <ul>
  *   <li>Names no screen class, because this is the half a dedicated server also runs. The ghost ingredient
- *       handlers, which JEI asks for only on a client, live in
- *       {@code client.jei.ThEJeiClientPlugin} - a second plugin with a UID of its own.</li>
- *   <li>Both registrations use Thaumaturge's arcane recipe category rather than one of our own: the
- *       Knowledge Inscriber encodes exactly what the arcane workbench crafts, so a second page listing
- *       those recipes again would only let the two lists fall out of step.</li>
+ *       handlers live in {@code client.jei.ThEJeiClientPlugin}, a second plugin with a UID of its own.
+ *   <li>Both use Thaumaturge's arcane recipe category: the Inscriber encodes exactly what it crafts.
  * </ul>
  */
 @JeiPlugin

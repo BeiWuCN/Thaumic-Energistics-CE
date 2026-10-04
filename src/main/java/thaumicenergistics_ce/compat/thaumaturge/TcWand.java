@@ -7,14 +7,10 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * Thaumaturge's wand: the focus socketed in it, and the vis it holds for a cast.
- *
  * <ul>
  *   <li>The wand lives in its {@code content} package rather than its {@code api} one, so it moves.
- *   <li>A wand is recognised by item class rather than by tag, which is what keeps this mod's
- *       dependency on Thaumaturge one-way.
- *   <li>{@code consumeVis} takes a crafting flag and a simulate flag. Every call this mod makes is a
- *       non-crafting one, so the two readings are named {@link #canPayVis} and {@link #payVis} rather
- *       than left as two bare booleans at the call site.
+ *   <li>A wand is recognised by item class rather than by tag, which keeps the dependency one-way.
+ *   <li>{@code consumeVis}'s flags are named {@link #canPayVis} and {@link #payVis} at our call sites.
  * </ul>
  */
 public final class TcWand {

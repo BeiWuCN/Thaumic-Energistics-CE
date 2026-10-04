@@ -33,8 +33,7 @@ import thaumicenergistics_ce.integration.jade.JadeGridState;
  * <ul>
  *   <li>The drawing half of {@link InfusionProviderProvider}. Both report the same {@link #getUid() UID},
  *       which is how Jade pairs the server data with this.
- *   <li>One aspect per entry, drawn as a chip with the amount in the corner, abbreviated with
- *       {@link AmountFormat#SLOT} so figures read as they do in a terminal.
+ *   <li>One aspect per entry: a chip with the amount in the corner, {@link AmountFormat#SLOT} figures.
  * </ul>
  */
 public final class InfusionProviderTooltip implements IBlockComponentProvider {
