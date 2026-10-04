@@ -40,8 +40,11 @@ jobs:
       # thaumaturge-src would park a Thaumaturge build (its own build/ directory holds the jar) in
       # that store, which is the redistribution section 3.1 forbids. The Gradle caches above hold
       # this mod's own dependencies only: the Thaumaturge jar reaches the build as a libs/ fileTree
-      # dependency (see build.gradle) and is never copied into them. It is therefore rebuilt from
-      # source on every run, which costs a few minutes and is the point.
+      # dependency (see build.gradle) and is never copied into them. For the same reason
+      # tools/fetch-thaumaturge.* build it with --no-build-cache - upstream enables the Gradle build
+      # cache, so its task output would otherwise land in ~/.gradle/caches/build-cache-1, which is
+      # cached above. It is rebuilt from source on every run, which costs a few minutes and is the
+      # point.
       #
       # The checkout directory is deliberately not hidden: Gradle refuses to configure a project
       # whose directory name begins with a dot ("The project name '.thaumaturge-src' must not start

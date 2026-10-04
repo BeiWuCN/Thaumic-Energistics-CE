@@ -72,9 +72,14 @@ echo "fetch-thaumaturge: checking out $commit"
 git -C "$src" fetch --quiet origin
 git -C "$src" checkout --quiet --force "$commit"
 
-gradle_args=""
+# --no-build-cache is not about speed. Upstream turns the Gradle build cache on (its own
+# gradle.properties sets org.gradle.caching=true), so a cached run writes this project's compiled
+# output and jar into ~/.gradle/caches/build-cache-1 - and CI persists that directory in this
+# repository's Actions cache, where a Thaumaturge build has no business being. Dependency downloads
+# still land there and are still cached; they are public artifacts.
+gradle_args="--no-build-cache"
 if [ -n "${CI:-}" ]; then
-    gradle_args="--no-daemon"
+    gradle_args="$gradle_args --no-daemon"
 fi
 
 echo "fetch-thaumaturge: generating Thaumaturge's data (this is what makes the jar usable)"

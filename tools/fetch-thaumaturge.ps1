@@ -76,7 +76,12 @@ if ($LASTEXITCODE -ne 0) { throw "fetch-thaumaturge: git checkout $commit failed
 
 $wrapper = Join-Path $src 'gradlew.bat'
 if (-not (Test-Path $wrapper)) { $wrapper = Join-Path $src 'gradlew' }
-$gradleArgs = @()
+# --no-build-cache is not about speed. Upstream turns the Gradle build cache on (its own
+# gradle.properties sets org.gradle.caching=true), so a cached run writes this project's compiled
+# output and jar into ~/.gradle/caches/build-cache-1 - and CI persists that directory in this
+# repository's Actions cache, where a Thaumaturge build has no business being. Dependency downloads
+# still land there and are still cached; they are public artifacts.
+$gradleArgs = @('--no-build-cache')
 if ($env:CI) { $gradleArgs += '--no-daemon' }
 
 Push-Location $src
