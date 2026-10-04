@@ -10,11 +10,6 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectCapabilities;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspectSource;
-import com.leclowndu93150.thaumaturge.content.infusion.BlockEntityInfusionMatrix;
-import com.leclowndu93150.thaumaturge.content.infusion.BlockEntityPedestal;
-import com.leclowndu93150.thaumaturge.content.infusion.InfusionRecipe;
-import com.leclowndu93150.thaumaturge.content.infusion.InfusionStabilitySurvey;
-import com.leclowndu93150.thaumaturge.registry.TCRecipeTypes;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -35,6 +30,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.block.BlockInfusionMonitor;
+import thaumicenergistics_ce.compat.thaumaturge.TcInfusion;
+import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Altar;
+import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Recipe;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 import thaumicenergistics_ce.init.ModBlockEntities;
@@ -43,7 +41,7 @@ import thaumicenergistics_ce.util.ThELog;
 /**
  * The Infusion Monitor: watches an Infusion Altar and reports what the ritual will do to the room.
  * <ul>
- *   <li>{@link InfusionStabilitySurvey} names the blocks that break the altar's symmetry.
+ *   <li>{@code InfusionStabilitySurvey} names the blocks that break the altar's symmetry.
  *   <li>A Thaumonomicon must be in the book slot, or {@link #canReport()} stays false.
  * </ul>
  */
@@ -92,7 +90,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     private @Nullable BlockPos surveyedAt;
 
     private ItemStack cachedCatalyst = ItemStack.EMPTY;
-    private @Nullable InfusionRecipe cachedRecipe;
+    private @Nullable Recipe cachedRecipe;
     private long cachedRecipeAt;
 
     private Report report = Report.NONE;
@@ -232,9 +230,12 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
             return;
         }
         // A found altar is re-checked directly, not by searching twelve blocks twice a second.
-        if (matrixPos != null && level.getBlockEntity(matrixPos) instanceof BlockEntityInfusionMatrix matrix) {
-            report = read(matrix, matrixPos);
-            return;
+        if (matrixPos != null) {
+            Altar altar = TcInfusion.altarAt(level, matrixPos);
+            if (altar != null) {
+                report = read(altar, matrixPos);
+                return;
+            }
         }
         matrixPos = null;
 
@@ -248,10 +249,11 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         for (BlockPos pos : BlockPos.betweenClosed(
                 worldPosition.offset(-ALTAR_SCAN_RANGE, -ALTAR_SCAN_RANGE, -ALTAR_SCAN_RANGE),
                 worldPosition.offset(ALTAR_SCAN_RANGE, ALTAR_SCAN_RANGE, ALTAR_SCAN_RANGE))) {
-            if (level.getBlockEntity(pos) instanceof BlockEntityInfusionMatrix matrix) {
+            Altar altar = TcInfusion.altarAt(level, pos);
+            if (altar != null) {
                 matrixPos = pos.immutable();
                 altarMissBackoff = SCAN_INTERVAL;
-                report = read(matrix, matrixPos);
+                report = read(altar, matrixPos);
                 return;
             }
         }
@@ -262,10 +264,10 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
 
     /** Reads one altar. The survey runs even between rituals, since blocks out of place are what a
      * player fixes first; the instability read is the catalyst's, two blocks below the matrix. */
-    private Report read(BlockEntityInfusionMatrix matrix, BlockPos pos) {
-        boolean crafting = matrix.isCrafting();
-        float stability = matrix.stability();
-        AspectList remaining = matrix.remainingEssentia();
+    private Report read(Altar altar, BlockPos pos) {
+        boolean crafting = altar.crafting();
+        float stability = altar.stability();
+        AspectList remaining = altar.remaining();
 
         // The survey describes the room, not the ritual: every two seconds, and at once on a new altar.
         if (level != null) {
@@ -273,9 +275,9 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
             if (now >= nextSurvey || !pos.equals(surveyedAt)) {
                 nextSurvey = now + SURVEY_INTERVAL;
                 surveyedAt = pos.immutable();
-                var survey = InfusionStabilitySurvey.survey(level, pos);
-                if (survey != null) {
-                    surveyedProblems = List.copyOf(survey.problemBlocks());
+                List<BlockPos> problems = TcInfusion.problemBlocks(level, pos);
+                if (problems != null) {
+                    surveyedProblems = problems;
                 }
             }
         }
@@ -284,7 +286,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         boolean shortages = crafting && shortOf(matrixPos, remaining);
         risk = new InfusionRisk(readBaseInstability(pos), problems.size(), shortages, stability);
 
-        InfusionRecipe recipe = crafting ? recipeFor(pedestalItem(pos)) : null;
+        Recipe recipe = crafting ? recipeFor(pedestalItem(pos)) : null;
         craftDisplay = crafting ? craftName(pedestalItem(pos), recipe) : ItemStack.EMPTY;
         if (crafting) {
             readEssentia(remaining, recipe);
@@ -297,14 +299,14 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     /** Instability of the catalyst's recipe, or zero. Research is ignored on purpose: the player who
      * has not unlocked the recipe is the one who needs the warning. */
     private int readBaseInstability(BlockPos matrixPos) {
-        if (level == null || !(level.getBlockEntity(matrixPos.below(2)) instanceof BlockEntityPedestal pedestal)) {
+        if (level == null) {
             return 0;
         }
-        ItemStack catalyst = pedestal.getItem();
+        ItemStack catalyst = pedestalItem(matrixPos);
         if (catalyst.isEmpty()) {
             return 0;
         }
-        InfusionRecipe recipe = recipeFor(catalyst);
+        Recipe recipe = recipeFor(catalyst);
         return recipe == null ? 0 : recipe.instability();
     }
 
@@ -533,23 +535,24 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return sourceCache;
     }
 
-    private ItemStack craftName(ItemStack catalyst, @Nullable InfusionRecipe recipe) {
+    private ItemStack craftName(ItemStack catalyst, @Nullable Recipe recipe) {
         if (catalyst.isEmpty()) {
             return ItemStack.EMPTY;
         }
-        return recipe == null ? catalyst : recipe.resultItem();
+        // Copied per read: the recipe hands out a fresh result stack on every call.
+        return recipe == null ? catalyst : recipe.result().copy();
     }
 
     private ItemStack pedestalItem(BlockPos matrixPos) {
-        if (level == null || !(level.getBlockEntity(matrixPos.below(2)) instanceof BlockEntityPedestal pedestal)) {
+        if (level == null) {
             return ItemStack.EMPTY;
         }
-        return pedestal.getItem();
+        return TcInfusion.catalystUnder(level, matrixPos);
     }
 
     /** How far along each ritual aspect is: both numbers come from the job, never a room scan (which
      * drains as the ritual runs). An unknown recipe reports 0 / n. */
-    private void readEssentia(AspectList remaining, @Nullable InfusionRecipe recipe) {
+    private void readEssentia(AspectList remaining, @Nullable Recipe recipe) {
         essentia.clear();
         AspectList total = recipe == null ? remaining : recipe.aspects();
         if (total == null || total.isEmpty()) {
@@ -569,7 +572,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         }
     }
 
-    private @Nullable InfusionRecipe recipeFor(ItemStack catalyst) {
+    private @Nullable Recipe recipeFor(ItemStack catalyst) {
         if (level == null || catalyst.isEmpty()) {
             return null;
         }
@@ -579,18 +582,16 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
                 && ItemStack.isSameItemSameComponents(cachedCatalyst, catalyst)) {
             return cachedRecipe;
         }
-        for (var holder : level.getRecipeManager().getAllRecipesFor(TCRecipeTypes.INFUSION.get())) {
-            InfusionRecipe recipe = holder.value();
-            if (recipe.catalyst().test(catalyst)) {
-                cachedCatalyst = catalyst.copy();
-                cachedRecipe = recipe;
-                cachedRecipeAt = now;
-                return recipe;
-            }
+        Recipe recipe = TcInfusion.recipeFor(level, catalyst);
+        if (recipe == null) {
+            cachedCatalyst = ItemStack.EMPTY;
+            cachedRecipe = null;
+            return null;
         }
-        cachedCatalyst = ItemStack.EMPTY;
-        cachedRecipe = null;
-        return null;
+        cachedCatalyst = catalyst.copy();
+        cachedRecipe = recipe;
+        cachedRecipeAt = now;
+        return recipe;
     }
 
     public record EssentiaLine(String aspect, int drawn, int total) {
