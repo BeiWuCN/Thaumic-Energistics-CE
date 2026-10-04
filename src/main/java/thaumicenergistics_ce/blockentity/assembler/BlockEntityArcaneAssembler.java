@@ -23,12 +23,10 @@ import appeng.api.networking.storage.IStorageService;
 import appeng.api.networking.ticking.IGridTickable;
 import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
-import appeng.api.parts.IPartHost;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.GenericStack;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.util.AECableType;
-import appeng.util.Platform;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.aspect.TCAspects;
@@ -45,7 +43,6 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
@@ -61,15 +58,12 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ArcanePatternDetails;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
-import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.inventory.GearSlots;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.menu.MenuArcaneAssembler;
-import thaumicenergistics_ce.part.PartVisInterface;
-import thaumicenergistics_ce.part.VisReservation;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
@@ -102,15 +96,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     private static final int MIN_TICKS_PER_CRAFT = 4;
 
     private static final int MAX_SPEED_UPGRADES = 4;
-
-    /** Vis reach in chunks, 3x3: one chunk is never enough, Thaumaturge caps an aura's base at 500 vis
-     * while the priciest recipe costs 1728. */
-    private static final int VIS_SOURCE_RADIUS = 1;
-
-    /** Centivis in one vis: the relay network answers in hundredths of a vis, the aura in whole vis. */
-    private static final int CENTIVIS_PER_VIS = 100;
-
-    private static final int RELAY_POLL_INTERVAL = 20;
 
     private static final double ACTIVE_POWER = 1.5;
     private static final float MIN_CONSUMPTION_MODIFIER = 0.1F;
@@ -167,31 +152,10 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
     final AssemblerCraftState craft = new AssemblerCraftState();
 
-    private final AssemblerDisplaySync displaySync = new AssemblerDisplaySync(this);
+    final AssemblerDisplaySync displaySync = new AssemblerDisplaySync(this);
 
     private int speedUpgrades;
-    final AssemblerVisPool visPool = new AssemblerVisPool(PRIMALS.size());
-    private long nextRelayPoll;
-
-    /** Centivis below a whole vis, per aspect: a whole vis goes to the aspect that supplied it. */
-    private final int[] aspectCentivis = new int[PRIMALS.size()];
-    private long nextRelayReachCheck;
-    private @Nullable Boolean relayReach;
-
-    /** How far the machine looks for one of this mod's vis interfaces: the relay's own reach. */
-    private static final int INTERFACE_RANGE = 8;
-
-    /** How long a fruitless interface scan waits. The cube is 4,913 block entity lookups. */
-    private static final int INTERFACE_MISS_MAX = 200;
-
-    private @Nullable PartVisInterface nearbyInterface;
-    private long nextInterfaceLookup;
-
-    private int interfaceMissBackoff = RELAY_POLL_INTERVAL;
-    private long nextInterfacePoll;
-
-    /** Aura vis taken but not yet a whole vis: the aura is a float, the pool is whole vis. */
-    private float auraRemainder;
+    final AssemblerVisSource vis = new AssemblerVisSource(this);
 
     int gearDiscount;
 
@@ -204,6 +168,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     Level level() {
         return level;
     }
+
     boolean patternsDirty = true;
     boolean suppressNotify;
 
@@ -288,23 +253,23 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     }
 
     public int getBufferedVis() {
-        return visPool.bufferedVis();
+        return vis.bufferedVis();
     }
 
     public int getAspectVis(int index) {
-        return visPool.aspectVis(index);
+        return vis.aspectVis(index);
     }
 
     public String aspectVisTrace() {
-        return visPool.aspectVisTrace();
+        return vis.aspectVisTrace();
     }
 
     public float getAuraAround() {
-        return auraAround();
+        return vis.auraAround();
     }
 
     public int getAuraCapacity() {
-        return auraCapacity();
+        return vis.auraCapacity();
     }
 
     public int getSpeedUpgrades() {
@@ -351,8 +316,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                 "[asmtest] vis target for {} ({} vis) is {}, with {} in the buffer",
                 pattern.result(),
                 craftCost(pattern),
-                visPool.visTarget(craft.isCrafting(), craft.craftPrice()),
-                visPool.bufferedVis());
+                vis.visTarget(craft.isCrafting(), craft.craftPrice()),
+                vis.bufferedVis());
     }
 
     public String resumeReportForTest() {
@@ -438,8 +403,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         if (!mainNode.isActive()) {
             return TickRateModulation.IDLE;
         }
-        if (visPool.bufferedVis() < visPool.visTarget(craft.isCrafting(), craft.craftPrice())) {
-            replenishVis();
+        if (vis.bufferedVis() < vis.visTarget(craft.isCrafting(), craft.craftPrice())) {
+            vis.replenishVis();
         }
         if (!craft.isCrafting()) {
             return TickRateModulation.IDLE;
@@ -504,25 +469,25 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         int price = craft.craftPrice();
         // Waiting for this price is forever unless a relay or interface reaches vis the aura cannot hold.
         boolean unpayableForever = price > 0
-                && auraCapacity() > 0
-                && price > auraCapacity()
-                && !relayNetworkInReach()
-                && !interfaceInReach();
+                && vis.auraCapacity() > 0
+                && price > vis.auraCapacity()
+                && !vis.relayNetworkInReach()
+                && !vis.interfaceInReach();
         // A relay that exists but never pays is not a promise either - see STALL_RELEASE_TICKS.
         boolean stalledOut = !unpayableForever && craft.stalledTicks() >= STALL_RELEASE_TICKS;
-        if (visPool.bufferedVis() < price && !unpayableForever && !stalledOut) {
+        if (vis.bufferedVis() < price && !unpayableForever && !stalledOut) {
             // Waiting on vis; the tick handler keeps refilling the buffer.
             noteStall(wait(WAIT_NO_VIS, "no vis (%s banked of %s needed, target %s)",
-                    visPool.bufferedVis(), price, visPool.visTarget(craft.isCrafting(), craft.craftPrice())));
+                    vis.bufferedVis(), price, vis.visTarget(craft.isCrafting(), craft.craftPrice())));
             return TickRateModulation.SAME;
         }
-        if (visPool.bufferedVis() < price && stalledOut) {
+        if (vis.bufferedVis() < price && stalledOut) {
             ThELog.LOG.warn(
                     "[assembler] at {} delivers {} after {} ticks of waiting for {} vis: a machine that waits"
                             + " for ever refuses every later job",
                     worldPosition, inventory.getItem(TARGET_SLOT), craft.stalledTicks(), price);
         }
-        if (visPool.bufferedVis() < price) {
+        if (vis.bufferedVis() < price) {
             // Delivered anyway, the lesser evil: AE2 already took the ingredients and waits with no timeout.
             ThELog.LOG.info(
                     "[assembler] at {} delivers {} without charging its {} vis: this chunk's aura can never hold"
@@ -530,7 +495,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                     worldPosition,
                     inventory.getItem(TARGET_SLOT),
                     price,
-                    auraCapacity());
+                    vis.auraCapacity());
         }
 
         IStorageService storage = grid.getService(IStorageService.class);
@@ -567,7 +532,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         takeCrystals(storage);
         storage.getInventory().insert(outputKey, output.getCount(), Actionable.MODULATE, actionSource);
         // What the craft still owed, and no more.
-        visPool.spendVis(price);
+        vis.spendVis(price);
         finishCraft();
         return TickRateModulation.URGENT;
     }
@@ -662,243 +627,12 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return Math.max(MIN_TICKS_PER_CRAFT, BASE_TICKS_PER_CRAFT - TICKS_PER_SPEED_UPGRADE * speedUpgrades);
     }
 
-    private float auraAround() {
-        if (level == null) {
-            return -1.0F;
-        }
-        float total = 0;
-        for (int dx = -VIS_SOURCE_RADIUS; dx <= VIS_SOURCE_RADIUS; dx++) {
-            for (int dz = -VIS_SOURCE_RADIUS; dz <= VIS_SOURCE_RADIUS; dz++) {
-                total += TcAura.vis(level, worldPosition.offset(dx * 16, 0, dz * 16));
-            }
-        }
-        return total;
-    }
-
-    private int auraCapacity() {
-        if (level == null) {
-            return 0;
-        }
-        int total = 0;
-        for (int dx = -VIS_SOURCE_RADIUS; dx <= VIS_SOURCE_RADIUS; dx++) {
-            for (int dz = -VIS_SOURCE_RADIUS; dz <= VIS_SOURCE_RADIUS; dz++) {
-                total += TcAura.auraBase(level, worldPosition.offset(dx * 16, 0, dz * 16));
-            }
-        }
-        return total;
-    }
-
     /** Whether the aura can pay for {@code pattern}. An unpayable job is refused, not held: the CPU
      * skips a busy provider, so holding it stalls the plan. A low aura waits - its base can rise. */
     private boolean canEverPay(ThEArcanePattern pattern) {
-        int capacity = auraCapacity();
+        int capacity = vis.auraCapacity();
         // Zero means the chunk is not initialised yet; a relay counts too, its vis living in a node.
-        return capacity <= 0 || relayNetworkInReach() || interfaceInReach() || craftCost(pattern) <= capacity;
-    }
-
-    private int relayCarryTotal() {
-        int total = 0;
-        for (int value : aspectCentivis) {
-            total += value;
-        }
-        return total;
-    }
-
-    /** Tops the vis buffer up from the surrounding aura, from the grid tick rather than the craft loop:
-     * aura access is server-thread only. */
-    private void replenishVis() {
-        int target = visPool.visTarget(craft.isCrafting(), craft.craftPrice());
-        if (level == null || level.isClientSide() || visPool.bufferedVis() >= target) {
-            return;
-        }
-        // Relays first, then the aura: a node's vis lives in the node, so the aura alone reads as starved.
-        int before = visPool.bufferedVis();
-        drainVisFromRelays(target - visPool.bufferedVis());
-        if (visPool.bufferedVis() < target) {
-            // Asked directly: a relay picks its own parent, preferring a node over an addon source (relink).
-            drainVisFromInterfaces(target - visPool.bufferedVis());
-        }
-        if (visPool.bufferedVis() < target) {
-            // Aura vis has no aspect, so it lands evenly (bankVisEvenly); a drain returns a float.
-            int remaining = target - visPool.bufferedVis();
-            float thisCall = drainVisAround(remaining);
-            float drained = thisCall + auraRemainder;
-            int whole = Math.min((int) Math.floor(drained), remaining);
-            auraRemainder = drained - whole;
-            // The whole vis of this drain: the fraction it could not bank is carried above.
-            visPool.bankVisEvenly(whole);
-        }
-        if (visPool.bufferedVis() > before) {
-            displaySync.markDisplayForUpdate();
-        }
-    }
-
-    /** Tops the buffer up from Thaumaturge's relay network, as its workbench does: {@code drainCentivis}
-     * finds a linked relay and walks its chain; every primal is asked an equal share.
-     * @return whole vis obtained; a short answer means "ask the aura as well" */
-    private int drainVisFromRelays(int wantVis) {
-        if (wantVis <= 0 || !(level instanceof ServerLevel server)) {
-            return 0;
-        }
-        // Ask the cheap cached question first: each drainCentivis scans for a relay.
-        if (!relayNetworkInReach()) {
-            return 0;
-        }
-        long now = server.getGameTime();
-        if (now < nextRelayPoll) {
-            return 0;
-        }
-        nextRelayPoll = now + RELAY_POLL_INTERVAL;
-        int wantCentivis = wantVis * CENTIVIS_PER_VIS - relayCarryTotal();
-        if (wantCentivis <= 0) {
-            return 0;
-        }
-        int share = (wantCentivis + PRIMALS.size() - 1) / PRIMALS.size();
-        int taken = 0;
-        for (int i = 0; i < PRIMALS.size(); i++) {
-            if (taken >= wantCentivis) {
-                break;
-            }
-            int ask = Math.min(share, wantCentivis - taken);
-            int got = TcAura.drainCentivis(server, worldPosition, PRIMALS.get(i), ask, false);
-            taken += got;
-            // Banked per aspect, whole vis only; the remainder stays with the aspect that earned it.
-            int carried = aspectCentivis[i] + got;
-            visPool.bankVis(carried / CENTIVIS_PER_VIS, i);
-            aspectCentivis[i] = carried % CENTIVIS_PER_VIS;
-        }
-        return taken / CENTIVIS_PER_VIS;
-    }
-
-    private int drainVisFromInterfaces(int wantVis) {
-        if (wantVis <= 0 || !(level instanceof ServerLevel server)) {
-            return 0;
-        }
-        PartVisInterface source = nearbyInterface(server);
-        if (source == null) {
-            return 0;
-        }
-        long now = server.getGameTime();
-        if (now < nextInterfacePoll) {
-            return 0;
-        }
-        nextInterfacePoll = now + RELAY_POLL_INTERVAL;
-        int wantCentivis = wantVis * CENTIVIS_PER_VIS - relayCarryTotal();
-        if (wantCentivis <= 0) {
-            return 0;
-        }
-        int share = (wantCentivis + PRIMALS.size() - 1) / PRIMALS.size();
-        int taken = 0;
-        for (int i = 0; i < PRIMALS.size() && taken < wantCentivis; i++) {
-            int ask = Math.min(share, wantCentivis - taken);
-            int got = reserveFrom(source, PRIMALS.get(i), ask);
-            taken += got;
-            int carried = aspectCentivis[i] + got;
-            visPool.bankVis(carried / CENTIVIS_PER_VIS, i);
-            aspectCentivis[i] = carried % CENTIVIS_PER_VIS;
-        }
-        return taken / CENTIVIS_PER_VIS;
-    }
-
-    private static int reserveFrom(PartVisInterface source, ResourceKey<IAspect> aspect, int centivis) {
-        VisReservation reservation = source.reserve(aspect, centivis);
-        if (reservation == null) {
-            return 0;
-        }
-        try {
-            return reservation.commit();
-        } finally {
-            // Closing is bookkeeping only: nothing moves on reserve.
-            reservation.close();
-        }
-    }
-
-    private @Nullable PartVisInterface nearbyInterface(ServerLevel server) {
-        long now = server.getGameTime();
-        if (now < nextInterfaceLookup) {
-            return nearbyInterface;
-        }
-        nextInterfaceLookup = now + interfaceMissBackoff;
-        nearbyInterface = findInterface(server);
-        interfaceMissBackoff = nearbyInterface == null
-                ? Math.min(INTERFACE_MISS_MAX, interfaceMissBackoff * 2)
-                : RELAY_POLL_INTERVAL;
-        return nearbyInterface;
-    }
-
-    private @Nullable PartVisInterface findInterface(ServerLevel server) {
-        PartVisInterface best = null;
-        double bestDistance = Double.MAX_VALUE;
-        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
-        for (int x = -INTERFACE_RANGE; x <= INTERFACE_RANGE; x++) {
-            for (int y = -INTERFACE_RANGE; y <= INTERFACE_RANGE; y++) {
-                for (int z = -INTERFACE_RANGE; z <= INTERFACE_RANGE; z++) {
-                    cursor.setWithOffset(worldPosition, x, y, z);
-                    if (!(server.getBlockEntity(cursor) instanceof IPartHost host)) {
-                        continue;
-                    }
-                    for (Direction side : Platform.DIRECTIONS_WITH_NULL) {
-                        if (host.getPart(side) instanceof PartVisInterface part && part.isActive()) {
-                            double distance = cursor.distSqr(worldPosition);
-                            if (distance < bestDistance) {
-                                bestDistance = distance;
-                                best = part;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return best;
-    }
-
-    /** Whether a relay chain that can answer is in reach. Asked only when deciding whether a craft is
-     * payable: a relay resolving to nothing would accept the job and starve. */
-    private boolean relayNetworkInReach() {
-        if (!(level instanceof ServerLevel server)) {
-            return false;
-        }
-        // Cached: the caller runs this every tick while a craft is stalled.
-        long now = server.getGameTime();
-        if (relayReach == null || now >= nextRelayReachCheck) {
-            nextRelayReachCheck = now + RELAY_POLL_INTERVAL;
-            // Resolving is not paying: one simulated centivis settles whether an empty node can pay.
-            // A chain has one end, and a source that is not a node sells its own.
-            relayReach = TcAura.relayResolves(server, worldPosition) && relayCanSupply(server);
-        }
-        return relayReach;
-    }
-
-    /** Whether the relay chain can give one centivis of any primal: asking only the first primal would
-     * refuse a job the chain could pay for out of another. */
-    private boolean relayCanSupply(ServerLevel server) {
-        for (int i = 0; i < PRIMALS.size(); i++) {
-            if (TcAura.drainCentivis(server, worldPosition, PRIMALS.get(i), 1, true) > 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /** Whether a vis interface beside the machine can sell it anything: presence is not enough, so a
-     * one-centivis reservation asks. Cached like {@link #relayNetworkInReach}. */
-    private boolean interfaceInReach() {
-        if (!(level instanceof ServerLevel server)) {
-            return false;
-        }
-        PartVisInterface source = nearbyInterface(server);
-        if (source == null) {
-            return false;
-        }
-        // Any primal will do: an interface sells what its node holds, and a node holds one list, not six.
-        for (int i = 0; i < PRIMALS.size(); i++) {
-            VisReservation probe = source.reserve(PRIMALS.get(i), 1);
-            if (probe != null) {
-                probe.close();
-                return true;
-            }
-        }
-        return false;
+        return capacity <= 0 || vis.relayNetworkInReach() || vis.interfaceInReach() || craftCost(pattern) <= capacity;
     }
 
     private boolean awakeForCraft;
@@ -920,25 +654,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         } else {
             grid.getTickManager().sleepDevice(node);
         }
-    }
-
-    private float drainVisAround(int amount) {
-        int span = VIS_SOURCE_RADIUS * 2 + 1;
-        float share = (float) amount / (span * span);
-        float drained = 0;
-        for (int pass = 0; pass < 2; pass++) {
-            for (int dx = -VIS_SOURCE_RADIUS; dx <= VIS_SOURCE_RADIUS; dx++) {
-                for (int dz = -VIS_SOURCE_RADIUS; dz <= VIS_SOURCE_RADIUS; dz++) {
-                    float want = pass == 0 ? share : amount - drained;
-                    if (want <= 0.05F) {
-                        continue;
-                    }
-                    drained += TcAura.drainVis(
-                            level, worldPosition.offset(dx * 16, 0, dz * 16), want, false);
-                }
-            }
-        }
-        return drained;
     }
 
     // ------------------------------------------------------------------
@@ -1090,7 +805,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                 "the recipe costs %s vis and this chunk's aura can never hold more than %s (aura nodes would"
                         + " raise it)",
                 price,
-                auraCapacity());
+                vis.auraCapacity());
     }
 
     private @Nullable ThEArcanePattern resolveExternal(IPatternDetails details) {
@@ -1233,7 +948,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         mainNode.loadFromNBT(tag);
         craft.readNbt(tag, registries);
         speedUpgrades = Math.clamp(tag.getInt("SpeedUpgrades"), 0, MAX_SPEED_UPGRADES);
-        visPool.readNbt(tag);
+        vis.readNbt(tag);
         suppressNotify = true;
         try {
             ContainerHelper.loadAllItems(tag, inventory.getItems(), registries);
@@ -1291,7 +1006,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         super.saveAdditional(tag, registries);
         mainNode.saveToNBT(tag);
         tag.putInt("SpeedUpgrades", speedUpgrades);
-        visPool.writeNbt(tag);
+        vis.writeNbt(tag);
         // Saved with the craft, so finishing it after a reload needs nothing but this tag and the well.
         craft.writeNbt(tag, registries);
         ContainerHelper.saveAllItems(tag, inventory.getItems(), registries);
