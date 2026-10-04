@@ -10,9 +10,10 @@ import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
 /**
  * The Infusion Provider block.
  *
- * <p>No facing. The altar finds essentia sources by looking for the aspect container capability on nearby
- * blocks and does not care which way any of them point, so a direction property would be a state with no
- * meaning. The blockstate file in this mod's assets already declares a single unconditional variant.
+ * <ul>
+ * <li>No facing: the altar finds sources by aspect container capability on nearby blocks.</li>
+ * <li>The blockstate declares a single unconditional variant.</li>
+ * </ul>
  */
 public class BlockInfusionProvider extends ThEBaseEntityBlock {
 

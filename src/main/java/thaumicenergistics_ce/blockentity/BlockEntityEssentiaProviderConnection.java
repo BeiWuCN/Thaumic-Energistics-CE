@@ -13,6 +13,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.block.BlockEssentiaProviderConnection;
@@ -20,14 +23,14 @@ import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
- * The Essentia Provider Connection: the far end of a wireless essentia link. Bound to a provider with the
- * wireless connector, it carries essentia from that provider's network to whatever container <em>it</em> is
- * placed against, up to {@link BlockEntityEssentiaProvider#MAX_LINK_DISTANCE} blocks away.
- *
- * <p><b>It carries essentia, it does not store it.</b> What arrives is handed to the provider on the next
- * tick and what leaves comes out of the network rather than a local tank, so breaking the link loses nothing
- * beyond the transfer in flight. Neighbouring containers can be emptied into the network, or served from it;
- * the link is stored on both sides and whichever side notices the other gone clears its own half.
+ * The Essentia Provider Connection: the far end of a wireless essentia link, bound to a provider with the
+ * wireless connector and up to {@link BlockEntityEssentiaProvider#MAX_LINK_DISTANCE} blocks from it.
+ * <ul>
+ *   <li>It carries essentia, never stores it: what arrives goes to the provider on the next tick, what leaves
+ *       comes out of the network, so breaking the link loses only the transfer in flight.
+ *   <li>Neighbouring containers can be emptied into the network or served from it. The link lives on both
+ *       sides, and whichever side sees the other gone clears its own half.
+ * </ul>
  */
 public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity implements IEssentiaStorage {
 
@@ -59,9 +62,8 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
     }
 
     /**
-     * Binds this receiver to a provider, which is asked first because it is the side that enforces the
-     * limits - how many receivers it will serve and how far away they may be - so a refused link leaves both
-     * sides untouched.
+     * Binds this receiver to a provider, which is asked first because it enforces the limits - how many
+     * receivers it serves, how far away - so a refused link leaves both sides untouched.
      *
      * @return the reason the link was refused, or {@code null} on success
      */
@@ -98,9 +100,8 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
     }
 
     /**
-     * The bound provider, or {@code null}. Clears the link when the provider has gone: a receiver pointing at
-     * a block that no longer exists would otherwise look bound forever, and the player could not tell
-     * "linked but idle" from "linked to nothing".
+     * The bound provider, or {@code null}. Clears the link when the provider has gone, or the player could
+     * not tell "linked but idle" from "linked to nothing".
      */
     public @Nullable BlockEntityEssentiaProvider resolveProvider() {
         if (level == null || level.isClientSide() || providerPos == null) {
@@ -185,8 +186,8 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
     }
 
     /**
-     * Takes essentia from the containers this receiver touches. Only while a link exists: with no provider
-     * there is nowhere for it to go, and taking it anyway would move it into a buffer that can only grow.
+     * Takes essentia from neighbouring containers, only while linked: with no provider there is nowhere
+     * for it to go, and taking it anyway would grow a buffer that can never drain.
      */
     private void drawFromNeighbours() {
         if (level == null) {
@@ -209,8 +210,8 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
                 if (space <= 0) {
                     continue;
                 }
-                // One at a time, for the same reason the provider does: a container reports one contents
-                // snapshot and no notion of "as much as fits", so asking for more would overdraw it.
+                // The container reports one contents snapshot, so asking for more than one would overdraw it.
+                // One unit per pull keeps this in step with the provider's own draw.
                 int taken = source.extract(aspect, 1, false);
                 if (taken > 0) {
                     buffer.put(aspect, held + taken);
@@ -219,8 +220,7 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
                 }
             }
         }
-        // Once per visit rather than once per unit moved: every setChanged() flags the chunk for the next
-        // save, and a receiver that took six units was flagging it six times.
+        // Once per visit, not per unit moved: every setChanged() flags the chunk for the next save.
         if (moved) {
             setChanged();
         }
@@ -249,8 +249,8 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
     }
 
     /**
-     * Serves a neighbouring container out of the provider's network, not out of the buffer: the buffer holds
-     * what is on its way <em>in</em>, and giving that back out would put the same essentia on both paths.
+     * Serves a neighbouring container out of the provider's network, not the buffer: the buffer holds what
+     * is on its way <em>in</em>, so giving it back out would put the same essentia on both paths.
      */
     @Override
     public int extract(Holder<IAspect> aspect, int amount, boolean simulate) {
@@ -303,9 +303,9 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
     }
 
     @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu createMenu(
-            int containerId, net.minecraft.world.entity.player.Inventory playerInventory,
-            net.minecraft.world.entity.player.Player player) {
+    public AbstractContainerMenu createMenu(
+            int containerId, Inventory playerInventory,
+            Player player) {
         // No screen: a link is made with the connector and there is nothing to configure.
         return null;
     }

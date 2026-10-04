@@ -1,0 +1,82 @@
+package thaumicenergistics_ce.compat.thaumaturge;
+
+import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
+import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
+import com.leclowndu93150.thaumaturge.content.essentia.jar.BlockEntityJar;
+import com.leclowndu93150.thaumaturge.content.essentia.jar.JarItem;
+import com.leclowndu93150.thaumaturge.content.item.PhialItem;
+import com.leclowndu93150.thaumaturge.content.taint.item.EssentiaCrystalFactory;
+import com.leclowndu93150.thaumaturge.content.taint.item.ItemEssentiaCrystal;
+import com.leclowndu93150.thaumaturge.registry.TCDataComponents;
+import com.leclowndu93150.thaumaturge.registry.TCItems;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * Thaumaturge's item registry, and the stacks this mod builds out of it.
+ *
+ * <p>Which registry entry carries which name is exactly the sort of detail that moves between
+ * releases - {@code TCItems.ALCHEMICAL_FURNACE} was deleted outright in 0.4.7 - so nothing outside
+ * this package names a {@code TCItems} field or a {@code TCDataComponents} entry directly.
+ */
+public final class TcRegistry {
+    private TcRegistry() {}
+
+    // -- essentia crystals ---------------------------------------------------
+
+    /** Whether {@code stack} is an essentia crystal of any configuration. */
+    public static boolean isCrystal(ItemStack stack) {
+        return !stack.isEmpty() && stack.is(TCItems.ESSENTIA_CRYSTAL.get());
+    }
+
+    /** The aspect a configured crystal carries, or null for an empty or unconfigured crystal. */
+    public static @Nullable Holder<IAspect> crystalAspect(ItemStack stack) {
+        return isCrystal(stack) ? ItemEssentiaCrystal.aspectOf(stack) : null;
+    }
+
+    /** A crystal stack of {@code count}, configured through the data component by hand. */
+    public static ItemStack crystalStack(Holder<IAspect> aspect, int count) {
+        ItemStack stack = new ItemStack(TCItems.ESSENTIA_CRYSTAL.get(), Math.max(1, count));
+        stack.set(TCDataComponents.CRYSTAL_ASPECT.get(), new AspectInstance(aspect, 1));
+        return stack;
+    }
+
+    /** Thaumaturge's own crystal factory, for a recipe that names an aspect and an amount. */
+    public static ItemStack crystalFor(Holder<IAspect> aspect, int amount) {
+        return EssentiaCrystalFactory.of(aspect, amount);
+    }
+
+    // -- essentia containers -------------------------------------------------
+
+    /** The research book, recognised by item rather than by class. */
+    public static boolean isThaumonomicon(ItemStack stack) {
+        return stack.is(TCItems.THAUMONOMICON.get());
+    }
+
+    /** Whether {@code stack} is a jar or a phial, the two container kinds this mod fills. */
+    public static boolean isEssentiaContainer(ItemStack stack) {
+        return !stack.isEmpty()
+                && (stack.getItem() instanceof JarItem || stack.getItem() instanceof PhialItem);
+    }
+
+    /** Whether {@code stack} is a phial specifically, which is filled whole or not at all. */
+    public static boolean isPhial(ItemStack stack) {
+        return !stack.isEmpty() && stack.getItem() instanceof PhialItem;
+    }
+
+    /** How much essentia a jar holds, as Thaumaturge defines it. */
+    public static int jarCapacity() {
+        return BlockEntityJar.CAPACITY;
+    }
+
+    /** How much essentia one phial holds, as Thaumaturge defines it. */
+    public static int phialCapacity() {
+        return PhialItem.BASE_AMOUNT;
+    }
+
+    /** A phial pre-filled with {@code amount} of {@code aspect}. */
+    public static ItemStack filledPhial(Holder<IAspect> aspect, int amount) {
+        return PhialItem.makeFilled(aspect, amount);
+    }
+}

@@ -11,17 +11,13 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
 
 /**
- * "Draw this aspect out of the network and into my container", sent by the Essentia Terminal's
- * left-click on a list entry.
- *
- * <p>The aspect travels by id rather than as an {@code AEssentiaKey}, because an id is what the client is
- * sure of - the entry it clicked carries one - and the server rebuilds the key from it. Sending the key
- * would mean the client asserting a type, and a key it built wrong would be a key the server cannot match
- * against its own storage.
- *
- * <p>{@code where} names the container the essentia is wanted in - the cursor stack or the main hand, see
- * {@link ContainerSlot} - and {@code stack} travels as a hint the server checks itself against rather than
- * trusts: it fills the stack it finds at that place, not the one it was sent.
+ * "Draw this aspect out of the network into my container", sent by the Essentia Terminal's left-click.
+ * <ul>
+ * <li>{@code aspectId} travels by id, not as a key: the client is sure of the id it clicked, and a
+ * key it built wrong could not be matched against server storage.
+ * <li>{@code where} names the container (see {@link ContainerSlot}); {@code stack} is only a hint -
+ * the server fills the stack it finds there, not the one sent.
+ * </ul>
  */
 public record EssentiaFillPayload(int containerId, ResourceLocation aspectId, int where, ItemStack stack)
         implements CustomPacketPayload {

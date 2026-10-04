@@ -3,6 +3,7 @@ package thaumicenergistics_ce.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -13,9 +14,12 @@ import net.minecraft.world.phys.BlockHitResult;
 
 /**
  * Shared shell for Thaumic Energistics blocks that are a machine plus a menu.
- *
- * <p>Keeps the boilerplate identical across machines: open the block entity's menu on use, and render
- * as a plain model. Subclasses only supply the block entity.
+ * <ul>
+ * <li>Subclasses supply only the block entity; the menu of whatever block entity offers one is opened
+ * on use, and the block renders as a plain model.
+ * <li>Opening follows the vanilla {@link MenuProvider} contract, not this package's own base type, so
+ * a machine built on AE2's block entity base is served the same way with nothing added here.
+ * </ul>
  */
 public abstract class ThEBaseEntityBlock extends BaseEntityBlock {
 
@@ -35,8 +39,8 @@ public abstract class ThEBaseEntityBlock extends BaseEntityBlock {
             return InteractionResult.SUCCESS;
         }
         BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity instanceof ThEBaseBlockEntity machine && player instanceof ServerPlayer serverPlayer) {
-            serverPlayer.openMenu(machine, buffer -> buffer.writeBlockPos(pos));
+        if (blockEntity instanceof MenuProvider menuHost && player instanceof ServerPlayer serverPlayer) {
+            serverPlayer.openMenu(menuHost, buffer -> buffer.writeBlockPos(pos));
             return InteractionResult.CONSUME;
         }
         return InteractionResult.PASS;

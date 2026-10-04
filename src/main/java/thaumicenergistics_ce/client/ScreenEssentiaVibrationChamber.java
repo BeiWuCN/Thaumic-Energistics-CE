@@ -12,15 +12,15 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 
 /**
- * The Essentia Vibration Chamber's screen: how much fuel is buffered, how full the energy slot is, and how
- * far through the current unit of fuel the machine is.
- *
- * <p>Drawn, not blitted: the machine's texture is a 60x100 widget - the machine's face, not a window - and
- * the reference build blits it as a 176-pixel panel, leaving two thirds of the window empty. This screen
- * draws its own window out of fills in the game's container colours and paints the readings into it.
- *
- * <p>The tank is tinted by the aspect inside it, the energy slot in AE2's red, and the burn bar in a colour
- * of its own so progress is not read as a third tank.
+ * The Essentia Vibration Chamber's screen: buffered fuel, energy slot fill, and progress through the
+ * current unit of fuel.
+ * <ul>
+ * <li>The machine's texture is a 60x100 widget - its face, not a window - and blitting it as a
+ * 176-pixel panel leaves two thirds of the window empty, so this screen draws its own window out of
+ * fills in the game's container colours.</li>
+ * <li>The tank is tinted by the aspect inside it, the energy slot in AE2's red, and the burn bar in
+ * a colour of its own so progress is not read as a third tank.</li>
+ * </ul>
  */
 public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<MenuEssentiaVibrationChamber> {
 
@@ -89,8 +89,8 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
         graphics.fill(x + WIDTH - 1, y, x + WIDTH, y + HEIGHT, PANEL_DARK);
         graphics.fill(x, y + HEIGHT - 1, x + WIDTH, y + HEIGHT, PANEL_DARK);
 
-        // Every well is drawn one pixel up and to the left of its slot, which is where the game draws a well
-        // in its own textures; on the slot's own coordinates every item sits a pixel down and right of centre.
+        // Wells are drawn one pixel up and left of their slot, as the game draws its own; on the slot's own
+        // coordinates every item sits a pixel down and right of centre.
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
                 slot(graphics, x + 8 + column * 18 - 1, y + 84 + row * 18 - 1);
@@ -100,16 +100,16 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
             slot(graphics, x + 8 + column * 18 - 1, y + 142 - 1);
         }
 
-        // Every bar is framed, so an empty one is still a bar. The first version drew the recess only and
-        // painted the fill over it, which left a machine with nothing in it showing three dark rectangles.
+        // Every bar is framed, so an empty one is still a bar; a recess with the fill painted over it
+        // showed an empty machine as three dark rectangles.
         int aspectColour = menu.reading(MenuEssentiaVibrationChamber.DATA_ASPECT_COLOUR);
         bar(graphics, x + TANK_X, y + GAUGE_Y, GAUGE_W, GAUGE_H, menu.essentiaFill(),
                 aspectColour == 0 ? TANK_EMPTY : aspectColour, true);
         bar(graphics, x + ENERGY_X, y + GAUGE_Y, GAUGE_W, GAUGE_H, menu.energyFill(), ENERGY, true);
         bar(graphics, x + BURN_X, y + BURN_Y, BURN_W, BURN_H, menu.burnProgress(), BURN, false);
 
-        // The numbers go in a column beside the gauges, not under them: under them is the window's own
-        // "Inventory" label, which the first version printed "Essentia 26 / 64" straight through.
+        // The numbers go in a column beside the gauges, not under them: under them is the window's
+        // own "Inventory" label, which a reading printed there runs straight through.
         Component essentia = Component.translatable(
                 "thaumicenergistics_ce.gui.vibration_chamber.essentia",
                 menu.reading(MenuEssentiaVibrationChamber.DATA_ESSENTIA),
@@ -137,9 +137,8 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
     }
 
     /**
-     * One bar: a dark frame, a recess inside it, and the fill at the end of the recess. The frame is the
-     * point - a recess alone is a dark rectangle whether the machine is empty or full. Vertical bars fill
-     * upwards, like every tank in the game; the progress bar fills to the right.
+     * One bar: a dark frame, a recess, and the fill at the end of the recess - a recess alone is a
+     * dark rectangle whether empty or full. Vertical fills upwards; the progress bar to the right.
      */
     private static void bar(
             GuiGraphics graphics, int x, int y, int width, int height, float fill, int colour, boolean vertical) {
@@ -198,8 +197,8 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
     }
 
     /**
-     * The reason the machine is not burning, or null while it is or has nothing to burn: the state the block
-     * entity decided, never a fullness worked out from the readings.
+     * Why the machine is not burning, or null while it is or has nothing to burn: the state the block
+     * entity decided, never a fullness computed from the readings.
      */
     private @Nullable MutableComponent heldBackLine() {
         return switch (menu.state()) {

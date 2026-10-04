@@ -53,9 +53,8 @@ public final class ModCreativeTab {
                         output.accept(ModItems.ESSENTIA_STORAGE_BUS.get());
                         output.accept(ModItems.ESSENTIA_LEVEL_EMITTER.get());
                         output.accept(ModItems.WIRELESS_ESSENTIA_TERMINAL.get());
-                        // Accepted through the same call the item uses, so the stack in the tab is not a
-                        // second, unassembled way to get this item. A creative-tab stack is never ticked
-                        // and never passes through a recipe, so nothing else would fix it up.
+                        // Same call the item uses, so the tab stack is not a second, unassembled copy:
+                        // a tab stack is never ticked and never passes a recipe, so nothing else fixes it up.
                         output.accept(thaumicenergistics_ce.item.ItemFocusAEWrench.assembledStack());
                         output.accept(ModItems.GOLEM_WIFI_BACKPACK.get());
                     })

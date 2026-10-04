@@ -1,15 +1,16 @@
 package thaumicenergistics_ce.network;
 
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 /**
  * Network registration.
- *
- * <p>The Knowledge Inscriber's button still travels in vanilla's own menu-button packet - the click only
- * needs an id, and the menu already carries it. What does need a payload is the inscriber's crafting
- * grid, which is a ghost grid: the client fills it, and the server is the only side that can turn it into
- * a recipe.
+ * <ul>
+ * <li>The Knowledge Inscriber's button needs no payload: vanilla's own menu-button packet carries the id.
+ * <li>The inscriber's crafting grid does: it is a ghost grid the client fills, and only the server can
+ * turn it into a recipe.
+ * </ul>
  */
 public final class ModNetwork {
 
@@ -18,7 +19,7 @@ public final class ModNetwork {
     /** The protocol version, bumped whenever a payload's shape changes. */
     private static final String VERSION = "1";
 
-    public static void register(net.neoforged.bus.api.IEventBus modBus) {
+    public static void register(IEventBus modBus) {
         modBus.addListener(ModNetwork::onRegisterPayloads);
     }
 
@@ -28,9 +29,8 @@ public final class ModNetwork {
                 InscriberGridPayload.TYPE,
                 InscriberGridPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
-        // The whole grid at once, for loading a stored recipe or a JEI transfer. One message rather than nine,
-        // because nine separate grid writes make the machine resolve eight grids that are neither recipe and
-        // the screen draw all of them - see InscriberGridFillPayload.
+        // The whole grid at once, for a stored recipe or a JEI transfer: nine writes would leave the
+        // machine resolving eight grids that are neither recipe nor drawn - see InscriberGridFillPayload.
         registrar.playToServer(
                 InscriberGridFillPayload.TYPE,
                 InscriberGridFillPayload.CODEC,
@@ -63,9 +63,8 @@ public final class ModNetwork {
                 EncoderSourcePayload.TYPE,
                 EncoderSourcePayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
-        // A golem's backpack, told to the players watching the golem. What the backpack is lives in the
-        // golem's persistent data, which vanilla does not sync, and the backpack has to be drawn - see
-        // GolemBackpackPayload.
+        // A golem's backpack, told to the players watching the golem: what it is lives in the
+        // golem's persistent data, which vanilla does not sync, so it still has to be drawn.
         registrar.playToClient(
                 GolemBackpackPayload.TYPE,
                 GolemBackpackPayload.CODEC,

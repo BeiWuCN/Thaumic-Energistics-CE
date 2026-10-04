@@ -5,19 +5,19 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 
 /**
  * What the Distillation Encoder screen asks the server to do.
- *
- * <p>A few instructions travel, and no state does. The aspect list is not sent in either direction: both
- * sides derive it from the source item, which vanilla's slot sync already carries, using the same lookup.
- * Sending it would be a second copy of the same answer, and the two could disagree after the item changed.
- *
- * <p>The selected aspect travels as an <em>index</em> into that derived list rather than as an aspect id,
- * for the same reason - an index cannot name an aspect the item does not have, so a stale or forged value
- * fails to resolve instead of selecting something impossible.
+ * <ul>
+ * <li>Instructions travel, no state does: both sides derive the aspect list from the source item,
+ * which vanilla's slot sync already carries, using the same lookup - sending it would be a second
+ * copy of the same answer, and the two could disagree after the item changed.</li>
+ * <li>The selected aspect travels as an <em>index</em> into that derived list, not as an aspect id,
+ * so a stale or forged value fails to resolve instead of selecting something impossible.</li>
+ * </ul>
  *
  * @param containerId the menu this applies to, checked on arrival so a packet for a closed screen is
  *     ignored rather than applied to whatever is open now
@@ -33,12 +33,9 @@ public record EncoderActionPayload(int containerId, int action, int value) imple
     public static final int ACTION_ENCODE = 1;
 
     /**
-     * Moves one blank pattern from the player's inventory into the blank well.
-     *
-     * <p>For JEI's drag, and it has to be a real move rather than the ghost write the source well takes.
-     * The source well is a template, so naming an item there costs nothing and gives nothing back; the
-     * blank well is not - what lands there is consumed by the next encode and can be taken back out - so a
-     * drag that conjured a pattern from JEI would be a way to mint them.
+     * Moves one blank pattern from the player's inventory into the blank well, for JEI's drag. It must
+     * be a real move: the source well is a template, but what lands in the blank well is consumed by
+     * the next encode and can be taken back out, so a drag that conjured a pattern would mint them.
      */
     public static final int ACTION_INSERT_BLANK = 2;
 
@@ -61,14 +58,11 @@ public record EncoderActionPayload(int containerId, int action, int value) imple
     }
 
     /**
-     * Applies this instruction to the open menu.
-     *
-     * <p>Every action still re-checks its own preconditions on the server. The screen greys out what it can,
-     * but a screen is a suggestion - the item, the blank pattern and the aspect are all validated again by
-     * the block entity before anything is consumed, which is what keeps a client from writing patterns it
-     * should not be able to.
+     * Applies this instruction to the open menu. Every action re-checks its own preconditions on the
+     * server: a screen is a suggestion, and the block entity validates the item, pattern and aspect
+     * again before anything is consumed, which keeps a client from writing patterns it should not.
      */
-    public void handle(net.minecraft.world.entity.player.Player player) {
+    public void handle(Player player) {
         if (!(player.containerMenu instanceof MenuDistillationEncoder menu) || menu.containerId != containerId) {
             return;
         }

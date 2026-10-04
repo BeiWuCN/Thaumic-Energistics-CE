@@ -28,22 +28,15 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
  * A storage component for essentia.
- *
- * <p>Deliberately not a storage implementation. Implementing AE2's {@link IBasicCellItem} is the whole
- * job: AE2 asks a cell item for its key type and its byte budget, and then builds its own
- * {@code BasicCellInventory} around the answer - byte accounting, per-type overhead, partitioning,
- * upgrade cards, the void card, NBT persistence and the tooltip that lists what is inside all come from
- * AE2. Writing a second one here would be a second set of those rules to keep in step, and the two would
- * drift.
- *
- * <p>That this works at all is because {@code BasicCellInventory} is key-type agnostic: it holds an
- * {@link AEKeyType}, never an item type. Essentia keys are not item keys, so the alternative would have
- * been a parallel storage stack from scratch.
- *
- * <p>Sizes follow AE2's own components: 1k, 4k, 16k and 64k bytes. At eight essentia per byte that is
- * 8192, 32768, 131072 and 524288 - the "8000" through "500k" the reference build quotes. Eight bytes per
- * type is likewise AE2's own figure, so a component holding many aspects pays for them at the same rate
- * an item component would.
+ * <ul>
+ * <li>AE2 builds its own {@code BasicCellInventory} from the key type and byte budget this item
+ * reports, so byte accounting, partitioning, upgrades, NBT and the tooltip stay AE2's rules.
+ * <li>A second implementation would drift from those rules; a parallel storage stack was the
+ * alternative.
+ * <li>Sizes follow AE2's 1k/4k/16k/64k components: at eight essentia per byte,
+ * 8192/32768/131072/524288.
+ * <li>Eight bytes per type and the 63-type ceiling are likewise AE2's own figures.
+ * </ul>
  */
 public class ItemEssentiaCell extends Item implements IBasicCellItem {
 
@@ -84,11 +77,8 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
     }
 
     /**
-     * The creative component.
-     *
-     * <p>Essentially unbounded bytes rather than infinitely many: {@code BasicCellInventory} works in
-     * longs and the byte figures are ints, so a truly unbounded cell is not expressible through this
-     * interface. A quarter of the int range is more essentia than a player can produce.
+     * The creative component: unbounded rather than infinite, since {@code BasicCellInventory} works
+     * in longs and the byte figures are ints.
      */
     public static ItemEssentiaCell createCreative(Item.Properties properties) {
         return new ItemEssentiaCell(properties, "creative", Integer.MAX_VALUE / 1024, 0.0);
@@ -131,12 +121,8 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
     }
 
     /**
-     * Refuses anything that is not essentia.
-     *
-     * <p>Load-bearing. The byte budget and the key type check between them would already keep item keys
-     * out of a cell, but a cell is also a valid target for AE2's "put anything here" paths - a cell in a
-     * drive, a cell being filled by an interface - and a refusal here is the one place all of them pass
-     * through.
+     * Refuses anything that is not essentia. A cell in a drive or filled by an interface reaches it
+     * through the same paths, so this refusal is the one place all of them pass through.
      */
     @Override
     public boolean isBlackListed(ItemStack cellItem, AEKey requestedAddition) {
@@ -154,7 +140,7 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
         return CellConfig.create(Set.of(AEssentiaKeyType.INSTANCE), stack);
     }
 
-    /** Not fuzzy. There is no damage or durability on an aspect for a percentage to describe. */
+    /** Not fuzzy. An aspect has no damage or durability for a percentage to describe. */
     @Override
     public FuzzyMode getFuzzyMode(ItemStack stack) {
         return FuzzyMode.IGNORE_ALL;
@@ -198,7 +184,7 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
         return aspects;
     }
 
-    /** Adds an aspect to the partition. @return false when it is already there or the list is full */
+    /** Adds an aspect to the partition. @return false when already present or the list is full */
     public static boolean addPartition(ItemStack stack, ResourceLocation aspectId) {
         ConfigInventory inventory = partitionOf(stack);
         if (inventory == null) {
@@ -243,11 +229,8 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
     }
 
     /**
-     * Partitions a cell to whatever it already holds.
-     *
-     * <p>The workbench's "partition to contents", and the reason it is here rather than on the workbench:
-     * it reads the cell's own inventory, which means building AE2's inventory for it - and that is a
-     * question about this item, not about the block the player happens to be standing at.
+     * Partitions a cell to whatever it already holds. The workbench's "partition to contents"; it reads
+     * the cell's own inventory, so it belongs to this item and not to the block the player stands at.
      */
     public static void partitionToContents(ItemStack stack) {
         ConfigInventory partition = partitionOf(stack);

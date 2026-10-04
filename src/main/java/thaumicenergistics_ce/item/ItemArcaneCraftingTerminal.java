@@ -13,11 +13,9 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * The Arcane Crafting Terminal as an item, for placing it on a cable.
- *
- * <p>Follows the same shape as this mod's other part items rather than extending AE2's {@code PartItem}:
- * implementing {@link IPartItem} directly is what AE2 actually checks for, and doing it here keeps the
- * placement path, the tooltip and the factory in one place, the way the Essentia Terminal does it.
+ * The Arcane Crafting Terminal as an item, for placing it on a cable; implements {@link IPartItem}
+ * directly rather than extending AE2's {@code PartItem}, which is what AE2 actually checks for and
+ * keeps the placement path, the tooltip and the factory in one place.
  */
 public class ItemArcaneCraftingTerminal extends Item implements IPartItem<PartArcaneCraftingTerminal> {
 

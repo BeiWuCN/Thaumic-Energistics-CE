@@ -20,9 +20,10 @@ import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 /**
  * The Distillation Encoder block.
  *
- * <p>Facing, because the art has a front. The blockstate in this mod's assets declares the four horizontal
- * variants against a {@code facing} property, and a blockstate whose variants no state can match renders as
- * a missing-texture cube.
+ * <ul>
+ * <li>Faces horizontally: the art has a front.</li>
+ * <li>The four declared horizontal variants need {@code facing}, else missing-texture.</li>
+ * </ul>
  */
 public class BlockDistillationEncoder extends ThEBaseEntityBlock {
 

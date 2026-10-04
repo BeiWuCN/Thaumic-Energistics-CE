@@ -8,21 +8,19 @@ import thaumicenergistics_ce.ThEIds;
 
 /**
  * Thaumaturge's focus element registry, as seen from this mod.
- *
- * <p>{@code FocusElementType} is a NeoForge registry built by Thaumaturge through {@code RegistryBuilder},
- * so an addon registers into it with its own {@link DeferredRegister} over the same {@code REGISTRY_KEY} -
- * no addon hook to call, nothing to mix into. Thaumaturge's mod constructor binds the registry into
- * {@code FocusEngine} before any addon's runs.
+ * <ul>
+ * <li>{@code FocusElementType} is a NeoForge registry, so register a {@link DeferredRegister} of your
+ * own over the same {@code REGISTRY_KEY} - no addon hook, nothing to mix into.
+ * <li>Thaumaturge binds it into {@code FocusEngine} before any addon's constructor runs.
+ * </ul>
  */
 public final class FocusElements {
 
     public static final DeferredRegister<FocusElementType> REGISTRY =
             DeferredRegister.create(FocusElementType.REGISTRY_KEY, ThEIds.MODID);
 
-    /**
-     * The wrench focus effect. The research page blits {@code icon} directly, hence the {@code .png};
-     * {@code color} is AE2's wrench tint, as in the original focus.
-     */
+    /** The wrench focus effect; the research page blits {@code icon} directly, hence the
+     * {@code .png}; {@code color} is AE2's wrench tint, as in the original focus. */
     public static final DeferredHolder<FocusElementType, FocusElementType> AEWRENCH = REGISTRY.register(
             FocusEffectAEWrench.KEY.getPath(),
             () -> new FocusElementType(

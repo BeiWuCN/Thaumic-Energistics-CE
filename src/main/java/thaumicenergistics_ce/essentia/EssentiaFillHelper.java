@@ -9,9 +9,6 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaContainerItem;
-import com.leclowndu93150.thaumaturge.content.essentia.jar.BlockEntityJar;
-import com.leclowndu93150.thaumaturge.content.essentia.jar.JarItem;
-import com.leclowndu93150.thaumaturge.content.item.PhialItem;
 import com.leclowndu93150.thaumaturge.registry.TCItems;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,31 +21,29 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
+import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
- * Moving essentia between a container item and the ME network. A port of the reference build's
- * {@code EssentiaFillHelper} with Thaumaturge's item ids; the simulate-then-execute shape, the rollback when
- * the network refuses part of a transfer and the copy before shrink each guard a way essentia can be
- * duplicated or destroyed.
- *
- * <p>A phial is one item, empty or full, filled whole ({@link PhialItem#BASE_AMOUNT}) or not at all; a jar is
- * filled as far as the network allows and is not consumed. {@code IEssentiaContainerItem} is also implemented
- * by the label, the crystal and the mana bean, so {@link #isSupportedContainer} is the one gate.
- */
+ * Moving essentia between a container item and the ME network.
+ * <ul><li>A port of the reference build's {@code EssentiaFillHelper}. Simulate-then-execute, the rollback
+ * on a partial refusal and the copy before shrink all guard against duplication or loss.</li>
+ * <li>A phial is filled whole ({@code TcRegistry.phialCapacity()}) or not at all; a jar as far as the
+ * network allows, and is not consumed.</li>
+ * <li>The label, crystal and mana bean also implement {@code IEssentiaContainerItem}, so
+ * {@link #isSupportedContainer} is the one gate.</li></ul> */
 public final class EssentiaFillHelper {
 
     private EssentiaFillHelper() {}
 
-    /** How much a jar holds. Thaumaturge's own figure - see {@code BlockEntityJar.CAPACITY}. */
-    public static final int JAR_CAPACITY = BlockEntityJar.CAPACITY;
+    /** How much a jar holds. Thaumaturge's own figure - see {@code TcRegistry.jarCapacity()}. */
+    public static final int JAR_CAPACITY = TcRegistry.jarCapacity();
 
-    /** How much one phial holds. Thaumaturge's own figure - see {@code PhialItem.BASE_AMOUNT}. */
-    public static final int PHIAL_CAPACITY = PhialItem.BASE_AMOUNT;
+    /** How much one phial holds. Thaumaturge's own figure - see {@code TcRegistry.phialCapacity()}. */
+    public static final int PHIAL_CAPACITY = TcRegistry.phialCapacity();
 
-    /** Not {@code instanceof IEssentiaContainerItem}, which the label, the crystal and the mana bean also
-     * implement without being fillable. */
+    /** Not {@code instanceof IEssentiaContainerItem}: the label, crystal and mana bean are not fillable. */
     public static boolean isSupportedContainer(ItemStack stack) {
-        return !stack.isEmpty() && (stack.getItem() instanceof JarItem || stack.getItem() instanceof PhialItem);
+        return TcRegistry.isEssentiaContainer(stack);
     }
 
     /** Whether the stack is a container that is currently empty - what a fill wants. */
@@ -56,10 +51,8 @@ public final class EssentiaFillHelper {
         return isSupportedContainer(stack) && contents(stack) == null;
     }
 
-    /**
-     * Fills a container from the network. Server side only, and {@code level} is needed to resolve the
-     * aspect, which a key names but does not carry.
-     */
+    /** Fills a container from the network. Server side only; {@code level} resolves the aspect, which a
+     * key names but does not carry. */
     public static boolean fillFromNetwork(
             Level level,
             MEStorage storage,
@@ -77,9 +70,8 @@ public final class EssentiaFillHelper {
         }
 
         AEssentiaKey key = AEssentiaKey.of(aspectId);
-        // A simulated extract, not a read of the network's key counter: the counter is a complete copy of
-        // every key every mounted cell holds, rebuilt to answer one question, and this runs on a click a
-        // player can repeat as fast as they like.
+        // A simulated extract, not a read of the network's key counter: that counter is a complete copy of
+        // every key every mounted cell holds, and this runs on a click a player can repeat at will.
         long available = storage.extract(key, Long.MAX_VALUE, Actionable.SIMULATE, source);
         if (available <= 0) {
             log("fill {} refused: the network reports {} available for {}", aspectId, available, key);
@@ -87,22 +79,22 @@ public final class EssentiaFillHelper {
             return false;
         }
 
-        // Neither container takes a second aspect. A phial that already holds something would have a whole
-        // phial's worth extracted and overwrite what it carried, which is essentia destroyed.
+        // Neither container takes a second aspect: a phial that already held something would have a whole
+        // phial's worth extracted over it, which is essentia destroyed.
         if (contents(carried) != null) {
             log("fill {} refused: the held {} already holds {}", aspectId, carried.getItem(), contents(carried));
             return false;
         }
 
         // A phial is filled whole or not at all: it comes back as a different stack, not a topped-up one.
-        if (carried.getItem() instanceof PhialItem) {
+        if (TcRegistry.isPhial(carried)) {
             Holder<IAspect> aspect = AEssentiaKeyType.aspectOf(level, aspectId);
             if (aspect == null) {
                 log("fill {} refused: the id resolves to no aspect in this level", aspectId);
                 return false;
             }
             if (available < PHIAL_CAPACITY) {
-                // The refusal a player meets most often: a phial is filled whole, so fewer than 8 cannot go in.
+                // The refusal a player meets most often: a phial is filled whole, so fewer than 8 cannot.
                 log("fill {} refused: a phial needs {} and the network holds {}", aspectId,
                         PHIAL_CAPACITY, available);
                 return false;
@@ -116,7 +108,7 @@ public final class EssentiaFillHelper {
                 return false;
             }
             carried.shrink(1);
-            give(player, PhialItem.makeFilled(aspect, PHIAL_CAPACITY));
+            give(player, TcRegistry.filledPhial(aspect, PHIAL_CAPACITY));
             log("fill {} ok: {} into a phial", aspectId, PHIAL_CAPACITY);
             return true;
         }
@@ -150,8 +142,8 @@ public final class EssentiaFillHelper {
     }
 
     /**
-     * Prints everything the storage service says it holds: written to answer why the screen listed dozens of
-     * aspects while the server's {@code getAvailableStacks()} answered 0 for all but the last deposited.
+     * Prints everything the storage service says it holds; written to answer why the screen listed dozens of
+     * aspects while the server's available-stacks call answered 0 for all but the last deposit.
      */
     public static void dumpEssentia(MEStorage storage) {
         int total = 0;
@@ -169,12 +161,10 @@ public final class EssentiaFillHelper {
     }
 
     /**
-     * Empties an essentia container into the network. Simulated first: a stack of jars shares one contents
-     * tag, so the whole stack goes in as one amount, and if the network cannot take all of it nothing moves -
-     * half-filling the network while consuming the container is how essentia gets destroyed.
-     *
-     * @return {@code null} when the stack is not a container the terminal handles, so the caller falls back
-     *     to its own handling; otherwise the stack to put in the container's place
+     * Empties an essentia container into the network. Simulated first: a stack of jars shares one
+     * contents tag, so the whole stack goes in as one amount and a refusal anywhere moves nothing.
+     * @return {@code null} when the stack is not a container the terminal handles, so the caller
+     *     falls back to its own handling; otherwise the stack to put in the container's place
      */
     public static @Nullable ItemStack emptyIntoNetwork(
             MEStorage storage,
@@ -205,10 +195,8 @@ public final class EssentiaFillHelper {
             }
             ResourceLocation id = entry.aspect().unwrapKey().map(key -> key.location()).orElse(null);
             if (id == null) {
-                // Not registry-backed, so there is no id to store it under and no placeholder that would not
-                // move the wrong essentia. The whole container is left alone rather than emptied: skipping the
-                // entry and emptying anyway would discard it, and the caller empties whatever it is handed
-                // back a clean stack for.
+                // Not registry-backed, so it has no id to store under and the whole container is left alone:
+                // skipping the entry and emptying anyway would discard it.
                 return stack;
             }
             long total = (long) perItem * count;
@@ -238,8 +226,8 @@ public final class EssentiaFillHelper {
         }
 
         // Emptied. A jar survives as an empty jar and a phial is spent, both the same item id as the input
-        // (see the class note), so an empty copy is the whole of it and no phial is lost.
-        if (stack.getItem() instanceof PhialItem) {
+        // (see the class note), so an empty copy of the input is the whole of it.
+        if (TcRegistry.isPhial(stack)) {
             return new ItemStack(TCItems.PHIAL.get(), count);
         }
         return new ItemStack(stack.getItem(), count);

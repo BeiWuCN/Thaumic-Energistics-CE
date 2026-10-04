@@ -7,6 +7,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -24,20 +25,13 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * The decorative figure block - a plush likeness, not a machine.
- *
- * <p>Nothing in this mod depends on it. It exists because it is part of what the addon ships, and because
- * a decorative block is the cheapest possible place to be honest about a lesson the machines keep teaching:
- * a blockstate property that no state ever sets is a model that is never drawn.
- *
- * <p>{@code variant} is that property here. The blockstate file declares eight variants - four facings
- * times two variants - and the two models are the same figure with one sub-pixel difference in height, so
- * the property looks pointless from the outside. It is not decorative bookkeeping: leaving it out would
- * leave four of those eight variants unreachable, and a variant that no state can match renders as a
- * missing-texture cube. So it is kept, and it is kept settable - right-click turns the figure to face the
- * player who asked.
- *
- * <p>Shift-right-click picks it up, which is the reference build's behaviour and the one a player expects
- * from a small prop.
+ * <ul>
+ * <li>Nothing in this mod depends on it; it ships because it is part of the addon.
+ * <li>{@code variant} looks pointless (the two models differ by a sub-pixel of height) but the blockstate
+ * declares eight variants, four facings times two, so leaving it out would make four unreachable, and a
+ * variant no state can match renders as a missing-texture cube.
+ * <li>It stays settable: right-click turns the figure to face the player who asked.
+ * </ul>
  */
 public class BlockDecorativeFigure extends HorizontalDirectionalBlock {
 
@@ -47,11 +41,8 @@ public class BlockDecorativeFigure extends HorizontalDirectionalBlock {
     public static final BooleanProperty VARIANT = BooleanProperty.create("variant");
 
     /**
-     * The figure's box.
-     *
-     * <p>Smaller than a full cube and off-centre, because the model is a figure sitting on the floor rather
-     * than a block: a full collision shape would make it feel like an invisible wall, and a player would
-     * not be able to tell where they could stand.
+     * The figure's box: smaller than a full cube and off-centre, because a full collision shape would
+     * feel like an invisible wall around a figure sitting on the floor.
      */
     private static final VoxelShape SHAPE = Shapes.box(0.25, 0.0, 0.25, 0.75, 0.75, 0.75);
 
@@ -94,21 +85,17 @@ public class BlockDecorativeFigure extends HorizontalDirectionalBlock {
     }
 
     /**
-     * Turning, or picking up.
-     *
-     * <p>Two things on one button would be ambiguous, so shift is the distinction: a plain click turns the
-     * figure to face the player, and a shift-click takes it back. Both are non-destructive, so neither
-     * needs confirming.
+     * Turning, or picking up: two things on one button would be ambiguous, so shift is the distinction -
+     * a plain click turns the figure to face the player, a shift-click takes it back.
      */
     @Override
     protected InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (player.isShiftKeyDown()) {
             if (!level.isClientSide()) {
-                // Taken as an item rather than broken: breaking would drop it and play a break sound, and
-                // this is a prop being moved, not destroyed.
+                // Taken as an item rather than broken, which would play a break sound: a prop being moved.
                 if (!player.getAbilities().instabuild) {
-                    Block.popResource(level, pos, new net.minecraft.world.item.ItemStack(asItem()));
+                    Block.popResource(level, pos, new ItemStack(asItem()));
                 }
                 level.removeBlock(pos, false);
             }

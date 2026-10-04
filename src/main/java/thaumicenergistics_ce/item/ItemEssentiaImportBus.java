@@ -14,9 +14,8 @@ import thaumicenergistics_ce.part.PartEssentiaImportBus;
 
 /**
  * The Essentia Import Bus as an item, for placing it on a cable.
- *
- * <p>Like the terminal, this is AE2's {@link IPartItem} contract and nothing more: placing, wrenching,
- * the model and the cable's click handling all come through it.
+ * {@link IPartItem} is AE2's contract for a part: placing, wrenching, the model and the
+ * cable's click handling all come through it.
  */
 public class ItemEssentiaImportBus extends Item implements IPartItem<PartEssentiaImportBus> {
 

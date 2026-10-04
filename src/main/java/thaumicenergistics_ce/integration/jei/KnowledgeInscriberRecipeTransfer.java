@@ -23,17 +23,14 @@ import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 /**
  * Lets JEI's "transfer recipe" button fill the Knowledge Inscriber's grid from an arcane workbench
  * recipe.
- *
- * <p>Registered for Thaumaturge's own arcane workbench category, so the player opens a recipe in JEI the
- * way they always do and presses the button - no separate JEI page, and no chance of a recipe being
- * offered that the machine cannot actually encode.
- *
- * <p>This is both the {@link IRecipeTransferInfo} and the handler, rather than the usual pair of classes.
- * The info half says where the recipe's slots are and where the player's are; the handler half decides
- * whether the transfer can happen and then makes it. Keeping them together matters here because the
- * mapping between them is not a straight copy: JEI's recipe view has more ingredient slots than the
- * machine has cells - an arcane recipe carries its crystal requirement as separate ingredient slots -
- * so the transfer has to read the recipe rather than mirror slot for slot.
+ * <ul>
+ * <li>Registered for Thaumaturge's arcane workbench category, so no separate JEI page is needed and
+ * no recipe is offered that the machine cannot encode.</li>
+ * <li>Handles both halves of the usual pair: {@link IRecipeTransferInfo} says where the recipe's
+ * slots and the player's are, and the handler decides and makes the transfer.</li>
+ * <li>They stay together because the mapping is not a straight copy - an arcane recipe carries its
+ * crystal requirement in extra ingredient slots, so the transfer reads the recipe, not the view.</li>
+ * </ul>
  */
 public class KnowledgeInscriberRecipeTransfer
         implements IRecipeTransferInfo<MenuKnowledgeInscriber, RecipeHolder<?>>,
@@ -80,10 +77,8 @@ public class KnowledgeInscriberRecipeTransfer
     }
 
     /**
-     * The player's 36 slots, which come first in this menu.
-     *
-     * <p>JEI uses these to work out whether the player has the ingredients. The transfer never moves
-     * them, because the grid is a ghost grid - listing them is about availability, not about moving.
+     * The player's 36 slots, which come first in this menu: JEI reads them to work out whether the
+     * player has the ingredients, and the transfer never moves them - the grid is a ghost grid.
      */
     @Override
     public List<Slot> getInventorySlots(MenuKnowledgeInscriber menu, RecipeHolder<?> recipe) {
@@ -93,6 +88,8 @@ public class KnowledgeInscriberRecipeTransfer
     // ---- IRecipeTransferHandler ----------------------------------------
 
     @Override
+    // old 6-arg transferRecipe is the interface's only abstract method in JEI 19.57
+    @SuppressWarnings("removal")
     public @Nullable IRecipeTransferError transferRecipe(
             MenuKnowledgeInscriber menu,
             RecipeHolder<?> holder,
@@ -100,22 +97,20 @@ public class KnowledgeInscriberRecipeTransfer
             Player player,
             boolean maxTransfer,
             boolean doTransfer) {
-        // The ingredients come from the recipe's own grid, not from the slots JEI drew: the display is a
-        // picture, and re-reading it would mean depending on how the category chose to lay it out.
+        // Ingredients come from the recipe's own grid, not the slots JEI drew: re-reading the display would
+        // mean depending on how the category chose to lay it out.
         List<List<ItemStack>> cells = ArcaneRecipeTypes.cellsFor(holder);
         if (cells == null) {
             return helper.createInternalError();
         }
-        // Simulation first: the machine must be usable before it is touched. Checked after the recipe is
-        // known to be encodable, so a menu with no core still gets JEI's transfer button greyed out for
-        // the right reason.
+        // Simulation first: the machine must be usable before it is touched, checked after the recipe is
+        // known to be encodable so a menu with no core still gets the transfer button greyed out.
         if (!menu.canEncode()) {
             return helper.createUserErrorWithTooltip(
                     Component.translatable("thaumicenergistics_ce.gui.knowledge_inscriber.transfer_unavailable"));
         }
-        // An ingredient with several variants is placed as one the player actually has, falling back to
-        // the first. Placing an arbitrary member of a tag is how a transfer ends up filling the grid with
-        // something the recipe does not accept.
+        // Several variants: place one the player actually has, else the first. Placing an arbitrary member
+        // of a tag is how a transfer fills the grid with something the recipe does not accept.
         List<ItemStack> chosen = new ArrayList<>(BlockEntityKnowledgeInscriber.GRID_SLOT_COUNT);
         for (List<ItemStack> variants : cells) {
             chosen.add(pickVariant(variants, menu));
@@ -124,7 +119,7 @@ public class KnowledgeInscriberRecipeTransfer
             return null;
         }
         // Through the menu's slots, not its container: the client's grid is a ghost grid, so writing the
-        // container only filled a scratch pad the server never sees. See MenuKnowledgeInscriber.
+        // container only fills a scratch pad the server never sees. See MenuKnowledgeInscriber.
         menu.fillGridFromRecipe(chosen);
         return null;
     }

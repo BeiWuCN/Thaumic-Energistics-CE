@@ -3,8 +3,11 @@ package thaumicenergistics_ce.block;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -22,16 +25,16 @@ import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
 
 /**
  * The Infusion Monitor block.
- *
- * <p>Three properties, because the model has three states and they are not decorative: {@code facing} turns
- * the frame, {@code book} is whether the Thaumonomicon has been placed on it, and {@code network} is
- * whether it is connected to an ME network. The blockstate file in this mod's assets selects between the
- * off, book and lit models from exactly these, so all three have to exist and be named as written - a
- * multipart variant no state can match is simply never drawn.
- *
- * <p>{@code book} is the interesting one. It is a real state rather than a stored flag because the model
- * has to change the moment the book is placed, and because a player looking at the block should be able to
- * see whether it is armed without opening anything.
+ * <ul>
+ *   <li>Three properties, because the model has three states and none is decorative: {@code facing}
+ *       turns the frame, {@code book} is the Thaumonomicon, {@code network} is the ME connection.
+ *   <li>The blockstate file selects the off, book and lit models from exactly these, so all three
+ *       have to exist and be named as written - a multipart variant no state can match is never
+ *       drawn.
+ *   <li>{@code book} is the interesting one: a real state, not a stored flag, because the model has
+ *       to change when the book is placed, and a player should see whether it is armed without
+ *       opening anything.
+ * </ul>
  */
 public class BlockInfusionMonitor extends ThEBaseEntityBlock {
 
@@ -80,17 +83,11 @@ public class BlockInfusionMonitor extends ThEBaseEntityBlock {
 
     /**
      * Puts the book on, or takes it off.
-     *
-     * <h2>Taking it off is the half that had to become deliberate</h2>
-     *
-     * <p>This used to mean "holding a Thaumonomicon places it, anything else takes it back", with no other
-     * condition - so a player who right-clicked the monitor to <em>look</em> at it, with anything in hand or
-     * with nothing at all, had the book handed straight back. Reported as "right-clicking takes my
-     * Thaumonomicon off the machine": the machine undoing the one thing it is built for.
-     *
-     * <p>Taking the book back is now <b>sneak-right-click with an empty hand</b>, a gesture that cannot
-     * happen by accident while placing, reading or fiddling. Placing still needs no modifier, because that
-     * is the action with a book in hand and there is nothing ambiguous about it.
+     * Placing still needs no modifier: that is the action with a book in hand, and unambiguous.
+     * Taking it off is <b>sneak-right-click with an empty hand</b>, which cannot happen by
+     * accident while placing, reading or fiddling. It used to be "holding a Thaumonomicon places
+     * it, anything else takes it back"; a player who right-clicked the monitor to <em>look</em>
+     * at it had the book handed straight back.
      */
     @Override
     protected InteractionResult useWithoutItem(
@@ -99,28 +96,27 @@ public class BlockInfusionMonitor extends ThEBaseEntityBlock {
     }
 
     @Override
-    protected net.minecraft.world.ItemInteractionResult useItemOn(
-            net.minecraft.world.item.ItemStack stack,
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
             BlockState state,
             Level level,
             BlockPos pos,
             Player player,
-            net.minecraft.world.InteractionHand hand,
+            InteractionHand hand,
             BlockHitResult hit) {
-        // ItemInteractionResult rather than InteractionResult: that is the type this hook returns in 1.21,
-        // and the two are not interchangeable even though both describe "what happened". The pass constant
-        // is spelled out in full because 1.21 renamed it away from a bare PASS.
+        // ItemInteractionResult rather than InteractionResult: the type this hook returns in 1.21.
+        // The constant is spelled out because 1.21 renamed it away from a bare PASS.
         InteractionResult result = interact(level, pos, player, stack, player.isShiftKeyDown());
         return result == InteractionResult.SUCCESS
-                ? net.minecraft.world.ItemInteractionResult.SUCCESS
-                : net.minecraft.world.ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                ? ItemInteractionResult.SUCCESS
+                : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     private static InteractionResult interact(
-            Level level, BlockPos pos, Player player, net.minecraft.world.item.ItemStack held, boolean sneaking) {
+            Level level, BlockPos pos, Player player, ItemStack held, boolean sneaking) {
         if (level.isClientSide()) {
-            // Answer optimistically; the server decides. Both reach the same answer, because the condition
-            // is one both sides know: what is in hand, and whether the player is sneaking.
+            // Answer optimistically; the server decides. Both reach the same answer, because
+            // the condition is one both sides know: what is in hand, and whether sneaking.
             return InteractionResult.SUCCESS;
         }
         if (!(level.getBlockEntity(pos) instanceof BlockEntityInfusionMonitor monitor)) {

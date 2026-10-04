@@ -15,13 +15,12 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
 
 /**
- * The Knowledge Inscriber block.
- *
- * <p>Turns an AE2 pattern into the arcane recipe it encodes and writes that recipe into a knowledge
- * core, which an Arcane Assembler then reads.
- *
- * <p>Facing is cosmetic - the machine has no sided behaviour - but the art is not symmetric: its front
- * face is the bright one, so the blockstate rotates the model and this property is what drives it.
+ * The Knowledge Inscriber block: turns an AE2 pattern into the arcane recipe it encodes and writes
+ * that recipe into a knowledge core, which an Arcane Assembler then reads.
+ * <ul>
+ * <li>{@code FACING} is cosmetic - no sided behaviour - but the model's bright face is the front, so
+ * the blockstate rotates the model by this property.</li>
+ * </ul>
  */
 public class BlockKnowledgeInscriber extends ThEBaseEntityBlock {
     public static final MapCodec<BlockKnowledgeInscriber> CODEC = simpleCodec(BlockKnowledgeInscriber::new);

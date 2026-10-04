@@ -8,6 +8,7 @@ import appeng.api.parts.IPartCollisionHelper;
 import appeng.api.parts.IPartItem;
 import appeng.api.parts.IPartModel;
 import appeng.api.stacks.AEKey;
+import appeng.api.stacks.AEKeyType;
 import appeng.api.util.KeyTypeSelection;
 import appeng.api.util.KeyTypeSelectionHost;
 import appeng.core.settings.TickRates;
@@ -17,6 +18,7 @@ import appeng.parts.automation.IOBusPart;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
+import java.util.List;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -35,16 +37,14 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 /**
  * The Essentia Export Bus: takes essentia out of the ME network and puts it into the container it faces.
  *
- * <p>The mirror of {@link PartEssentiaImportBus}, and built the same way - an AE2 {@code IOBusPart} with
- * its config list filtered to essentia. What it exports is whatever the config list names, so a player
- * tells a jar to keep filling with aer by putting aer in the bus.
- *
- * <p>Like the import bus it uses Thaumaturge's {@link EssentiaCapabilities#STORAGE} rather than the
- * reference build's reflection, so any block publishing essentia storage works as a target.
- *
- * <p>The order of the three steps is what keeps essentia from being destroyed: take from the network,
- * give to the container, and put back whatever the container would not accept. Doing it the other way -
- * asking the container what it wants first - would need the container to promise, and none of them do.
+ * <ul>
+ * <li>The mirror of {@link PartEssentiaImportBus} - an AE2 {@code IOBusPart} whose config list is
+ * filtered to essentia, so it exports exactly what the config list names.</li>
+ * <li>Uses Thaumaturge's {@link EssentiaCapabilities#STORAGE} rather than the reference build's
+ * reflection, so any block publishing essentia storage works as a target.</li>
+ * <li>The step order keeps essentia from being destroyed: take from the network, give to the container,
+ * put back what it refused. Asking the container what it wants first would need it to promise.</li>
+ * </ul>
  */
 public class PartEssentiaExportBus extends IOBusPart implements KeyTypeSelectionHost {
 
@@ -59,6 +59,10 @@ public class PartEssentiaExportBus extends IOBusPart implements KeyTypeSelection
 
     @PartModels
     public static final ResourceLocation MODEL_HAS_CHANNEL = ThEIds.id("parts/essentia_export_bus_has_channel");
+
+    /** Every model that has to be registered for this part, named once for {@code ThaumicEnergistics}. */
+    public static final List<ResourceLocation> MODEL_LOCATIONS =
+            List.of(MODEL_BASE, MODEL_OFF, MODEL_ON, MODEL_HAS_CHANNEL);
 
     private static final PartModel MODELS_OFF = new PartModel(MODEL_BASE, MODEL_OFF);
     private static final PartModel MODELS_ON = new PartModel(MODEL_BASE, MODEL_ON);
@@ -81,7 +85,7 @@ public class PartEssentiaExportBus extends IOBusPart implements KeyTypeSelection
         getMainNode().setIdlePowerUsage(IDLE_POWER);
     }
 
-    private boolean isEssentia(appeng.api.stacks.AEKeyType type) {
+    private boolean isEssentia(AEKeyType type) {
         return type == AEssentiaKeyType.INSTANCE;
     }
 
@@ -115,15 +119,13 @@ public class PartEssentiaExportBus extends IOBusPart implements KeyTypeSelection
         if (!level.isLoaded(target)) {
             return false;
         }
-        // The container's own face towards us. A jar answers isConnectable true only for UP, so a bus on its
-        // side is not connected and must not pretend to be. See EssentiaNeighbour.
+        // The container's own face: a jar answers isConnectable only for UP. See EssentiaNeighbour.
         IEssentiaStorage storage = EssentiaNeighbour.find(level, target, side.getOpposite());
         if (storage == null) {
             return false;
         }
 
-        // What the player asked this bus to move. The first configured aspect, as in the reference - a bus
-        // exports one kind of essentia, and a player wanting two places two buses.
+        // What the player asked this bus to move: the first configured aspect, one kind per bus.
         AEssentiaKey key = firstConfigured();
         if (key == null) {
             return false;
@@ -143,8 +145,7 @@ public class PartEssentiaExportBus extends IOBusPart implements KeyTypeSelection
 
         int accepted = storage.insert(aspect, (int) Math.min(taken, Integer.MAX_VALUE), false);
         if (accepted < taken) {
-            // The container filled up part way. What it would not take goes back to the network, or it
-            // would simply cease to exist.
+            // The container filled up part way; what it refused goes back or it would cease to exist.
             grid.getStorageService()
                     .getInventory()
                     .insert(key, taken - accepted, Actionable.MODULATE, actionSource());

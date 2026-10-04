@@ -5,7 +5,6 @@ import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
-import com.leclowndu93150.thaumaturge.content.taint.item.EssentiaCrystalFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -14,15 +13,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
+import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
- * Adapts a {@link ThEArcanePattern} to AE2's crafting API: each non-empty grid cell becomes one input, plus
- * any crystal the recipe needs that vis cannot pay for. Cells are order independent - the assembler
- * re-resolves the live recipe and validates the actual inputs before starting a craft.
- *
- * <p>Vis is deliberately not mapped to a synthetic AE2 ingredient: it comes from the aura at craft time, so
- * the crafting plan stays about real items. A primal crystal is paid for the same way and does not appear; a
- * compound crystal has no vis value Thaumaturge will substitute, so it does.
+ * Adapts a {@link ThEArcanePattern} to AE2's crafting API.
+ * <ul>
+ *   <li>Each non-empty grid cell becomes one input, plus any crystal vis cannot pay for.
+ *   <li>Vis is not mapped to a synthetic AE2 ingredient: it comes from the aura at craft time.
+ *   <li>A primal crystal is paid by vis and stays hidden; a compound one has no vis value, so it appears.
+ * </ul>
  */
 public final class ArcanePatternDetails implements IPatternDetails {
 
@@ -38,15 +37,15 @@ public final class ArcanePatternDetails implements IPatternDetails {
         this.outputs = List.of(new GenericStack(AEItemKey.of(pattern.result()), pattern.result().getCount()));
     }
 
-    /** Builds the AE2 view of an arcane pattern, or {@code null} if it has no usable input or output. */
+    /** The AE2 view of an arcane pattern, or {@code null} when it has no usable input or output. */
     public static @Nullable ArcanePatternDetails of(ThEArcanePattern pattern, HolderLookup.Provider registries) {
         return of(pattern, registries, null);
     }
 
     /**
-     * As {@link #of}, but reports why a pattern was refused. Refusing is otherwise silent: the pattern simply
-     * does not appear in {@link #getAvailablePatterns()}, which from the player's side is indistinguishable
-     * from one that failed to be recognised after a reload.
+     * As {@link #of}, but reports why a pattern was refused: otherwise it is simply absent from
+     * {@link BlockEntityArcaneAssembler#getAvailablePatterns()}, which looks the same as a pattern
+     * not recognised after a reload.
      *
      * @param refusal when non-null, receives one short reason if the pattern is refused
      */
@@ -56,12 +55,8 @@ public final class ArcanePatternDetails implements IPatternDetails {
     }
 
     /**
-     * As {@link #of}, but with the definition supplied rather than rebuilt.
-     *
-     * <p>AE2 finds the machine for a task in a {@code HashMap} keyed by {@code IPatternDetails} equality, and
-     * this class defines that in terms of its definition. Rebuilding it during a decode needs
-     * {@code save(load(tag)) == tag} for the whole pattern, which a normalising read has no reason to satisfy:
-     * measured, a decoded task came back unequal and matched no machine.
+     * As {@link #of}, but with the definition supplied rather than rebuilt: {@code IPatternDetails} equality
+     * is defined on it, and a rebuilt key need not satisfy {@code save(load(tag)) == tag} to match a machine.
      *
      * @param decodedDefinition the exact key the pattern was decoded from, or {@code null} to build one
      */
@@ -70,9 +65,8 @@ public final class ArcanePatternDetails implements IPatternDetails {
             HolderLookup.Provider registries,
             @Nullable Consumer<String> refusal,
             @Nullable AEItemKey decodedDefinition) {
-        // The definition is the *pattern item*, not the crafting result: AE2 rebuilds a pending task with
-        // PatternDetailsHelper.decodePattern, which answers only for an encoded pattern item. A crafting
-        // result makes it return null and ExecutingCraftingJob drops the task, so the plan hangs for good.
+        // The definition is the *pattern item*, not the result: decodePattern only answers an
+        // encoded pattern item; with a result it returns null and ExecutingCraftingJob drops it.
         AEItemKey definition =
                 decodedDefinition != null ? decodedDefinition : AEItemKey.of(pattern.toItem(registries));
         if (definition == null) {
@@ -99,7 +93,7 @@ public final class ArcanePatternDetails implements IPatternDetails {
         }
         // Crystals the assembler cannot pay for with vis; the count is the recipe's requirement.
         for (AspectInstance crystal : pattern.crystalItems().entries()) {
-            ItemStack stack = EssentiaCrystalFactory.of(crystal.aspect(), crystal.amount());
+            ItemStack stack = TcRegistry.crystalFor(crystal.aspect(), crystal.amount());
             if (stack.isEmpty()) {
                 // No crystal item for this aspect, so the recipe cannot be automated at all.
                 refuse(refusal, "the crystal " + crystal.aspect().getKey().location() + " has no crystal item");
@@ -158,10 +152,10 @@ public final class ArcanePatternDetails implements IPatternDetails {
 
     /**
      * An input satisfied by any one of a set of item keys, the first being the one the AE2 view shows.
-     *
-     * <p>More than one key is what an ore dictionary entry means: a recipe written against
-     * {@code c:ingots/iron} can be crafted from any member of that tag. AE2 matches a pushed stack with
-     * {@link #isValid} and picks what to send from {@link #getPossibleInputs()}, so both need the whole set.
+     * <ul>
+     *   <li>More than one key is what an ore dictionary entry means: any member of the tag will do.
+     *   <li>AE2 matches a pushed stack with {@link #isValid} and sends from {@link #getPossibleInputs()}.
+     * </ul>
      */
     private record ItemChoicesInput(List<GenericStack> choices) implements IInput {
 

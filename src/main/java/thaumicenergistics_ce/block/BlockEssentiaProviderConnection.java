@@ -22,14 +22,14 @@ import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProviderConnection;
 /**
  * The Essentia Provider Connection: the receiving end of a wireless essentia link.
  *
- * <p>Two properties. {@code facing} turns the plug towards whatever surface it is on - the blockstate in
- * this mod's assets declares all six directions against it, so the property has to exist and be named
- * {@code facing} for the model to be drawn at all. {@code connected} is whether a link has been made, and
- * the blockstate draws a lit ring for it.
- *
- * <p>Mounts on any surface, including up and down, which is why this one uses the full six-direction
- * property rather than the horizontal one the other machines use. A receiver's whole purpose is to be
- * somewhere awkward.
+ * <ul>
+ *   <li>{@code facing} points the plug at the surface it is mounted on; the blockstate in this mod's
+ *       assets declares all six directions against it, so the property has to exist and be named
+ *       {@code facing} or the model is not drawn at all. {@code connected} is whether a link exists,
+ *       and draws the lit ring.
+ *   <li>Mounts on any surface, including up and down, so it uses the full six-direction property where the
+ *       other machines use the horizontal one: a receiver's purpose is to be somewhere awkward.
+ * </ul>
  */
 public class BlockEssentiaProviderConnection extends ThEBaseEntityBlock {
 
@@ -61,9 +61,11 @@ public class BlockEssentiaProviderConnection extends ThEBaseEntityBlock {
     /**
      * Points the plug into the surface it was placed against.
      *
-     * <p>The model is built facing north, so {@code FACING} has to be the direction the plug points
-     * <em>away</em> from the block it is mounted on - which is the side the player clicked, the opposite of
-     * where they were standing. Getting this backwards would put every receiver inside the wall.
+     * <ul>
+     *   <li>The model is built facing north, so {@code FACING} must be the direction the plug points
+     *       <em>away</em> from the block it is mounted on: the clicked face, not where the player stands.
+     *   <li>Getting this backwards would put every receiver inside the wall.
+     * </ul>
      */
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
@@ -86,11 +88,8 @@ public class BlockEssentiaProviderConnection extends ThEBaseEntityBlock {
     }
 
     /**
-     * The receiver needs a tick loop to carry essentia.
-     *
-     * <p>It has no grid node of its own - it is a wire, not a machine - so it cannot ask AE2 to tick it the
-     * way the provider does. A block ticker is what is left, and it is the right tool: the work is a
-     * transfer every half second, not a machine that has to react to a network.
+     * A block ticker carries the essentia: it has no grid node of its own - it is a wire, not a machine - so
+     * it cannot ask AE2 to tick it the way the provider does, and the work is one transfer per half second.
      */
     @Override
     public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(

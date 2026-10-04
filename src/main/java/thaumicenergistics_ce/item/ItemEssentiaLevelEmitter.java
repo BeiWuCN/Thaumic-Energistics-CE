@@ -12,9 +12,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 
-/**
- * The Essentia Level Emitter as an item, for placing it on a cable.
- */
+/** The Essentia Level Emitter as an item, for placing it on a cable. */
 public class ItemEssentiaLevelEmitter extends Item implements IPartItem<PartEssentiaLevelEmitter> {
 
     public ItemEssentiaLevelEmitter(Item.Properties properties) {

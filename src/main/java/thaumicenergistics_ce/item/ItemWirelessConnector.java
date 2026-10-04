@@ -7,6 +7,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -19,18 +20,16 @@ import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProviderConnection;
 
 /**
  * The Wireless Essentia Binding Tool: makes and breaks the links an Essentia Provider uses.
- *
- * <p>A two-ended link needs something to carry the identity of one end to the other, and this is it. The
- * tool holds one coordinate at a time - a receiver that has been selected but not yet bound - and the
- * second click completes the pair.
- *
- * <p>Sneak is the difference between reading and writing, which is the arrangement the reference build
- * uses and the one that survives contact with a player: a plain right-click on either end reports where it
- * is and what it is bound to, and only a deliberate sneak acts. Without that split, walking past an altar
- * with the tool in hand would rebind things.
- *
- * <p>The selected coordinate is stored under a single key and is only ever meaningful as a pair of clicks.
- * A selection that is never completed simply expires the next time a different receiver is selected.
+ * <ul>
+ * <li>A two-ended link needs something to carry the identity of one end to the other, and this is it: the
+ * tool holds one coordinate at a time - a receiver selected but not yet bound - and the second click
+ * completes the pair.
+ * <li>Sneak is the difference between reading and writing, the reference build's arrangement: a plain
+ * right-click on either end reports where it is and what it is bound to, and only a deliberate sneak
+ * acts. Without that split, walking past an altar with the tool in hand would rebind things.
+ * <li>The selection is stored under one key and is only meaningful as a pair of clicks; it expires the
+ * next time a different receiver is selected.
+ * </ul>
  */
 public class ItemWirelessConnector extends Item {
 
@@ -78,7 +77,7 @@ public class ItemWirelessConnector extends Item {
     }
 
     /** Points the tool at a receiver and remembers where it is. */
-    private static void select(Level level, BlockPos receiver, ItemStack tool, net.minecraft.world.entity.player.Player player) {
+    private static void select(Level level, BlockPos receiver, ItemStack tool, Player player) {
         setSelection(tool, receiver, level.dimension().location().toString());
         player.displayClientMessage(
                 Component.translatable("item.thaumicenergistics_ce.wireless_connector.selected",
@@ -87,10 +86,9 @@ public class ItemWirelessConnector extends Item {
     }
 
     /**
-     * The receiver this tool is holding, or {@code null}.
-     *
-     * <p>Read through the custom-data component rather than a raw NBT tag: 1.21 removed the direct tag
-     * accessors from {@link ItemStack}, and the component is what actually travels with the stack now.
+     * The receiver this tool is holding, or {@code null}. Read through the custom-data component rather
+     * than a raw NBT tag: 1.21 removed the direct tag accessors from {@link ItemStack}, and the component
+     * is what actually travels with the stack now.
      */
     private static @Nullable CompoundTag selection(ItemStack tool) {
         CustomData data = tool.get(DataComponents.CUSTOM_DATA);
@@ -117,13 +115,11 @@ public class ItemWirelessConnector extends Item {
     }
 
     /**
-     * Binds the remembered receiver to the provider that was clicked.
-     *
-     * <p>The receiver does the work and reports why it refused - the provider enforces how many receivers
-     * it will serve and how far away they may be - so the player is told which limit they hit rather than
-     * just that nothing happened.
+     * Binds the remembered receiver to the provider that was clicked. The receiver does the work and
+     * reports why it refused - the provider enforces how many receivers it will serve and how far away
+     * they may be - so the player is told which limit they hit rather than just that nothing happened.
      */
-    private static void bind(Level level, BlockPos provider, ItemStack tool, net.minecraft.world.entity.player.Player player) {
+    private static void bind(Level level, BlockPos provider, ItemStack tool, Player player) {
         CompoundTag tag = selection(tool);
         if (tag == null || !tag.contains(NBT_SELECTED)) {
             player.displayClientMessage(
@@ -161,7 +157,7 @@ public class ItemWirelessConnector extends Item {
     }
 
     /** Says where this end is and what it is bound to. */
-    private static void report(Level level, BlockPos pos, net.minecraft.world.entity.player.Player player,
+    private static void report(Level level, BlockPos pos, Player player,
             boolean isReceiver, boolean isProvider) {
         if (isReceiver && level.getBlockEntity(pos) instanceof BlockEntityEssentiaProviderConnection receiver) {
             BlockPos provider = receiver.linkedProvider();

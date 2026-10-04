@@ -24,74 +24,53 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
- * The Essentia Vibration Chamber: burns essentia to generate AE.
- *
- * <p>Potentia - Thaumaturge's aspect of energy itself - burns longest and hottest, ignis at the base rate,
- * every other aspect at half of it. Essentia arrives the way it arrives for any container: pulled from an
- * adjacent one, or pushed in by a pipe or an export bus. The chamber does not take it out of the ME network
- * itself - an export bus beside it does that, with the chamber as the container it is. The buffer is a
- * count, not an aspect list; {@link #currentAspect} is remembered only so the screen and the tooltip can
- * name the fuel.
- *
- * <p>Power is banked in a {@link #MAX_ENERGY_STORAGE 16,000 AE} slot and emptied into the network at up to
- * {@link #MAX_OUTPUT_PER_TICK 2,000 AE a tick}. {@link BurnState} is the one answer to what the machine is
- * doing and why: a full slot stops the burn rather than spending fuel on power the network would refuse,
- * and a grid with nowhere to put the power - nothing on it that can hold any, nothing drawing any - stops
- * it too, so a machine with no cable burns nothing and does not power itself. The tooltip reports those
- * states as *"能量槽已满，停止发电"* and *"无网络"*.
- *
- * <p><b>The slot, the pause and the container intake are this mod's own, not AE2's.</b> AE2's chamber keeps
- * no buffer at all: it burns a fuel item, injects what it made every tick, and destroys whatever the grid
- * will not take while the fuel is spent all the same, throttling down only to a 4 AE/t floor
- * (VibrationChamberBlockEntity:200-216, AEConfig:695-697). The reference build is cited in this file for its
- * numbers and for how it configures its node, never as parity for those three.
+ * The Essentia Vibration Chamber burns essentia to generate AE.
+ * <ul>
+ *   <li>Potentia burns 1.6x duration and power, ignis at the base rate, everything else at half.
+ *   <li>The buffer is a count, not an aspect list; the aspect kept is for display only.
+ *   <li>{@link BurnState} is the one answer to the burn: a full slot or a grid that refuses holds it back.
+ *   <li>AE2 destroys what the grid refuses (VibrationChamberBlockEntity:200-216).
+ * </ul>
  */
 public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
-        implements IGridTickable, IEssentiaStorage, IEssentiaTransport, net.minecraft.world.MenuProvider {
+        implements IGridTickable, IEssentiaStorage, IEssentiaTransport, MenuProvider {
 
     /** How much essentia the chamber can hold, in units. */
     public static final int MAX_ESSENTIA = 64;
 
-    /** Ticks one unit of ignis burns; a full buffer of 64 is most of an hour of generation. */
+    /** Ticks one unit of ignis burns; a full buffer of 64 is most of an hour. */
     private static final int BASE_BURN_TICKS = 800;
 
     /** Power per tick while burning ignis. Potentia multiplies this, everything else halves it. */
     private static final double BASE_AE_PER_TICK = 200.0;
 
-    /**
-     * Energy slot size in AE; the tooltip shows it as 16 kAE / 32,000 FE, AE2 quoting both at two FE to the AE.
-     */
+    /** Energy slot size in AE; AE2 quotes 16 kAE as 32,000 FE at two FE to the AE. */
     public static final double MAX_ENERGY_STORAGE = 16_000.0;
 
-    /**
-     * How much of the slot may be handed to the network per tick - ten times one ignis unit's output, so the
-     * cap only binds on a slot that has been filling for a while.
-     */
+    /** Most of the slot handed out per tick; ten times one ignis unit's output, so it rarely binds. */
     public static final double MAX_OUTPUT_PER_TICK = 2_000.0;
 
-    /**
-     * How much room has to open in the slot before the burn resumes. Hysteresis: the output drains the slot
-     * before the burn fills it again, so without a margin the pause would be entered and left on every
-     * visit. A few hundred AE is more than one tick of even potentia's burn, and small enough that the slot
-     * still reads as full.
-     */
+    /** Room that must open in the slot before the burn resumes: hysteresis, larger than one potentia tick. */
     private static final double RESUME_MARGIN = 400.0;
 
-    /** How often the chamber looks at the network while burning, and while idle. */
+    /** How often the chamber looks at the network: while burning, and while idle. */
     private static final int TICK_RATE_BURNING = 10;
     private static final int TICK_RATE_IDLE = 40;
 
-    /**
-     * How hard the chamber pulls on a pipe. The pull is wildcard: {@link #getSuctionType} answers null so a
-     * pipe will offer any aspect, not only the one currently burning.
-     */
+    /** Pull strength on a pipe; wildcard, so any aspect is offered. */
     private static final int SUCTION = 128;
 
     /** The two aspects that burn better than the rest, by path. */
@@ -99,31 +78,25 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     private static final String ASPECT_IGNIS = "ignis";
 
     /**
-     * What the machine is doing, and - while it is not burning - why. One answer, read by the burn, the
-     * intake, the suction, the tooltip and the screen, so that none of them works it out from the numbers:
-     * a condition asked again wherever it is read is a condition answered differently in different places,
-     * which is what both of this chamber's bugs were.
+     * What the machine is doing, and why when it is not burning: what the burn, the intake, the suction,
+     * the tooltip and the screen all read.
      */
     public enum BurnState {
         /** Converting essentia into AE right now. */
         BURNING,
         /** Held back: the energy slot cannot take another tick of the burn. */
         PAUSED_FULL,
-        /** Nothing but this machine is on its grid, so there is nowhere for the power to go. */
+        /** Nothing but this machine is on its grid: nowhere for the power to go. */
         NO_NETWORK,
         /** Nothing loaded to burn, and room for it. */
         IDLE;
 
-        /** Whether the machine may spend fuel, or is being held back for one of the two reasons above. */
+        /** Whether the machine may spend fuel, rather than being held back by the slot or the network. */
         public boolean mayBurn() {
             return this == BURNING || this == IDLE;
         }
 
-        /**
-         * The state an ordinal names, or {@link #IDLE} for one that names nothing: the number arrives in a
-         * payload from the other side, and an index out of range would take the client down rather than
-         * show a wrong line.
-         */
+        /** The state an ordinal names, or {@link #IDLE} for an out-of-range index from a payload. */
         public static BurnState byOrdinal(int ordinal) {
             BurnState[] states = values();
             return ordinal >= 0 && ordinal < states.length ? states[ordinal] : IDLE;
@@ -133,7 +106,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     /** Essentia waiting to be burned. */
     private int storedEssentia;
 
-    /** The aspect that will be burned next, or was burned last. Display only. */
+    /** The aspect burned next, or burned last. Display only. */
     private @Nullable Holder<IAspect> currentAspect;
 
     private int burnTicksRemaining;
@@ -147,9 +120,8 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     private BurnState burnState = BurnState.IDLE;
 
     /**
-     * Whether to report what the chamber sees of its neighbours, once a second. Off unless
-     * {@code THAUMICENERGISTICS_EVC_TRACE=true}: a machine that will not take fuel gives no error, and this
-     * tells a pipe that is not reaching it apart from one that is being out-pulled.
+     * Whether to log what the chamber sees of its neighbours, once a second; on with
+     * {@code THAUMICENERGISTICS_EVC_TRACE=true}. Tells a pipe not reaching from one out-pulled.
      */
     private static final boolean TRACE = "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_EVC_TRACE"));
 
@@ -157,16 +129,13 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     private long nextTrace;
 
-    /** Bumped whenever the buffer changes, so anything caching this container's contents notices. */
+    /** Bumped whenever the buffer changes, so a cache of this container's contents notices. */
     private long revision;
 
     public BlockEntityEssentiaVibrationChamber(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(), pos, state);
-        // A generator pays nothing to be on the grid and asks for no channel: AE2's fuel chamber, crystal
-        // resonance generator and charger are all idle 0.0 and channel-free (VibrationChamberBlockEntity:57,
-        // ChargerBlockEntity:43), and the machines that consume are the ones that pay (Growth Accelerator
-        // 8.0). Either one on its own would take this machine dark exactly when the network is flat and a
-        // player reaches for it.
+        // Idle 0.0 and channel-free, as AE2's own generators are (VibrationChamberBlockEntity:57,
+        // ChargerBlockEntity:43): a channel would go dark when a flat network needs it most.
         getMainNode().setIdlePowerUsage(0.0).setFlags().addService(IGridTickable.class, this);
     }
 
@@ -183,45 +152,38 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
             return TickRateModulation.IDLE;
         }
 
-        // Intake runs whether or not the node is active: fuel does not need the network to arrive, and a
-        // machine that refused it would back a pipe up behind it. It arrives the way it arrives for any
-        // container - pulled from a neighbour, or pushed in by a pipe or an export bus. Nothing is taken
-        // while the slot is full, though, or the fuel's power would have nowhere to go.
+        // Runs while the node is inactive too: fuel needs no network, and refusing it would back a pipe up.
+        // Nothing is taken while the slot is full: the fuel's power would have nowhere to go.
         if (storedEssentia < MAX_ESSENTIA && !isPaused()) {
             pullEssentia();
         }
         traceIntake();
 
-        // A grid, not an active one: this machine makes power, so it must not wait to be powered before it
-        // works - a network that has run flat is exactly when a player reaches for it.
+        // Grid, not active grid: a generator must not wait to be powered, and a flat grid needs it most.
         IGrid grid = node.getGrid();
         if (grid == null) {
-            // Not on a grid at all is the answer a grid of one gives: there is nothing to hand power to.
+            // The answer a grid of one gives too: there is nothing to hand the power to.
             updateBurnState(false);
             return TickRateModulation.SLOWER;
         }
 
-        // Whether there is anywhere for the power to go, asked of what the grid holds rather than of how big
-        // it is. See {@link #hasNetwork}.
+        // Asked of what the grid holds, not of how big it is: {@link #hasNetwork}.
         boolean onNetwork = hasNetwork(grid, node);
 
-        // Output before input, so room is made in the same visit that notices the slot was full - and the
-        // state is decided on what the output left behind.
+        // Output first, so room opens in the same visit that finds the slot full.
         if (onNetwork) {
             outputEnergy(grid, ticksSinceLast);
         }
         updateBurnState(onNetwork);
 
-        // Held back: no room for the power in the slot, or nothing on the grid to take it.
+        // Held back: no room in the slot for the power, or nothing on the grid to take it.
         if (!burnState.mayBurn()) {
             return TickRateModulation.SAME;
         }
 
         if (burnTicksRemaining > 0) {
-            // Only the ticks whose power the slot can take are burnt. A grid with machines on it frees a
-            // trickle of room every tick, and crediting a whole wake-up for that trickle is what spent a
-            // full chamber's fuel on power that had nowhere to go. The ticks held back are burnt when the
-            // room is there, so the burn freezes rather than restarting the unit.
+            // Only ticks whose power fits are burnt, the rest later: the unit freezes, it does not restart.
+            // Crediting a whole wake-up is what spent fuel on power with nowhere to put it.
             double perTick = burnTickPower();
             int burnt = (int) Math.min(
                     burnTicksRemaining,
@@ -243,22 +205,14 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         }
 
         startBurning();
-        // The rate the room is measured in has just changed: a unit loaded into a slot that cannot take a
-        // tick of it is held back from the start.
+        // Re-evaluate: the rate just changed, so a unit may be held back from the start.
         updateBurnState(onNetwork);
         return TickRateModulation.URGENT;
     }
 
     /**
-     * Whether there is anywhere on this grid for the machine's power to go: a node that can hold it, or a
-     * grid that draws power of its own. A lone machine still has a grid - AE2 builds one around its single
-     * node - so a grid that exists is not a network, and neither is one that swallows a mouthful: every grid
-     * carries an inherent buffer of 25 AE a node (GridEnergyStorage:83, AEConfig:648), which would accept a
-     * first offer and leave a machine burning its slot full to pay for a grid of one.
-     *
-     * <p>Both halves are AE2's own answers: its energy service asks each node for {@link IAEPowerStorage} to
-     * find what can hold power (EnergyService:375), and a grid that declares an idle draw has machines that
-     * will consume what the chamber makes even where nothing can store it.
+     * Whether this grid can take the power: a node holding it ({@link IAEPowerStorage}) or machines that draw
+     * it. A mere grid is not enough: its 25 AE per node buffer (GridEnergyStorage:83) takes it.
      */
     private boolean hasNetwork(IGrid grid, IGridNode self) {
         IEnergyService energy = grid.getService(IEnergyService.class);
@@ -276,10 +230,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         return false;
     }
 
-    /**
-     * Hands the slot's power to the network, up to {@link #MAX_OUTPUT_PER_TICK} a tick. Whatever the network
-     * refuses stays in the slot, so an unattended chamber fills up, stops and waits.
-     */
+    /** Hands power to the network, up to {@link #MAX_OUTPUT_PER_TICK} a tick; what it refuses stays. */
     private void outputEnergy(IGrid grid, int ticksSinceLast) {
         if (storedEnergy <= 0) {
             return;
@@ -297,16 +248,8 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     }
 
     /**
-     * Re-decides {@link #burnState} and announces it only when it changes. Called from the places that can
-     * change the answer - the output, the burn that banks what it made, the start of a burn, whose rate the
-     * room is measured in, and the network test every visit begins with - rather than from every reader,
-     * because a condition asked again wherever it is read is a condition answered differently in different
-     * places.
-     *
-     * <p>The slot is full when it cannot take another tick of the burn, and it stays full until
-     * {@link #RESUME_MARGIN} of room has opened: a grid that is drawing frees a trickle of room every tick,
-     * and a plain "is it full?" would call that trickle room enough to burn into. The state is its own latch,
-     * so there is one answer and not two.
+     * Re-decides {@link #burnState} and announces it only when it changes; not read by callers. Full stays
+     * full until {@link #RESUME_MARGIN} of room opens again.
      */
     private void updateBurnState(boolean onNetwork) {
         double room = MAX_ENERGY_STORAGE - storedEnergy;
@@ -330,10 +273,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         }
     }
 
-    /**
-     * One tick of the burn, or of the smallest burn the chamber could be given while nothing is burning.
-     * Never zero, so the room divided by it is a real number of ticks even for a tag that saved no rate.
-     */
+    /** One tick of the burn, or of the smallest burn possible; never zero, so room/rate is a tick count. */
     private double burnTickPower() {
         return burnTicksRemaining > 0 ? Math.max(aePerTick, 1.0) : BASE_AE_PER_TICK / 2.0;
     }
@@ -341,8 +281,8 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     // Fuel
 
     /**
-     * Draws one unit of essentia from a neighbouring container. One unit at a time because containers expose
-     * no "give me as much as fits" call, and putting an excess back is where essentia gets lost.
+     * Draws one unit from a neighbouring container: there is no "as much as fits" call, and returning an
+     * excess is where essentia gets lost.
      */
     private void pullEssentia() {
         if (level == null || storedEssentia >= MAX_ESSENTIA) {
@@ -377,9 +317,8 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     }
 
     /**
-     * Pulls from a Thaumaturge essentia tube. A tube does not push into the machines it passes - the
-     * destination is the side that asks, as in Thaumaturge's own essentia port - so a chamber that only
-     * waited to be filled would sit empty beside a working pipe. The three conditions below are the port's.
+     * Pulls from a Thaumaturge essentia tube, which does not push into the machines it passes: the
+     * destination is the side that asks, as in Thaumaturge's port. The tests below are that port's.
      */
     private boolean pullFromTube(Direction side) {
         Direction facing = side.getOpposite();
@@ -405,11 +344,9 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         return false;
     }
 
-    /**
-     * Reports, once a second, one line per side that has anything on it. See {@link #TRACE}.
-     */
+    /** Reports, once a second, one line per side that has anything on it. See {@link #TRACE}. */
     private void traceIntake() {
-        if (!TRACE || level == null || !(level instanceof net.minecraft.server.level.ServerLevel server)) {
+        if (!TRACE || level == null || !(level instanceof ServerLevel server)) {
             return;
         }
         long now = server.getGameTime();
@@ -452,7 +389,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         tracedEssentia = 0;
     }
 
-    /** Puts essentia in the buffer and remembers which aspect it was, for the tooltip and the screen. */
+    /** Puts essentia in the buffer and remembers the aspect, for the tooltip and the screen. */
     private void accept(Holder<IAspect> aspect, int amount) {
         int space = MAX_ESSENTIA - storedEssentia;
         int taken = Math.min(amount, space);
@@ -464,15 +401,11 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         currentAspect = aspect;
         revision++;
         setChanged();
-        // The tooltip reads the buffer from the client, so it has to be told when the buffer moves. Fuel
-        // arrives one unit at a time and stops once the buffer is full or the slot is holding the burn back,
-        // so this is not a per-tick stream.
+        // The tooltip reads the buffer client-side; fuel arrives a unit at a time, not per tick.
         markForClientUpdate();
     }
 
-    /**
-     * Spends one buffered unit and starts its burn; the power for it is made tick by tick as the burn runs.
-     */
+    /** Spends one buffered unit and starts its burn; its power is made tick by tick. */
     private void startBurning() {
         int burnTicks = burnTicksFor();
         double power = powerFor();
@@ -520,10 +453,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     // IEssentiaStorage - the chamber as a container, so it can be filled
 
-    /**
-     * The whole buffer reported under the aspect put in last: the buffer is a count rather than an aspect
-     * list, so this is the same lossy answer the reference build gives.
-     */
+    /** The whole buffer under the aspect put in last: the buffer is a count, so this answer is lossy. */
     @Override
     public AspectList contents() {
         if (storedEssentia <= 0 || currentAspect == null) {
@@ -534,13 +464,11 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     @Override
     public int insert(Holder<IAspect> aspect, int amount, boolean simulate) {
-        // The same rule the pull and the suction follow: a chamber whose slot is full takes nothing, or an
-        // export bus beside it fills a buffer that cannot burn.
+        // Same rule as the pull and the suction: a full slot takes nothing, however it is offered.
         if (aspect == null || amount <= 0 || isPaused()) {
             return 0;
         }
-        // Floored: a saved count above the cap would otherwise make this negative, and a caller that treats a
-        // negative acceptance as "nothing taken" voids the essentia it has already taken from its neighbour.
+        // Floored at 0: a saved count above the cap would go negative, read as "nothing taken".
         int accepted = Math.min(amount, Math.max(0, MAX_ESSENTIA - storedEssentia));
         if (accepted > 0 && !simulate) {
             accept(aspect, accepted);
@@ -570,10 +498,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         return true;
     }
 
-    /**
-     * Reported true - as the reference build does - so pipes treat the chamber as somewhere essentia can go
-     * rather than dead-ending at it, even though {@link #takeEssentia} never gives anything back.
-     */
+    /** True so pipes see a destination, not a dead end, though {@link #takeEssentia} takes nothing. */
     @Override
     public boolean canOutputTo(Direction side) {
         return true;
@@ -589,10 +514,8 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         return null;
     }
 
-    /**
-     * Zero while the buffer or the energy slot is full. The pipes steer by this number, so a full machine
-     * advertising suction would draw essentia out of them with nowhere to put it or its power.
-     */
+    /** Zero when the buffer or the energy slot is full: pipes steer by this number, and a full machine
+     * advertising suction would draw essentia it cannot burn. */
     @Override
     public int getSuctionAmount(Direction side) {
         return storedEssentia < MAX_ESSENTIA && !isPaused() ? SUCTION : 0;
@@ -659,10 +582,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         return burnState;
     }
 
-    /**
-     * Whether the chamber is converting essentia right now; a full slot, or a grid with nothing but this
-     * machine on it, holds the burn back without spending it.
-     */
+    /** Whether the chamber is converting essentia right now; a held-back burn spends nothing. */
     public boolean isBurning() {
         return burnState == BurnState.BURNING;
     }
@@ -691,16 +611,9 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     // What the client is told
 
     /**
-     * The client's copy: the state, the rate it burns at and the fuel in the buffer, so a tooltip is drawn
-     * from what the machine is doing now rather than from a snapshot taken when it was first looked at.
-     * Jade's server data is collected once per hover, and the owner watched a machine that had just lost its
-     * only consumer go on saying "Device Online" for as long as the tooltip stayed open.
-     *
-     * <p>Sent by {@link #markForClientUpdate()}, which the state transitions and every change of fuel
-     * already call, so nothing here is broadcast per tick. What is deliberately left out is what moves every
-     * tick or every visit - the burn's countdown and the energy in the slot: a number that freezes while it
-     * is watched is worse than no number, and syncing those would be traffic for a tooltip. The machine's
-     * own screen carries them live through its menu.
+     * The client's copy - state, burn rate and buffered fuel - so Jade's once-per-hover snapshot is not
+     * what the tooltip shows. Sent only by {@link #markForClientUpdate()}, never per tick, or the
+     * countdown and the slot's energy would freeze while watched.
      */
     @Override
     protected void writeToStream(RegistryFriendlyByteBuf data) {
@@ -760,8 +673,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         totalBurnTicks = tag.getInt("TotalBurnTicks");
         aePerTick = tag.getDouble("AePerTick");
         storedEnergy = Math.min(tag.getDouble("StoredEnergy"), MAX_ENERGY_STORAGE);
-        // Read off the slot rather than saved with it: a tag that carried both could carry them disagreeing.
-        // Whether there is a network is not knowable here; the first tick decides it.
+        // Read off the slot, not saved with it: a tag carrying both could carry them disagreeing.
         burnState = MAX_ENERGY_STORAGE - storedEnergy < burnTickPower()
                 ? BurnState.PAUSED_FULL
                 : BurnState.IDLE;
@@ -781,15 +693,15 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     /** The screen, opened by right-clicking the machine. See {@code BlockEssentiaVibrationChamber}. */
     @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu createMenu(
-            int containerId, net.minecraft.world.entity.player.Inventory inventory,
-            net.minecraft.world.entity.player.Player player) {
+    public AbstractContainerMenu createMenu(
+            int containerId, Inventory inventory,
+            Player player) {
         return new thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber(containerId, inventory, this);
     }
 
     @Override
-    public net.minecraft.network.chat.Component getDisplayName() {
-        return net.minecraft.network.chat.Component.translatable(
+    public Component getDisplayName() {
+        return Component.translatable(
                 getBlockState().getBlock().getDescriptionId());
     }
 

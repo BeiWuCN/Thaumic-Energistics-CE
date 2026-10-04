@@ -4,14 +4,13 @@ import net.minecraft.resources.ResourceLocation;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * The skins a golem's wireless backpack can wear.
+ * The skins a golem's wireless backpack can wear: the reference build's ten, by material.
  *
- * <p>The reference build's ten, named for their materials - a golem in a stone room should be able to wear
- * stone.
- *
- * <p>Each is a texture at {@code textures/model/golembackpack/<id>.png}, looked up by the id rather than by
- * the enum's name so the files and the constants can be read against each other. Built lazily, because an
- * enum constant is constructed before the mod's own id is settled.
+ * <ul>
+ * <li>Each is a texture at {@code textures/model/golembackpack/<id>.png}, looked up by the id rather than
+ * by the enum's name so the files and the constants can be read against each other.</li>
+ * <li>Built lazily, because an enum constant is constructed before the mod's own id is settled.</li>
+ * </ul>
  */
 public enum BackpackSkins {
 
@@ -47,9 +46,8 @@ public enum BackpackSkins {
     /**
      * The skin with this ordinal, or the default when the number is out of range.
      *
-     * <p>Out of range is not an error here: the ordinal travels in the golem's own data, and a golem saved
-     * by a build with more skins than this one should come back wearing the default rather than throwing
-     * while it is being loaded.
+     * <p>The ordinal travels in the golem's own data, so a golem saved by a build with more skins than this
+     * one comes back wearing the default rather than throwing while it is being loaded.
      */
     public static BackpackSkins fromOrdinal(int ordinal) {
         return ordinal < 0 || ordinal >= VALUES.length ? Thaumium : VALUES[ordinal];

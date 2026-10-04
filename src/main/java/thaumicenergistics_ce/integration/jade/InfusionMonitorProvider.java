@@ -10,6 +10,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
@@ -22,13 +23,13 @@ import thaumicenergistics_ce.infusion.InfusionRisk;
 
 /**
  * The Infusion Monitor's Jade tooltip: whether it can see, and what it sees.
- *
- * <p>Server reads the altar and writes the answers into the data tag; the client draws them. The altar is
- * server-side state - stability moves between block updates - so a client copy would be a photograph.
- *
- * <p>The network line comes first and is always there: a monitor off the network is watching nothing,
- * however healthy the altar looks. The risk is split as "4 (base 1 + altar 3)" so the player knows which
- * half to fix.
+ * <ul>
+ *   <li>The server reads the altar and writes the answers into the data tag; stability is server-side
+ *       state that moves between block updates, so the client cannot compute it.
+ *   <li>The network line comes first and is always there: a monitor off the network is watching
+ *       nothing, however healthy the altar looks.
+ *   <li>Risk is split as "4 (base 1 + altar 3)" so the player knows which half to fix.
+ * </ul>
  */
 public class InfusionMonitorProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
 
@@ -113,7 +114,7 @@ public class InfusionMonitorProvider implements IBlockComponentProvider, IServer
                         tier)
                 .withStyle(colourOf(tier))));
         // The live stability first, because it is the number that moves, then the two behind the ritual.
-        // Negative is not an error: the altar clamps from -100 to 25, and below zero it starts throwing things.
+        // Negative is not an error: the altar clamps from -100 to 25 and throws things below zero.
         float stability = tag.getInt(TAG_STABILITY) / 10.0F;
         tooltip.add(helper.text(Component.translatable(
                 "thaumicenergistics_ce.jade.monitor.stability",
@@ -175,7 +176,7 @@ public class InfusionMonitorProvider implements IBlockComponentProvider, IServer
 
     /** "Ignis, Terra", as one component. */
     private static Component join(List<Component> parts) {
-        net.minecraft.network.chat.MutableComponent joined = Component.empty();
+        MutableComponent joined = Component.empty();
         for (int i = 0; i < parts.size(); i++) {
             if (i > 0) {
                 joined.append(Component.literal(", "));

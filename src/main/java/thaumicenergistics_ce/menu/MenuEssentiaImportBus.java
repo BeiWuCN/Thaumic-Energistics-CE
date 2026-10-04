@@ -1,5 +1,6 @@
 package thaumicenergistics_ce.menu;
 
+import appeng.api.stacks.AEKeyType;
 import appeng.api.util.KeyTypeSelection;
 import appeng.api.util.KeyTypeSelectionHost;
 import appeng.menu.guisync.GuiSync;
@@ -11,18 +12,12 @@ import net.minecraft.world.inventory.MenuType;
 import thaumicenergistics_ce.part.PartEssentiaImportBus;
 
 /**
- * The Essentia Import Bus's config screen.
- *
- * <p>AE2's own upgradeable-bus menu, with the config grid and slot addressing inherited from
- * {@link MenuEssentiaBus}. Two things are this bus's own.
- *
- * <p>The config grid is <em>expandable</em> - two rows always shown, five more unlocked by capacity
- * cards - which is AE2's behaviour for its own buses.
- *
- * <p>The key types are synced so the client's "which types does this bus accept" checkbox knows what the
- * part decided. The part answers essentia and nothing else, so this is reported rather than chosen - but
- * a bus that offered items it cannot move would be worse than no setting at all, and this is the channel
- * AE2 uses to say so.
+ * The Essentia Import Bus's config screen, extending {@link MenuEssentiaBus} with two settings.
+ * <ul>
+ * <li>The config grid is expandable: two rows always shown, five more unlocked by capacity cards.
+ * <li>Key types are synced so the client checkbox knows what the part decided - essentia only.
+ * <li>Reported rather than chosen: offering what the bus cannot move would be worse than no setting.
+ * </ul>
  */
 public class MenuEssentiaImportBus extends MenuEssentiaBus<PartEssentiaImportBus>
         implements KeyTypeSelectionMenu {
@@ -43,7 +38,7 @@ public class MenuEssentiaImportBus extends MenuEssentiaBus<PartEssentiaImportBus
     public void broadcastChanges() {
         super.broadcastChanges();
         if (isServerSide() && getHost() instanceof KeyTypeSelectionHost selectionHost) {
-            Map<appeng.api.stacks.AEKeyType, Boolean> enabled = selectionHost.getKeyTypeSelection().enabled();
+            Map<AEKeyType, Boolean> enabled = selectionHost.getKeyTypeSelection().enabled();
             if (!importKeyTypes.keyTypes().equals(enabled)) {
                 importKeyTypes = new SyncedKeyTypes(enabled);
             }

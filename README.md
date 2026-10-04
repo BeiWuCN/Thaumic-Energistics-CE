@@ -28,13 +28,17 @@
 
 ## 编译
 
-需要 JDK 21，然后 `gradlew build`。依赖不走公共 maven，放在 `libs/` 目录里（`build.gradle` 直接读这个目录）：
+需要 JDK 21，然后 `gradlew build`。依赖不走公共 maven，放在 `libs/` 目录里（`build.gradle` 直接读这个目录，7 个 jar 见 `libs/README.md`）：
 
 - Thaumaturge：<https://github.com/Leclowndu93150/Thaumaturge/> —— 去它的仓库或 release 拿，不要从这里转发
 - Applied Energistics 2 19.2.17：<https://modrinth.com/mod/ae2>
 - GuideME 21.1.x：<https://modrinth.com/mod/guideme>
 
-Curios、TerraBlender、JEI 只有开发时跑客户端/服务端才需要，都是公开依赖。
+下面这几个也放在 `libs/` 里，原因同上（其中 Thaumaturge 是前置模组，不在 Maven Central 上，所以本模组也不走公共 maven）：
+
+- JEI 19.57.x：<https://modrinth.com/mod/jei> —— 配方转移按钮
+- Jade 15.10.x：<https://modrinth.com/mod/jade> —— 机器顶部信息面板
+- Curios 9.5.x + TerraBlender 4.1.x：Thaumaturge 的运行前置，装它俩就能跑
 
 ## 鸣谢
 

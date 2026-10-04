@@ -7,13 +7,12 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * The server's half of the Knowledge Inscriber's crafting grid.
- *
- * <p>Same shape as {@link GhostGridSlot} and no payload: the server already holds the grid the machine
- * reads, and this slot is only here so both sides lay out the same number of slots at the same
- * coordinates.  Vanilla's slot sync compares the two by index, so they have to line up.
- *
- * <p>Picking up is refused. On the client a click means "clear this cell"; here it would mean taking an
- * item out of the machine, which would let a player pull ingredients they never put in.
+ * <ul>
+ * <li>Same shape as {@link GhostGridSlot} and no payload: the server already holds the grid the
+ * machine reads, and both sides must lay out the same slot count for vanilla's by-index sync.
+ * <li>Picking up is refused: on the client a click means "clear this cell", but here it would let a
+ * player pull out ingredients they never put in.
+ * </ul>
  */
 public class MachineGridSlot extends Slot {
 

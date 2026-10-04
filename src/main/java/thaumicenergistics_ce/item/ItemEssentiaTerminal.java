@@ -14,9 +14,8 @@ import thaumicenergistics_ce.part.PartEssentiaTerminal;
 
 /**
  * The Essentia Terminal as an item, for placing it on a cable.
- *
- * <p>Implements AE2's {@link IPartItem}, which is what makes AE2 treat it as a part at all: placing,
- * wrenching, the cable's own click handling and the part's model are all driven through this interface.
+ * Implementing {@link IPartItem} is what makes AE2 treat this as a part: placing, wrenching,
+ * the cable's click handling and the model are all driven through it.
  */
 public class ItemEssentiaTerminal extends Item implements IPartItem<PartEssentiaTerminal> {
 

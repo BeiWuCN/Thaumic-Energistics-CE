@@ -25,22 +25,11 @@ import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 
 /**
  * Putting the wireless backpack on a golem, taking it off again, and repainting it.
- *
- * <p>Three clicks, all of them on the golem:
- *
  * <ul>
- *   <li>a <em>linked</em> backpack in hand equips it, keeping the link;
- *   <li>a golem bell while sneaking takes it off and hands the backpack back with its link intact;
- *   <li>a block in hand repaints it, one skin per material - see {@link FacadeToSkinMapping}.
+ *   <li>Equip with a linked backpack, remove with a sneaking golem bell, repaint with a mapped block.
+ *   <li>Not an accessory: those use a fixed five-id atlas and a {@code final} item with no AE2 link.
+ *   <li>The link lives in the golem's persistent data, unsynced: {@link GolemBackpackTickHandler} pushes it.
  * </ul>
- *
- * <p>Not one of Thaumaturge's accessories: those are drawn from one fixed atlas of five ids, and their item
- * class is {@code final} and knows nothing about AE2 links. The link lives in the golem's persistent data
- * instead, which survives a chunk unload and a server restart - but not "pick the golem up", which returns a
- * placer item carrying only the golem's properties and experience.
- *
- * <p>Persistent data is not synced, so {@link GolemBackpackTickHandler} sends the skin and the connection
- * state to everyone tracking the golem.
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class GolemBackpackHandler {
@@ -52,17 +41,10 @@ public final class GolemBackpackHandler {
     /** The block the skin was chosen with, kept so it can be handed back. */
     static final String KEY_FACADE = "ThEBackpackFacade";
 
-    /**
-     * Golem UUID to decoded link, so the tick handler does not parse the same NBT twenty times a second.
-     * Weakly keyed, and refreshed by every writer below.
-     */
+    /** Golem UUID to decoded link: the tick handler must not re-parse the same NBT twenty times a second. */
     private static final Map<UUID, GlobalPos> LINK_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
 
-    /**
-     * Set {@code THAUMICENERGISTICS_BACKPACK_TRACE} to have every equip, removal, repaint and transfer
-     * print a line. The same switch-by-environment-variable the rest of this mod's machines use, and for
-     * the same reason: a golem on a server is hard to watch, and "nothing happened" is not a report.
-     */
+    /** Set {@code THAUMICENERGISTICS_BACKPACK_TRACE} to log each equip, removal, repaint and transfer. */
     static final boolean TRACE = System.getenv("THAUMICENERGISTICS_BACKPACK_TRACE") != null;
 
     private GolemBackpackHandler() {}
@@ -86,9 +68,8 @@ public final class GolemBackpackHandler {
         }
 
         if (held.getItem() instanceof ItemGolemWirelessBackpack backpack) {
-            // Client first, and only to swing: the server is where anything happens. Vanilla sends the
-            // interaction packet before this event either way, so cancelling locally does not hide the
-            // click from the server.
+            // Client only to swing: the server is where anything happens, and vanilla sends the interaction
+            // packet before this event either way, so cancelling locally does not hide the click from it.
             if (event.getLevel().isClientSide()) {
                 event.setCancellationResult(InteractionResult.SUCCESS);
                 event.setCanceled(true);
@@ -102,9 +83,8 @@ public final class GolemBackpackHandler {
         }
 
         if (held.getItem() instanceof ItemGolemBell) {
-            // Sneak, because the bell on its own is Thaumaturge's follow toggle and sneaking with it is
-            // how a golem is picked up - this branch has to run before that one, and cancelling is what
-            // stops the golem being pocketed along with its backpack.
+            // Sneak, because the bell alone is Thaumaturge's follow toggle; cancelling is what stops the
+            // golem being pocketed along with its backpack.
             if (!player.isShiftKeyDown()) {
                 return;
             }
@@ -146,9 +126,7 @@ public final class GolemBackpackHandler {
         }
         GlobalPos link = backpack.getLinkedPosition(held);
         if (link == null) {
-            // Unlinked backpacks are equipable in the reference build only in the sense that nothing
-            // happens: a backpack with no network is a decoration, and this refuses it rather than
-            // letting a player wonder why the golem never reaches anything.
+            // Refused: a backpack with no network is a decoration, and the golem would never reach anything.
             return false;
         }
 
@@ -176,9 +154,7 @@ public final class GolemBackpackHandler {
         backpack.set(AEComponents.WIRELESS_LINK_TARGET, link);
         golem.spawnAtLocation(backpack);
 
-        // The block the skin was chosen with goes back too - it was a real item the player spent, and
-        // holding on to it would make repainting a golem quietly consume the block. Creative gets
-        // nothing back, which is how the rest of the mod treats creative.
+        // The block goes back too: it was a real item the player spent, and repainting must not consume it.
         ItemStack facade = getFacade(golem);
         if (!facade.isEmpty() && !player.isCreative()) {
             golem.spawnAtLocation(facade);
@@ -219,8 +195,8 @@ public final class GolemBackpackHandler {
     }
 
     /**
-     * The reference build's sound, kept because it is the one a player already associates with putting
-     * something on a golem. Thaumaturge has its own clack for accessories; this is a backpack, not one.
+     * The reference build's sound, the one a player already associates with putting something on a golem.
+     * Thaumaturge has its own clack for accessories; this is a backpack, not one.
      */
     private static void playEquipSound(EntityThaumaturgeGolem golem) {
         golem.level().playSound(null, golem.getX(), golem.getY(), golem.getZ(),

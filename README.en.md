@@ -28,13 +28,17 @@ Plus a full Thaumonomicon tree, in English and Chinese.
 
 ## Building
 
-JDK 21 and `gradlew build`. Dependencies are not resolved from maven; they are read from `libs/`:
+JDK 21 and `gradlew build`. Dependencies are not resolved from maven; they are read from `libs/` (see `libs/README.md` for all seven):
 
 - Thaumaturge: <https://github.com/Leclowndu93150/Thaumaturge/> — get it from their repo or releases rather than redistributing it here
 - Applied Energistics 2 19.2.17: <https://modrinth.com/mod/ae2>
 - GuideME 21.1.x: <https://modrinth.com/mod/guideme>
 
-Curios, TerraBlender and JEI are needed for dev runs only and are publicly resolvable.
+These also live in `libs/`, for the same reason (Thaumaturge is a prerequisite mod that is not on Maven Central, so this mod does not use public maven either):
+
+- JEI 19.57.x: <https://modrinth.com/mod/jei> — the recipe transfer button
+- Jade 15.10.x: <https://modrinth.com/mod/jade> — the block info overlay
+- Curios 9.5.x + TerraBlender 4.1.x: Thaumaturge's runtime prerequisites
 
 ## Credits
 

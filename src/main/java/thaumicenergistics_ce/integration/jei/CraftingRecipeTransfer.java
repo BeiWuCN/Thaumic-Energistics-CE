@@ -27,20 +27,13 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
  * Lets JEI fill the Arcane Crafting Terminal's grid from an ordinary crafting recipe.
- *
- * <p>A second handler beside the arcane one, because a terminal's grid is nine ordinary slots and will
- * happily craft a vanilla recipe - a player who opens a plank recipe in JEI and finds the button missing
- * would reasonably read it as a broken terminal.
- *
- * <p>Unlike the arcane handler, this one <em>does</em> pass the recipe id, and that is not a difference in
- * taste: an ordinary crafting recipe is in the vanilla recipe manager, so
- * {@link FillCraftingGridFromRecipePacket} can look it up and read the ingredients itself. Handing it the
- * templates as well would be a second copy of an answer it already has.
- *
- * <p>Written out rather than left to JEI's own transfer handler. JEI can move stacks between slots, but it
- * only knows about the player's inventory - and on an ME crafting terminal the ingredients are supposed to
- * come out of the network. Sending AE2's packet means a terminal fills the same way whichever kind of
- * recipe is on screen.
+ * <ul>
+ * <li>A second handler beside the arcane one: the grid is nine plain slots, so a missing JEI button reads as broken.</li>
+ * <li>Unlike the arcane handler it passes the recipe id, which
+ *     {@link FillCraftingGridFromRecipePacket} resolves in the vanilla manager.</li>
+ * <li>Written out rather than left to JEI, which only knows the player's inventory; AE2's packet
+ *     pulls from the network.</li>
+ * </ul>
  */
 public class CraftingRecipeTransfer
         implements IRecipeTransferInfo<MenuArcaneCraftingTerminal, RecipeHolder<CraftingRecipe>>,
@@ -74,10 +67,8 @@ public class CraftingRecipeTransfer
     }
 
     /**
-     * Whether this recipe can be laid out in the grid.
-     *
-     * <p>Asked of the recipe rather than of the ingredient list, because a shaped recipe's dimensions are
-     * its own business and a 3x3 check on the flat list would accept a recipe that is 4 wide.
+     * Whether this recipe can be laid out in the grid. Asked of the recipe, not of the flat ingredient
+     * list: a 3x3 check on the list would accept a recipe that is 4 wide.
      */
     @Override
     public boolean canHandle(MenuArcaneCraftingTerminal menu, RecipeHolder<CraftingRecipe> recipe) {
@@ -97,7 +88,9 @@ public class CraftingRecipeTransfer
 
     // ---- IRecipeTransferHandler ----------------------------------------
 
+    // old 6-arg transferRecipe is the interface's only abstract method in JEI 19.57
     @Override
+    @SuppressWarnings("removal")
     public @Nullable IRecipeTransferError transferRecipe(
             MenuArcaneCraftingTerminal menu,
             RecipeHolder<CraftingRecipe> holder,
@@ -116,9 +109,8 @@ public class CraftingRecipeTransfer
             return null;
         }
 
-        // The templates travel empty on purpose: the packet resolves the recipe by id and reads its own
-        // ingredients, and a recipe that would not resolve is refused above. Handing over a second copy
-        // would be an answer the packet did not ask for.
+        // The templates travel empty: the packet resolves the recipe by id and reads its own ingredients,
+        // and a non-resolving recipe was refused above. A second copy would answer a question never asked.
         NonNullList<ItemStack> templates =
                 NonNullList.withSize(PartArcaneCraftingTerminal.GRID_SIZE, ItemStack.EMPTY);
         PacketDistributor.sendToServer(

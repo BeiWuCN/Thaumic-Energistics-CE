@@ -14,9 +14,8 @@ import thaumicenergistics_ce.part.PartVisInterface;
 
 /**
  * The Vis Interface as an item, for fitting it to a cable.
- *
- * <p>Same shape as this mod's other part items: implementing {@link IPartItem} directly is what AE2 checks
- * for, and doing it here keeps placement, tooltip and factory together.
+ * Implementing {@link IPartItem} directly is what AE2 checks for, so placement, tooltip and
+ * the part factory all stay in this one class.
  */
 public class ItemVisInterface extends Item implements IPartItem<PartVisInterface> {
 

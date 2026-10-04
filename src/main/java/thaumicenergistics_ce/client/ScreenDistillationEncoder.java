@@ -26,11 +26,10 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
     private static final ResourceLocation TEXTURE =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "textures/gui/distillation_encoder.png");
 
-    /**
-     * The panel the art draws, at the top-left of the 256-square texture. 234 rows, not 229: the art's opaque
-     * pixels run y=0..233 and the last five rows are the bottom bevel, which a 229-row window cut off.
-     */
+    /** The panel the art draws, at the top-left of the 256-square texture. */
     private static final int WIDTH = 176;
+
+    /** 234 rows, not 229: the art's opaque pixels run y=0..233 and the last five rows are the bottom bevel. */
     private static final int HEIGHT = 234;
 
     private static final int TITLE_X = 8;
@@ -41,10 +40,7 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
     /** How large an aspect is drawn in a well. Matches Thaumaturge's own GUI aspect size. */
     private static final int ASPECT_SIZE = 16;
 
-    /**
-     * The Encode button's top-left, in panel pixels: a 34x14 band of bare panel between the two pattern wells.
-     * It replaced an invisible 16x16 hotspot nobody could find, so encoding looked unimplemented.
-     */
+    /** The Encode button's top-left, in panel pixels: the 34x14 band of bare panel between the pattern wells. */
     private static final int BUTTON_X = 140;
     private static final int BUTTON_Y = 94;
 
@@ -71,7 +67,7 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
                 button -> menu.sendAction(EncoderActionPayload.ACTION_ENCODE, 0)));
     }
 
-    /** Keeps the button's enabled state honest from the same predicate the machine acts on; the server re-checks. */
+    /** Enables the button on the same predicate the machine acts on; the server re-checks. */
     @Override
     public void containerTick() {
         super.containerTick();
@@ -82,7 +78,7 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // Before anything else: the row comes from the source item, and a client menu is never told when it arrives.
+        // The row comes from the source item, and a client menu is never told when it arrives.
         menu.ensureAspects();
         renderBackground(graphics, mouseX, mouseY, partialTick);
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -107,9 +103,9 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
     }
 
     /**
-     * Draws the aspect icon over each filled well, with how much of it the item carries, and marks the
-     * picked one. Called from inside {@code super.render}, after the slots: the stack representations those
-     * draw exist only to give each well something to hit-test against, so covering them is the intent.
+     * Draws the aspect icon over each filled well with how much the item carries, marking the picked one.
+     * Called inside {@code super.render}, after the slots: the stack representations those draw exist only
+     * to give each well something to hit-test against, so covering them is the intent.
      */
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -118,10 +114,10 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
         List<Holder<IAspect>> aspects = menu.aspects();
         for (Slot slot : menu.slots) {
             if (slot instanceof AspectSelectSlot aspectSlot && aspectSlot.aspectIndex() < 0) {
-                // The picked well: its slot holds nothing either, because what goes here is a choice, not a stack.
+                // The picked well: its slot holds nothing, because what goes here is a choice, not a stack.
                 Holder<IAspect> picked = menu.pickedAspect();
                 if (picked != null) {
-                    // No amount on purpose: this well is the choice itself, and the well it came from shows the number.
+                    // No amount on purpose: this well is the choice itself, the source well shows the number.
                     AspectRendering.renderGui(graphics, font, slot.x, slot.y, picked, 0.0F);
                 }
                 continue;
@@ -133,15 +129,15 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
                 if (index < 0 || index >= aspects.size() || !menu.isAspectRevealed(index)) {
                     continue;
                 }
-                // Slot coordinates, not screen coordinates: renderLabels already runs inside the pose the panel
-                // offset has been applied to, and adding leftPos again put every icon at twice its distance.
+                // Slot coordinates, not screen: renderLabels already runs inside the panel-offset pose,
+                // and adding leftPos again put every icon at twice its distance.
                 int x = slot.x;
                 int y = slot.y;
-                // The amount goes to the renderer, which draws it in the well's corner: it is what the pattern outputs.
+                // The amount goes to the renderer, which draws it in the well's corner: the pattern's output.
                 AspectRendering.renderGui(graphics, font, x, y, aspects.get(index), menu.aspectAmountFor(index));
 
                 if (aspectSlot.isSelected()) {
-                    // A frame around the picked well, inset by one so it sits on the border; drawn, so it needs no art.
+                    // A frame around the picked well, inset by one to sit on the border; drawn, so no art.
                     graphics.renderOutline(x - 1, y - 1, ASPECT_SIZE + 2, ASPECT_SIZE + 2, 0xFFFFD700);
                 }
             }

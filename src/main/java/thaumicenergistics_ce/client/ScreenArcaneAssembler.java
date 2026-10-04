@@ -15,11 +15,9 @@ import thaumicenergistics_ce.gui.GuiLayout;
 import thaumicenergistics_ce.menu.MenuArcaneAssembler;
 
 /**
- * Screen for the Arcane Assembler: the reference screen's composition over the reference's own art.
- *
- * <p>The art is not one rectangle - its first 102 rows are 197 wide, everything below is 176 - so a
- * window-sized blit would paint the transparent wedge and drag the bar sprites parked below the panel into
- * view. The pieces are described in {@link GuiLayout} and composited here.
+ * The Arcane Assembler screen: pieces from {@link GuiLayout} composited over the reference's own art.
+ * That art is not one rectangle - its first 102 rows are 197 wide and the rest 176 - so a window-sized
+ * blit would paint the transparent wedge and drag the bar sprites parked below the panel into view.
  */
 public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAssembler> {
 
@@ -27,15 +25,10 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
     private static final ResourceLocation FALLBACK_TEXTURE =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "textures/gui/arcane_assembler.png");
 
-    /**
-     * Read from the block entity, not written here: as a second literal it disagreed with the machine it draws.
-     */
+    /** Read from the block entity: as a second literal it disagreed with the machine it draws. */
     private static final int VIS_BAR_MAX = BlockEntityArcaneAssembler.visBufferTarget();
 
-    /**
-     * A sixth of the pool, not the whole of it: the machine keeps one pool of {@link #VIS_BAR_MAX} shared by
-     * six bars, so scaling against the pool would draw a full machine as six nearly empty columns.
-     */
+    /** A sixth of the shared {@link #VIS_BAR_MAX} pool: scaling against it would show six near-empty columns. */
     private static final int VIS_BAR_MAX_PER_ASPECT =
             Math.max(1, VIS_BAR_MAX / GuiLayout.PRIMAL_COLUMNS);
 
@@ -109,8 +102,7 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
     }
 
     /**
-     * Draws AE2's "empty upgrade" icon into each empty upgrade slot, so the column reads as slots rather than
-     * as four anonymous recesses. The icon comes from AE2's sprite sheet, not this panel's art.
+     * AE2's "empty upgrade" icon in each empty slot, so the column reads as slots, not as recesses.
      */
     private void drawUpgradeIcons(GuiGraphics graphics) {
         GuiLayout.Grid grid = layout.upgradeSlots();
@@ -129,9 +121,8 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
     }
 
     /**
-     * Fills the vis columns built into the art. The troughs are part of the panel, so only the fill is drawn,
-     * cropped from the strip at the bottom of the texture and grown upwards. Each column reads its own source
-     * column, which is what gives the primal aspects their colours.
+     * Fills the vis columns built into the art: the troughs are part of the panel, so only the fill is
+     * drawn, cropped from the strip at the bottom and grown upwards, each column from its own source column.
      */
     private void drawVisColumns(GuiGraphics graphics) {
         GuiLayout.VisBars bars = layout.visBars();
@@ -153,16 +144,13 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
     }
 
     /**
-     * Fill fraction for a column. Columns 0-5 each read their own aspect through
-     * {@link MenuArcaneAssembler#getBarVis}; reading the one buffered pool drew all six at the same height.
-     *
-     * <p>Aura vis has no aspect of its own and is spread evenly, so the six moving together on an aura-fed
-     * machine is not a fault.
+     * Fill fraction for a column: columns 0-5 each read their own aspect through
+     * {@link MenuArcaneAssembler#getBarVis}; aura vis is spread evenly, so all six moving together is fine.
      */
     private float columnRatio(int index) {
         if (index >= GuiLayout.PRIMAL_COLUMNS) {
-            // Craft progress, and nothing else: falling back to "full whenever any vis is buffered" drew a
-            // complete bar for an idle assembler and made a cancelled job look like it was still finishing.
+            // Craft progress only: "full whenever any vis is buffered" would draw a complete bar on an
+            // idle assembler and make a cancelled job look like it was still finishing.
             float progress = menu.isCrafting() ? menu.getProgress() : 0.0F;
             if (TRACE_PROGRESS && Math.abs(progress - lastTracedProgress) > 0.001F) {
                 lastTracedProgress = progress;

@@ -1,5 +1,6 @@
 package thaumicenergistics_ce.item;
 
+import com.leclowndu93150.thaumaturge.api.casters.FocusEngine;
 import com.leclowndu93150.thaumaturge.api.casters.FocusPackage;
 import com.leclowndu93150.thaumaturge.api.casters.FocusSettings;
 import com.leclowndu93150.thaumaturge.content.casters.ItemFocus;
@@ -21,55 +22,28 @@ import net.minecraft.world.level.Level;
 import thaumicenergistics_ce.focus.FocusEffectAEWrench;
 
 /**
- * The AE2 wrench, as a focus you can put in a wand.
- *
- * <p>This is the item half of the focus; {@link FocusEffectAEWrench} is what it does.
- *
- * <h2>It ships assembled</h2>
- *
- * <p>The package - the programme the wand actually casts - is written onto the stack when the stack is
- * made, not left for the player to build at a focal manipulator. A wrench is a utility rather than a spell:
- * the manipulator's complexity, XP and crystal costs exist to price an effect you designed, and there is
- * nothing here to design. The original 1.7.10 focus was an ordinary craftable item for the same reason.
- *
- * <p>The package is installed by {@link #assemble}, which runs on every tick and again just before the
- * focus is put into a wand.
- *
- * <h2>Why not {@code getDefaultInstance}</h2>
- *
- * <p>That looked like the one place every route to a stack goes through, and it is not.
- * {@code Item.getDefaultInstance()} is {@code new ItemStack(this)} and the {@code ItemStack} constructor
- * copies the components of the stack that method returns - so an override that calls {@code super} and then
- * sets a component on the result sets it on a <em>different</em> stack than the caller ends up holding. Every
- * stack arrived without a package, and the item looked exactly like one that had it. This was found by the
- * gear self-test asserting on a freshly constructed stack, which is the only reason it is not still here.
+ * The AE2 wrench as a wand focus; the item half, {@link FocusEffectAEWrench} is what it does.
+ * <ul>
+ *   <li>The package is written onto the stack when it is made, not built at a focal manipulator: a wrench is a
+ *       utility, so there is nothing to design. {@link #assemble} installs it on every tick.</li>
+ *   <li>Not installed from {@code getDefaultInstance}: it returns {@code new ItemStack(this)}, whose constructor
+ *       copies that stack's components, so a component set on the {@code super} result never reaches the caller.</li>
+ * </ul>
  */
 public class ItemFocusAEWrench extends ItemFocus {
 
-    /**
-     * The root medium every wand cast starts from, and the one Thaumaturge's own foci name first.
-     *
-     * <p>Without it the package holds an effect and nothing else, and {@code CastExecutor} applies effects
-     * only to the targets a medium produced: {@code CastStreams.targets()} stays null, {@code applyEffect}
-     * returns {@code CastStreams.EMPTY}, and the wand spends vis on a cast that does nothing. The symptom is
-     * a focus that is silent, not one that errors.
-     */
+    /** The root medium every wand cast starts from; without it {@code CastExecutor} has no targets, so the
+     * cast silently does nothing and still costs vis. */
     private static final ResourceLocation ROOT = ResourceLocation.fromNamespaceAndPath("thaumaturge", "root");
 
-    /**
-     * The assembled package: root medium, then the wrench effect.
-     *
-     * <p>Built fresh each time rather than cached. {@code FocusPackage} is an immutable record and the
-     * caster id is deliberately absent, so two calls produce equal values; a static field would only be one
-     * more thing to invalidate.
-     *
-     * <p>{@code complexity} is set explicitly and is the vis price: {@link #visCost()} reads it as
-     * {@code complexity / 5}, Thaumaturge's own rule, and {@code FocusPackage.Builder} defaults it to
-     * <b>0</b> rather than deriving it from the units. A package built without it casts for nothing,
-     * which is a silently free spell rather than an error - the gear self-test asserts on it for that
-     * reason. The figure is the sum of the parts' own {@code complexity()} values, which is how
-     * Thaumaturge's manipulator arrives at one: the root medium contributes 10 and the wrench effect 10,
-     * so 20, which prices a use at 4 vis.
+    /** The assembled package: root medium, then the wrench effect.
+     * <ul>
+     *   <li>Built fresh each call: {@code FocusPackage} is an immutable record with no caster id, so two calls
+     *       are equal and a static cache would only add something to invalidate.</li>
+     *   <li>{@code complexity} must be set explicitly - {@code FocusPackage.Builder} defaults it to {@code 0},
+     *       and {@link #visCost()} reads it as {@code complexity / 5}. Root 10 plus effect 10 is 20, so one use
+     *       costs 4 vis.</li>
+     * </ul>
      */
     public static FocusPackage wrenchPackage() {
         int complexity = rootComplexity() + new FocusEffectAEWrench().complexity(FocusSettings.empty());
@@ -82,26 +56,20 @@ public class ItemFocusAEWrench extends ItemFocus {
 
     /** The root medium's own complexity, read from the registry so it cannot drift from the real element. */
     private static int rootComplexity() {
-        var element = com.leclowndu93150.thaumaturge.api.casters.FocusEngine.element(ROOT);
+        var element = FocusEngine.element(ROOT);
         return element == null ? 0 : element.complexity(FocusSettings.defaults(element));
     }
 
-    /**
-     * What one wrench use costs: the package's complexity over five, Thaumaturge's rule for a focus
-     * ({@code ItemFocus.getVisCost}). Derived from the package rather than written down here, so the price
-     * cannot drift from what the wand casts.
-     *
-     * <p>{@link FocusEffectAEWrench} charges this once a wrench has acted; the wand's own charge cannot,
-     * because it runs before the cast is known to do anything - see {@link #getVisCost}.
-     */
+    /** What one wrench use costs - the package's complexity over five, Thaumaturge's rule for a focus
+     * ({@code ItemFocus.getVisCost}) - derived from the package so the price cannot drift from the cast.
+     * {@link FocusEffectAEWrench} charges it after a wrench has acted; see {@link #getVisCost} for why
+     * the wand's own charge is zero. */
     public static float visCost() {
         return wrenchPackage().complexity() / 5.0F;
     }
 
-    /**
-     * Writes the package onto a stack that has none. Idempotent and cheap after the first call, so callers
-     * do not have to know whether a stack has been through here. This is the only place a package is set.
-     *
+    /** Writes the package onto a stack that has none; the only place a package is set. Idempotent, so callers
+     * need not know whether a stack has been through here.
      * @return true if it wrote one now, false if the stack already had one or is empty
      */
     public static boolean assemble(ItemStack stack) {
@@ -112,13 +80,8 @@ public class ItemFocusAEWrench extends ItemFocus {
         return true;
     }
 
-    /**
-     * A stack with the package already written.
-     *
-     * <p>For callers that present the item rather than hand it out - the creative tab, a self-test - where
-     * there is no tick and no use to hang the assembly off. Written as one call so no caller has to remember
-     * to do it.
-     */
+    /** A stack with the package already written, for callers with no tick to hang assembly off (creative
+     * tab, self-test). */
     public static ItemStack assembledStack() {
         ItemStack stack = new ItemStack(thaumicenergistics_ce.init.ModItems.FOCUS_AEWRENCH.get());
         assemble(stack);
@@ -129,15 +92,10 @@ public class ItemFocusAEWrench extends ItemFocus {
         super(properties, 0);
     }
 
-    /**
-     * Zero, deliberately: {@code ItemWand.use} charges a focus before the cast runs, when nothing is known
-     * about what the caster is looking at, so any price here is spent on a cast that takes nothing apart.
-     * The real price is {@link #visCost()}, charged by {@link FocusEffectAEWrench} once a wrench action has
-     * actually happened.
-     *
-     * <p>The wand's tooltip and the caster HUD read this same method for their figure, so they show the
-     * up-front price - nothing - rather than the price of a use.
-     */
+    /** Zero, deliberately: {@code ItemWand.use} charges a focus before the cast runs, when nothing is known
+     * about what the caster is looking at. The real price is {@link #visCost()}, charged by
+     * {@link FocusEffectAEWrench} once a wrench action has happened; the wand's tooltip and the caster HUD
+     * read this method, so they show the up-front price - nothing. */
     @Override
     public float getVisCost(ItemStack focusStack) {
         return 0.0F;
@@ -161,14 +119,12 @@ public class ItemFocusAEWrench extends ItemFocus {
             return InteractionResultHolder.pass(stack);
         }
         if (!wand.getFocusStack(otherStack).isEmpty()) {
-            // The wand already holds a focus. Succeeding without installing anything would swallow the
-            // click and tell the player nothing, so pass and let the wand have it.
+            // Pass rather than succeed: succeeding would swallow the click without installing anything.
             return InteractionResultHolder.pass(stack);
         }
 
         if (!level.isClientSide()) {
-            // Assembled here as well as on the tick: a stack taken straight from a recipe result and used
-            // has never been ticked, and would otherwise go into the wand inert.
+            // Also here, not only on the tick: a stack straight from a recipe result has never been ticked.
             assemble(stack);
             wand.setFocus(otherStack, stack.copyWithCount(1));
             level.playSound(null, player.blockPosition(), SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.PLAYERS,

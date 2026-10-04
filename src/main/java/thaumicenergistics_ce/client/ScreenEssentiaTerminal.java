@@ -18,42 +18,19 @@ import thaumicenergistics_ce.network.EssentiaDepositPayload;
 import thaumicenergistics_ce.network.EssentiaFillPayload;
 
 /**
- * The Essentia Terminal's screen.
- *
- * <p>Everything visible is AE2's: the item list, the search box, the sort buttons, the scrollbar - the
- * whole terminal, driven by the same menu. This class only adds the two gestures, because essentia does
- * not travel as an item and AE2's click handling has no operation for "move the contents of the thing I am
- * holding".
- *
- * <p>Both gestures need a jar or a phial. With anything else held - an essentia crystal, a label, an
- * ordinary item - the screen handles no clicks at all and AE2 behaves exactly as it always does, so
- * moving items in and out of the network is untouched:
- *
+ * The Essentia Terminal's screen: AE2's terminal wholesale, plus two gestures of its own.
  * <ul>
- *   <li><b>Right-click</b> anywhere with a <b>filled</b> container empties it into the network. A jar stays
- *       a jar; a phial comes back as empty glass.
- *   <li><b>Left-click</b> a <b>network entry</b> with an <b>empty</b> container draws that aspect out of
- *       the network and into the container - a phial in one go, a jar as far as it will fill.
- *   <li><b>Shift-right-click</b> a container <b>in a player slot</b> empties that slot's container, where
- *       it lies.
- * </ul>
- *
- * <p>The two refusals are deliberate. A container with something in it is not filled, because the second
- * aspect would overwrite the first; a container with nothing in it is not emptied, because there is
- * nothing to empty.
- *
- * <h2>A held container is never inserted into the network</h2>
- *
- * <p>AE2's left-click on a grid entry is <em>insert what the cursor holds</em>, and that is exactly what
- * must not happen to a jar or a phial: one click on an entry that is not essentia used to pull a single
- * phial out of the carried stack and into the network. Holding a container on the cursor therefore
- * swallows the grid-entry click unless it is the fill gesture above - and {@link #slotClicked} covers the
- * drag path, which reaches the same AE2 code without passing through a click. That is a deliberate
- * deviation from the reference build, which leaves left-click to AE2 and has the leak.
- */
+ *   <li>Everything visible is AE2's and driven by the same menu; the gestures exist because essentia does
+ *       not travel as an item and AE2 has no "move what I am holding" operation.
+ *   <li>Both need a jar or a phial: <b>right-click</b> with a filled one empties it into the network,
+ *       <b>left-click</b> an entry with an empty one draws that aspect out.
+ *   <li><b>Shift-right-click</b> a container in a player slot empties it where it lies.
+ *   <li>A held container is never inserted - AE2's entry click means <em>insert what the cursor holds</em>,
+ *       which would pull a phial out of the stack. {@link #slotClicked} covers the drag path.
+ * </ul> */
 public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal> {
 
-    /** Diagnostic tag. One line per click that involves a container, and nothing per tick. */
+    /** Diagnostic tag: one line per container click, never per tick. */
     private static final String TAG = "[essentia-terminal] ";
 
     public ScreenEssentiaTerminal(
@@ -72,30 +49,26 @@ public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    /**
-     * The drag path into AE2's grid handler, which would scatter the cursor's container over the list one
-     * item at a time. Dragging is not one of the two gestures, so it is refused outright.
-     */
+    /** Refuses the drag path into AE2's grid handler, which would scatter the cursor's container over the
+     * list one item at a time. */
     @Override
     protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type) {
         if (slot instanceof RepoSlot && cursorIsContainer()) {
-            // Deliberately silent: slotClicked fires once per slot the cursor crosses, so a drag across
-            // the list would write a line per cell. Nothing happened, and the click path logs the one
-            // line per player action that is worth having.
+            // Silently: slotClicked fires once per slot the cursor crosses, so a drag would log per cell.
             return;
         }
         super.slotClicked(slot, slotId, mouseButton, type);
     }
 
-    /** Right-click: empty a filled container into the network. @return whether the click was ours */
+    /** Right-click: empty a filled container into the network.
+     * @return whether the click was ours */
     private boolean handleRightClick() {
-        // Shift-right-click on a player slot: empty that slot's container, where it lies.
+        // Shift-right-click on a player slot: empty that slot's container where it lies.
         if (hasShiftDown() && hoveredSlot != null && menu.isPlayerSideSlot(hoveredSlot)) {
             ItemStack inSlot = hoveredSlot.getItem();
             if (EssentiaFillHelper.isSupportedContainer(inSlot)) {
-                // The menu's slot id, not the slot's index inside the player's inventory: AE2 puts view-cell
-                // and upgrade slots in front of the player's, so the two numbers differ and the server
-                // resolves this against its own slot list.
+                // The menu's slot id, not the inventory index: AE2 puts view-cell and upgrade slots ahead
+                // of the player's, and the server resolves this against its own slot list.
                 PacketDistributor.sendToServer(new EssentiaDepositPayload(
                         menu.containerId, menu.slots.indexOf(hoveredSlot), inSlot));
                 return true;
@@ -108,14 +81,12 @@ public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal
             return false;
         }
         if (!EssentiaFillHelper.isContainerEmpty(container)) {
-            // Filled: its contents go into the network. A container with nothing in it has nothing to
-            // deposit, and is left to the left-click and to AE2.
+            // Filled: the contents go into the network; empty has nothing to deposit.
             PacketDistributor.sendToServer(new EssentiaDepositPayload(
                     menu.containerId, whereHeld(), container));
             return true;
         }
-        // An empty container right-clicked on an entry would otherwise be read as "put this item in the
-        // network", which is not what a jar or a phial is for here. Swallow it.
+        // Swallow it: AE2 reads the right-click as "put this item in the network".
         return true;
     }
 
@@ -128,8 +99,8 @@ public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal
         if (hoveredSlot instanceof RepoSlot repoSlot) {
             var entry = repoSlot.getEntry();
             if (cursorIsContainer() && entry != null && !(entry.getWhat() instanceof AEssentiaKey)) {
-                // Logged only in the surprising case - a container on the cursor over an entry that is not
-                // essentia, which is exactly where the insertion leak used to happen.
+                // Logged only in the surprising case: a container on the cursor over a non-essentia
+                // entry, where the insertion leak used to happen.
                 ThaumicEnergistics.LOG.info(TAG + "entry {} is not essentia ({}), so a held container"
                         + " cannot be drawn from here", entry.getWhat().getId(),
                         entry.getWhat().getClass().getSimpleName());
@@ -142,14 +113,14 @@ public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal
                         new EssentiaFillPayload(menu.containerId, key.getId(), whereHeld(), container));
                 return true;
             }
-            // Not the fill gesture, and still a grid entry: AE2 would insert whatever the cursor holds,
-            // one item per click. A jar or a phial goes in through nothing but the two gestures above.
+            // Still a grid entry: AE2 would insert what the cursor holds, one item per click. A jar or
+            // a phial goes in only through the two gestures above.
             if (cursorIsContainer()) {
                 ThaumicEnergistics.LOG.info(TAG + "entry click refused: the cursor holds a container,"
                         + " which is never inserted into the network");
                 return true;
             }
-            // The cursor is empty, so AE2's click is a withdrawal and there is nothing to leak.
+            // The cursor is empty, so AE2's click is a withdrawal: nothing to leak.
             return false;
         }
         return false;
@@ -161,14 +132,8 @@ public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal
         return !carried.isEmpty() && EssentiaFillHelper.isSupportedContainer(carried);
     }
 
-    /**
-     * The container the gesture acts on: what the cursor holds, or the main hand when the cursor is empty.
-     *
-     * <p>The main hand is a fallback rather than a second source, so the two never disagree about which
-     * stack is meant - {@link #whereHeld} is the same choice, made once for the packet.
-     *
-     * @return the container, or {@code null} when neither place holds a jar or a phial
-     */
+    /** The cursor's stack, or the main hand when the cursor is empty - {@link #whereHeld} picks the same.
+     * @return the container, or {@code null} when neither holds a jar or a phial */
     private ItemStack heldContainer() {
         ItemStack carried = menu.getCarried();
         if (!carried.isEmpty()) {

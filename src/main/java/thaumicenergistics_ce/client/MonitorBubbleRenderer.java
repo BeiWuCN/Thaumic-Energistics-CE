@@ -13,7 +13,6 @@ import java.util.WeakHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -23,25 +22,24 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
 
 /**
- * The bubble the Infusion Monitor floats above itself: how dangerous the altar it watches is, what that
- * altar is making, and whether the room can finish it.
- *
- * <p>Drawn, not spawned: the reference's {@code TextDisplay} entity could be left behind by a crash and had
- * to be found again after a reload.
+ * The bubble the Infusion Monitor floats above itself: how dangerous the altar is, what it is making,
+ * whether the room can finish it, and that it is drawn rather than spawned - a {@code TextDisplay}
+ * entity can be left behind by a crash.
  */
 public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInfusionMonitor> {
 
     /** How far above the block the panel floats - clear of the model's own top face. */
     private static final double HEIGHT = 1.7;
 
-    /** Text scale. Half a name tag's: this is a label on a machine, not a label on a distant entity. */
+    /** Text scale: half a name tag's, since this labels a machine, not a distant entity. */
     private static final float SCALE = 0.0125F;
 
-    /** Line spacing in text units; eleven is the floor: nine pixel glyphs plus a drop shadow overlap at ten. */
+    /** Line spacing in text units; eleven is the floor: glyphs plus a drop shadow overlap at ten. */
     private static final int LINE_HEIGHT = 11;
 
     /** The aspect chip, the gap to its badge, and the gap between one chip and the next. */
@@ -54,7 +52,7 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
     private static final int PANEL_FILL = 0xF0100010;
     private static final int BORDER_TOP = 0x505000FF;
     private static final int BORDER_BOTTOM = 0x5028007F;
-    /** The corner radius, in the panel's own units - two, the same as Jade's box. Ten read as far too round. */
+    /** Corner radius, in panel units: two, matching Jade's box; ten read as far too round. */
     private static final float CORNER_RADIUS = 2.0F;
 
     /** Border and fill sit at different depths: coplanar quads fight for the same depth and flicker. */
@@ -221,7 +219,7 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
         return rows;
     }
 
-    /** The aspect behind an id from the sync tag, or {@code null} if this client has never seen it. */
+    /** The aspect behind an id from the sync tag, or {@code null} when the client has not seen it. */
     private static Holder<IAspect> aspectOf(String id) {
         Minecraft minecraft = Minecraft.getInstance();
         ResourceLocation location = ResourceLocation.tryParse(id);

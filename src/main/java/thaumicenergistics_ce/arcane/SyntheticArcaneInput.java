@@ -13,10 +13,10 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A minimal {@link IArcaneCraftingInput} for machines, and for validating recipes outside a workbench.
+ * A minimal {@link IArcaneCraftingInput} for machines and for validating recipes off a workbench.
  *
- * <p>Slot order matches {@code InventoryArcaneWorkbench}: nine grid slots, then six crystal slots, then
- * the wand slot. The wand slot is always empty here because a machine pays with vis, not with a wand.
+ * Slot order matches {@code InventoryArcaneWorkbench}: nine grid slots, then six crystal slots,
+ * then the wand slot - always empty here, because a machine pays with vis, not with a wand.
  */
 public final class SyntheticArcaneInput implements IArcaneCraftingInput {
     /** Grid slots, matching {@code InventoryArcaneWorkbench.CRAFTING_SLOTS}. */
@@ -63,7 +63,7 @@ public final class SyntheticArcaneInput implements IArcaneCraftingInput {
     /**
      * Builds an input from a pattern's grid plus the crystal stacks to expose in the crystal slots.
      *
-     * @param crystals up to six stacks; further entries are ignored
+     * @param crystals up to six stacks, further entries are ignored
      */
     public static SyntheticArcaneInput of(ThEArcanePattern pattern, List<ItemStack> crystals) {
         List<ItemStack> items = new ArrayList<>(SIZE);

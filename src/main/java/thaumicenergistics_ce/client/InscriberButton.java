@@ -8,14 +8,11 @@ import net.minecraft.resources.ResourceLocation;
 
 /**
  * The Knowledge Inscriber's button, drawn from the reference build's own two-state sprite.
- *
- * <p>The sprite sheet is 32x32 and holds two 32x13 frames stacked vertically: the idle one at v=0 and
- * the hovered one at v=15. There is no disabled frame - the reference leaves the label to say what is
- * wrong (No Core, Invalid, Full) and greys nothing, so this draws the idle frame whenever the button is
- * not hovered, enabled or not.
- *
- * <p>The label is centred and drawn two pixels from the top, which is what the reference's own button
- * subclass does; the vanilla centring would sit too low for a 13-pixel-tall widget.
+ * <ul>
+ * <li>32x32 sheet, two 32x13 frames: idle at v=0, hovered at v=15. No disabled frame - the label
+ * says what is wrong (No Core, Invalid, Full), so idle is drawn whenever not hovered.
+ * <li>Label is centred two pixels down, as the reference does; vanilla centring sits too low.
+ * </ul>
  */
 public class InscriberButton extends Button {
 

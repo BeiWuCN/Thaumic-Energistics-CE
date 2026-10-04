@@ -25,9 +25,10 @@ import thaumicenergistics_ce.item.ItemWirelessEssentiaTerminal;
 
 /**
  * Item registration, including the block items for {@link ModBlocks}.
- *
- * <p>Block items live here because NeoForge's {@code registerSimpleBlockItem} helpers belong to the
- * item registry while the block holders come from {@link ModBlocks}, so this class reads both.
+ * <ul>
+ *   <li>Block items live here because NeoForge's {@code registerSimpleBlockItem} helpers belong to the item
+ *       registry while the block holders come from {@link ModBlocks}, so this class reads both.
+ * </ul>
  */
 public final class ModItems {
     public static final DeferredRegister.Items REGISTRY = DeferredRegister.createItems(ThEIds.MODID);
@@ -37,18 +38,8 @@ public final class ModItems {
             "knowledge_core", ItemKnowledgeCore::new, new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
 
     /**
-     * The item form of one arcane pattern, which exists so AE2's crafting CPU can save and reload its tasks.
-     *
-     * <p>Built through AE2's own {@code encodedPatternItemBuilder} rather than as a plain item, because the
-     * CPU persists a task as a single {@code AEItemKey} tag and rebuilds it with
-     * {@code PatternDetailsHelper.decodePattern}, which only answers for an {@code EncodedPatternItem}. A
-     * plain item would register, render and tooltip perfectly and still fail that one check - and the failure
-     * is silent: the CPU drops the task while keeping the job, so the plan hangs forever. See
-     * {@link ItemArcanePattern} and docs/RECIPES-AND-BUSES.md §23.
-     *
-     * <p>The builder is called on the way up and its result is what gets registered, so the item is not a
-     * {@code DeferredItem} of its own class - AE2 hands back the {@code EncodedPatternItem} it constructed
-     * around our decoder, and that is the object that has to be in the registry.
+     * Not a plain item: AE2's CPU saves a task as one {@code AEItemKey} tag and rebuilds it with
+     * {@code PatternDetailsHelper.decodePattern}, which answers only for {@code EncodedPatternItem}.
      */
     public static final DeferredItem<Item> ARCANE_PATTERN =
             REGISTRY.register("arcane_pattern", () -> ItemArcanePattern.build());
@@ -120,13 +111,7 @@ public final class ModItems {
     public static final DeferredItem<ItemWirelessConnector> WIRELESS_CONNECTOR = REGISTRY.registerItem(
             "wireless_connector", ItemWirelessConnector::new, new Item.Properties());
 
-    /**
-     * The decorative figure.
-     *
-     * <p>A plain block item, registered explicitly rather than through the simple helper: the helper names
-     * the item after the block, and this block's registry name is the only name it has - there is no
-     * separate in-world name to give it.
-     */
+    /** The decorative figure; a plain block item, as the block's registry name is its only name. */
     public static final DeferredItem<BlockItem> ALKUSURE86_FUMO =
             REGISTRY.registerSimpleBlockItem(ModBlocks.ALKUSURE86_FUMO);
 
@@ -135,10 +120,8 @@ public final class ModItems {
             REGISTRY.registerItem("vis_interface", ItemVisInterface::new, new Item.Properties());
 
     /**
-     * The AE2 wrench, worn as a wand focus.
-     *
-     * <p>Not a {@code PartItem}: it is not a cable part, it is a focus, and Thaumaturge's foci are ordinary
-     * items whose behaviour lives in the package component on the stack.
+     * The AE2 wrench, worn as a wand focus. Not a {@code PartItem}: it is a focus, and Thaumaturge's foci
+     * are ordinary items whose behaviour lives in the package component on the stack.
      */
     public static final DeferredItem<ItemFocusAEWrench> FOCUS_AEWRENCH = REGISTRY.registerItem(
             "focus_aewrench",
@@ -157,17 +140,12 @@ public final class ModItems {
                     "arcane_crafting_terminal", ItemArcaneCraftingTerminal::new, new Item.Properties());
 
     // ---- Essentia storage components --------------------------------------
-    //
-    // Sizes are bytes, as AE2's own components are: the capacity in essentia is eight times the number
-    // in the name, so a 1k component holds 8192. See ItemEssentiaCell.
+    // Sizes are bytes, as AE2's components are: capacity in essentia is eight times the name, so a 1k
+    // component holds 8192.
 
     /**
-     * The housing half of a storage cell.
-     *
-     * <p>A storage cell is two things: a component, which carries the capacity and is made at an arcane
-     * workbench, and this casing, which is ordinary crafting. Building cells straight from components -
-     * which this mod did first - makes a component look like a finished cell and skips the step that gives
-     * a player something to make before they have any vis.
+     * The housing half of a storage cell: made from ordinary crafting, unlike the component that carries the
+     * capacity and is made at an arcane workbench.
      */
     public static final DeferredItem<Item> STORAGE_CASING = REGISTRY.registerItem(
             "storage_casing", Item::new, new Item.Properties().stacksTo(64));
@@ -191,9 +169,8 @@ public final class ModItems {
             new Item.Properties().rarity(Rarity.EPIC));
 
     // ---- The arcane half of a cell ----------------------------------------
-    //
-    // Plain items: the capacity they describe lives in the cell they are built into, and a component on
-    // its own is only an ingredient. The tiers are the byte figures AE2 uses for its own components.
+    // Plain items: the capacity lives in the cell they are built into, so a component alone is only an
+    // ingredient. Tiers are the byte figures AE2 uses for its own components.
 
     public static final DeferredItem<Item> STORAGE_COMPONENT_1K = REGISTRY.registerItem(
             "storage_component_1k", Item::new, new Item.Properties().stacksTo(64));
@@ -214,10 +191,8 @@ public final class ModItems {
             new Item.Properties().stacksTo(64).rarity(Rarity.RARE));
 
     // ---- Essentia machine cores -------------------------------------------
-    //
-    // Plain items, as in the reference build: they are ingredients for the terminal and the buses, and
-    // have no behaviour of their own. AE2's annihilation and formation cores are the pattern they follow.
-
+    // Plain items with no behaviour: ingredients for the terminal and the buses, the shape AE2 uses for
+    // its annihilation and formation cores.
     /** Pulls essentia one way. Ingredient of the import bus and the terminal. */
     public static final DeferredItem<Item> DIFFUSION_CORE = REGISTRY.registerItem(
             "diffusion_core", Item::new, new Item.Properties().stacksTo(64));
@@ -251,10 +226,8 @@ public final class ModItems {
             new Item.Properties().stacksTo(64).rarity(Rarity.RARE));
 
     /**
-     * The Essentia Terminal, reached from anywhere rather than from a cable.
-     *
-     * <p>The power capacity is a supplier so the item reads it on demand rather than storing it - the same
-     * shape AE2's own wireless terminals use.
+     * The Essentia Terminal, reached from anywhere rather than from a cable. The power capacity is a
+     * supplier so the item reads it on demand, the shape AE2's own wireless terminals use.
      */
     public static final DeferredItem<ItemWirelessEssentiaTerminal> WIRELESS_ESSENTIA_TERMINAL =
             REGISTRY.registerItem(

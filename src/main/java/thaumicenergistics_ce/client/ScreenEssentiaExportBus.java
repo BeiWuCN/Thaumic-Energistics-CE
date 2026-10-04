@@ -7,10 +7,8 @@ import net.minecraft.world.entity.player.Inventory;
 import thaumicenergistics_ce.menu.MenuEssentiaExportBus;
 
 /**
- * The Essentia Export Bus's screen.
- *
- * <p>A named class for the same reason as the import bus's: JEI's ghost ingredient handler registers
- * against a screen class.
+ * The Essentia Export Bus's screen; it must be a named class because JEI's ghost ingredient
+ * handler registers against a screen class.
  */
 public class ScreenEssentiaExportBus extends UpgradeableScreen<MenuEssentiaExportBus> {
 

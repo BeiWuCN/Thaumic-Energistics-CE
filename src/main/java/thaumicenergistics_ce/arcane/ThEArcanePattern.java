@@ -5,10 +5,8 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.recipe.IArcaneRecipe;
 import com.leclowndu93150.thaumaturge.api.recipe.ResearchGate;
-import com.leclowndu93150.thaumaturge.content.recipe.workbench.ArcaneCraftingInput;
 import com.leclowndu93150.thaumaturge.content.recipe.workbench.ArcaneShapedCraftingRecipe;
 import com.leclowndu93150.thaumaturge.content.recipe.workbench.ArcaneShapelessCraftingRecipe;
-import com.leclowndu93150.thaumaturge.content.taint.item.EssentiaCrystalFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,13 +36,14 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThaumicEnergistics;
+import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
- * A fully resolved arcane crafting job: the grid layout, the vis price and the primal crystal requirement
- * of one Thaumaturge arcane recipe.
- *
- * <p>Instances are derived from the live {@link RecipeManager} rather than persisted as recipes, so datapack
- * changes take effect on the next reload. Only {@link #save}/{@link #load} round-trip them into a core.
+ * One resolved Thaumaturge arcane crafting job: grid layout, vis price, primal crystals.
+ * <ul>
+ *   <li>Derived from the live {@link RecipeManager}: datapack edits apply on the next reload.
+ *   <li>Only {@link #save}/{@link #load} round-trip one into a knowledge core.
+ * </ul>
  */
 public record ThEArcanePattern(
         ItemStack result,
@@ -58,25 +57,20 @@ public record ThEArcanePattern(
         @Nullable Integer researchStage,
         List<TagKey<Item>> cellTags) {
 
-    /** Vis charged per primal crystal consumed, matching Thaumaturge's own wand-substitution rate. */
+    /** Vis per primal crystal consumed, matching Thaumaturge's own wand-substitution rate. */
     public static final int CRYSTAL_SUBSTITUTE_VIS = 2;
 
     /** Surcharge for paying with ambient vis instead of a wand, mirroring Thaumaturge. */
     public static final float CRAFT_AURA_SURCHARGE = 1.25F;
 
-    /** Maximum arcane grid cells, matching the workbench's 3x3. */
+    /** Grid cells, matching the workbench's 3x3: the grid is square, {@link #GRID_SIDE} per side. */
     public static final int MAX_GRID = 9;
 
     public static final int GRID_SIDE = 3;
 
     // ----- Candidate narrowing, for the inscriber's grid -----
-    //
-    // Resolving a grid used to ask every arcane recipe whether it fits - 308 of them, each tested against 9
-    // cells at every offset and both mirrored. So each *item* is indexed by the recipes whose ingredients
-    // accept it, and a recipe is only tested when every non-empty cell holds an item one of them could take.
-    //
-    // The mirror-image question - "does the grid contain every item this recipe accepts?" - threw away every
-    // tagged recipe: a tag accepts sixteen items and is satisfied by one, and 46 of 308 stopped resolving.
+    // Indexing each item by its accepting recipes: 308 recipes x 9 cells x 2 mirrors is too slow.
+    // The inverse test - does the grid hold everything a recipe accepts? - dropped 46 of 308 tags.
 
     private static final Map<Item, Set<ResourceLocation>> ITEM_RECIPES = new HashMap<>();
 
@@ -86,14 +80,13 @@ public record ThEArcanePattern(
         result = result.copy();
         grid = List.copyOf(grid);
         ingredients = List.copyOf(ingredients);
-        // Not List.copyOf: cellTags holds nulls for plain-item cells and List.copyOf rejects nulls, which
-        // threw on every pattern read back out of a core. Copied and frozen by hand instead.
+        // Not List.copyOf: cellTags holds nulls and List.copyOf rejects them.
         cellTags = Collections.unmodifiableList(new ArrayList<>(cellTags));
     }
 
     /**
-     * The tag a grid cell stands for, or {@code null} when the cell names a plain item. Carried on the
-     * pattern because a pattern read back out of a knowledge core has no recipe behind it - see {@link #load}.
+     * The tag a grid cell stands for, or {@code null} for a plain item: carried because a pattern from
+     * a core has no recipe behind it - see {@link #load}.
      */
     public @Nullable TagKey<Item> cellTag(int cell) {
         if (cell < 0 || cell >= cellTags.size()) {
@@ -102,10 +95,7 @@ public record ThEArcanePattern(
         return cellTags.get(cell);
     }
 
-    /**
-     * Every item that satisfies a grid cell: the tag's members when it has one, the cell's own item
-     * otherwise. Lets an assemble request be filled by any member of the entry.
-     */
+    /** Every item satisfying a grid cell: the tag's members, or the cell's own item. */
     public List<ItemStack> cellChoices(int cell) {
         if (cell < 0 || cell >= grid.size()) {
             return List.of();
@@ -117,11 +107,11 @@ public record ThEArcanePattern(
         }
         List<ItemStack> choices = new ArrayList<>();
         BuiltInRegistries.ITEM.getTag(tag).ifPresent(holders -> holders.forEach(holder -> {
-            // A tag names items and an ingredient built from one carries no components, so a plain stack.
+            // The tag names items and its ingredient carries no components, so a plain stack.
             choices.add(new ItemStack(holder.value()));
         }));
         if (choices.isEmpty() && !display.isEmpty()) {
-            // An empty or not-yet-loaded tag: the stored display item is the honest answer.
+            // Empty or not-yet-loaded tag: fall back to the stored display item.
             choices.add(display);
         }
         return choices;
@@ -129,7 +119,7 @@ public record ThEArcanePattern(
 
     // ----- Price: what a craft costs, and how it is paid -----
 
-    /** Vis required for the primal part of the crystal requirement, at {@link #CRYSTAL_SUBSTITUTE_VIS} each. */
+    /** Vis for the crystal requirement's primal part, {@link #CRYSTAL_SUBSTITUTE_VIS} per crystal. */
     public int crystalVis() {
         return primalCrystals().totalAmount() * CRYSTAL_SUBSTITUTE_VIS;
     }
@@ -139,18 +129,15 @@ public record ThEArcanePattern(
         return Math.max(0, baseVis) + crystalVis();
     }
 
-    /**
-     * Total vis actually charged. The surcharge is the workbench's own for paying with aura, and the
-     * assembler always pays in aura, so it applies whenever the recipe wants crystals at all.
-     */
+    /** Total vis charged: the workbench's aura surcharge applies whenever the recipe wants crystals. */
     public int chargedVis() {
         float modifier = crystals.entries().isEmpty() ? 1.0F : CRAFT_AURA_SURCHARGE;
         return (int) Math.ceil(totalVis() * modifier);
     }
 
     /**
-     * The crystals that cannot be paid with vis and so have to be supplied as items: the non-primal ones. A
-     * compound crystal's value is the primals it is made of, and Thaumaturge does not substitute those.
+     * The crystals supplied as items: the non-primal ones. A compound crystal counts as its primals,
+     * which Thaumaturge does not substitute.
      */
     public AspectList crystalItems() {
         return nonPrimalCrystals();
@@ -174,7 +161,7 @@ public record ThEArcanePattern(
         return filtered;
     }
 
-    /** Whether a hand-filled grid has nothing in it. The machine and the menu share this definition. */
+    /** Whether a hand-filled grid has nothing in it; the machine and the menu share this definition. */
     public static boolean isGridEmpty(List<ItemStack> cells) {
         for (ItemStack cell : cells) {
             if (!cell.isEmpty()) {
@@ -207,8 +194,8 @@ public record ThEArcanePattern(
     // ----- Resolution against the live recipe manager -----
 
     /**
-     * Finds the arcane recipe producing {@code result} and converts it into a pattern, or {@code null} when
-     * no arcane recipe produces that exact stack.
+     * Converts the arcane recipe producing {@code result} into a pattern, or {@code null} when none
+     * produces that exact stack.
      */
     public static @Nullable ThEArcanePattern fromResult(@Nullable Level level, ItemStack result) {
         if (level == null || result.isEmpty()) {
@@ -231,9 +218,7 @@ public record ThEArcanePattern(
     }
 
     /**
-     * Finds the arcane recipe producing {@code output} whose grid accepts {@code patternInputs}, used to
-     * validate a player-encoded AE2 pattern against the recipe it claims to encode.
-     *
+     * Validates a player-encoded AE2 pattern against the arcane recipe it claims to encode.
      * @return the pattern, or {@code null} when no arcane recipe matches
      */
     public static @Nullable ThEArcanePattern fromEncoded(
@@ -258,8 +243,8 @@ public record ThEArcanePattern(
     }
 
     /**
-     * Whether every non-empty entry of {@code inputs} is something this recipe consumes: a grid cell or a
-     * crystal vis cannot pay for. Multiplicity is not checked; the live recipe is re-matched before a craft.
+     * Whether every non-empty {@code inputs} entry is consumed as a grid cell or a crystal: multiplicity
+     * is not checked, the live recipe is re-matched before the craft.
      */
     public boolean acceptsInputs(List<ItemStack> inputs) {
         int matched = 0;
@@ -281,7 +266,7 @@ public record ThEArcanePattern(
             if (stored.isEmpty()) {
                 continue;
             }
-            // A tag cell is satisfied by any member of the tag, not only by the item it displays.
+            // A tag cell is satisfied by any tag member, not just the displayed item.
             TagKey<Item> tag = cellTag(cell);
             if (tag != null) {
                 if (input.is(tag)) {
@@ -298,7 +283,7 @@ public record ThEArcanePattern(
 
     private boolean matchesCrystalItem(ItemStack input) {
         for (AspectInstance crystal : crystalItems().entries()) {
-            ItemStack wanted = EssentiaCrystalFactory.of(crystal.aspect(), crystal.amount());
+            ItemStack wanted = TcRegistry.crystalFor(crystal.aspect(), crystal.amount());
             if (!wanted.isEmpty() && ItemStack.isSameItemSameComponents(wanted, input)) {
                 return true;
             }
@@ -327,9 +312,8 @@ public record ThEArcanePattern(
     }
 
     /**
-     * The layout's ingredient tags laid out on the workbench's 3x3 grid. A shaped recipe's list is compacted
-     * to its own {@code width x height} while the grid is always three wide, so each tag goes at the cell its
-     * ingredient occupies - the same expansion {@code layoutOf} does for the display stacks.
+     * The layout's ingredient tags on the 3x3 grid: a shaped recipe's list is compacted to its own
+     * {@code width x height}, as {@code layoutOf} does for the display stacks.
      */
     private static List<TagKey<Item>> gridTags(Layout layout) {
         List<TagKey<Item>> byCell = new ArrayList<>(MAX_GRID);
@@ -348,10 +332,7 @@ public record ThEArcanePattern(
     }
 
     /**
-     * Finds the arcane recipe a hand-filled 3x3 grid stands for, by asking each recipe whether the grid
-     * satisfies it - building each recipe's pattern first would collapse every ingredient to a representative
-     * stack and then fail a grid filled with another member of the same tag.
-     *
+     * Finds the arcane recipe a hand-filled 3x3 grid stands for.
      * @return the pattern, or {@code null} when no arcane recipe matches that grid
      */
     public static @Nullable ThEArcanePattern resolveGrid(@Nullable Level level, List<ItemStack> cells) {
@@ -361,9 +342,8 @@ public record ThEArcanePattern(
         RecipeManager manager = level.getRecipeManager();
         indexRecipes(manager);
 
-        // Only the recipes that take every item present, by intersecting the per-item sets. An item the index
-        // has never heard of abandons the narrowing rather than dropping everything: the index is built from
-        // default stacks, so a filter that cannot tell must not guess - a full scan, never a lost recipe.
+        // Intersect the per-item sets: only recipes taking every item present survive. An item missing from
+        // the index (built from default stacks) falls back to a full scan, never to a lost recipe.
         Set<ResourceLocation> candidates = null;
         for (ItemStack cell : cells) {
             if (cell.isEmpty()) {
@@ -407,9 +387,8 @@ public record ThEArcanePattern(
     }
 
     /**
-     * Rebuilds the item index if the recipe manager is not the one it was built from - keyed on identity,
-     * because a datapack reload hands out a new manager. An item is indexed when <em>any</em> ingredient takes
-     * it: a false positive costs one failing test, a false negative silently loses a recipe.
+     * Rebuilds the index when the manager changes - a reload hands out a new one. An item is indexed by
+     * any accepting ingredient: over-indexing costs a test, under-indexing loses a recipe silently.
      */
     private static void indexRecipes(RecipeManager manager) {
         if (manager == indexedManager) {
@@ -479,8 +458,8 @@ public record ThEArcanePattern(
     }
 
     /**
-     * One placement of a shaped recipe. The recipe's own row width indexes its ingredients, not the grid's: a
-     * two-wide pattern read three cells at a time would compare the wrong columns.
+     * One placement of a shaped recipe: ingredients are indexed by the recipe's row width, not the
+     * grid's, or a two-wide pattern read three cells at a time compares the wrong columns.
      */
     private static boolean fitsAt(
             List<ItemStack> cells,
@@ -505,8 +484,8 @@ public record ThEArcanePattern(
                 }
                 int column = mirrored ? width - localX - 1 : localX;
                 Ingredient ingredient = ingredients.get(localY * width + column);
-                // The cell's ingredient decides: a deliberately blank cell has an empty ingredient that
-                // accepts only emptiness. Testing emptiness here as well once refused every such recipe.
+                // The ingredient decides: a deliberately blank cell carries an empty ingredient that accepts
+                // only emptiness, so testing emptiness here too would refuse such recipes.
                 if (ingredient == null || !ingredient.test(cell)) {
                     return false;
                 }
@@ -516,9 +495,8 @@ public record ThEArcanePattern(
     }
 
     /**
-     * Whether a shapeless recipe's ingredients are all present, with nothing left over. A matching, not a
-     * first-fit scan: on [any planks, oak planks] against [oak, birch], a first fit gives the oak to "any
-     * planks" and finds nothing for "oak planks". The workbench uses {@code RecipeMatcher} too.
+     * Whether a shapeless recipe's ingredients are present with nothing left over: a full matching, like
+     * the workbench's {@code RecipeMatcher}, not a greedy scan (oak must take the "oak planks" slot).
      */
     private static boolean fitsShapeless(List<ItemStack> cells, List<Ingredient> ingredients) {
         List<ItemStack> present = new ArrayList<>(cells.size());
@@ -553,12 +531,9 @@ public record ThEArcanePattern(
     }
 
     /**
-     * Finds the arcane recipe a set of inputs and an output correspond to, for a pattern handed in from
-     * outside - AE2's encoding terminal or a pattern provider. Such a pattern names concrete stacks rather
-     * than ingredients, so this is a membership test, not a cell-by-cell comparison.
-     *
-     * @return the pattern, or {@code null} when no arcane recipe both produces that output and accepts
-     *     those inputs
+     * Resolves a pattern handed in from outside - AE2's encoding terminal or a pattern provider: its
+     * entries are concrete stacks, so matching is by membership, not cell by cell.
+     * @return the pattern, or {@code null} when no arcane recipe matches both output and inputs
      */
     public static @Nullable ThEArcanePattern resolve(
             @Nullable Level level, List<ItemStack> inputs, ItemStack output) {
@@ -584,9 +559,8 @@ public record ThEArcanePattern(
     private record Layout(List<ItemStack> cells, List<Ingredient> ingredients, int width, int height) {}
 
     /**
-     * Derives the cell layout of an arcane recipe. Shaped recipes expose their full padded grid, so their
-     * real width and height are used; shapeless ones are laid out in reading order. Both the display stacks,
-     * which a pattern carries, and the ingredients, which let a hand-filled grid be matched back, are kept.
+     * Derives the cell layout of an arcane recipe: shaped keeps its real width and height, shapeless is
+     * laid out in reading order. Keeps the display stacks and the ingredients a grid matches on.
      */
     private static @Nullable Layout layoutOf(IArcaneRecipe recipe) {
         if (recipe instanceof ArcaneShapedCraftingRecipe shaped) {
@@ -599,8 +573,8 @@ public record ThEArcanePattern(
             if (optional.size() < width * height) {
                 return null;
             }
-            // The ingredients come in the recipe's own rows, width entries per row, while the grid is three
-            // wide: using the recipe's stride would put a two-wide recipe's second row in the grid's first.
+            // Ingredients come in the recipe's own rows, width per row, while the grid is three wide: using the
+            // recipe's stride would put a two-wide recipe's second row in the grid's first.
             List<ItemStack> cells = new ArrayList<>(GRID_SIDE * GRID_SIDE);
             List<Ingredient> ingredients = new ArrayList<>(width * height);
             for (int row = 0; row < GRID_SIDE; row++) {
@@ -628,9 +602,8 @@ public record ThEArcanePattern(
     }
 
     /**
-     * One representative stack for an ingredient: a pattern carries only concrete stacks, so a multi-item
-     * ingredient is represented by its first entry. For a tag ingredient this is only the <em>display</em>
-     * item - see {@link #cellChoices}.
+     * A representative stack per ingredient: a pattern carries concrete stacks only, so a multi-item
+     * ingredient takes its first entry, and a tag the <em>display</em> item - see {@link #cellChoices}.
      */
     private static ItemStack representative(Optional<Ingredient> ingredient) {
         if (ingredient.isEmpty() || ingredient.get().isEmpty()) {
@@ -641,17 +614,15 @@ public record ThEArcanePattern(
     }
 
     /**
-     * The item tag an ingredient stands for, or {@code null} when it is a plain list of items. The recipe
-     * means "any iron ingot", not "the first iron ingot the registry listed"; writing that item is what made
-     * an assembler refuse to craft with another member of the tag.
+     * The item tag an ingredient stands for, or {@code null} for a plain list of items: the recipe means
+     * "any iron ingot", and writing the first listed member made an assembler refuse another member.
      */
     private static @Nullable TagKey<Item> tagOf(Optional<Ingredient> ingredient) {
         if (ingredient.isEmpty() || ingredient.get().isEmpty()) {
             return null;
         }
-        // Guarded, and load-bearing. Ingredient#getValues throws for any ingredient that is not a plain item
-        // list - CompoundIngredient and custom types refuse it - and the throw propagates out of fromRecipe
-        // and resolveGrid, so a perfectly laid out grid reports "no recipe". "I cannot tell" must mean no.
+        // Guarded: Ingredient#getValues throws for anything but a plain item list, and the throw escapes
+        // fromRecipe and resolveGrid, reporting "no recipe" for a perfectly laid out grid.
         try {
             for (Ingredient.Value value : ingredient.get().getValues()) {
                 if (value instanceof Ingredient.TagValue tagValue) {
@@ -662,14 +633,6 @@ public record ThEArcanePattern(
             return null;
         }
         return null;
-    }
-
-    private static List<TagKey<Item>> tagsOf(List<Ingredient> ingredients) {
-        List<TagKey<Item>> tags = new ArrayList<>(ingredients.size());
-        for (Ingredient ingredient : ingredients) {
-            tags.add(tagOf(Optional.of(ingredient)));
-        }
-        return tags;
     }
 
     // ----- Live registry helpers -----
@@ -701,9 +664,8 @@ public record ThEArcanePattern(
     // ----- NBT, for the knowledge core -----
 
     /**
-     * Wraps a recipe into the item that carries it, for AE2's CPU to save and decode. Uses the same
-     * {@link #save}/{@link #load} pair as the knowledge core, so a pattern cannot mean one thing in a core
-     * and another in a task list; stored in the stack's own {@code CustomData}.
+     * Wraps a pattern into the item AE2's CPU saves and decodes: the same {@link #save}/{@link #load}
+     * contract as the knowledge core, so a pattern cannot differ between a core and a task list.
      */
     public ItemStack toItem(HolderLookup.Provider registries) {
         ItemStack stack = new ItemStack(thaumicenergistics_ce.init.ModItems.ARCANE_PATTERN.get());
@@ -713,7 +675,7 @@ public record ThEArcanePattern(
         return stack;
     }
 
-    /** Reads a pattern back out of the item {@link #toItem} produced, or {@code null} when unreadable. */
+    /** Reads a pattern back out of the item {@link #toItem} produced, or {@code null} if unreadable. */
     public static @Nullable ThEArcanePattern ofItem(ItemStack stack, HolderLookup.Provider registries) {
         if (stack == null || stack.isEmpty()) {
             return null;
@@ -737,8 +699,8 @@ public record ThEArcanePattern(
         tag.putInt("GridWidth", gridWidth);
         tag.putInt("GridHeight", gridHeight);
 
-        // One tag per grid cell, empty strings for plain-item cells. Written next to the display grid rather
-        // than derived from a recipe, because a core outlives any one recipe manager.
+        // One tag per cell, an empty string for a plain item. Stored, not derived: a core outlives any one
+        // recipe manager.
         ListTag tagTag = new ListTag();
         for (int cell = 0; cell < MAX_GRID; cell++) {
             TagKey<Item> cellTag = cellTag(cell);
@@ -821,19 +783,17 @@ public record ThEArcanePattern(
         return new ThEArcanePattern(
                 output,
                 grid,
-                // A pattern read back out of a core keeps only its display stacks: the ingredients belong to
-                // the recipe, which is looked up again from the live manager whenever one is needed.
+                // Only the display stacks: the ingredients belong to the recipe, looked up from the live manager
+                // whenever one is needed.
                 List.of(),
-                // Clamped at both ends: the width and height come out of a saved pattern, and a pattern
-                // asking for a grid of a million cells is a hang, not a recipe.
+                // Clamped: the width and height come from a saved pattern, and a million-cell grid is a hang.
                 Math.clamp(width, 1, MAX_GRID),
                 Math.clamp(height, 1, MAX_GRID),
                 crystals,
                 tag.getInt("BaseVis"),
                 research,
                 stage,
-                // The tags do survive, the exception to the line above: a tag is not recoverable from the
-                // recipe, which is the whole point of writing one.
+                // The tags do survive, the exception to the line above: a tag is not recoverable from the recipe.
                 cellTags);
     }
 }

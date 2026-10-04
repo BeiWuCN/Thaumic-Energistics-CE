@@ -15,18 +15,21 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThaumicEnergistics;
 
 /**
- * GUI geometry for the Arcane Assembler screen. Values come from
- * {@code assets/thaumicenergistics_ce/gui/arcane_assembler_gui.json}, written by
- * {@code tools/build_assembler_layout.js} with coordinates measured off the GUI art's slot wells, so the
- * wells in the image and the slots in the menu land on the same pixels. Read off the classpath, so it is
- * available on both sides and needs no reload listener.
+ * Geometry for the Arcane Assembler screen, read from {@code arcane_assembler_gui.json} off the
+ * classpath, so it is available on both sides with no reload listener.
+ *
+ * <ul>
+ * <li>Coordinates are measured off the GUI art's slot wells, so image wells and menu slots land on the
+ * same pixels.</li>
+ * <li>The file is written by {@code tools/build_assembler_layout.js}.</li>
+ * </ul>
  */
 public final class GuiLayout {
 
     /** Path under the mod's assets, matching the generator's output. */
     private static final String RESOURCE = "/assets/thaumicenergistics_ce/gui/arcane_assembler_gui.json";
 
-    /** Window size, matching the reference screen. Only used when the layout file cannot be read. */
+    /** Window size, matching the reference screen; used only when the layout file cannot be read. */
     private static final int FB_WIDTH = 175;
     private static final int FB_HEIGHT = 231;
 
@@ -55,10 +58,7 @@ public final class GuiLayout {
         }
     }
 
-    /**
-     * The vis columns, each with its own source in the texture and destination in the window. They are not
-     * a regular row: the art parks the primal columns on the panel's left edge and progress separately.
-     */
+    /** The vis columns, not a regular row: the art parks the primal columns on the panel's left edge. */
     public record VisBars(List<Column> columns) {
 
         /** One column: where the fill comes from in the texture, and where it lands in the window. */
@@ -85,9 +85,8 @@ public final class GuiLayout {
     public static final int BAR_HEIGHT = 16;
 
     /**
-     * Where a trough's recess starts, and how many rows of it there are. The art's first sprite row is the
-     * well's shadow, so only rows 1..15 are recess. Drawing all sixteen grew the fill one row past the
-     * recess and repainted the shadow over it, visible only at a full column.
+     * Where a trough's recess starts, and how many rows it has. The art's first sprite row is the well's
+     * shadow, so only rows 1..15 are recess; drawing all sixteen repainted the shadow at a full column.
      */
     public static final int TROUGH_INSET = 1;
     public static final int TROUGH_INTERIOR = BAR_HEIGHT - TROUGH_INSET;
@@ -109,17 +108,13 @@ public final class GuiLayout {
     private final Grid previewGrid;
     private final Anchor previewResult;
     private final Anchor playerInventory;
-    /**
-     * One piece of the background art, paired with where it lands in the window. The destination is not
-     * derived from the source offset - that would shift a cropped side slab twice.
-     */
+    /** One piece of the background art and where it lands: the destination is not derived from the source
+     * offset, which would shift a cropped side slab twice. */
     public record PanelPiece(Region source, Anchor destination) {}
 
     private final Anchor hotbar;
-    /**
-     * The opaque pieces of the background art, in paint order. Blitting one window-sized box instead would
-     * paint the transparency right of the side slabs and drag the bar sprites parked below the panel in.
-     */
+    /** The opaque pieces of the background art, in paint order. Blitting one window-sized box instead would
+     * paint the transparency right of the side slabs and drag the bar sprites parked below the panel in. */
     private final List<PanelPiece> panels;
 
     private GuiLayout(JsonObject root) {
@@ -187,9 +182,9 @@ public final class GuiLayout {
     }
 
     /**
-     * Reads the vis columns, and the craft progress column that follows them: one {@code [sourceU, x, y]}
-     * triple per entry. No fallback to an older file shape on purpose - an unreadable layout should fail
-     * loudly. Progress is appended last, so {@code PRIMAL_COLUMNS} indexes straight at it and the bar renders.
+     * Reads the vis columns and the craft progress column after them: one {@code [sourceU, x, y]} triple per
+     * entry, with progress appended last so {@code PRIMAL_COLUMNS} indexes straight at it. No fallback to an
+     * older file shape on purpose - an unreadable layout should fail loudly.
      */
     private static VisBars visBars(JsonObject root, String key) {
         List<VisBars.Column> columns = new ArrayList<>();

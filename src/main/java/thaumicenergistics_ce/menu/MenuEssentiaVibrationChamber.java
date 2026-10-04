@@ -10,29 +10,25 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
+import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber.BurnState;
+import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
 import thaumicenergistics_ce.init.ModMenuTypes;
 
 /**
  * The Essentia Vibration Chamber's menu: the player's inventory, and the machine's three readings.
- *
- * <p><b>The machine has no slots of its own.</b> It burns whatever essentia reaches it and hands the power
- * to the grid, so there is nothing for a player to put in it or take out of it - the fuel arrives through
- * pipes or out of the ME network, and the power leaves through the cable. What the screen is for is the
- * three things a player cannot see from outside: how much essentia is buffered, how full the energy slot is,
- * and how far through the current unit of fuel the machine is.
- *
- * <p>Those travel as {@link ContainerData} rather than as an item stack, for the reason the furnace uses it:
- * the readings change every tick, a menu is synced on open and on change, and a screen that read its own copy
- * of the block entity would show whatever the last block update happened to carry.
+ * <ul>
+ * <li>The machine has no slots: fuel arrives by pipe or from the ME network, and power leaves by cable.
+ * <li>The readings travel as {@link ContainerData} because they change every tick; a screen reading its
+ * own copy of the block entity would show whatever the last block update happened to carry.
+ * </ul>
  */
 public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
 
     /** The player's inventory, which is every slot this menu has. */
     public static final int PLAYER_SLOTS = 36;
 
-    /** The three rows of the inventory, and the hotbar under them - the standard window's layout. */
+    /** The three inventory rows and the hotbar under them - the standard window's layout. */
     private static final int INV_X = 8;
     private static final int INV_Y = 84;
     private static final int HOTBAR_Y = 142;
@@ -84,12 +80,8 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
             /**
              * The server reads the machine; the client reads what the server last sent it.
              *
-             * <p><b>That second half is what a {@code set} that does nothing breaks.</b> The menu syncs a
-             * data slot by reading it on the server, sending it, and calling {@code set} with the value on
-             * the client - so a read-only {@code ContainerData} leaves the client's readings wherever its own
-             * copy of the block entity happens to be, which is nowhere: the chamber syncs nothing to the
-             * client but this menu. Every reading stayed at zero and every bar stayed empty however full the
-             * machine was, reported as *"里面的进度条还是不会绘制"*.
+             * <p>A read-only {@code set} breaks this: syncing a slot calls {@code set} on the client, and the
+             * chamber sends the client nothing but this menu, so every bar stayed empty for a full machine.
              */
             @Override
             public int get(int index) {
@@ -114,7 +106,7 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
 
             @Override
             public void set(int index, int value) {
-                // What the server sent, kept for {@link #get} to hand back on the client. See the note there.
+                // What the server sent, kept for get to hand back on the client. See the note there.
                 if (index >= 0 && index < readings.length) {
                     readings[index] = value;
                 }
@@ -137,6 +129,7 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
         return aspect == null ? 0 : aspect.value().color() | 0xFF000000;
     }
 
+    @Nullable
     private static BlockEntityEssentiaVibrationChamber blockEntity(
             Inventory inventory, RegistryFriendlyByteBuf buf) {
         return inventory.player.level().getBlockEntity(buf.readBlockPos())
@@ -150,10 +143,7 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
         return data.get(index);
     }
 
-    /**
-     * The machine's state, as the server last sent it. Everything the screen says about what the machine is
-     * doing comes from this, so that none of it is worked out from the readings.
-     */
+    /** The machine's state, as the server last sent it; the screen derives nothing from the readings. */
     public BurnState state() {
         return BurnState.byOrdinal(data.get(DATA_STATE));
     }
@@ -184,9 +174,7 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
     /**
      * Shift-clicking moves stacks between the player's inventory and the hotbar, and nothing else.
      *
-     * <p>There is no machine inventory to move anything into, which is not an omission: the machine has no
-     * slots, so a shift-click that did nothing at all would be the honest implementation - this at least
-     * tidies the inventory, which is what a player pressing it in this window is most likely to want.
+     * <p>Not an omission: the machine has no slots, so this at least tidies the inventory.
      */
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
@@ -215,9 +203,7 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
     /**
      * Whether the window should stay open.
      *
-     * <p>The block entity is the whole test: a player who walks away and comes back to a machine that is
-     * still there keeps the window, and one whose machine is gone loses it. The distance check is vanilla's,
-     * in {@code stillValid}, and it is deliberately generous - a machine in a wall is still a machine.
+     * <p>The block entity is the whole test; the distance check is vanilla's, in {@code stillValid}.
      */
     @Override
     public boolean stillValid(Player player) {

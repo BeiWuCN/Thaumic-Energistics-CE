@@ -10,11 +10,7 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
-/**
- * Screen for the Knowledge Inscriber: one panel blitted whole, with the knowledge core, the stored pattern
- * grid and the crafting preview placed by the menu at the reference build's coordinates. Status is carried
- * by the button's label rather than a line of text, as in the reference build.
- */
+/** Screen for the Knowledge Inscriber: one panel blitted whole, with the status on the button's label. */
 public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowledgeInscriber> {
 
     private static final ResourceLocation TEXTURE =
@@ -60,10 +56,8 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
                 buttonLabel(),
                 button -> {
                     if (minecraft != null && minecraft.gameMode != null) {
-                        // A menu button click, not a custom packet: the id and the click travel in vanilla's
-                        // own packet. Whether this is a delete is asked of the menu, not the selection - after
-                        // a save the selection is empty and the grid cleared, so asking the selection sent a
-                        // second Save instead of the Delete the button was showing.
+                        // A menu button click, not a custom packet - id and click ride vanilla's.
+                        // Delete is read from the menu, not the selection a save leaves empty.
                         minecraft.gameMode.handleInventoryButtonClick(
                                 menu.containerId, menu.isDelete() ? 1 : 0);
                     }
@@ -89,9 +83,8 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
     }
 
     /**
-     * Clicking a stored pattern is handled by the menu, not here: acting on the click means writing the grid,
-     * and the grid is written through the slot so the payload goes out. See
-     * {@code MenuKnowledgeInscriber.clicked}, which is where vanilla sends the click anyway.
+     * Pattern clicks go to {@code MenuKnowledgeInscriber.clicked}: writing the grid through the slot is what
+     * makes the payload go out.
      */
 
     /** Keeps the button's label and enabled state in step with the machine's last action. */
@@ -105,9 +98,8 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
     }
 
     /**
-     * The label the button should carry: "No Core", "Invalid" when the grid does not stand for a recipe the
-     * machine could act on, "Full" when the core has no room, then Save or Delete. "No Core" and "Invalid" are
-     * separate on purpose: they once shared a label, so inserting a core still read "No Core".
+     * The label the button carries, refined by the machine's state.
+     * "No Core" and "Invalid" stay separate: merged, inserting a core still read "No Core".
      */
     private Component buttonLabel() {
         if (!menu.hasCore()) {

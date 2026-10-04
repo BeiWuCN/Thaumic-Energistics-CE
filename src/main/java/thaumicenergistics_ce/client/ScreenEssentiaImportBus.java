@@ -7,11 +7,9 @@ import net.minecraft.world.entity.player.Inventory;
 import thaumicenergistics_ce.menu.MenuEssentiaImportBus;
 
 /**
- * The Essentia Import Bus's screen.
- *
- * <p>A named class rather than AE2's {@code UpgradeableScreen} used directly, for one reason: JEI's ghost
- * ingredient handler is registered against a screen class, and an anonymous or generic screen has no
- * class to register against. Everything it does comes from the parent.
+ * The Essentia Import Bus's screen; named rather than using AE2's {@code UpgradeableScreen}
+ * directly, because JEI registers its ghost ingredient handler against a screen class and an
+ * anonymous or generic screen cannot offer one.
  */
 public class ScreenEssentiaImportBus extends UpgradeableScreen<MenuEssentiaImportBus> {
 

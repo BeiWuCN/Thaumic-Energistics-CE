@@ -1,18 +1,35 @@
 package thaumicenergistics_ce.essentia;
 
+import appeng.api.AECapabilities;
 import appeng.api.config.Actionable;
+import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.AEKeyType;
+import appeng.api.stacks.AEKeyTypes;
+import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.cells.StorageCell;
 import appeng.me.cells.BasicCellInventory;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectCapabilities;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectIndexAccess;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
+import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.init.ModItems;
@@ -21,13 +38,12 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
 
 /**
- * A headless check of the essentia storage layer, off unless
- * {@code THAUMICENERGISTICS_ESSENTIA_SELFTEST=true} is set in the environment: a diagnostic, not something a
- * player should pay for.
- *
- * <p>None of what it checks fails at compile time - key type registration, AE2's cell logic for a non-item key
- * type, the byte budget and the NBT round trip all fail silently at runtime instead. Runs on
- * {@code ServerStartedEvent}, which it needs for a level to resolve aspects against.
+ * Headless self-check of the essentia storage layer, off unless {@code THAUMICENERGISTICS_ESSENTIA_SELFTEST=true}.
+ * <ul>
+ * <li>Everything it checks fails silently at runtime rather than at compile time: key type registration, AE2's
+ * cell logic for a non-item key type, the byte budget and the NBT round trip.
+ * <li>Runs on {@code ServerStartedEvent}, which it needs for a level to resolve aspects against.
+ * </ul>
  */
 public final class EssentiaSelfTest {
 
@@ -61,9 +77,7 @@ public final class EssentiaSelfTest {
         report(failures);
     }
 
-    /**
-     * Checked by name: a recipe JSON that fails to parse is simply absent, with no error anywhere.
-     */
+    /** Checked by name: a recipe JSON that fails to parse is simply absent, with no error anywhere. */
     private static void checkMyRecipesAreLoaded(ServerStartedEvent event, List<String> failures) {
         var manager = event.getServer().getRecipeManager();
         for (String path : new String[] {
@@ -113,18 +127,16 @@ public final class EssentiaSelfTest {
         }
     }
 
-    /**
-     * The quietest way a recipe can be wrong: a misspelt tag, or a convention like {@code c:ingots/iron} that
-     * nothing declares, loads fine, appears in JEI, and matches no grid a player can build.
-     */
+    /** A misspelt tag, or a convention like {@code c:ingots/iron} that nothing declares, loads fine, appears in
+     * JEI, and matches no grid a player can build. */
     private static void checkRecipeTagsResolve(Level level, List<String> failures) {
-        var items = level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ITEM);
+        var items = level.registryAccess().registryOrThrow(Registries.ITEM);
         for (var entry : new String[][] {
             {"illuminated_panel", "thaumicenergistics_ce:illuminated_panel"},
             {"essentia_cell_glass", "thaumicenergistics_ce:essentia_cell_glass"},
         }) {
             ResourceLocation id = ResourceLocation.parse(entry[1]);
-            var tag = net.minecraft.tags.ItemTags.create(id);
+            var tag = ItemTags.create(id);
             var holders = items.getTag(tag);
             if (holders.isEmpty()) {
                 failures.add("tag " + id + " (" + entry[0] + ") resolves to nothing - the recipe naming it "
@@ -133,12 +145,8 @@ public final class EssentiaSelfTest {
         }
     }
 
-    /**
-     * {@code thaumaturge:essentia_crystal} is one item and the aspect is a component, so a bare
-     * {@code {"item": ...}} ingredient matches any crystal and JEI draws it as an "unknown" one, with nothing
-     * logged. Read off the classpath rather than the recipe manager, which resolves ingredients into stacks
-     * and has dropped whether they were specific.
-     */
+    /** A bare {@code {"item": ...}} naming {@code thaumaturge:essentia_crystal} matches any crystal and draws as
+     * an "unknown" one in JEI, silently. Read off the classpath, which keeps whether the aspect was pinned. */
     private static void checkCrystalIngredientsArePinned(List<String> failures) {
         var folder = EssentiaSelfTest.class.getClassLoader()
                 .getResource("data/" + ThEIds.MODID + "/recipe");
@@ -146,9 +154,9 @@ public final class EssentiaSelfTest {
             // Packed into a jar: not enumerable this way. Skip rather than fail - it already runs in dev.
             return;
         }
-        java.io.File[] files;
+        File[] files;
         try {
-            files = new java.io.File(folder.toURI()).listFiles((d, n) -> n.endsWith(".json"));
+            files = new File(folder.toURI()).listFiles((d, n) -> n.endsWith(".json"));
         } catch (java.net.URISyntaxException e) {
             return;
         }
@@ -157,11 +165,11 @@ public final class EssentiaSelfTest {
         }
 
         var gson = new com.google.gson.Gson();
-        for (java.io.File file : files) {
+        for (File file : files) {
             String text;
             try {
                 text = java.nio.file.Files.readString(file.toPath());
-            } catch (java.io.IOException e) {
+            } catch (IOException e) {
                 failures.add("could not read recipe " + file.getName() + ": " + e);
                 continue;
             }
@@ -206,11 +214,12 @@ public final class EssentiaSelfTest {
     }
 
     /** The type has to be in AE2's registry, or every packet write of a key throws. */
-    private static void checkKeyTypeRegistered(List<String> failures) {        if (AEKeyType.fromRawId(AEssentiaKeyType.INSTANCE.getRawId()) != AEssentiaKeyType.INSTANCE) {
+    private static void checkKeyTypeRegistered(List<String> failures) {
+        if (AEKeyType.fromRawId(AEssentiaKeyType.INSTANCE.getRawId()) != AEssentiaKeyType.INSTANCE) {
             failures.add("key type is not retrievable by its own raw id");
         }
         boolean present = false;
-        for (AEKeyType type : appeng.api.stacks.AEKeyTypes.getAll()) {
+        for (AEKeyType type : AEKeyTypes.getAll()) {
             if (type == AEssentiaKeyType.INSTANCE) {
                 present = true;
                 break;
@@ -308,7 +317,7 @@ public final class EssentiaSelfTest {
         }
         inventory.insert(ignis, 8L, Actionable.MODULATE, source());
 
-        var counter = new appeng.api.stacks.KeyCounter();
+        var counter = new KeyCounter();
         inventory.getAvailableStacks(counter);
         long storedAer = counter.get(aer);
         long storedIgnis = counter.get(ignis);
@@ -337,7 +346,7 @@ public final class EssentiaSelfTest {
             failures.add("cell could not be reopened after persisting");
             return;
         }
-        var reCounter = new appeng.api.stacks.KeyCounter();
+        var reCounter = new KeyCounter();
         reopened.getAvailableStacks(reCounter);
         if (reCounter.get(aer) != 60L) {
             failures.add("after persisting, aer is " + reCounter.get(aer) + ", expected 60");
@@ -347,30 +356,27 @@ public final class EssentiaSelfTest {
         }
     }
 
-    private static appeng.api.networking.security.IActionSource source() {
-        return appeng.api.networking.security.IActionSource.empty();
+    private static IActionSource source() {
+        return IActionSource.empty();
     }
 
     /** A registry provider for the tag round trip, taken from the running server. */
-    private static net.minecraft.core.HolderLookup.Provider dummyProvider() {
-        var server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+    private static HolderLookup.Provider dummyProvider() {
+        var server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) {
             throw new IllegalStateException("self-test requires a running server");
         }
         return server.registryAccess();
     }
 
-    /**
-     * Checked because implementing an interface is not what makes a capability exist: NeoForge only answers a
-     * query for an interface registered for it, so an unregistered machine looks like a switched-off one, and
-     * no method on it is ever called. A null answer is the failure this mod has already hit once.
-     */
+    /** A capability exists where NeoForge has an interface registered for it: an unregistered machine looks
+     * switched off and no method on it is ever called, however many interfaces it implements. */
     private static void checkMachineCapabilities(List<String> failures) {
-        var origin = new net.minecraft.core.BlockPos(0, 0, 0);
+        var origin = new BlockPos(0, 0, 0);
 
         // Both grid machines must be reachable as grid node hosts, or no cable will ever connect.
         expectGridHost(
-                appeng.api.AECapabilities.IN_WORLD_GRID_NODE_HOST,
+                AECapabilities.IN_WORLD_GRID_NODE_HOST,
                 new thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber(
                         origin,
                         thaumicenergistics_ce.init.ModBlocks.ESSENTIA_VIBRATION_CHAMBER
@@ -378,7 +384,7 @@ public final class EssentiaSelfTest {
                 "essentia_vibration_chamber",
                 failures);
         expectGridHost(
-                appeng.api.AECapabilities.IN_WORLD_GRID_NODE_HOST,
+                AECapabilities.IN_WORLD_GRID_NODE_HOST,
                 new thaumicenergistics_ce.blockentity.BlockEntityEssentiaProvider(
                         origin,
                         thaumicenergistics_ce.init.ModBlocks.ESSENTIA_PROVIDER
@@ -386,7 +392,7 @@ public final class EssentiaSelfTest {
                 "essentia_provider",
                 failures);
         expectGridHost(
-                appeng.api.AECapabilities.IN_WORLD_GRID_NODE_HOST,
+                AECapabilities.IN_WORLD_GRID_NODE_HOST,
                 new thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider(
                         origin,
                         thaumicenergistics_ce.init.ModBlocks.INFUSION_PROVIDER
@@ -396,7 +402,7 @@ public final class EssentiaSelfTest {
 
         // The provider is an essentia container, which is how the network puts essentia into it.
         expectGridHost(
-                com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities.STORAGE,
+                EssentiaCapabilities.STORAGE,
                 new thaumicenergistics_ce.blockentity.BlockEntityEssentiaProvider(
                         origin,
                         thaumicenergistics_ce.init.ModBlocks.ESSENTIA_PROVIDER
@@ -406,7 +412,7 @@ public final class EssentiaSelfTest {
 
         // And the infusion provider is an aspect source, which is what an Infusion Altar scans for.
         expectGridHost(
-                com.leclowndu93150.thaumaturge.api.aspect.AspectCapabilities.CONTAINER,
+                AspectCapabilities.CONTAINER,
                 new thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider(
                         origin,
                         thaumicenergistics_ce.init.ModBlocks.INFUSION_PROVIDER
@@ -414,8 +420,7 @@ public final class EssentiaSelfTest {
                 "infusion_provider as an aspect source for the infusion altar",
                 failures);
 
-        // The distillation encoder has no capability of its own; it needs a block entity type and a menu
-        // type, and a missing one is a block that places and does nothing, or a screen that cannot open.
+        // The encoder has no capability of its own - a missing block entity or menu type is a dead block.
         if (thaumicenergistics_ce.init.ModBlockEntities.DISTILLATION_ENCODER.get() == null) {
             failures.add("the distillation encoder's block entity type is not registered");
         }
@@ -423,16 +428,15 @@ public final class EssentiaSelfTest {
             failures.add("the distillation encoder's menu type is not registered");
         }
 
-        // What is checked is that the model files the Arcane Crafting Terminal's locations name are on the
-        // classpath: an unregistered part model crashes the renderer, and AE2's model registry for them is
-        // package-private, so this is the half of that failure that can be asked about.
+        // Checks the Arcane Crafting Terminal's model files are on the classpath: an unregistered part model
+        // crashes the renderer, and AE2's registry is package-private, so this is all that is askable here.
         if (thaumicenergistics_ce.init.ModItems.ARCANE_CRAFTING_TERMINAL.get() == null) {
             failures.add("the arcane crafting terminal's item is not registered");
         }
         if (thaumicenergistics_ce.init.ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get() == null) {
             failures.add("the arcane crafting terminal's menu type is not registered");
         }
-        for (var model : new net.minecraft.resources.ResourceLocation[] {
+        for (var model : new ResourceLocation[] {
                 thaumicenergistics_ce.part.PartArcaneCraftingTerminal.MODEL_BASE,
                 thaumicenergistics_ce.part.PartArcaneCraftingTerminal.MODEL_OFF,
                 thaumicenergistics_ce.part.PartArcaneCraftingTerminal.MODEL_ON,
@@ -444,10 +448,10 @@ public final class EssentiaSelfTest {
             }
         }
 
-        // The infusion monitor's blockstate needs the two properties its model selects on: a missing one does
-        // not fail, the variants simply never match and the block renders with no model at all.
+        // The infusion monitor's blockstate needs both properties its model selects on: a missing one does not
+        // fail, the variants never match and the block renders with no model.
         expectGridHost(
-                appeng.api.AECapabilities.IN_WORLD_GRID_NODE_HOST,
+                AECapabilities.IN_WORLD_GRID_NODE_HOST,
                 new thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor(
                         origin,
                         thaumicenergistics_ce.init.ModBlocks.INFUSION_MONITOR
@@ -470,18 +474,15 @@ public final class EssentiaSelfTest {
         }
     }
 
-    /**
-     * Asks for one sided capability and records a failure when the answer is null. The capability is a raw
-     * type and the side a {@code null} on purpose: the erased call would otherwise hand NeoForge's internal
-     * lambda a value it tries to cast to the capability's own context type.
-     */
+    /** Asks a one-sided capability, recording a null answer as a failure. Capability and side are raw and
+     * {@code null} on purpose: an erased call hands NeoForge's lambda a value it must cast to its context type. */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static void expectGridHost(
-            net.neoforged.neoforge.capabilities.BlockCapability<?, ?> capability,
-            net.minecraft.world.level.block.entity.BlockEntity blockEntity,
+            BlockCapability<?, ?> capability,
+            BlockEntity blockEntity,
             String what,
             List<String> failures) {
-        Object offered = ((net.neoforged.neoforge.capabilities.BlockCapability) capability)
+        Object offered = ((BlockCapability) capability)
                 .getCapability(null, blockEntity.getBlockPos(), blockEntity.getBlockState(), blockEntity, null);
         if (offered == null) {
             failures.add("no " + capability.name() + " capability registered for " + what
@@ -489,23 +490,21 @@ public final class EssentiaSelfTest {
         }
     }
 
-    /**
-     * The Distillation Encoder offers the aspects Thaumaturge's aspect index reports, and that index is bound
-     * by whichever side owns it, not by this mod: unbound, every lookup is empty and the machine silently has
-     * nothing to say. Several unrelated items are checked, since one item alone would pass.
-     */
+    /** The Distillation Encoder offers what Thaumaturge's aspect index reports, and that index is bound by
+     * whichever side owns it: unbound, every lookup is empty. Several items are checked, since one would pass. */
     private static void checkAspectIndexResolves(Level level, List<String> failures) {
-        var items = level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ITEM);
+        var items = level.registryAccess().lookupOrThrow(Registries.ITEM);
         for (String id : new String[] {"minecraft:bone", "minecraft:stone", "minecraft:coal"}) {
-            var key = net.minecraft.resources.ResourceKey.create(
-                    net.minecraft.core.registries.Registries.ITEM,
-                    net.minecraft.resources.ResourceLocation.parse(id));
+            var key = ResourceKey.create(
+                    Registries.ITEM,
+                    ResourceLocation.parse(id));
             var holder = items.get(key);
             if (holder.isEmpty()) {
-                continue; // not an item in this pack; nothing to learn from it
+                // Not an item in this pack; nothing to learn from it.
+                continue;
             }
             ItemStack stack = new ItemStack(holder.get().value());
-            var composition = com.leclowndu93150.thaumaturge.api.aspect.AspectIndexAccess.of(stack);
+            var composition = AspectIndexAccess.of(stack);
             if (composition == null || composition.isEmpty()) {
                 failures.add("the aspect index reports no aspects for " + id
                         + " - the Distillation Encoder would offer nothing to distil");

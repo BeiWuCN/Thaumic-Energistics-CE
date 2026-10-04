@@ -10,13 +10,12 @@ import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 
 /**
  * The Essentia Cell Workbench's screen.
- *
- * <p>Over this mod's own art, blitted whole, with the cell and the 63 partition wells placed by the menu
- * at the coordinates the art draws them - the same arrangement AE2's own cell workbench uses.
- *
- * <p>Drawn directly rather than through AE2's screen-style system, as the Knowledge Inscriber is. That
- * system resolves a style document inside AE2's namespace only, so an addon's own art cannot be named by
- * one; a screen that owns its texture draws it itself.
+ * <ul>
+ * <li>Blits this mod's own art whole; the cell and the 63 partition wells sit at the coordinates the
+ * art draws them, as in AE2's own cell workbench.
+ * <li>Drawn directly instead of through AE2's screen-style system, which resolves a style document
+ * inside AE2's namespace only and so cannot name an addon's own art.
+ * </ul>
  */
 public class ScreenEssentiaCellWorkbench extends AbstractContainerScreen<MenuEssentiaCellWorkbench> {
 

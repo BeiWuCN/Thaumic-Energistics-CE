@@ -12,13 +12,11 @@ import net.minecraft.world.phys.BlockHitResult;
 
 /**
  * Everything in AE2 that just needs "a wrench was used here".
- *
- * <p>AE2 has one entry point for a wrench action - {@link WrenchHook} - and decides whether a stack is a
- * wrench purely by the {@code c:tools/wrench} tag. So this class puts a real wrench where the game will
- * look for one, asks AE2 to do the thing, and puts the player's item back.
- *
- * <p>The swap is server-only and always restored, because {@code Player#setItemInHand} on a client changes
- * what the client predicts and sends, and a desync leaves the player holding a wrench they do not have.
+ * <ul>
+ * <li>AE2 has one entry point, {@link WrenchHook}, and calls a stack a wrench purely by the {@code c:tools/wrench} tag.
+ * <li>So this swaps a real wrench in, asks AE2 to do the thing, and puts the player's item back.
+ * <li>Server-only and always restored, because a client-side {@code setItemInHand} would desync what it predicts.
+ * </ul>
  */
 public final class AEWrench {
 
@@ -26,7 +24,6 @@ public final class AEWrench {
 
     /**
      * Runs AE2's wrench action against one block, as if the player held a quartz wrench. Server only.
-     *
      * @return true if AE2 did something; false means the block is not one a wrench acts on.
      */
     public static boolean use(Player player, Level level, InteractionHand hand, BlockHitResult hit) {

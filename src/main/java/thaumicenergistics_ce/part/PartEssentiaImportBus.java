@@ -9,6 +9,7 @@ import appeng.api.networking.security.IActionSource;
 import appeng.api.parts.IPartCollisionHelper;
 import appeng.api.parts.IPartItem;
 import appeng.api.parts.IPartModel;
+import appeng.api.stacks.AEKeyType;
 import appeng.api.util.IConfigManagerBuilder;
 import appeng.api.util.KeyTypeSelection;
 import appeng.api.util.KeyTypeSelectionHost;
@@ -20,6 +21,7 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
+import java.util.List;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -38,19 +40,15 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
  * The Essentia Import Bus: pulls essentia out of the container it faces and into the ME network.
- *
- * <p>An AE2 import bus in every structural respect - it extends {@code IOBusPart} like AE2's own, so it
- * gets the same upgrade cards, power accounting, redstone and scheduling settings, and the same config
- * GUI, with the config list filtered to essentia by the key types handed to the parent constructor.
- *
- * <p>The one place it does better than the reference build: that reads the neighbouring container by
- * reflection, because Thaumcraft 1.12 had no capability for it. Thaumaturge has
- * {@link EssentiaCapabilities#STORAGE}, so this asks for the block's own storage and moves essentia
- * through the interface the block publishes. No reflection, and any block that exposes the capability
- * works - jars, alembics, the reservoir, or anything another mod adds.
- *
- * <p>Essentia that has been pulled out is put back if the network will not take it. Losing it would be
- * silent, and essentia is not cheap.
+ * <ul>
+ * <li>Extends {@code IOBusPart}, so it inherits AE2's import bus upgrades, power accounting,
+ * redstone and scheduling settings, and config GUI - the list filtered to essentia by the key types
+ * handed to the parent constructor.
+ * <li>Reads the neighbour through {@link EssentiaCapabilities#STORAGE} rather than reflection (the
+ * reference build reflected because Thaumcraft 1.12 had no capability), so jars, alembics, the
+ * reservoir, or any block another mod adds all work.
+ * <li>Extracted essentia is put back if the network will not take it - losing it would be silent.
+ * </ul>
  */
 public class PartEssentiaImportBus extends IOBusPart implements KeyTypeSelectionHost {
 
@@ -66,15 +64,17 @@ public class PartEssentiaImportBus extends IOBusPart implements KeyTypeSelection
     @PartModels
     public static final ResourceLocation MODEL_HAS_CHANNEL = ThEIds.id("parts/essentia_import_bus_has_channel");
 
+    /** Every model that has to be registered for this part, named once for {@code ThaumicEnergistics}. */
+    public static final List<ResourceLocation> MODEL_LOCATIONS =
+            List.of(MODEL_BASE, MODEL_OFF, MODEL_ON, MODEL_HAS_CHANNEL);
+
     private static final PartModel MODELS_OFF = new PartModel(MODEL_BASE, MODEL_OFF);
     private static final PartModel MODELS_ON = new PartModel(MODEL_BASE, MODEL_ON);
     private static final PartModel MODELS_HAS_CHANNEL = new PartModel(MODEL_BASE, MODEL_HAS_CHANNEL);
 
     /**
-     * How much one operation moves.
-     *
-     * <p>Eight - one jar's worth, and the reference build's figure. What actually moves per tick is this
-     * times the operations the acceleration cards allow, so the bus scales the same way AE2's does.
+     * How much one operation moves: eight, one jar's worth and the reference build's figure. Per tick
+     * this is multiplied by the operations the acceleration cards allow.
      */
     private static final int TRANSFER_RATE = 8;
 
@@ -95,7 +95,7 @@ public class PartEssentiaImportBus extends IOBusPart implements KeyTypeSelection
         getMainNode().setIdlePowerUsage(IDLE_POWER);
     }
 
-    private boolean isEssentia(appeng.api.stacks.AEKeyType type) {
+    private boolean isEssentia(AEKeyType type) {
         return type == AEssentiaKeyType.INSTANCE;
     }
 
@@ -136,9 +136,8 @@ public class PartEssentiaImportBus extends IOBusPart implements KeyTypeSelection
         if (!level.isLoaded(target)) {
             return false;
         }
-        // The container's own face towards us, and a container that does not accept that face is not
-        // connected - a jar only takes essentia from above, so a bus on its side has nothing to do. See
-        // EssentiaNeighbour.
+        // The container's own face towards us; one that does not accept that face is not connected - a
+        // jar only takes essentia from above, so a bus on its side has nothing to do. See EssentiaNeighbour.
         IEssentiaStorage storage = EssentiaNeighbour.find(level, target, side.getOpposite());
         if (storage == null) {
             return false;

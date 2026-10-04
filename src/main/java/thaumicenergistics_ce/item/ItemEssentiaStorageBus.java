@@ -12,9 +12,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.part.PartEssentiaStorageBus;
 
-/**
- * The Essentia Storage Bus as an item, for placing it on a cable.
- */
+/** The Essentia Storage Bus as an item, for placing it on a cable. */
 public class ItemEssentiaStorageBus extends Item implements IPartItem<PartEssentiaStorageBus> {
 
     public ItemEssentiaStorageBus(Item.Properties properties) {

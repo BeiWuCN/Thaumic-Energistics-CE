@@ -9,15 +9,15 @@ import net.minecraft.world.level.block.Block;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A machine's block item, with the two tooltip lines the rest of this mod's machines carry.
- *
- * <p>Exists because {@code registerSimpleBlockItem} makes a plain {@link BlockItem}, which has no hook for
- * a description - and a machine whose only explanation is its name is a machine a player has to guess at.
- * The description and the placement hint are separate lines rather than one paragraph: the first says what
- * the block is for, the second says where to put it, and they answer different questions.
- *
- * <p>Keys are supplied by the caller so the same class covers every machine, and both lines are optional -
- * a block with nothing useful to add passes {@code null} and gets a plain tooltip.
+ * A machine's block item, carrying the two tooltip lines the rest of this mod's machines have.
+ * <ul>
+ * <li>Exists because {@code registerSimpleBlockItem} makes a plain {@link BlockItem}, which has no
+ * hook for a description.
+ * <li>Description and placement hint are separate lines: one says what the block is for, the other
+ * where to put it.
+ * <li>Keys are passed in, so one item covers every machine; either may be {@code null} for a plain
+ * tooltip.
+ * </ul>
  */
 public class ItemMachineBlock extends BlockItem {
 

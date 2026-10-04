@@ -7,12 +7,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 
 /**
- * The four states AE2 shows for a grid node, and how our tooltips draw them.
- *
- * <p>The cases, words and colours are AE2's and its translation keys are reused on purpose, so every machine
- * here that reports a network state shares one set of strings.
- *
- * <p>Worked out on the server, where the node lives, and sent to the client as an ordinal under {@link #TAG}.
+ * The four grid-node states AE2 shows, and how our tooltips draw them.
+ * <ul>
+ * <li>Cases, words and colours are AE2's; its translation keys are reused on purpose so every machine
+ * reporting a network state shares one set of strings.
+ * <li>Resolved on the server, where the node lives, and sent to the client as an ordinal under
+ * {@link #TAG}.
+ * </ul>
  */
 enum JadeGridState {
 
@@ -52,8 +53,7 @@ enum JadeGridState {
     }
 
     static JadeGridState read(CompoundTag tag) {
-        // Bounds-checked: the ordinal arrives in a payload from the other side, and an index out of range
-        // would take the client down rather than show a wrong colour.
+        // Bounds-checked: an out-of-range ordinal from the other side would crash the client.
         JadeGridState[] states = values();
         int ordinal = tag.getByte(TAG);
         return ordinal >= 0 && ordinal < states.length ? states[ordinal] : OFFLINE;

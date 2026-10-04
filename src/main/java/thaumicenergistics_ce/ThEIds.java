@@ -5,8 +5,10 @@ import net.minecraft.resources.ResourceLocation;
 /**
  * Central identifiers for Thaumic Energistics.
  *
- * <p>The mod id matches upstream Thaumic Energistics so the reused textures, models, blockstates and
- * lang keys resolve without rewriting every asset path.
+ * <ul>
+ * <li>MODID matches upstream Thaumic Energistics.</li>
+ * <li>That keeps the reused textures, models, blockstates and lang keys resolving as-is.</li>
+ * </ul>
  */
 public final class ThEIds {
     public static final String MODID = "thaumicenergistics_ce";

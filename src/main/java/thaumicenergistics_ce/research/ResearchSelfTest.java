@@ -5,12 +5,14 @@ import com.leclowndu93150.thaumaturge.api.research.IResearchEntry;
 import com.leclowndu93150.thaumaturge.api.research.IResearchStage;
 import com.leclowndu93150.thaumaturge.api.research.ResearchParent;
 import com.leclowndu93150.thaumaturge.api.research.ResearchRequirement;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
@@ -26,19 +28,12 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.ThaumicEnergistics;
 
 /**
- * A headless check of the Thaumonomicon research this addon contributes.
+ * Headless check of the Thaumonomicon research this addon contributes.
  *
- * <p>Off unless {@code THAUMICENERGISTICS_RESEARCH_SELFTEST=true} is set, for the same reason the other
- * self-tests are.
- *
- * <p>It exists because a research definition is pure data, and wrong data does not fail loudly. A parent
- * naming an entry that does not exist makes a node unreachable rather than erroring; an icon naming an
- * item that was never registered draws an empty box; a stage naming a recipe that does not exist shows a
- * blank page where the recipe should be; a missing language key prints the raw key at the player. None of
- * those throw, and none of them are visible to a compiler or to the generator script that wrote the files -
- * only to the game, which is why the game is asked.
- *
- * <p>Runs on {@code ServerStartedEvent} because it needs a loaded registry and recipe manager.
+ * <ul><li>Off unless {@code THAUMICENERGISTICS_RESEARCH_SELFTEST=true}; runs on
+ * {@code ServerStartedEvent}, which supplies the registry and recipe manager.</li>
+ * <li>Research data fails silently - an unknown parent, a bad icon, a missing recipe id or
+ * language key all pass without throwing - so ask the game, not a compiler.</li></ul>
  */
 public final class ResearchSelfTest {
 
@@ -61,8 +56,7 @@ public final class ResearchSelfTest {
             categories = registries.lookupOrThrow(IResearchCategory.REGISTRY_KEY);
             entries = registries.lookupOrThrow(IResearchEntry.REGISTRY_KEY);
         } catch (IllegalStateException e) {
-            // Thaumaturge not present, or its registries were renamed. Say so rather than throwing out of
-            // the event handler, which would look like a crash in this mod.
+            // Thaumaturge absent or registries renamed: report, do not throw out of the handler.
             ThaumicEnergistics.LOG.error("[research] self-test could not read Thaumaturge's research "
                     + "registries: {}", e.getMessage());
             return;
@@ -72,14 +66,12 @@ public final class ResearchSelfTest {
                 .map(Holder.Reference::value)
                 .orElse(null);
         if (category == null) {
-            // Report what the registry does hold, not just that ours is missing. Whether an addon's category
-            // file is read at all is the question this diagnostic exists to answer, and "no categories" and
-            // "seven categories, none of them ours" mean very different things.
-            var present = new java.util.ArrayList<String>();
+            // List what the registry does hold: "none" and "seven, none of them ours" differ.
+            var present = new ArrayList<String>();
             for (Holder.Reference<IResearchCategory> holder : categories.listElements().toList()) {
                 present.add(holder.key().location().toString());
             }
-            java.util.Collections.sort(present);
+            Collections.sort(present);
             ThaumicEnergistics.LOG.error("[research] FAIL no research category {} - the tab will not "
                     + "appear at all. The registry holds {} categor{}: {}",
                     CATEGORY_KEY.location(),
@@ -91,7 +83,7 @@ public final class ResearchSelfTest {
 
         checkCategory(category, categories, failures);
 
-        // Every entry id that exists anywhere, so a reference to one can be told from a typo.
+        // All entry ids that exist, so a reference can be told from a typo.
         Set<ResourceLocation> allEntryIds = new HashSet<>();
         for (Holder.Reference<IResearchEntry> holder : entries.listElements().toList()) {
             allEntryIds.add(holder.key().location());
@@ -121,20 +113,8 @@ public final class ResearchSelfTest {
     }
 
     /**
-     * The tab's gate and its first entry have to agree, or the tab opens onto a page nobody can start.
-     *
-     * <p>Both gates are real research the player completes, and they are independent: the category waits for
-     * its own {@code required_research} while each entry waits for its parents. Nothing forces the two to
-     * name the same thing, and a mismatch fails silently in the worst way - the tab appears, and every node
-     * on it is refused. That is exactly what shipped: the category waited for
-     * {@code thaumaturge:unlock_infusion} while the root waited for {@code thaumaturge:unlock_artifice}, so a
-     * player who had just finished the infusion branch got a tab full of dead nodes.
-     *
-     * <p>The rule is the one the player experiences: once the category's gate is complete, at least one entry
-     * must be startable. Each entry with no parent of ours is such a candidate; it is startable when every one
-     * of its parents is already done at that moment, which is the gate itself or anything the gate needed.
-     * Requiring this of *every* such entry would be wrong - an entry gated on a later research is a legitimate
-     * thing to have, and {@code infusion_provider} is one.
+     * The tab's gate and at least one of its entries have to agree, or it opens onto dead nodes: the gate
+     * and each entry's parents are set independently, and only one parentless entry must be startable.
      */
     private static void checkFirstPageReachable(
             IResearchCategory category,
@@ -179,11 +159,7 @@ public final class ResearchSelfTest {
         }
     }
 
-    /**
-     * Every research that is complete once {@code id} is, by walking parents in Thaumaturge's own registry.
-     *
-     * <p>Returns as soon as an id repeats, so a cycle in the data stops the walk instead of the recursion.
-     */
+    /** Every research complete once {@code id} is, walked through Thaumaturge's registry; stops on a repeat. */
     private static void collectAncestors(
             ResourceLocation id,
             HolderLookup.RegistryLookup<IResearchEntry> allEntries,
@@ -211,13 +187,12 @@ public final class ResearchSelfTest {
         category.overlayBackground()
                 .ifPresent(bg -> checkTexture(bg, "category overlay background", failures));
 
-        // The two sizes blitLegacyBackground is called with, for this category and for any overlay it names.
+        // The two sizes blitLegacyBackground is called with, for the tab and any overlay it names.
         checkTextureSize(category.background(), 1024, "category background", failures);
         category.overlayBackground()
                 .ifPresent(bg -> checkTextureSize(bg, 512, "category overlay background", failures));
 
-        // Two categories sharing an index would draw on top of each other in the tab strip. Compared by
-        // identity because this category came out of the same lookup, so it is the same instance.
+        // Two categories sharing an index overlap in the tab strip; compared by identity.
         int duplicates = 0;
         for (Holder.Reference<IResearchCategory> holder : categories.listElements().toList()) {
             if (holder.value() != category && holder.value().index() == category.index()) {
@@ -235,11 +210,8 @@ public final class ResearchSelfTest {
                     + "and always succeed");
         }
 
-        // The tab's own label. This is not the entry-name key and it is not free-form: the browser builds it
-        // as "research_category." + namespace + "." + path of the category's id, so for us that is
-        // research_category.thaumicenergistics_ce.ThaumicEnergistics. A key in any other shape - the 1.12.2
-        // style tc.research_category.THAUMICENERGISTICS, say - resolves to nothing and the tab strip shows
-        // the raw key instead of a name.
+        // The label key is "research_category." + namespace + "." + path - it is not free-form.
+        // Any other shape resolves to nothing and the tab strip prints the raw key.
         checkLang("research_category." + CATEGORY_KEY.location().getNamespace() + "."
                 + CATEGORY_KEY.location().getPath(), failures);
     }
@@ -276,8 +248,7 @@ public final class ResearchSelfTest {
             }
         }
 
-        // A parent that is not an entry and not one of Thaumaturge's progress markers makes the node
-        // unreachable: the book only draws an entry once a parent has been completed.
+        // A parent that is neither an entry nor a progress marker makes the node unreachable.
         for (var parent : entry.parents()) {
             ResourceLocation parentId = parent.id();
             if (!allEntryIds.contains(parentId) && !isProgressMarker(parentId)) {
@@ -299,7 +270,7 @@ public final class ResearchSelfTest {
                 checkLang(stage.textKey(), failures);
             }
 
-            // The recipe list is what puts a recipe page in the book. A wrong id there is a blank page.
+            // The recipe list is what puts a recipe page in the book; a wrong id is a blank page.
             for (ResourceLocation recipe : stage.recipes()) {
                 if (recipes.byKey(recipe).isEmpty()) {
                     failures.add(stageWhere + " names recipe " + recipe + ", which does not exist");
@@ -313,7 +284,7 @@ public final class ResearchSelfTest {
                 checkRequirement(stageWhere + " craft", requirement, registries, failures);
             }
 
-            // Knowledge is awarded into a category; awarding into one that does not exist is silently lost.
+            // Knowledge awarded into a category that does not exist is silently lost.
             for (var reward : stage.knowledge()) {
                 if (!reward.category().getKey().location().equals(CATEGORY_KEY.location())) {
                     failures.add(stageWhere + " awards knowledge into " + reward.category().getKey().location()
@@ -392,12 +363,7 @@ public final class ResearchSelfTest {
         }
     }
 
-    /**
-     * Confirms a texture is actually on the classpath.
-     *
-     * <p>A research icon is a plain {@code ResourceLocation} resolved to a file, with no registry to catch
-     * a mistake, so a typo here is an invisible sprite rather than an error.
-     */
+    /** Confirms a texture is on the classpath: a typo here is an invisible sprite, never an error. */
     private static void checkTexture(ResourceLocation id, String what, List<String> failures) {
         String path = "assets/" + id.getNamespace() + "/" + id.getPath();
         if (ResearchSelfTest.class.getClassLoader().getResource(path) == null) {
@@ -406,23 +372,17 @@ public final class ResearchSelfTest {
     }
 
     /**
-     * The category background has to be the size the browser tiles it at.
-     *
-     * <p>{@code ThaumonomiconBrowserScreen#blitLegacyBackground} blits the background as a {@code size x
-     * size} texture - 1024 for the background, 512 for the overlay - with a UV window worked out from that
-     * figure and nothing clamping it to the image. A file of any other size is sampled as though it were
-     * that size, so the window runs off the edge of the texture and the panel is drawn with whatever the
-     * sampler returns out there. Thaumaturge's own backgrounds are 1024x1024 and its overlay 512x512.
-     *
-     * <p>Read from the PNG's own header rather than by loading it: this runs on the server, and the image
-     * loader is client-only.
+     * The category background must be the size the browser tiles it at: {@code blitLegacyBackground} derives
+     * its UV window from that figure without clamping, so another size samples off the edge of the image.
      */
     private static void checkTextureSize(ResourceLocation id, int expected, String what, List<String> failures) {
         String path = "assets/" + id.getNamespace() + "/" + id.getPath();
         try (var in = ResearchSelfTest.class.getClassLoader().getResourceAsStream(path)) {
             if (in == null) {
-                return; // checkTexture already reported it
+                // checkTexture already reported it.
+                return;
             }
+            // Read by hand: this runs on the server, where the image loader is client-only.
             byte[] header = in.readNBytes(24);
             if (header.length < 24
                     || header[0] != (byte) 0x89 || header[1] != 'P' || header[2] != 'N' || header[3] != 'G') {
@@ -438,28 +398,22 @@ public final class ResearchSelfTest {
                         + expected + "x" + expected + " - the panel would sample off the edge of the image. "
                         + "tools/resize_texture.js <file> " + expected);
             }
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             failures.add(what + " " + id + " could not be read: " + e);
         }
     }
 
-    /**
-     * Confirms a translation key resolves.
-     *
-     * <p>Thaumaturge prints a research entry's title and stage text by the literal key in the data file, so
-     * a key with no translation shows the player "tc.research_name.SOMETHING" in the middle of the book.
-     */
+    /** Confirms a translation key resolves; Thaumaturge prints research text by the literal key. */
     private static void checkLang(String key, List<String> failures) {
         if (key == null) {
             return;
         }
         try {
-            if (!net.minecraft.locale.Language.getInstance().has(key)) {
+            if (!Language.getInstance().has(key)) {
                 failures.add("no translation for key " + key + " - the book would show the raw key");
             }
         } catch (RuntimeException | LinkageError e) {
-            // A client-only language class would make this an unreliable check; skip rather than fail the
-            // whole run for it.
+            // Skip on a client-only Language class rather than fail the whole run for it.
         }
     }
 

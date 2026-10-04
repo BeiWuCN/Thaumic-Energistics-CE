@@ -24,21 +24,15 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.init.ModBlocks;
 
 /**
- * Round-trips the Distillation Encoder's slots through NBT and checks that no pattern moves into the source
- * well.
- *
- * <p>This exists because of a bug that destroyed items with nothing on screen to show for it: the save wrote a
- * compact list of the non-empty slots with no index on any entry, the load read that list by position, and the
- * source well is slot 0 - so with the source well empty every pattern came back one well earlier than it was
- * saved. The front one landed in the source well, which is a ghost slot the player cannot take anything out
- * of, and the next template written there discarded it. Nothing threw, nothing was logged, and the well looked
- * like it held an item because the items had moved.
- *
- * <p>So the checks below are written around the states that made it invisible: an empty source well, and both
- * pattern wells full. They assert on the stored format as well as on the round trip, because a loader that
- * agreed with a lossy writer would pass a round trip on its own.
- *
- * <p>Off unless {@code THAUMICENERGISTICS_ENCODER_SELFTEST=true}.
+ * Round-trips the Distillation Encoder's slots through NBT and checks that no pattern moves into the source well.
+ * <ul>
+ *   <li>Written after a silent bug that destroyed items: entries named no slot and the load read them in order,
+ *       but the source well came first, so an empty source well shifted every pattern one well early - into a
+ *       ghost slot the player cannot take from, where the next template written discarded it.</li>
+ *   <li>Asserts on the stored format, not just a round trip: a lossy writer plus an agreeing loader passes a
+ *       round trip on its own. Drives the states that made the bug invisible.</li>
+ *   <li>Off unless {@code THAUMICENERGISTICS_ENCODER_SELFTEST=true}.</li>
+ * </ul>
  */
 public final class EncoderSelfTest {
 
@@ -70,11 +64,8 @@ public final class EncoderSelfTest {
         report(failures);
     }
 
-    /**
-     * Asserts the written form itself: every entry has to name its slot, and the empty source well has to stay
-     * unnamed. A round trip through the loader alone would pass for the wrong reason if the writer were ever
-     * changed back to a bare list, since a bare list read by position is exactly what the two agree on.
-     */
+    /** Asserts the written form itself: every entry must name its slot, and the empty source well must stay
+     * unnamed. A round trip alone passes if the writer goes back to a bare list. */
     private static void checkTheSaveNamesItsSlots(ServerLevel level, List<String> failures) {
         ItemStack written = writtenPattern();
         if (written.isEmpty()) {
@@ -118,16 +109,12 @@ public final class EncoderSelfTest {
         }
     }
 
-    /**
-     * The bug end to end, driven through the machine's own {@code encode()} rather than a hand-built tag: a
-     * written pattern in the pattern well, nothing in the source well - the state the owner reported finding
-     * their patterns in - saved and loaded again.
-     */
+    /** The bug end to end, driven through the machine's own {@code encode()} rather than a hand-built tag: a
+     * written pattern in the pattern well, nothing in the source well, saved and loaded again. */
     private static void checkAPatternDoesNotMoveIntoTheSourceWell(ServerLevel level, List<String> failures) {
         ItemStack sourceItem = firstDistillableItem(level);
         if (sourceItem == null) {
-            // Not a failure: a pack whose aspect index knows none of these items has nothing to encode, so
-            // there is no state to drive. Reported so the silence reads as a skip.
+            // Not a failure: with no known aspects there is no state to drive. Reported so the silence is a skip.
             System.out.println("[encoder] no item with known aspects, so the encode path is unchecked");
             return;
         }
@@ -152,16 +139,14 @@ public final class EncoderSelfTest {
             failures.add("encode() reported success and left the written well empty");
             return;
         }
-        // The blank was spent and the source template is cleared: exactly the state the owner described, with
-        // patterns in the pattern wells and nothing in the source well.
+        // The state the owner described: patterns in the pattern wells, nothing in the source well.
         encoder.setSourceTemplate(ItemStack.EMPTY);
 
         BlockEntityDistillationEncoder reloaded = roundTrip(level, encoder);
         expectNoPatternInTheSourceWell(reloaded, failures);
         expectWell(failures, "the written pattern", written, reloaded, BlockEntityDistillationEncoder.SLOT_ENCODED);
 
-        // And again with both pattern wells full, since the old form shifted the second one too: the blank
-        // well holds a blank, the written well holds the pattern, the source well holds nothing.
+        // And again with both pattern wells full, since the old form shifted the second one too.
         reloaded.getInventory().setItem(BlockEntityDistillationEncoder.SLOT_BLANK, newBlankPattern());
         BlockEntityDistillationEncoder twice = roundTrip(level, reloaded);
         expectNoPatternInTheSourceWell(twice, failures);
@@ -169,11 +154,8 @@ public final class EncoderSelfTest {
         expectWell(failures, "the written pattern", written, twice, BlockEntityDistillationEncoder.SLOT_ENCODED);
     }
 
-    /**
-     * The migration: a world saved in the old form has to come back with its patterns in the pattern wells, not
-     * positionally. The old form is produced here by the old writer itself - {@code SimpleContainer.createTag}
-     * - so this is the shape a real world carries and not a guess at it.
-     */
+    /** The migration: a world saved in the old form must come back with its patterns in the pattern wells, not
+     * positionally. The old form is produced by {@code SimpleContainer.createTag} itself, not guessed at. */
     private static void checkTheOldFormComesBackToTheRightWells(ServerLevel level, List<String> failures) {
         ItemStack written = writtenPattern();
         if (written.isEmpty()) {
@@ -191,8 +173,8 @@ public final class EncoderSelfTest {
         expectWell(failures, "the blank pattern", newBlankPattern(), reloaded, BlockEntityDistillationEncoder.SLOT_BLANK);
         expectWell(failures, "the written pattern", written, reloaded, BlockEntityDistillationEncoder.SLOT_ENCODED);
 
-        // And the world the bug had already moved: the pattern sat in the source well when it was saved, which
-        // is the form a re-save of the shifted container writes. It belongs in the well it can be taken from.
+        // The world the bug had already moved: a pattern saved from the source well must come back in the encoded
+        // well, the one it can be taken from.
         BlockEntityDistillationEncoder shifted = newEncoder(level);
         shifted.getInventory().setItem(BlockEntityDistillationEncoder.SLOT_SOURCE, written);
 
@@ -222,11 +204,8 @@ public final class EncoderSelfTest {
         return reloaded;
     }
 
-    /**
-     * The heart of it: nothing that is a pattern may sit in the source well after a load. That well is a
-     * template well - the player cannot take anything out of it and the next template written into it
-     * discards whatever is there - so a pattern that lands in it is a pattern that will be destroyed.
-     */
+    /** The heart of it: nothing that is a pattern may sit in the source well after a load. That well is a ghost
+     * slot - the player cannot take anything out and the next template written into it discards what is there. */
     private static void expectNoPatternInTheSourceWell(
             BlockEntityDistillationEncoder encoder, List<String> failures) {
         ItemStack source = encoder.getInventory().getItem(BlockEntityDistillationEncoder.SLOT_SOURCE);
@@ -251,8 +230,7 @@ public final class EncoderSelfTest {
     }
 
     private static BlockEntityDistillationEncoder newEncoder(ServerLevel level) {
-        // Detached, like the other self-tests: only its level is set, and only because reading a tag needs the
-        // registry access. Nothing is placed in the world.
+        // Detached; only its level is set, and only because reading a tag needs the registry access.
         BlockEntityDistillationEncoder encoder = new BlockEntityDistillationEncoder(
                 new BlockPos(0, -4096, 0), ModBlocks.DISTILLATION_ENCODER.get().defaultBlockState());
         encoder.setLevel(level);
@@ -274,10 +252,8 @@ public final class EncoderSelfTest {
                 List.of(new GenericStack(in, 1)), List.of(new GenericStack(out, 1)));
     }
 
-    /**
-     * An item the aspect index has a composition for, or {@code null} when the pack has none of the few tried -
-     * the machine offers nothing to distil without one, so the encode path cannot be driven at all.
-     */
+    /** An item the aspect index has a composition for, or {@code null} when the few tried all have none: without
+     * one the machine offers nothing to distil, so the encode path cannot be driven. */
     private static @Nullable ItemStack firstDistillableItem(ServerLevel level) {
         var items = level.registryAccess().lookupOrThrow(Registries.ITEM);
         for (String id : new String[] {"minecraft:bone", "minecraft:stone", "minecraft:coal"}) {

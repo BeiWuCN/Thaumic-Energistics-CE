@@ -11,9 +11,10 @@ import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
 /**
  * The Essentia Cell Workbench block.
  *
- * <p>Where a storage cell is told which aspects it may hold. The block has no facing: its model is
- * symmetric, so there is nothing for a direction property to turn, and a property that does nothing is
- * only a state to keep in step.
+ * <ul>
+ * <li>Where a storage cell is told which aspects it may hold.</li>
+ * <li>No facing: the model is symmetric, so a direction property would turn nothing.</li>
+ * </ul>
  */
 public class BlockEssentiaCellWorkbench extends ThEBaseEntityBlock {
     public static final MapCodec<BlockEssentiaCellWorkbench> CODEC =

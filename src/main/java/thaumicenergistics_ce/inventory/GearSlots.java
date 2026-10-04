@@ -8,13 +8,12 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * What may go in the Arcane Assembler's four gear slots.
- *
- * <p>Shared by the machine's own container and by the menu's slots. Two copies of this rule is how the
- * menu's slots came to accept anything while the container still refused: a slot's {@code mayPlace} is
- * what the player's click goes through, and without it the container's {@code canPlaceItem} is never
- * consulted.
- *
- * <p>Ordering mirrors slot 0..3 as head, chest, legs, feet.
+ * <ul>
+ *   <li>Shared by the machine's container and by the menu's slots. Two copies of the rule is how the
+ *       menu's slots came to accept anything while the container still refused, since only
+ *       {@code mayPlace} sees the player's click.
+ *   <li>Ordering mirrors slots 0..3 as head, chest, legs, feet.
+ * </ul>
  */
 public final class GearSlots {
 
@@ -35,10 +34,8 @@ public final class GearSlots {
 
     /**
      * Whether {@code stack} belongs in a gear slot at all.
-     *
-     * <p>Deliberately looser than {@link #accepts}: used for shift-click routing, where the caller does
-     * not yet know which of the four slots is free. Something that passes this but no single slot is
-     * simply not gear, and is handled by the ordinary inventory shuffle.
+     * <p>Deliberately looser than {@link #accepts}: the caller of shift-click routing does not yet know
+     * which of the four slots is free, so anything that passes this but no single slot is not gear.
      */
     public static boolean isGear(ItemStack stack) {
         return !stack.isEmpty()
@@ -47,16 +44,11 @@ public final class GearSlots {
 
     /**
      * Whether {@code stack} may go in the gear slot {@code index}.
-     *
-     * <p>One rule, not two: the item must be vis-discount or warping gear <em>and</em> it must declare the
-     * equipment slot this gear slot stands for. An earlier version waved discount gear through without
-     * checking the slot, on the reasoning that it is gear "of its own accord" - which let a helmet sit in
-     * the boots slot, since a helmet is discount gear too.
-     *
-     * <p>An item that declares no equipment slot at all is refused rather than accepted everywhere. Every
-     * piece of Thaumaturge's discount gear extends {@code ArmorItem} and so declares one; something that
-     * does not is, by definition, not wearable, and "accept anywhere" is how the slot check went missing in
-     * the first place.
+     * <p>One rule, not two: the item must be vis-discount or warping gear, and it must declare the
+     * equipment slot this gear slot stands for. Waving discount gear through without the slot check put a
+     * helmet in the boots slot.
+     * <p>An item declaring no equipment slot is refused, not accepted everywhere: "accept anywhere" is
+     * how the slot check went missing.
      */
     public static boolean accepts(int index, ItemStack stack) {
         if (stack.isEmpty()) {

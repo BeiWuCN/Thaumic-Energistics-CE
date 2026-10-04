@@ -25,30 +25,16 @@ import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * Lets JEI fill the Arcane Crafting Terminal's grid from an arcane workbench recipe.
- *
- * <p>Registered for Thaumaturge's own arcane category, so a player opens a recipe the way they always do
- * and presses the transfer button. As with the Knowledge Inscriber, the transfer reads the recipe rather
- * than mirroring JEI's drawn slots: an arcane recipe's view carries its crystal requirement as ingredient
- * slots of its own, and only the nine grid cells are filled here - the terminal's six crystal slots, three
- * down each side of the grid, are left to the player, which is the gap recorded in
- * docs/ARCANE-CRAFTING-TERMINAL.md.
- *
- * <p><b>Where the slots are found.</b> By {@link SlotSemantics}, not by counting. The terminal's menu is not
- * the Knowledge Inscriber's and never will be - it inherits a terminal's layout, a result slot and a wand
- * slot - so any constant worked out from one of them would be wrong for the other. Asking AE2 which slots
- * are the crafting grid cannot drift from how AE2 laid that grid out.
- *
- * <p><b>The filling is AE2's, not this class's.</b> {@link FillCraftingGridFromRecipePacket} takes nine
- * ingredient templates and puts them in the grid, taking what the player does not have out of the ME
- * network and charging the network for it. Writing that here would be a second implementation of exactly
- * what an ME crafting terminal does, and it would be worse: a hand-written version can only reach the
- * player's inventory, which is the one place a terminal's ingredients are not supposed to come from.
- *
- * <p>The packet is given no recipe id, deliberately. It resolves an id through the vanilla recipe manager,
- * and an arcane recipe is not in there; passing one would have the packet find nothing and fill the grid
- * with empty ingredients. With no id it falls back to the templates, which is the path an arcane recipe
- * needs - confirmed by reading the packet's own {@code getDesiredIngredients}.
+ * Lets JEI's transfer button fill the Arcane Crafting Terminal's grid from an arcane workbench recipe.
+ * <ul>
+ *   <li>Handles Thaumaturge's own arcane category, so the button shows where players look. Slots come
+ *       from {@link SlotSemantics}, never counted constants, since this menu inherits a terminal's
+ *       layout. The six crystal slots stay the player's.
+ *   <li>Filling is AE2's: {@link FillCraftingGridFromRecipePacket} takes nine ingredient templates and
+ *       pulls what the player lacks from the ME network, which no hand-written fill could reach.
+ *   <li>No recipe id is passed deliberately: an arcane recipe is not in the vanilla recipe manager,
+ *       so an id would resolve to nothing and fill the grid with empty ingredients.
+ * </ul>
  */
 public class ArcaneCraftingRecipeTransfer
         implements IRecipeTransferInfo<MenuArcaneCraftingTerminal, RecipeHolder<?>>,
@@ -96,7 +82,9 @@ public class ArcaneCraftingRecipeTransfer
 
     // ---- IRecipeTransferHandler ----------------------------------------
 
+    // JEI 19.57 leaves this 6-arg transferRecipe as the interface's only abstract method.
     @Override
+    @SuppressWarnings("removal")
     public @Nullable IRecipeTransferError transferRecipe(
             MenuArcaneCraftingTerminal menu,
             RecipeHolder<?> holder,
@@ -112,9 +100,8 @@ public class ArcaneCraftingRecipeTransfer
             return helper.createInternalError();
         }
 
-        // One template per cell, alongside which of them the player cannot supply. The packet decides what
-        // to do about the missing ones; this only reports them, so the button can say why it will not work
-        // rather than appearing to do nothing.
+        // One template per cell, plus which ones the player cannot supply. The packet acts on the missing
+        // ones; this only reports them, so the button can say why instead of doing nothing.
         NonNullList<ItemStack> templates = NonNullList.withSize(PartArcaneCraftingTerminal.GRID_SIZE, ItemStack.EMPTY);
         boolean missing = false;
         for (int cell = 0; cell < PartArcaneCraftingTerminal.GRID_SIZE; cell++) {
@@ -130,9 +117,8 @@ public class ArcaneCraftingRecipeTransfer
             }
         }
 
-        // A recipe whose ingredients cannot be laid out is refused outright. The packet would fill what it
-        // can, and a partly filled grid reads as "this terminal cannot craft that" rather than "you are
-        // short of something" - a misleading thing to show for a fixable problem.
+        // A recipe that cannot be laid out is refused: the packet would fill what it can, and a
+        // partly filled grid reads as "this terminal cannot craft that", not "you are short of it".
         if (missing) {
             return helper.createUserErrorWithTooltip(
                     Component.translatable("thaumicenergistics_ce.jei.transfer.missing_ingredients"));
@@ -141,8 +127,7 @@ public class ArcaneCraftingRecipeTransfer
             return null;
         }
 
-        // No recipe id: an arcane recipe is not in the vanilla manager, and the packet's template fallback
-        // is the path that fits. See the class note.
+        // No recipe id: the recipe is not in the vanilla manager, so the packet's template path is used.
         PacketDistributor.sendToServer(new FillCraftingGridFromRecipePacket(null, templates, false));
         return null;
     }

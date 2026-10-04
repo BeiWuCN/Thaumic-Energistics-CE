@@ -12,22 +12,18 @@ import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
 /**
  * Lets the player drag an item from JEI straight into the Knowledge Inscriber's grid.
- *
- * <p>The grid is the machine's input, so this is the shortest path to using it: drag the recipe's
- * ingredients in one at a time, or press JEI's transfer button to have them all placed at once.
- *
- * <p>There is no bookkeeping in {@link #onComplete()} because there is none to do. The grid is a ghost
- * grid, so JEI is not being asked to hand anything over - the cells note what the player has, and the
- * real ingredients are paid for by the crafting job.
+ * <ul>
+ * <li>The grid is the machine's input, so this is the shortest path to using it.</li>
+ * <li>Nothing in {@link #onComplete()}: the grid is a ghost grid, so JEI hands nothing over - the cells
+ * only note what the player has, and the crafting job pays for the real ingredients.</li>
+ * </ul>
  */
 public class KnowledgeInscriberGhostIngredientHandler
         implements IGhostIngredientHandler<ScreenKnowledgeInscriber> {
 
     /**
-     * Drop area, in GUI pixels.
-     *
-     * <p>A well's interior is 16 wide and 15 tall, so a 16-square sits on it; the last row of the well is
-     * its own wall and is not part of the hole.
+     * Drop area, in GUI pixels: a well's interior is 16 wide and 15 tall, so a 16-square sits on it -
+     * its last row is wall, not hole.
      */
     private static final int SLOT_SIZE = 16;
 
@@ -55,13 +51,8 @@ public class KnowledgeInscriberGhostIngredientHandler
             implements Target<I> {
 
         /**
-         * Where JEI should draw this target, in <em>screen</em> pixels.
-         *
-         * <p>Not the slot's own x and y. JEI fills this rectangle through {@code guiGraphics.fill} with
-         * no translation - it is treated as an absolute screen position - while a slot's x and y are
-         * relative to the GUI's top-left. Returning the raw slot coordinates therefore drew every drop
-         * target a whole GUI up and to the left of the well it belonged to; the GUI's own offset is what
-         * was missing.
+         * Where JEI should draw this target, in <em>screen</em> pixels. Not the slot's x/y: JEI fills the
+         * rectangle with no translation, while slot x/y are relative to the GUI's top-left.
          */
         @Override
         public Rect2i getArea() {
@@ -72,8 +63,8 @@ public class KnowledgeInscriberGhostIngredientHandler
         @Override
         public void accept(I ingredient) {
             if (ingredient instanceof ItemStack stack && !stack.isEmpty()) {
-                // The slot, and not the container: writing the container only reaches the client's
-                // scratch copy of the grid. GhostGridSlot.set sends the cell to the server.
+                // The slot, not the container: the container only reaches the client's scratch copy.
+                // GhostGridSlot.set sends the cell to the server.
                 menu.slots.get(MenuKnowledgeInscriber.gridSlotIndex(cell))
                         .set(stack.copyWithCount(1));
             }

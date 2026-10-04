@@ -5,6 +5,7 @@ import appeng.api.stacks.GenericStack;
 import appeng.menu.slot.FakeSlot;
 import appeng.util.ConfigInventory;
 import appeng.util.ConfigMenuInventory;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -18,20 +19,14 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
 
 /**
- * The Essentia Cell Workbench's menu.
- *
- * <p>Two things on screen: the cell, and the partition being edited. The partition grid is 63 wells -
- * seven rows of nine - which is the size the art draws and the size AE2's own cell workbench uses.
- *
- * <p>The wells are AE2's {@link FakeSlot}, not a slot class of ours, and that is the whole design. A fake
- * slot exists for exactly this case: a grid whose entries are {@code AEKey}s rather than items, edited by
- * drag or by click, where nothing is handed over. It knows how to wrap a key into an item stack for
- * display, how to unwrap one on the way back, how to refuse entries the grid does not accept, and - the
- * part that is easy to get wrong - how to send the change to the server, which owns the real inventory.
- * Writing that again here would be a second implementation of a solved problem.
- *
- * <p>The partition itself lives on the cell item, so this menu is a view of it: the block entity mirrors
- * the cell's partition into the inventory the wells are backed by, and writes edits back.
+ * The Essentia Cell Workbench's menu: the cell, and the partition being edited.
+ * <ul>
+ *   <li>The partition grid is 63 wells, as the art draws and AE2's cell workbench uses.
+ *   <li>The wells are AE2's {@link FakeSlot}: {@code AEKey}s edited by click or drag, nothing
+ *       handed over, wrapping keys for display and syncing edits to the server.
+ *   <li>The partition lives on the cell item; the block entity mirrors it into the wells' backing
+ *       inventory and writes edits back.
+ * </ul>
  */
 public class MenuEssentiaCellWorkbench extends AbstractContainerMenu {
 
@@ -43,8 +38,7 @@ public class MenuEssentiaCellWorkbench extends AbstractContainerMenu {
 
     private static final int PLAYER_SLOTS = 36;
 
-    // From AE2's own cell workbench, which is the layout the art draws: the cell well at the top right,
-    // the partition grid below it, and the player's inventory at the bottom.
+    // The layout AE2's cell workbench uses and our art draws: cell top right, partition, inventory.
     private static final int CELL_X = 152;
     private static final int CELL_Y = 8;
     private static final int PARTITION_X = 8;
@@ -60,19 +54,14 @@ public class MenuEssentiaCellWorkbench extends AbstractContainerMenu {
     /** The cell's own slot container. On the client this is a scratch copy the server syncs. */
     private final Container cellContainer;
 
-    /**
-     * The partition, as the wells see it.
-     *
-     * <p>On the server this wraps the block entity's own inventory, so a well edit lands on the cell. On
-     * the client the block entity is absent, so this is an empty stand-in the server's sync fills.
-     */
+    /** The partition as the wells see it: a wrapper over the block entity on the server, an empty
+     * stand-in the sync fills on the client. */
     private final ConfigMenuInventory partition;
 
-    /** Client constructor: the block entity lives on the client already, so nothing is wired here. */
+    /** Client constructor: the block entity is not sent, so nothing is wired here. */
     public MenuEssentiaCellWorkbench(
-            int containerId, Inventory playerInventory, net.minecraft.network.RegistryFriendlyByteBuf buf) {
-        // The cast picks the block-entity constructor: with two reference-typed third parameters, a bare
-        // null would be ambiguous.
+            int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
+        // Picks the block-entity constructor: a bare null is ambiguous between two parameters.
         this(containerId, playerInventory, (BlockEntityEssentiaCellWorkbench) null);
     }
 
@@ -97,7 +86,7 @@ public class MenuEssentiaCellWorkbench extends AbstractContainerMenu {
             addSlot(new Slot(playerInventory, column, INV_X + column * PITCH, HOTBAR_Y));
         }
 
-        // 2. The cell. Only a storage cell goes here - the whole block is about configuring one.
+        // 2. The cell: only a storage cell goes here.
         addSlot(new Slot(cellContainer, 0, CELL_X, CELL_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
@@ -105,17 +94,9 @@ public class MenuEssentiaCellWorkbench extends AbstractContainerMenu {
             }
         });
 
-        // 3. The partition wells.
-        //
-        // Positioned by hand, because a fake slot has nowhere to be told where it goes: AE2's FakeSlot
-        // takes an inventory and an index and no coordinates at all, and its superclass leaves the slot at
-        // 0,0. AE2 does not need to carry a position, because its own screens lay their slots out from the
-        // style document afterwards - but this is a plain AbstractContainerScreen over this mod's own art,
-        // with no style document and nothing to reposition anything. Left at 0,0 all 63 wells sit stacked
-        // in the GUI's top-left corner, under each other.
-        //
-        // Writing x and y needs the access transformer in META-INF, which is the same access AE2 grants
-        // itself for the same field.
+        // 3. The partition wells, positioned by hand: FakeSlot takes an inventory and an index but
+        // no coordinates and places the slot at 0,0, and nothing repositions it here, so all 63
+        // wells would stack in the corner. Writing x and y needs the META-INF access transformer.
         for (int index = 0; index < BlockEntityEssentiaCellWorkbench.PARTITION_SLOTS; index++) {
             FakeSlot well = new FakeSlot(partition, index);
             well.x = PARTITION_X + (index % PARTITION_COLS) * PITCH;
@@ -129,13 +110,8 @@ public class MenuEssentiaCellWorkbench extends AbstractContainerMenu {
         return BlockEntityEssentiaCellWorkbench.PARTITION_SLOTS;
     }
 
-    /**
-     * The menu index of a partition well.
-     *
-     * <p>Named here rather than counted at each call site - three places counting one layout is three
-     * chances to count it differently, which is how the Knowledge Inscriber's grid ended up addressing the
-     * wrong container.
-     */
+    /** The menu index of a partition well. Computed in one place, so no call site counts the
+     * layout itself. */
     public static int partitionSlotIndex(int well) {
         return IDX_PARTITION_START + well;
     }

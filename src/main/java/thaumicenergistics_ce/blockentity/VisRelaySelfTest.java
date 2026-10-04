@@ -2,54 +2,39 @@ package thaumicenergistics_ce.blockentity;
 
 import appeng.api.parts.IPartHost;
 import appeng.util.Platform;
-import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.aspect.TCAspects;
-import com.leclowndu93150.thaumaturge.api.aura.IVisRelaySource;
-import com.leclowndu93150.thaumaturge.api.aura.VisRelayHelper;
-import com.leclowndu93150.thaumaturge.content.aura.node.BlockEntityNode;
-import com.leclowndu93150.thaumaturge.content.aura.relay.BlockEntityVisRelay;
-import com.leclowndu93150.thaumaturge.content.aura.relay.VisRelayNetwork;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThaumicEnergistics;
+import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.part.PartVisInterface;
+import thaumicenergistics_ce.part.VisReservation;
 
 /**
- * Answers one question with measurements instead of inference: <b>can the Arcane Assembler beside this
- * player actually draw vis along the relay chain?</b>
- *
- * <p>Off unless {@code THAUMICENERGISTICS_VIS_RELAY_TEST=true}.
- *
- * <p><b>Read-only.</b> It walks the loaded blocks around the player and prints what it finds; it builds
- * nothing, consumes nothing, and changes no block. That matters because the question it answers is about
- * a base the player has already built, and a test that rearranged anything would be measuring itself.
- *
- * <p>It exists because the chain has a shape that is easy to build wrongly and produces no error when it
- * is wrong. {@code VisRelayNetwork.drainCentivis} - the only entry point, and the same call
- * Thaumaturge's own arcane workbench makes - resolves in two steps:
- *
- * <ol>
- *   <li>{@code findRelayNear} scans the 17x17x17 around the consumer for a <b>{@code BlockEntityVisRelay}
- *       block</b>. A cable part is not one, and is never returned here.</li>
- *   <li>that relay's {@code resolveAddonSource} walks its parent chain; the last hop is the addon
- *       source's position, which for a Vis Interface is the block its cable is on.</li>
- * </ol>
- *
- * <p>And the second step is where this mod's interface gets shut out: a relay picks its own parent, and
- * {@code BlockEntityVisRelay.relink} prefers a node over an addon source <em>regardless of distance</em>, so
- * in any base with an energized node within eight blocks of the relay the chain belongs to the node and the
- * interface is never asked. The Arcane Assembler therefore asks a nearby interface directly, and the
- * interface in turn asks the relay chain it can reach - which is what makes the aspects honest at both ends.
- *
- * <p>This prints each hop, and what each interface would carry, so the answer is a number from the player's
- * own world rather than an inference from a tooltip.
+ * Diagnostic that measures whether the Arcane Assembler beside the player can draw vis along
+ * the relay chain, enabled only by {@code THAUMICENERGISTICS_VIS_RELAY_TEST=true}.
+ * <ul>
+ *   <li>Read-only: it scans the loaded blocks around the player and logs what it finds, and
+ *       builds, consumes and changes nothing. One run per server.</li>
+ *   <li>{@code TcAura.drainCentivis} resolves in two steps. A relay block is found near the
+ *       consumer - a cable part is not one - then that relay's parent chain is walked to a
+ *       source, which may be a node, another addon's source, or this part.</li>
+ *   <li>A relay's relink takes the nearest source and does not rank a node
+ *       above an addon source. A vis interface is itself a source, so a relay beside one can
+ *       end its chain at the interface; the interface reports {@code canSupply() == false} in
+ *       that state, which is how the relay is sent back to the node.</li>
+ *   <li>It logs each hop and what each interface would carry, so the answer comes from the
+ *       player's world rather than from a tooltip.</li>
+ * </ul>
  */
 public final class VisRelaySelfTest {
 
@@ -74,71 +59,60 @@ public final class VisRelaySelfTest {
         BlockPos origin = player.blockPosition();
         ThaumicEnergistics.LOG.info("[vistest] scanning {} blocks around {} in {}", SCAN, origin, level.dimension().location());
 
-        List<BlockPos> assemblers = find(level, origin, BlockEntityArcaneAssembler.class);
-        List<BlockPos> relays = find(level, origin, BlockEntityVisRelay.class);
-        List<BlockPos> interfaces = findVisInterfaces(level, origin);
+        List<BlockPos> assemblers = find(level, origin,
+                pos -> level.getBlockEntity(pos) instanceof BlockEntityArcaneAssembler);
+        List<BlockPos> relays = find(level, origin, pos -> TcAura.isRelay(level, pos));
+        List<BlockPos> interfaces = find(level, origin, pos -> partAt(level, pos) != null);
 
         ThaumicEnergistics.LOG.info(
                 "[vistest] found {} arcane assembler(s), {} vis relay block(s), {} vis interface part(s)",
                 assemblers.size(), relays.size(), interfaces.size());
 
         for (BlockPos relayPos : relays) {
-            if (!(level.getBlockEntity(relayPos) instanceof BlockEntityVisRelay relay)) {
+            TcAura.RelayLink link = TcAura.link(level, relayPos);
+            if (link == null) {
                 continue;
             }
-            BlockPos parent = relay.parentPos();
-            BlockEntityNodeReport node = describeParent(level, relay);
-            // resolveAddonSource is the relay's own answer to "can I see an addon vis source (this mod's
-            // interface) as my parent?". A node at the top of the chain wins over it in VisRelayNetwork,
-            // so this is the number that says whether the interface is even in the running.
+            TcAura.RelayEnd end = TcAura.chainEnd(level, relayPos);
+            // Where the relay's chain ends: a node, another addon source, or nothing at all. A relay
+            // links to the nearest source, so this says whether the interface is in the running.
             ThaumicEnergistics.LOG.info(
-                    "[vistest] relay at {} linked={} depth={} parent={} resolvesTo={} addonSource={}",
-                    relayPos, relay.isLinked(), relay.depth(), parent,
-                    node == null ? "NOTHING" : node.description(),
-                    relay.resolveAddonSource(level));
+                    "[vistest] relay at {} linked={} depth={} parent={} resolvesTo={}",
+                    relayPos, link.linked(), link.depth(), link.parent(),
+                    end == null ? "NOTHING" : end.description());
 
-            // <b>What the node at the end of the chain can actually give.</b> This is the number that
-            // decides whether a Vis Interface carrying it is worth anything, and it is not the node's size:
-            // an energized node accrues `aspectsBase.amountOf(aspect)` centivis a second (BlockEntityNode's
-            // accrueCentivis, once a second) and hands out `min(allowance, stored)`, so its palette and its
-            // RATE are two different things. A node holding three points of earth supplies three centivis a
-            // second - 0.03 vis - however full it looks in its own GUI.
-            BlockEntityNode resolved = relay.resolveSource(level);
+            // What the node at the end of the chain can give: an energized node accrues
+            // aspectsBase.amountOf(aspect) centivis a second and hands out min(allowance, stored).
+            TcAura.NodeReport resolved = TcAura.nodeReport(level, relayPos);
             if (resolved != null) {
                 StringBuilder palette = new StringBuilder();
-                for (AspectInstance entry : resolved.getAspectsBase().entries()) {
+                for (TcAura.NodeAspect entry : resolved.palette()) {
                     if (palette.length() > 0) {
                         palette.append(", ");
                     }
-                    String name = entry.aspect().unwrapKey()
-                            .map(key -> key.location().getPath())
-                            .orElse("?");
-                    palette.append(name)
+                    palette.append(entry.name())
                             .append(" amount=").append(entry.amount())
-                            .append(" rate=").append(resolved.centivisRate(entry.aspect())).append("c/s")
-                            .append(" stored=").append(resolved.getAspects().amountOf(entry.aspect()));
+                            .append(" rate=").append(entry.rate()).append("c/s")
+                            .append(" stored=").append(entry.stored());
                 }
                 ThaumicEnergistics.LOG.info(
                         "[vistest]   node at {} energized={} palette[{}]",
-                        resolved.getBlockPos(), resolved.isEnergized(),
+                        resolved.pos(), resolved.energized(),
                         palette.length() == 0 ? "empty" : palette);
             }
         }
 
-        // What each interface would carry, aspect by aspect. reserve() only reports - it asks the relay chain
-        // what it would give and the network what it could pay, and takes neither - so this is read-only and
-        // is the interface's own answer rather than an inference from the machine's buffer.
-        //
-        // Six numbers, because the point of the part is that they follow the world: a node holding three
-        // aspects can answer for those three and for nothing else, whatever the network's energy says.
+        // What each interface would carry, aspect by aspect. reserve() only reports - it takes neither
+        // from the chain nor from the network - so this is the interface's own read-only answer.
+        // All six aspects, because the part follows the world rather than the node's palette.
         for (BlockPos interfacePos : interfaces) {
             double nearest = Double.MAX_VALUE;
             for (BlockPos assemblerPos : assemblers) {
                 nearest = Math.min(nearest, Math.sqrt(interfacePos.distSqr(assemblerPos)));
             }
-            // The three flags Thaumaturge asks of an addon source before it will use one
-            // (AddonVisRelaySources.Registration.usable): a part that answers no to any of them is
-            // invisible to every relay block, however it is placed.
+            // What Thaumaturge asks of a source now: canSupply decides whether a relay may link to it,
+            // and the per-aspect answers decide what it would hand over. A part answering no to the
+            // first is invisible to every relay block, however it is placed.
             StringBuilder flags = new StringBuilder();
             StringBuilder carries = new StringBuilder();
             PartVisInterface part = partAt(level, interfacePos);
@@ -146,12 +120,11 @@ public final class VisRelaySelfTest {
             if (part == null) {
                 flags.append("part-not-found");
             } else {
-                flags.append("valid=").append(part.isValid())
-                        .append(" active=").append(part.isActive())
-                        .append(" linked=").append(part.isLinked());
+                flags.append("active=").append(part.isActive())
+                        .append(" canSupply=").append(part.canSupply());
                 upstream = part.upstreamPosition();
                 for (ResourceKey<IAspect> primal : TCAspects.PRIMALS) {
-                    IVisRelaySource.Reservation offer = part.reserve(primal, 100);
+                    VisReservation offer = part.reserve(primal, 100);
                     int amount = offer == null ? 0 : offer.amount();
                     if (offer != null) {
                         offer.close();
@@ -173,20 +146,16 @@ public final class VisRelaySelfTest {
             ThaumicEnergistics.LOG.info("[vistest] no assembler in range, so the chain was not measured from one");
         }
 
-        // The measurement that answers the question: ask the same call the machine makes, from each
-        // assembler, and see whether anything comes back. simulate=true, so nothing is actually drained.
-        //
-        // Every primal is asked, not just one. A relay chain resolves to a node or to an addon source, and
-        // both meter per aspect; a node holds only the aspects it has been fed, so a single AER probe
-        // reading zero is entirely consistent with a chain that works for the other five. The six numbers
-        // together are what this base can actually pay.
+        // The measurement that answers the question: the same call the machine makes, from each assembler,
+        // with simulate=true so nothing is drained.
+        // Every primal is asked: a chain meters per aspect, and a node holds only what it was fed.
         for (BlockPos assemblerPos : assemblers) {
-            boolean reach = VisRelayNetwork.findRelayNear(level, assemblerPos) != null;
+            boolean reach = TcAura.relayWithinReach(level, assemblerPos);
             StringBuilder draws = new StringBuilder();
             int total = 0;
             for (ResourceKey<IAspect> primal : TCAspects.PRIMALS) {
                 // TCAspects' primals are already the ResourceKey the helper wants, not a holder.
-                int drawn = VisRelayHelper.drainCentivis(level, assemblerPos, primal, 100, true);
+                int drawn = TcAura.drainCentivis(level, assemblerPos, primal, 100, true);
                 total += drawn;
                 if (draws.length() > 0) {
                     draws.append(' ');
@@ -196,7 +165,7 @@ public final class VisRelaySelfTest {
             ThaumicEnergistics.LOG.info(
                     "[vistest] assembler at {}: aura={} relayBlockWithin8={} simulatedDraw[{}] total={} centivis",
                     assemblerPos,
-                    com.leclowndu93150.thaumaturge.api.aura.AuraHelper.getVis(level, assemblerPos),
+                    TcAura.vis(level, assemblerPos),
                     reach, draws, total);
             if (!reach) {
                 ThaumicEnergistics.LOG.info(
@@ -206,47 +175,18 @@ public final class VisRelaySelfTest {
             } else if (total <= 0) {
                 ThaumicEnergistics.LOG.info(
                         "[vistest]   -> a relay block is in range but gave nothing for any of the six aspects."
-                                + " Either the relay's parent chain reaches no node and no addon source, or the"
-                                + " node at the end of it is empty.");
+                                + " Either the relay's parent chain reaches no source at all, or the source at"
+                                + " the end of it is empty.");
             } else {
-                // Anything non-zero is the chain's own answer, and which aspects answered is the part worth
-                // reading: a chain that pays in three aspects and not the other three is doing its job.
+                // Any non-zero answer is the chain's own; which aspects answered is the part worth reading.
                 ThaumicEnergistics.LOG.info(
                         "[vistest]   -> the chain answers, in the aspects listed above and no others.");
             }
         }
     }
 
-    /**
-     * What a relay's parent chain ends at, described for a human.
-     *
-     * <p>Separate from the drain so a relay that is linked but leads nowhere is visible as such: the drain
-     * answers "did any vis come back", and this answers "<em>why</em> not", which is the half that names
-     * the block to go and fix.
-     */
-    private static @org.jspecify.annotations.Nullable BlockEntityNodeReport describeParent(
-            ServerLevel level, BlockEntityVisRelay relay) {
-        var node = relay.resolveSource(level);
-        if (node != null) {
-            return new BlockEntityNodeReport("node", node.getBlockPos(), true);
-        }
-        BlockPos addon = relay.resolveAddonSource(level);
-        if (addon != null) {
-            return new BlockEntityNodeReport("addon source", addon, true);
-        }
-        return null;
-    }
-
-    /** One resolved end of a chain, for the log line. */
-    private record BlockEntityNodeReport(String kind, BlockPos pos, boolean usable) {
-        String description() {
-            return kind + " at " + pos + (usable ? "" : " (not usable)");
-        }
-    }
-
-    /** Loaded block entities of one type within {@link #SCAN} blocks, scanned coarsely. */
     /** The vis interface part mounted on the cable bus at {@code pos}, or null when there is none. */
-    private static @org.jspecify.annotations.Nullable PartVisInterface partAt(ServerLevel level, BlockPos pos) {
+    private static @Nullable PartVisInterface partAt(ServerLevel level, BlockPos pos) {
         if (!(level.getBlockEntity(pos) instanceof IPartHost host)) {
             return null;
         }
@@ -258,45 +198,18 @@ public final class VisRelaySelfTest {
         return null;
     }
 
-    private static <T> List<BlockPos> find(ServerLevel level, BlockPos origin, Class<T> type) {
+    /** Every block in the scan cube the predicate accepts. Blocks carrying a vis interface part are
+     * found the same way: a part is not a block entity, so {@code partAt} asks the cable bus it is
+     * mounted on, one face at a time. All three predicates are O(1): none of them scans onward. */
+    private static List<BlockPos> find(ServerLevel level, BlockPos origin, Predicate<BlockPos> matches) {
         List<BlockPos> found = new ArrayList<>();
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
         for (int x = -SCAN; x <= SCAN; x++) {
             for (int y = -SCAN; y <= SCAN; y++) {
                 for (int z = -SCAN; z <= SCAN; z++) {
                     cursor.setWithOffset(origin, x, y, z);
-                    if (type.isInstance(level.getBlockEntity(cursor))) {
+                    if (matches.test(cursor)) {
                         found.add(cursor.immutable());
-                    }
-                }
-            }
-        }
-        return found;
-    }
-
-    /**
-     * Blocks carrying a Vis Interface part.
-     *
-     * <p>A part is not a block entity, so it cannot be found by type - it has to be asked of the cable bus
-     * it is mounted on, one face at a time. Reported separately from the relay blocks because the two are
-     * what a player confuses: seeing an interface beside the machine <em>feels</em> like enough, and this
-     * line is where the world says whether it is.
-     */
-    private static List<BlockPos> findVisInterfaces(ServerLevel level, BlockPos origin) {
-        List<BlockPos> found = new ArrayList<>();
-        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
-        for (int x = -SCAN; x <= SCAN; x++) {
-            for (int y = -SCAN; y <= SCAN; y++) {
-                for (int z = -SCAN; z <= SCAN; z++) {
-                    cursor.setWithOffset(origin, x, y, z);
-                    if (!(level.getBlockEntity(cursor) instanceof IPartHost host)) {
-                        continue;
-                    }
-                    for (Direction side : Platform.DIRECTIONS_WITH_NULL) {
-                        if (host.getPart(side) instanceof PartVisInterface) {
-                            found.add(cursor.immutable());
-                            break;
-                        }
                     }
                 }
             }

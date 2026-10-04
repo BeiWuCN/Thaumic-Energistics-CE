@@ -8,12 +8,14 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProvider;
 
 /**
- * The Essentia Provider block.
- *
- * <p>No facing and no properties. The model is a plain cube with one texture on every side, so a direction
- * property would be a state that changes nothing - and states that change nothing are states that have to
- * be kept in step for no reason. The blockstate file in this mod's assets already declares a single
- * unconditional variant, which is what a block with no properties needs.
+ * The Essentia Provider block: a plain cube with one texture on every side, so it has no properties
+ * and no facing.
+ * <ul>
+ * <li>A direction property would be a state that changes nothing, and states that change nothing
+ * must still be kept in step for no reason.</li>
+ * <li>The blockstate file declares a single unconditional variant, all a block with no properties
+ * needs.</li>
+ * </ul>
  */
 public class BlockEssentiaProvider extends ThEBaseEntityBlock {
 

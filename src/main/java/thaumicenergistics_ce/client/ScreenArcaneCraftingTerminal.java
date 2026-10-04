@@ -2,31 +2,24 @@ package thaumicenergistics_ce.client;
 
 import appeng.client.gui.me.common.MEStorageScreen;
 import appeng.client.gui.style.ScreenStyle;
+import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
+import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.client.AspectRendering;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphics;
-import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Inventory;
+import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
+import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
 
 /**
  * The Arcane Crafting Terminal's screen.
- *
- * <p>Everything visible so far is AE2's, the same as the Essentia Terminal: the item list, the search box,
- * the sort controls, the scrollbar. The one addition the screen will need is the vis cost - an arcane recipe
- * is paid for partly in vis, and a player about to craft has to be able to see whether the wand in the slot
- * can afford it, and in which aspects.
- *
- * <p><b>Current state: no vis display yet.</b> It is deliberately left out rather than faked. The cost
- * comes from Thaumaturge's arcane crafting transaction, and drawing a number that is not the number the
- * craft will actually charge would be worse than drawing nothing - a player would trust it. It goes in
- * together with the craft itself, so the figure on screen and the figure charged come from one source.
- *
- * <p>The style document lives in AE2's namespace rather than this mod's, which is not a mistake: AE2's
- * {@code StyleManager} resolves a style path against its own namespace only, so a terminal style cannot be
- * named by this addon. That is also why the path below has no namespace in it.
+ * <ul>
+ *   <li>No vis display yet, by choice: it ships with the craft, so drawn and charged share one source.
+ *   <li>The style document is in AE2's namespace: {@code StyleManager} resolves against its own only.
+ * </ul>
  */
 public class ScreenArcaneCraftingTerminal extends MEStorageScreen<MenuArcaneCraftingTerminal> {
 
@@ -37,12 +30,8 @@ public class ScreenArcaneCraftingTerminal extends MEStorageScreen<MenuArcaneCraf
     private static final int COST_Y = 96;
 
     /**
-     * The only open instance, so an incoming cost can find the screen it belongs to.
-     *
-     * <p>There is exactly one terminal screen open at a time - a player has one menu - so a single
-     * reference is not an approximation of "the right screen", it is the right screen. The alternative
-     * would be handing the screen to a packet handler through a registry, which is more machinery for the
-     * same answer.
+     * The only open instance, so an incoming cost finds its screen: a player has one menu, so this one
+     * reference is the right screen rather than an approximation of it.
      */
     private static @Nullable ScreenArcaneCraftingTerminal open;
 
@@ -79,15 +68,8 @@ public class ScreenArcaneCraftingTerminal extends MEStorageScreen<MenuArcaneCraf
     }
 
     /**
-     * Draws the vis cost beside the crafting grid.
-     *
-     * <p>One icon per aspect with the cost beneath it, which is how a player already reads a wand's vis.
-     * Nothing is drawn for a grid that matches no recipe, because an empty cost means "nothing to pay"
-     * rather than "nothing needed".
-     *
-     * <p>{@code drawFG} rather than {@code renderLabels}: AE2 makes its own {@code renderLabels} final,
-     * because it already uses it to lay out the style document's text and slot backgrounds. This is the
-     * hook it leaves open, and the offsets it passes are the same GUI-relative ones.
+     * Draws the vis cost beside the grid: one icon per aspect, the cost beneath, as a wand's vis reads.
+     * {@code drawFG} because AE2 makes {@code renderLabels} final; the offsets passed are the same.
      */
     @Override
     public void drawFG(GuiGraphics graphics, int offsetX, int offsetY, int mouseX, int mouseY) {
@@ -99,11 +81,12 @@ public class ScreenArcaneCraftingTerminal extends MEStorageScreen<MenuArcaneCraf
         int y = topPos + COST_Y;
         for (ArcaneCraftCostPayload.AspectCost cost : costs) {
             if (x + ICON_SIZE > leftPos + imageWidth) {
-                break; // out of room: better to show fewer than to draw over the grid
+                // Out of room: fewer aspects shown beats drawing over the grid.
+                break;
             }
-            var aspect = com.leclowndu93150.thaumaturge.api.aspect.Aspects.resolve(
-                    menu.getPlayer().level(), net.minecraft.resources.ResourceKey.create(
-                            com.leclowndu93150.thaumaturge.api.aspect.IAspect.REGISTRY_KEY, cost.aspect()));
+            var aspect = Aspects.resolve(
+                    menu.getPlayer().level(), ResourceKey.create(
+                            IAspect.REGISTRY_KEY, cost.aspect()));
             if (aspect != null) {
                 AspectRendering.renderGui(graphics, font, x, y, aspect, 0.0F);
                 // Centivis to whole vis, rounded up: a cost of 1 centivis still needs a vis to pay it, and

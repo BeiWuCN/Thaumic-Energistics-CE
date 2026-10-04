@@ -2,6 +2,8 @@ package thaumicenergistics_ce.integration.jade;
 
 import appeng.api.networking.IGridNode;
 import appeng.core.localization.InGameTooltip;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -23,18 +25,16 @@ import snownee.jade.api.ui.IElementHelper;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.BlockEntityArcaneAssembler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * The Arcane Assembler's Jade tooltip.
- *
- * <p>Written against Jade's own API rather than AE2's tooltip abstraction: AE2 registers its grid-state line
- * through the internal {@code appeng.integration.modules.igtooltip} package, which an addon cannot hook.
- *
- * <p>One class for both halves, because both sides need the same numbers: the server writes them into the
- * data tag and the client reads them back. The state is genuinely server-side - the craft, the vis buffer and
- * the grid node change between block updates.
+ * <ul>
+ *   <li>Written against Jade's API, not AE2's tooltip abstraction: AE2 registers its grid-state line
+ *       through the internal {@code appeng.integration.modules.igtooltip} package, which an addon
+ *       cannot hook.
+ *   <li>One provider covers both halves: the server writes the numbers into the data tag and the client
+ *       reads them back. The state is genuinely server-side - the craft, the vis buffer and the grid
+ *       node all change between block updates.
+ * </ul>
  */
 public class ArcaneAssemblerProvider
         implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
@@ -68,8 +68,8 @@ public class ArcaneAssemblerProvider
     /** The running craft's ingredients as saved stacks, in grid order. */
     private static final String TAG_INPUTS = "CraftInputs";
     /**
-     * What the machine is waiting for, and why it last turned a job away. Plain diagnostic sentences, not
-     * translation keys: they carry numbers, and they are deliberately the same sentences the log gets.
+     * Plain sentences, not translation keys: they carry numbers, and they are deliberately the same
+     * sentences the log gets.
      */
     private static final String TAG_WAIT = "WaitReason";
     private static final String TAG_REFUSAL = "RefusalReason";
@@ -80,9 +80,8 @@ public class ArcaneAssemblerProvider
     }
 
     /**
-     * <b>The node comes from {@code getActionableNode}, not {@code getGridNode(null)}.</b> A null side is
-     * exposed on nothing, so the capability lookup answers null however healthy the machine is - that mistake
-     * put "Device offline" on three machines that were online.
+     * <b>Take the node from {@code getActionableNode}, never {@code getGridNode(null)}.</b> A null side is
+     * exposed on nothing, so the capability lookup answers null however healthy the machine is.
      */
     @Override
     public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
@@ -94,34 +93,32 @@ public class ArcaneAssemblerProvider
         JadeGridState.of(node).write(tag, node);
 
         tag.putInt(TAG_VIS, assembler.getBufferedVis());
-        // Rounded to whole vis: the aura is a float, and hundredths are not worth a tooltip line.
+        // Rounded to whole vis: hundredths are not worth a tooltip line.
         tag.putInt(TAG_AURA, Math.round(assembler.getAuraAround()));
         tag.putInt(TAG_DISCOUNT, assembler.getGearDiscount());
         tag.putInt(TAG_SPEED, assembler.getSpeedUpgrades());
-        // Available patterns, not stored ones: the number that answers "why is nothing being crafted for me".
+        // Available, not stored patterns: the number that answers "why is nothing being crafted for me".
         tag.putInt(TAG_PATTERNS, assembler.getAvailablePatterns().size());
 
         tag.putBoolean(TAG_CRAFTING, assembler.isCrafting());
         if (assembler.isCrafting()) {
             tag.putFloat(TAG_PROGRESS, assembler.getCraftProgress());
-            // The stack's own translation key, not "block." + registry id: that prefix asked for
-            // block.thaumaturge.wand where the wand is item.thaumaturge.wand, and drew the raw key.
+            // The stack's own description id, not "block." + registry id: the wrong prefix drew a raw key.
             ItemStack targetStack = assembler.getInventory()
                     .getItem(BlockEntityArcaneAssembler.TARGET_SLOT);
             if (!targetStack.isEmpty()) {
                 tag.putString(TAG_TARGET, targetStack.getDescriptionId());
             }
-            // Sent as saved stacks rather than ids: an id alone cannot be drawn, and re-deriving the stack on
-            // the client would resolve a recipe the server already resolved. Guarded on the level because
-            // saving an ItemStack needs registry access, which a server-data provider has no promise of.
+            // Sent as saved stacks: an id alone cannot be drawn, and deriving the stack on the client
+            // would re-resolve a recipe the server already resolved.
             var level = accessor.getLevel();
             if (level != null) {
                 var registries = level.registryAccess();
                 if (!targetStack.isEmpty()) {
                     tag.put(TAG_TARGET_STACK, targetStack.save(registries));
                 }
-                // Grid order, so the icons read left to right the way the recipe does. Only the cells that
-                // hold something: nine empty frames would be nine icons of nothing.
+                // Grid order, so the icons read left to right the way the recipe does. Only non-empty cells:
+                // nine empty frames would be nine icons of nothing.
                 ListTag inputs = new ListTag();
                 for (int i = 0; i < BlockEntityArcaneAssembler.PREVIEW_SLOT_COUNT; i++) {
                     ItemStack cell = assembler.getInventory()
@@ -133,8 +130,8 @@ public class ArcaneAssemblerProvider
                 tag.put(TAG_INPUTS, inputs);
             }
         }
-        // Sent as components, not as their English text: the server decides the reason but has no idea what
-        // language the player reads. NbtOps carries the key and its arguments; the client resolves them.
+        // Sent as components, not as their English text: the server picks the reason but cannot know the
+        // player's language. NbtOps carries the key and its arguments; the client resolves them.
         Component wait = assembler.waitReason();
         if (wait != null) {
             tag.put(TAG_WAIT, encode(wait));
@@ -145,7 +142,7 @@ public class ArcaneAssemblerProvider
         }
     }
 
-    /** A component as NBT, or an empty tag if it somehow cannot be written. See {@link #decode}. */
+    /** A component as NBT, or an empty tag when it cannot be written. See {@link #decode}. */
     private static Tag encode(Component component) {
         return ComponentSerialization.CODEC
                 .encodeStart(NbtOps.INSTANCE, component)
@@ -154,8 +151,8 @@ public class ArcaneAssemblerProvider
     }
 
     /**
-     * The component back, or {@code null} when the tag is absent or unreadable, so the caller can leave the
-     * line out entirely: an empty line under "waiting" would claim the machine is waiting for nothing.
+     * The component back, or {@code null} when the tag is absent or unreadable. An empty line under
+     * "waiting" would claim the machine waits for nothing.
      */
     private static @Nullable Component decode(CompoundTag tag, String key) {
         Tag encoded = tag.get(key);
@@ -183,10 +180,9 @@ public class ArcaneAssemblerProvider
             tooltip.add(helper.text(
                     Component.translatable("jade.thaumicenergistics_ce.arcane_assembler.crafting")
                             .withStyle(ChatFormatting.WHITE)));
-            // The arrow row: what goes in on the left, what comes out on the right, so the two questions a
-            // player here actually has - "what is it making" and "out of what" - are answered without a
-            // sentence. Full-size icons on both sides because Jade's arrow sprite is 22x16 and its 10x10
-            // smallItem would read as a lesser class of thing.
+            // The arrow row: what goes in on the left and what comes out on the right, so "what is it
+            // making" and "out of what" need no sentence.
+            // Full-size icons because Jade's arrow sprite is 22x16 and its 10x10 smallItem reads as lesser.
             ListTag inputs = tag.getList(TAG_INPUTS, Tag.TAG_COMPOUND);
             List<IElement> row = new ArrayList<>();
             var level = accessor.getLevel();
@@ -218,9 +214,8 @@ public class ArcaneAssemblerProvider
             }
         }
 
-        // One line, not two: what is banked and what the machine can still draw on answer the same question,
-        // and split they read as two separate facts to compare. The first number is a cache being filled and
-        // spent, not plain vis; the aura's ceiling is left out, being a constant for the spot.
+        // One line, not two: banked and drawable answer the same question, and split they read as two
+        // facts to compare. The first number is a cache, not plain vis.
         tooltip.add(helper.text(Component.translatable(
                         "jade.thaumicenergistics_ce.arcane_assembler.vis",
                         tag.getInt(TAG_VIS),
@@ -246,8 +241,8 @@ public class ArcaneAssemblerProvider
                         "jade.thaumicenergistics_ce.arcane_assembler.patterns", tag.getInt(TAG_PATTERNS))
                 .withStyle(ChatFormatting.GRAY)));
 
-        // A waiting machine and an idle one look identical from outside; the CPU waiting on it shows only a
-        // stopped timer.
+        // A waiting machine and an idle one look identical from outside; the CPU waiting on it shows
+        // only a stopped timer.
         Component wait = decode(tag, TAG_WAIT);
         if (wait != null) {
             tooltip.add(helper.text(Component.translatable(

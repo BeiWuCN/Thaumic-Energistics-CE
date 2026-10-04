@@ -27,15 +27,12 @@ import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 
 /**
- * Drives the Knowledge Inscriber's save/delete cycle and checks the button's state follows it.
- *
- * <p>This exists because of a bug no other check could see: the machine cached what the grid resolves to,
- * keyed on a signature of the grid, and deleting a stored recipe does not touch the grid - the grid is how the
- * player names the entry. The signature was unchanged, the cache was never invalidated, and the button went on
- * offering "delete" for a recipe that had just been removed.
- *
- * <p>So it walks the whole cycle and asserts the status after each step. Off unless
- * {@code THAUMICENERGISTICS_INSCRIBER_SELFTEST=true}.
+ * Drives the Knowledge Inscriber's save/delete cycle and checks the inscriber status follows it.
+ * <ul>
+ *   <li>Deleting does not touch the grid - that is how the player names the entry - so a grid-keyed
+ *       cache never invalidates and no other check sees that transition.
+ *   <li>Off unless {@code THAUMICENERGISTICS_INSCRIBER_SELFTEST=true}.
+ * </ul>
  */
 public final class InscriberSelfTest {
 
@@ -43,8 +40,8 @@ public final class InscriberSelfTest {
     private static boolean hasRun;
 
     /**
-     * The key {@code HandlerKnowledgeCore} stores its pattern list under. Repeated rather than shared because
-     * the unreadable-entry check is about the bytes in the item, not the constant the handler writes them by.
+     * The key {@code HandlerKnowledgeCore} stores its pattern list under. Repeated, not shared: the
+     * unreadable-entry check is about the bytes in the item, not the constant the handler writes by.
      */
     private static final String NBT_PATTERNS = "Patterns";
 
@@ -75,8 +72,8 @@ public final class InscriberSelfTest {
         checkSavesAndReloads(level, failures);
         checkUnreadableEntriesSurvive(level, failures);
 
-        // A real arcane recipe, taken from the server's own recipe manager rather than invented: the grid has
-        // to genuinely resolve, or the test would pass by never reaching the states it checks.
+        // A real recipe from the server's own manager: an invented grid that never resolves would pass by
+        // never reaching the states it checks.
         ThEArcanePattern pattern = anyPattern(level);
         if (pattern == null) {
             report(failures);
@@ -85,14 +82,13 @@ public final class InscriberSelfTest {
         }
 
         BlockEntityKnowledgeInscriber inscriber = new BlockEntityKnowledgeInscriber(
-                // A detached instance, not one in the world: only its level is real, and only because resolving
-                // a grid needs the recipe manager. The Y is plain out-of-range rather than a minimum, since
-                // BlockPos packs its coordinates and an extreme Y would overflow the packing.
+                // A detached instance: only its level is real, needed because resolving a grid wants the
+                // recipe manager. Y is not extreme: BlockPos packs coordinates, so it would overflow.
                 new BlockPos(0, -4096, 0),
                 ModBlocks.KNOWLEDGE_INSCRIBER.get().defaultBlockState());
         inscriber.setLevel(level);
 
-        // The core is what the machine writes into, and an empty slot reports "No Core" whatever the grid.
+        // The machine writes into the core; an empty slot reports "No Core" whatever the grid.
         inscriber.getInventory().setItem(
                         BlockEntityKnowledgeInscriber.CORE_SLOT, new ItemStack(ModItems.KNOWLEDGE_CORE.get()));
 
@@ -102,12 +98,11 @@ public final class InscriberSelfTest {
         inscriber.save(player);
         expect(failures, "after save", BlockEntityKnowledgeInscriber.STATUS_READY, inscriber.status());
 
-        // Asking for the recipe back is how a delete is named, so the button should now offer to delete.
+        // A delete names its entry by asking for the recipe back, so the button now offers delete.
         writeGrid(inscriber, pattern);
         expect(failures, "stored grid re-resolves", BlockEntityKnowledgeInscriber.STATUS_ALREADY_STORED, inscriber.status());
 
-        // The bug: the grid does not move, so this is the one transition that has to come from noticing the
-        // core changed.
+        // The grid does not move here, so this transition can only come from noticing the core changed.
         inscriber.deleteStored(player);
         expect(failures, "after delete", BlockEntityKnowledgeInscriber.STATUS_ACTIONABLE, inscriber.status());
 
@@ -119,7 +114,7 @@ public final class InscriberSelfTest {
             failures.add("after delete: the core still holds a pattern for " + pattern.result());
         }
 
-        // 6. Save has to work again, or the button would only have moved the dead end along.
+        // Save has to work again, or the button merely moved the dead end along.
         inscriber.save(player);
         writeGrid(inscriber, pattern);
         expect(failures, "re-save after delete", BlockEntityKnowledgeInscriber.STATUS_ALREADY_STORED, inscriber.status());
@@ -128,10 +123,8 @@ public final class InscriberSelfTest {
     }
 
     /**
-     * Checks that an ore dictionary entry survives being written into a core. The pattern used to store whichever
-     * member of the tag was listed first, so a network holding a different member could not craft a recipe it
-     * plainly satisfies. The tag has to be read off the recipe, survive the round trip through the core, and make
-     * every member a valid input.
+     * An item tag must survive being written into a core, which stores only the first listed member: a network
+     * holding another member could not otherwise craft, so every member must be a valid input.
      */
     private static void checkTagPatterns(ServerLevel level, List<String> failures, ServerPlayer player) {
         ThEArcanePattern tagged = null;
@@ -161,8 +154,7 @@ public final class InscriberSelfTest {
         }
 
         if (tagged == null) {
-            // Not a failure: a pack with no tagged arcane recipe has nothing to check. Reported so the
-            // silence is visibly a skip rather than a pass.
+            // Not a failure: nothing to check without a tagged recipe, so the silence must read as a skip.
             System.out.println("[inscriber] no arcane recipe uses an item tag, so the tag path is unchecked");
             return;
         }
@@ -175,12 +167,12 @@ public final class InscriberSelfTest {
             failures.add("tag " + tag.location() + " on " + where + " resolves to no items");
         }
         if (choices.size() < 2) {
-            // One member proves nothing: the old bug wrote the one member too, and looked identical.
+            // One member proves nothing: storing the shown member alone satisfies a one-member tag.
             System.out.println("[inscriber] tag " + tag.location() + " on " + where + " has only "
                     + choices.size() + " member(s); the tag path is weakly checked");
         }
 
-        // A tag that is dropped on save leaves a pattern that can only match the one item it displays.
+        // A tag dropped on save leaves a pattern that can only match the one item it displays.
         CompoundTag saved = tagged.save(level.registryAccess());
         ThEArcanePattern reloaded = ThEArcanePattern.load(level.registryAccess(), saved);
         if (reloaded == null) {
@@ -197,7 +189,7 @@ public final class InscriberSelfTest {
                     + reloaded.cellChoices(taggedCell).size() + " members instead of " + choices.size());
         }
 
-        // And every member is actually accepted, which is what "written as the tag" has to mean in the end.
+        // Every member must actually be accepted, which is what storing the tag has to mean.
         for (ItemStack member : choices) {
             if (!tagged.acceptsInputs(List.of(member))) {
                 failures.add("tag " + tag.location() + " does not accept its own member " + member);
@@ -207,10 +199,8 @@ public final class InscriberSelfTest {
     }
 
     /**
-     * Round-trips a sample of arcane patterns through NBT and checks none of them throws - here because of a
-     * crash: the tag list held a null for every cell naming a plain item, and the record's compact constructor
-     * uses {@code List.copyOf}, which rejects nulls. Nothing threw at encode time; the first pattern read back
-     * out of a core threw while a world was loading, so the world would not start.
+     * Round-trips arcane patterns through NBT and checks none throws: a null in the tag list of every
+     * plain-item cell would hit {@code List.copyOf} in the record's compact constructor, at world load.
      */
     private static void checkRoundTripIsSafe(ServerLevel level, List<String> failures) {
         int checked = 0;
@@ -236,7 +226,7 @@ public final class InscriberSelfTest {
                     failures.add("round trip lost the pattern for " + output);
                 }
             } catch (RuntimeException e) {
-                // Named by recipe: a stack trace alone would not say which shape of pattern the record refused.
+                // Named by recipe: a stack trace would not say which pattern the record refused.
                 failures.add("round trip threw on " + output + ": " + e);
             }
         }
@@ -246,14 +236,13 @@ public final class InscriberSelfTest {
     }
 
     /**
-     * An item that is not in the tag, or {@code null} when the registry offered none - the other direction of
-     * the tag check. See the caller for why the cell is emptied before the wrong item goes in.
+     * An item that is not in the tag, or {@code null} when the registry offered none: the other direction of the
+     * tag check. See the caller for why every other cell is emptied.
      */
     private static @Nullable ItemStack firstItemOutside(TagKey<Item> tag) {
         for (Item item : BuiltInRegistries.ITEM) {
-            // Air is in no tag and is not placeable: it would leave the grid empty, and an empty grid reads as
-            // "ready" rather than "no recipe", reporting a failure that is not one.
-            if (item == net.minecraft.world.item.Items.AIR) {
+            // Air is in no tag and not placeable, and an empty grid reads "ready", not "no recipe".
+            if (item == Items.AIR) {
                 continue;
             }
             if (!item.builtInRegistryHolder().is(tag)) {
@@ -264,9 +253,8 @@ public final class InscriberSelfTest {
     }
 
     /**
-     * A grid holding {@code placed} at {@code onlyCell} and nothing else, or {@code null} if that grid is still
-     * a recipe. Every other cell is emptied on purpose: one item in one cell is unambiguous, where rebuilding
-     * the rest of the recipe's grid around the wrong item muddies what is under test.
+     * A pattern whose grid holds {@code placed} in {@code onlyCell} and nothing else, or {@code null} when it
+     * is still a recipe. The other cells are empty so the grid around the wrong item cannot muddy the test.
      */
     private static @Nullable ThEArcanePattern gridWithOnly(
             Level level, ThEArcanePattern pattern, int onlyCell, ItemStack placed) {
@@ -294,9 +282,8 @@ public final class InscriberSelfTest {
     }
 
     /**
-     * Drives a tagged recipe through the inscriber's own grid, the way a player does. The case that matters is
-     * the one a player hits constantly without meaning to: JEI's transfer, and a player with a stack in hand,
-     * both place a member of the tag they happen to <em>have</em>, not the member the pattern would have picked.
+     * Drives a tagged recipe through the inscriber's own grid, the way a player does: JEI's transfer and a
+     * stack in hand both place a member of the tag the player <em>has</em>, not the one the pattern picked.
      */
     private static void checkTaggedRecipeInTheGrid(
             ServerLevel level, List<String> failures, ServerPlayer player) {
@@ -329,14 +316,13 @@ public final class InscriberSelfTest {
             }
         }
         if (tagged == null) {
-            // Not a failure: a pack with no tagged arcane recipe has nothing to drive. Reported so the silence
-            // reads as a skip.
+            // Not a failure: nothing to check without a tagged recipe, so the silence must read as a skip.
             System.out.println("[inscriber] no tagged arcane recipe, so the inscriber's grid path is unchecked");
             return;
         }
 
-        // A tag member that is not the one the grid displays: what a player actually holds. When the tag has a
-        // single member there is none, and the check still runs - only the "different member" half is conditional.
+        // A tag member other than the displayed one: what a player actually holds. A single-member tag has
+        // none, and the check still runs - only the "different member" half is conditional.
         ItemStack other = null;
         for (ItemStack member : tagged.cellChoices(taggedCell)) {
             if (!ItemStack.isSameItemSameComponents(member, tagged.grid().get(taggedCell))) {
@@ -369,8 +355,8 @@ public final class InscriberSelfTest {
             return;
         }
 
-        // An item the tag does *not* accept has to be refused: tag matching widened what the cell takes, so a
-        // version that accepted anything at all would pass every check above while quietly encoding nonsense.
+        // An item outside the tag must be refused: tag matching widened what a cell takes, so one accepting
+        // anything would pass every check above while encoding nonsense.
         ItemStack wrong = firstItemOutside(tag);
         if (wrong != null) {
             ThEArcanePattern onlyWrong = gridWithOnly(level, tagged, taggedCell, wrong);
@@ -387,16 +373,15 @@ public final class InscriberSelfTest {
         }
 
         if (inscriber.save(player) == BlockEntityKnowledgeInscriber.STATUS_RESEARCH_LOCKED) {
-            // The recipe the tag resolved to happens to be one this player has not unlocked, which is the
-            // machine being right, not being broken. Every assertion below is about what the core kept, so
-            // none of them can run: said out loud, because a skipped check and a passed one read the same.
+            // The machine is right, not broken: every assertion below is about what the core kept, so none
+            // can run. Said out loud, because a skipped check and a passed one read the same.
             System.out.println("[inscriber] tagged recipe " + tagged.result()
                     + " is gated by research for this player, so the tagged store path is unchecked");
             return;
         }
 
-        // What the core kept has to be a grid that still stands for the same recipe, or reading the entry
-        // back leaves the player looking at a grid that says "no recipe" and cannot be deleted.
+        // The core must keep a grid that still resolves to the same recipe, or a re-read shows "no recipe"
+        // and the entry cannot be deleted.
         HandlerKnowledgeCore core = HandlerKnowledgeCore.of(
                 inscriber.getInventory().getItem(BlockEntityKnowledgeInscriber.CORE_SLOT),
                 level.registryAccess());
@@ -422,15 +407,14 @@ public final class InscriberSelfTest {
                     + " instead of already stored, so the entry cannot be deleted");
         }
 
-        // And the stored grid has to resolve to the same recipe, which is what makes the above meaningful:
-        // a grid that resolves to some *other* recipe would report "actionable" and store a second entry.
+        // Stored grid must resolve to the same recipe, else it reads "actionable" and stores a second entry.
         if (!ThEArcanePattern.satisfiesGrid(recipeFor(level, tagged), readBack, level)) {
             failures.add("the stored grid for " + tagged.result()
                     + " no longer satisfies its own recipe after a round trip");
         }
     }
 
-    /** The live recipe that produces a pattern's result, for re-checking a stored grid against it. */
+    /** The live recipe that produces a pattern's result; throws when nothing does. */
     private static IArcaneRecipe recipeFor(Level level, ThEArcanePattern pattern) {
         for (RecipeHolder<?> holder : level.getRecipeManager().getRecipes()) {
             if (!(holder.value() instanceof IArcaneRecipe arcane)) {
@@ -447,9 +431,8 @@ public final class InscriberSelfTest {
     }
 
     /**
-     * Re-resolves every arcane recipe from the exact grid the inscriber would show for it and reports the ones
-     * that do not come back - such a recipe cannot be encoded at all, since the player lays out exactly what the
-     * machine showed them and the result well says "invalid".
+     * Re-resolves every arcane recipe from the grid the inscriber shows: a player lays out exactly what the
+     * machine showed, so a recipe that does not come back cannot be encoded at all.
      */
     private static void checkEveryRecipeResolvesFromItsGrid(ServerLevel level, List<String> failures) {
         int total = 0;
@@ -468,7 +451,7 @@ public final class InscriberSelfTest {
             try {
                 pattern = ThEArcanePattern.fromRecipe(arcane, output);
             } catch (RuntimeException e) {
-                // A bare stack trace says nothing about which recipe in a pack of hundreds refused to load.
+                // A bare stack trace would not name the recipe that refused to load.
                 unresolved++;
                 if (examples.size() < 12) {
                     examples.add(holder.id() + " -> threw while building: " + e);
@@ -490,7 +473,7 @@ public final class InscriberSelfTest {
                 tagged++;
             }
 
-            // Resolving must not throw either; a throw would abort the scan and hide every result behind it.
+            // Resolving must not throw either: a throw aborts the scan and hides every result behind it.
             ThEArcanePattern resolved;
             try {
                 resolved = ThEArcanePattern.resolveGrid(level, pad(pattern.grid()));
@@ -521,17 +504,15 @@ public final class InscriberSelfTest {
     }
 
     /**
-     * Saves and reloads the machine's own slots, and checks the grid comes back where it was - the loader used
-     * to read the saved list <em>by position</em>, so a grid with gaps came back collapsed and shifted and the
-     * player found a layout that matched no recipe. The shape below is deliberately gappy, because a contiguous
-     * one would survive the broken loader and prove nothing.
+     * Saves and reloads the machine's own slots and checks the grid comes back where it was. A loader reading
+     * the saved list <em>by position</em> collapses a gappy grid and shifts it, so the shape below is gappy.
      */
     private static void checkSavesAndReloads(ServerLevel level, List<String> failures) {
         BlockEntityKnowledgeInscriber source = new BlockEntityKnowledgeInscriber(
                 new BlockPos(0, -4096, 0), ModBlocks.KNOWLEDGE_INSCRIBER.get().defaultBlockState());
         source.setLevel(level);
 
-        // Gaps on purpose: cells 2, 4, 5 and 8 stay empty, so a by-position read cannot land the rest right.
+        // Gaps on purpose: cells 2, 4, 5 and 8 stay empty, so a positional read cannot land the rest right.
         ItemStack[] placed = new ItemStack[BlockEntityKnowledgeInscriber.GRID_SLOT_COUNT];
         for (int cell = 0; cell < placed.length; cell++) {
             placed[cell] = cell % 3 == 2 || cell == 4 || cell == 5 ? ItemStack.EMPTY : new ItemStack(Items.STONE);
@@ -544,9 +525,8 @@ public final class InscriberSelfTest {
         CompoundTag tag = new CompoundTag();
         source.saveAdditional(tag, level.registryAccess());
 
-        // Asserted on the format itself: a round trip through the *fixed* loader alone would pass for the wrong
-        // reason if the writer were ever changed to match it. The index each entry carries is the whole
-        // difference from the broken format - a bare list cannot express a grid with gaps.
+        // Asserted on the format itself: a loader alone would pass even if the writer matched it. The slot
+        // index each entry carries is what a bare list cannot express: the gaps.
         ListTag saved = tag.getList(ContainerHelper.TAG_ITEMS, Tag.TAG_COMPOUND);
         int expectedEntries = 0;
         for (ItemStack stack : placed) {
@@ -573,8 +553,7 @@ public final class InscriberSelfTest {
                 return;
             }
         }
-        // The indices have to point at the cells the items actually came from: that is what the old format
-        // could not hold.
+        // Indices must point at the cells the items came from: the old format could not hold that.
         boolean[] seen = new boolean[BlockEntityKnowledgeInscriber.SLOT_COUNT];
         for (int entry = 0; entry < saved.size(); entry++) {
             int named = saved.getCompound(entry).getByte("Slot");
@@ -616,13 +595,8 @@ public final class InscriberSelfTest {
     }
 
     /**
-     * A save must not delete what it could not read.
-     *
-     * <p>{@code HandlerKnowledgeCore.save} rewrites the whole pattern list from what the handler managed to
-     * load, so an entry this build cannot read used to be dropped by it - and for good, because the next store
-     * or delete of any other pattern wrote the shortened list back. A core whose every entry failed to read
-     * therefore came back from a save looking emptied, with the log saying nothing. The entry is broken here
-     * the way a schema change or a removed mod breaks one: by taking its result away.
+     * A save must not delete what it could not read: {@code HandlerKnowledgeCore.save} rewrites the whole
+     * pattern list from what the handler loaded, so an unreadable entry would be dropped by the next store.
      */
     private static void checkUnreadableEntriesSurvive(ServerLevel level, List<String> failures) {
         ThEArcanePattern first = anotherPattern(level, List.of());
@@ -673,7 +647,7 @@ public final class InscriberSelfTest {
             return;
         }
 
-        // The dangerous write: a store replaces the whole list with what the handler read.
+        // A store replaces the whole list with what the handler read, so this is the dangerous write.
         reread.store(third);
         HandlerKnowledgeCore afterStore = HandlerKnowledgeCore.of(core, level.registryAccess());
         if (afterStore == null
@@ -720,9 +694,8 @@ public final class InscriberSelfTest {
     }
 
     /**
-     * An arcane recipe whose own stored grid resolves back to it and whose result is none of {@code excluded},
-     * or {@code null}. The same filter {@link #anyPattern} applies, plus the result check, so two patterns of
-     * this test cannot be the same entry.
+     * A pattern that resolves from its own grid and whose result is not already {@code excluded}, or {@code
+     * null}: the result check keeps two patterns from naming the same entry.
      */
     private static @Nullable ThEArcanePattern anotherPattern(Level level, List<ThEArcanePattern> excluded) {
         for (RecipeHolder<?> holder : level.getRecipeManager().getRecipes()) {
@@ -764,8 +737,8 @@ public final class InscriberSelfTest {
     }
 
     /**
-     * Any arcane recipe whose own stored grid resolves back to it. A recipe that does not resolve from its own
-     * pattern is one the machine could never encode, so asserting against it would test the wrong thing.
+     * Any arcane recipe whose own stored grid resolves back to it: one that does not resolve could never be
+     * encoded, so asserting against it would test the wrong thing.
      */
     private static ThEArcanePattern anyPattern(Level level) {
         for (RecipeHolder<?> holder : level.getRecipeManager().getRecipes()) {

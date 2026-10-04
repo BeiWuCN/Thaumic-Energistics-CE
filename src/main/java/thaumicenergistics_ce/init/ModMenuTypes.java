@@ -40,17 +40,14 @@ public final class ModMenuTypes {
             REGISTRY.register(
                     "knowledge_inscriber", () -> IMenuTypeExtension.create(MenuKnowledgeInscriber::new));
 
-    /**
-     * The Essentia Vibration Chamber's screen: what is buffered, how full the slot is, and how far through
-     * the current unit of fuel the machine is.
-     */
+    /** The Essentia Vibration Chamber's screen: the buffer, the fuel slot, and progress through it. */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaVibrationChamber>>
             ESSENTIA_VIBRATION_CHAMBER =
                     REGISTRY.register(
                             "essentia_vibration_chamber",
                             () -> IMenuTypeExtension.create(MenuEssentiaVibrationChamber::new));
 
-    /** The Essentia Cell Workbench's screen: the cell, and the partition being edited. */
+    /** The Essentia Cell Workbench's screen: the cell and the partition being edited. */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaCellWorkbench>> ESSENTIA_CELL_WORKBENCH =
             REGISTRY.register(
                     "essentia_cell_workbench",
@@ -63,40 +60,24 @@ public final class ModMenuTypes {
                     () -> IMenuTypeExtension.create(MenuDistillationEncoder::new));
 
     /**
-     * The Arcane Crafting Terminal's screen.
-     *
-     * <p>A terminal, so it is built the way the Essentia Terminal below is: through AE2's
-     * {@link MenuTypeBuilder}, because the menu is opened from a host that has to travel with it - the part
-     * on the cable. The builder is what puts that host in the open packet.
+     * The Arcane Crafting Terminal's screen. Built through AE2's {@link MenuTypeBuilder}: it puts the host
+     * into the open packet, without which the menu has no network behind it.
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneCraftingTerminal>>
             ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
                     "arcane_crafting_terminal",
-                    // The lambda is written as a block rather than a method reference because this menu has
-                    // both a four-argument and a five-argument constructor, and `MenuArcaneCraftingTerminal::new`
-                    // matches MenuTypeBuilder's two overloads equally well - which the compiler rejects as
-                    // ambiguous rather than picking one. The type arguments are spelled out for the same
-                    // reason: with a lambda there is nothing for inference to work from, so it has to be told.
-                    () -> MenuTypeBuilder.<MenuArcaneCraftingTerminal, appeng.api.storage.ITerminalHost>create(
+                    // A lambda, not a method reference: the two MenuTypeBuilder overloads are equally applicable.
+                    () -> MenuTypeBuilder.<MenuArcaneCraftingTerminal, ITerminalHost>create(
                                     (menuType, id, playerInventory, host) ->
                                             new MenuArcaneCraftingTerminal(menuType, id, playerInventory, host),
-                                    appeng.api.storage.ITerminalHost.class)
+                                    ITerminalHost.class)
                             .withMenuTitle(host -> Component.translatable(
                                     "gui.thaumicenergistics_ce.ArcaneCraftingTerminal"))
                             .buildUnregistered(ThEIds.id("arcane_crafting_terminal")));
 
     /**
-     * The Essentia Terminal.
-     *
-     * <p>Built by AE2's own {@link MenuTypeBuilder} rather than the plain extension, because a terminal
-     * menu is opened from a host that has to travel with it - the part on the cable, or the wireless item
-     * in the player's hand. The builder is what encodes that host into the open packet; without it the
-     * server would build a menu with no network behind it. {@code buildUnregistered} is AE2's own form for
-     * a terminal, and is what its own terminals use.
-     *
-     * <p>The title is named here rather than left to the screen style. AE2's terminal style carries a
-     * title of its own - the literal translation key {@code gui.ae2.Terminal} - so a terminal that borrows
-     * that style is captioned "Terminal" whatever it actually is. This is the hook that overrides it.
+     * The Essentia Terminal. The builder puts the host - the cable part, or the wireless item in hand - into
+     * the open packet. The title is named because AE2's terminal style carries {@code gui.ae2.Terminal}.
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaTerminal>> ESSENTIA_TERMINAL =
             REGISTRY.register(
@@ -106,11 +87,8 @@ public final class ModMenuTypes {
                             .buildUnregistered(ThEIds.id("essentia_terminal")));
 
     /**
-     * The Wireless Essentia Terminal's screen.
-     *
-     * <p>A second menu type rather than reusing the wired one, because the host differs: a cable terminal
-     * is opened from a part, a wireless one from an item in the player's inventory, and AE2's builder
-     * encodes that host class into the open packet. The reference build registers the same pair.
+     * The Wireless Essentia Terminal's screen. A second menu type rather than a reuse of the wired one: the
+     * builder encodes the host class into the open packet, and the host differs.
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaTerminal>> WIRELESS_ESSENTIA_TERMINAL =
             REGISTRY.register(
@@ -121,16 +99,8 @@ public final class ModMenuTypes {
                             .buildUnregistered(ThEIds.id("wireless_essentia_terminal")));
 
     /**
-     * The Essentia Import Bus's config screen.
-     *
-     * <p>The host type is the part class, which is what the builder encodes into the open packet - a bus
-     * is opened by clicking the part, so the menu has to be able to name the part it belongs to.
-     *
-     * <p>The title is named here rather than left to AE2. Without it the builder falls back to AE2's own
-     * generic caption for a bus - {@code gui.ae2.ImportBus}, "ME输入总线" - so all three of these screens
-     * were labelled as plain ME buses and nothing said they carried essentia. It is the same trap the
-     * Essentia Terminal documents below: a screen borrowing AE2's machinery is captioned by AE2 unless it
-     * says otherwise.
+     * The Essentia Import Bus screen; the part is the host encoded into the open packet. The title is
+     * is explicit: the builder would caption it with AE2's generic {@code gui.ae2.ImportBus}.
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaImportBus>> ESSENTIA_IMPORT_BUS =
             REGISTRY.register(
@@ -160,19 +130,16 @@ public final class ModMenuTypes {
                             .buildUnregistered(ThEIds.id("essentia_storage_bus")));
 
     /**
-     * The Essentia Level Emitter's screen.
-     *
-     * <p>Carries the reporting value as initial data, so the player's threshold box opens showing what the
-     * emitter is actually set to. AE2's own level emitter does the same, and for the same reason: the
-     * value is a setting rather than something the server keeps pushing.
+     * The Essentia Level Emitter's screen. The reporting value rides along as initial data - a setting, not
+     * something the server keeps pushing - so the threshold box opens on what the emitter is set to.
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaLevelEmitter>> ESSENTIA_LEVEL_EMITTER =
             REGISTRY.register(
                     "essentia_level_emitter",
                     () -> MenuTypeBuilder.create(
                                     MenuEssentiaLevelEmitter::new, PartEssentiaLevelEmitter.class)
-                            // Named for the same reason the buses above are: left to itself the builder
-                            // captions this with AE2's own generic level emitter title.
+                            // Named as the buses are: left alone the builder captions this with AE2's generic
+                            // level emitter title.
                             .withMenuTitle(host -> Component.translatable(
                                     "gui.thaumicenergistics_ce.essentia_level_emitter"))
                             .withInitialData(

@@ -6,18 +6,14 @@ import net.minecraft.world.item.ItemStack;
 /**
  * Cheap change-detection keys for stacks and grids.
  *
- * <p>Every one of these replaced a string built by appending {@code getComponentsPatch()}, and that turned
- * out to be the most expensive thing several menus did. Appending a component patch calls its
- * {@code toString}, which serialises every component to SNBT - and for a knowledge core the components
- * <em>are</em> the stored pattern list. On paths that run once a frame that meant re-serialising a whole
- * recipe store sixty times a second, which is how it was reported:
- *
- * <pre>"它会循环知识核心中所储存的所有配方以每帧的形式"</pre>
- *
- * <p>An int hash walks the same components but allocates nothing and formats nothing. It is not a perfect
- * fingerprint - two different component sets could collide - but every caller uses it to decide whether to
- * <em>recompute</em>, and a collision costs one skipped recomputation rather than a wrong answer, because
- * the recomputation itself reads the real stacks.
+ * <ul>
+ * <li>Each replaced a string built by appending {@code getComponentsPatch()}, whose {@code toString}
+ * serialises every component to SNBT - for a knowledge core those components are the stored pattern
+ * list, so a once-a-frame path re-serialised it sixty times a second.</li>
+ * <li>An int hash walks the same components without allocating or formatting. It can collide, but every
+ * caller only decides whether to <em>recompute</em>, and a collision costs one skipped recomputation
+ * rather than a wrong answer, because the recomputation itself reads the real stacks.</li>
+ * </ul>
  */
 public final class StackSignatures {
 
@@ -33,10 +29,8 @@ public final class StackSignatures {
     }
 
     /**
-     * A running key over a sequence of stacks.
-     *
-     * <p>Order matters, so this is not a sum: two grids holding the same items in different cells stand for
-     * different recipes, and a commutative combination would call them equal.
+     * A running key over a sequence of stacks. Order matters, so this is not a sum: two grids holding the
+     * same items in different cells stand for different recipes and must not hash equal.
      */
     public static int of(Iterable<ItemStack> stacks) {
         int hash = 1;

@@ -6,14 +6,14 @@ import appeng.api.networking.ticking.IGridTickable;
 import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
 import appeng.blockentity.grid.AENetworkedBlockEntity;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectCapabilities;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
-import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
+import com.leclowndu93150.thaumaturge.api.aspect.IAspectSource;
 import com.leclowndu93150.thaumaturge.content.infusion.BlockEntityInfusionMatrix;
 import com.leclowndu93150.thaumaturge.content.infusion.BlockEntityPedestal;
 import com.leclowndu93150.thaumaturge.content.infusion.InfusionRecipe;
 import com.leclowndu93150.thaumaturge.content.infusion.InfusionStabilitySurvey;
-import com.leclowndu93150.thaumaturge.registry.TCItems;
 import com.leclowndu93150.thaumaturge.registry.TCRecipeTypes;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,53 +21,51 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.block.BlockInfusionMonitor;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
-import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.infusion.InfusionRisk;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import thaumicenergistics_ce.init.ModBlockEntities;
+import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
  * The Infusion Monitor: watches an Infusion Altar and reports what the ritual will do to the room.
- *
- * <p>It scans for the altar, reads what the altar holds and still needs, and asks Thaumaturge what is
- * wrong - {@link InfusionStabilitySurvey} names the blocks breaking the altar's symmetry, which is a
- * specific, fixable problem rather than a number to worry about.
- *
- * <p>The Thaumonomicon is the key: without it the monitor still connects and watches but reports nothing.
+ * <ul>
+ *   <li>{@link InfusionStabilitySurvey} names the blocks that break the altar's symmetry.
+ *   <li>A Thaumonomicon must be in the book slot, or {@link #canReport()} stays false.
+ * </ul>
  */
 public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implements IGridTickable {
 
     public static final int BOOK_SLOT = 0;
 
-    /**
-     * What the network pays per tick for the watch, whether or not an altar is in range: 256 AE, which is the
-     * price of the function rather than a courtesy fee. A monitor that draws nothing is a monitor that can be
-     * left running on a dead network for free, and the reading it shows is only worth what it costs to keep
-     * current.
-     */
+    /** Idle draw of the watch, whether or not an altar is in range: 256 AE per tick. */
     private static final double IDLE_POWER = 256.0;
 
-    /**
-     * How far the monitor looks for an altar, in blocks. Twelve reaches the matrix from anywhere in the
-     * altar's footprint, and is small enough not to find the neighbouring altar in a room with two.
-     */
+    /** Altar search radius: twelve covers the altar's footprint but not the next altar. */
     private static final int ALTAR_SCAN_RANGE = 12;
 
     private static final int SCAN_INTERVAL = 10;
 
-    /** Ticks before a fruitless altar search is repeated: the cube below is 15,625 block entity lookups. */
+    /** Retry delay after a fruitless search: the cube below is 15,625 block entity lookups. */
     private static final int ALTAR_MISS_INTERVAL = 100;
 
-    /** Ticks between stability surveys. Blocks out of place change only when a player builds something. */
+    /** Ticks between stability surveys; blocks out of place change only when a player builds. */
     private static final int SURVEY_INTERVAL = 40;
 
-    /** How long a catalyst's recipe is remembered. Short, so a datapack reload cannot leave it stale. */
+    /** Recipe cache lifetime; short so a datapack reload cannot leave it stale. */
     private static final int RECIPE_CACHE_TICKS = 40;
 
 
@@ -82,22 +80,24 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
 
         @Override
         public boolean canPlaceItem(int slot, ItemStack stack) {
-            return stack.is(TCItems.THAUMONOMICON.get());
+            return TcRegistry.isThaumonomicon(stack);
         }
     };
 
     /** The altar being watched, or {@code null} when none was found. */
     private @Nullable BlockPos matrixPos;
 
-    /** Game time before which the altar cube is not searched again, and before which the survey is not re-run. */
+    /** Game time before which the altar cube is not searched again. */
     private long nextCubeScan;
+    /** Game time before which the survey is not re-run. */
     private long nextSurvey;
 
-    /** How long the next fruitless search waits. Doubles per miss, so a new altar is found within a second. */
+    /** Wait before the next search; doubles per miss, so a new altar is found within a second. */
     private int altarMissBackoff = SCAN_INTERVAL;
 
-    /** The last survey's blocks out of place, and the altar it was taken at. */
+    /** Last survey's blocks out of place. */
     private List<BlockPos> surveyedProblems = List.of();
+    /** The altar {@link #surveyedProblems} was taken at. */
     private @Nullable BlockPos surveyedAt;
 
     /** The last catalyst asked about, the recipe it starts, and when that was worked out. */
@@ -105,24 +105,20 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     private @Nullable InfusionRecipe cachedRecipe;
     private long cachedRecipeAt;
 
-    /** Everything read from the altar on the last scan. Kept for the tooltip, which reads it. */
+    /** Everything read from the altar on the last scan; kept for the tooltip, which reads it. */
     private Report report = Report.NONE;
 
-    /** The altar's risk as of the last scan: what the recipe costs plus what the room costs. */
+    /** Risk as of the last scan: what the recipe costs plus what the room costs. */
     private InfusionRisk risk = InfusionRisk.NONE;
 
-    /**
-     * Whether to report what the monitor sees, once a second; off unless
-     * {@code THAUMICENERGISTICS_MONITOR_TRACE=true}. No grid, no power, no book and no altar otherwise look
-     * alike.
-     */
+    /** One log line a second when {@code THAUMICENERGISTICS_MONITOR_TRACE=true}, because the failure
+     * modes - no grid, no power, no book, no altar - otherwise look alike. */
     private static final boolean TRACE =
             "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_MONITOR_TRACE"));
 
     private long nextTrace;
 
-    // The bubble is drawn on the client, so the numbers it needs travel in the update tag: the tier, the
-    // number behind it, and whether the monitor has anything to say at all.
+    // The bubble is drawn on the client, so its numbers travel in the update tag.
 
     private boolean bubbleReporting;
     private int bubbleTier = 1;
@@ -131,17 +127,14 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     private int bubbleStabilityTimesTen = 250;
     private boolean bubbleCrafting;
     private ItemStack bubbleCraft = ItemStack.EMPTY;
-    /** What the altar still wants and what it can reach, one line per aspect. See {@link EssentiaLine}. */
+    /** What the altar still wants and can reach, one entry per aspect. See {@link EssentiaLine}. */
     private final List<EssentiaLine> bubbleEssentia = new ArrayList<>();
     private final List<EssentiaLine> essentia = new ArrayList<>();
 
-    /**
-     * How far the monitor looks for the containers an altar can draw from; twelve blocks is
-     * {@code EssentiaSources}' own range, so nothing counted is out of the ritual's reach.
-     */
+    /** Search radius around an altar: twelve, {@code EssentiaSources}' own container range. */
     private static final int SOURCE_RANGE = 12;
 
-    /** The containers found around the altar, and when they were last looked for. See {@link #shortOf}. */
+    /** Containers found around the altar; also when they were last looked for. See {@link #shortOf}. */
     private final List<BlockPos> sourceCache = new ArrayList<>();
     private long nextSourceScan;
     private ItemStack craftDisplay = ItemStack.EMPTY;
@@ -150,15 +143,12 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     private boolean syncedReporting;
     private int syncedTier = -1;
     private int syncedInstability = -1;
-    /** Everything else the bubble draws, as one string, so a change in any of it is a change to send. */
+    /** Everything else the bubble draws, as one string; any change in it means a packet to send. */
     private String syncedDetail = "";
 
     public BlockEntityInfusionMonitor(BlockPos pos, BlockState state) {
         super(ModBlockEntities.INFUSION_MONITOR.get(), pos, state);
-        // One channel, like every other machine on the network: without this flag the monitor is on the
-        // grid but invisible to channel readings, which is what "it is not in my ME network" means in
-        // practice. The vibration chamber deliberately has none - a generator that needed a channel could
-        // not wake a network with no channel to give it.
+        // REQUIRE_CHANNEL so the monitor shows up in channel readings, as every other machine does.
         getMainNode()
                 .setIdlePowerUsage(IDLE_POWER)
                 .addService(IGridTickable.class, this)
@@ -177,14 +167,11 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
 
     /** Whether a Thaumonomicon is in the slot. Without one the monitor reports nothing. */
     public boolean hasBook() {
-        return getBook().is(TCItems.THAUMONOMICON.get());
+        return TcRegistry.isThaumonomicon(getBook());
     }
 
-    /**
-     * Puts the book in, or - only when the player sneaks - takes it back out: placing is what a player does
-     * with a Thaumonomicon in hand, while removing it disarms the machine. Before {@code sneaking} existed a
-     * plain right-click removed the book. See {@code BlockInfusionMonitor}.
-     */
+    /** Adds the book, or removes it only when the player sneaks - a plain right-click would disarm
+     * the machine. See {@code BlockInfusionMonitor}. */
     public @Nullable ItemStack interact(ItemStack held, boolean sneaking) {
         if (hasBook()) {
             if (!sneaking || !held.isEmpty()) {
@@ -194,7 +181,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
             inventory.setItem(BOOK_SLOT, ItemStack.EMPTY);
             return removed;
         }
-        if (held.isEmpty() || !held.is(TCItems.THAUMONOMICON.get())) {
+        if (held.isEmpty() || !TcRegistry.isThaumonomicon(held)) {
             return null;
         }
         ItemStack placed = held.copyWithCount(1);
@@ -203,7 +190,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return null;
     }
 
-    /** Mirrors the book into the blockstate, which is what selects between the three models. */
+    /** Mirrors the book into the blockstate, which selects between the three models. */
     private void updateBookState() {
         if (level == null || level.isClientSide()) {
             return;
@@ -246,10 +233,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
             return TickRateModulation.IDLE;
         }
         updateNetworkState();
-        // Offline is not a state to keep watching in. With no power, no channel or a grid that has not
-        // booted, the monitor surveys nothing and reports nothing - the work it skips is the energy it does
-        // not spend, and IDLE_POWER is what that work costs. SAME rather than IDLE on purpose: the node has
-        // to keep being ticked, or nothing would notice the grid coming back.
+        // Offline: skip work, but keep ticking (SAME) so the grid's return is noticed.
         if (!getMainNode().isActive()) {
             syncBubble();
             trace(node);
@@ -261,23 +245,19 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return TickRateModulation.SAME;
     }
 
-    /**
-     * Finds the altar and reads it. The scan is a cube, because a matrix's position is not derivable from
-     * the monitor's own - a player can put the monitor anywhere near the altar.
-     */
+    /** Finds and reads the altar; a cube scan, since the matrix's offset is arbitrary. */
     private void scanAltar() {
         if (level == null) {
             return;
         }
-        // An altar already found is re-checked directly, rather than searching twelve blocks twice a second.
+        // A found altar is re-checked directly, not by searching twelve blocks twice a second.
         if (matrixPos != null && level.getBlockEntity(matrixPos) instanceof BlockEntityInfusionMatrix matrix) {
             report = read(matrix, matrixPos);
             return;
         }
         matrixPos = null;
 
-        // A fruitless search waits: with no altar in the cube there is nothing to find, and this used to
-        // spend fifteen thousand lookups twice a second on saying so.
+        // A miss backs off: the cube is 15,625 lookups and finding nothing changes nothing.
         long now = level.getGameTime();
         if (now < nextCubeScan) {
             report = Report.NONE;
@@ -299,19 +279,14 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         report = Report.NONE;
     }
 
-    /**
-     * Reads one altar. The survey runs whether or not a ritual is under way, because the blocks out of place
-     * are what a player can fix <em>before</em> starting one. The recipe's instability belongs to the
-     * catalyst two blocks below the matrix, as in Thaumaturge's altars; the altar's is the survey's count.
-     */
+    /** Reads one altar. The survey runs even between rituals, since blocks out of place are what a
+     * player fixes first; the instability read is the catalyst's, two blocks below the matrix. */
     private Report read(BlockEntityInfusionMatrix matrix, BlockPos pos) {
         boolean crafting = matrix.isCrafting();
         float stability = matrix.stability();
         AspectList remaining = matrix.remainingEssentia();
 
-        // The survey reads a seventeen by eleven by seventeen volume for blocks out of place, which is a
-        // property of the room rather than of the ritual, so it is re-run every two seconds - and at once
-        // when the monitor is looking at a different altar.
+        // The survey describes the room, not the ritual: every two seconds, and at once on a new altar.
         if (level != null) {
             long now = level.getGameTime();
             if (now >= nextSurvey || !pos.equals(surveyedAt)) {
@@ -324,8 +299,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
             }
         }
         List<BlockPos> problems = surveyedProblems;
-        // A shortage is essentia the altar cannot find, not essentia it has not finished with: asking
-        // whether the ritual still wanted anything pinned the tier at four for every whole infusion.
+        // A shortage is essentia the altar cannot find, not essentia it has not finished with.
         boolean shortages = crafting && shortOf(matrixPos, remaining);
         risk = new InfusionRisk(readBaseInstability(pos), problems.size(), shortages, stability);
 
@@ -339,11 +313,8 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return new Report(true, crafting, stability, remaining, problems);
     }
 
-    /**
-     * The instability the recipe for whatever is on the central pedestal carries, or zero. Research is
-     * deliberately ignored: a player looking at an altar stacked for something they have not unlocked yet is
-     * exactly the player who needs the warning.
-     */
+    /** Instability of the catalyst's recipe, or zero. Research is ignored on purpose: the player who
+     * has not unlocked the recipe is the one who needs the warning. */
     private int readBaseInstability(BlockPos matrixPos) {
         if (level == null || !(level.getBlockEntity(matrixPos.below(2)) instanceof BlockEntityPedestal pedestal)) {
             return 0;
@@ -360,17 +331,13 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return risk;
     }
 
-    /**
-     * Sends the bubble's numbers to the client, only when one of them changed - the alternative is a block
-     * update twice a second for a machine that spends most of its life saying the same thing.
-     */
+    /** Sends the bubble's numbers to the client, but only when one of them changed. */
     private void syncBubble() {
         boolean reporting = canReport();
         int tier = risk.tier();
         int instability = risk.instability();
         boolean crafting = report.crafting();
-        // The stability moves in fractions of a point during a craft, so it is part of the signature; else
-        // the bubble would sit on the reading it was given when the ritual started.
+        // Stability moves during a craft, so it is part of the signature or the bubble would freeze.
         String signature = crafting + "|" + craftDisplay.getItem() + "|" + essentia + "|"
                 + Math.round(risk.stability() * 10.0F);
         if (reporting == syncedReporting
@@ -387,14 +354,12 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         bubbleCraft = craftDisplay;
         bubbleEssentia.clear();
         bubbleEssentia.addAll(essentia);
-        // Sent to the players watching this chunk by hand. AE2's markForClientUpdate goes through
-        // level.sendBlockUpdated, which on 1.21 sends no block entity packet at all - so the live bubble
-        // update reached nobody, and the numbers only ever arrived with a chunk send.
-        if (level instanceof net.minecraft.server.level.ServerLevel server) {
-            net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket packet =
-                    net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);
-            for (net.minecraft.server.level.ServerPlayer player : server.getChunkSource().chunkMap
-                    .getPlayers(new net.minecraft.world.level.ChunkPos(worldPosition), false)) {
+        // Sent by hand: on 1.21 AE2's markForClientUpdate path sends no block entity packet.
+        if (level instanceof ServerLevel server) {
+            ClientboundBlockEntityDataPacket packet =
+                    ClientboundBlockEntityDataPacket.create(this);
+            for (ServerPlayer player : server.getChunkSource().chunkMap
+                    .getPlayers(new ChunkPos(worldPosition), false)) {
                 player.connection.send(packet);
             }
         }
@@ -449,9 +414,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
                 String.format("%.1f", risk.stability()), report.remainingKinds(), risk.instability());
     }
 
-    /**
-     * The node's state as one word, for the trace: "not active" covers four faults with four different fixes.
-     */
+    /** The node's state as one word: "not active" would cover four faults with four different fixes. */
     private String describeNode(IGridNode node) {
         if (node == null) {
             return "none";
@@ -473,9 +436,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
 
     // The bubble's half of the sync
 
-    /**
-     * Client sync payload for the bubble: the numbers it draws, never the book, which travels as a blockstate.
-     */
+    /** Client sync payload for the bubble. The book is not here - it travels as a blockstate. */
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = super.getUpdateTag(registries);
@@ -485,7 +446,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         tag.putInt("BubbleStability", Math.round(risk.stability() * 10.0F));
         tag.putBoolean("BubbleCrafting", bubbleCrafting);
         tag.put("BubbleCraft", bubbleCraft.saveOptional(registries));
-        net.minecraft.nbt.ListTag lines = new net.minecraft.nbt.ListTag();
+        ListTag lines = new ListTag();
         for (EssentiaLine line : bubbleEssentia) {
             CompoundTag entry = new CompoundTag();
             entry.putString("Aspect", line.aspect());
@@ -503,20 +464,18 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         applyBubbleState(tag, registries);
     }
 
-    /**
-     * Applies an update tag on the client, which is the route a live update takes; {@code handleUpdateTag} is
-     * the chunk-load route. Both end here rather than in the persistence path, which would load the inventory.
-     */
+    /** A live update arrives here; {@code handleUpdateTag} is the chunk-load route. Both end here,
+     * not in {@code loadTag}, which would load the inventory. */
     @Override
     public void onDataPacket(
-            net.minecraft.network.Connection net,
-            net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket packet,
+            Connection net,
+            ClientboundBlockEntityDataPacket packet,
             HolderLookup.Provider registries) {
         super.onDataPacket(net, packet, registries);
         applyBubbleState(packet.getTag(), registries);
     }
 
-    /** The three numbers the bubble draws, taken off a tag. Absent keys mean "nothing to say". */
+    /** The bubble's numbers, taken off a tag; absent keys mean "nothing to say". */
     private void applyBubbleState(CompoundTag tag, HolderLookup.Provider registries) {
         if (level != null && level.isClientSide() && TRACE) {
             thaumicenergistics_ce.ThaumicEnergistics.LOG.info(
@@ -531,7 +490,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         bubbleCrafting = tag.getBoolean("BubbleCrafting");
         bubbleCraft = ItemStack.parseOptional(registries, tag.getCompound("BubbleCraft"));
         bubbleEssentia.clear();
-        net.minecraft.nbt.ListTag lines = tag.getList("BubbleEssentia", net.minecraft.nbt.Tag.TAG_COMPOUND);
+        ListTag lines = tag.getList("BubbleEssentia", Tag.TAG_COMPOUND);
         for (int i = 0; i < lines.size(); i++) {
             CompoundTag entry = lines.getCompound(i);
             bubbleEssentia.add(new EssentiaLine(
@@ -539,26 +498,21 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         }
     }
 
-    /**
-     * Whether the altar cannot reach what the ritual still wants, asked through
-     * {@code IAspectSource.containerContains}; counting {@code getAspects} would miss this mod's provider,
-     * which reports itself empty on purpose.
-     */
+    /** Whether the altar cannot reach what the ritual still wants, asked via
+     * {@code IAspectSource.containerContains}; counting {@code getAspects} misses our provider. */
     private boolean shortOf(BlockPos matrixPos, @Nullable AspectList remaining) {
         if (remaining == null || remaining.isEmpty() || level == null) {
             return false;
         }
-        // Resolved once for the whole check, not once per (aspect, position) pair as it used to be: when the
-        // source is this mod's Infusion Provider, every containerContains walks the ME network, so asking it
-        // six times an aspect was six walks of the network twice a second.
-        List<com.leclowndu93150.thaumaturge.api.aspect.IAspectSource> sources =
+        // Resolved once here, not per (aspect, source): containerContains walks the ME network.
+        List<IAspectSource> sources =
                 new ArrayList<>(sourcesAround(matrixPos).size());
         for (BlockPos sourcePos : sourcesAround(matrixPos)) {
             if (level.getCapability(
-                            com.leclowndu93150.thaumaturge.api.aspect.AspectCapabilities.CONTAINER,
+                            AspectCapabilities.CONTAINER,
                             sourcePos,
                             null)
-                    instanceof com.leclowndu93150.thaumaturge.api.aspect.IAspectSource source
+                    instanceof IAspectSource source
                     && !source.isBlocked()) {
                 sources.add(source);
             }
@@ -588,8 +542,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
             return List.of();
         }
         long now = level.getGameTime();
-        // The empty result is cached too: "no containers in range" is the common case, and it used to defeat
-        // the cache and re-run the whole cube on every scan.
+        // The empty result is cached too: "no containers in range" is the common case.
         if (now < nextSourceScan) {
             return sourceCache;
         }
@@ -599,7 +552,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
                 matrixPos.offset(-SOURCE_RANGE, -SOURCE_RANGE, -SOURCE_RANGE),
                 matrixPos.offset(SOURCE_RANGE, SOURCE_RANGE, SOURCE_RANGE))) {
             if (level.getCapability(
-                            com.leclowndu93150.thaumaturge.api.aspect.AspectCapabilities.CONTAINER, pos, null)
+                            AspectCapabilities.CONTAINER, pos, null)
                     != null) {
                 sourceCache.add(pos.immutable());
             }
@@ -607,9 +560,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return sourceCache;
     }
 
-    /**
-     * What the running ritual is making, named from outside the matrix: the recipe's result, else the catalyst.
-     */
+    /** What the running ritual is making: the recipe's result, else the catalyst. */
     private ItemStack craftName(ItemStack catalyst, @Nullable InfusionRecipe recipe) {
         if (catalyst.isEmpty()) {
             return ItemStack.EMPTY;
@@ -624,10 +575,8 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return pedestal.getItem();
     }
 
-    /**
-     * How far along each of the ritual's aspects is. Both numbers come from the job, not a scan of the room:
-     * counting the surrounding containers falls as the altar drains them. An unknown recipe reports 0 / n.
-     */
+    /** How far along each ritual aspect is: both numbers come from the job, never a room scan (which
+     * drains as the ritual runs). An unknown recipe reports 0 / n. */
     private void readEssentia(AspectList remaining, @Nullable InfusionRecipe recipe) {
         essentia.clear();
         AspectList total = recipe == null ? remaining : recipe.aspects();
@@ -642,8 +591,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
             int left = remaining == null ? 0 : remaining.amountOf(entry.aspect());
             ResourceLocation id = entry.aspect().unwrapKey().map(key -> key.location()).orElse(null);
             if (id != null) {
-                // The whole id, not the path: the client has to be able to resolve it, and an aspect from
-                // another namespace would come back as a different aspect - or as nothing at all.
+                // Full id, not the path: the client resolves aspects by namespace too.
                 essentia.add(new EssentiaLine(id.toString(), Math.max(0, wanted - left), wanted));
             }
         }
@@ -654,8 +602,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         if (level == null || catalyst.isEmpty()) {
             return null;
         }
-        // Walked linearly, and asked twice per scan for the same catalyst, so the answer is remembered for
-        // a couple of seconds - short enough that a datapack reload cannot leave it stale for long.
+        // Walked linearly and asked twice per scan, so the answer is cached for a couple of seconds.
         long now = level.getGameTime();
         if (now - cachedRecipeAt <= RECIPE_CACHE_TICKS
                 && ItemStack.isSameItemSameComponents(cachedCatalyst, catalyst)) {
@@ -675,7 +622,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         return null;
     }
 
-    /** One aspect of the running ritual: how much has gone in, and how much the recipe wants in total. */
+    /** One aspect of the running ritual: how much has gone in of the recipe's total. */
     public record EssentiaLine(String aspect, int drawn, int total) {
         @Override
         public String toString() {
@@ -688,8 +635,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     }
 
     public boolean canReport() {
-        // Online as well as book and altar: a reading taken while the machine was powered is not a reading
-        // of the altar now, and a bubble left on screen after the network went down says otherwise.
+        // Online too: a bubble left on screen after the network went down would report a stale reading.
         return hasBook() && report.foundAltar() && getMainNode().isActive();
     }
 
@@ -717,7 +663,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         }
         ItemStack book = inventory.getItem(BOOK_SLOT);
         if (!book.isEmpty()) {
-            net.minecraft.world.Containers.dropItemStack(
+            Containers.dropItemStack(
                     level,
                     worldPosition.getX() + 0.5,
                     worldPosition.getY() + 0.5,

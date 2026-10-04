@@ -14,21 +14,18 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 /**
  * The Arcane Crafting Terminal's grid, presented to Thaumaturge as a workbench's input.
  *
- * <p><b>The grid stays nine cells, empty ones included.</b> Vanilla's {@code CraftingInput.of} cannot
- * build it: that factory shrinks its list to the rectangle the non-empty cells occupy, so a grid holding a
- * single item in its middle arrives as a one-element list. Thaumaturge reads a grid as nine cells whatever
- * is in it - its shapeless matcher walks {@code items().subList(0, 9)}, its pattern matcher compares
- * {@code width()} and {@code height()} with the recipe's - so a shrunk grid throws there. That throw leaves
- * a menu constructor while a right-click is still being handled, and the terminal does not open.
- *
- * <p>What this adds over the raw grid is the two things a plain crafting grid does not have: the player
- * doing the crafting, and the machine's own contributions - the wand it will charge, and any crystals it
- * can supply. Both are needed because an arcane recipe is not satisfied by items alone.
- *
- * <p>The grid is rebuilt from the part's inventory on each construction rather than held. A terminal's
- * grid changes constantly while a player arranges ingredients, and a cached view would be stale the moment
- * anything moved; the snapshot is taken at the moment a recipe is matched, which is the only moment it has
- * to be right.
+ * <ul>
+ *   <li><b>The grid stays nine cells, empty ones included.</b> Vanilla's {@code CraftingInput.of} shrinks
+ *       the list to the rectangle the non-empty cells occupy, so a grid holding one item in its middle
+ *       arrives as a one-element list. Thaumaturge reads nine cells whatever is in it - its shapeless
+ *       matcher walks {@code items().subList(0, 9)}, its pattern matcher compares {@code width()} and
+ *       {@code height()} with the recipe's - so a shrunk grid throws there, out of a menu constructor
+ *       while a right-click is handled, and the terminal does not open.</li>
+ *   <li>Adds what a plain grid lacks: the crafting player and the machine's own contributions, the wand
+ *       it charges and the crystals it supplies - an arcane recipe is not satisfied by items alone.</li>
+ *   <li>The grid is rebuilt from the part's inventory each construction, not held: a terminal's grid
+ *       changes constantly and a cached view would be stale the moment anything moved.</li>
+ * </ul>
  */
 public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
 
@@ -49,15 +46,9 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
     private final @Nullable PartArcaneCraftingTerminal part;
 
     /**
-     * The essentia crystals the terminal can offer for a recipe's crystal requirement.
-     *
-     * <p>Read out of the terminal's own six crystal slots, which is where a player puts them. This used to
-     * read the crafting grid, on the theory that a terminal has no separate crystal slots and the grid is the
-     * whole of what it can offer. That was wrong twice over: a crystal in the grid is also a grid ingredient,
-     * so it counted towards {@code ingredientCount} and made every recipe with a crystal cost unmatchable -
-     * and the terminal does have separate crystal slots, drawn in its own texture and implemented in 1.12.2
-     * as slots 9 to 14. The grid is the recipe's shape; the crystals are payment for it, and they belong in
-     * their own place.
+     * Collects the crystal payment from the terminal's own crystal slots, never from the grid: a crystal in
+     * the grid also counts towards {@code ingredientCount}, which makes every recipe with a crystal cost
+     * unmatchable. The grid is the recipe's shape, the crystals are payment for it.
      */
     private static AspectList crystalsIn(List<ItemStack> slots) {
         AspectList found = AspectList.EMPTY;
@@ -98,11 +89,9 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
     }
 
     /**
-     * The part this input came from, or {@code null} when it was built for something else.
-     *
-     * <p>Needed by the workbench vis source: Thaumaturge hands a vis source this input and nothing else that
-     * says which machine is crafting, and a virtual workbench context carries no position to look the aura
-     * up by. The part is where both the position and the network live.
+     * The part this input came from, or {@code null} when built for something else.
+     * The vis source needs it: Thaumaturge hands it this input alone, and a virtual workbench context has no
+     * position to look the aura up by.
      */
     public @Nullable PartArcaneCraftingTerminal part() {
         return part;

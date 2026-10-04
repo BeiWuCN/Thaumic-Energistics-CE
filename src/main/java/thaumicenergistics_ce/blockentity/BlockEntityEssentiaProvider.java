@@ -1,24 +1,36 @@
 package thaumicenergistics_ce.blockentity;
 
+import appeng.api.config.Actionable;
 import appeng.api.networking.IGrid;
+import appeng.api.networking.IGridNode;
+import appeng.api.networking.security.IActionSource;
+import appeng.api.networking.storage.IStorageService;
 import appeng.api.networking.ticking.IGridTickable;
 import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
+import appeng.api.stacks.AEKey;
+import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.IStorageMounts;
 import appeng.api.storage.IStorageProvider;
 import appeng.api.storage.MEStorage;
 import appeng.blockentity.grid.AENetworkedBlockEntity;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.LongTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
@@ -27,12 +39,11 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.EssentiaMEStorage;
 
 /**
- * The Essentia Provider: a place for the ME network to put essentia that is meant for the world - the
- * opposite half of the Import Bus, handing essentia from the network to whatever container it touches, so
- * a jar, alembic or crucible stays supplied without a player carrying phials.
+ * The Essentia Provider: where the ME network puts essentia meant for the world - the opposite half
+ * of the Import Bus, handing essentia to whatever container it touches.
  *
- * <p>The buffer is a waypoint, not storage: essentia inserted here is pushed to a neighbour on the next
- * tick, never accumulates and is never persisted, so a provider with nothing attached refuses everything.
+ * <ul><li>The buffer is a waypoint, not storage: inserted essentia is pushed to a neighbour on the
+ * next tick and is never persisted.</li><li>A provider with nothing attached refuses everything.</li></ul>
  */
 public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         implements IStorageProvider, IGridTickable, IEssentiaStorage {
@@ -49,12 +60,12 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
     /** Extra network cost per bound receiver, on top of {@link #IDLE_POWER}. */
     private static final double POWER_PER_RECEIVER = 5.0;
 
-    /** The receivers bound to this provider. Kept so the provider can price its own draw. */
-    private final java.util.List<BlockPos> linkedReceivers = new java.util.ArrayList<>();
+    /** The receivers bound to this provider, kept so it can price its own draw. */
+    private final List<BlockPos> linkedReceivers = new ArrayList<>();
 
     /** Identity for anything taken out of the network on a receiver's behalf. */
-    private final appeng.api.networking.security.IActionSource actionSource =
-            appeng.api.networking.security.IActionSource.ofMachine(this);
+    private final IActionSource actionSource =
+            IActionSource.ofMachine(this);
 
     /** The network cost of being connected. A provider does nothing while idle, so this is small. */
     private static final double IDLE_POWER = 1.0;
@@ -65,7 +76,7 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
     /** Essentia waiting to be pushed to a neighbour, by aspect. Never persisted - see the class note. */
     private final Map<Holder<IAspect>, Integer> buffer = new HashMap<>();
 
-    /** Bumped whenever the buffer changes; a change nothing announces is a change a terminal will not show. */
+    /** Bumped whenever the buffer changes: an unannounced change is one a terminal will not show. */
     private long revision;
 
     public BlockEntityEssentiaProvider(BlockPos pos, BlockState state) {
@@ -86,17 +97,17 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
     // IGridTickable
 
     @Override
-    public TickingRequest getTickingRequest(appeng.api.networking.IGridNode node) {
+    public TickingRequest getTickingRequest(IGridNode node) {
         return new TickingRequest(TICK_RATE_ACTIVE, TICK_RATE_IDLE, false);
     }
 
     @Override
-    public TickRateModulation tickingRequest(appeng.api.networking.IGridNode node, int ticksSinceLast) {
+    public TickRateModulation tickingRequest(IGridNode node, int ticksSinceLast) {
         if (level == null || level.isClientSide()) {
             return TickRateModulation.IDLE;
         }
         if (!getMainNode().isActive() || buffer.isEmpty()) {
-            // One may have been broken, and paying for a receiver that is not there is invisible to the player.
+            // A receiver may have been broken; paying for a missing one is invisible to the player.
             if (pruneDeadReceivers()) {
                 return TickRateModulation.URGENT;
             }
@@ -104,12 +115,13 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         }
 
         boolean moved = pushBufferToNeighbours();
-        // Anything still buffered means every neighbour is full; looking at it again sooner will not empty it.
+        // Anything still buffered means every neighbour is full; looking again sooner will not empty it.
         return moved ? TickRateModulation.URGENT : TickRateModulation.SLOWER;
     }
 
     /**
-     * Hands the buffer to whatever the block touches; each side is offered all that is left, so no side starves.
+     * Hands the buffer to whatever the block touches; each side is offered all that is left, so none
+     * of them starves.
      */
     private boolean pushBufferToNeighbours() {
         if (level == null) {
@@ -117,7 +129,7 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         }
         boolean movedAnything = false;
 
-        var aspects = new java.util.ArrayList<>(buffer.keySet());
+        var aspects = new ArrayList<>(buffer.keySet());
         for (Holder<IAspect> aspect : aspects) {
             int remaining = buffer.getOrDefault(aspect, 0);
             if (remaining <= 0) {
@@ -187,10 +199,10 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         if (buffer.isEmpty()) {
             return AspectList.EMPTY;
         }
-        var entries = new java.util.ArrayList<com.leclowndu93150.thaumaturge.api.aspect.AspectInstance>();
+        var entries = new ArrayList<AspectInstance>();
         buffer.forEach((aspect, amount) -> {
             if (amount > 0) {
-                entries.add(new com.leclowndu93150.thaumaturge.api.aspect.AspectInstance(aspect, amount));
+                entries.add(new AspectInstance(aspect, amount));
             }
         });
         return AspectList.ofEntries(entries);
@@ -224,12 +236,13 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
     // Wireless receivers
 
     /**
-     * Registers a receiver as bound to this provider, which pays for it: every bound receiver adds to the
-     * idle draw. Returns a reason for the refusal, or {@code null} when the link was accepted.
+     * Registers a receiver as bound to this provider, which pays for it. Returns a refusal reason, or
+     * {@code null} when the link was accepted.
      */
     public @Nullable String addLinkedReceiver(BlockPos receiver) {
         if (linkedReceivers.contains(receiver)) {
-            return null; // already bound; not an error
+            // Already bound; not an error.
+            return null;
         }
         if (linkedReceivers.size() >= MAX_LINKED_RECEIVERS) {
             return "provider is already serving " + MAX_LINKED_RECEIVERS + " receivers";
@@ -260,13 +273,11 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         return linkedReceivers.size();
     }
 
-    public java.util.List<BlockPos> linkedReceivers() {
-        return java.util.List.copyOf(linkedReceivers);
+    public List<BlockPos> linkedReceivers() {
+        return List.copyOf(linkedReceivers);
     }
 
-    /**
-     * Recomputes what this block costs the network; a broken receiver is dropped here, when the cost is wrong.
-     */
+    /** Recomputes what this block costs the network; broken receivers are dropped when the cost is wrong. */
     private void updateIdlePower() {
         getMainNode().setIdlePowerUsage(IDLE_POWER + POWER_PER_RECEIVER * linkedReceivers.size());
     }
@@ -286,20 +297,20 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
     }
 
     /**
-     * Lets a bound receiver take essentia out of the network for its own neighbours. It goes to the network,
-     * not to {@link #extract}: the buffer holds essentia on its way <em>into</em> the world.
+     * Lets a bound receiver take essentia from the network on behalf of its own neighbours. It goes
+     * to the grid, not to {@link #extract}: the buffer holds essentia on its way into the world.
      */
     public int takeForLink(Holder<IAspect> aspect, int amount, boolean simulate) {
         if (aspect == null || amount <= 0 || !getMainNode().isActive()) {
             return 0;
         }
-        appeng.api.storage.MEStorage storage = networkStorage();
+        MEStorage storage = networkStorage();
         if (storage == null) {
             return 0;
         }
-        appeng.api.config.Actionable mode = simulate
-                ? appeng.api.config.Actionable.SIMULATE
-                : appeng.api.config.Actionable.MODULATE;
+        Actionable mode = simulate
+                ? Actionable.SIMULATE
+                : Actionable.MODULATE;
         AEssentiaKey key = AEssentiaKey.of(aspect);
         if (key == null) {
             // Not registry-backed: no id, so nothing the network could hold it under.
@@ -313,8 +324,8 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
     }
 
     /** The network's storage, or {@code null} when this block is not on a grid. */
-    private appeng.api.storage.MEStorage networkStorage() {
-        appeng.api.networking.IGridNode node = getMainNode().getNode();
+    private MEStorage networkStorage() {
+        IGridNode node = getMainNode().getNode();
         if (node == null) {
             return null;
         }
@@ -322,8 +333,8 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         if (grid == null) {
             return null;
         }
-        appeng.api.networking.storage.IStorageService service =
-                grid.getService(appeng.api.networking.storage.IStorageService.class);
+        IStorageService service =
+                grid.getService(IStorageService.class);
         return service == null ? null : service.getInventory();
     }
 
@@ -336,9 +347,9 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
     @Override
     public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        net.minecraft.nbt.ListTag receivers = new net.minecraft.nbt.ListTag();
+        ListTag receivers = new ListTag();
         for (BlockPos pos : linkedReceivers) {
-            receivers.add(net.minecraft.nbt.LongTag.valueOf(pos.asLong()));
+            receivers.add(LongTag.valueOf(pos.asLong()));
         }
         tag.put("LinkedReceivers", receivers);
     }
@@ -347,9 +358,9 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
     public void loadTag(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadTag(tag, registries);
         linkedReceivers.clear();
-        net.minecraft.nbt.ListTag receivers = tag.getList("LinkedReceivers", CompoundTag.TAG_LONG);
+        ListTag receivers = tag.getList("LinkedReceivers", CompoundTag.TAG_LONG);
         for (int i = 0; i < receivers.size(); i++) {
-            if (receivers.get(i) instanceof net.minecraft.nbt.LongTag value) {
+            if (receivers.get(i) instanceof LongTag value) {
                 linkedReceivers.add(BlockPos.of(value.getAsLong()));
             }
         }
@@ -357,10 +368,7 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         buffer.clear();
     }
 
-    /**
-     * The network's view of the provider: reports the buffer so a terminal can show what is waiting, accepts
-     * inserts by handing them to the block entity, and offers no extraction. See {@link #extract}.
-     */
+    /** The network's view of the provider: reports the buffer, accepts inserts, offers no extraction. */
     private static final class ProviderStorage implements MEStorage {
 
         private final BlockEntityEssentiaProvider provider;
@@ -371,10 +379,10 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
 
         @Override
         public long insert(
-                appeng.api.stacks.AEKey what,
+                AEKey what,
                 long amount,
-                appeng.api.config.Actionable mode,
-                appeng.api.networking.security.IActionSource source) {
+                Actionable mode,
+                IActionSource source) {
             if (!(what instanceof AEssentiaKey key) || amount <= 0) {
                 return 0;
             }
@@ -387,15 +395,15 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
 
         @Override
         public long extract(
-                appeng.api.stacks.AEKey what,
+                AEKey what,
                 long amount,
-                appeng.api.config.Actionable mode,
-                appeng.api.networking.security.IActionSource source) {
+                Actionable mode,
+                IActionSource source) {
             return 0;
         }
 
         @Override
-        public void getAvailableStacks(appeng.api.stacks.KeyCounter out) {
+        public void getAvailableStacks(KeyCounter out) {
             var contents = provider.contents();
             for (var entry : contents.entries()) {
                 ResourceLocation id = entry.aspect().unwrapKey().map(k -> k.location()).orElse(null);
@@ -406,8 +414,8 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         }
 
         @Override
-        public net.minecraft.network.chat.Component getDescription() {
-            return net.minecraft.network.chat.Component.translatable(
+        public Component getDescription() {
+            return Component.translatable(
                     "block.thaumicenergistics_ce.essentia_provider");
         }
 

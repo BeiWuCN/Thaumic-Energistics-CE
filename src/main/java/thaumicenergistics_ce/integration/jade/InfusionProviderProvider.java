@@ -34,11 +34,12 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 /**
  * The Infusion Provider's Jade tooltip: what the altar beside it can actually draw.
- *
- * <p>{@code getAspects} is empty on purpose - the block is a window, not a container, so essentia pipes do
- * not spend their time pumping it - which leaves this tooltip as the only place the network's contents show
- * up. One aspect per entry, as a chip with the amount in the corner; the amounts are the server's,
- * abbreviated with {@link AmountFormat#SLOT} so they read as they do in a terminal.
+ * <ul>
+ *   <li>{@code getAspects} is empty on purpose: the block is a window, not a container, so essentia
+ *       pipes do not pump it. This tooltip is therefore the only view of the network's contents.
+ *   <li>One aspect per entry, drawn as a chip with the amount in the corner, abbreviated with
+ *       {@link AmountFormat#SLOT} so figures read as they do in a terminal.
+ * </ul>
  */
 public class InfusionProviderProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
 
@@ -159,8 +160,7 @@ public class InfusionProviderProvider implements IBlockComponentProvider, IServe
 
     /**
      * An aspect's chip with its amount in the corner, drawn through Thaumaturge's own
-     * {@code AspectRendering.renderGui} so the texture, the blend mode and the undiscovered-aspect mask are
-     * all its. A crystal item cannot be told aspect from aspect at a glance.
+     * {@code AspectRendering.renderGui} so the texture, blend mode and undiscovered-aspect mask are all its.
      */
     private static final class AspectIcon implements IElement {
 
@@ -175,8 +175,8 @@ public class InfusionProviderProvider implements IBlockComponentProvider, IServe
         private AspectIcon(Holder<IAspect> aspect, String badge) {
             this.aspect = aspect;
             this.badge = badge;
-            // The badge is part of the width: Jade lays a row out by the sizes elements report, and the first
-            // version reported only the chip's 16 pixels, so numbers printed on top of the next chip.
+            // The badge is part of the width: Jade lays a row out by the sizes elements report, and the
+            // first version reported only the chip's 16 pixels, so numbers printed on top of the next chip.
             this.size = new Vec2(CHIP + GAP + Minecraft.getInstance().font.width(badge), CHIP);
         }
 
@@ -184,7 +184,7 @@ public class InfusionProviderProvider implements IBlockComponentProvider, IServe
         public void render(GuiGraphics graphics, float x, float y, float delta, float alpha) {
             Font font = Minecraft.getInstance().font;
             AspectRendering.renderGui(graphics, font, (int) x, (int) y, aspect, 0.0F);
-            // The chip's bottom line, so a row reads as one band of numbers. The amount passed above is zero
+            // The chip's bottom line, so a row reads as one band of numbers. The amount above is zero
             // because this badge is the number, not the chip's own label.
             graphics.drawString(font, badge, (int) x + CHIP + GAP, (int) y + 9, 0xFFFFFFFF, true);
         }

@@ -2,6 +2,7 @@ package thaumicenergistics_ce.menu;
 
 import appeng.api.implementations.menuobjects.IPortableTerminal;
 import appeng.menu.locator.ItemMenuHostLocator;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftingTransaction;
@@ -33,12 +34,11 @@ import thaumicenergistics_ce.part.PartEssentiaTerminal;
 
 /**
  * Builds every menu this mod registers, once, and reports any that throw.
- *
- * <p>Written for a bug nothing else could see: {@code MenuArcaneCraftingTerminal} called
- * {@code createPlayerInventorySlots} twice, the constructor threw, and the server suppressed it. Runs on
- * the first player login, because a menu needs an {@code Inventory} and an {@code Inventory} needs a
- * player; off unless {@code THAUMICENERGISTICS_MENU_SELFTEST=true}.
- */
+ * <ul>
+ *   <li>Written for a bug nothing else could see: a menu constructor threw, silently suppressed.
+ *   <li>Runs at the first player login, since a menu needs a player; off unless
+ *       {@code THAUMICENERGISTICS_MENU_SELFTEST=true}.
+ * </ul> */
 public final class MenuSelfTest {
 
     /** One run per server: the menus do not change between players. */
@@ -62,7 +62,7 @@ public final class MenuSelfTest {
         List<String> failures = new ArrayList<>();
 
         // Every machine menu here accepts a null host, which is what makes the client half work. The casts
-        // are needed: these classes also have a RegistryFriendlyByteBuf constructor, and null fits both.
+        // are needed: the classes also have a RegistryFriendlyByteBuf constructor, and null fits both.
         check(failures, "KNOWLEDGE_INSCRIBER", () -> new MenuKnowledgeInscriber(
                 0, inventory, (BlockEntityKnowledgeInscriber) null));
         check(failures, "ESSENTIA_CELL_WORKBENCH", () -> new MenuEssentiaCellWorkbench(
@@ -72,7 +72,7 @@ public final class MenuSelfTest {
         checkEncoderWellsAreWritable(failures, inventory);
 
         // AE2 accepts exactly three host kinds - BlockEntity, IPart, ItemMenuHost - and rejects a stand-in
-        // that merely implements ITerminalHost. Build the host the way the game does, through AE2's locator.
+        // that merely implements ITerminalHost, so build the host the way the game does, via AE2's locator.
         ItemStack terminal = new ItemStack(ModItems.WIRELESS_ESSENTIA_TERMINAL.get());
         ItemMenuHostLocator locator = new ItemMenuHostLocator() {
             @Override
@@ -97,8 +97,7 @@ public final class MenuSelfTest {
         }
 
         // The wired path is where the layout is: the ACT menu takes its grid from
-        // `host instanceof PartArcaneCraftingTerminal`, so the wireless run above never reaches the nine
-        // cells, the result well or the wand slot. A part can be built without a cable.
+        // `host instanceof PartArcaneCraftingTerminal`, so the wireless run never reaches the grid.
         PartArcaneCraftingTerminal actPart =
                 new PartArcaneCraftingTerminal(ModItems.ARCANE_CRAFTING_TERMINAL.get());
         check(failures, "ARCANE_CRAFTING_TERMINAL (with its part)", () -> new MenuArcaneCraftingTerminal(
@@ -116,8 +115,7 @@ public final class MenuSelfTest {
     }
 
     /** Lays a recipe out in the terminal and checks the product appears. The result well is filled by
-     * {@code ArcaneCraftingResultSlot.refresh()}, which nothing used to call - the grid and crystal slots
-     * are AE2 inventories the part owns, so no container change callback reaches the menu for them. */
+     * {@code ArcaneCraftingResultSlot.refresh()}, which nothing used to call. */
     private static void checkCraftReachesTheResult(
             ServerLevel level, ServerPlayer player, Inventory inventory, List<String> failures) {
         ThEArcanePattern pattern = null;
@@ -147,7 +145,7 @@ public final class MenuSelfTest {
         MenuArcaneCraftingTerminal menu = new MenuArcaneCraftingTerminal(
                 ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get(), 0, inventory, part);
 
-        // Found by semantic, not by index, because AE2's base class adds five slots before ours.
+        // Found by semantic, not by index: AE2's base class adds five slots before ours.
         if (menu.resultSlot() == null) {
             failures.add("the ACT menu offers no result slot after being built with its part");
             dumpSlots(menu);
@@ -167,10 +165,8 @@ public final class MenuSelfTest {
             }
         }
 
-        // Each crystal slot is pinned to one primal aspect, the way the arcane workbench's six are. Asked of
-        // the slot rather than read off a field: the defect was that the slots were plain AppEngSlots and the
-        // rule existed only in the shape of the data, so anything short of mayPlace() would have passed while
-        // the slot went on accepting six Aer crystals.
+        // Each crystal slot is pinned to one primal aspect, as the arcane workbench's six are. Asked of
+        // the slot via mayPlace(), not of a field: plain AppEngSlots passed while taking six Aer crystals.
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
             var slot = menu.crystalSlots().get(i);
             if (!(slot instanceof CrystalSlot crystalSlot)) {
@@ -209,7 +205,7 @@ public final class MenuSelfTest {
         }
         ItemStack[] crystals = new ItemStack[PartArcaneCraftingTerminal.CRYSTAL_SLOTS];
         int written = 0;
-        for (com.leclowndu93150.thaumaturge.api.aspect.AspectInstance entry :
+        for (AspectInstance entry :
                 pattern.primalCrystals().entries()) {
             if (written >= crystals.length) {
                 break;
@@ -227,14 +223,8 @@ public final class MenuSelfTest {
                 ? ArcaneCraftingTransaction.Failure.NO_RECIPE
                 : resultSlot.lastFailure();
 
-        // NOT_RECIPE is the bug this check exists for: a grid laid out as the recipe asks that the terminal
-        // cannot see. PAYMENT_UNAVAILABLE is expected - the vis comes from the aura of the block it is on.
-        //
-        // RESEARCH_LOCKED is acceptance too, and it has to be taken on Thaumaturge's word: match() in
-        // ArcaneCraftingTransactions finds the recipe through matches(...) first and only then asks
-        // doesPassGate(player), so that failure is only reachable from a grid that already resolved. It means
-        // the check ran and the player has not unlocked the output - usually a fresh dev player, who has no
-        // research at all - and reporting it as a refusal would make this test about the player's progress.
+        // NO_RECIPE is the bug this check exists for: a grid laid out as the recipe asks that the terminal
+        // cannot see. PAYMENT_UNAVAILABLE and RESEARCH_LOCKED are acceptance.
         if (failure == ArcaneCraftingTransaction.Failure.NO_RECIPE) {
             failures.add("a grid laid out for " + pattern.result()
                     + " does not resolve in the terminal - the recipe is not being matched");
@@ -260,7 +250,7 @@ public final class MenuSelfTest {
         System.out.println("[menu] craft path: " + pattern.result() + " is offered with its crystals in the"
                 + " slots and none in the grid");
 
-        // Without the crystals the same grid is refused, which proves they paid for it and not a wand.
+        // Without the crystals the same grid is refused, which proves they paid, not a wand.
         for (int i = 0; i < crystals.length; i++) {
             part.crystalInventory().setItemDirect(i, ItemStack.EMPTY);
         }
@@ -286,8 +276,8 @@ public final class MenuSelfTest {
         AbstractContainerMenu build();
     }
 
-    /** Checks that the Distillation Encoder's written-pattern well can actually be written to: it was a
-     * display-only slot whose {@code set} was a no-op, so server writes never reached the screen. */
+    /** Checks that the Distillation Encoder's written-pattern well can be written to: its {@code set} was
+     * a no-op, so server writes never reached the screen. */
     private static void checkEncoderWellsAreWritable(List<String> failures, Inventory inventory) {
         MenuDistillationEncoder menu = new MenuDistillationEncoder(
                 0, inventory, (BlockEntityDistillationEncoder) null);

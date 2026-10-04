@@ -28,21 +28,15 @@ import thaumicenergistics_ce.menu.slot.MachineGridSlot;
 import thaumicenergistics_ce.menu.slot.ReadOnlySlot;
 
 /**
- * The Knowledge Inscriber's menu: the knowledge core, the core's stored patterns mirrored across the 7x3
- * read-only grid, the 3x3 ghost grid the player edits to say which recipe to encode, and the recipe's
- * result beside it.
- *
- * <p>There is no pattern slot - nothing produces a pattern here; the core is the pattern store, see
- * {@code BlockEntityKnowledgeInscriber}.
+ * The Knowledge Inscriber's menu: the core slot, the 7x3 read-only grid of patterns, the player's
+ * 3x3 ghost grid and the result well.
+ * <ul>
+ *   <li>No output slot: the core is the pattern store, see {@code BlockEntityKnowledgeInscriber}.
+ * </ul>
  */
 public class MenuKnowledgeInscriber extends AbstractContainerMenu {
 
-    /**
-     * Fallback geometry, copied from the reference container.
-     *
-     * <p>These describe the wells' interiors, not the frames; 'correcting' them by a pixel puts the item
-     * on the frame. Suspected of being off twice, and both times the suspicion was wrong.
-     */
+    /** Geometry from the reference container: a well's interior, not its frame. */
     private static final int FB_CORE_X = 186;
     private static final int FB_CORE_Y = 8;
     private static final int FB_PATTERN_X = 26;
@@ -65,12 +59,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     private static final int IDX_CORE = PLAYER_SLOTS;
     private static final int IDX_PATTERN_START = IDX_CORE + 1;
     private static final int IDX_CRAFT_START = IDX_PATTERN_START + PATTERN_COUNT;
-    private static final int IDX_RESULT = IDX_CRAFT_START + CRAFT_SIZE;
 
-    /**
-     * Vanilla's menu-button packet carries only an id, which is why the delete flag rides in it: the client
-     * cannot name a pattern index on the server, and it does not need to.
-     */
+    /** The menu-button packet carries only an id, so the delete flag rides in it. */
     @Override
     public boolean clickMenuButton(Player player, int id) {
         runButton(player, id == 1);
@@ -84,71 +74,44 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     public static final int PATTERN_SLOTS = PATTERN_COUNT;
     public static final int CRAFT_SLOTS = CRAFT_SIZE;
 
-    /**
-     * Menu index of one cell of the player-editable grid. Public because JEI names these slots too, for
-     * drag drop areas and for the recipe transfer's slot list.
-     */
+    /** Menu index of one cell of the player grid; public because JEI names these slots too. */
     public static int gridSlotIndex(int cell) {
         return IDX_CRAFT_START + cell;
     }
 
     private final @Nullable BlockEntityKnowledgeInscriber inscriber;
 
-    /**
-     * The machine's own slots, unindexed. Held separately so button state can be read from the slots
-     * directly: the core is a real slot, so {@code AbstractContainerMenu} already keeps it identical on
-     * both sides, and each side has the recipe manager locally.
-     */
+    /** The machine's own slots, held separately so button state can be read from them directly. */
     private final Container machine;
 
-    /**
-     * The player's inventory, kept for its {@code player} - the client menu has no block entity to ask for
-     * a level, and the recipe manager the preview needs hangs off the player's own level.
-     */
+    /** Kept for its {@code player}: the client menu has no block entity. */
     private final Inventory playerInventory;
 
-    /**
-     * The result well's container.
-     *
-     * <p>The client's own, deliberately: the preview is worked out from the grid the player is looking at,
-     * on the side looking at it, where a server-owned container would show the result a round trip late -
-     * and nothing at all if the two sides disagreed. Storing the recipe happens on the server; this is
-     * only a picture of what the player has built.
-     */
+    /** The result well, client-owned: deriving it from the grid is a round trip sooner than syncing. */
     private final SimpleContainer previewResult = new SimpleContainer(1);
 
-    /**
-     * The 7x3 wells' container, on the client.
-     *
-     * <p>Client-owned, like {@link #previewResult}: the wells are derived from the knowledge core item,
-     * and the core is a slot, so the client can work them out itself. The machine's own container has
-     * slots in the same places for the server, but this block has no update tag to sync with.
-     */
+    /** The 7x3 wells, client-side like {@link #previewResult}: derived from the core slot. */
     private final SimpleContainer mirrorDisplay =
             new SimpleContainer(BlockEntityKnowledgeInscriber.MIRROR_SLOT_COUNT);
 
-    /** Signature of the core the wells were last filled from, so they are only refilled when it changes. */
+    /** Signature of the core the wells were last filled from. */
     private int mirroredCore = -1;
 
-    /**
-     * The core signature as of {@link #coreSignatureTick}: hashing a core walks its whole stored pattern
-     * store and the screen asks once a frame, so it is taken at most once a tick - one tick of staleness
-     * changes nothing, because the screen polls its own state once a tick anyway.
-     */
+    /** The core signature as of {@link #coreSignatureTick}; one hash per tick covers the whole store. */
     private int sampledCore = -1;
     private long coreSignatureTick = Long.MIN_VALUE;
 
-    /** Last grid {@link #updatePreview} resolved, so it only resolves when the grid changes. */
+    /** Last grid {@link #updatePreview} resolved; resolving walks every arcane recipe. */
     private int previewedSignature = -1;
 
-    /** The grid signature as of {@link #gridSignatureTick}, sampled once a tick for the same reason. */
+    /** The grid signature as of {@link #gridSignatureTick}, sampled once a tick, as above. */
     private int sampledGrid = -1;
     private long gridSignatureTick = Long.MIN_VALUE;
 
-    /** The nine grid cells, in one list reused by {@link #gridSignature} instead of a fresh one per call. */
+    /** The nine grid cells, one list reused by {@link #gridSignature} rather than one per call. */
     private final List<ItemStack> gridScratch = new ArrayList<>(CRAFT_SIZE);
 
-    // Synced to the client through the menu's data slots, as the Arcane Assembler's status is.
+    // Synced to the client through the menu's data slots.
     public static final int DATA_HAS_CORE = 0;
     public static final int DATA_STATE = 1;
     private static final int DATA_SIZE = 2;
@@ -156,7 +119,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     private final int[] clientData = new int[DATA_SIZE];
     private final ContainerData data;
 
-    /** Client constructor: the block entity lives on the client already, so nothing is wired here. */
+    /** Client constructor: the block entity is already on this side, so nothing is wired here. */
     public MenuKnowledgeInscriber(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
         this(containerId, playerInventory, (BlockEntityKnowledgeInscriber) null);
     }
@@ -226,8 +189,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
                 }
                 return switch (index) {
                     case DATA_HAS_CORE -> slotStack(IDX_CORE).is(ModItems.KNOWLEDGE_CORE.get()) ? 1 : 0;
-                    // ACTIONABLE means the machine could store this, not that this player may: the recipe can be
-            // gated by research. Pushed as Locked so the button says why instead of doing nothing.
+            // ACTIONABLE is storable, not permitted: research can gate it, so push Locked.
             case DATA_STATE -> inscriber != null
                             && inscriber.status() == BlockEntityKnowledgeInscriber.STATUS_ACTIONABLE
                             && !inscriber.canStore(playerInventory.player)
@@ -253,11 +215,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     }
 
     /**
-     * Handles clicks on the grid and on the stored patterns.
-     *
-     * <p>The carried stack is the instruction and the slot is only the target; an empty hand clears the
-     * cell, anything else writes one of it. Vanilla's click reads what is <em>in</em> the slot instead,
-     * which on a ghost grid took the ingredient out and made a placed recipe vanish on the second click.
+     * Vanilla reads what is <em>in</em> the clicked slot, which lost a placed recipe on the second
+     * click; here the carried stack instructs and the slot is only the target.
      */
     @Override
     public void clicked(int slotId, int dragType, ClickType clickType, Player player) {
@@ -278,14 +237,13 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     }
 
     /**
-     * Reads a stored pattern back onto the grid. The button acts on the grid, so this is also how a
-     * recipe is deleted. The tail is cleared because a shapeless recipe's stored grid is a compact list
-     * of its ingredients, and the grid that comes out has to resolve back to the same recipe.
+     * Reads a stored pattern back onto the grid: the button acts there, so this is also the delete path.
+     * The tail is cleared because a shapeless recipe's stored grid is a compact ingredient list.
      */
     private void loadStoredPattern(int index) {
         List<ItemStack> cells = storedGrid(index);
         if (cells == null) {
-            // Says which well was asked for, so an empty well is distinguishable from the wrong one.
+            // Names the well asked for, so an empty well is distinguishable from the wrong one.
             ThaumicEnergistics.LOG.info("[inscriber] pattern well {} holds nothing to load", index);
             return;
         }
@@ -299,11 +257,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     }
 
     /**
-     * The grid of the stored pattern in a given well, or {@code null} when the well is empty.
-     *
-     * <p><b>Read from the core by position, not from the well's slot.</b> The wells are read-only and
-     * their backing mirror slots are never filled, so the slot gave the server a stale stack and the two
-     * sides disagreed about the same click. The core's pattern list is in the order the wells are drawn.
+     * The grid of the stored pattern in a well, or {@code null} when it is empty. Read from the core by
+     * position: the well's own slots are never filled, so they were stale.
      */
     private @Nullable List<ItemStack> storedGrid(int index) {
         if (index < 0) {
@@ -317,10 +272,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
         return index < patterns.size() ? patterns.get(index).grid() : null;
     }
 
-    /**
-     * The server writes the container directly; the client goes through the slot, which is what sends the
-     * payload. See {@code GhostGridSlot}.
-     */
+    /** Server writes the container directly; the client goes through the slot to send the payload. */
     private void setGridCell(int cell, ItemStack stack) {
         if (inscriber != null) {
             inscriber.setGridCell(cell, stack);
@@ -330,10 +282,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     }
 
     /**
-     * Applies one grid cell, from {@code InscriberGridPayload}. Server only: on the client this writes
-     * into a container the server never sees, which is what a JEI recipe transfer used to do - the grid
-     * stayed empty and the button read 'Invalid'. The client's route into the grid is the slot, see
-     * {@link #fillGridFromRecipe}.
+     * Applies one grid cell from {@code InscriberGridPayload}, server only: a client write lands in a
+     * container the server never sees.
      */
     public void setGridCell(Player player, int cell, ItemStack stack) {
         if (inscriber == null) {
@@ -344,10 +294,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     }
 
     /**
-     * Applies a whole grid, from {@code InscriberGridFillPayload}. Server only, like {@link #setGridCell}:
-     * one message in, one write, one resolution, so the two sides change together rather than a cell at a
-     * time.
-     *
+     * Applies a whole grid from {@code InscriberGridFillPayload}, server only: one write and one
+     * resolution, so the two sides change together rather than a cell at a time.
      * @param cells the stacks sent; missing entries are treated as empty
      * @param count how many cells the grid has, so a short or long list cannot run past it
      */
@@ -355,7 +303,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
         if (inscriber == null) {
             return;
         }
-        List<ItemStack> full = new java.util.ArrayList<>(count);
+        List<ItemStack> full = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             full.add(i < cells.size() ? cells.get(i) : ItemStack.EMPTY);
         }
@@ -364,10 +312,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
         broadcastChanges();
     }
 
-    /**
-     * Whether the player is carrying a stack the given stack would match. For JEI, so an ingredient that
-     * accepts several items is placed as one the player actually has.
-     */
+    /** Whether the player carries a stack that matches: JEI places what the player actually has. */
     public boolean playerHas(ItemStack wanted) {
         if (wanted.isEmpty()) {
             return false;
@@ -382,17 +327,11 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     }
 
     /**
-     * Replaces the grid with a recipe's layout, the way a JEI transfer and a stored-pattern click both do.
-     *
-     * <p><b>One replacement, not nine writes.</b> Writing each cell through its slot sent a payload per
-     * cell, so the server re-resolved nine times against grids that were part the old recipe and part the
-     * new.
-     *
-     * <p>The write goes to the container rather than to the slots: {@code GhostGridSlot} sends a payload
-     * when the <em>player</em> edits one cell, and this is not a player edit.
+     * Fills the grid from a recipe's layout, as a JEI transfer and a pattern click do, in one write: a
+     * payload per cell made the server re-resolve against a grid that was half the old recipe.
      */
     public void fillGridFromRecipe(List<ItemStack> cells) {
-        List<ItemStack> full = new java.util.ArrayList<>(CRAFT_SIZE);
+        List<ItemStack> full = new ArrayList<>(CRAFT_SIZE);
         for (int cell = 0; cell < CRAFT_SIZE; cell++) {
             ItemStack stack = cell < cells.size() ? cells.get(cell) : ItemStack.EMPTY;
             full.add(stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1));
@@ -416,9 +355,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     }
 
     /**
-     * Works out what the grid the player has built stands for, and shows its result. Runs on both sides
-     * because the client draws the result well, from its own copy of the ghost grid. Only when the grid
-     * changes - resolving walks every arcane recipe, and this runs once a frame.
+     * Resolves the grid and shows its result, on both sides: the client draws the well, and resolving
+     * walks every arcane recipe.
      */
     public void updatePreview() {
         int signature = gridSignature();
@@ -442,15 +380,13 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     }
 
     /**
-     * Fills the 7x3 wells from the knowledge core. Called every frame, but does nothing unless the core
-     * changed. Derived rather than remembered, because the wells are read-only slots and only the side
-     * drawing them can write what they show.
+     * Fills the 7x3 wells from the core, each frame but only on a change: they are read-only slots, so
+     * only the side drawing them can write what they show.
      */
     public void refreshMirrors() {
         ItemStack core = slotStack(IDX_CORE);
-        // An int key, not a string: the old getItem() + '|' + getComponentsPatch() called toString on
-        // every component, re-serialising the core's whole stored pattern list sixty times a second.
-        // Still taken at most once a tick: this is a per-frame call and the hash walks the whole store.
+        // An int key, not a string: the old getItem() + '|' + getComponentsPatch() reserialised the
+        // core's whole stored pattern list sixty times a second.
         long now = playerInventory.player.level().getGameTime();
         if (now != coreSignatureTick) {
             coreSignatureTick = now;
@@ -483,9 +419,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     }
 
     /**
-     * Whether this menu could encode a recipe at all, ignoring which recipe it is. For JEI. The client
-     * asks the synced data slot rather than the slot itself: its own copy of the core slot is not
-     * reliably filled, which made an earlier button stick on 'No Core'.
+     * Whether the menu could encode at all, whatever the recipe. The client reads the synced data slot,
+     * since its own slot copy is not reliably filled.
      */
     public boolean canEncode() {
         if (inscriber == null) {
@@ -503,13 +438,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     }
 
     /**
-     * Signature of what the result well depends on, so it is only recomputed when it changed. An int
-     * rather than a string: this runs once a frame and the string version serialised all nine cells'
-     * patches every time. See {@link StackSignatures}.
-     *
-     * <p>Sampled at most once a tick, like the core's - one tick of staleness changes nothing, because the
-     * screen polls its own state once a tick anyway - and filled into {@link #gridScratch}, one list for the
-     * menu's life, where this used to allocate a fresh nine-element ArrayList on every call.
+     * Signature of what the result well depends on. An int, not a string: this runs once a frame and a
+     * string serialised nine cells' patches - see {@link StackSignatures}.
      */
     private int gridSignature() {
         long now = playerInventory.player.level().getGameTime();
@@ -524,11 +454,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
         return sampledGrid;
     }
 
-    /**
-     * What the button should say, and whether it is usable. Driven by container data because the
-     * client's copy of this menu never received the core slot's contents, so a decision taken from the
-     * slots was made against an empty container.
-     */
+    /** The button's label and usability, from container data, as the client's copy is not filled. */
     public int buttonState() {
         if (data.get(DATA_HAS_CORE) == 0) {
             return BlockEntityKnowledgeInscriber.STATUS_READY;
@@ -537,18 +463,15 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     }
 
     /**
-     * True when pressing the button would remove a stored recipe rather than store one. Deliberately not
-     * a mode the player can put the button into: a grid that resolves to nothing is Invalid, however
-     * many patterns the core holds.
+     * True when the button would delete rather than store, not a player-picked mode: a grid resolving to
+     * nothing is Invalid however many patterns the core holds.
      */
     public boolean isDelete() {
         return data.get(DATA_HAS_CORE) != 0
                 && data.get(DATA_STATE) == BlockEntityKnowledgeInscriber.STATUS_ALREADY_STORED;
     }
 
-    /**
-     * True when pressing the button would do something, either way round. Delete counts.
-     */
+    /** True when pressing the button would do something, either way round. Delete counts. */
     public boolean isActionable() {
         if (isDelete()) {
             return true;
@@ -558,9 +481,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu {
     }
 
     /**
-     * The level to resolve recipes against: the block entity's on the server, the player's own on the
-     * client. The client menu is built without a block entity, so asking one there returns null and the
-     * result well could never be filled.
+     * The level recipes resolve against: the block entity's on the server, the player's own on the
+     * client, where the menu is built without a block entity.
      */
     private @Nullable Level level() {
         if (inscriber != null) {

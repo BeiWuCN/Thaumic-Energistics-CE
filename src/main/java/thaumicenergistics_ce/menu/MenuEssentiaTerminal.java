@@ -3,6 +3,7 @@ package thaumicenergistics_ce.menu;
 import appeng.api.storage.ITerminalHost;
 import appeng.menu.me.common.MEStorageMenu;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
@@ -14,21 +15,16 @@ import thaumicenergistics_ce.network.ContainerSlot;
 /**
  * The Essentia Terminal's menu, shared by the cable part and the wireless item.
  *
- * <p>Everything ordinary about it comes from AE2's {@link MEStorageMenu}: the terminal's item list, the
- * search and sort controls, the crafting grid, the upgrade slots. Essentia needs no code of its own to be
- * <em>shown</em> - registering the key type was the whole of that, because the terminal lists whatever
- * keys the network holds and gets their names and amounts from the key type.
- *
- * <p>What is left is getting essentia in and out, and that lives here rather than in the screen because
- * it moves things: {@link #fillFromNetwork} and {@link #deposit}.
- *
- * <p>Which key types the terminal offers is not decided here. It comes from the host's
- * {@code KeyTypeSelection}, so the cable part can present an essentia-only terminal while AE2's own
- * machinery still handles the list.
- *
- * <p>Both directions act on the container the player holds - the cursor stack, or the main hand when the
- * cursor is empty - and neither touches anything else. A stack that is not a jar or a phial is refused
- * before any essentia moves; see {@link EssentiaFillHelper#isSupportedContainer}.
+ * <ul>
+ * <li>Everything ordinary comes from AE2's {@link MEStorageMenu}: the item list, search and sort, the
+ * crafting grid, the upgrade slots. Essentia only needs its key type registered.
+ * <li>Moving essentia lives here rather than in the screen, because it does move things:
+ * {@link #fillFromNetwork} and {@link #deposit}.
+ * <li>Which key types are offered is not decided here but by the host's {@code KeyTypeSelection}, so the
+ * cable part can present an essentia-only terminal while AE2 still handles the list.
+ * <li>Both directions act only on the container the player holds, refusing anything that is not a jar or a
+ * phial.
+ * </ul>
  */
 public class MenuEssentiaTerminal extends MEStorageMenu {
 
@@ -42,13 +38,9 @@ public class MenuEssentiaTerminal extends MEStorageMenu {
     }
 
     /**
-     * Takes essentia out of the network and into the player's container.
-     *
-     * <p>Server side only. The container is looked up on the server rather than taken from the packet:
-     * {@code stack} is only a hint about what the client meant to hold, and this fills what is actually
-     * there.
-     *
-     * @param where the cursor or the main hand - see {@link ContainerSlot}
+     * Takes essentia out of the network and into the player's container. Server side only.
+     * @param where the cursor or the main hand - see {@link ContainerSlot}; {@code stack} is only a hint, so
+     *     the container is looked up on the server rather than taken from the packet
      * @return whether anything was transferred
      */
     public boolean fillFromNetwork(Player player, int where, ResourceLocation aspectId) {
@@ -62,24 +54,17 @@ public class MenuEssentiaTerminal extends MEStorageMenu {
         boolean moved = EssentiaFillHelper.fillFromNetwork(
                 player.level(), storage, energySource, getActionSource(), player, container, aspectId);
         if (moved) {
-            // A filled container replaces the one held - a phial comes back as another stack - so the
-            // client's copy of both places is stale.
+            // A filled container is replaced by another stack, so the client's copy of both places is stale.
             broadcastChanges();
         }
         return moved;
     }
 
     /**
-     * Empties an essentia container into the network.
-     *
-     * <p>Server side only, and it works from what the server holds rather than from what the client sent:
-     * the payload's stack is only used to find the container the player meant. A client that named a place
-     * the server does not agree about - because the inventory moved on between the click and the packet -
-     * would otherwise be able to hand over a container that is not there.
-     *
-     * @param player the player whose menu this is
+     * Empties an essentia container into the network. Server side only, working from what the server holds:
+     * the payload's stack only locates the container meant, so a moved inventory cannot be handed over.
      * @param where the cursor, the main hand, or a menu slot id
-     * @param claimed what the client says it was holding
+     * @param claimed what the client says it was holding, never trusted
      */
     public void deposit(Player player, int where, ItemStack claimed) {
         if (isClientSide()) {
@@ -92,8 +77,7 @@ public class MenuEssentiaTerminal extends MEStorageMenu {
                 return;
             }
             Slot target = slots.get(where);
-            // Only the player's own slots, so a slot AE2 owns - an upgrade slot, the crafting grid - can
-            // never be emptied from here.
+            // Only the player's own slots, so no slot AE2 owns can be emptied from here.
             if (!isPlayerSideSlot(target)) {
                 return;
             }
@@ -121,16 +105,14 @@ public class MenuEssentiaTerminal extends MEStorageMenu {
         if (where == ContainerSlot.CURSOR) {
             setCarried(left);
         } else {
-            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, left);
+            player.setItemInHand(InteractionHand.MAIN_HAND, left);
         }
         broadcastChanges();
     }
 
     /**
-     * The stack a place names, or {@code null} when that place is not one this menu will move.
-     *
-     * <p>Only the cursor and the main hand are offered. Those are the two places "the container I am
-     * using" can be, and neither is a menu slot, which is why they need ids of their own.
+     * The stack a place names, or {@code null} when that place is not one this menu will move: the cursor and
+     * the main hand, the only places "the container I am using" can be, and neither is a slot.
      */
     private ItemStack containerAt(Player player, int where) {
         return switch (where) {
@@ -142,7 +124,6 @@ public class MenuEssentiaTerminal extends MEStorageMenu {
 
     /**
      * Empties an essentia container into the network.
-     *
      * @return {@code null} when the stack is not a container the terminal handles
      */
     public ItemStack emptyIntoNetwork(ItemStack stack) {

@@ -9,14 +9,12 @@ import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 /**
  * One well in the Distillation Encoder's aspect row.
  *
- * <p>Not an item slot in any sense the player cares about. What is drawn there represents an aspect, and
- * the click means "use this one" - so nothing may be placed and nothing may be taken. Letting vanilla
- * handle a click would let a player pull a phantom item out of a display, which is why
- * {@link MenuDistillationEncoder#clicked} intercepts these slots before vanilla sees them and this class
- * refuses both directions as a second line.
- *
- * <p>The slot index is the aspect's position in the row, not an inventory index: slot {@code i} is always
- * the i-th aspect the source item offers, and {@code -1} marks the separate display of the picked one.
+ * <ul>
+ * <li>Nothing may be placed or taken: the drawing represents an aspect and a click means "use this one",
+ * so {@link MenuDistillationEncoder#clicked} intercepts these slots before vanilla could pull a phantom
+ * item out.
+ * <li>The slot index is the aspect's position in the row, not an inventory index: slot {@code i} is the
+ * i-th aspect the source item offers, and {@code -1} marks the picked-aspect display.</ul>
  */
 public class AspectSelectSlot extends Slot {
 

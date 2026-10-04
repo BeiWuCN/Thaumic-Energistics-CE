@@ -15,8 +15,10 @@ import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
 /**
  * Registers this mod's Jade providers.
  *
- * <p>Annotated rather than listed in a service file, which is how Jade finds plugins on NeoForge. Jade is
- * an optional dependency and only ever loads this class itself, so a world without Jade never reaches it.
+ * <ul>
+ * <li>Annotated rather than a service file: that is how Jade finds plugins on NeoForge.</li>
+ * <li>Jade is optional; this class is only loaded when Jade is present.</li>
+ * </ul>
  */
 @WailaPlugin
 public class ThEJadePlugin implements IWailaPlugin {

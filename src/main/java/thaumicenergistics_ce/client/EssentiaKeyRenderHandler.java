@@ -1,6 +1,7 @@
 package thaumicenergistics_ce.client;
 
 import appeng.api.client.AEKeyRenderHandler;
+import appeng.util.Platform;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.client.AspectRendering;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -20,42 +21,31 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
  * How AE2 draws an essentia key.
- *
- * <p>Registering one of these is not optional. AE2 asks for a handler by key type whenever it draws a key
- * - in a terminal row, on a storage cell's tooltip, on a bus's config slot - and throws when there is
- * none. The failure looks nothing like a missing registration: it arrives as a crash while rendering a
- * screen, from inside AE2's own tooltip code, the first time a cell holding essentia is hovered.
- *
- * <p>The icon comes from Thaumaturge's own {@link AspectRendering}, which is its public drawing entry
- * point and already knows about the aspect textures, their blend mode and whether the player has
- * discovered the aspect. Drawing the texture here by hand was the first attempt and is the wrong one -
- * the aspect chips are not plain textures, and a hand-rolled blit loses the discovery masking.
+ * <ul>
+ *   <li>Registration is mandatory: AE2 asks for a handler by key type whenever it draws a key, and
+ *       throws when there is none.
+ *   <li>The icon comes from Thaumaturge's own {@link AspectRendering}, which knows the aspect textures
+ *       and the player's discovery state - a hand-rolled blit loses the masking.
+ * </ul>
  */
 public class EssentiaKeyRenderHandler implements AEKeyRenderHandler<AEssentiaKey> {
 
-    /**
-     * Ids already reported as unresolvable.
-     *
-     * <p>Once each, not once per slot per frame: this is a diagnostic, and a terminal of eight aspects
-     * redrawing sixty times a second would otherwise fill the log with one fact.
-     */
+    /** Ids already reported as unresolvable, once each rather than once per slot per frame. */
     private static final Set<ResourceLocation> REPORTED = ConcurrentHashMap.newKeySet();
 
     @Override
     public void drawInGui(Minecraft minecraft, GuiGraphics graphics, int x, int y, AEssentiaKey key) {
         Holder<IAspect> aspect = key.resolveAspect();
         if (aspect == null) {
-            // A chip reading "unknown" is a report; an empty slot is not. Nothing else here is visible:
-            // AE2 catches whatever a render handler throws and carries on, so a key whose aspect cannot be
-            // resolved disappears from the screen without a word - which is how this took three rounds to
-            // see. The line below is the only evidence that this path ran at all.
+            // AE2 swallows anything a render handler throws, so an unresolved key vanishes silently:
+            // this warning is the only evidence the path ran.
             if (REPORTED.add(key.getId())) {
                 ThaumicEnergistics.LOG.warn(
                         "[essentia-icon] {} has no aspect ({}); drawing the missing chip",
                         key.getId(),
                         AEssentiaKeyType.whyNoAspect(key.getId()));
             }
-            AspectRendering.renderMissingGui(graphics, x, y, key.getId());
+            AspectRendering.renderMissingGui(graphics, x, y);
             return;
         }
         // The amount is zero because AE2 draws the count itself, right after this and on top. Asking for
@@ -63,12 +53,7 @@ public class EssentiaKeyRenderHandler implements AEKeyRenderHandler<AEssentiaKey
         AspectRendering.renderGui(graphics, minecraft.font, x, y, aspect, 0.0F);
     }
 
-    /**
-     * Not drawn on block faces.
-     *
-     * <p>AE2 calls this for keys shown in the world - on a storage monitor, or a facade. Essentia has no
-     * such display here, and the reference build leaves it empty for the same reason.
-     */
+    /** Not drawn on block faces: an essentia key has no in-world display here. */
     @Override
     public void drawOnBlockFace(
             PoseStack poseStack,
@@ -87,6 +72,6 @@ public class EssentiaKeyRenderHandler implements AEKeyRenderHandler<AEssentiaKey
 
     @Override
     public List<Component> getTooltip(AEssentiaKey key) {
-        return List.of(key.getDisplayName(), Component.literal(appeng.util.Platform.formatModName(key.getModId())));
+        return List.of(key.getDisplayName(), Component.literal(Platform.formatModName(key.getModId())));
     }
 }

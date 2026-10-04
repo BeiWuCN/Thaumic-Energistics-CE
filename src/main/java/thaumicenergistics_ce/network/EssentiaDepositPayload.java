@@ -12,18 +12,11 @@ import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
 
 /**
  * "Empty this essentia container into the network", sent by the Essentia Terminal's right-click.
- *
- * <p>A payload rather than a menu click because AE2's own terminal packets move <em>one item</em> between
- * the player and the network; this moves the contents of a container that stays with the player, which is
- * a different operation with a different result - a jar comes back empty, a phial comes back as glass.
- * None of that is expressible as "transfer slot N to the network".
- *
- * <p>Both the container on the cursor and the one in the main hand are deposited from, so {@code where}
- * says which of the two it was - see {@link ContainerSlot}. The stack travels as well, but only so the
- * server can see what the client thought it was moving; the server re-reads the container from the place
- * it names and refuses when the two disagree, because the inventory can move on between click and packet.
- *
- * @param where the cursor, the main hand, or a menu slot id
+ * <ul>
+ * <li>A payload, not a menu click: AE2's terminal packets move one item, this empties a container.
+ * <li>A jar comes back empty, a phial as glass - no "transfer slot N" expresses that.
+ * <li>The server re-reads {@code where} and rejects a stale {@code stack}: the inventory moves on.
+ * </ul>
  */
 public record EssentiaDepositPayload(int containerId, int where, ItemStack stack) implements CustomPacketPayload {
 
