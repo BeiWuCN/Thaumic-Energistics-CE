@@ -24,6 +24,20 @@ to rebuild.
 
 **Do not commit the jar and do not pass it on.** `.gitignore` already refuses `libs/*.jar`.
 
+## It runs the data generator too, and it has to
+
+Building Thaumaturge with nothing but `gradlew jar` produces a jar that loads and then kills the game.
+Upstream registers a `generateData` task but nothing depends on it, so `src/generated/resources` stays
+empty unless somebody runs it by hand, and the jar ends up carrying 216 data files instead of roughly
+1780. Every datapack registry Thaumaturge declares is then empty and the first world load dies inside
+`RegistryDataLoader` with
+
+    Unbound values in registry ResourceKey[minecraft:root / thaumaturge:aspect]: [thaumaturge:aer, ...]
+
+Both scripts run `runData -PdatagenPass=true` before `jar` for that reason, and then refuse to install a
+jar carrying fewer than 37 aspect files. If you build Thaumaturge yourself, do the same — otherwise you
+will spend an evening chasing a crash that looks like a bug in this addon.
+
 ## Why a commit and not a version
 
 The upstream repository has no tags and no releases, so there is no version to pin and no artifact to
