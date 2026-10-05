@@ -11,6 +11,7 @@ import appeng.api.networking.storage.IStorageService;
 import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.GenericStack;
+import appeng.api.stacks.KeyCounter;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import java.util.ArrayList;
 import java.util.List;
@@ -406,5 +407,120 @@ final class AssemblerCraftJob {
         return HandlerKnowledgeCore.of(
                 owner.inventory.getItem(BlockEntityArcaneAssembler.CORE_SLOT),
                 owner.level().registryAccess());
+    }
+
+    // ------------------------------------------------------------------
+    // Repairing an interrupted craft
+    // ------------------------------------------------------------------
+
+    /** Finishes recovering a craft that a save interrupted, once there is a level to read the core with:
+     * not in {@code loadAdditional}, which runs before the block entity has a level. */
+    void recoverInterruptedCraft() {
+        if (owner.level() == null || owner.level().isClientSide()) {
+            return;
+        }
+        // Driven by the well: only finishCraft empties it, so a product there means a craft did not finish.
+        ItemStack waiting = owner.inventory.getItem(BlockEntityArcaneAssembler.TARGET_SLOT);
+        if (!waiting.isEmpty()) {
+            owner.craft.setCrafting(true);
+            // Recovered only for the preview grid: the price and crystals were saved with the craft.
+            ThEArcanePattern recovered = patternForResult(waiting);
+            owner.craft.setCurrentPattern(recovered);
+            if (recovered != null) {
+                // A readable pattern restates both numbers; the saved ones are the fallback.
+                owner.craft.setCraftPrice(craftCost(recovered));
+                owner.craft.setCraftCrystals(crystalStacksOf(recovered));
+            }
+            ThELog.LOG.info(
+                    "[assembler] at {} resumed the craft a save interrupted: {} for {} vis{}",
+                    owner.blockPos(),
+                    waiting.getHoverName().getString(),
+                    owner.craft.craftPrice(),
+                    recovered == null ? " (the knowledge core no longer has its pattern)" : "");
+            // Deliver on the first tick: the crafting time was served before the save.
+            owner.craft.setCraftTicks(owner.upgrades.ticksPerCraft());
+            owner.craft.clearStall();
+        } else {
+            owner.craft.setCrafting(false);
+            owner.craft.setCraftTicks(0);
+            owner.craft.setCraftPrice(0);
+            owner.craft.setCraftCrystals(List.of());
+            owner.displaySync.clearDisplay(true);
+        }
+        // Ask to be ticked rather than assuming a later grid event: with no grid yet this is a no-op.
+        updateSleepiness();
+    }
+
+    // ------------------------------------------------------------------
+    // Taking a job
+    // ------------------------------------------------------------------
+
+    /** Why the machine cannot take a job at all, or {@code null} when it can: both entry points ask this
+     * first, so a refusal reads the same whichever way AE2 came in. */
+    private @Nullable Component refusalFor() {
+        if (!owner.acceptsPlans()) {
+            return AssemblerStatus.refuse(AssemblerStatus.REFUSE_BUSY, "it is already holding a craft");
+        }
+        if (!owner.mainNode.isActive()) {
+            return AssemblerStatus.refuse(
+                    AssemblerStatus.REFUSE_NODE_INACTIVE, "its grid node is not active");
+        }
+        return null;
+    }
+
+    /** Takes the job a pattern provider on the same grid pushed; the inputs are kept only to give back. */
+    boolean accept(IPatternDetails patternDetails, KeyCounter[] inputHolder) {
+        Component refusal = refusalFor();
+        if (refusal != null) {
+            noteRefusal(refusal);
+            return false;
+        }
+        if (!(patternDetails instanceof ArcanePatternDetails details)) {
+            noteRefusal(AssemblerStatus.refuse(
+                    AssemblerStatus.REFUSE_NOT_ARCANE, "the pattern is not an arcane pattern this machine can read"));
+            return false;
+        }
+        if (!canEverPay(details.pattern())) {
+            noteRefusal(cannotPay(craftCost(details.pattern())));
+            return false;
+        }
+        // What AE2 just extracted. This machine pays in vis and crystals, so keep these only to give back.
+        owner.craft.heldInputs().clear();
+        for (KeyCounter counter : inputHolder) {
+            for (var entry : counter) {
+                if (entry.getKey() instanceof AEItemKey itemKey && entry.getLongValue() > 0) {
+                    owner.craft.heldInputs()
+                            .add(itemKey.toStack((int) Math.min(Integer.MAX_VALUE, entry.getLongValue())));
+                }
+            }
+        }
+        return beginCraft(details.pattern());
+    }
+
+    /** Takes the job a colocated pattern provider pushed; its inputs were extracted before this point. */
+    boolean acceptFromMachine(IPatternDetails patternDetails) {
+        Component refusal = refusalFor();
+        if (refusal != null) {
+            noteRefusal(refusal);
+            return false;
+        }
+        if (patternDetails instanceof ArcanePatternDetails details) {
+            if (!canEverPay(details.pattern())) {
+                noteRefusal(cannotPay(craftCost(details.pattern())));
+                return false;
+            }
+            return beginCraft(details.pattern());
+        }
+        ThEArcanePattern resolved = resolveExternal(patternDetails);
+        if (resolved == null) {
+            noteRefusal(AssemblerStatus.refuse(
+                    AssemblerStatus.REFUSE_UNRESOLVED, "the pattern does not resolve to an arcane recipe"));
+            return false;
+        }
+        if (!canEverPay(resolved)) {
+            noteRefusal(cannotPay(craftCost(resolved)));
+            return false;
+        }
+        return beginCraft(resolved);
     }
 }

@@ -51,7 +51,7 @@ final class AssemblerTestAccess {
     /** Hands the machine a level and lets it pick a craft back up out of what it saved. */
     static void recover(BlockEntityArcaneAssembler machine, Level level) {
         machine.setLevel(level);
-        reach(machine, "recoverInterruptedCraft", NO_ARGUMENTS);
+        reach(reach(machine, "craftJob", NO_ARGUMENTS), "recoverInterruptedCraft", NO_ARGUMENTS);
     }
 
     /** Puts a stack in without the container listener; {@link #onInventoryChanged} then runs it by hand. */

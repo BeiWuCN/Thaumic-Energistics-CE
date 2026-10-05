@@ -42,7 +42,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.arcane.ArcanePatternDetails;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.init.ModBlockEntities;
@@ -78,15 +77,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     /** The acceleration-card slots, one card each: four of them are the machine's whole speed ladder. */
     public static final int UPGRADE_SLOT_COUNT = 4;
     public static final int SLOT_COUNT = UPGRADE_SLOT_START + UPGRADE_SLOT_COUNT;
-
-    // ---- Tuning -----------------------------------------------------------
-    private static final double ACTIVE_POWER = 1.5;
-    private static final float MIN_CONSUMPTION_MODIFIER = 0.1F;
-    private static final int STALLED_CRAFT_REPORT_TICKS = 100;
-
-    /** Ticks of unbroken stalling after which the craft is finished anyway: a minute. AE2 has no
-     * cancellation callback on a provider, and a craft waiting for ever keeps the machine busy. */
-    private static final int STALL_RELEASE_TICKS = 1200;
 
     /** The primal aspects, in the fixed order the six vis columns are drawn in. */
     public static final List<ResourceKey<IAspect>> PRIMALS = TCAspects.PRIMALS;
@@ -200,7 +190,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         if (level != null && !level.isClientSide()) {
             mainNode.create(level, getBlockPos());
             // loadAdditional ran before setLevel, so a restored craft had no world to match against.
-            recoverInterruptedCraft();
+            craftJob().recoverInterruptedCraft();
         }
     }
 
@@ -383,33 +373,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
     @Override
     public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputHolder) {
-        AssemblerCraftJob job = craftJob();
-        if (!acceptsPlans() || !mainNode.isActive()) {
-            job.noteRefusal(acceptsPlans()
-                    ? AssemblerStatus.refuse(AssemblerStatus.REFUSE_NODE_INACTIVE, "its grid node is not active")
-                    : AssemblerStatus.refuse(AssemblerStatus.REFUSE_BUSY, "it is already holding a craft"));
-            return false;
-        }
-        if (!(patternDetails instanceof ArcanePatternDetails details)) {
-            job.noteRefusal(AssemblerStatus.refuse(
-                    AssemblerStatus.REFUSE_NOT_ARCANE, "the pattern is not an arcane pattern this machine can read"));
-            return false;
-        }
-        if (!job.canEverPay(details.pattern())) {
-            job.noteRefusal(job.cannotPay(job.craftCost(details.pattern())));
-            return false;
-        }
-        // What AE2 just extracted. This machine pays in vis and crystals, so keep these only to give back.
-        craft.heldInputs().clear();
-        for (KeyCounter counter : inputHolder) {
-            for (var entry : counter) {
-                if (entry.getKey() instanceof AEItemKey itemKey && entry.getLongValue() > 0) {
-                    craft.heldInputs()
-                            .add(itemKey.toStack((int) Math.min(Integer.MAX_VALUE, entry.getLongValue())));
-                }
-            }
-        }
-        return job.beginCraft(details.pattern());
+        return craftJob().accept(patternDetails, inputHolder);
     }
 
     @Override
@@ -436,31 +400,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
     @Override
     public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputs, Direction ejectionDirection) {
-        AssemblerCraftJob job = craftJob();
-        if (!acceptsPlans() || !mainNode.isActive()) {
-            job.noteRefusal(acceptsPlans()
-                    ? AssemblerStatus.refuse(AssemblerStatus.REFUSE_NODE_INACTIVE, "its grid node is not active")
-                    : AssemblerStatus.refuse(AssemblerStatus.REFUSE_BUSY, "it is already holding a craft"));
-            return false;
-        }
-        if (patternDetails instanceof ArcanePatternDetails details) {
-            if (!job.canEverPay(details.pattern())) {
-                job.noteRefusal(job.cannotPay(job.craftCost(details.pattern())));
-                return false;
-            }
-            return job.beginCraft(details.pattern());
-        }
-        ThEArcanePattern resolved = job.resolveExternal(patternDetails);
-        if (resolved == null) {
-            job.noteRefusal(AssemblerStatus.refuse(
-                    AssemblerStatus.REFUSE_UNRESOLVED, "the pattern does not resolve to an arcane recipe"));
-            return false;
-        }
-        if (!job.canEverPay(resolved)) {
-            job.noteRefusal(job.cannotPay(job.craftCost(resolved)));
-            return false;
-        }
-        return job.beginCraft(resolved);
+        return craftJob().acceptFromMachine(patternDetails);
     }
 
     // ------------------------------------------------------------------
@@ -514,45 +454,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         // saved number a menu-local container used to write.
         upgrades.recountSpeedUpgrades();
         patternsDirty = true;
-    }
-
-    /** Finishes recovering a craft that a save interrupted, once there is a level to read the core with:
-     * not in {@code loadAdditional}, which runs before the block entity has a level. */
-    private void recoverInterruptedCraft() {
-        if (level == null || level.isClientSide()) {
-            return;
-        }
-        AssemblerCraftJob job = craftJob();
-        // Driven by the well: only finishCraft empties it, so a product there means a craft did not finish.
-        ItemStack waiting = inventory.getItem(TARGET_SLOT);
-        if (!waiting.isEmpty()) {
-            craft.setCrafting(true);
-            // Recovered only for the preview grid: the price and crystals were saved with the craft.
-            ThEArcanePattern recovered = job.patternForResult(waiting);
-            craft.setCurrentPattern(recovered);
-            if (recovered != null) {
-                // A readable pattern restates both numbers; the saved ones are the fallback.
-                craft.setCraftPrice(job.craftCost(recovered));
-                craft.setCraftCrystals(AssemblerCraftJob.crystalStacksOf(recovered));
-            }
-            ThELog.LOG.info(
-                    "[assembler] at {} resumed the craft a save interrupted: {} for {} vis{}",
-                    worldPosition,
-                    waiting.getHoverName().getString(),
-                    craft.craftPrice(),
-                    recovered == null ? " (the knowledge core no longer has its pattern)" : "");
-            // Deliver on the first tick: the crafting time was served before the save.
-            craft.setCraftTicks(upgrades.ticksPerCraft());
-            craft.clearStall();
-        } else {
-            craft.setCrafting(false);
-            craft.setCraftTicks(0);
-            craft.setCraftPrice(0);
-            craft.setCraftCrystals(List.of());
-            displaySync.clearDisplay(true);
-        }
-        // Ask to be ticked rather than assuming a later grid event: with no grid yet this is a no-op.
-        craftJob().updateSleepiness();
     }
 
     public static int visBufferTarget() {
