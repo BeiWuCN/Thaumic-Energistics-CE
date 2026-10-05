@@ -1,61 +1,34 @@
 package thaumicenergistics_ce.client.render;
 
 import com.leclowndu93150.thaumaturge.api.aspect.AspectKnowledgeAccess;
-import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
-import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.client.AspectRendering;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.client.render.BubbleCells.Cell;
+import thaumicenergistics_ce.client.render.BubbleCells.ChipCell;
+import thaumicenergistics_ce.client.render.BubbleCells.TextCell;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The bubble the Infusion Monitor floats above itself: how dangerous the altar is, what it is making,
  * whether the room can finish it, and that it is drawn rather than spawned - a {@code TextDisplay}
- * entity can be left behind by a crash.
+ * entity can be left behind by a crash. What it says is {@link BubbleCells}, the box it sits on
+ * {@link RoundedPanel}; what is left here is the pose and the two ways a cell is drawn.
  */
 public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInfusionMonitor> {
 
     private static final double HEIGHT = 1.7;
 
     private static final float SCALE = 0.0125F;
-
-    /** Line spacing in text units; eleven is the floor: glyphs plus a drop shadow overlap at ten. */
-    private static final int LINE_HEIGHT = 11;
-
-    /** The aspect chip, the gap to its badge, and the gap between one chip and the next. */
-    private static final int CHIP = 12;
-    private static final int CELL_GAP = 5;
-
-    private static final int CHIP_ROW_HEIGHT = CHIP + 2;
-
-    private static final int PANEL_FILL = 0xF0100010;
-    private static final int BORDER_TOP = 0x505000FF;
-    private static final int BORDER_BOTTOM = 0x5028007F;
-    /** Corner radius, in panel units: two, matching Jade's box; ten read as far too round. */
-    private static final float CORNER_RADIUS = 2.0F;
-
-    /** Border and fill sit at different depths: coplanar quads fight for the same depth and flicker. */
-    private static final float BORDER_Z = -0.08F;
-    private static final float FILL_Z = -0.06F;
 
     private static final float PADDING_X = 5.0F;
     private static final float PADDING_Y = 4.0F;
@@ -69,15 +42,9 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
 
     private static long lastTrace;
 
+    private final BubbleCells cells = new BubbleCells();
+
     public MonitorBubbleRenderer(BlockEntityRendererProvider.Context context) {}
-
-    // --- Contents ---
-
-    private sealed interface Cell {}
-
-    private record TextCell(Component text) implements Cell {}
-
-    private record ChipCell(Holder<IAspect> aspect) implements Cell {}
 
     @Override
     public void render(
@@ -103,7 +70,7 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
         }
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
-        List<List<Cell>> rows = rowsFor(font, monitor);
+        List<List<Cell>> rows = cells.rowsFor(font, monitor);
         if (rows.isEmpty()) {
             return;
         }
@@ -111,8 +78,8 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
         float width = 0;
         float height = 0;
         for (List<Cell> row : rows) {
-            width = Math.max(width, rowWidth(font, row));
-            height += rowHeight(row);
+            width = Math.max(width, BubbleCells.rowWidth(font, row));
+            height += BubbleCells.rowHeight(row);
         }
         float panelWidth = width + PADDING_X * 2;
         float panelHeight = height + PADDING_Y * 2;
@@ -126,126 +93,35 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
         // Centred on the anchor, so the panel grows both ways rather than downwards from the block's face.
         float left = -panelWidth / 2.0F;
         float top = -panelHeight / 2.0F;
-        roundedPanel(buffers, matrix, left, top, left + panelWidth, top + panelHeight);
+        RoundedPanel.draw(buffers, matrix, left, top, left + panelWidth, top + panelHeight);
 
         float y = top + PADDING_Y;
         for (List<Cell> row : rows) {
-            float rowWidth = rowWidth(font, row);
+            float rowWidth = BubbleCells.rowWidth(font, row);
             float x = -rowWidth / 2.0F;
             // Centred on the row: a chip row is taller than a text row.
-            float textY = y + (rowHeight(row) - font.lineHeight) / 2.0F;
+            float textY = y + (BubbleCells.rowHeight(row) - font.lineHeight) / 2.0F;
             for (Cell cell : row) {
                 drawCell(pose, buffers, font, cell, x, y, textY, true);
-                x += cellWidth(font, cell) + CELL_GAP;
+                x += BubbleCells.stride(font, cell);
             }
-            y += rowHeight(row);
+            y += BubbleCells.rowHeight(row);
         }
         // The text again with the depth test off, so the numbers read through walls; not the chips.
         y = top + PADDING_Y;
         for (List<Cell> row : rows) {
-            float rowWidth = rowWidth(font, row);
+            float rowWidth = BubbleCells.rowWidth(font, row);
             float x = -rowWidth / 2.0F;
-            float textY = y + (rowHeight(row) - font.lineHeight) / 2.0F;
+            float textY = y + (BubbleCells.rowHeight(row) - font.lineHeight) / 2.0F;
             for (Cell cell : row) {
                 if (cell instanceof TextCell text) {
                     drawText(font, text.text(), x, textY, buffers, matrix, false);
                 }
-                x += cellWidth(font, cell) + CELL_GAP;
+                x += BubbleCells.stride(font, cell);
             }
-            y += rowHeight(row);
+            y += BubbleCells.rowHeight(row);
         }
         pose.popPose();
-    }
-
-    private final Map<BlockEntityInfusionMonitor, Built> built = new WeakHashMap<>();
-
-    private record Built(int tier, String stability, boolean crafting, ItemStack craft,
-            List<BlockEntityInfusionMonitor.EssentiaLine> essentia, List<List<Cell>> rows) {}
-
-    private List<List<Cell>> rowsFor(Font font, BlockEntityInfusionMonitor monitor) {
-        List<BlockEntityInfusionMonitor.EssentiaLine> essentia = monitor.bubbleEssentia();
-        ItemStack craft = monitor.bubbleCraft();
-        Built previous = built.get(monitor);
-        if (previous != null
-                && previous.tier() == monitor.bubbleTier()
-                && previous.stability().equals(monitor.bubbleStability())
-                && previous.crafting() == monitor.bubbleCrafting()
-                && ItemStack.matches(previous.craft(), craft)
-                && previous.essentia().equals(essentia)) {
-            return previous.rows();
-        }
-        List<List<Cell>> rows = rows(font, monitor, essentia, craft);
-        built.put(monitor, new Built(monitor.bubbleTier(), monitor.bubbleStability(),
-                monitor.bubbleCrafting(), craft, essentia, rows));
-        return rows;
-    }
-
-    private static List<List<Cell>> rows(Font font, BlockEntityInfusionMonitor monitor,
-            List<BlockEntityInfusionMonitor.EssentiaLine> essentia, ItemStack craft) {
-        List<List<Cell>> rows = new ArrayList<>();
-        int tier = monitor.bubbleTier();
-        rows.add(List.of(new TextCell(Component.translatable(
-                        "thaumicenergistics_ce.monitor.bubble.risk",
-                        Component.translatable("thaumicenergistics_ce.jade.monitor.risk." + tier))
-                .withStyle(style -> style.withColor(colourOf(tier))))));
-        rows.add(List.of(new TextCell(Component.translatable(
-                "thaumicenergistics_ce.monitor.bubble.instability", monitor.bubbleStability()))));
-
-        if (monitor.bubbleCrafting() && !craft.isEmpty()) {
-            rows.add(List.of(new TextCell(Component.translatable(
-                            "thaumicenergistics_ce.monitor.bubble.crafting",
-                            monitor.bubbleCraft().getHoverName())
-                    .withStyle(ChatFormatting.WHITE))));
-        }
-
-        // One aspect per row; a full one turns green.
-        for (BlockEntityInfusionMonitor.EssentiaLine line : essentia) {
-            Holder<IAspect> aspect = aspectOf(line.aspect());
-            if (aspect == null) {
-                continue;
-            }
-            boolean complete = line.drawn() >= line.total();
-            rows.add(List.of(
-                    new ChipCell(aspect),
-                    new TextCell(Component.literal(line.drawn() + " / " + line.total())
-                            .withStyle(complete ? ChatFormatting.GREEN : ChatFormatting.WHITE))));
-        }
-        return rows;
-    }
-
-    private static Holder<IAspect> aspectOf(String id) {
-        Minecraft minecraft = Minecraft.getInstance();
-        ResourceLocation location = ResourceLocation.tryParse(id);
-        if (location == null || minecraft.level == null) {
-            return null;
-        }
-        return Aspects.resolve(
-                minecraft.level.registryAccess(),
-                ResourceKey.create(IAspect.REGISTRY_KEY, location));
-    }
-
-    // --- Layout ---
-
-    private static float cellWidth(Font font, Cell cell) {
-        return switch (cell) {
-            case TextCell text -> font.width(text.text());
-            case ChipCell ignored -> CHIP;
-        };
-    }
-
-    private static float rowWidth(Font font, List<Cell> row) {
-        float width = 0;
-        for (int i = 0; i < row.size(); i++) {
-            width += cellWidth(font, row.get(i));
-            if (i < row.size() - 1) {
-                width += CELL_GAP;
-            }
-        }
-        return width;
-    }
-
-    private static float rowHeight(List<Cell> row) {
-        return row.get(0) instanceof ChipCell ? CHIP_ROW_HEIGHT : LINE_HEIGHT;
     }
 
     /** Draws one cell at {@code x}, {@code y} - the row's top-left corner. */
@@ -263,9 +139,10 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
             case ChipCell chip -> {
                 // Drawn by Thaumaturge's own world renderer, so texture, blend and the undiscovered-aspect
                 // mask are right. Negative vertical scale: the panel's pose is (x, -y), which flips textures.
+                float size = BubbleCells.CHIP;
                 pose.pushPose();
-                pose.translate(x + CHIP / 2.0F, rowTop + CHIP / 2.0F, 0.0F);
-                pose.scale(CHIP, -CHIP, 1.0F);
+                pose.translate(x + size / 2.0F, rowTop + size / 2.0F, 0.0F);
+                pose.scale(size, -size, 1.0F);
                 var knowledge = AspectKnowledgeAccess.of(chip.aspect());
                 AspectRendering.renderQuad(
                         pose,
@@ -299,134 +176,5 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
                 solid ? Font.DisplayMode.NORMAL : Font.DisplayMode.SEE_THROUGH,
                 0,
                 LightTexture.FULL_BRIGHT);
-    }
-
-    // --- The panel itself ---
-
-    /**
-     * The box: a filled rounded rectangle with a one-pixel gradient border, the way Jade draws tooltips.
-     * {@code debugQuads} takes position and colour only, which is all the panel has to give.
-     */
-    private static void roundedPanel(
-            MultiBufferSource buffers, Matrix4f matrix, float left, float top, float right, float bottom) {
-        VertexConsumer quads = buffers.getBuffer(RenderType.debugQuads());
-        // The border is the whole shape in the gradient, the fill the same shape one pixel in, so the radius
-        // is one less. Separate depths because sprites in one plane fight for it and flicker.
-        roundedFill(quads, matrix, left, top, right, bottom, CORNER_RADIUS, BORDER_TOP, BORDER_BOTTOM, BORDER_Z);
-        roundedFill(
-                quads,
-                matrix,
-                left + 1,
-                top + 1,
-                right - 1,
-                bottom - 1,
-                CORNER_RADIUS - 1,
-                PANEL_FILL,
-                PANEL_FILL,
-                FILL_Z);
-    }
-
-    private static void roundedFill(
-            VertexConsumer quads,
-            Matrix4f matrix,
-            float left,
-            float top,
-            float right,
-            float bottom,
-            float radius,
-            int topColour,
-            int bottomColour,
-            float z) {
-        float r = Math.max(0.0F, Math.min(radius, Math.min((right - left) / 2.0F, (bottom - top) / 2.0F)));
-        if (r < 1.0F) {
-            fill(quads, matrix, left, top, right, bottom, topColour, bottomColour, z);
-            return;
-        }
-        strip(quads, matrix, left + r, top, right - r, top + r, top, bottom, topColour, bottomColour, z);
-        strip(quads, matrix, left, top + r, right, bottom - r, top, bottom, topColour, bottomColour, z);
-        strip(quads, matrix, left + r, bottom - r, right - r, bottom, top, bottom, topColour, bottomColour, z);
-
-        int steps = (int) Math.ceil(r);
-        for (int i = 0; i < steps; i++) {
-            float dy = r - i - 0.5F;
-            float dx = r - (float) Math.sqrt(Math.max(0.0F, r * r - dy * dy));
-            float yTop = top + i;
-            float yBottom = bottom - i - 1;
-            strip(quads, matrix, left + dx, yTop, left + r, yTop + 1, top, bottom, topColour, bottomColour, z);
-            strip(quads, matrix, right - r, yTop, right - dx, yTop + 1, top, bottom, topColour, bottomColour, z);
-            strip(quads, matrix, left + dx, yBottom, left + r, yBottom + 1, top, bottom, topColour, bottomColour, z);
-            strip(
-                    quads,
-                    matrix,
-                    right - r,
-                    yBottom,
-                    right - dx,
-                    yBottom + 1,
-                    top,
-                    bottom,
-                    topColour,
-                    bottomColour,
-                    z);
-        }
-    }
-
-    private static void strip(
-            VertexConsumer quads,
-            Matrix4f matrix,
-            float x0,
-            float y0,
-            float x1,
-            float y1,
-            float panelTop,
-            float panelBottom,
-            int topColour,
-            int bottomColour,
-            float z) {
-        float span = Math.max(1.0F, panelBottom - panelTop);
-        fill(
-                quads,
-                matrix,
-                x0,
-                y0,
-                x1,
-                y1,
-                mix(topColour, bottomColour, (y0 - panelTop) / span),
-                mix(topColour, bottomColour, (y1 - panelTop) / span),
-                z);
-    }
-
-    private static void fill(
-            VertexConsumer quads,
-            Matrix4f matrix,
-            float x0,
-            float y0,
-            float x1,
-            float y1,
-            int topColour,
-            int bottomColour,
-            float z) {
-        quads.addVertex(matrix, x0, y0, z).setColor(topColour);
-        quads.addVertex(matrix, x0, y1, z).setColor(bottomColour);
-        quads.addVertex(matrix, x1, y1, z).setColor(bottomColour);
-        quads.addVertex(matrix, x1, y0, z).setColor(topColour);
-    }
-
-    private static int mix(int from, int to, float t) {
-        float f = Math.max(0.0F, Math.min(1.0F, t));
-        int a = (int) (((from >>> 24) & 0xFF) + (((to >>> 24) & 0xFF) - ((from >>> 24) & 0xFF)) * f);
-        int r = (int) (((from >> 16) & 0xFF) + (((to >> 16) & 0xFF) - ((from >> 16) & 0xFF)) * f);
-        int g = (int) (((from >> 8) & 0xFF) + (((to >> 8) & 0xFF) - ((from >> 8) & 0xFF)) * f);
-        int b = (int) ((from & 0xFF) + ((to & 0xFF) - (from & 0xFF)) * f);
-        return (a << 24) | (r << 16) | (g << 8) | b;
-    }
-
-    private static int colourOf(int tier) {
-        return switch (tier) {
-            case 1 -> 0xFF55FF55;
-            case 2 -> 0xFFAAFF55;
-            case 3 -> 0xFFFFFF55;
-            case 4 -> 0xFFFFAA55;
-            default -> 0xFFFF5555;
-        };
     }
 }
