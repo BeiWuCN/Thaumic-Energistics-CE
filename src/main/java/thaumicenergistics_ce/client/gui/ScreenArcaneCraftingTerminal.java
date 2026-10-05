@@ -13,9 +13,9 @@ import net.minecraft.world.entity.player.Inventory;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.client.GolemBackpackClientData;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
-import thaumicenergistics_ce.net.ArcaneCraftCostPayload;
-import thaumicenergistics_ce.net.ClientboundReceiver;
-import thaumicenergistics_ce.net.GolemBackpackPayload;
+import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
+import thaumicenergistics_ce.network.ClientboundReceiver;
+import thaumicenergistics_ce.network.GolemBackpackPayload;
 
 /**
  * The Arcane Crafting Terminal's screen.

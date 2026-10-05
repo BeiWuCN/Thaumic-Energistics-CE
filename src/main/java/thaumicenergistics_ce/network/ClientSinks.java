@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.net;
+package thaumicenergistics_ce.network;
 
 /**
  * Where the client installs itself as the receiver of the serverbound-to-client payloads, so a payload

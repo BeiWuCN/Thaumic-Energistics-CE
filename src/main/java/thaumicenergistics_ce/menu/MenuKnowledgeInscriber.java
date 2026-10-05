@@ -21,7 +21,7 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.menu.slot.GhostGridSlot;
 import thaumicenergistics_ce.menu.slot.MachineGridSlot;
 import thaumicenergistics_ce.menu.slot.ReadOnlySlot;
-import thaumicenergistics_ce.net.KnowledgeInscriberReceiver;
+import thaumicenergistics_ce.network.KnowledgeInscriberReceiver;
 
 /**
  * The Knowledge Inscriber's menu: the core slot, the 7x3 read-only grid of patterns, the player's

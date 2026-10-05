@@ -29,8 +29,8 @@ import thaumicenergistics_ce.init.ModBlocks;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
-import thaumicenergistics_ce.net.PartitionWellPayload;
-import thaumicenergistics_ce.net.PartitionWellReceiver;
+import thaumicenergistics_ce.network.PartitionWellPayload;
+import thaumicenergistics_ce.network.PartitionWellReceiver;
 import thaumicenergistics_ce.util.ThELog;
 
 /**

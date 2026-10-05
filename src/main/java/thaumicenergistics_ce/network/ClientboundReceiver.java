@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.net;
+package thaumicenergistics_ce.network;
 
 /**
  * The wire contract for the two payloads that travel server to client, where the receiver is a screen or a

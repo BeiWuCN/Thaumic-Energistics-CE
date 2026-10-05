@@ -14,7 +14,7 @@ import net.minecraft.world.inventory.Slot;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 import thaumicenergistics_ce.menu.slot.AspectSelectSlot;
-import thaumicenergistics_ce.net.EncoderActionPayload;
+import thaumicenergistics_ce.network.EncoderActionPayload;
 
 /**
  * The Distillation Encoder's screen: this mod's own art blitted whole, with the slots placed by the menu at

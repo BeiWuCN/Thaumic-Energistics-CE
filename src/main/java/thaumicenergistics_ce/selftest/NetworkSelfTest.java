@@ -20,16 +20,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.net.ArcaneCraftCostPayload;
-import thaumicenergistics_ce.net.EncoderActionPayload;
-import thaumicenergistics_ce.net.EncoderSourcePayload;
-import thaumicenergistics_ce.net.EssentiaBusConfigPayload;
-import thaumicenergistics_ce.net.EssentiaDepositPayload;
-import thaumicenergistics_ce.net.EssentiaFillPayload;
-import thaumicenergistics_ce.net.GolemBackpackPayload;
-import thaumicenergistics_ce.net.InscriberGridFillPayload;
-import thaumicenergistics_ce.net.InscriberGridPayload;
-import thaumicenergistics_ce.net.PartitionWellPayload;
+import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
+import thaumicenergistics_ce.network.EncoderActionPayload;
+import thaumicenergistics_ce.network.EncoderSourcePayload;
+import thaumicenergistics_ce.network.EssentiaBusConfigPayload;
+import thaumicenergistics_ce.network.EssentiaDepositPayload;
+import thaumicenergistics_ce.network.EssentiaFillPayload;
+import thaumicenergistics_ce.network.GolemBackpackPayload;
+import thaumicenergistics_ce.network.InscriberGridFillPayload;
+import thaumicenergistics_ce.network.InscriberGridPayload;
+import thaumicenergistics_ce.network.PartitionWellPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**

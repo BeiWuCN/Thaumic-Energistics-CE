@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.net;
+package thaumicenergistics_ce.network;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;

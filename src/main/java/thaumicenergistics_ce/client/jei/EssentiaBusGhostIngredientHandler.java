@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.network.PacketDistributor;
 import thaumicenergistics_ce.menu.MenuEssentiaBus;
-import thaumicenergistics_ce.net.EssentiaBusConfigPayload;
+import thaumicenergistics_ce.network.EssentiaBusConfigPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**

@@ -3,10 +3,10 @@ package thaumicenergistics_ce.menu;
 import java.util.List;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
-import thaumicenergistics_ce.net.EncoderActionPayload;
-import thaumicenergistics_ce.net.EncoderSourcePayload;
-import thaumicenergistics_ce.net.InscriberGridFillPayload;
-import thaumicenergistics_ce.net.InscriberGridPayload;
+import thaumicenergistics_ce.network.EncoderActionPayload;
+import thaumicenergistics_ce.network.EncoderSourcePayload;
+import thaumicenergistics_ce.network.InscriberGridFillPayload;
+import thaumicenergistics_ce.network.InscriberGridPayload;
 
 /**
  * The four requests a menu sends to the server, built in one place.

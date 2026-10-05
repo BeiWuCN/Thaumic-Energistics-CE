@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.network.PacketDistributor;
 import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
-import thaumicenergistics_ce.net.PartitionWellPayload;
+import thaumicenergistics_ce.network.PartitionWellPayload;
 
 /**
  * The Essentia Cell Workbench's screen.

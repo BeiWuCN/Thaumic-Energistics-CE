@@ -16,7 +16,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.net.GolemBackpackPayload;
+import thaumicenergistics_ce.network.GolemBackpackPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**

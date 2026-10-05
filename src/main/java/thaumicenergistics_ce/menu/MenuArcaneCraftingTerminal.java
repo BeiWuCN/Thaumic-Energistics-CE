@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import thaumicenergistics_ce.menu.slot.ArcaneCraftingResultSlot;
 import thaumicenergistics_ce.menu.slot.CrystalSlot;
-import thaumicenergistics_ce.net.ArcaneCraftCostPayload;
+import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**

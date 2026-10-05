@@ -31,7 +31,7 @@ import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
-import thaumicenergistics_ce.net.PartitionWellPayload;
+import thaumicenergistics_ce.network.PartitionWellPayload;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
 import thaumicenergistics_ce.util.ThELog;
 

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.net;
+package thaumicenergistics_ce.network;
 
 import java.util.List;
 import net.minecraft.network.RegistryFriendlyByteBuf;

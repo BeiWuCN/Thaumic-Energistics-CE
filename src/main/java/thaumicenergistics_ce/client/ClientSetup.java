@@ -41,10 +41,10 @@ import thaumicenergistics_ce.menu.MenuEssentiaImportBus;
 import thaumicenergistics_ce.menu.MenuEssentiaLevelEmitter;
 import thaumicenergistics_ce.menu.MenuEssentiaStorageBus;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
-import thaumicenergistics_ce.net.ArcaneCraftCostPayload;
-import thaumicenergistics_ce.net.ClientSinks;
-import thaumicenergistics_ce.net.ClientboundReceiver;
-import thaumicenergistics_ce.net.GolemBackpackPayload;
+import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
+import thaumicenergistics_ce.network.ClientSinks;
+import thaumicenergistics_ce.network.ClientboundReceiver;
+import thaumicenergistics_ce.network.GolemBackpackPayload;
 
 /**
  * Client-only wiring, kept behind {@link Dist#CLIENT} so the dedicated server never loads a screen

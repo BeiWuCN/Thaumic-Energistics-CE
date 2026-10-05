@@ -1,18 +1,18 @@
-package thaumicenergistics_ce.network;
+package thaumicenergistics_ce.init;
 
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
-import thaumicenergistics_ce.net.ArcaneCraftCostPayload;
-import thaumicenergistics_ce.net.EncoderActionPayload;
-import thaumicenergistics_ce.net.EncoderSourcePayload;
-import thaumicenergistics_ce.net.EssentiaBusConfigPayload;
-import thaumicenergistics_ce.net.EssentiaDepositPayload;
-import thaumicenergistics_ce.net.EssentiaFillPayload;
-import thaumicenergistics_ce.net.GolemBackpackPayload;
-import thaumicenergistics_ce.net.InscriberGridFillPayload;
-import thaumicenergistics_ce.net.InscriberGridPayload;
-import thaumicenergistics_ce.net.PartitionWellPayload;
+import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
+import thaumicenergistics_ce.network.EncoderActionPayload;
+import thaumicenergistics_ce.network.EncoderSourcePayload;
+import thaumicenergistics_ce.network.EssentiaBusConfigPayload;
+import thaumicenergistics_ce.network.EssentiaDepositPayload;
+import thaumicenergistics_ce.network.EssentiaFillPayload;
+import thaumicenergistics_ce.network.GolemBackpackPayload;
+import thaumicenergistics_ce.network.InscriberGridFillPayload;
+import thaumicenergistics_ce.network.InscriberGridPayload;
+import thaumicenergistics_ce.network.PartitionWellPayload;
 
 /**
  * Network registration.

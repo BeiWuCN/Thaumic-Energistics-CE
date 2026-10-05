@@ -11,7 +11,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.essentia.EssentiaFillHelper;
 import thaumicenergistics_ce.menu.slot.ContainerSlot;
-import thaumicenergistics_ce.net.EssentiaTerminalReceiver;
+import thaumicenergistics_ce.network.EssentiaTerminalReceiver;
 
 /**
  * The Essentia Terminal's menu, shared by the cable part and the wireless item.

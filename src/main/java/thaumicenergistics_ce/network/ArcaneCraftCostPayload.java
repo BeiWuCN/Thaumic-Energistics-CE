@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.net;
+package thaumicenergistics_ce.network;
 
 import appeng.core.network.ClientboundPacket;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;

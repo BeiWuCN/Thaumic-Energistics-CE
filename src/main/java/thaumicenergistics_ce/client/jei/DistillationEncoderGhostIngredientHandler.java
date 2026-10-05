@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
 import thaumicenergistics_ce.menu.MenuDistillationEncoder;
-import thaumicenergistics_ce.net.EncoderActionPayload;
+import thaumicenergistics_ce.network.EncoderActionPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**

@@ -19,7 +19,7 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.menu.slot.AspectSelectSlot;
 import thaumicenergistics_ce.menu.slot.MachineOutputSlot;
 import thaumicenergistics_ce.menu.slot.TemplateSlot;
-import thaumicenergistics_ce.net.DistillationEncoderReceiver;
+import thaumicenergistics_ce.network.DistillationEncoderReceiver;
 
 /**
  * The Distillation Encoder's menu: the item, its aspects, the picked one and the pattern wells.

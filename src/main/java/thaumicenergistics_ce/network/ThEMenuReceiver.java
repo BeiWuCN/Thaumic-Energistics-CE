@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.net;
+package thaumicenergistics_ce.network;
 
 /**
  * The one thing every serverbound payload needs from its receiver: which menu it was addressed to, so a

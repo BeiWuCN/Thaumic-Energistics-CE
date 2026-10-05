@@ -13,7 +13,7 @@ import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.network.PacketDistributor;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
 import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
-import thaumicenergistics_ce.net.PartitionWellPayload;
+import thaumicenergistics_ce.network.PartitionWellPayload;
 
 /**
  * Lets the player drag an aspect from JEI into an Essentia Cell Workbench partition well.

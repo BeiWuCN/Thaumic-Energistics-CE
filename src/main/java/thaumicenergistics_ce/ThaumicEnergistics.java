@@ -36,7 +36,7 @@ import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
-import thaumicenergistics_ce.network.ModNetwork;
+import thaumicenergistics_ce.init.ModNetwork;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartEssentiaExportBus;
 import thaumicenergistics_ce.part.PartEssentiaImportBus;
