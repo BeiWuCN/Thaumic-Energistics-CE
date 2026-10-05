@@ -1,9 +1,12 @@
 package thaumicenergistics_ce.blockentity;
 
+import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
+import java.util.Objects;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber.BurnState;
@@ -98,6 +101,24 @@ public final class VibrationChamberSync {
         int essentia = data.readVarInt();
         ResourceLocation aspect = data.readBoolean() ? data.readResourceLocation() : null;
         return new Streamed(state, rate, essentia, aspect);
+    }
+
+    /**
+     * Puts the stream on the machine and says whether anything moved, so the block entity can answer AE2
+     * with one flag. The aspect is resolved here: the registry lives on the wire, not on the machine.
+     */
+    static boolean applyStreamed(BlockEntityEssentiaVibrationChamber chamber, RegistryFriendlyByteBuf data) {
+        Streamed streamed = readStream(data);
+        boolean changed = chamber.getBurnState() != streamed.state()
+                || chamber.getAePerTick() != streamed.aePerTick()
+                || chamber.getStoredEssentia() != streamed.essentia()
+                || !Objects.equals(chamber.getCurrentAspect(), streamed.aspect());
+        Holder<IAspect> aspect = streamed.aspect() == null
+                ? null
+                : Aspects.resolve(data.registryAccess(),
+                        ResourceKey.create(IAspect.REGISTRY_KEY, streamed.aspect()));
+        chamber.applyStreamed(streamed.state(), streamed.aePerTick(), streamed.essentia(), aspect);
+        return changed;
     }
 
     // The save tag: what a reload needs, in its own names and order rather than the stream's.
