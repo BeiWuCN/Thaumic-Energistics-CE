@@ -7,7 +7,6 @@ import appeng.api.networking.GridFlags;
 import appeng.api.networking.GridHelper;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
-import appeng.api.networking.IGridNodeListener;
 import appeng.api.networking.IInWorldGridNodeHost;
 import appeng.api.networking.IManagedGridNode;
 import appeng.api.networking.crafting.ICraftingProvider;
@@ -19,7 +18,6 @@ import appeng.api.networking.ticking.TickingRequest;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.util.AECableType;
-import appeng.core.definitions.AEItems;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.aspect.TCAspects;
 import java.util.EnumSet;
@@ -33,7 +31,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -81,51 +78,11 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     /** The primal aspects, in the fixed order the six vis columns are drawn in. */
     public static final List<ResourceKey<IAspect>> PRIMALS = TCAspects.PRIMALS;
 
-    final SimpleContainer inventory = new SimpleContainer(SLOT_COUNT) {
-        @Override
-        public boolean canPlaceItem(int slot, ItemStack stack) {
-            if (slot >= UPGRADE_SLOT_START) {
-                // The card band: the slots the menu's four card wells point at.
-                return AEItems.SPEED_CARD.is(stack);
-            }
-            if (AssemblerDisplaySync.isDisplaySlot(slot)) {
-                // The machine's own display: it takes nothing from a player.
-                return false;
-            }
-            return switch (slot) {
-                case CORE_SLOT -> stack.is(ModItems.KNOWLEDGE_CORE.get());
-                default -> slot >= GEAR_SLOT_START && GearSlots.accepts(slot - GEAR_SLOT_START, stack);
-            };
-        }
-
-        @Override
-        public void setChanged() {
-            super.setChanged();
-            BlockEntityArcaneAssembler.this.onInventoryChanged();
-        }
-    };
+    final SimpleContainer inventory = new AssemblerInventoryLayout(this::onInventoryChanged);
 
     final IManagedGridNode mainNode;
     final IActionSource actionSource;
-    private final IGridNodeListener<BlockEntityArcaneAssembler> nodeListener =
-            new IGridNodeListener<BlockEntityArcaneAssembler>() {
-                @Override
-                public void onSaveChanges(BlockEntityArcaneAssembler owner, IGridNode node) {
-                    owner.setChanged();
-                }
-
-                @Override
-                public void onStateChanged(BlockEntityArcaneAssembler owner, IGridNode node, State state) {
-                    if (state == State.POWER) {
-                        owner.active = owner.mainNode.isActive();
-                    }
-                    owner.displaySync.markForUpdate();
-                    // loadAdditional runs before the node exists; this wake has to cover a resumed craft.
-                    owner.craftJob().updateSleepiness();
-                }
-            };
-
-    private boolean active;
+    boolean active;
 
     // Built in the constructor, not here: a helper that reads this machine is built in order, and the
     // fields below it are the ones it reads.
@@ -168,7 +125,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         this.vis = new AssemblerVisSource(this);
         this.upgrades = new AssemblerUpgrades(this);
 
-        this.mainNode = GridHelper.createManagedNode(this, nodeListener)
+        this.mainNode = GridHelper.createManagedNode(this, AssemblerNodeListener.INSTANCE)
                 .setVisualRepresentation(ModItems.ARCANE_ASSEMBLER.get())
                 .setInWorldNode(true)
                 .setTagName("proxy")
@@ -206,27 +163,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
      * target and preview bands hold copies the machine made, so dropping them would hand out unpaid
      * items. */
     public void dropContents() {
-        if (level == null || level.isClientSide()) {
-            return;
-        }
-        // Give back ingredients the network has already paid for before the block goes.
-        craftJob().returnHeldInputs();
-        suppressNotify = true;
-        try {
-            for (int slot = 0; slot < SLOT_COUNT; slot++) {
-                if (AssemblerDisplaySync.isMachineOwned(slot)) {
-                    continue;
-                }
-                ItemStack stack = inventory.getItem(slot);
-                if (!stack.isEmpty()) {
-                    Containers.dropItemStack(
-                            level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), stack);
-                    inventory.setItem(slot, ItemStack.EMPTY);
-                }
-            }
-        } finally {
-            suppressNotify = false;
-        }
+        AssemblerContents.drop(this);
     }
 
     public SimpleContainer getInventory() {
