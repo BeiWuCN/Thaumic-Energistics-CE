@@ -178,7 +178,7 @@ public final class SyncSelfTest {
      * A machine outside a world has no level, so the write half and the read tail both routes share run here.
      */
     private static int checkBubbleTag(HolderLookup.Provider registries, List<String> failures) {
-        Object bubble = syncUnit("InfusionMonitorSync", failures);
+        Object bubble = syncUnit("infusionmonitor.InfusionMonitorSync", failures);
         Method write = reach("thaumicenergistics_ce.blockentity.infusionmonitor.InfusionMonitorSync", "write",
                 CompoundTag.class, HolderLookup.Provider.class, failures);
         CompoundTag tag = new CompoundTag();
@@ -388,7 +388,7 @@ public final class SyncSelfTest {
                 key(machine + "assembler.AssemblerUpgrades", "TAG_SPEED_UPGRADES", failures), failures);
         compared += sameWord("the monitor's reporting flag",
                 key(jade + "InfusionMonitorProvider", "TAG_REPORTING", failures),
-                key(machine + "InfusionMonitorSync", "TAG_REPORTING", failures), failures);
+                key(machine + "infusionmonitor.InfusionMonitorSync", "TAG_REPORTING", failures), failures);
         return compared;
     }
 

@@ -39,10 +39,11 @@ repositories {
 // Declared before neoForge because the mod entry below names it. A dev run reaches it through that
 // entry and not through a dependency: ModDevGradle hands a run its mods as MOD_CLASSES folders.
 sourceSets {
-    selftest {
-        java.srcDir 'src/selftest/java'
-        resources.srcDir 'src/selftest/resources'
-    }
+    // Both directories default to src/selftest/{java,resources}, which is where they live. Naming
+    // them again lists each one twice: javac tolerates that, the resource copy does not - it fails
+    // the run with "Entry META-INF/services/... is a duplicate but no duplicate handling strategy
+    // has been set".
+    selftest
 }
 sourceSets.selftest.compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
 
