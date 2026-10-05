@@ -1,13 +1,10 @@
 package thaumicenergistics_ce.integration.jei;
 
 import com.leclowndu93150.thaumaturge.api.recipe.IArcaneRecipe;
-import com.leclowndu93150.thaumaturge.compat.jei.ThaumaturgeJEIPlugin;
-import com.leclowndu93150.thaumaturge.compat.jei.category.ArcaneWorkbenchCategory;
 import com.leclowndu93150.thaumaturge.content.recipe.workbench.ArcaneShapedCraftingRecipe;
 import com.leclowndu93150.thaumaturge.content.recipe.workbench.ArcaneShapelessCraftingRecipe;
 import java.util.ArrayList;
 import java.util.List;
-import mezz.jei.api.recipe.RecipeType;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -15,27 +12,17 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
+import thaumicenergistics_ce.integration.ae2.ClientRegistries;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The recipe type the Knowledge Inscriber encodes for, and how to read a grid out of one.
- * <ul>
- * <li>The type is Thaumaturge's own workbench category, borrowed not mirrored: a second page would disagree.
- * <li>Resolved inside the method, never a static field, so a client without JEI never loads
- * Thaumaturge's JEI classes.</li>
- * </ul>
+ * How to read a Thaumaturge arcane recipe's grid: the nine cells a transfer would fill, and whether one
+ * fits. It names no JEI type, because the recipe self-test reads this on a dedicated server; borrowing
+ * Thaumaturge's JEI recipe type is {@code ArcaneJeiRecipeType}'s job.
  */
 public final class ArcaneRecipeTypes {
 
     private ArcaneRecipeTypes() {}
-
-    /** Thaumaturge's arcane workbench recipe type. */
-    public static RecipeType<RecipeHolder<?>> arcane() {
-        RecipeType<?> type = ArcaneWorkbenchCategory.RECIPE_TYPE;
-        @SuppressWarnings("unchecked")
-        RecipeType<RecipeHolder<?>> cast = (RecipeType<RecipeHolder<?>>) (RecipeType<?>) type;
-        return cast;
-    }
 
     /**
      * The nine grid cells a recipe asks for, in reading order, as variant lists; an empty list is an
@@ -139,14 +126,14 @@ public final class ArcaneRecipeTypes {
     }
 
     /**
-     * Registry access for a recipe's result: the server's, or Thaumaturge's client copy when a client has
-     * no server of its own. Asking Thaumaturge first would load its JEI plugin and log "invalid dist".
+     * Registry access for a recipe's result: the server's when there is one, else this side's own through
+     * the client sink. Never Thaumaturge's JEI plugin, which a dedicated server cannot load.
      */
     private static HolderLookup.Provider registryAccess() {
         var server = ServerLifecycleHooks.getCurrentServer();
         if (server != null) {
             return server.registryAccess();
         }
-        return ThaumaturgeJEIPlugin.clientRegistryAccess();
+        return ClientRegistries.get();
     }
 }

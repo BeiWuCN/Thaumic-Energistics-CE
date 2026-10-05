@@ -54,7 +54,7 @@ public class KnowledgeInscriberRecipeTransfer
 
     @Override
     public RecipeType<RecipeHolder<?>> getRecipeType() {
-        return ArcaneRecipeTypes.arcane();
+        return ArcaneJeiRecipeType.arcane();
     }
 
     @Override

@@ -41,12 +41,12 @@ public class ThEJeiPlugin implements IModPlugin {
         // BasicRecipeTransferHandler, which assumes one slot per container slot and refuses 12 vs 9.
         registration.addRecipeTransferHandler(
                 new KnowledgeInscriberRecipeTransfer(registration.getTransferHelper()),
-                ArcaneRecipeTypes.arcane());
+                ArcaneJeiRecipeType.arcane());
         // And the Arcane Crafting Terminal's grid, from the same category; a second handler, not a shared
         // one, because the inscriber's grid is a ghost grid and the terminal's is real.
         registration.addRecipeTransferHandler(
                 new ArcaneCraftingRecipeTransfer(registration.getTransferHelper()),
-                ArcaneRecipeTypes.arcane());
+                ArcaneJeiRecipeType.arcane());
         // Ordinary crafting recipes too. The terminal's grid is nine ordinary slots, so a player who opens a
         // plank recipe and finds no transfer button would reasonably read it as a broken terminal.
         registration.addRecipeTransferHandler(

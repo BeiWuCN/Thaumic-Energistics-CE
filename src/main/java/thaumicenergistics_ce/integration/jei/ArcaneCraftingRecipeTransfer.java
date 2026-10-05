@@ -55,7 +55,7 @@ public class ArcaneCraftingRecipeTransfer
 
     @Override
     public RecipeType<RecipeHolder<?>> getRecipeType() {
-        return ArcaneRecipeTypes.arcane();
+        return ArcaneJeiRecipeType.arcane();
     }
 
     @Override

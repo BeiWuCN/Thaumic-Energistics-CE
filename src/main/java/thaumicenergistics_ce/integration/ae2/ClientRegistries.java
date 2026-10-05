@@ -4,7 +4,7 @@ import net.minecraft.core.RegistryAccess;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Where the client installs the way to reach its registries, so the key type can ask for them without
+ * Where the client installs the way to reach its registries, so common code can ask for them without
  * naming a client class - the shape {@code net.ClientSinks} uses, for the same reason.
  * <ul>
  * <li>Installed from {@code ClientSetup} before anything draws a key; a dedicated server installs nothing.
@@ -21,7 +21,8 @@ public final class ClientRegistries {
         ClientRegistries.source = source;
     }
 
-    static @Nullable RegistryAccess get() {
+    /** This side's registries, or null when it has none to offer - a dedicated server installs nothing. */
+    public static @Nullable RegistryAccess get() {
         ClientRegistrySource source = ClientRegistries.source;
         return source == null ? null : source.registries();
     }
