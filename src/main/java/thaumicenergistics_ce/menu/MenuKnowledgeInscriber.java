@@ -13,7 +13,6 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
@@ -23,7 +22,6 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.menu.slot.GhostGridSlot;
 import thaumicenergistics_ce.menu.slot.MachineGridSlot;
 import thaumicenergistics_ce.menu.slot.ReadOnlySlot;
-import thaumicenergistics_ce.net.InscriberGridFillPayload;
 import thaumicenergistics_ce.net.KnowledgeInscriberReceiver;
 import thaumicenergistics_ce.util.ThELog;
 
@@ -153,7 +151,12 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
             int x = FB_CRAFT_X + (i % 3) * PITCH;
             int y = FB_CRAFT_Y + (i / 3) * PITCH;
             addSlot(inscriber == null
-                    ? new GhostGridSlot(machine, BlockEntityKnowledgeInscriber.GRID_SLOT_START + i, x, y, containerId)
+                    ? new GhostGridSlot(
+                            machine,
+                            BlockEntityKnowledgeInscriber.GRID_SLOT_START + i,
+                            x,
+                            y,
+                            (cell, stack) -> MenuNetwork.sendInscriberGrid(containerId, cell, stack))
                     : new MachineGridSlot(machine, BlockEntityKnowledgeInscriber.GRID_SLOT_START + i, x, y));
         }
 
@@ -315,7 +318,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
         if (inscriber != null) {
             inscriber.setGrid(full);
         } else {
-            PacketDistributor.sendToServer(new InscriberGridFillPayload(containerId, full));
+            MenuNetwork.sendInscriberGridFill(containerId, full);
         }
 
         updatePreview();

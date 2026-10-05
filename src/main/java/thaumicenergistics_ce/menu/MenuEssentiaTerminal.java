@@ -40,9 +40,8 @@ public class MenuEssentiaTerminal extends MEStorageMenu implements EssentiaTermi
         if (container == null || !EssentiaFillHelper.isSupportedContainer(container)) {
             return false;
         }
-        // One turn spends one item of the held stack and hands back a filled one, so the whole-stack click is
-        // the same turn repeated: it stops at the first refusal, which is what "as far as the network pays"
-        // means, and at the last item of the stack.
+        // One turn spends one item of the held stack and hands back a filled one, so the whole-stack
+        // click is that turn repeated: it stops at the first refusal and at the last item of the stack.
         int turns = wholeStack ? container.getCount() : 1;
         boolean moved = false;
         for (int turn = 0; turn < turns; turn++) {

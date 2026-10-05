@@ -1,11 +1,10 @@
 package thaumicenergistics_ce.menu.slot;
 
+import java.util.function.BiConsumer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
-import thaumicenergistics_ce.net.InscriberGridPayload;
 
 /**
  * One cell of the Knowledge Inscriber's crafting grid, on the side the player is looking at.
@@ -17,11 +16,12 @@ import thaumicenergistics_ce.net.InscriberGridPayload;
  */
 public class GhostGridSlot extends Slot {
 
-    private final int containerId;
+    private final BiConsumer<Integer, ItemStack> writer;
 
-    public GhostGridSlot(Container container, int index, int x, int y, int containerId) {
+    public GhostGridSlot(
+            Container container, int index, int x, int y, BiConsumer<Integer, ItemStack> writer) {
         super(container, index, x, y);
-        this.containerId = containerId;
+        this.writer = writer;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class GhostGridSlot extends Slot {
     @Override
     public void set(ItemStack stack) {
         super.set(stack);
-        send(stack);
+        request(stack);
     }
 
     @Override
@@ -45,11 +45,10 @@ public class GhostGridSlot extends Slot {
         super.onTake(player, stack);
         // Empty, not the stack that was taken: the machine needs the cell's new contents, and sending the
         // taken stack would say the cell still holds the recipe the player has just removed.
-        send(ItemStack.EMPTY);
+        request(ItemStack.EMPTY);
     }
 
-    private void send(ItemStack stack) {
-        PacketDistributor.sendToServer(
-                new InscriberGridPayload(containerId, getContainerSlot(), stack.copyWithCount(Math.min(1, stack.getCount()))));
+    private void request(ItemStack stack) {
+        writer.accept(getContainerSlot(), stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1));
     }
 }

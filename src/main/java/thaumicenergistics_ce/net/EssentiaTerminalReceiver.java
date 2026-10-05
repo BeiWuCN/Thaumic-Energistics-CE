@@ -12,8 +12,7 @@ public interface EssentiaTerminalReceiver extends ThEMenuReceiver {
 
     /**
      * Draws one container's worth of {@code aspectId} out of the network into the container at
-     * {@code where}; with {@code wholeStack} it keeps going for as many items as the held stack holds and
-     * the network can pay for. Returns whether anything moved.
+     * {@code where}, or the held stack with {@code wholeStack}; says whether anything moved.
      */
     boolean fillFromNetwork(Player player, int where, ResourceLocation aspectId, boolean wholeStack);
 

@@ -82,8 +82,7 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         super(ModMenuTypes.ESSENTIA_CELL_WORKBENCH.get(), containerId, playerInventory, host(workbench));
         this.workbench = getHost();
         // AE2 files the hotbar under its own semantic and adds it before the main inventory, so the first
-        // PLAYER_INVENTORY slot sits nine slots into the player side rather than at its start. Reading both
-        // groups is what keeps a shift-click from reaching past the end of the slot list.
+        // PLAYER_INVENTORY slot sits nine slots in, and reading both groups keeps a shift-click bounded.
         List<Slot> playerSide = new ArrayList<>(getSlots(SlotSemantics.PLAYER_HOTBAR));
         playerSide.addAll(getSlots(SlotSemantics.PLAYER_INVENTORY));
         int[] playerRange = slotRange(playerSide);
@@ -97,9 +96,8 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
     }
 
     /**
-     * A group of slots as the one range {@code moveItemStackTo} wants: the lowest index it holds and one
-     * past the highest. An empty group becomes an empty range at the end of the list, so a move into it
-     * finds nothing and reports failure instead of walking off.
+     * A group of slots as the one range {@code moveItemStackTo} wants: lowest index and one past the
+     * highest; an empty group becomes an empty range at the end, so a move into it just fails.
      */
     private int[] slotRange(List<Slot> group) {
         int start = Integer.MAX_VALUE;
@@ -319,9 +317,8 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
             }
         } else if (index >= playerSlotStart) {
             if (stack.getItem() instanceof ItemEssentiaCell && !cellSlot.hasItem()) {
-                // The destination is the cell slot, not the clicked one: handing moveItemStackTo the clicked
-                // slot's own range made it merge the stack into itself, which doubled a single cell and moved
-                // nothing. The range has to name where the stack is going.
+                // The destination is the cell slot, not the clicked one: the clicked slot's own range
+                // merged the stack into itself, so the range names where the stack is going.
                 if (!moveItemStackTo(stack, cellSlot.index, cellSlot.index + 1, false)) {
                     return ItemStack.EMPTY;
                 }

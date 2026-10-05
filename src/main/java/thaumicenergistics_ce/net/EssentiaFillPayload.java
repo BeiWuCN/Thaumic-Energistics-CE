@@ -12,8 +12,7 @@ import thaumicenergistics_ce.ThEIds;
 /**
  * "Draw this aspect out of the network into my container", sent by the Essentia Terminal's left-click.
  * <ul>
- *   <li>{@code aspectId} travels by id, not as a key: a key the client built wrong could not be
- *       matched against server storage.
+ *   <li>{@code aspectId} travels by id: a key the client built wrong would not match server storage.
  *   <li>{@code where} names the container slot; {@code stack} is only a hint on the client side.
  *   <li>{@code wholeStack} is the shift-click: fill the held stack, not one item of it.
  * </ul>

@@ -19,7 +19,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 import thaumicenergistics_ce.init.ModMenuTypes;
@@ -27,8 +26,6 @@ import thaumicenergistics_ce.menu.slot.AspectSelectSlot;
 import thaumicenergistics_ce.menu.slot.MachineOutputSlot;
 import thaumicenergistics_ce.menu.slot.TemplateSlot;
 import thaumicenergistics_ce.net.DistillationEncoderReceiver;
-import thaumicenergistics_ce.net.EncoderActionPayload;
-import thaumicenergistics_ce.net.EncoderSourcePayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
@@ -381,7 +378,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
         slots.get(MENU_SOURCE).set(wanted);
         localSelection = -1;
         refreshAspects();
-        PacketDistributor.sendToServer(new EncoderSourcePayload(containerId, wanted));
+        MenuNetwork.sendEncoderSource(containerId, wanted);
     }
 
     @Override
@@ -423,7 +420,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
     }
 
     public void sendAction(int action, int value) {
-        PacketDistributor.sendToServer(new EncoderActionPayload(containerId, action, value));
+        MenuNetwork.sendEncoderAction(containerId, action, value);
     }
 
     @Override
@@ -459,7 +456,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
             if (index < aspects.size() && isAspectRevealed(index)) {
                 localSelection = index;
                 if (player.level().isClientSide) {
-                    sendAction(EncoderActionPayload.ACTION_SELECT, index);
+                    sendAction(MenuNetwork.ACTION_SELECT, index);
                 } else if (encoder != null) {
                     encoder.setSelectedAspect(index);
                 }
@@ -470,7 +467,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
             // Clicking the picked aspect clears it.
             localSelection = -1;
             if (player.level().isClientSide) {
-                sendAction(EncoderActionPayload.ACTION_SELECT, -1);
+                sendAction(MenuNetwork.ACTION_SELECT, -1);
             } else if (encoder != null) {
                 encoder.setSelectedAspect(-1);
             }

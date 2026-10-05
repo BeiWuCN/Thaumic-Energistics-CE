@@ -158,8 +158,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     final AssemblerUpgrades upgrades = new AssemblerUpgrades(this);
 
     /**
-     * The two {@link BlockEntity} members a same-package sibling cannot reach: {@code worldPosition} and
-     * {@code level} are protected, so the helper asks rather than reads.
+     * The block's coordinates, for a helper in this package: the protected field behind it is out of a
+     * helper's reach, so it asks through here. {@link #level()} does the same for the level.
      */
     BlockPos blockPos() {
         return worldPosition;

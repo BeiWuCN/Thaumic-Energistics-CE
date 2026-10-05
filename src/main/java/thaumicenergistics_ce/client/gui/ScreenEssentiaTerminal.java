@@ -20,9 +20,8 @@ import thaumicenergistics_ce.util.ThELog;
 /**
  * The Essentia Terminal's screen: AE2's terminal wholesale, plus two gestures of its own.
  * <ul>
- *   <li>Right-click with a filled jar or phial empties it into the network, left-click an entry with
- *       an empty one draws that aspect out, shift-left-click draws it out for the whole held stack,
- *       shift-right-click empties a container where it lies.
+ *   <li>Right-click empties a held jar or phial into the network, left-click an entry fills one from it;
+ *       shift takes the whole held stack, and shift-right-click empties where the container lies.
  *   <li>A held container is never inserted: AE2's entry click means <em>insert the cursor</em>.
  * </ul>
  */
