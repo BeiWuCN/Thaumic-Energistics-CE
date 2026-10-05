@@ -2,6 +2,7 @@ package thaumicenergistics_ce.selftest;
 
 import net.neoforged.neoforge.common.NeoForge;
 import thaumicenergistics_ce.init.SelfTestProvider;
+import thaumicenergistics_ce.blockentity.assembler.AssemblerScanCostSelfTest;
 import thaumicenergistics_ce.init.capability.MachineItemBandSelfTest;
 import thaumicenergistics_ce.part.EssentiaTransportViewSelfTest;
 
@@ -45,5 +46,8 @@ public final class SelfTestBootstrap implements SelfTestProvider {
         // What a pipe may reach against what a broken machine gives back: the source well of the
         // distillation encoder is a name JEI writes for free, so a band that reached it mints items.
         NeoForge.EVENT_BUS.addListener(MachineItemBandSelfTest::run);
+        // The assembler's own cube of 4,913 block entity lookups: timed before anyone decides to
+        // shrink it or to have the vis interface announce itself instead.
+        NeoForge.EVENT_BUS.addListener(AssemblerScanCostSelfTest::run);
     }
 }
