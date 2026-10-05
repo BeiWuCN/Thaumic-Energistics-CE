@@ -27,6 +27,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
+import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
@@ -347,7 +348,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     public AbstractContainerMenu createMenu(
             int containerId, Inventory inventory,
             Player player) {
-        return new thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber(containerId, inventory, this);
+        return MachineMenus.essentiaVibrationChamber(containerId, inventory, this);
     }
 
     @Override

@@ -29,6 +29,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
+import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.util.ThELog;
@@ -235,7 +236,7 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
     public AbstractContainerMenu createMenu(
             int containerId, Inventory playerInventory,
             Player player) {
-        return new thaumicenergistics_ce.menu.MenuDistillationEncoder(containerId, playerInventory, this);
+        return MachineMenus.distillationEncoder(containerId, playerInventory, this);
     }
 
     // ------------------------------------------------------------------

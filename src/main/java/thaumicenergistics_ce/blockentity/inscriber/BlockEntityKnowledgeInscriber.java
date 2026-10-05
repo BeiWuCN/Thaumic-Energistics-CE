@@ -14,8 +14,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
+import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
-import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
 /**
  * The Knowledge Inscriber: the slots the player fills and the two answers read off them - what the grid
@@ -142,7 +142,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
 
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-        return new MenuKnowledgeInscriber(containerId, playerInventory, this);
+        return MachineMenus.knowledgeInscriber(containerId, playerInventory, this);
     }
 
     @Override

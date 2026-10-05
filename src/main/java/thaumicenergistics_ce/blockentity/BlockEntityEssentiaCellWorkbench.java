@@ -22,6 +22,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
+import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
@@ -213,7 +214,7 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
     public AbstractContainerMenu createMenu(
             int containerId, Inventory playerInventory,
             Player player) {
-        return new thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench(containerId, playerInventory, this);
+        return MachineMenus.essentiaCellWorkbench(containerId, playerInventory, this);
     }
 
 

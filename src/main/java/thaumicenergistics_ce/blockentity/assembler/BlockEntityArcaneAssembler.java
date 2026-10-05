@@ -40,9 +40,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
+import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.ModItems;
-import thaumicenergistics_ce.menu.MenuArcaneAssembler;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
@@ -377,7 +377,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
         displaySync.refreshPatternSlots();
         upgrades.recalculateGearDiscount();
-        return new MenuArcaneAssembler(containerId, playerInventory, this);
+        return MachineMenus.arcaneAssembler(containerId, playerInventory, this);
     }
 
     public static void serverTick(

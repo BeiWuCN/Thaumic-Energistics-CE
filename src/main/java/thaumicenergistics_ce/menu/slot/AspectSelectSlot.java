@@ -1,10 +1,10 @@
 package thaumicenergistics_ce.menu.slot;
 
+import java.util.function.IntSupplier;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 
 /**
  * One well in the Distillation Encoder's aspect row.
@@ -18,13 +18,24 @@ public class AspectSelectSlot extends Slot {
 
     private final int aspectIndex;
 
-    private final MenuDistillationEncoder menu;
+    // The row's size and its picked aspect arrive as reads rather than as the menu itself: a slot that
+    // names its menu is one half of the menu <-> slot cycle.
+    private final IntSupplier aspectCount;
+
+    private final IntSupplier selection;
 
     public AspectSelectSlot(
-            Container container, int containerSlot, int x, int y, int aspectIndex, MenuDistillationEncoder menu) {
+            Container container,
+            int containerSlot,
+            int x,
+            int y,
+            int aspectIndex,
+            IntSupplier aspectCount,
+            IntSupplier selection) {
         super(container, containerSlot, x, y);
         this.aspectIndex = aspectIndex;
-        this.menu = menu;
+        this.aspectCount = aspectCount;
+        this.selection = selection;
     }
 
     public int aspectIndex() {
@@ -32,11 +43,11 @@ public class AspectSelectSlot extends Slot {
     }
 
     public boolean isFilled() {
-        return aspectIndex >= 0 && aspectIndex < menu.aspectCount();
+        return aspectIndex >= 0 && aspectIndex < aspectCount.getAsInt();
     }
 
     public boolean isSelected() {
-        return aspectIndex >= 0 && menu.localSelection() == aspectIndex;
+        return aspectIndex >= 0 && selection.getAsInt() == aspectIndex;
     }
 
     @Override

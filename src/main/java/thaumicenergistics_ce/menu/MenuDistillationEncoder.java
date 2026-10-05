@@ -114,9 +114,17 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
         // 3. The aspect row and the picked aspect: views written by the aspect table, never by the player.
         for (int i = 0; i < ASPECT_SLOTS; i++) {
             // Down the panel, not across it.
-            addSlot(new AspectSelectSlot(aspectDisplay, i, ASPECTS_X, ASPECTS_Y + i * ASPECT_PITCH, i, this));
+            addSlot(new AspectSelectSlot(
+                    aspectDisplay,
+                    i,
+                    ASPECTS_X,
+                    ASPECTS_Y + i * ASPECT_PITCH,
+                    i,
+                    this::aspectCount,
+                    this::localSelection));
         }
-        addSlot(new AspectSelectSlot(selectedDisplay, 0, SELECTED_X, SELECTED_Y, -1, this));
+        addSlot(new AspectSelectSlot(
+                selectedDisplay, 0, SELECTED_X, SELECTED_Y, -1, this::aspectCount, this::localSelection));
 
         table.refresh();
     }
