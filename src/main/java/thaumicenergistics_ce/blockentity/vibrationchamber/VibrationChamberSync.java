@@ -4,6 +4,7 @@ import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import java.util.Objects;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -151,4 +152,18 @@ public final class VibrationChamberSync {
         return new Persisted(essentia, tag.getInt(KEY_BURN), tag.getInt(KEY_BURN_TOTAL),
                 tag.getDouble(KEY_AE_PER_TICK), storedEnergy, aspect);
     }
+
+    static void applyPersistent(BlockEntityEssentiaVibrationChamber chamber, CompoundTag tag,
+            HolderLookup.Provider registries) {
+        Persisted persisted = readPersistent(tag);
+        chamber.tank().set(persisted.essentia(), persisted.aspect() == null
+                ? null
+                : Aspects.resolve(registries, ResourceKey.create(IAspect.REGISTRY_KEY, persisted.aspect())));
+        chamber.burn().restore(persisted.burnTicksRemaining(), persisted.totalBurnTicks(),
+                persisted.aePerTick());
+        chamber.energy().restore(persisted.storedEnergy());
+        // Read off the slot, not saved with it: a tag carrying both could carry them disagreeing.
+        chamber.burn().setState(chamber.energy().isFull() ? BurnState.PAUSED_FULL : BurnState.IDLE);
+    }
+
 }
