@@ -99,6 +99,15 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return craftJob;
     }
 
+    private AssemblerCraftRunner craftRunner;
+
+    AssemblerCraftRunner craftRunner() {
+        if (craftRunner == null) {
+            craftRunner = new AssemblerCraftRunner(this);
+        }
+        return craftRunner;
+    }
+
     boolean suppressNotify;
 
     public BlockEntityArcaneAssembler(BlockPos pos, BlockState state) {
@@ -253,7 +262,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         if (grid == null) {
             return TickRateModulation.IDLE;
         }
-        return craftJob().craftingTick(grid, ticksSinceLast);
+        return craftRunner().craftingTick(grid, ticksSinceLast);
     }
 
     // ------------------------------------------------------------------

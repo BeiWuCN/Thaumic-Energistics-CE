@@ -13,7 +13,7 @@ final class AssemblerContents {
             return;
         }
         // Give back ingredients the network has already paid for before the block goes.
-        machine.craftJob().returnHeldInputs();
+        machine.craftRunner().returnHeldInputs();
         machine.suppressNotify = true;
         try {
             for (int slot = 0; slot < BlockEntityArcaneAssembler.SLOT_COUNT; slot++) {
