@@ -3,7 +3,6 @@ package thaumicenergistics_ce.blockentity.vibrationchamber;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
 import net.minecraft.core.Direction;
@@ -11,6 +10,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jspecify.annotations.Nullable;
+import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 
 /**
  * The chamber's fuel slot: a count of essentia under the aspect put in last, and the pulling that fills it.
@@ -26,6 +26,8 @@ final class ChamberEssentiaTank {
 
     private final BlockEntityEssentiaVibrationChamber chamber;
 
+    private final CachedEssentiaNeighbours neighbours;
+
     private int storedEssentia;
 
     private @Nullable Holder<IAspect> currentAspect;
@@ -38,6 +40,7 @@ final class ChamberEssentiaTank {
 
     ChamberEssentiaTank(BlockEntityEssentiaVibrationChamber chamber) {
         this.chamber = chamber;
+        this.neighbours = new CachedEssentiaNeighbours(chamber);
     }
 
     int amount() {
@@ -112,8 +115,7 @@ final class ChamberEssentiaTank {
     }
 
     private boolean pullFromContainer(Direction side) {
-        IEssentiaStorage storage = chamber.getLevel().getCapability(
-                EssentiaCapabilities.STORAGE, chamber.getBlockPos().relative(side), side.getOpposite());
+        IEssentiaStorage storage = neighbours.storage(side);
         if (storage == null) {
             return false;
         }
@@ -137,8 +139,7 @@ final class ChamberEssentiaTank {
      */
     private boolean pullFromTube(Direction side) {
         Direction facing = side.getOpposite();
-        IEssentiaTransport tube = chamber.getLevel().getCapability(
-                EssentiaCapabilities.TRANSPORT, chamber.getBlockPos().relative(side), facing);
+        IEssentiaTransport tube = neighbours.transport(side);
         if (tube == null || !tube.canOutputTo(facing)) {
             return false;
         }

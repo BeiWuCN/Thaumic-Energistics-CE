@@ -21,6 +21,7 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
+import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
@@ -155,6 +156,23 @@ public class PartEssentiaImportBus extends IOBusPart implements KeyTypeSelection
             }
         }
         return false;
+    }
+
+    /**
+     * The port a pipe asks this bus for, so a tube can be attached and run essence into the network
+     * instead of having to face a container directly. Null when the bus faces nothing.
+     */
+    public IEssentiaTransport transportView() {
+        Direction side = getSide();
+        if (side == null || !(getLevel() instanceof ServerLevel level)) {
+            return null;
+        }
+        BlockPos target = getBlockEntity().getBlockPos().relative(side);
+        if (!level.isLoaded(target)) {
+            return null;
+        }
+        IEssentiaStorage storage = EssentiaNeighbour.find(level, target, side.getOpposite());
+        return storage == null ? null : new EssentiaTransportView(storage, side);
     }
 
     private IActionSource actionSource() {

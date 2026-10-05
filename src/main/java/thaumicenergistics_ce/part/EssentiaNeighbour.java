@@ -26,6 +26,10 @@ final class EssentiaNeighbour {
 
     private EssentiaNeighbour() {}
 
+    /**
+     * Deliberately uncached, alone among this mod's neighbour lookups: the target is not a block the
+     * caller owns, and the part's host never says the neighbour was re-packed. Asking is cheaper.
+     */
     static @Nullable IEssentiaStorage find(Level level, BlockPos target, Direction from) {
         if (!(level instanceof ServerLevel server)) {
             return null;

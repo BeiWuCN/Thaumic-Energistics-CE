@@ -115,6 +115,12 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
      * target and preview bands hold copies the machine made, so dropping them hands out unpaid items. */
     public void dropContents() { AssemblerContents.drop(this); }
 
+    /** Whether a band holds what the player put there. The display bands hold copies the machine
+     * wrote, so this is also the band a pipe may reach. */
+    public static boolean isPlayerOwned(int slot) {
+        return !AssemblerDisplaySync.isMachineOwned(slot);
+    }
+
     public SimpleContainer getInventory() { return inventory; }
     public boolean isCrafting() { return craft.isCrafting(); }
     public boolean isActive() { return active; }

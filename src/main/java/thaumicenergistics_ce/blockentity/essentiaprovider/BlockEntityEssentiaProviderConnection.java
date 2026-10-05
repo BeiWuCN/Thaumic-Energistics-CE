@@ -3,7 +3,6 @@ package thaumicenergistics_ce.blockentity.essentiaprovider;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +20,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.block.BlockEssentiaProviderConnection;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.init.ModBlockEntities;
+import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 
 /**
  * The Essentia Provider Connection: the far end of a wireless essentia link to a provider.
@@ -39,6 +39,8 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
     private @Nullable BlockPos providerPos;
 
     private final Map<Holder<IAspect>, Integer> buffer = new HashMap<>();
+
+    private final CachedEssentiaNeighbours neighbours = new CachedEssentiaNeighbours(this);
 
     private long revision;
     private int tickCounter;
@@ -182,8 +184,7 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
         }
         boolean moved = false;
         for (Direction side : Direction.values()) {
-            IEssentiaStorage source = level.getCapability(
-                    EssentiaCapabilities.STORAGE, worldPosition.relative(side), side.getOpposite());
+            IEssentiaStorage source = neighbours.storage(side);
             if (source == null) {
                 continue;
             }

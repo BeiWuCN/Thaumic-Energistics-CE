@@ -3,14 +3,13 @@ package thaumicenergistics_ce.blockentity.essentiaprovider;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.world.level.Level;
+import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 
 /**
  * The provider's buffer: essentia held on its way out to the world, one tick at a time.
@@ -26,10 +25,13 @@ final class EssentiaProviderBuffer {
 
     private final Map<Holder<IAspect>, Integer> buffer = new HashMap<>();
 
+    private final CachedEssentiaNeighbours neighbours;
+
     private long revision;
 
     EssentiaProviderBuffer(BlockEntityEssentiaProvider provider) {
         this.provider = provider;
+        this.neighbours = new CachedEssentiaNeighbours(provider);
     }
 
     int buffered(Holder<IAspect> aspect) {
@@ -81,14 +83,8 @@ final class EssentiaProviderBuffer {
 
     /** True when any neighbour takes essentia, so an insert has somewhere to go. */
     boolean hasAnyTarget() {
-        Level level = provider.getLevel();
-        if (level == null) {
-            return false;
-        }
         for (Direction side : Direction.values()) {
-            if (level.getCapability(EssentiaCapabilities.STORAGE,
-                            provider.getBlockPos().relative(side), side.getOpposite())
-                    != null) {
+            if (neighbours.storage(side) != null) {
                 return true;
             }
         }
@@ -97,8 +93,7 @@ final class EssentiaProviderBuffer {
 
     /** Hands the buffer to the neighbours, sides in turn, and says whether anything moved. */
     boolean push() {
-        Level level = provider.getLevel();
-        if (level == null) {
+        if (provider.getLevel() == null) {
             return false;
         }
         boolean movedAnything = false;
@@ -114,10 +109,7 @@ final class EssentiaProviderBuffer {
                 if (remaining <= 0) {
                     break;
                 }
-                IEssentiaStorage target = level.getCapability(
-                        EssentiaCapabilities.STORAGE,
-                        provider.getBlockPos().relative(side),
-                        side.getOpposite());
+                IEssentiaStorage target = neighbours.storage(side);
                 if (target == null) {
                     continue;
                 }

@@ -37,6 +37,7 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.init.ModNetwork;
 import thaumicenergistics_ce.init.SelfTestHook;
+import thaumicenergistics_ce.init.capability.ThEItemCapabilities;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartEssentiaExportBus;
 import thaumicenergistics_ce.part.PartEssentiaImportBus;
@@ -68,7 +69,8 @@ public final class ThaumicEnergistics {
         FocusElements.register(modBus);
 
         modBus.addListener(this::registerCapabilities);
-        modBus.addListener(this::registerPartCapabilities);
+        modBus.addListener(ThEItemCapabilities::install);
+        modBus.addListener(ThaumicEnergistics::registerPartCapabilities);
         modBus.addListener(this::registerKeyTypes);
         modBus.addListener(this::commonSetup);
 
@@ -146,11 +148,21 @@ public final class ThaumicEnergistics {
     }
 
     /**
-     * Exposes the Vis Interface part to Thaumaturge's relay network. Parts are not block entities, so
-     * they need AE2's own event: the lookup is answered through the cable bus the part sits on.
+     * Exposes TECE's own parts to the rest of the game. Parts are not block entities, so this needs
+     * AE2's own event, and the lookup is answered through the cable bus the part sits on. Static and
+     * public so the self-test source set can run the very event a part AE2 refuses would throw from.
      */
-    private void registerPartCapabilities(RegisterPartCapabilitiesEvent event) {
+    public static void registerPartCapabilities(RegisterPartCapabilitiesEvent event) {
         TcAura.registerVisSource(event, PartVisInterface.class);
+        // A pipe asks a neighbour only for the transport capability, so without these three the
+        // essentia buses can see a tube but a tube cannot see them. The port is whatever the bus
+        // faces, which is why it is rebuilt per query rather than held.
+        event.register(EssentiaCapabilities.TRANSPORT, (part, context) -> part.transportView(),
+                PartEssentiaStorageBus.class);
+        event.register(EssentiaCapabilities.TRANSPORT, (part, context) -> part.transportView(),
+                PartEssentiaImportBus.class);
+        event.register(EssentiaCapabilities.TRANSPORT, (part, context) -> part.transportView(),
+                PartEssentiaExportBus.class);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

@@ -19,6 +19,7 @@ import appeng.parts.PartModel;
 import appeng.parts.automation.UpgradeablePart;
 import appeng.util.ConfigInventory;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
+import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
@@ -157,6 +158,16 @@ public class PartEssentiaStorageBus extends UpgradeablePart
         // Through EssentiaNeighbour, so the container is asked whether it accepts this face (a jar
         // only takes UP) and so a pipe exposing the transport capability can be attached too.
         return EssentiaNeighbour.find(level, target, side.getOpposite());
+    }
+
+    /**
+     * The port a pipe asks this bus for. Empty and missing are both null, which is why a storage bus
+     * with nothing in front of it reads as no pipe connection.
+     */
+    public IEssentiaTransport transportView() {
+        Direction side = getSide();
+        IEssentiaStorage storage = adjacentStorage();
+        return side == null || storage == null ? null : new EssentiaTransportView(storage, side);
     }
 
     public ConfigInventory getConfig() {
