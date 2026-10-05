@@ -28,8 +28,8 @@ final class AssemblerNodeListener implements IGridNodeListener<BlockEntityArcane
     /** Creates the node when the chunk loads. A craft saved mid-flight is picked up here, because
      * {@code loadAdditional} ran before there was a level to match its result against. */
     static void attach(BlockEntityArcaneAssembler machine) {
-        if (machine.level() != null && !machine.level().isClientSide()) {
-            machine.mainNode.create(machine.level(), machine.getBlockPos());
+        if (machine.getLevel() != null && !machine.getLevel().isClientSide()) {
+            machine.mainNode.create(machine.getLevel(), machine.getBlockPos());
             machine.craftJob().recoverInterruptedCraft();
         }
     }

@@ -97,7 +97,7 @@ final class AssemblerDisplaySync {
         }
         if (report && hadAnything) {
             ThELog.LOG.info(
-                    "[assembler] at {} cleared a leftover craft display: nothing is crafting", owner.blockPos());
+                    "[assembler] at {} cleared a leftover craft display: nothing is crafting", owner.getBlockPos());
         }
     }
 
@@ -144,7 +144,7 @@ final class AssemblerDisplaySync {
     /** Rewrites the pattern slots from the advertised set: the mirror a player reads, not a real
      * inventory. */
     void refreshPatternSlots() {
-        if (owner.level() == null) {
+        if (owner.getLevel() == null) {
             return;
         }
         owner.patternCache.refresh();
@@ -167,10 +167,10 @@ final class AssemblerDisplaySync {
 
     /** Pushes the display to the watching players, at most every {@link #UPDATE_INTERVAL} ticks. */
     void markDisplayForUpdate() {
-        if (owner.level() == null) {
+        if (owner.getLevel() == null) {
             return;
         }
-        long now = owner.level().getGameTime();
+        long now = owner.getLevel().getGameTime();
         if (now - lastUpdate < UPDATE_INTERVAL) {
             return;
         }
@@ -179,7 +179,7 @@ final class AssemblerDisplaySync {
     }
 
     void markForUpdate() {
-        if (owner.level() == null) {
+        if (owner.getLevel() == null) {
             return;
         }
         owner.setChanged();

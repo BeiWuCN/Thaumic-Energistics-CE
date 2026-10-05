@@ -99,18 +99,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return craftJob;
     }
 
-    /**
-     * The block's coordinates, for a helper in this package: the protected field behind it is out of a
-     * helper's reach, so it asks through here. {@link #level()} does the same for the level.
-     */
-    BlockPos blockPos() {
-        return worldPosition;
-    }
-
-    Level level() {
-        return level;
-    }
-
     boolean suppressNotify;
 
     public BlockEntityArcaneAssembler(BlockPos pos, BlockState state) {

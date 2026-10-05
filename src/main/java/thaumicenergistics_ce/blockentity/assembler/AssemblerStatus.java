@@ -17,12 +17,12 @@ public final class AssemblerStatus {
     private AssemblerStatus() {}
 
     /** One of this machine's tooltip reasons. */
-    static Component wait(String key, String english, Object... args) {
+    static Component waitReason(String key, String english, Object... args) {
         return Component.translatableWithFallback(
                 "jade.thaumicenergistics_ce.arcane_assembler.wait_reason." + key, english, args);
     }
 
-    static Component refuse(String key, String english, Object... args) {
+    static Component refusalReason(String key, String english, Object... args) {
         return Component.translatableWithFallback(
                 "jade.thaumicenergistics_ce.arcane_assembler.refuse_reason." + key, english, args);
     }
@@ -60,7 +60,7 @@ public final class AssemblerStatus {
 
     /** The refusal for a recipe whose vis cost is more than this chunk's aura can ever hold. */
     static Component tooExpensive(int price, int capacity) {
-        return refuse(
+        return refusalReason(
                 REFUSE_TOO_EXPENSIVE,
                 "the recipe costs %s vis and this chunk's aura can never hold more than %s (aura nodes would"
                         + " raise it)",

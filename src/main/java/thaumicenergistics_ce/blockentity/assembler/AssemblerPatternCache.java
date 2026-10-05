@@ -53,14 +53,14 @@ final class AssemblerPatternCache {
         HandlerKnowledgeCore core = knowledgeCore();
         if (core == null) {
             // No core, or - the case that matters - no level to read one with; report failure until it is.
-            return machine.level() != null;
+            return machine.getLevel() != null;
         }
         List<IPatternDetails> details = new ArrayList<>();
         List<ThEArcanePattern> stored = core.patterns();
         for (ThEArcanePattern pattern : stored) {
             ArcanePatternDetails detail = ArcanePatternDetails.of(
                     pattern,
-                    machine.level().registryAccess(),
+                    machine.getLevel().registryAccess(),
                     why -> ThELog.LOG.warn(
                             "[assembler] at {} is not offering the stored pattern for {}: {}",
                             machine.getBlockPos(),
@@ -92,11 +92,11 @@ final class AssemblerPatternCache {
     }
 
     private @Nullable HandlerKnowledgeCore knowledgeCore() {
-        if (machine.level() == null) {
+        if (machine.getLevel() == null) {
             return null;
         }
         return HandlerKnowledgeCore.of(
                 machine.inventory.getItem(BlockEntityArcaneAssembler.CORE_SLOT),
-                machine.level().registryAccess());
+                machine.getLevel().registryAccess());
     }
 }

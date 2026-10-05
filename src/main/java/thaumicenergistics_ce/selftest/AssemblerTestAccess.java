@@ -40,7 +40,7 @@ final class AssemblerTestAccess {
     }
 
     /** The craft as it stands, plus what sits in the target well, for a round-trip log line. */
-    static String resumeReport(BlockEntityArcaneAssembler machine) {
+    static String report(BlockEntityArcaneAssembler machine) {
         Object craft = read(machine, "craft");
         return "crafting=" + reach(craft, "isCrafting", NO_ARGUMENTS)
                 + " price=" + reach(craft, "craftPrice", NO_ARGUMENTS)

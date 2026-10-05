@@ -88,8 +88,8 @@ public final class AssemblerCraftSelfTest {
 
         ThELog.LOG.info(
                 "[asmtest] save/load round trip: saved [{}] reloaded [{}]",
-                AssemblerTestAccess.resumeReport(machine),
-                AssemblerTestAccess.resumeReport(reloaded));
+                AssemblerTestAccess.report(machine),
+                AssemblerTestAccess.report(reloaded));
 
         // That round trip only proved the craft state survived - the pattern did not, and an AE2 CPU
         // skips a machine that offers none. The core goes in as the game's own load does.
@@ -98,7 +98,7 @@ public final class AssemblerCraftSelfTest {
         ThELog.LOG.info(
                 "[asmtest] after a reload the machine offers {} pattern(s), and the craft in its well is {}",
                 reloaded.getAvailablePatterns().size(),
-                AssemblerTestAccess.resumeReport(reloaded));
+                AssemblerTestAccess.report(reloaded));
 
         checkCoreSurvivesTheRoundTrip(level);
         checkAccelerationCardsSurviveTheRoundTrip(level);

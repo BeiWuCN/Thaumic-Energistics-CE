@@ -64,7 +64,7 @@ final class AssemblerCraftJob {
             double needed = ACTIVE_POWER * ticksSinceLast;
             double extracted = energy.extractAEPower(needed, Actionable.MODULATE, PowerMultiplier.CONFIG);
             if (extracted < needed * 0.9) {
-                noteStall(AssemblerStatus.wait(AssemblerStatus.WAIT_NO_POWER, "no power"));
+                noteStall(AssemblerStatus.waitReason(AssemblerStatus.WAIT_NO_POWER, "no power"));
                 return TickRateModulation.SAME;
             }
         }
@@ -83,7 +83,7 @@ final class AssemblerCraftJob {
             ThELog.LOG.info(
                     "[assembler] at {} a craft is waiting for {} ({} ticks so far); it will finish when it"
                             + " can",
-                    owner.blockPos(),
+                    owner.getBlockPos(),
                     reason.getString(),
                     owner.craft.stalledTicks());
         }
@@ -102,7 +102,7 @@ final class AssemblerCraftJob {
         boolean stalledOut = !unpayableForever && owner.craft.stalledTicks() >= STALL_RELEASE_TICKS;
         if (owner.vis.bufferedVis() < price && !unpayableForever && !stalledOut) {
             // Waiting on vis; the tick handler keeps refilling the buffer.
-            noteStall(AssemblerStatus.wait(
+            noteStall(AssemblerStatus.waitReason(
                     AssemblerStatus.WAIT_NO_VIS,
                     "no vis (%s banked of %s needed, target %s)",
                     owner.vis.bufferedVis(),
@@ -114,7 +114,7 @@ final class AssemblerCraftJob {
             ThELog.LOG.warn(
                     "[assembler] at {} delivers {} after {} ticks of waiting for {} vis: a machine that waits"
                             + " for ever refuses every later job",
-                    owner.blockPos(),
+                    owner.getBlockPos(),
                     owner.inventory.getItem(BlockEntityArcaneAssembler.TARGET_SLOT),
                     owner.craft.stalledTicks(),
                     price);
@@ -124,7 +124,7 @@ final class AssemblerCraftJob {
             ThELog.LOG.info(
                     "[assembler] at {} delivers {} without charging its {} vis: this chunk's aura can never hold"
                             + " more than {}",
-                    owner.blockPos(),
+                    owner.getBlockPos(),
                     owner.inventory.getItem(BlockEntityArcaneAssembler.TARGET_SLOT),
                     price,
                     owner.vis.auraCapacity());
@@ -145,7 +145,7 @@ final class AssemblerCraftJob {
 
         // Crystals vis cannot stand in for; checked before the result is inserted, never after.
         if (!hasCrystals(storage)) {
-            noteStall(AssemblerStatus.wait(AssemblerStatus.WAIT_NO_CRYSTALS, "no crystals"));
+            noteStall(AssemblerStatus.waitReason(AssemblerStatus.WAIT_NO_CRYSTALS, "no crystals"));
             return TickRateModulation.SAME;
         }
 
@@ -153,13 +153,13 @@ final class AssemblerCraftJob {
                 .insert(outputKey, output.getCount(), Actionable.SIMULATE, owner.actionSource);
         if (insertable < output.getCount()) {
             noteStall(
-                    AssemblerStatus.wait(AssemblerStatus.WAIT_NO_ROOM, "no room for %s", output.getHoverName()));
+                    AssemblerStatus.waitReason(AssemblerStatus.WAIT_NO_ROOM, "no room for %s", output.getHoverName()));
             return TickRateModulation.SAME;
         }
 
         // Re-check after the simulate: the extraction below is the point of no return for the crystals.
         if (!hasCrystals(storage)) {
-            noteStall(AssemblerStatus.wait(AssemblerStatus.WAIT_NO_CRYSTALS_RECHECK, "no crystals (recheck)"));
+            noteStall(AssemblerStatus.waitReason(AssemblerStatus.WAIT_NO_CRYSTALS_RECHECK, "no crystals (recheck)"));
             return TickRateModulation.SAME;
         }
         takeCrystals(storage);
@@ -236,10 +236,10 @@ final class AssemblerCraftJob {
             }
             if (left > 0) {
                 Containers.dropItemStack(
-                        owner.level(),
-                        owner.blockPos().getX(),
-                        owner.blockPos().getY(),
-                        owner.blockPos().getZ(),
+                        owner.getLevel(),
+                        owner.getBlockPos().getX(),
+                        owner.getBlockPos().getY(),
+                        owner.getBlockPos().getZ(),
                         stack.copyWithCount((int) left));
             }
         }
@@ -273,7 +273,7 @@ final class AssemblerCraftJob {
     /** Wakes the grid's tick while a craft is held, and lets it sleep when not: a craft restored from a
      * save never runs otherwise, as AE2 ticks idle devices at the idle rate. */
     void updateSleepiness() {
-        if (owner.level() == null || owner.level().isClientSide() || awakeForCraft == owner.craft.isCrafting()) {
+        if (owner.getLevel() == null || owner.getLevel().isClientSide() || awakeForCraft == owner.craft.isCrafting()) {
             return;
         }
         IGrid grid = gridOrNull();
@@ -295,7 +295,7 @@ final class AssemblerCraftJob {
         }
         owner.craft.setLastRefusal(why);
         // getString() resolves against the server's language; every key carries an English fallback.
-        ThELog.LOG.info("[assembler] at {} turned a job away: {}", owner.blockPos(), why.getString());
+        ThELog.LOG.info("[assembler] at {} turned a job away: {}", owner.getBlockPos(), why.getString());
     }
 
     Component cannotPay(int price) {
@@ -303,7 +303,7 @@ final class AssemblerCraftJob {
     }
 
     @Nullable ThEArcanePattern resolveExternal(IPatternDetails details) {
-        if (owner.level() == null) {
+        if (owner.getLevel() == null) {
             return null;
         }
         List<GenericStack> outputs = details.getOutputs();
@@ -318,7 +318,7 @@ final class AssemblerCraftJob {
             }
             inputs.add(itemKey.toStack((int) Math.min(Integer.MAX_VALUE, possible[0].amount())));
         }
-        return ThEArcanePattern.fromEncoded(owner.level(), inputs, outputKey.getReadOnlyStack());
+        return ThEArcanePattern.fromEncoded(owner.getLevel(), inputs, outputKey.getReadOnlyStack());
     }
 
     @Nullable ThEArcanePattern patternForResult(ItemStack result) {
@@ -358,7 +358,7 @@ final class AssemblerCraftJob {
     /** Finishes recovering a craft that a save interrupted, once there is a level to read the core with:
      * not in {@code loadAdditional}, which runs before the block entity has a level. */
     void recoverInterruptedCraft() {
-        if (owner.level() == null || owner.level().isClientSide()) {
+        if (owner.getLevel() == null || owner.getLevel().isClientSide()) {
             return;
         }
         // Driven by the well: only finishCraft empties it, so a product there means a craft did not finish.
@@ -375,7 +375,7 @@ final class AssemblerCraftJob {
             }
             ThELog.LOG.info(
                     "[assembler] at {} resumed the craft a save interrupted: {} for {} vis{}",
-                    owner.blockPos(),
+                    owner.getBlockPos(),
                     waiting.getHoverName().getString(),
                     owner.craft.craftPrice(),
                     recovered == null ? " (the knowledge core no longer has its pattern)" : "");
@@ -401,10 +401,10 @@ final class AssemblerCraftJob {
      * first, so a refusal reads the same whichever way AE2 came in. */
     private @Nullable Component refusalFor() {
         if (!owner.acceptsPlans()) {
-            return AssemblerStatus.refuse(AssemblerStatus.REFUSE_BUSY, "it is already holding a craft");
+            return AssemblerStatus.refusalReason(AssemblerStatus.REFUSE_BUSY, "it is already holding a craft");
         }
         if (!owner.mainNode.isActive()) {
-            return AssemblerStatus.refuse(
+            return AssemblerStatus.refusalReason(
                     AssemblerStatus.REFUSE_NODE_INACTIVE, "its grid node is not active");
         }
         return null;
@@ -418,7 +418,7 @@ final class AssemblerCraftJob {
             return false;
         }
         if (!(patternDetails instanceof ArcanePatternDetails details)) {
-            noteRefusal(AssemblerStatus.refuse(
+            noteRefusal(AssemblerStatus.refusalReason(
                     AssemblerStatus.REFUSE_NOT_ARCANE, "the pattern is not an arcane pattern this machine can read"));
             return false;
         }
@@ -455,7 +455,7 @@ final class AssemblerCraftJob {
         }
         ThEArcanePattern resolved = resolveExternal(patternDetails);
         if (resolved == null) {
-            noteRefusal(AssemblerStatus.refuse(
+            noteRefusal(AssemblerStatus.refusalReason(
                     AssemblerStatus.REFUSE_UNRESOLVED, "the pattern does not resolve to an arcane recipe"));
             return false;
         }

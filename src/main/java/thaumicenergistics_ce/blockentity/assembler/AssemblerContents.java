@@ -9,7 +9,7 @@ final class AssemblerContents {
     private AssemblerContents() {}
 
     public static void drop(BlockEntityArcaneAssembler machine) {
-        if (machine.level() == null || machine.level().isClientSide()) {
+        if (machine.getLevel() == null || machine.getLevel().isClientSide()) {
             return;
         }
         // Give back ingredients the network has already paid for before the block goes.
@@ -23,10 +23,10 @@ final class AssemblerContents {
                 ItemStack stack = machine.inventory.getItem(slot);
                 if (!stack.isEmpty()) {
                     Containers.dropItemStack(
-                            machine.level(),
-                            machine.blockPos().getX(),
-                            machine.blockPos().getY(),
-                            machine.blockPos().getZ(),
+                            machine.getLevel(),
+                            machine.getBlockPos().getX(),
+                            machine.getBlockPos().getY(),
+                            machine.getBlockPos().getZ(),
                             stack);
                     machine.inventory.setItem(slot, ItemStack.EMPTY);
                 }

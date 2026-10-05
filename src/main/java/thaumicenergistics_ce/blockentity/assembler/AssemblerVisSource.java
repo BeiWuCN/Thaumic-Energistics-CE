@@ -100,26 +100,26 @@ final class AssemblerVisSource {
     // ------------------------------------------------------------------
 
     float auraAround() {
-        if (owner.level() == null) {
+        if (owner.getLevel() == null) {
             return -1.0F;
         }
         float total = 0;
         for (int dx = -VIS_SOURCE_RADIUS; dx <= VIS_SOURCE_RADIUS; dx++) {
             for (int dz = -VIS_SOURCE_RADIUS; dz <= VIS_SOURCE_RADIUS; dz++) {
-                total += TcAura.vis(owner.level(), owner.blockPos().offset(dx * 16, 0, dz * 16));
+                total += TcAura.vis(owner.getLevel(), owner.getBlockPos().offset(dx * 16, 0, dz * 16));
             }
         }
         return total;
     }
 
     int auraCapacity() {
-        if (owner.level() == null) {
+        if (owner.getLevel() == null) {
             return 0;
         }
         int total = 0;
         for (int dx = -VIS_SOURCE_RADIUS; dx <= VIS_SOURCE_RADIUS; dx++) {
             for (int dz = -VIS_SOURCE_RADIUS; dz <= VIS_SOURCE_RADIUS; dz++) {
-                total += TcAura.auraBase(owner.level(), owner.blockPos().offset(dx * 16, 0, dz * 16));
+                total += TcAura.auraBase(owner.getLevel(), owner.getBlockPos().offset(dx * 16, 0, dz * 16));
             }
         }
         return total;
@@ -137,7 +137,7 @@ final class AssemblerVisSource {
      * aura access is server-thread only. */
     void replenishVis() {
         int target = pool.visTarget(owner.craft.isCrafting(), owner.craft.craftPrice());
-        if (owner.level() == null || owner.level().isClientSide() || pool.bufferedVis() >= target) {
+        if (owner.getLevel() == null || owner.getLevel().isClientSide() || pool.bufferedVis() >= target) {
             return;
         }
         // Relays first, then the aura: a node's vis lives in the node, so the aura alone reads as starved.
@@ -166,7 +166,7 @@ final class AssemblerVisSource {
      * finds a linked relay and walks its chain; every primal is asked an equal share.
      * @return whole vis obtained; a short answer means "ask the aura as well" */
     private int drainVisFromRelays(int wantVis) {
-        if (wantVis <= 0 || !(owner.level() instanceof ServerLevel server)) {
+        if (wantVis <= 0 || !(owner.getLevel() instanceof ServerLevel server)) {
             return 0;
         }
         // Ask the cheap cached question first: each drainCentivis scans for a relay.
@@ -191,7 +191,7 @@ final class AssemblerVisSource {
             }
             int ask = Math.min(share, wantCentivis - taken);
             int got = TcAura.drainCentivis(
-                    server, owner.blockPos(), BlockEntityArcaneAssembler.PRIMALS.get(i), ask, false);
+                    server, owner.getBlockPos(), BlockEntityArcaneAssembler.PRIMALS.get(i), ask, false);
             taken += got;
             // Banked per aspect, whole vis only; the remainder stays with the aspect that earned it.
             int carried = aspectCentivis[i] + got;
@@ -202,7 +202,7 @@ final class AssemblerVisSource {
     }
 
     private int drainVisFromInterfaces(int wantVis) {
-        if (wantVis <= 0 || !(owner.level() instanceof ServerLevel server)) {
+        if (wantVis <= 0 || !(owner.getLevel() instanceof ServerLevel server)) {
             return 0;
         }
         PartVisInterface source = nearbyInterface(server);
@@ -265,13 +265,13 @@ final class AssemblerVisSource {
         for (int x = -INTERFACE_RANGE; x <= INTERFACE_RANGE; x++) {
             for (int y = -INTERFACE_RANGE; y <= INTERFACE_RANGE; y++) {
                 for (int z = -INTERFACE_RANGE; z <= INTERFACE_RANGE; z++) {
-                    cursor.setWithOffset(owner.blockPos(), x, y, z);
+                    cursor.setWithOffset(owner.getBlockPos(), x, y, z);
                     if (!(server.getBlockEntity(cursor) instanceof IPartHost host)) {
                         continue;
                     }
                     for (Direction side : Platform.DIRECTIONS_WITH_NULL) {
                         if (host.getPart(side) instanceof PartVisInterface part && part.isActive()) {
-                            double distance = cursor.distSqr(owner.blockPos());
+                            double distance = cursor.distSqr(owner.getBlockPos());
                             if (distance < bestDistance) {
                                 bestDistance = distance;
                                 best = part;
@@ -287,7 +287,7 @@ final class AssemblerVisSource {
     /** Whether a relay chain that can answer is in reach. Asked only when deciding whether a craft is
      * payable: a relay resolving to nothing would accept the job and starve. */
     boolean relayNetworkInReach() {
-        if (!(owner.level() instanceof ServerLevel server)) {
+        if (!(owner.getLevel() instanceof ServerLevel server)) {
             return false;
         }
         // Cached: the caller runs this every tick while a craft is stalled.
@@ -296,7 +296,7 @@ final class AssemblerVisSource {
             nextRelayReachCheck = now + RELAY_POLL_INTERVAL;
             // Resolving is not paying: one simulated centivis settles whether an empty node can pay.
             // A chain has one end, and a source that is not a node sells its own.
-            relayReach = TcAura.relayResolves(server, owner.blockPos()) && relayCanSupply(server);
+            relayReach = TcAura.relayResolves(server, owner.getBlockPos()) && relayCanSupply(server);
         }
         return relayReach;
     }
@@ -306,7 +306,7 @@ final class AssemblerVisSource {
     private boolean relayCanSupply(ServerLevel server) {
         int primals = BlockEntityArcaneAssembler.PRIMALS.size();
         for (int i = 0; i < primals; i++) {
-            if (TcAura.drainCentivis(server, owner.blockPos(), BlockEntityArcaneAssembler.PRIMALS.get(i), 1, true)
+            if (TcAura.drainCentivis(server, owner.getBlockPos(), BlockEntityArcaneAssembler.PRIMALS.get(i), 1, true)
                     > 0) {
                 return true;
             }
@@ -317,7 +317,7 @@ final class AssemblerVisSource {
     /** Whether a vis interface beside the machine can sell it anything: presence is not enough, so a
      * one-centivis reservation asks. Cached like {@link #relayNetworkInReach}. */
     boolean interfaceInReach() {
-        if (!(owner.level() instanceof ServerLevel server)) {
+        if (!(owner.getLevel() instanceof ServerLevel server)) {
             return false;
         }
         PartVisInterface source = nearbyInterface(server);
@@ -348,7 +348,7 @@ final class AssemblerVisSource {
                         continue;
                     }
                     drained += TcAura.drainVis(
-                            owner.level(), owner.blockPos().offset(dx * 16, 0, dz * 16), want, false);
+                            owner.getLevel(), owner.getBlockPos().offset(dx * 16, 0, dz * 16), want, false);
                 }
             }
         }
