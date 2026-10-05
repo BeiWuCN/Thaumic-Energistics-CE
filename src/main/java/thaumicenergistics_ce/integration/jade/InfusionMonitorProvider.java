@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IServerDataProvider;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 
 /**

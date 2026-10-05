@@ -22,7 +22,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
-import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
+import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 import thaumicenergistics_ce.init.ModBlocks;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;

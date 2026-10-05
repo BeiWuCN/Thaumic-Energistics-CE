@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.blockentity.infusionmonitor;
 
 import com.leclowndu93150.thaumaturge.api.aspect.AspectCapabilities;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor.EssentiaLine;
+import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor.EssentiaLine;
 import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Recipe;
 
 /**

@@ -22,10 +22,10 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
-import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
-import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
-import thaumicenergistics_ce.blockentity.VibrationChamberSync;
+import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
+import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
+import thaumicenergistics_ce.blockentity.vibrationchamber.VibrationChamberSync;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 import thaumicenergistics_ce.init.ModBlocks;
@@ -132,9 +132,9 @@ public final class SyncSelfTest {
         if (ignis != null) {
             source.insert(ignis, 20, false);
         }
-        Method write = reach("thaumicenergistics_ce.blockentity.VibrationChamberSync", "writeStream",
+        Method write = reach("thaumicenergistics_ce.blockentity.vibrationchamber.VibrationChamberSync", "writeStream",
                 RegistryFriendlyByteBuf.class, BlockEntityEssentiaVibrationChamber.class, failures);
-        Method read = reach("thaumicenergistics_ce.blockentity.VibrationChamberSync", "readStream",
+        Method read = reach("thaumicenergistics_ce.blockentity.vibrationchamber.VibrationChamberSync", "readStream",
                 RegistryFriendlyByteBuf.class, failures);
         if (write == null || read == null) {
             return 0;
@@ -179,7 +179,7 @@ public final class SyncSelfTest {
      */
     private static int checkBubbleTag(HolderLookup.Provider registries, List<String> failures) {
         Object bubble = syncUnit("InfusionMonitorSync", failures);
-        Method write = reach("thaumicenergistics_ce.blockentity.InfusionMonitorSync", "write",
+        Method write = reach("thaumicenergistics_ce.blockentity.infusionmonitor.InfusionMonitorSync", "write",
                 CompoundTag.class, HolderLookup.Provider.class, failures);
         CompoundTag tag = new CompoundTag();
         if (bubble != null && write != null) {
@@ -209,7 +209,7 @@ public final class SyncSelfTest {
         tag.put("BubbleEssentia", lines);
 
         BlockEntityInfusionMonitor reader = newMonitor();
-        Method apply = reach("thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor", "applyBubbleState",
+        Method apply = reach("thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor", "applyBubbleState",
                 CompoundTag.class, HolderLookup.Provider.class, failures);
         if (apply != null) {
             try {

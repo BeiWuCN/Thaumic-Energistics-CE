@@ -16,7 +16,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
+import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 

@@ -8,9 +8,9 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber.BurnState;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
-import thaumicenergistics_ce.blockentity.VibrationChamberSync;
+import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber.BurnState;
+import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
+import thaumicenergistics_ce.blockentity.vibrationchamber.VibrationChamberSync;
 import thaumicenergistics_ce.init.ModMenuTypes;
 
 /**

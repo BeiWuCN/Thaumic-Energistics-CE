@@ -8,8 +8,8 @@ import snownee.jade.api.ITooltip;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.IElementHelper;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber.BurnState;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
+import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber.BurnState;
+import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
 import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**

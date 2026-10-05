@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
 
 /**
  * What the bubble says, as rows of cells: a chip is an aspect drawn from Thaumaturge's own textures, a text

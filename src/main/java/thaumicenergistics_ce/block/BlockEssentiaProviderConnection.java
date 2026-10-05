@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProviderConnection;
+import thaumicenergistics_ce.blockentity.essentiaprovider.BlockEntityEssentiaProviderConnection;
 
 /**
  * The Essentia Provider Connection: the receiving end of a wireless essentia link.

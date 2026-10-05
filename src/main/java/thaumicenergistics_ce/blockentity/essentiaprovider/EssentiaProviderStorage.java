@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.blockentity.essentiaprovider;
 
 import appeng.api.config.Actionable;
 import appeng.api.networking.security.IActionSource;

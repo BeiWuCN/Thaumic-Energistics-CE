@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
+import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 
 /**
  * The Knowledge Inscriber block: turns an AE2 pattern into the arcane recipe it encodes and writes

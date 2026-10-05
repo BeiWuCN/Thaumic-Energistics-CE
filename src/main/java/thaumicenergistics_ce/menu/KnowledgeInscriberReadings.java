@@ -4,7 +4,7 @@ import java.util.function.IntSupplier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerData;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
+import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 
 /**
  * The knowledge inscriber's two readings, as the menu hands them to the screen: on the server they

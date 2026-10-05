@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProvider;
+import thaumicenergistics_ce.blockentity.essentiaprovider.BlockEntityEssentiaProvider;
 
 /**
  * The Essentia Provider block: a plain cube with one texture on every side, so it has no properties

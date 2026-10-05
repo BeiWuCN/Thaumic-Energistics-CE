@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.blockentity.inscriber;
 
 import java.util.List;
 import net.minecraft.core.BlockPos;

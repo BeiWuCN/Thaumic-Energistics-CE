@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
 
 /**
  * The Infusion Monitor block.

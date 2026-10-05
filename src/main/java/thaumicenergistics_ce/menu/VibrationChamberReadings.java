@@ -2,8 +2,8 @@ package thaumicenergistics_ce.menu;
 
 import net.minecraft.world.inventory.ContainerData;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
-import thaumicenergistics_ce.blockentity.VibrationChamberSync;
+import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
+import thaumicenergistics_ce.blockentity.vibrationchamber.VibrationChamberSync;
 
 /**
  * The vibration chamber's readings, as the menu hands them to the screen: on the server they come off

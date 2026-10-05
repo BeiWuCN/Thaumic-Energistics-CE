@@ -1,6 +1,6 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.blockentity.vibrationchamber;
 
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber.BurnState;
+import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber.BurnState;
 
 /**
  * The chamber's burn: what one unit of fuel is worth and how much of it is left.

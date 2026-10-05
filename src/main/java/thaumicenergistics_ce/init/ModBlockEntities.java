@@ -9,12 +9,12 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProvider;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProviderConnection;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
-import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.essentiaprovider.BlockEntityEssentiaProvider;
+import thaumicenergistics_ce.blockentity.essentiaprovider.BlockEntityEssentiaProviderConnection;
+import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
+import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
-import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
+import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
 /** Block entity type registration. */

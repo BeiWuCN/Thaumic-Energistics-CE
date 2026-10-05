@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
-import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
 import thaumicenergistics_ce.client.render.bubble.BubbleCells.Cell;
 import thaumicenergistics_ce.client.render.bubble.BubbleCells.ChipCell;
 import thaumicenergistics_ce.client.render.bubble.BubbleCells.TextCell;

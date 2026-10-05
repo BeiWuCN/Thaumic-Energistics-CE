@@ -1,10 +1,10 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.blockentity.infusionmonitor;
 
 import java.util.List;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor.EssentiaLine;
+import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor.EssentiaLine;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 import thaumicenergistics_ce.util.ThELog;
 

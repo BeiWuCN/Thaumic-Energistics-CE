@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.blockentity.infusionmonitor;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;

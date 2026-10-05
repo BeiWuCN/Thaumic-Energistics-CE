@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.blockentity.infusionmonitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import thaumicenergistics_ce.blockentity.ClientSyncSend;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 
 /** The infusion monitor's client copy of the bubble, split out of {@link BlockEntityInfusionMonitor}:

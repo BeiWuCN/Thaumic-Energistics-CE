@@ -15,8 +15,8 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProvider;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProviderConnection;
+import thaumicenergistics_ce.blockentity.essentiaprovider.BlockEntityEssentiaProvider;
+import thaumicenergistics_ce.blockentity.essentiaprovider.BlockEntityEssentiaProviderConnection;
 
 /**
  * The Wireless Essentia Binding Tool: makes and breaks the links an Essentia Provider uses.

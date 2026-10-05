@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.blockentity.infusionmonitor;
 
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import java.util.List;
@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor.Report;
+import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor.Report;
 import thaumicenergistics_ce.compat.thaumaturge.TcInfusion;
 import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Altar;
 import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Recipe;

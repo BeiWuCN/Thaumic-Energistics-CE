@@ -395,7 +395,7 @@ public final class EssentiaSelfTest {
 
         expectGridHost(
                 AECapabilities.IN_WORLD_GRID_NODE_HOST,
-                new thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber(
+                new thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber(
                         origin,
                         thaumicenergistics_ce.init.ModBlocks.ESSENTIA_VIBRATION_CHAMBER
                                 .get().defaultBlockState()),
@@ -403,7 +403,7 @@ public final class EssentiaSelfTest {
                 failures);
         expectGridHost(
                 AECapabilities.IN_WORLD_GRID_NODE_HOST,
-                new thaumicenergistics_ce.blockentity.BlockEntityEssentiaProvider(
+                new thaumicenergistics_ce.blockentity.essentiaprovider.BlockEntityEssentiaProvider(
                         origin,
                         thaumicenergistics_ce.init.ModBlocks.ESSENTIA_PROVIDER
                                 .get().defaultBlockState()),
@@ -420,7 +420,7 @@ public final class EssentiaSelfTest {
 
         expectGridHost(
                 EssentiaCapabilities.STORAGE,
-                new thaumicenergistics_ce.blockentity.BlockEntityEssentiaProvider(
+                new thaumicenergistics_ce.blockentity.essentiaprovider.BlockEntityEssentiaProvider(
                         origin,
                         thaumicenergistics_ce.init.ModBlocks.ESSENTIA_PROVIDER
                                 .get().defaultBlockState()),
@@ -465,13 +465,13 @@ public final class EssentiaSelfTest {
         // fail, the variants never match and the block renders with no model.
         expectGridHost(
                 AECapabilities.IN_WORLD_GRID_NODE_HOST,
-                new thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor(
+                new thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor(
                         origin,
                         thaumicenergistics_ce.init.ModBlocks.INFUSION_MONITOR
                                 .get().defaultBlockState()),
                 "infusion_monitor as a grid node host",
                 failures);
-        var monitor = new thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor(
+        var monitor = new thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor(
                 origin, thaumicenergistics_ce.init.ModBlocks.INFUSION_MONITOR.get().defaultBlockState());
         if (!monitor.hasBook()) {
             var state = thaumicenergistics_ce.init.ModBlocks.INFUSION_MONITOR.get().defaultBlockState();

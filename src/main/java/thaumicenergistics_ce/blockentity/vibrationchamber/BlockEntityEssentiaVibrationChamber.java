@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.blockentity.vibrationchamber;
 
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;

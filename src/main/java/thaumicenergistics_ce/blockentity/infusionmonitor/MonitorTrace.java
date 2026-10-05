@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity;
+package thaumicenergistics_ce.blockentity.infusionmonitor;
 
 import appeng.api.networking.IGridNode;
 import net.minecraft.world.level.Level;
