@@ -1,23 +1,14 @@
 package thaumicenergistics_ce.menu;
 
 import appeng.api.stacks.AEKey;
-import appeng.api.stacks.GenericStack;
 import appeng.api.upgrades.IUpgradeInventory;
-import appeng.api.upgrades.Upgrades;
 import appeng.menu.SlotSemantics;
 import appeng.menu.implementations.UpgradeableMenu;
 import appeng.menu.slot.CellPartitionSlot;
 import appeng.menu.slot.IPartitionSlotHost;
 import appeng.menu.slot.RestrictedInputSlot;
-import appeng.util.ConfigMenuInventory;
-import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
-import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import java.util.ArrayList;
-import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -27,18 +18,15 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
 import thaumicenergistics_ce.init.ModBlocks;
 import thaumicenergistics_ce.init.ModMenuTypes;
-import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
-import thaumicenergistics_ce.network.PartitionWellPayload;
 import thaumicenergistics_ce.network.PartitionWellReceiver;
-import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The Essentia Cell Workbench's menu: the cell, its upgrade slots, and the partition being edited.
  * <ul>
  *   <li>An AE2 menu, so the upgrades panel, the cell slot and the wells come with AE2's own handling.
  *   <li>The partition grid is 63 wells; a mark arrives as {@code PartitionWellPayload}.
- *   <li>The partition lives on the cell item; the block entity mirrors it into the wells and writes back.
+ *   <li>What the wells hold is the {@link CellPartitionEditor}'s; this menu holds the slots themselves.
  * </ul>
  */
 public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssentiaCellWorkbench>
@@ -54,19 +42,14 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
     private static final int CELL_X = 152;
     private static final int CELL_Y = 8;
 
-    private final BlockEntityEssentiaCellWorkbench workbench;
+    // Package-private for the partition editor, which writes the cell and tells the host it changed.
+    final BlockEntityEssentiaCellWorkbench workbench;
 
-    private ConfigMenuInventory partition;
+    // Built by setupConfig, which AE2's base calls while it constructs, so the field cannot be final.
+    private CellPartitionEditor partitionEditor;
 
-    // The player side, first slot and one past its last: a shift-click moves into that range.
-    private final int playerSlotStart;
-
-    private final int playerSlotEnd;
-
-    // The card slots, same convention: a card shift-clicked in the inventory goes into that range.
-    private final int cardSlotStart;
-
-    private final int cardSlotEnd;
+    // Built in the constructor body: the ranges it measures need the slots AE2 has already filed.
+    private final CellWorkbenchShiftClick shiftClick;
 
     // The wells ask this menu whether they are enabled, so the slot is kept; setupInventorySlots sets it.
     private Slot cellSlot;
@@ -81,32 +64,9 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         // AE2's base calls the three setup methods from its own constructor, so they read the host.
         super(ModMenuTypes.ESSENTIA_CELL_WORKBENCH.get(), containerId, playerInventory, host(workbench));
         this.workbench = getHost();
-        // AE2 files the hotbar under its own semantic and adds it before the main inventory, so the first
-        // PLAYER_INVENTORY slot sits nine slots in, and reading both groups keeps a shift-click bounded.
-        List<Slot> playerSide = new ArrayList<>(getSlots(SlotSemantics.PLAYER_HOTBAR));
-        playerSide.addAll(getSlots(SlotSemantics.PLAYER_INVENTORY));
-        int[] playerRange = slotRange(playerSide);
-        this.playerSlotStart = playerRange[0];
-        this.playerSlotEnd = playerRange[1];
-        int[] cardRange = slotRange(getSlots(SlotSemantics.UPGRADE));
-        this.cardSlotStart = cardRange[0];
-        this.cardSlotEnd = cardRange[1];
+        this.shiftClick = new CellWorkbenchShiftClick(this);
         registerClientAction(ACTION_PARTITION, this::partitionToContents);
         registerClientAction(ACTION_CLEAR, this::clearPartition);
-    }
-
-    /**
-     * A group of slots as the one range {@code moveItemStackTo} wants: lowest index and one past the
-     * highest; an empty group becomes an empty range at the end, so a move into it just fails.
-     */
-    private int[] slotRange(List<Slot> group) {
-        int start = Integer.MAX_VALUE;
-        int end = 0;
-        for (Slot slot : group) {
-            start = Math.min(start, slot.index);
-            end = Math.max(end, slot.index + 1);
-        }
-        return end == 0 ? new int[] {slots.size(), slots.size()} : new int[] {start, end};
     }
 
     @Override
@@ -129,10 +89,11 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
 
     @Override
     protected void setupConfig() {
-        this.partition = getHost().getPartition().createMenuWrapper();
+        this.partitionEditor =
+                new CellPartitionEditor(this, getHost().getPartition().createMenuWrapper());
         for (int well = 0; well < BlockEntityEssentiaCellWorkbench.PARTITION_SLOTS; well++) {
             // AE2's own partition slot, so a well with no cell behind it draws itself faint and empty.
-            addSlot(new CellPartitionSlot(partition, this, well), SlotSemantics.CONFIG);
+            addSlot(new CellPartitionSlot(partitionEditor.partition(), this, well), SlotSemantics.CONFIG);
         }
     }
 
@@ -160,8 +121,13 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
      * Whether a cell sits in the menu's own slot. The wells and the card slots both follow the slot rather
      * than the block entity: on a client the host may be a stand-in, and only the slot is synced.
      */
-    private boolean hasCellInMenu() {
+    boolean hasCellInMenu() {
         return cellSlot != null && cellSlot.getItem().getItem() instanceof ItemEssentiaCell;
+    }
+
+    /** The cell's slot, where the one cell goes; the shift-click collaborator names its range. */
+    Slot cellSlot() {
+        return getSlots(SlotSemantics.STORAGE_CELL).get(0);
     }
 
     /**
@@ -191,8 +157,7 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
     }
 
     public @Nullable AEKey keyInWell(int well) {
-        GenericStack stack = partition.getDelegate().getStack(well);
-        return stack == null ? null : stack.what();
+        return partitionEditor.keyInWell(well);
     }
 
     /**
@@ -204,13 +169,7 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
             sendClientAction(ACTION_PARTITION);
             return;
         }
-        if (!hasCell()) {
-            ThELog.LOG.warn("[cell-partition] no cell in the workbench, so the wells cannot be filled");
-            return;
-        }
-        ItemEssentiaCell.partitionToContents(workbench.getCell());
-        workbench.setChanged();
-        broadcastChanges();
+        partitionEditor.partitionToContents();
     }
 
     /** Empties every well. Sent from the client, like {@link #partitionToContents}. */
@@ -219,13 +178,7 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
             sendClientAction(ACTION_CLEAR);
             return;
         }
-        if (!hasCell()) {
-            ThELog.LOG.warn("[cell-partition] no cell in the workbench, so there is no partition to clear");
-            return;
-        }
-        ItemEssentiaCell.clearPartition(workbench.getCell());
-        workbench.setChanged();
-        broadcastChanges();
+        partitionEditor.clearPartition();
     }
 
     /**
@@ -237,63 +190,7 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
             int well,
             ResourceLocation aspectId,
             Player player) {
-        if (workbench == null) {
-            return;
-        }
-        if (well < 0 || well >= BlockEntityEssentiaCellWorkbench.PARTITION_SLOTS) {
-            ThELog.LOG.warn("[cell-partition] well {} is out of range", well);
-            return;
-        }
-        if (!hasCell()) {
-            ThELog.LOG.warn("[cell-partition] no cell in the workbench, so well {} has nowhere to go", well);
-            return;
-        }
-        if (PartitionWellPayload.CLEAR.equals(aspectId)) {
-            // A mark is taken out by clicking its well, where AE2 would pick the entry back up.
-            clearWell(well);
-            return;
-        }
-
-        Holder<IAspect> aspect =
-                Aspects.resolve(
-                        player.level(),
-                        ResourceKey.create(
-                                IAspect.REGISTRY_KEY, aspectId));
-        if (aspect == null) {
-            // An id the server does not know: dropping it beats a partition entry that can never match.
-            ThELog.LOG.warn("[cell-partition] the server cannot resolve aspect {}", aspectId);
-            return;
-        }
-        AEssentiaKey key = AEssentiaKey.of(aspect);
-        if (key == null) {
-            // Not registry-backed: no id, so the entry could never match anything.
-            ThELog.LOG.warn("[cell-partition] aspect {} is not a registry entry", aspectId);
-            return;
-        }
-
-        // One type, one well: a key already marked elsewhere moves here instead of appearing twice.
-        for (int other = 0; other < BlockEntityEssentiaCellWorkbench.PARTITION_SLOTS; other++) {
-            if (other != well && key.equals(keyInWell(other))) {
-                clearWell(other);
-            }
-        }
-
-        // One, because a partition entry is a type rather than an amount - how much the cell holds is
-        // decided by its size. Writing here is what fires the block entity's listener, which stores it.
-        partition.getDelegate().setStack(well, new GenericStack(key, 1));
-        workbench.setChanged();
-        broadcastChanges();
-        // Read straight back: "wrote" and "now holds" as two separate facts, for the failure being chased.
-        ThELog.LOG.info(
-                "[cell-partition] wrote {} to well {}; it now holds {}",
-                key, well, keyInWell(well));
-    }
-
-    private void clearWell(int well) {
-        partition.getDelegate().setStack(well, null);
-        workbench.setChanged();
-        broadcastChanges();
-        ThELog.LOG.info("[cell-partition] took the mark out of well {}; it now holds {}", well, keyInWell(well));
+        partitionEditor.setWell(well, aspectId, player);
     }
 
     @Override
@@ -309,34 +206,9 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         }
         ItemStack stack = slot.getItem();
         ItemStack original = stack.copy();
-        Slot cellSlot = getSlots(SlotSemantics.STORAGE_CELL).get(0);
-
-        if (slot == cellSlot) {
-            if (!moveItemStackTo(stack, playerSlotStart, playerSlotEnd, true)) {
-                return ItemStack.EMPTY;
-            }
-        } else if (index >= playerSlotStart) {
-            if (stack.getItem() instanceof ItemEssentiaCell && !cellSlot.hasItem()) {
-                // The destination is the cell slot, not the clicked one: the clicked slot's own range
-                // merged the stack into itself, so the range names where the stack is going.
-                if (!moveItemStackTo(stack, cellSlot.index, cellSlot.index + 1, false)) {
-                    return ItemStack.EMPTY;
-                }
-            } else if (hasCellInMenu() && Upgrades.isUpgradeCardItem(stack)) {
-                // A card rides on the cell, so there is nowhere to put one without it. Which cards the cell
-                // takes is the cell's own upgrade inventory's call, asked through the slots' mayPlace.
-                if (!moveItemStackTo(stack, cardSlotStart, cardSlotEnd, false)) {
-                    return ItemStack.EMPTY;
-                }
-            } else {
-                return ItemStack.EMPTY;
-            }
-        } else if (getSlots(SlotSemantics.UPGRADE).contains(slot)) {
-            if (!moveItemStackTo(stack, playerSlotStart, playerSlotEnd, true)) {
-                return ItemStack.EMPTY;
-            }
-        } else {
-            // A well: a mark is a type, not a pile, so there is nothing for shift-click to move.
+        CellWorkbenchShiftClick.Move move = shiftClick.moveFor(slot, index, stack);
+        if (move == null || !moveItemStackTo(stack, move.from(), move.to(), move.reverse())) {
+            // Nothing to hand the stack to, or the destination refused it: it stays where it is.
             return ItemStack.EMPTY;
         }
 
