@@ -16,17 +16,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.block.BlockInfusionMonitor;
@@ -112,14 +107,8 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
 
     // The bubble is drawn on the client, so its numbers travel in the update tag.
 
-    private boolean bubbleReporting;
-    private int bubbleTier = 1;
-    private int bubbleInstability;
-    /** The altar's stability at the last scan, times ten - the number the bubble leads with. */
-    private int bubbleStabilityTimesTen = 250;
-    private boolean bubbleCrafting;
-    private ItemStack bubbleCraft = ItemStack.EMPTY;
-    private final List<EssentiaLine> bubbleEssentia = new ArrayList<>();
+    private final InfusionMonitorSync bubble = new InfusionMonitorSync();
+
     private final List<EssentiaLine> essentia = new ArrayList<>();
 
     /** Search radius around an altar: twelve, {@code EssentiaSources}' own container range. */
@@ -129,12 +118,6 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     private final List<BlockPos> sourceCache = new ArrayList<>();
     private long nextSourceScan;
     private ItemStack craftDisplay = ItemStack.EMPTY;
-
-    private boolean syncedReporting;
-    private int syncedTier = -1;
-    private int syncedInstability = -1;
-    /** Everything else the bubble draws, as one string; any change in it means a packet to send. */
-    private String syncedDetail = "";
 
     public BlockEntityInfusionMonitor(BlockPos pos, BlockState state) {
         super(ModBlockEntities.INFUSION_MONITOR.get(), pos, state);
@@ -328,64 +311,42 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     }
 
     private void syncBubble() {
-        boolean reporting = canReport();
-        int tier = risk.tier();
-        int instability = risk.instability();
-        boolean crafting = report.crafting();
-        // Stability moves during a craft, so it is part of the signature or the bubble would freeze.
-        String signature = crafting + "|" + craftDisplay.getItem() + "|" + essentia + "|"
-                + Math.round(risk.stability() * 10.0F);
-        if (reporting == syncedReporting
-                && tier == syncedTier
-                && instability == syncedInstability
-                && signature.equals(syncedDetail)) {
-            return;
-        }
-        syncedReporting = reporting;
-        syncedTier = tier;
-        syncedInstability = instability;
-        syncedDetail = signature;
-        bubbleCrafting = crafting;
-        bubbleCraft = craftDisplay;
-        bubbleEssentia.clear();
-        bubbleEssentia.addAll(essentia);
-        // Sent by hand: on 1.21 AE2's markForClientUpdate path sends no block entity packet.
-        if (level instanceof ServerLevel server) {
-            ClientboundBlockEntityDataPacket packet =
-                    ClientboundBlockEntityDataPacket.create(this);
-            for (ServerPlayer player : server.getChunkSource().chunkMap
-                    .getPlayers(new ChunkPos(worldPosition), false)) {
-                player.connection.send(packet);
-            }
-        }
+        bubble.offer(this, new InfusionMonitorSync.Snapshot(
+                canReport(),
+                risk.tier(),
+                risk.instability(),
+                Math.round(risk.stability() * 10.0F),
+                report.crafting(),
+                craftDisplay,
+                essentia));
     }
 
     public boolean bubbleReporting() {
-        return bubbleReporting;
+        return bubble.reporting();
     }
 
     public int bubbleTier() {
-        return bubbleTier;
+        return bubble.tier();
     }
 
     public int bubbleInstability() {
-        return bubbleInstability;
+        return bubble.instability();
     }
 
     public String bubbleStability() {
-        return String.format("%.1f", bubbleStabilityTimesTen / 10.0F);
+        return String.format("%.1f", bubble.stabilityTimesTen() / 10.0F);
     }
 
     public boolean bubbleCrafting() {
-        return bubbleCrafting;
+        return bubble.crafting();
     }
 
     public ItemStack bubbleCraft() {
-        return bubbleCraft;
+        return bubble.craft();
     }
 
     public List<EssentiaLine> bubbleEssentia() {
-        return List.copyOf(bubbleEssentia);
+        return bubble.essentia();
     }
 
     private void trace(IGridNode node) {
@@ -431,21 +392,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = super.getUpdateTag(registries);
-        tag.putBoolean("Reporting", canReport());
-        tag.putInt("BubbleTier", risk.tier());
-        tag.putInt("BubbleInstability", risk.instability());
-        tag.putInt("BubbleStability", Math.round(risk.stability() * 10.0F));
-        tag.putBoolean("BubbleCrafting", bubbleCrafting);
-        tag.put("BubbleCraft", bubbleCraft.saveOptional(registries));
-        ListTag lines = new ListTag();
-        for (EssentiaLine line : bubbleEssentia) {
-            CompoundTag entry = new CompoundTag();
-            entry.putString("Aspect", line.aspect());
-            entry.putInt("Drawn", line.drawn());
-            entry.putInt("Total", line.total());
-            lines.add(entry);
-        }
-        tag.put("BubbleEssentia", lines);
+        bubble.write(tag, registries);
         return tag;
     }
 
@@ -470,22 +417,11 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
         if (level != null && level.isClientSide() && TRACE) {
             ThELog.LOG.info(
                     "[bubble] tag at {} reporting={} tier={} instability={}",
-                    worldPosition, tag.getBoolean("Reporting"), tag.getInt("BubbleTier"),
-                    tag.getInt("BubbleInstability"));
+                    worldPosition, tag.getBoolean(InfusionMonitorSync.TAG_REPORTING),
+                    tag.getInt(InfusionMonitorSync.TAG_TIER),
+                    tag.getInt(InfusionMonitorSync.TAG_INSTABILITY));
         }
-        bubbleReporting = tag.getBoolean("Reporting");
-        bubbleTier = Math.max(1, Math.min(InfusionRisk.MAX_TIER, tag.getInt("BubbleTier")));
-        bubbleInstability = tag.getInt("BubbleInstability");
-        bubbleStabilityTimesTen = tag.getInt("BubbleStability");
-        bubbleCrafting = tag.getBoolean("BubbleCrafting");
-        bubbleCraft = ItemStack.parseOptional(registries, tag.getCompound("BubbleCraft"));
-        bubbleEssentia.clear();
-        ListTag lines = tag.getList("BubbleEssentia", Tag.TAG_COMPOUND);
-        for (int i = 0; i < lines.size(); i++) {
-            CompoundTag entry = lines.getCompound(i);
-            bubbleEssentia.add(new EssentiaLine(
-                    entry.getString("Aspect"), entry.getInt("Drawn"), entry.getInt("Total")));
-        }
+        bubble.read(tag, registries);
     }
 
     /** Whether the altar cannot reach what the ritual still wants, asked via

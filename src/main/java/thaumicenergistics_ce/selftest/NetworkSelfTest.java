@@ -1,11 +1,14 @@
 package thaumicenergistics_ce.selftest;
 
 import io.netty.buffer.Unpooled;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 import net.minecraft.core.RegistryAccess;
@@ -30,13 +33,14 @@ import thaumicenergistics_ce.net.PartitionWellPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Asserts the wire contract of every payload, because moving a payload between packages cannot be seen by
- * a compiler: a codec that lost a field round trips into a record that lies. Each codec must survive a
- * write and a read with nothing left in the buffer, and carry the same fields back - ItemStack has no
- * equals, so stacks are compared with ItemStack.matches. Each wire id must still be the namespaced one, and
- * the protocol package must not name a menu or a screen. Runs only behind its own env var.
+ * Asserts the wire contract of every payload: a codec that lost a field round trips into a record that
+ * lies, and a package move cannot be seen by a compiler. Each codec must survive a write and a read with
+ * nothing left in the buffer - ItemStack has no equals, so stacks go through ItemStack.matches - and the
+ * ten agreed wire ids must all be the ones NeoForge holds for this mod. Runs only behind its own env var.
  */
 public final class NetworkSelfTest {
+
+    private static final Set<ResourceLocation> REGISTERED = readRegistrations(ThEIds.MODID);
 
     private static boolean hasRun;
 
@@ -53,49 +57,111 @@ public final class NetworkSelfTest {
 
         RegistryAccess registries = event.getServer().registryAccess();
         List<String> failures = new ArrayList<>();
-        checkWireIds(failures);
+        if (REGISTERED == null) {
+            failures.add("NeoForge registered no payload at all by the time this ran");
+        }
+        List<ResourceLocation> admitted = new ArrayList<>(REGISTERED);
+        List<ResourceLocation> required = checkWireIds(admitted, failures);
+        checkRegistrations(admitted, required, failures);
         checkCodecs(registries, failures);
         report(failures);
     }
 
-    private static void checkWireIds(List<String> failures) {
-        Map<String, ResourceLocation> expected = new LinkedHashMap<>();
+    /**
+     * Read reflectively on purpose: no accessor exists, so a hand-kept list compared against itself would
+     * prove nothing. The table is global, so it is filtered to one namespace.
+     */
+    private static Set<ResourceLocation> readRegistrations(String namespace) {
+        try {
+            Field field = Class.forName("net.neoforged.neoforge.network.registration.NetworkRegistry")
+                    .getDeclaredField("PAYLOAD_REGISTRATIONS");
+            field.setAccessible(true);
+            Map<?, ?> byProtocol = (Map<?, ?>) field.get(null);
+            Set<ResourceLocation> found = new LinkedHashSet<>();
+            for (Object perFlow : byProtocol.values()) {
+                for (Object registration : ((Map<?, ?>) perFlow).values()) {
+                    Field type = registration.getClass().getDeclaredField("type");
+                    type.setAccessible(true);
+                    ResourceLocation id = ((CustomPacketPayload.Type<?>) type.get(registration)).id();
+                    if (namespace.equals(id.getNamespace())) {
+                        found.add(id);
+                    }
+                }
+            }
+            return found;
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return null;
+        }
+    }
+
+    private static final List<ResourceLocation> WIRE_IDS = List.of(
+            ThEIds.id("inscriber_grid"),
+            ThEIds.id("inscriber_grid_fill"),
+            ThEIds.id("essentia_terminal_fill"),
+            ThEIds.id("essentia_terminal_deposit"),
+            ThEIds.id("essentia_bus_config"),
+            ThEIds.id("partition_well"),
+            ThEIds.id("encoder_source"),
+            ThEIds.id("encoder_action"),
+            ThEIds.id("arcane_craft_cost"),
+            ThEIds.id("golem_backpack"));
+
+    /** A payload built with the wrong namespace is not a compile error, only a connection error later. */
+    private static List<ResourceLocation> checkWireIds(List<ResourceLocation> admitted, List<String> failures) {
+        if (admitted.isEmpty()) {
+            failures.add("no payload carried a wire id");
+            return List.of();
+        }
+        Map<String, ResourceLocation> declared = new LinkedHashMap<>();
         for (CustomPacketPayload.Type<?> type : List.of(
                 InscriberGridPayload.TYPE,
                 InscriberGridFillPayload.TYPE,
                 EssentiaFillPayload.TYPE,
                 EssentiaDepositPayload.TYPE,
                 EssentiaBusConfigPayload.TYPE,
+                PartitionWellPayload.TYPE,
                 EncoderSourcePayload.TYPE,
                 EncoderActionPayload.TYPE,
                 ArcaneCraftCostPayload.TYPE,
-                GolemBackpackPayload.TYPE,
-                PartitionWellPayload.TYPE)) {
-            expected.put(type.id().getPath(), type.id());
+                GolemBackpackPayload.TYPE)) {
+            declared.put(type.id().getPath(), type.id());
         }
-        expected.forEach((path, id) -> {
+        declared.forEach((path, id) -> {
             if (!ThEIds.MODID.equals(id.getNamespace())) {
                 failures.add("payload " + path + " is namespaced " + id.getNamespace());
             }
         });
-        List<String> wanted = List.of(
-                "inscriber_grid",
-                "inscriber_grid_fill",
-                "essentia_terminal_fill",
-                "essentia_terminal_deposit",
-                "essentia_bus_config",
-                "encoder_source",
-                "encoder_action",
-                "arcane_craft_cost",
-                "golem_backpack",
-                "partition_well");
-        for (String path : wanted) {
-            if (!expected.containsKey(path)) {
-                failures.add("no payload claims the wire id " + path);
+        List<ResourceLocation> required = new ArrayList<>();
+        for (ResourceLocation id : WIRE_IDS) {
+            required.add(id);
+            ResourceLocation held = declared.get(id.getPath());
+            if (held == null) {
+                failures.add("no payload claims the wire id " + id);
+            } else if (!held.equals(id)) {
+                failures.add("the wire id " + id + " is declared as " + held);
             }
         }
-        if (expected.size() != wanted.size()) {
-            failures.add("payloads claim " + expected.size() + " wire ids, expected " + wanted.size());
+        if (declared.size() != WIRE_IDS.size()) {
+            failures.add("payloads declare " + declared.size() + " wire ids, expected " + WIRE_IDS.size());
+        }
+        return required;
+    }
+
+    /**
+     * A payload that is written but never registered compiles and is simply never sent: the two lists have
+     * to be compared with each other, and neither side is derivable from the other.
+     */
+    private static void checkRegistrations(List<ResourceLocation> admitted, List<ResourceLocation> required,
+            List<String> failures) {
+        for (ResourceLocation id : required) {
+            if (!admitted.contains(id)) {
+                failures.add("NeoForge did not register " + id);
+            }
+        }
+        for (ResourceLocation id : admitted) {
+            if (!required.contains(id)) {
+                failures.add("NeoForge registered " + id + ", which this mod does not declare");
+            }
         }
     }
 
@@ -121,10 +187,11 @@ public final class NetworkSelfTest {
                         (wrote, read) -> wrote.containerId() == read.containerId() && sameStacks(wrote.cells(), read.cells())),
                 new Roundtrip<>(
                         "EssentiaFillPayload",
-                        () -> new EssentiaFillPayload(7, unknown, 2, stack),
+                        () -> new EssentiaFillPayload(7, unknown, 2, stack, true),
                         EssentiaFillPayload.CODEC,
                         (wrote, read) -> wrote.containerId() == read.containerId() && wrote.aspectId().equals(read.aspectId())
-                                && wrote.where() == read.where() && sameStack(wrote.stack(), read.stack())),
+                                && wrote.where() == read.where() && wrote.wholeStack() == read.wholeStack()
+                                && sameStack(wrote.stack(), read.stack())),
                 new Roundtrip<>(
                         "EssentiaDepositPayload",
                         () -> new EssentiaDepositPayload(7, 2, stack),
@@ -254,7 +321,7 @@ public final class NetworkSelfTest {
 
     private static void report(List<String> failures) {
         if (failures.isEmpty()) {
-            ThELog.LOG.info("[network] self-test passed");
+            ThELog.LOG.info("[network] self-test passed: {} wire ids registered, codecs round tripped", WIRE_IDS.size());
             return;
         }
         for (String failure : failures) {

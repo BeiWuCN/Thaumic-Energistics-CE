@@ -10,7 +10,12 @@ import net.minecraft.world.item.ItemStack;
  */
 public interface EssentiaTerminalReceiver extends ThEMenuReceiver {
 
-    boolean fillFromNetwork(Player player, int where, ResourceLocation aspectId);
+    /**
+     * Draws one container's worth of {@code aspectId} out of the network into the container at
+     * {@code where}; with {@code wholeStack} it keeps going for as many items as the held stack holds and
+     * the network can pay for. Returns whether anything moved.
+     */
+    boolean fillFromNetwork(Player player, int where, ResourceLocation aspectId, boolean wholeStack);
 
     void deposit(Player player, int where, ItemStack claimed);
 }

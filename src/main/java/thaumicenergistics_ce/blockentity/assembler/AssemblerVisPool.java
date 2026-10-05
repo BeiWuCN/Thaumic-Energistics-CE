@@ -10,6 +10,11 @@ final class AssemblerVisPool {
     /** Idle vis ceiling; {@link #visTarget} raises it to a craft's price, the aura bounds it. */
     static final int IDLE_TARGET = 512;
 
+    /** The names the pool is written under. The save tag and the update tag share them, and the Jade
+     * payload spells the first one in its own contract: the sync self-test holds the two equal. */
+    private static final String TAG_BUFFERED_VIS = "BufferedVis";
+    private static final String TAG_ASPECT_VIS = "AspectVis";
+
     /** Ambient vis pulled from the aura and the relay network, buffered for the next craft. */
     private int bufferedVis;
     /** Vis banked per primal, indexed as the assembler's primals are: a breakdown of
@@ -156,8 +161,8 @@ final class AssemblerVisPool {
     /** Restores the pool and its split from a saved tag, with the same repair a load does: a tag whose
      * split does not fit is one written before the bars were split, and is spread evenly. */
     void readNbt(CompoundTag tag) {
-        bufferedVis = tag.getInt("BufferedVis");
-        int[] savedAspects = tag.getIntArray("AspectVis");
+        bufferedVis = tag.getInt(TAG_BUFFERED_VIS);
+        int[] savedAspects = tag.getIntArray(TAG_ASPECT_VIS);
         if (savedAspects.length == aspectVis.length) {
             System.arraycopy(savedAspects, 0, aspectVis, 0, aspectVis.length);
             // A hand-edited tag must not leave six bars disagreeing with the pool.
@@ -169,13 +174,13 @@ final class AssemblerVisPool {
     }
 
     void writeNbt(CompoundTag tag) {
-        tag.putInt("BufferedVis", bufferedVis);
-        tag.putIntArray("AspectVis", aspectVis);
+        tag.putInt(TAG_BUFFERED_VIS, bufferedVis);
+        tag.putIntArray(TAG_ASPECT_VIS, aspectVis);
     }
 
     void readSync(CompoundTag tag) {
-        bufferedVis = tag.getInt("BufferedVis");
-        int[] syncedAspects = tag.getIntArray("AspectVis");
+        bufferedVis = tag.getInt(TAG_BUFFERED_VIS);
+        int[] syncedAspects = tag.getIntArray(TAG_ASPECT_VIS);
         if (syncedAspects.length == aspectVis.length) {
             System.arraycopy(syncedAspects, 0, aspectVis, 0, aspectVis.length);
         }

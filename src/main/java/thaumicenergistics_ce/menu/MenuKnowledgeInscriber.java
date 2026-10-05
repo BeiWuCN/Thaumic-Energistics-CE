@@ -101,9 +101,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
 
     public static final int DATA_HAS_CORE = 0;
     public static final int DATA_STATE = 1;
-    private static final int DATA_SIZE = 2;
 
-    private final int[] clientData = new int[DATA_SIZE];
     private final ContainerData data;
 
     public MenuKnowledgeInscriber(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
@@ -165,36 +163,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
 
         // 6. The button's inputs, reported to the client through the menu's data slots. Resolving a
         // recipe scans every recipe in the manager, so this is throttled to one recompute per tick.
-        this.data = new ContainerData() {
-            @Override
-            public int get(int index) {
-                if (inscriber == null) {
-                    return index >= 0 && index < clientData.length ? clientData[index] : 0;
-                }
-                return switch (index) {
-                    case DATA_HAS_CORE -> slotStack(IDX_CORE).is(ModItems.KNOWLEDGE_CORE.get()) ? 1 : 0;
-            // ACTIONABLE is storable, not permitted: research can gate it, so push Locked.
-            case DATA_STATE -> inscriber != null
-                            && inscriber.status() == BlockEntityKnowledgeInscriber.STATUS_ACTIONABLE
-                            && !inscriber.canStore(playerInventory.player)
-                    ? BlockEntityKnowledgeInscriber.STATUS_RESEARCH_LOCKED
-                    : inscriber.status();
-                    default -> 0;
-                };
-            }
-
-            @Override
-            public void set(int index, int value) {
-                if (index >= 0 && index < clientData.length) {
-                    clientData[index] = value;
-                }
-            }
-
-            @Override
-            public int getCount() {
-                return DATA_SIZE;
-            }
-        };
+        this.data = new KnowledgeInscriberReadings(inscriber, playerInventory.player,
+                () -> slotStack(IDX_CORE).is(ModItems.KNOWLEDGE_CORE.get()) ? 1 : 0);
         addDataSlots(data);
     }
 

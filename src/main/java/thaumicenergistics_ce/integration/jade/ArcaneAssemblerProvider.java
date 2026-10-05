@@ -31,7 +31,10 @@ public class ArcaneAssemblerProvider implements IServerDataProvider<BlockAccesso
     public static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "arcane_assembler");
 
-    /** Read back by the drawing half, so the wire format below is this class's own public contract. */
+    /** Read back by the drawing half, so the wire format below is this class's own public contract.
+     * Three of these names are also spelled by a tag the machine writes for itself
+     * ({@code AssemblerVisPool}, {@code AssemblerDisplaySync}, {@code AssemblerUpgrades}): the values
+     * agree and the documents are separate, so {@code SyncSelfTest} asserts they stay equal. */
     public static final String TAG_VIS = "BufferedVis";
     public static final String TAG_AURA = "AuraAround";
     /** Whole-percent vis discount from the installed gear. */

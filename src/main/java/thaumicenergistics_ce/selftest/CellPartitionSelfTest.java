@@ -3,7 +3,10 @@ package thaumicenergistics_ce.selftest;
 import appeng.api.config.Actionable;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.GenericStack;
+import appeng.api.storage.StorageCells;
 import appeng.api.storage.cells.StorageCell;
+import appeng.api.upgrades.IUpgradeInventory;
+import appeng.core.definitions.AEItems;
 import appeng.me.cells.BasicCellInventory;
 import appeng.menu.SlotSemantics;
 import appeng.menu.slot.AppEngSlot;
@@ -16,6 +19,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -86,6 +91,8 @@ public final class CellPartitionSelfTest {
         checkMarkReachedTheCell(bench, marked, failures);
         checkTheMarkSurvivesASave(bench, level, marked, failures);
         checkTheMarkFiltersTheCell(bench, marked, other, failures);
+        checkTheInverterCardFlipsTheGrid(level, marked, other, failures);
+        checkTheCardSlotTakesTheCard(level, failures);
         checkTheMenuCarriesTheGrid(level, bench, other, failures);
         checkOneMarkFillsOneWell(level, bench, marked, failures);
         checkTakingTheCellOutEmptiesTheWells(level, bench, failures);
@@ -281,6 +288,127 @@ public final class CellPartitionSelfTest {
         } catch (RuntimeException | LinkageError e) {
             failures.add("building the workbench menu threw " + e);
         }
+    }
+
+    /**
+     * The inverter card flips the grid from a whitelist to a blacklist, so the cell then takes everything
+     * the wells do not name. AE2 works that out in BasicCellInventory, from the card on the cell itself.
+     */
+    private static void checkTheInverterCardFlipsTheGrid(
+            ServerLevel level, AEssentiaKey marked, AEssentiaKey other, List<String> failures) {
+        BlockEntityEssentiaCellWorkbench bench = newWorkbench();
+        bench.setLevel(level);
+        bench.getInventory().setItem(0, new ItemStack(ModItems.ESSENTIA_CELL_1K.get()));
+        bench.getPartition().setStack(WELL, new GenericStack(marked, 1));
+        ItemStack card = new ItemStack(AEItems.INVERTER_CARD.get());
+        IUpgradeInventory upgrades = bench.getUpgrades();
+        if (!upgrades.isItemValid(0, card)) {
+            failures.add("the workbench refuses an inverter card in a cell's upgrade slot");
+            return;
+        }
+        upgrades.setItemDirect(0, card);
+        if (upgrades.getInstalledUpgrades(AEItems.INVERTER_CARD) != 1) {
+            failures.add("the card went into the cell's upgrade slot but the cell does not count it");
+            return;
+        }
+        // The drive's own entry point, not a shortcut: this is what mounts the cell when it is inserted.
+        StorageCell inventory = StorageCells.getCellInventory(bench.getCell(), null);
+        if (inventory == null) {
+            failures.add("AE2 did not build a cell inventory from the inverted cell");
+            return;
+        }
+        long refused = inventory.insert(marked, 100L, Actionable.MODULATE, source());
+        long allowed = inventory.insert(other, 100L, Actionable.MODULATE, source());
+        if (refused != 0L || allowed != 100L) {
+            failures.add("with an inverter card on the cell, the cell took " + allowed + " of " + other
+                    + " and " + refused + " of " + marked + " - expected 100 and 0");
+            return;
+        }
+        // The card travels with the cell: a second workbench sees it on a copy of the stack.
+        BlockEntityEssentiaCellWorkbench second = newWorkbench();
+        second.setLevel(level);
+        second.getInventory().setItem(0, bench.getCell().copy());
+        if (second.getUpgrades().getInstalledUpgrades(AEItems.INVERTER_CARD) != 1) {
+            failures.add("the inverter card did not travel with the cell out of the workbench");
+            return;
+        }
+        checkAMarkStillReachesTheCell(level, bench, other, failures);
+        checkAnInvertedCellWithNoMarks(level, marked);
+        ThELog.LOG.info(
+                "[cellpartition] the inverter card flips the grid: it refused the marked {} and took {}",
+                marked,
+                other);
+    }
+
+    /**
+     * The player's own way in: a click that carries an inverter card onto a card slot. A slot that
+     * refuses the card would leave the cell unable to wear one, which reads as the card doing nothing.
+     */
+    private static void checkTheCardSlotTakesTheCard(ServerLevel level, List<String> failures) {
+        BlockEntityEssentiaCellWorkbench bench = newWorkbench();
+        bench.setLevel(level);
+        bench.getInventory().setItem(0, new ItemStack(ModItems.ESSENTIA_CELL_1K.get()));
+        ItemStack card = new ItemStack(AEItems.INVERTER_CARD.get());
+        String where = "the click never happened";
+        try {
+            var player = FakePlayerFactory.getMinecraft(level);
+            MenuEssentiaCellWorkbench menu = new MenuEssentiaCellWorkbench(6, player.getInventory(), bench);
+            Slot slot = menu.getSlots(SlotSemantics.UPGRADE).get(0);
+            menu.setCarried(card);
+            menu.clicked(menu.slots.indexOf(slot), 0, ClickType.PICKUP, player);
+            where = "the card slot holds " + slot.getItem() + " and the cursor holds " + menu.getCarried();
+        } catch (RuntimeException | LinkageError e) {
+            failures.add("a click on the card slot threw " + e);
+            return;
+        }
+        if (bench.getUpgrades().getInstalledUpgrades(AEItems.INVERTER_CARD) != 1) {
+            failures.add("a click on the card slot did not put the card on the cell: " + where);
+            return;
+        }
+        ThELog.LOG.info("[cellpartition] a click on a card slot puts the inverter card on the cell");
+    }
+
+    /** With a card in, the wells still have to take a mark: one half of the report was that they did not. */
+    private static void checkAMarkStillReachesTheCell(
+            ServerLevel level, BlockEntityEssentiaCellWorkbench bench, AEssentiaKey aspect, List<String> failures) {
+        try {
+            var player = FakePlayerFactory.getMinecraft(level);
+            MenuEssentiaCellWorkbench menu = new MenuEssentiaCellWorkbench(5, player.getInventory(), bench);
+            if (!menu.isPartitionSlotEnabled(WELL)) {
+                failures.add("a cell wearing an inverter card leaves the wells disabled");
+                return;
+            }
+            menu.setPartitionWell(1, aspect.getId(), player);
+        } catch (RuntimeException | LinkageError e) {
+            failures.add("marking a well with an inverter card installed threw " + e);
+            return;
+        }
+        GenericStack throughTheMenu = cellPartition(bench, 1);
+        if (throughTheMenu == null || !aspect.equals(throughTheMenu.what())) {
+            failures.add("with an inverter card, a mark through the menu left well 1 holding "
+                    + describe(throughTheMenu));
+            return;
+        }
+        ThELog.LOG.info(
+                "[cellpartition] the wells still take a mark with a card in: well 1 = {}",
+                describe(throughTheMenu));
+    }
+
+    /**
+     * The other reading of the report, logged rather than asserted: an inverted cell with an empty grid.
+     * AE2's own cells answer this the same way, since the same constructor decides it for all of them.
+     */
+    private static void checkAnInvertedCellWithNoMarks(ServerLevel level, AEssentiaKey marked) {
+        BlockEntityEssentiaCellWorkbench bare = newWorkbench();
+        bare.setLevel(level);
+        bare.getInventory().setItem(0, new ItemStack(ModItems.ESSENTIA_CELL_1K.get()));
+        bare.getUpgrades().setItemDirect(0, new ItemStack(AEItems.INVERTER_CARD.get()));
+        StorageCell inventory = BasicCellInventory.createInventory(bare.getCell(), null);
+        long taken = inventory == null ? -1L : inventory.insert(marked, 100L, Actionable.MODULATE, source());
+        ThELog.LOG.info(
+                "[cellpartition] an inverted cell with no marks took {} of {} (AE2 decides this, not us)",
+                taken,
+                marked);
     }
 
     /** The cell's own config grid, as AE2 reads it: a mark has to be in there or a drive never sees it. */

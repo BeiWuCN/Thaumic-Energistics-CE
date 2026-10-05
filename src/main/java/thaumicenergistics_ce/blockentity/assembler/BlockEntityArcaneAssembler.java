@@ -43,7 +43,6 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
@@ -51,7 +50,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
@@ -113,13 +111,13 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                 // The card band: the slots the menu's four card wells point at.
                 return AEItems.SPEED_CARD.is(stack);
             }
+            if (AssemblerDisplaySync.isDisplaySlot(slot)) {
+                // The machine's own display: it takes nothing from a player.
+                return false;
+            }
             return switch (slot) {
                 case CORE_SLOT -> stack.is(ModItems.KNOWLEDGE_CORE.get());
-                // Both are the machine's own display and take nothing from a player.
-                case TARGET_SLOT -> false;
-                default -> slot >= PREVIEW_SLOT_START
-                        ? false
-                        : slot >= GEAR_SLOT_START && GearSlots.accepts(slot - GEAR_SLOT_START, stack);
+                default -> slot >= GEAR_SLOT_START && GearSlots.accepts(slot - GEAR_SLOT_START, stack);
             };
         }
 
@@ -225,10 +223,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         suppressNotify = true;
         try {
             for (int slot = 0; slot < SLOT_COUNT; slot++) {
-                boolean display = slot >= PATTERN_SLOT_START && slot < GEAR_SLOT_START
-                        || slot >= PREVIEW_SLOT_START && slot < UPGRADE_SLOT_START;
-                if (display) {
-                    // The machine's own display; none of it was ever the player's.
+                if (AssemblerDisplaySync.isMachineOwned(slot)) {
                     continue;
                 }
                 ItemStack stack = inventory.getItem(slot);
@@ -310,7 +305,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         craft.setCrafting(true);
         craft.setCraftPrice(craftCost(pattern));
         craft.setCraftCrystals(crystalStacksOf(pattern));
-        // Exactly as beginCraft puts it in; the round-trip check is worthless without it.
+        // As beginCraft leaves the target well - a copy of the product - but without the notify guard,
+        // so the container's listener runs: the round-trip check is worthless without it.
         this.inventory.setItem(TARGET_SLOT, pattern.result().copy());
         ThELog.LOG.info(
                 "[asmtest] vis target for {} ({} vis) is {}, with {} in the buffer",
@@ -786,17 +782,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         // Fixed now, not recomputed at completion, so a craft survives a save without the core: the
         // price and the crystals are handed over with the pattern.
         craft.begin(pattern, craftCost(pattern), crystalStacksOf(pattern));
-        suppressNotify = true;
-        try {
-            inventory.setItem(TARGET_SLOT, pattern.result().copy());
-            // The grid the GUI draws: written here, since the running craft exists only on the server.
-            for (int i = 0; i < PREVIEW_SLOT_COUNT; i++) {
-                ItemStack cell = i < pattern.grid().size() ? pattern.grid().get(i) : ItemStack.EMPTY;
-                inventory.setItem(PREVIEW_SLOT_START + i, cell.isEmpty() ? ItemStack.EMPTY : cell.copy());
-            }
-        } finally {
-            suppressNotify = false;
-        }
+        displaySync.refreshDisplaySlots(pattern.result().copy(), pattern.grid());
         setChanged();
         displaySync.markForUpdate();
         // Wake the grid: measured, a craft pushed while asleep ticked once a second rather than twenty.

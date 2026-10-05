@@ -15,9 +15,11 @@ import thaumicenergistics_ce.ThEIds;
  *   <li>{@code aspectId} travels by id, not as a key: a key the client built wrong could not be
  *       matched against server storage.
  *   <li>{@code where} names the container slot; {@code stack} is only a hint on the client side.
+ *   <li>{@code wholeStack} is the shift-click: fill the held stack, not one item of it.
  * </ul>
  */
-public record EssentiaFillPayload(int containerId, ResourceLocation aspectId, int where, ItemStack stack)
+public record EssentiaFillPayload(
+        int containerId, ResourceLocation aspectId, int where, ItemStack stack, boolean wholeStack)
         implements CustomPacketPayload {
 
     public static final Type<EssentiaFillPayload> TYPE =
@@ -33,6 +35,8 @@ public record EssentiaFillPayload(int containerId, ResourceLocation aspectId, in
                     EssentiaFillPayload::where,
                     ItemStack.OPTIONAL_STREAM_CODEC,
                     EssentiaFillPayload::stack,
+                    ByteBufCodecs.BOOL,
+                    EssentiaFillPayload::wholeStack,
                     EssentiaFillPayload::new);
 
     @Override
@@ -44,7 +48,7 @@ public record EssentiaFillPayload(int containerId, ResourceLocation aspectId, in
         // The stack field of this record is a client-side hint and is not read here.
         if (player.containerMenu instanceof EssentiaTerminalReceiver receiver
                 && receiver.containerId() == containerId) {
-            receiver.fillFromNetwork(player, where, aspectId);
+            receiver.fillFromNetwork(player, where, aspectId, wholeStack);
         }
     }
 }

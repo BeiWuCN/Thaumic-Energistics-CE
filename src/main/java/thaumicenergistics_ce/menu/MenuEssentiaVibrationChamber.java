@@ -1,7 +1,5 @@
 package thaumicenergistics_ce.menu;
 
-import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -12,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber.BurnState;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
+import thaumicenergistics_ce.blockentity.VibrationChamberSync;
 import thaumicenergistics_ce.init.ModMenuTypes;
 
 /**
@@ -31,24 +30,20 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
     private static final int HOTBAR_Y = 142;
     private static final int PITCH = 18;
 
-    // The readings, in the order the screen reads them out of ContainerData.
-    public static final int DATA_ESSENTIA = 0;
-    public static final int DATA_ESSENTIA_MAX = 1;
-    public static final int DATA_ENERGY = 2;
-    public static final int DATA_ENERGY_MAX = 3;
-    public static final int DATA_BURN = 4;
-    public static final int DATA_BURN_TOTAL = 5;
-    /** Power per tick, times ten: the reading has one decimal and ContainerData carries ints. */
-    public static final int DATA_AE_PER_TICK = 6;
-    public static final int DATA_ASPECT_COLOUR = 7;
-    public static final int DATA_STATE = 8;
-
-    private static final int DATA_COUNT = 9;
+    // The readings, in the order the screen reads them out of ContainerData. The numbers and their
+    // meanings live in VibrationChamberSync; these names stay because the screen reaches for them.
+    public static final int DATA_ESSENTIA = VibrationChamberSync.ESSENTIA;
+    public static final int DATA_ESSENTIA_MAX = VibrationChamberSync.ESSENTIA_MAX;
+    public static final int DATA_ENERGY = VibrationChamberSync.ENERGY;
+    public static final int DATA_ENERGY_MAX = VibrationChamberSync.ENERGY_MAX;
+    public static final int DATA_BURN = VibrationChamberSync.BURN;
+    public static final int DATA_BURN_TOTAL = VibrationChamberSync.BURN_TOTAL;
+    public static final int DATA_AE_PER_TICK = VibrationChamberSync.AE_PER_TICK;
+    public static final int DATA_ASPECT_COLOUR = VibrationChamberSync.ASPECT_COLOUR;
+    public static final int DATA_STATE = VibrationChamberSync.STATE;
 
     private final BlockEntityEssentiaVibrationChamber chamber;
     private final ContainerData data;
-
-    private final int[] readings = new int[DATA_COUNT];
 
     public MenuEssentiaVibrationChamber(int containerId, Inventory inventory, RegistryFriendlyByteBuf buf) {
         this(containerId, inventory, blockEntity(inventory, buf));
@@ -69,54 +64,8 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
             addSlot(new Slot(inventory, column, INV_X + column * PITCH, HOTBAR_Y));
         }
 
-        this.data = new ContainerData() {
-            /**
-             * The server reads the machine; the client reads what the server last sent it. A read-only
-             * {@code set} breaks it: a slot sync calls {@code set} on the client, and no bar ever fills.
-             */
-            @Override
-            public int get(int index) {
-                if (chamber == null
-                        || chamber.getLevel() == null
-                        || chamber.getLevel().isClientSide()) {
-                    return index >= 0 && index < readings.length ? readings[index] : 0;
-                }
-                return switch (index) {
-                    case DATA_ESSENTIA -> chamber == null ? 0 : chamber.getStoredEssentia();
-                    case DATA_ESSENTIA_MAX -> BlockEntityEssentiaVibrationChamber.MAX_ESSENTIA;
-                    case DATA_ENERGY -> chamber == null ? 0 : (int) Math.round(chamber.getStoredEnergy());
-                    case DATA_ENERGY_MAX -> (int) BlockEntityEssentiaVibrationChamber.MAX_ENERGY_STORAGE;
-                    case DATA_BURN -> chamber == null ? 0 : chamber.getBurnTicksRemaining();
-                    case DATA_BURN_TOTAL -> chamber == null ? 0 : chamber.getTotalBurnTicks();
-                    case DATA_AE_PER_TICK -> chamber == null ? 0 : (int) Math.round(chamber.getAePerTick() * 10.0);
-                    case DATA_ASPECT_COLOUR -> aspectColour(chamber);
-                    case DATA_STATE -> chamber == null ? BurnState.IDLE.ordinal() : chamber.getBurnState().ordinal();
-                    default -> 0;
-                };
-            }
-
-            @Override
-            public void set(int index, int value) {
-                // What the server sent, kept for get to hand back on the client. See the note there.
-                if (index >= 0 && index < readings.length) {
-                    readings[index] = value;
-                }
-            }
-
-            @Override
-            public int getCount() {
-                return DATA_COUNT;
-            }
-        };
+        this.data = new VibrationChamberReadings(chamber);
         addDataSlots(data);
-    }
-
-    private static int aspectColour(BlockEntityEssentiaVibrationChamber chamber) {
-        if (chamber == null) {
-            return 0;
-        }
-        Holder<IAspect> aspect = chamber.currentAspectHolder();
-        return aspect == null ? 0 : aspect.value().color() | 0xFF000000;
     }
 
     @Nullable

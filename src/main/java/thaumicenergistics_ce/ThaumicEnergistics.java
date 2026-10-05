@@ -59,6 +59,7 @@ import thaumicenergistics_ce.selftest.InscriberSelfTest;
 import thaumicenergistics_ce.selftest.MenuSelfTest;
 import thaumicenergistics_ce.selftest.NetworkSelfTest;
 import thaumicenergistics_ce.selftest.ResearchSelfTest;
+import thaumicenergistics_ce.selftest.SyncSelfTest;
 import thaumicenergistics_ce.selftest.VisRelaySelfTest;
 import thaumicenergistics_ce.util.ThELog;
 
@@ -138,6 +139,9 @@ public final class ThaumicEnergistics {
         // The payload codecs: a field dropped while the records moved packages compiles and only shows
         // up as a client drawing something the server never sent.
         NeoForge.EVENT_BUS.addListener(NetworkSelfTest::run);
+        // Every synced number, in and out: the save tag, the packet, the menu reading table. A figure
+        // that goes out and comes back changed shows up nowhere else until a player reads it.
+        NeoForge.EVENT_BUS.addListener(SyncSelfTest::run);
     }
 
     /**

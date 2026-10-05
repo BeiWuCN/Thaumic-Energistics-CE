@@ -95,7 +95,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
     private int mirroredCore = -1;
     private int sampledCore = -1;
     private long coreSignatureTick = Long.MIN_VALUE;
-    private final int[] clientData = new int[DATA_SIZE];
     private final ContainerData data;
 
     /**
@@ -240,46 +239,8 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
                     previewY + (i / 3) * 18));
         }
 
-        this.data = new ContainerData() {
-            @Override
-            public int get(int index) {
-                if (assembler == null) {
-                    return index >= 0 && index < clientData.length ? clientData[index] : 0;
-                }
-                // Two separate numbers rather than a percentage, so the ratio stays right when speed cards
-                // shorten the craft.
-                return switch (index) {
-                    // Four-unit steps: broadcastChanges sends a value only when it changed, and a vis column
-                    // is drawn far coarser than one vis. The tick count is not throttled.
-                    case DATA_BUFFERED_VIS -> (assembler.getBufferedVis() / 4) * 4;
-                    case DATA_ASPECT_AIR -> aspectForSlot(index);
-                    case DATA_ASPECT_WATER -> aspectForSlot(index);
-                    case DATA_ASPECT_FIRE -> aspectForSlot(index);
-                    case DATA_ASPECT_ORDER -> aspectForSlot(index);
-                    case DATA_ASPECT_ENTROPY -> aspectForSlot(index);
-                    case DATA_ASPECT_EARTH -> aspectForSlot(index);
-                    case DATA_CRAFTING -> assembler.isCrafting() ? 1 : 0;
-                    // Quantised like the vis pool: the bar interpolates, and a value that changes every tick
-                    // is twenty packets a second to say what four do.
-                    case DATA_CRAFT_TICK -> (assembler.getCraftTicks() / 4) * 4;
-                    case DATA_TICKS_PER_CRAFT -> assembler.getTicksPerCraft();
-                    case DATA_GEAR_DISCOUNT -> assembler.upgrades().getGearDiscount();
-                    default -> 0;
-                };
-            }
-
-            @Override
-            public void set(int index, int value) {
-                if (index >= 0 && index < clientData.length) {
-                    clientData[index] = value;
-                }
-            }
-
-            @Override
-            public int getCount() {
-                return DATA_SIZE;
-            }
-        };
+        // Who reads the numbers lives in ArcaneAssemblerReadings; the bar order stays here, with the aspects.
+        this.data = new ArcaneAssemblerReadings(assembler, this::aspectForSlot);
         addDataSlots(data);
     }
 

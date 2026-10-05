@@ -78,6 +78,14 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
         }
 
         @Override
+        public int getSlotLimit(int slot) {
+            // A card slot takes its stack size from the inventory, and the interface's own default is 99,
+            // so without this one slot swallows a whole stack of cards. One card per slot, as AE2's own.
+            IUpgradeInventory cell = upgradesOfCell();
+            return slot < cell.size() ? cell.getSlotLimit(slot) : 1;
+        }
+
+        @Override
         public void setItemDirect(int slot, ItemStack stack) {
             IUpgradeInventory cell = upgradesOfCell();
             if (slot >= cell.size()) {
@@ -140,7 +148,6 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
     public boolean hasCell() {
         return getCell().getItem() instanceof ItemEssentiaCell;
     }
-
 
     private void loadPartitionFromCell() {
         syncing = true;

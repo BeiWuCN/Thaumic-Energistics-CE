@@ -32,7 +32,7 @@ public class MenuEssentiaTerminal extends MEStorageMenu implements EssentiaTermi
     }
 
     @Override
-    public boolean fillFromNetwork(Player player, int where, ResourceLocation aspectId) {
+    public boolean fillFromNetwork(Player player, int where, ResourceLocation aspectId, boolean wholeStack) {
         if (isClientSide()) {
             return false;
         }
@@ -40,8 +40,21 @@ public class MenuEssentiaTerminal extends MEStorageMenu implements EssentiaTermi
         if (container == null || !EssentiaFillHelper.isSupportedContainer(container)) {
             return false;
         }
-        boolean moved = EssentiaFillHelper.fillFromNetwork(
-                player.level(), storage, energySource, getActionSource(), player, container, aspectId);
+        // One turn spends one item of the held stack and hands back a filled one, so the whole-stack click is
+        // the same turn repeated: it stops at the first refusal, which is what "as far as the network pays"
+        // means, and at the last item of the stack.
+        int turns = wholeStack ? container.getCount() : 1;
+        boolean moved = false;
+        for (int turn = 0; turn < turns; turn++) {
+            if (!EssentiaFillHelper.isContainerEmpty(container)) {
+                break;
+            }
+            if (!EssentiaFillHelper.fillFromNetwork(
+                    player.level(), storage, energySource, getActionSource(), player, container, aspectId)) {
+                break;
+            }
+            moved = true;
+        }
         if (moved) {
             // A filled container is replaced by another stack, so the client's copy of both places is stale.
             broadcastChanges();

@@ -28,6 +28,7 @@ import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 import thaumicenergistics_ce.client.render.ArcaneAssemblerRenderer;
 import thaumicenergistics_ce.client.render.EssentiaKeyRenderHandler;
 import thaumicenergistics_ce.client.render.MonitorBubbleRenderer;
+import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
@@ -101,9 +102,9 @@ public final class ClientSetup {
     public static void registerRenderers(
             EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(
-                thaumicenergistics_ce.init.ModBlockEntities.INFUSION_MONITOR.get(), MonitorBubbleRenderer::new);
+                ModBlockEntities.INFUSION_MONITOR.get(), MonitorBubbleRenderer::new);
         event.registerBlockEntityRenderer(
-                thaumicenergistics_ce.init.ModBlockEntities.ARCANE_ASSEMBLER.get(),
+                ModBlockEntities.ARCANE_ASSEMBLER.get(),
                 ArcaneAssemblerRenderer::new);
     }
 

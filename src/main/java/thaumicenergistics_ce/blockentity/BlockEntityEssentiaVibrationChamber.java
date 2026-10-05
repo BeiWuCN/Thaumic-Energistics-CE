@@ -587,34 +587,24 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     @Override
     protected void writeToStream(RegistryFriendlyByteBuf data) {
         super.writeToStream(data);
-        data.writeByte(burnState.ordinal());
-        data.writeDouble(aePerTick);
-        data.writeVarInt(storedEssentia);
-        ResourceLocation aspect = getCurrentAspect();
-        data.writeBoolean(aspect != null);
-        if (aspect != null) {
-            data.writeResourceLocation(aspect);
-        }
+        VibrationChamberSync.writeStream(data, this);
     }
 
     @Override
     protected boolean readFromStream(RegistryFriendlyByteBuf data) {
         boolean changed = super.readFromStream(data);
-        BurnState state = BurnState.byOrdinal(data.readByte());
-        double rate = data.readDouble();
-        int essentia = data.readVarInt();
-        ResourceLocation aspect = data.readBoolean() ? data.readResourceLocation() : null;
-
-        changed |= burnState != state
-                || aePerTick != rate
-                || storedEssentia != essentia
-                || !Objects.equals(getCurrentAspect(), aspect);
-        burnState = state;
-        aePerTick = rate;
-        storedEssentia = essentia;
-        currentAspect = aspect == null
+        VibrationChamberSync.Streamed streamed = VibrationChamberSync.readStream(data);
+        changed |= burnState != streamed.state()
+                || aePerTick != streamed.aePerTick()
+                || storedEssentia != streamed.essentia()
+                || !Objects.equals(getCurrentAspect(), streamed.aspect());
+        burnState = streamed.state();
+        aePerTick = streamed.aePerTick();
+        storedEssentia = streamed.essentia();
+        currentAspect = streamed.aspect() == null
                 ? null
-                : Aspects.resolve(data.registryAccess(), ResourceKey.create(IAspect.REGISTRY_KEY, aspect));
+                : Aspects.resolve(data.registryAccess(),
+                        ResourceKey.create(IAspect.REGISTRY_KEY, streamed.aspect()));
         return changed;
     }
 
@@ -623,35 +613,26 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     @Override
     public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        tag.putInt("StoredEssentia", storedEssentia);
-        tag.putInt("BurnTicksRemaining", burnTicksRemaining);
-        tag.putInt("TotalBurnTicks", totalBurnTicks);
-        tag.putDouble("AePerTick", aePerTick);
-        tag.putDouble("StoredEnergy", storedEnergy);
-        ResourceLocation id = getCurrentAspect();
-        if (id != null) {
-            tag.putString("CurrentAspect", id.toString());
-        }
+        VibrationChamberSync.writePersistent(tag, this);
     }
 
     @Override
     public void loadTag(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadTag(tag, registries);
-        storedEssentia = Math.clamp(tag.getInt("StoredEssentia"), 0, MAX_ESSENTIA);
-        burnTicksRemaining = tag.getInt("BurnTicksRemaining");
-        totalBurnTicks = tag.getInt("TotalBurnTicks");
-        aePerTick = tag.getDouble("AePerTick");
-        storedEnergy = Math.min(tag.getDouble("StoredEnergy"), MAX_ENERGY_STORAGE);
+        VibrationChamberSync.Persisted persisted = VibrationChamberSync.readPersistent(tag);
+        storedEssentia = persisted.essentia();
+        burnTicksRemaining = persisted.burnTicksRemaining();
+        totalBurnTicks = persisted.totalBurnTicks();
+        aePerTick = persisted.aePerTick();
+        storedEnergy = persisted.storedEnergy();
         // Read off the slot, not saved with it: a tag carrying both could carry them disagreeing.
         burnState = MAX_ENERGY_STORAGE - storedEnergy <= FULL_MARGIN
                 ? BurnState.PAUSED_FULL
                 : BurnState.IDLE;
         currentAspect = null;
-        if (tag.contains("CurrentAspect")) {
-            ResourceLocation id = ResourceLocation.tryParse(tag.getString("CurrentAspect"));
-            if (id != null) {
-                currentAspect = Aspects.resolve(registries, ResourceKey.create(IAspect.REGISTRY_KEY, id));
-            }
+        if (persisted.aspect() != null) {
+            currentAspect = Aspects.resolve(
+                    registries, ResourceKey.create(IAspect.REGISTRY_KEY, persisted.aspect()));
         }
     }
 

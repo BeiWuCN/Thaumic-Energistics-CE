@@ -5,11 +5,8 @@ import appeng.api.stacks.GenericStack;
 import java.util.List;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
+import thaumicenergistics_ce.blockentity.ClientSyncSend;
 import thaumicenergistics_ce.util.ThELog;
 
 /** The assembler's display and its network sync, split out of {@link BlockEntityArcaneAssembler}: what
@@ -22,6 +19,12 @@ final class AssemblerDisplaySync {
     /** Throttle on the per-tick display pushes; walking a craft's progress one packet per tick is not
      * worth it, and the machine still reads as live at this rate. */
     private static final int UPDATE_INTERVAL = 4;
+
+    /** The wire names. The first is spelled the same way by the Jade payload
+     * ({@code ArcaneAssemblerProvider.TAG_DISCOUNT}); the sync self-test holds the two equal. */
+    private static final String TAG_GEAR_DISCOUNT = "GearDiscount";
+    /** The product the renderer previews: sent on a slower clock, so an absent key means "unchanged". */
+    private static final String TAG_PREVIEW = "Preview";
 
     private final BlockEntityArcaneAssembler owner;
 
@@ -48,9 +51,9 @@ final class AssemblerDisplaySync {
     void writeSync(CompoundTag tag, HolderLookup.Provider registries) {
         owner.craft.writeSync(tag);
         owner.vis.writeNbt(tag);
-        tag.putInt("GearDiscount", owner.upgrades().gearDiscount());
+        tag.putInt(TAG_GEAR_DISCOUNT, owner.upgrades().gearDiscount());
         if (!owner.craft.isCrafting() || owner.craft.craftTicks() == 0 || owner.craft.craftTicks() % 100 == 0) {
-            tag.put("Preview", owner.inventory.getItem(BlockEntityArcaneAssembler.TARGET_SLOT).saveOptional(registries));
+            tag.put(TAG_PREVIEW, owner.inventory.getItem(BlockEntityArcaneAssembler.TARGET_SLOT).saveOptional(registries));
         }
     }
 
@@ -61,10 +64,10 @@ final class AssemblerDisplaySync {
         try {
             owner.craft.readSync(tag);
             owner.vis.readSync(tag);
-            owner.upgrades().setGearDiscount(tag.getInt("GearDiscount"));
+            owner.upgrades().setGearDiscount(tag.getInt(TAG_GEAR_DISCOUNT));
             // A display: an absent key means "unchanged", the product going out on a slower clock.
-            if (tag.contains("Preview")) {
-                previewStack = ItemStack.parseOptional(registries, tag.getCompound("Preview"));
+            if (tag.contains(TAG_PREVIEW)) {
+                previewStack = ItemStack.parseOptional(registries, tag.getCompound(TAG_PREVIEW));
             }
         } finally {
             owner.suppressNotify = false;
@@ -95,6 +98,46 @@ final class AssemblerDisplaySync {
         if (report && hadAnything) {
             ThELog.LOG.info(
                     "[assembler] at {} cleared a leftover craft display: nothing is crafting", owner.blockPos());
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Display bands
+    // ------------------------------------------------------------------
+
+    /** The bands the machine writes for itself: the pattern mirror, the target well and the preview
+     * grid. None of it was ever a player's item - they hold copies - so none of it is dropped. */
+    static boolean isMachineOwned(int slot) {
+        return slot >= BlockEntityArcaneAssembler.PATTERN_SLOT_START
+                        && slot < BlockEntityArcaneAssembler.GEAR_SLOT_START
+                || slot >= BlockEntityArcaneAssembler.PREVIEW_SLOT_START
+                        && slot < BlockEntityArcaneAssembler.UPGRADE_SLOT_START;
+    }
+
+    /** The part of that display a player may never put an item into: the target well and the preview
+     * grid, both of which the machine overwrites from the running craft. */
+    static boolean isDisplaySlot(int slot) {
+        return slot == BlockEntityArcaneAssembler.TARGET_SLOT
+                || slot >= BlockEntityArcaneAssembler.PREVIEW_SLOT_START
+                        && slot < BlockEntityArcaneAssembler.UPGRADE_SLOT_START;
+    }
+
+    /** Writes the running craft's display - the product into the target well, the 3x3 into the preview
+     * grid - behind the notify guard: without it the container's listener takes every write for a
+     * player changing the machine, and rebuilds the pattern list off the core each time. The grid
+     * exists here, on the server, since the running craft does; the client is sent a copy. */
+    void refreshDisplaySlots(ItemStack target, List<ItemStack> grid) {
+        owner.suppressNotify = true;
+        try {
+            owner.inventory.setItem(BlockEntityArcaneAssembler.TARGET_SLOT, target);
+            for (int i = 0; i < BlockEntityArcaneAssembler.PREVIEW_SLOT_COUNT; i++) {
+                ItemStack cell = i < grid.size() ? grid.get(i) : ItemStack.EMPTY;
+                owner.inventory.setItem(
+                        BlockEntityArcaneAssembler.PREVIEW_SLOT_START + i,
+                        cell.isEmpty() ? ItemStack.EMPTY : cell.copy());
+            }
+        } finally {
+            owner.suppressNotify = false;
         }
     }
 
@@ -142,14 +185,6 @@ final class AssemblerDisplaySync {
             return;
         }
         owner.setChanged();
-        if (!(owner.level() instanceof ServerLevel server)) {
-            return;
-        }
-        // Only the players watching this chunk, and one packet built once for all of them.
-        ClientboundBlockEntityDataPacket packet = ClientboundBlockEntityDataPacket.create(owner);
-        for (ServerPlayer player :
-                server.getChunkSource().chunkMap.getPlayers(new ChunkPos(owner.blockPos()), false)) {
-            player.connection.send(packet);
-        }
+        ClientSyncSend.sendBlockEntityUpdate(owner);
     }
 }

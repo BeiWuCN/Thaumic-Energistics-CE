@@ -28,7 +28,10 @@ public class InfusionMonitorProvider implements IServerDataProvider<BlockAccesso
     public static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "infusion_monitor");
 
-    /** Whether the monitor has its book and an altar - without both it says nothing about risk. */
+    /** Whether the monitor has its book and an altar - without both it says nothing about risk.
+     * The bubble the machine syncs to its own renderer spells this word too
+     * ({@code InfusionMonitorSync.TAG_REPORTING}); the two are separate documents, so
+     * {@code SyncSelfTest} asserts they stay equal. */
     public static final String TAG_REPORTING = "Reporting";
     public static final String TAG_FOUND_ALTAR = "FoundAltar";
     /** Whether an altar search has run since the monitor's node was last active. "No altar" is a fact

@@ -3,6 +3,7 @@ package thaumicenergistics_ce.menu;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
 import appeng.api.upgrades.IUpgradeInventory;
+import appeng.api.upgrades.Upgrades;
 import appeng.menu.SlotSemantics;
 import appeng.menu.implementations.UpgradeableMenu;
 import appeng.menu.slot.CellPartitionSlot;
@@ -11,6 +12,8 @@ import appeng.menu.slot.RestrictedInputSlot;
 import appeng.util.ConfigMenuInventory;
 import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -47,8 +50,6 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
     /** Client action: empty every well. */
     private static final String ACTION_CLEAR = "clear";
 
-    private static final int PLAYER_SLOTS = 36;
-
     // The cell sits top right, where the art draws it; the wells and the inventory are the style's job.
     private static final int CELL_X = 152;
     private static final int CELL_Y = 8;
@@ -57,7 +58,15 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
 
     private ConfigMenuInventory partition;
 
+    // The player side, first slot and one past its last: a shift-click moves into that range.
     private final int playerSlotStart;
+
+    private final int playerSlotEnd;
+
+    // The card slots, same convention: a card shift-clicked in the inventory goes into that range.
+    private final int cardSlotStart;
+
+    private final int cardSlotEnd;
 
     // The wells ask this menu whether they are enabled, so the slot is kept; setupInventorySlots sets it.
     private Slot cellSlot;
@@ -72,9 +81,34 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         // AE2's base calls the three setup methods from its own constructor, so they read the host.
         super(ModMenuTypes.ESSENTIA_CELL_WORKBENCH.get(), containerId, playerInventory, host(workbench));
         this.workbench = getHost();
-        this.playerSlotStart = slots.indexOf(getSlots(SlotSemantics.PLAYER_INVENTORY).get(0));
+        // AE2 files the hotbar under its own semantic and adds it before the main inventory, so the first
+        // PLAYER_INVENTORY slot sits nine slots into the player side rather than at its start. Reading both
+        // groups is what keeps a shift-click from reaching past the end of the slot list.
+        List<Slot> playerSide = new ArrayList<>(getSlots(SlotSemantics.PLAYER_HOTBAR));
+        playerSide.addAll(getSlots(SlotSemantics.PLAYER_INVENTORY));
+        int[] playerRange = slotRange(playerSide);
+        this.playerSlotStart = playerRange[0];
+        this.playerSlotEnd = playerRange[1];
+        int[] cardRange = slotRange(getSlots(SlotSemantics.UPGRADE));
+        this.cardSlotStart = cardRange[0];
+        this.cardSlotEnd = cardRange[1];
         registerClientAction(ACTION_PARTITION, this::partitionToContents);
         registerClientAction(ACTION_CLEAR, this::clearPartition);
+    }
+
+    /**
+     * A group of slots as the one range {@code moveItemStackTo} wants: the lowest index it holds and one
+     * past the highest. An empty group becomes an empty range at the end of the list, so a move into it
+     * finds nothing and reports failure instead of walking off.
+     */
+    private int[] slotRange(List<Slot> group) {
+        int start = Integer.MAX_VALUE;
+        int end = 0;
+        for (Slot slot : group) {
+            start = Math.min(start, slot.index);
+            end = Math.max(end, slot.index + 1);
+        }
+        return end == 0 ? new int[] {slots.size(), slots.size()} : new int[] {start, end};
     }
 
     @Override
@@ -83,6 +117,12 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return stack.getItem() instanceof ItemEssentiaCell;
+            }
+
+            @Override
+            public int getMaxStackSize() {
+                // One cell per slot: a cell carries its contents in its own stack, so a pile would share one.
+                return 1;
             }
         };
         this.cellSlot = cell;
@@ -274,19 +314,28 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         Slot cellSlot = getSlots(SlotSemantics.STORAGE_CELL).get(0);
 
         if (slot == cellSlot) {
-            if (!moveItemStackTo(stack, playerSlotStart, playerSlotStart + PLAYER_SLOTS, true)) {
+            if (!moveItemStackTo(stack, playerSlotStart, playerSlotEnd, true)) {
                 return ItemStack.EMPTY;
             }
         } else if (index >= playerSlotStart) {
             if (stack.getItem() instanceof ItemEssentiaCell && !cellSlot.hasItem()) {
-                if (!moveItemStackTo(stack, slot.index, slot.index + 1, false)) {
+                // The destination is the cell slot, not the clicked one: handing moveItemStackTo the clicked
+                // slot's own range made it merge the stack into itself, which doubled a single cell and moved
+                // nothing. The range has to name where the stack is going.
+                if (!moveItemStackTo(stack, cellSlot.index, cellSlot.index + 1, false)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (hasCellInMenu() && Upgrades.isUpgradeCardItem(stack)) {
+                // A card rides on the cell, so there is nowhere to put one without it. Which cards the cell
+                // takes is the cell's own upgrade inventory's call, asked through the slots' mayPlace.
+                if (!moveItemStackTo(stack, cardSlotStart, cardSlotEnd, false)) {
                     return ItemStack.EMPTY;
                 }
             } else {
                 return ItemStack.EMPTY;
             }
         } else if (getSlots(SlotSemantics.UPGRADE).contains(slot)) {
-            if (!moveItemStackTo(stack, playerSlotStart, playerSlotStart + PLAYER_SLOTS, true)) {
+            if (!moveItemStackTo(stack, playerSlotStart, playerSlotEnd, true)) {
                 return ItemStack.EMPTY;
             }
         } else {

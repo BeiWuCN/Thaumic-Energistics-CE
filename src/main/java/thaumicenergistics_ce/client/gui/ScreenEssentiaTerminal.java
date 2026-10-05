@@ -21,7 +21,8 @@ import thaumicenergistics_ce.util.ThELog;
  * The Essentia Terminal's screen: AE2's terminal wholesale, plus two gestures of its own.
  * <ul>
  *   <li>Right-click with a filled jar or phial empties it into the network, left-click an entry with
- *       an empty one draws that aspect out, shift-right-click empties a container where it lies.
+ *       an empty one draws that aspect out, shift-left-click draws it out for the whole held stack,
+ *       shift-right-click empties a container where it lies.
  *   <li>A held container is never inserted: AE2's entry click means <em>insert the cursor</em>.
  * </ul>
  */
@@ -96,12 +97,13 @@ public class ScreenEssentiaTerminal extends MEStorageScreen<MenuEssentiaTerminal
                         + " cannot be drawn from here", entry.getWhat().getId(),
                         entry.getWhat().getClass().getSimpleName());
             }
-            if (!hasShiftDown()
-                    && EssentiaFillHelper.isContainerEmpty(container)
-                    && entry != null
-                    && entry.getWhat() instanceof AEssentiaKey key) {
-                PacketDistributor.sendToServer(
-                        new EssentiaFillPayload(menu.containerId, key.getId(), whereHeld(), container));
+            if (entry != null
+                    && entry.getWhat() instanceof AEssentiaKey key
+                    && EssentiaFillHelper.isContainerEmpty(container)) {
+                // Shift turns the same click into "the whole held stack": filled as far as the network pays
+                // for, with the ones it could not cover left where they are.
+                PacketDistributor.sendToServer(new EssentiaFillPayload(
+                        menu.containerId, key.getId(), whereHeld(), container, hasShiftDown()));
                 return true;
             }
             // Still a grid entry: AE2 would insert what the cursor holds, one item per click. A jar or

@@ -47,6 +47,12 @@ public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaC
                 continue;
             }
             Slot slot = menu.slots.get(menu.partitionSlotIndex(well));
+            // A disabled well is not active, so AE2 never takes it for the slot under the mouse and never
+            // highlights it: the box is drawn here in its place, so the grey goes where the pointer is.
+            if (isHovering(slot, mouseX, mouseY)) {
+                renderSlotHighlight(graphics, slot, mouseX, mouseY, partialTick);
+                continue;
+            }
             Icon.SLOT_BACKGROUND.getBlitter()
                     .dest(slot.x - 1, slot.y - 1)
                     .color(WELL_DISABLED_TINT, WELL_DISABLED_TINT, WELL_DISABLED_TINT, 1.0f)
