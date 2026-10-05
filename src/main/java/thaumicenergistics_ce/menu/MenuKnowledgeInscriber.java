@@ -9,7 +9,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -23,7 +22,6 @@ import thaumicenergistics_ce.menu.slot.GhostGridSlot;
 import thaumicenergistics_ce.menu.slot.MachineGridSlot;
 import thaumicenergistics_ce.menu.slot.ReadOnlySlot;
 import thaumicenergistics_ce.net.KnowledgeInscriberReceiver;
-import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The Knowledge Inscriber's menu: the core slot, the 7x3 read-only grid of patterns, the player's
@@ -53,9 +51,14 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
     private static final int CRAFT_SIZE = 9;
 
     private static final int PLAYER_SLOTS = 36;
-    private static final int IDX_CORE = PLAYER_SLOTS;
+
+    /** Package-private for the readout and the preview, which both ask what the core slot holds. */
+    static final int IDX_CORE = PLAYER_SLOTS;
+
     private static final int IDX_PATTERN_START = IDX_CORE + 1;
-    private static final int IDX_CRAFT_START = IDX_PATTERN_START + PATTERN_COUNT;
+
+    /** Package-private for the grid state, whose window into the slots is the 3x3 recipe grid. */
+    static final int IDX_CRAFT_START = IDX_PATTERN_START + PATTERN_COUNT;
 
     /** The menu-button packet carries only an id, so the delete flag rides in it. */
     @Override
@@ -74,33 +77,22 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
         return IDX_CRAFT_START + cell;
     }
 
-    private final @Nullable BlockEntityKnowledgeInscriber inscriber;
+    /** Package-private for the readout, whose core check runs on the side the machine is present. */
+    final @Nullable BlockEntityKnowledgeInscriber inscriber;
 
-    private final Container machine;
+    /** Package-private for the grid state, which writes a whole recipe into it in one pass. */
+    final Container machine;
 
-    private final Inventory playerInventory;
+    final Inventory playerInventory;
 
-    private final SimpleContainer previewResult = new SimpleContainer(1);
+    private final InscriberGridState grid;
 
-    private final SimpleContainer mirrorDisplay =
-            new SimpleContainer(BlockEntityKnowledgeInscriber.MIRROR_SLOT_COUNT);
+    private final InscriberPreview preview;
 
-    private int mirroredCore = -1;
-
-    private int sampledCore = -1;
-    private long coreSignatureTick = Long.MIN_VALUE;
-
-    private int previewedSignature = -1;
-
-    private int sampledGrid = -1;
-    private long gridSignatureTick = Long.MIN_VALUE;
-
-    private final List<ItemStack> gridScratch = new ArrayList<>(CRAFT_SIZE);
+    private final InscriberMenuReadout readout;
 
     public static final int DATA_HAS_CORE = 0;
     public static final int DATA_STATE = 1;
-
-    private final ContainerData data;
 
     public MenuKnowledgeInscriber(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
         this(containerId, playerInventory, (BlockEntityKnowledgeInscriber) null);
@@ -117,6 +109,9 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
                 ? new SimpleContainer(BlockEntityKnowledgeInscriber.SLOT_COUNT)
                 : inscriber.getInventory();
         this.machine = machine;
+
+        this.grid = new InscriberGridState(this);
+        this.preview = new InscriberPreview(this, grid);
 
         // 1. Player inventory, three rows then the hotbar.
         for (int row = 0; row < 3; row++) {
@@ -139,7 +134,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
         // 3. The core's stored patterns, read-only, derived from the core item - see refreshMirrors.
         for (int i = 0; i < PATTERN_COUNT; i++) {
             addSlot(new ReadOnlySlot(
-                    inscriber == null ? mirrorDisplay : machine,
+                    inscriber == null ? preview.mirrors() : machine,
                     inscriber == null ? i : BlockEntityKnowledgeInscriber.MIRROR_SLOT_START + i,
                     FB_PATTERN_X + (i % PATTERN_COLS) * PITCH,
                     FB_PATTERN_Y + (i / PATTERN_COLS) * PITCH));
@@ -162,13 +157,12 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
 
         // 5. The result well. The machine's own container, so vanilla syncs what the server resolved;
         // the client resolving for itself drew nothing. Only this well, not the player's input grid.
-        addSlot(new ReadOnlySlot(previewResult, 0, FB_RESULT_X, FB_RESULT_Y));
+        addSlot(new ReadOnlySlot(preview.well(), 0, FB_RESULT_X, FB_RESULT_Y));
 
         // 6. The button's inputs, reported to the client through the menu's data slots. Resolving a
         // recipe scans every recipe in the manager, so this is throttled to one recompute per tick.
-        this.data = new KnowledgeInscriberReadings(inscriber, playerInventory.player,
-                () -> slotStack(IDX_CORE).is(ModItems.KNOWLEDGE_CORE.get()) ? 1 : 0);
-        addDataSlots(data);
+        this.readout = new InscriberMenuReadout(this, playerInventory);
+        addDataSlots(readout.data());
     }
 
     /**
@@ -181,52 +175,16 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
             int cell = slotId - IDX_CRAFT_START;
             if (cell >= 0 && cell < CRAFT_SIZE && clickType == ClickType.PICKUP) {
                 ItemStack carried = getCarried();
-                setGridCell(cell, carried.isEmpty() ? ItemStack.EMPTY : carried.copyWithCount(1));
+                grid.setCell(cell, carried.isEmpty() ? ItemStack.EMPTY : carried.copyWithCount(1));
                 return;
             }
             int pattern = slotId - IDX_PATTERN_START;
             if (pattern >= 0 && pattern < PATTERN_COUNT) {
-                loadStoredPattern(pattern);
+                grid.loadPattern(pattern);
                 return;
             }
         }
         super.clicked(slotId, dragType, clickType, player);
-    }
-
-    /**
-     * Reads a stored pattern back onto the grid: the button acts there, so this is also the delete path.
-     * The tail is cleared because a shapeless recipe's stored grid is a compact ingredient list.
-     */
-    private void loadStoredPattern(int index) {
-        List<ItemStack> cells = storedGrid(index);
-        if (cells == null) {
-            // Names the well asked for, so an empty well is distinguishable from the wrong one.
-            ThELog.LOG.info("[inscriber] pattern well {} holds nothing to load", index);
-            return;
-        }
-        ThELog.LOG.info(
-                "[inscriber] loading pattern well {} -> {} ({} cells)",
-                index,
-                cells.isEmpty() ? "empty grid" : cells.getFirst(),
-                cells.size());
-        // One replacement, so the grid never holds a mixture of the old recipe and the new.
-        fillGridFromRecipe(cells);
-    }
-
-    /**
-     * The grid of the stored pattern in a well, or {@code null} when it is empty. Read from the core by
-     * position: the well's own slots are never filled, so they were stale.
-     */
-    private @Nullable List<ItemStack> storedGrid(int index) {
-        if (index < 0) {
-            return null;
-        }
-        HandlerKnowledgeCore core = handler();
-        if (core == null) {
-            return null;
-        }
-        List<ThEArcanePattern> patterns = core.patterns();
-        return index < patterns.size() ? patterns.get(index).grid() : null;
     }
 
     @Override
@@ -237,14 +195,6 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
     @Override
     public int gridSlotCount() {
         return BlockEntityKnowledgeInscriber.GRID_SLOT_COUNT;
-    }
-
-    private void setGridCell(int cell, ItemStack stack) {
-        if (inscriber != null) {
-            inscriber.setGridCell(cell, stack);
-            return;
-        }
-        slots.get(IDX_CRAFT_START + cell).set(stack);
     }
 
     /**
@@ -304,44 +254,16 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
      * payload per cell made the server re-resolve against a grid that was half the old recipe.
      */
     public void fillGridFromRecipe(List<ItemStack> cells) {
-        List<ItemStack> full = new ArrayList<>(CRAFT_SIZE);
-        for (int cell = 0; cell < CRAFT_SIZE; cell++) {
-            ItemStack stack = cell < cells.size() ? cells.get(cell) : ItemStack.EMPTY;
-            full.add(stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1));
-        }
-
-        // 1. This side's grid, in one pass. Writing the container sends no payload.
-        for (int cell = 0; cell < CRAFT_SIZE; cell++) {
-            machine.setItem(BlockEntityKnowledgeInscriber.GRID_SLOT_START + cell, full.get(cell));
-        }
-
-        if (inscriber != null) {
-            inscriber.setGrid(full);
-        } else {
-            MenuNetwork.sendInscriberGridFill(containerId, full);
-        }
-
-        updatePreview();
+        grid.fillFromRecipe(cells);
+        preview.update();
     }
 
     public void updatePreview() {
-        int signature = gridSignature();
-        if (signature == previewedSignature) {
-            return;
-        }
-        previewedSignature = signature;
-        Level level = level();
-        List<ItemStack> cells = gridCells();
-        if (level == null || ThEArcanePattern.isGridEmpty(cells)) {
-            previewResult.setItem(0, ItemStack.EMPTY);
-            return;
-        }
-        ThEArcanePattern pattern = ThEArcanePattern.resolveGrid(level, cells);
-        previewResult.setItem(0, pattern == null ? ItemStack.EMPTY : pattern.result());
+        preview.update();
     }
 
     public boolean hasCore() {
-        return data.get(DATA_HAS_CORE) != 0;
+        return readout.hasCore();
     }
 
     /**
@@ -349,29 +271,11 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
      * only the side drawing them can write what they show.
      */
     public void refreshMirrors() {
-        ItemStack core = slotStack(IDX_CORE);
-        // An int key, not a string: the old getItem() + '|' + getComponentsPatch() reserialised the
-        // core's whole stored pattern list sixty times a second.
-        long now = playerInventory.player.level().getGameTime();
-        if (now != coreSignatureTick) {
-            coreSignatureTick = now;
-            sampledCore = StackSignatures.of(core);
-        }
-        if (sampledCore == mirroredCore) {
-            return;
-        }
-        mirroredCore = sampledCore;
-        HandlerKnowledgeCore handler = handler();
-        List<ItemStack> outputs = handler == null ? List.of() : handler.storedOutputs();
-        for (int i = 0; i < PATTERN_COUNT; i++) {
-            ItemStack wanted = i < outputs.size() ? outputs.get(i) : ItemStack.EMPTY;
-            if (!ItemStack.matches(mirrorDisplay.getItem(i), wanted)) {
-                mirrorDisplay.setItem(i, wanted.copy());
-            }
-        }
+        preview.refreshMirrors();
     }
 
-    private @Nullable HandlerKnowledgeCore handler() {
+    /** Package-private for the grid state and the preview, whose reads all start at the core item. */
+    @Nullable HandlerKnowledgeCore handler() {
         Level level = level();
         if (level == null) {
             return null;
@@ -380,7 +284,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
     }
 
     public boolean isGridEmpty() {
-        return ThEArcanePattern.isGridEmpty(gridCells());
+        return ThEArcanePattern.isGridEmpty(grid.cells());
     }
 
     /**
@@ -388,38 +292,11 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
      * since its own slot copy is not reliably filled.
      */
     public boolean canEncode() {
-        if (inscriber == null) {
-            return hasCore();
-        }
-        return slotStack(IDX_CORE).is(ModItems.KNOWLEDGE_CORE.get());
-    }
-
-    private List<ItemStack> gridCells() {
-        List<ItemStack> cells = new ArrayList<>(CRAFT_SIZE);
-        for (int i = 0; i < CRAFT_SIZE; i++) {
-            cells.add(slotStack(IDX_CRAFT_START + i));
-        }
-        return cells;
-    }
-
-    private int gridSignature() {
-        long now = playerInventory.player.level().getGameTime();
-        if (now != gridSignatureTick) {
-            gridSignatureTick = now;
-            gridScratch.clear();
-            for (int i = 0; i < CRAFT_SIZE; i++) {
-                gridScratch.add(slotStack(IDX_CRAFT_START + i));
-            }
-            sampledGrid = StackSignatures.of(gridScratch);
-        }
-        return sampledGrid;
+        return readout.canEncode();
     }
 
     public int buttonState() {
-        if (data.get(DATA_HAS_CORE) == 0) {
-            return BlockEntityKnowledgeInscriber.STATUS_READY;
-        }
-        return data.get(DATA_STATE);
+        return readout.buttonState();
     }
 
     /**
@@ -427,26 +304,23 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
      * nothing is Invalid however many patterns the core holds.
      */
     public boolean isDelete() {
-        return data.get(DATA_HAS_CORE) != 0
-                && data.get(DATA_STATE) == BlockEntityKnowledgeInscriber.STATUS_ALREADY_STORED;
+        return readout.isDelete();
     }
 
     public boolean isActionable() {
-        if (isDelete()) {
-            return true;
-        }
-        return data.get(DATA_HAS_CORE) != 0
-                && data.get(DATA_STATE) == BlockEntityKnowledgeInscriber.STATUS_ACTIONABLE;
+        return readout.isActionable();
     }
 
-    private @Nullable Level level() {
+    /** Package-private for the grid state and the preview, which resolve against the same level. */
+    @Nullable Level level() {
         if (inscriber != null) {
             return inscriber.getLevel();
         }
         return playerInventory.player.level();
     }
 
-    private ItemStack slotStack(int index) {
+    /** Package-private for the three collaborators, whose reads are all slot reads. */
+    ItemStack slotStack(int index) {
         if (index < 0 || index >= slots.size()) {
             return ItemStack.EMPTY;
         }
@@ -469,7 +343,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
         // A save clears the grid, so the cached resolution must catch up before the status is pushed.
         inscriber.refreshResolution();
         broadcastChanges();
-        updatePreview();
+        preview.update();
     }
 
     @Override
