@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
-import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
@@ -211,19 +210,44 @@ public final class GuiLayout {
         return new Region(at(v, 0, 0), at(v, 1, 0), at(v, 2, 0), at(v, 3, 0));
     }
 
-
-    public static @Nullable GuiLayout load() {
+    /** The layout the mod ships, or the built-in numbers when the file cannot be read: a menu with no slot
+     * positions is not a menu, so a missing file is a packaging mistake worth logging. */
+    public static GuiLayout load() {
         try (InputStream stream = GuiLayout.class.getResourceAsStream(RESOURCE)) {
             if (stream == null) {
                 ThELog.LOG.error("Missing GUI layout {}", RESOURCE);
-                return null;
+                return builtIn();
             }
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
             return new GuiLayout(JsonParser.parseReader(reader).getAsJsonObject());
         } catch (Exception e) {
             ThELog.LOG.error("Could not read GUI layout {}", RESOURCE, e);
-            return null;
+            return builtIn();
         }
+    }
+
+    /** The slot geometry the generated file carries, in code, for the case load() cannot read it: art-only
+     * fields are left empty, since the menu reads none of them. */
+    private static GuiLayout builtIn() {
+        JsonObject root = new JsonObject();
+        root.add("patternGrid", array(26, 15, 7, 3));
+        root.add("coreSlot", array(175, 6));
+        root.add("upgradeSlots", array(175, 24, 1, 4));
+        root.add("armorSlots", array(152, 73, 1, 4));
+        root.add("previewGrid", array(26, 81, 3, 3));
+        root.add("previewResult", array(115, 98));
+        root.add("playerInventory", array(8, 147));
+        root.add("hotbar", array(8, 205));
+        root.add("panelOrder", new JsonArray());
+        return new GuiLayout(root);
+    }
+
+    private static JsonArray array(int... values) {
+        JsonArray array = new JsonArray();
+        for (int value : values) {
+            array.add(value);
+        }
+        return array;
     }
 
     public int imageWidth() {
