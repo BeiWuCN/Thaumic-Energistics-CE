@@ -75,13 +75,13 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
     // Package-private for the aspect table, which derives the row from the slots and the player.
     final Player owner;
 
-    private final @Nullable BlockEntityDistillationEncoder encoder;
+    final @Nullable BlockEntityDistillationEncoder encoder;
 
     private final SimpleContainer aspectDisplay = new SimpleContainer(ASPECT_SLOTS);
 
     private final SimpleContainer selectedDisplay = new SimpleContainer(1);
 
-    private final EncoderAspectTable table;
+    final EncoderAspectTable table;
 
     public MenuDistillationEncoder(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
         this(containerId, playerInventory, (BlockEntityDistillationEncoder) null);
@@ -129,10 +129,6 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
         table.refresh();
     }
 
-    // ------------------------------------------------------------------
-    // The aspect row
-    // ------------------------------------------------------------------
-
     public void ensureAspects() {
         table.ensure();
     }
@@ -173,88 +169,24 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
         return table.localSelection();
     }
 
-    // ------------------------------------------------------------------
-    // Actions from the screen
-    // ------------------------------------------------------------------
+    @Override
+    public void selectAspect(int index) { EncoderActions.selectAspect(this, index); }
 
     @Override
-    public void selectAspect(int index) {
-        if (index < -1 || index >= table.aspectCount()) {
-            return;
-        }
-        // Refused here and not only in the screen: an action payload arrives through this path too, and a
-        // hand-assembled click must not select an undiscovered aspect.
-        if (index >= 0 && !table.isRevealed(index)) {
-            return;
-        }
-        table.select(index);
-        if (encoder != null) {
-            encoder.setSelectedAspect(index);
-            table.refresh();
-        }
-    }
+    public void encode() { EncoderActions.encode(this); }
 
     @Override
-    public void encode() {
-        if (encoder != null) {
-            encoder.encode();
-            table.refresh();
-        }
-    }
+    public void applySourceTemplate(ItemStack stack) { EncoderActions.applySourceTemplate(this, stack); }
+
+    public void requestSourceTemplate(ItemStack stack) { EncoderActions.requestSourceTemplate(this, stack); }
 
     @Override
-    public void applySourceTemplate(ItemStack stack) {
-        ItemStack wanted = stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1);
-        slots.get(MENU_SOURCE).set(wanted);
-        table.select(-1);
-        table.refresh();
-    }
-
-    public void requestSourceTemplate(ItemStack stack) {
-        ItemStack wanted = stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1);
-        slots.get(MENU_SOURCE).set(wanted);
-        table.select(-1);
-        table.refresh();
-        MenuNetwork.sendEncoderSource(containerId, wanted);
-    }
+    public void insertBlankFromInventory(Player player) { EncoderActions.insertBlank(this, player); }
 
     @Override
-    public void insertBlankFromInventory(Player player) {
-        if (!slots.get(MENU_BLANK).getItem().isEmpty()) {
-            return;
-        }
-        Inventory inventory = player.getInventory();
-        for (int i = 0; i < inventory.getContainerSize(); i++) {
-            ItemStack stack = inventory.getItem(i);
-            if (AEItems.BLANK_PATTERN.is(stack)) {
-                ItemStack one = stack.copyWithCount(1);
-                stack.shrink(1);
-                inventory.setChanged();
-                slots.get(MENU_BLANK).set(one);
-                table.refresh();
-                return;
-            }
-        }
-    }
+    public int containerId() { return containerId; }
 
-    @Override
-    public int containerId() {
-        return containerId;
-    }
-
-    public boolean canEncode() {
-        if (slots.get(MENU_SOURCE).getItem().isEmpty()) {
-            return false;
-        }
-        if (table.pickedIndex() < 0) {
-            return false;
-        }
-        ItemStack blank = slots.get(MENU_BLANK).getItem();
-        if (blank.isEmpty() || !AEItems.BLANK_PATTERN.is(blank)) {
-            return false;
-        }
-        return slots.get(MENU_ENCODED).getItem().isEmpty();
-    }
+    public boolean canEncode() { return EncoderActions.canEncode(this); }
 
     public void sendAction(int action, int value) {
         MenuNetwork.sendEncoderAction(containerId, action, value);
@@ -268,46 +200,11 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
         super.broadcastChanges();
     }
 
-    // ------------------------------------------------------------------
-    // Clicks
-    // ------------------------------------------------------------------
-
     /** Intercepts clicks on the aspect row and the picked-aspect display: clicking one means 'use this
      * aspect', and falling through to vanilla would let a player pull a phantom item out of a display. */
     @Override
     public void clicked(int slotId, int dragType, ClickType clickType, Player player) {
-        // The row is re-derived first, so the decision is made against it as it is now.
-        table.ensure();
-        // Menu indices, not container ones: slotId indexes this menu's list, players' slots first. The
-        // source well is handled here too, as TemplateSlot refuses both ways and so cannot be emptied.
-        if (slotId == MENU_SOURCE) {
-            if (player.level().isClientSide) {
-                ItemStack carried = getCarried();
-                requestSourceTemplate(carried.isEmpty() ? ItemStack.EMPTY : carried.copyWithCount(1));
-            }
-            return;
-        }
-        if (slotId >= MENU_ASPECT_START && slotId < MENU_ASPECT_START + ASPECT_SLOTS) {
-            int index = slotId - MENU_ASPECT_START;
-            // Nothing is drawn for an undiscovered well, so a click where nothing is drawn must not pick.
-            if (index < table.aspectCount() && table.isRevealed(index)) {
-                table.select(index);
-                if (player.level().isClientSide) {
-                    sendAction(MenuNetwork.ACTION_SELECT, index);
-                } else if (encoder != null) {
-                    encoder.setSelectedAspect(index);
-                }
-            }
-            return;
-        }
-        if (slotId == MENU_SELECTED) {
-            // Clicking the picked aspect clears it.
-            table.select(-1);
-            if (player.level().isClientSide) {
-                sendAction(MenuNetwork.ACTION_SELECT, -1);
-            } else if (encoder != null) {
-                encoder.setSelectedAspect(-1);
-            }
+        if (EncoderClicks.handles(this, slotId, dragType, clickType, player)) {
             return;
         }
         super.clicked(slotId, dragType, clickType, player);
