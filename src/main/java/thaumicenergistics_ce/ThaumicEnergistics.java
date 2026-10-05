@@ -24,7 +24,6 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
@@ -37,6 +36,7 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.init.ModNetwork;
+import thaumicenergistics_ce.init.SelfTestHook;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartEssentiaExportBus;
 import thaumicenergistics_ce.part.PartEssentiaImportBus;
@@ -44,18 +44,6 @@ import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 import thaumicenergistics_ce.part.PartEssentiaStorageBus;
 import thaumicenergistics_ce.part.PartEssentiaTerminal;
 import thaumicenergistics_ce.part.PartVisInterface;
-import thaumicenergistics_ce.selftest.AssemblerCraftSelfTest;
-import thaumicenergistics_ce.selftest.CellPartitionSelfTest;
-import thaumicenergistics_ce.selftest.EncoderSelfTest;
-import thaumicenergistics_ce.selftest.EssentiaSelfTest;
-import thaumicenergistics_ce.selftest.GearSelfTest;
-import thaumicenergistics_ce.selftest.InscriberSelfTest;
-import thaumicenergistics_ce.selftest.MenuSelfTest;
-import thaumicenergistics_ce.selftest.NetworkSelfTest;
-import thaumicenergistics_ce.selftest.ResearchSelfTest;
-import thaumicenergistics_ce.selftest.RecipeSelfTest;
-import thaumicenergistics_ce.selftest.SyncSelfTest;
-import thaumicenergistics_ce.selftest.VisRelaySelfTest;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
@@ -85,7 +73,7 @@ public final class ThaumicEnergistics {
         modBus.addListener(this::commonSetup);
 
         registerPartModels();
-        registerSelfTests();
+        SelfTestHook.install();
     }
 
     /**
@@ -105,39 +93,6 @@ public final class ThaumicEnergistics {
         PartModels.registerModels(models);
     }
 
-    /**
-     * Wires the diagnostic self-tests to the game bus; each self-guards on its own switch.
-     * {@code build.gradle} must pass the {@code THAUMICENERGISTICS_*} vars to the game JVM, else none run.
-     */
-    private static void registerSelfTests() {
-        NeoForge.EVENT_BUS.addListener(RecipeSelfTest::run);
-        NeoForge.EVENT_BUS.addListener(EssentiaSelfTest::run);
-        // Waits for the tick that can see Thaumaturge's aspect index, which is published a hop late.
-        NeoForge.EVENT_BUS.addListener(EssentiaSelfTest::onServerTick);
-        NeoForge.EVENT_BUS.addListener(GearSelfTest::run);
-        NeoForge.EVENT_BUS.addListener(MenuSelfTest::run);
-        NeoForge.EVENT_BUS.addListener(ResearchSelfTest::run);
-        NeoForge.EVENT_BUS.addListener(InscriberSelfTest::run);
-        // The Distillation Encoder: the mod's other container whose slots a save can rearrange.
-        NeoForge.EVENT_BUS.addListener(EncoderSelfTest::run);
-        // Same wait as the essentia battery: the encoder reads the same aspect index.
-        NeoForge.EVENT_BUS.addListener(EncoderSelfTest::onServerTick);
-        // Runs on login against block entities never added to a level; builds nothing. It answers the
-        // server-starting event too, so a headless gate sees these checks without a player.
-        NeoForge.EVENT_BUS.addListener(AssemblerCraftSelfTest::run);
-        NeoForge.EVENT_BUS.addListener(AssemblerCraftSelfTest::onServerStarted);
-        // The cell workbench's partition: a mark has to reach the cell item, survive a save, and then
-        // filter it. Nothing a client writes to the grid is ever sent - see PartitionWellPayload.
-        NeoForge.EVENT_BUS.addListener(CellPartitionSelfTest::onServerStarted);
-        // Read-only check that an assembler can reach a relay block; a lone interface cannot.
-        NeoForge.EVENT_BUS.addListener(VisRelaySelfTest::run);
-        // The payload codecs: a field dropped while the records moved packages compiles and only shows
-        // up as a client drawing something the server never sent.
-        NeoForge.EVENT_BUS.addListener(NetworkSelfTest::run);
-        // Every synced number, in and out: the save tag, the packet, the menu reading table. A figure
-        // that goes out and comes back changed shows up nowhere else until a player reads it.
-        NeoForge.EVENT_BUS.addListener(SyncSelfTest::run);
-    }
     /**
      * Exposes the mod's grid machines to AE2's network; without {@code IN_WORLD_GRID_NODE_HOST} a
      * machine forms its own isolated grid and the ME terminal never learns about it.

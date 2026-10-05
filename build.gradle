@@ -30,6 +30,22 @@ repositories {
     // maven { url = '../local-maven' }
 }
 
+// ---- Self-tests: a diagnostic that must not ship --------------------------
+// They have a source set of their own for one reason: src/main may not reference them, so the jar -
+// which packages main's output alone - cannot carry them. The mod side of the seam is
+// init/SelfTestHook, which finds the provider through ServiceLoader; that provider and the
+// META-INF/services file naming it live in this source set, so neither exists in a release.
+//
+// Declared before neoForge because the mod entry below names it. A dev run reaches it through that
+// entry and not through a dependency: ModDevGradle hands a run its mods as MOD_CLASSES folders.
+sourceSets {
+    selftest {
+        java.srcDir 'src/selftest/java'
+        resources.srcDir 'src/selftest/resources'
+    }
+}
+sourceSets.selftest.compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+
 neoForge {
     version = project.neo_version
 
@@ -52,6 +68,11 @@ neoForge {
     mods {
         "${mod_id}" {
             sourceSet(sourceSets.main)
+            // The self-tests are a second folder of the SAME mod, which is what puts them in a dev run:
+            // ModDevGradle hands a run its mods as MOD_CLASSES folders, not as a Java classpath, so a
+            // runtimeOnly dependency would never be seen by the loader. The jar packages main's output
+            // alone, so neither folder of this entry reaches a release.
+            sourceSet(sourceSets.selftest)
         }
     }
 
@@ -135,6 +156,7 @@ neoForge {
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
 
 // ---- Thaumaturge: built by the builder, never shipped ---------------------
 // It is All Rights Reserved. Its LICENSE forbids publishing the mod or any binary built from it and
