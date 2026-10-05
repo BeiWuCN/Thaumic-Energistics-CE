@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "${loader_version_range}"
 license = "${mod_license}"
-issueTrackerURL = "https://github.com/Leclowndu93150/ThaumicEnergistics/issues"
+issueTrackerURL = "https://github.com/BeiWuCN/ThaumicEnergistics/issues"
 
 [[mods]]
 modId = "${mod_id}"
