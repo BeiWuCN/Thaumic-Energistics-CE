@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.network.PacketDistributor;
-import thaumicenergistics_ce.menu.MenuEssentiaBus;
+import thaumicenergistics_ce.menu.MenuEssentiaBusBase;
 import thaumicenergistics_ce.network.EssentiaBusConfigPayload;
 import thaumicenergistics_ce.util.ThELog;
 
@@ -26,7 +26,7 @@ import thaumicenergistics_ce.util.ThELog;
  *   <li>{@link Slot#set} with a stack carrying the key as a data component is AE2's non-item route.
  * </ul>
  */
-public class EssentiaBusGhostIngredientHandler<T extends UpgradeableScreen<? extends MenuEssentiaBus<?>>>
+public class EssentiaBusGhostIngredientHandler<T extends UpgradeableScreen<? extends MenuEssentiaBusBase<?>>>
         implements IGhostIngredientHandler<T> {
 
     @Override
@@ -39,7 +39,7 @@ public class EssentiaBusGhostIngredientHandler<T extends UpgradeableScreen<? ext
         if (!(ingredient.getIngredient() instanceof AspectInstance)) {
             return targets;
         }
-        MenuEssentiaBus<?> menu = screen.getMenu();
+        MenuEssentiaBusBase<?> menu = screen.getMenu();
         for (int slot = 0; slot < menu.getConfigSlotCount(); slot++) {
             Target<I> target = ConfigTarget.of(menu, slot, screen.getGuiLeft(), screen.getGuiTop());
             if (target != null) {
@@ -62,14 +62,14 @@ public class EssentiaBusGhostIngredientHandler<T extends UpgradeableScreen<? ext
         // Nothing to release: a config slot never took an item from the player.
     }
 
-    private record ConfigTarget<I>(MenuEssentiaBus<?> menu, int index, int guiLeft, int guiTop)
+    private record ConfigTarget<I>(MenuEssentiaBusBase<?> menu, int index, int guiLeft, int guiTop)
             implements Target<I> {
 
         /**
          * A target for one config slot, or {@code null}: it must be a live {@link AppEngSlot} over a
          * {@link ConfigMenuInventory}, since locked rows sit off-panel and the index is not a fixed offset.
          */
-        static <I> ConfigTarget<I> of(MenuEssentiaBus<?> menu, int index, int guiLeft, int guiTop) {
+        static <I> ConfigTarget<I> of(MenuEssentiaBusBase<?> menu, int index, int guiLeft, int guiTop) {
             Slot slot = menu.slots.get(menu.configSlotIndex(index));
             if (slot instanceof AppEngSlot appEngSlot
                     && appEngSlot.getInventory() instanceof ConfigMenuInventory

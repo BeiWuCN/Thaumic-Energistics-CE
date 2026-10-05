@@ -13,10 +13,10 @@ import thaumicenergistics_ce.part.PartEssentiaExportBus;
 
 /**
  * The Essentia Export Bus's config screen: AE2's upgradeable-bus menu, with the config grid and its
- * slot addressing inherited from {@link MenuEssentiaBus} - the same screen as the import bus's, the
+ * slot addressing inherited from {@link MenuEssentiaBusBase} - the same screen as the import bus's, the
  * only difference being what each bus does with the config, not how it is presented.
  */
-public class MenuEssentiaExportBus extends MenuEssentiaBus<PartEssentiaExportBus>
+public class MenuEssentiaExportBus extends MenuEssentiaBusBase<PartEssentiaExportBus>
         implements KeyTypeSelectionMenu {
 
     @GuiSync(20)

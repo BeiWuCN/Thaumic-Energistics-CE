@@ -30,10 +30,10 @@ import thaumicenergistics_ce.util.ThELog;
  *       slot is, and a second copy of the arithmetic would be a second chance to get it wrong.
  * </ul>
  */
-public abstract class MenuEssentiaBus<T extends IUpgradeableObject> extends UpgradeableMenu<T>
+public abstract class MenuEssentiaBusBase<T extends IUpgradeableObject> extends UpgradeableMenu<T>
         implements EssentiaBusReceiver {
 
-    protected MenuEssentiaBus(MenuType<?> menuType, int id, Inventory playerInventory, T host) {
+    protected MenuEssentiaBusBase(MenuType<?> menuType, int id, Inventory playerInventory, T host) {
         super(menuType, id, playerInventory, host);
     }
 

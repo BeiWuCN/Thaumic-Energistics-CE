@@ -16,7 +16,7 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
  *   <li>The wells are derived at most once a tick: the signature walks the whole pattern store.
  * </ul>
  */
-final class PreviewMirror {
+final class AssemblerPreviewMirror {
 
     /**
      * The pattern wells' container on the client: the client derives them from the core slot, and the
@@ -38,7 +38,7 @@ final class PreviewMirror {
 
     private final Slot[] previewSlots = new Slot[BlockEntityArcaneAssembler.PREVIEW_SLOT_COUNT];
 
-    PreviewMirror(MenuArcaneAssembler menu) {
+    AssemblerPreviewMirror(MenuArcaneAssembler menu) {
         this.menu = menu;
     }
 

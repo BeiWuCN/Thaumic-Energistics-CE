@@ -236,7 +236,7 @@ public final class ThaumicEnergistics {
                 ModItems.ARCANE_ASSEMBLER.get(),
                 BlockEntityArcaneAssembler.UPGRADE_SLOT_COUNT);
         // The count is the bus's own slot count (PartEssentiaImportBus#getUpgradeSlots); capacity is
-        // deliberately absent because MenuEssentiaBus keeps 18 fixed config slots and never reads the card.
+        // absent because MenuEssentiaBusBase keeps 18 fixed config slots and never reads the card.
         for (var bus : List.of(
                 ModItems.ESSENTIA_IMPORT_BUS.get(),
                 ModItems.ESSENTIA_EXPORT_BUS.get())) {

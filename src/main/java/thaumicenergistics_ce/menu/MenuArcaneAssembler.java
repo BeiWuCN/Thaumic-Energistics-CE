@@ -61,7 +61,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
 
     final Inventory playerInventory;
 
-    private final PreviewMirror mirror;
+    private final AssemblerPreviewMirror mirror;
 
     private final AssemblerMenuReadout readout;
 
@@ -94,7 +94,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         super(ModMenuTypes.ARCANE_ASSEMBLER.get(), containerId);
         this.assembler = assembler;
         this.playerInventory = playerInventory;
-        this.mirror = new PreviewMirror(this);
+        this.mirror = new AssemblerPreviewMirror(this);
         this.readout = new AssemblerMenuReadout(this);
 
         GuiLayout layout = layout();
@@ -132,7 +132,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
             }
         });
 
-        // 3. Pattern mirror, display only, derived from the core - see PreviewMirror.refresh.
+        // 3. Pattern mirror, display only, derived from the core - see AssemblerPreviewMirror.refresh.
         for (int i = 0; i < BlockEntityArcaneAssembler.PATTERN_SLOT_COUNT; i++) {
             addSlot(new ReadOnlySlot(
                     assembler == null ? mirror.display() : machine,

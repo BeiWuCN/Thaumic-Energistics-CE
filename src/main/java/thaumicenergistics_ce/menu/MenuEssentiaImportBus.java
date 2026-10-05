@@ -12,14 +12,14 @@ import net.minecraft.world.inventory.MenuType;
 import thaumicenergistics_ce.part.PartEssentiaImportBus;
 
 /**
- * The Essentia Import Bus's config screen, extending {@link MenuEssentiaBus} with two settings.
+ * The Essentia Import Bus's config screen, extending {@link MenuEssentiaBusBase} with two settings.
  * <ul>
  * <li>The config grid is expandable: two rows always shown, five more unlocked by capacity cards.
  * <li>Key types are synced so the client checkbox knows what the part decided - essentia only.
  * <li>Reported rather than chosen: offering what the bus cannot move would be worse than no setting.
  * </ul>
  */
-public class MenuEssentiaImportBus extends MenuEssentiaBus<PartEssentiaImportBus>
+public class MenuEssentiaImportBus extends MenuEssentiaBusBase<PartEssentiaImportBus>
         implements KeyTypeSelectionMenu {
 
     @GuiSync(20)
