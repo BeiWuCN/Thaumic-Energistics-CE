@@ -8,30 +8,21 @@ import appeng.api.networking.storage.IStorageService;
 import appeng.api.networking.ticking.IGridTickable;
 import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
-import appeng.api.stacks.AEKey;
-import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.IStorageMounts;
 import appeng.api.storage.IStorageProvider;
 import appeng.api.storage.MEStorage;
 import appeng.blockentity.grid.AENetworkedBlockEntity;
-import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.init.ModBlockEntities;
@@ -54,36 +45,29 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
 
     public static final int MAX_LINK_DISTANCE = 32;
 
-    private static final double POWER_PER_RECEIVER = 5.0;
+    private static final int TICK_RATE_ACTIVE = 10;
+    private static final int TICK_RATE_IDLE = 40;
 
-    private final List<BlockPos> linkedReceivers = new ArrayList<>();
+    private final EssentiaProviderBuffer buffer = new EssentiaProviderBuffer(this);
+
+    private final ReceiverLinks links = new ReceiverLinks(this);
 
     private final IActionSource actionSource =
             IActionSource.ofMachine(this);
 
-    private static final double IDLE_POWER = 1.0;
-
-    private static final int TICK_RATE_ACTIVE = 10;
-    private static final int TICK_RATE_IDLE = 40;
-
-    private final Map<Holder<IAspect>, Integer> buffer = new HashMap<>();
-
-    private long revision;
-
     public BlockEntityEssentiaProvider(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ESSENTIA_PROVIDER.get(), pos, state);
+        // Asked of the links so the idle power has one author: with none, they set the base figure.
+        links.updateIdlePower();
         getMainNode()
-                .setIdlePowerUsage(IDLE_POWER)
                 .addService(IStorageProvider.class, this)
                 .addService(IGridTickable.class, this);
     }
 
-
     @Override
     public void mountInventories(IStorageMounts mounts) {
-        mounts.mount(new ProviderStorage(this));
+        mounts.mount(new EssentiaProviderStorage(this));
     }
-
 
     @Override
     public TickingRequest getTickingRequest(IGridNode node) {
@@ -103,71 +87,16 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
             return TickRateModulation.SLOWER;
         }
 
-        boolean moved = pushBufferToNeighbours();
+        boolean moved = buffer.push();
         // Anything still buffered means every neighbour is full; looking again sooner will not empty it.
         return moved ? TickRateModulation.URGENT : TickRateModulation.SLOWER;
     }
 
-    private boolean pushBufferToNeighbours() {
-        if (level == null) {
-            return false;
-        }
-        boolean movedAnything = false;
-
-        var aspects = new ArrayList<>(buffer.keySet());
-        for (Holder<IAspect> aspect : aspects) {
-            int remaining = buffer.getOrDefault(aspect, 0);
-            if (remaining <= 0) {
-                buffer.remove(aspect);
-                continue;
-            }
-            for (Direction side : Direction.values()) {
-                if (remaining <= 0) {
-                    break;
-                }
-                IEssentiaStorage target = level.getCapability(
-                        EssentiaCapabilities.STORAGE, worldPosition.relative(side), side.getOpposite());
-                if (target == null) {
-                    continue;
-                }
-                int accepted = target.insert(aspect, remaining, false);
-                if (accepted > 0) {
-                    remaining -= accepted;
-                    movedAnything = true;
-                }
-            }
-            if (remaining <= 0) {
-                buffer.remove(aspect);
-            } else {
-                buffer.put(aspect, remaining);
-            }
-        }
-
-        if (movedAnything) {
-            revision++;
-            setChanged();
-        }
-        return movedAnything;
-    }
-
+    // IEssentiaStorage - the buffer as seen by the network
 
     @Override
     public int insert(Holder<IAspect> aspect, int amount, boolean simulate) {
-        if (aspect == null || amount <= 0 || !hasAnyTarget()) {
-            return 0;
-        }
-        int held = buffer.getOrDefault(aspect, 0);
-        int space = BUFFER_PER_ASPECT - held;
-        if (space <= 0) {
-            return 0;
-        }
-        int accepted = Math.min(amount, space);
-        if (!simulate) {
-            buffer.put(aspect, held + accepted);
-            revision++;
-            setChanged();
-        }
-        return accepted;
+        return buffer.insert(aspect, amount, simulate);
     }
 
     @Override
@@ -177,94 +106,43 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
 
     @Override
     public AspectList contents() {
-        if (buffer.isEmpty()) {
-            return AspectList.EMPTY;
-        }
-        var entries = new ArrayList<AspectInstance>();
-        buffer.forEach((aspect, amount) -> {
-            if (amount > 0) {
-                entries.add(new AspectInstance(aspect, amount));
-            }
-        });
-        return AspectList.ofEntries(entries);
+        return buffer.contents();
     }
 
     @Override
     public long contentRevision() {
-        return revision;
-    }
-
-    private boolean hasAnyTarget() {
-        if (level == null) {
-            return false;
-        }
-        for (Direction side : Direction.values()) {
-            if (level.getCapability(
-                            EssentiaCapabilities.STORAGE, worldPosition.relative(side), side.getOpposite())
-                    != null) {
-                return true;
-            }
-        }
-        return false;
+        return buffer.revision();
     }
 
     public int buffered(Holder<IAspect> aspect) {
-        return buffer.getOrDefault(aspect, 0);
+        return buffer.buffered(aspect);
     }
 
+    // The bound receivers
 
+    /** A refusal, or null when the link was made; the message is what the connector shows. */
     public @Nullable String addLinkedReceiver(BlockPos receiver) {
-        if (linkedReceivers.contains(receiver)) {
-            return null;
-        }
-        if (linkedReceivers.size() >= MAX_LINKED_RECEIVERS) {
-            return "provider is already serving " + MAX_LINKED_RECEIVERS + " receivers";
-        }
-        double distance = Math.sqrt(worldPosition.distSqr(receiver));
-        if (distance > MAX_LINK_DISTANCE) {
-            return "receiver is " + (int) Math.ceil(distance) + " blocks away, further than "
-                    + MAX_LINK_DISTANCE;
-        }
-        linkedReceivers.add(receiver.immutable());
-        setChanged();
-        updateIdlePower();
-        return null;
+        return links.add(receiver);
     }
 
     public void removeLinkedReceiver(BlockPos receiver) {
-        if (linkedReceivers.remove(receiver)) {
-            setChanged();
-            updateIdlePower();
-        }
+        links.remove(receiver);
     }
 
     public boolean isLinkedReceiver(BlockPos receiver) {
-        return linkedReceivers.contains(receiver);
+        return links.contains(receiver);
     }
 
     public int linkedReceiverCount() {
-        return linkedReceivers.size();
+        return links.count();
     }
 
     public List<BlockPos> linkedReceivers() {
-        return List.copyOf(linkedReceivers);
-    }
-
-    private void updateIdlePower() {
-        getMainNode().setIdlePowerUsage(IDLE_POWER + POWER_PER_RECEIVER * linkedReceivers.size());
+        return links.all();
     }
 
     public boolean pruneDeadReceivers() {
-        if (level == null || linkedReceivers.isEmpty()) {
-            return false;
-        }
-        boolean removed = linkedReceivers.removeIf(pos ->
-                !(level.getBlockEntity(pos) instanceof BlockEntityEssentiaProviderConnection));
-        if (removed) {
-            setChanged();
-            updateIdlePower();
-        }
-        return removed;
+        return links.pruneDead();
     }
 
     /**
@@ -307,12 +185,13 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
         return service == null ? null : service.getInventory();
     }
 
+    // Persistence: the links only. The buffer is a waypoint and is not saved.
 
     @Override
     public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         ListTag receivers = new ListTag();
-        for (BlockPos pos : linkedReceivers) {
+        for (BlockPos pos : links.all()) {
             receivers.add(LongTag.valueOf(pos.asLong()));
         }
         tag.put("LinkedReceivers", receivers);
@@ -321,70 +200,15 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
     @Override
     public void loadTag(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadTag(tag, registries);
-        linkedReceivers.clear();
         ListTag receivers = tag.getList("LinkedReceivers", CompoundTag.TAG_LONG);
+        List<BlockPos> positions = new ArrayList<>();
         for (int i = 0; i < receivers.size(); i++) {
             if (receivers.get(i) instanceof LongTag value) {
-                linkedReceivers.add(BlockPos.of(value.getAsLong()));
+                positions.add(BlockPos.of(value.getAsLong()));
             }
         }
-        updateIdlePower();
+        links.replace(positions);
+        links.updateIdlePower();
         buffer.clear();
-    }
-
-    private static final class ProviderStorage implements MEStorage {
-
-        private final BlockEntityEssentiaProvider provider;
-
-        ProviderStorage(BlockEntityEssentiaProvider provider) {
-            this.provider = provider;
-        }
-
-        @Override
-        public long insert(
-                AEKey what,
-                long amount,
-                Actionable mode,
-                IActionSource source) {
-            if (!(what instanceof AEssentiaKey key) || amount <= 0) {
-                return 0;
-            }
-            Holder<IAspect> aspect = key.resolveAspect();
-            if (aspect == null) {
-                return 0;
-            }
-            return provider.insert(aspect, clamp(amount), mode.isSimulate());
-        }
-
-        @Override
-        public long extract(
-                AEKey what,
-                long amount,
-                Actionable mode,
-                IActionSource source) {
-            return 0;
-        }
-
-        @Override
-        public void getAvailableStacks(KeyCounter out) {
-            var contents = provider.contents();
-            for (var entry : contents.entries()) {
-                ResourceLocation id = entry.aspect().unwrapKey().map(k -> k.location()).orElse(null);
-                if (id != null && entry.amount() > 0) {
-                    out.add(AEssentiaKey.of(id), entry.amount());
-                }
-            }
-        }
-
-        @Override
-        public Component getDescription() {
-            return Component.translatable(
-                    "block.thaumicenergistics_ce.essentia_provider");
-        }
-
-        /** The buffer holds ints; a single AE insert cannot exceed what one aspect slot allows anyway. */
-        private static int clamp(long amount) {
-            return (int) Math.min(amount, Integer.MAX_VALUE);
-        }
     }
 }
