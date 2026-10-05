@@ -154,7 +154,7 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
             float progress = menu.isCrafting() ? menu.getProgress() : 0.0F;
             if (TRACE_PROGRESS && Math.abs(progress - lastTracedProgress) > 0.001F) {
                 lastTracedProgress = progress;
-                ThELog.LOG.info("[asmtest] bar={} {}", progress, menu.progressForTest());
+                ThELog.LOG.info("[asmtest] bar={} {}", progress, menu.progressTrace());
             }
             return progress;
         }

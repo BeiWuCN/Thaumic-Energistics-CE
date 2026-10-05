@@ -79,7 +79,7 @@ public final class AssemblerCraftSelfTest {
         BlockPos pos = BlockPos.ZERO;
         BlockEntityArcaneAssembler machine =
                 new BlockEntityArcaneAssembler(pos, ModBlocks.ARCANE_ASSEMBLER.get().defaultBlockState());
-        machine.forcePatternForTest(priciest);
+        AssemblerTestAccess.forcePattern(machine, priciest);
 
         CompoundTag saved = machine.saveWithoutMetadata(level.registryAccess());
         BlockEntityArcaneAssembler reloaded =
@@ -88,17 +88,17 @@ public final class AssemblerCraftSelfTest {
 
         ThELog.LOG.info(
                 "[asmtest] save/load round trip: saved [{}] reloaded [{}]",
-                machine.resumeReportForTest(),
-                reloaded.resumeReportForTest());
+                AssemblerTestAccess.resumeReport(machine),
+                AssemblerTestAccess.resumeReport(reloaded));
 
         // That round trip only proved the craft state survived - the pattern did not, and an AE2 CPU
         // skips a machine that offers none. The core goes in as the game's own load does.
-        reloaded.setItemForTest(BlockEntityArcaneAssembler.coreSlotForTest(), knowledgeCoreHolding(priciest, level));
-        reloaded.recoverForTest(level);
+        AssemblerTestAccess.setItem(reloaded, BlockEntityArcaneAssembler.CORE_SLOT, knowledgeCoreHolding(priciest, level));
+        AssemblerTestAccess.recover(reloaded, level);
         ThELog.LOG.info(
                 "[asmtest] after a reload the machine offers {} pattern(s), and the craft in its well is {}",
                 reloaded.getAvailablePatterns().size(),
-                reloaded.resumeReportForTest());
+                AssemblerTestAccess.resumeReport(reloaded));
 
         checkCoreSurvivesTheRoundTrip(level);
         checkAccelerationCardsSurviveTheRoundTrip(level);
@@ -127,7 +127,7 @@ public final class AssemblerCraftSelfTest {
         BlockPos pos = BlockPos.ZERO;
         BlockEntityArcaneAssembler machine =
                 new BlockEntityArcaneAssembler(pos, ModBlocks.ARCANE_ASSEMBLER.get().defaultBlockState());
-        machine.setItemForTest(BlockEntityArcaneAssembler.coreSlotForTest(), core);
+        AssemblerTestAccess.setItem(machine, BlockEntityArcaneAssembler.CORE_SLOT, core);
         CompoundTag saved = machine.saveWithoutMetadata(level.registryAccess());
 
         BlockEntityArcaneAssembler reloaded =
@@ -135,7 +135,7 @@ public final class AssemblerCraftSelfTest {
         reloaded.loadWithComponents(saved, level.registryAccess());
         reloaded.setLevel(level);
 
-        ItemStack back = reloaded.getInventory().getItem(BlockEntityArcaneAssembler.coreSlotForTest());
+        ItemStack back = reloaded.getInventory().getItem(BlockEntityArcaneAssembler.CORE_SLOT);
         HandlerKnowledgeCore handler = HandlerKnowledgeCore.of(back, level.registryAccess());
         int stored = handler == null ? -1 : handler.size();
         int offered = reloaded.getAvailablePatterns().size();
@@ -170,10 +170,10 @@ public final class AssemblerCraftSelfTest {
         machine.setLevel(level);
         // Two cards, so the count has to follow the slots rather than a floor of one. Two cards off twenty
         // ticks per craft is twelve.
-        machine.setItemForTest(BlockEntityArcaneAssembler.UPGRADE_SLOT_START, AEItems.SPEED_CARD.stack());
-        machine.setItemForTest(BlockEntityArcaneAssembler.UPGRADE_SLOT_START + 1, AEItems.SPEED_CARD.stack());
+        AssemblerTestAccess.setItem(machine, BlockEntityArcaneAssembler.UPGRADE_SLOT_START, AEItems.SPEED_CARD.stack());
+        AssemblerTestAccess.setItem(machine, BlockEntityArcaneAssembler.UPGRADE_SLOT_START + 1, AEItems.SPEED_CARD.stack());
         // The insert above suppresses the container listener, so run what a slot click runs.
-        machine.onInventoryChangedForTest();
+        AssemblerTestAccess.onInventoryChanged(machine);
         int before = machine.upgrades().getSpeedUpgrades();
         int ticksBefore = machine.getTicksPerCraft();
         CompoundTag saved = machine.saveWithoutMetadata(level.registryAccess());

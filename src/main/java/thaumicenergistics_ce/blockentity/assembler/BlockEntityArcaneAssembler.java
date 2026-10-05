@@ -243,8 +243,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return inventory;
     }
 
-    private boolean awakeForCraft;
-
     public boolean isCrafting() {
         return craft.isCrafting();
     }
@@ -296,66 +294,9 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return displaySync.previewStack();
     }
 
-    public void forceCraftForTest(boolean crafting, int craftTicks) {
-        craft.setCrafting(crafting);
-        craft.setCraftTicks(craftTicks);
-        displaySync.markForUpdate();
-    }
-
     /** The vis a craft of {@code pattern} is charged, after the gear discount. */
     public int craftCost(ThEArcanePattern pattern) {
         return craftJob().craftCost(pattern);
-    }
-
-    /** The crystals a pattern's craft must be handed, as items the network will be asked for. */
-    static List<ItemStack> crystalStacksOf(ThEArcanePattern pattern) {
-        return AssemblerCraftJob.crystalStacksOf(pattern);
-    }
-
-    /** Holds a real recipe as if pushed, and reports what the machine would bank for it. */
-    public void forcePatternForTest(ThEArcanePattern pattern) {
-        craft.setCurrentPattern(pattern);
-        craft.setCrafting(true);
-        craft.setCraftPrice(craftCost(pattern));
-        craft.setCraftCrystals(crystalStacksOf(pattern));
-        // As beginCraft leaves the target well - a copy of the product - but without the notify guard,
-        // so the container's listener runs: the round-trip check is worthless without it.
-        this.inventory.setItem(TARGET_SLOT, pattern.result().copy());
-        ThELog.LOG.info(
-                "[asmtest] vis target for {} ({} vis) is {}, with {} in the buffer",
-                pattern.result(),
-                craftCost(pattern),
-                vis.visTarget(craft.isCrafting(), craft.craftPrice()),
-                vis.bufferedVis());
-    }
-
-    public String resumeReportForTest() {
-        return "crafting=" + craft.isCrafting() + " price=" + craft.craftPrice() + " crystals="
-                + craft.craftCrystals().size() + " output=" + inventory.getItem(TARGET_SLOT);
-    }
-
-    public void recoverForTest(Level level) {
-        setLevel(level);
-        recoverInterruptedCraft();
-    }
-
-    public void setItemForTest(int slot, ItemStack stack) {
-        suppressNotify = true;
-        try {
-            inventory.setItem(slot, stack);
-        } finally {
-            suppressNotify = false;
-        }
-    }
-
-    /** Runs the container listener by hand: {@link #setItemForTest} suppresses it, and a card put into the
-     * machine has to move the count before anything is ever saved. */
-    public void onInventoryChangedForTest() {
-        onInventoryChanged();
-    }
-
-    public static int coreSlotForTest() {
-        return CORE_SLOT;
     }
 
     /** Whether {@code stack} belongs in a gear slot at all; shift-click routing uses this, while the

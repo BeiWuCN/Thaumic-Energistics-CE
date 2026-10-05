@@ -368,7 +368,9 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         return Math.max(live, mirrored);
     }
 
-    public String progressForTest() {
+    /** The progress the screen's traced bar reads, live and mirrored side by side; only the
+     * {@code THAUMICENERGISTICS_ASSEMBLER_SELFTEST} trace calls this. */
+    public String progressTrace() {
         BlockEntityArcaneAssembler machine = machineView();
         String live = machine == null
                 ? "no block entity at " + clientPos
