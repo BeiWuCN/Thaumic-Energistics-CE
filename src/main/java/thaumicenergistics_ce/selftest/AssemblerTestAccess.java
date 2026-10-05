@@ -18,8 +18,7 @@ final class AssemblerTestAccess {
 
     private static final Class<?>[] NO_ARGUMENTS = new Class<?>[0];
 
-    private AssemblerTestAccess() {
-    }
+    private AssemblerTestAccess() {}
 
     /** Holds a real recipe as if pushed, and reports what the machine would bank for it. */
     static void forcePattern(BlockEntityArcaneAssembler machine, ThEArcanePattern pattern) {
