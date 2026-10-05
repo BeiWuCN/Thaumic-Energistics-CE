@@ -36,6 +36,14 @@ final class InscriberInventory {
                     inscriber.setChanged();
                     inscriber.contentsChanged();
                 }
+
+                @Override
+                public boolean canPlaceItem(int slot, ItemStack stack) {
+                    // The core is the only slot that holds an item; the wells beside it only mirror what
+                    // the core already stores, so nothing may be put there at all.
+                    return slot == BlockEntityKnowledgeInscriber.CORE_SLOT
+                            && stack.is(ModItems.KNOWLEDGE_CORE.get());
+                }
             };
 
     /** True while the grid is written cell by cell: a notification per cell would resolve a half-replaced

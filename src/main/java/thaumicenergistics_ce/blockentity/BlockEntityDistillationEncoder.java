@@ -327,6 +327,11 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
             return;
         }
         for (int slot = 0; slot < SLOT_COUNT; slot++) {
+            // The source well names an item; JEI writes that name without taking anything, so dropping
+            // it would mint one. The inscriber's grid is left out of its drop for the same reason.
+            if (slot == SLOT_SOURCE) {
+                continue;
+            }
             ItemStack stack = inventory.getItem(slot);
             if (stack.isEmpty()) {
                 continue;

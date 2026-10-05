@@ -2,6 +2,8 @@ package thaumicenergistics_ce.selftest;
 
 import net.neoforged.neoforge.common.NeoForge;
 import thaumicenergistics_ce.init.SelfTestProvider;
+import thaumicenergistics_ce.init.capability.MachineItemBandSelfTest;
+import thaumicenergistics_ce.part.EssentiaTransportViewSelfTest;
 
 /**
  * The self-tests' half of the seam: this source set is not in the release, so the mod reaches these
@@ -37,5 +39,11 @@ public final class SelfTestBootstrap implements SelfTestProvider {
         // Every synced number, in and out: the save tag, the packet, the menu reading table. A figure
         // that goes out and comes back changed shows up nowhere else until a player reads it.
         NeoForge.EVENT_BUS.addListener(SyncSelfTest::run);
+        // The port an essentia bus shows a pipe: a pipe asks only for TRANSPORT, so a bus that
+        // answers nothing is a bus no tube can reach - invisible until something is placed by hand.
+        NeoForge.EVENT_BUS.addListener(EssentiaTransportViewSelfTest::run);
+        // What a pipe may reach against what a broken machine gives back: the source well of the
+        // distillation encoder is a name JEI writes for free, so a band that reached it mints items.
+        NeoForge.EVENT_BUS.addListener(MachineItemBandSelfTest::run);
     }
 }
