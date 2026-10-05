@@ -22,7 +22,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ArcanePatternDetails;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
-import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
@@ -326,11 +325,11 @@ final class AssemblerCraftJob {
         if (result.isEmpty()) {
             return null;
         }
-        if (owner.patternsDirty) {
-            // Rebuild without spending the dirty flag: no level yields an empty list, making it final.
-            owner.rebuildPatterns();
+        if (owner.patternCache.isStale()) {
+            // Rebuild without settling the stale flag: a set read before a level would become final.
+            owner.patternCache.rebuild();
         }
-        for (IPatternDetails details : owner.cachedPatterns) {
+        for (IPatternDetails details : owner.patternCache.patterns()) {
             if (details instanceof ArcanePatternDetails arcane
                     && ItemStack.isSameItemSameComponents(arcane.pattern().result(), result)) {
                 return arcane.pattern();
@@ -350,63 +349,6 @@ final class AssemblerCraftJob {
         ICraftingProvider.requestUpdate(owner.mainNode);
         updateSleepiness();
         return true;
-    }
-
-    // ------------------------------------------------------------------
-    // Pattern cache
-    // ------------------------------------------------------------------
-
-    /** Rebuilds the advertised set from the core, not the live recipe manager: a core needs registry
-     * access, so clear {@code patternsDirty} only when this returns {@code true}.
-     * @return {@code true} when the core was readable and the cache is complete */
-    boolean rebuildPatterns() {
-        owner.cachedPatterns = List.of();
-        HandlerKnowledgeCore core = knowledgeCore();
-        if (core == null) {
-            // No core, or - the case that matters - no level to read one with; report failure until it is.
-            return owner.level() != null;
-        }
-        List<IPatternDetails> details = new ArrayList<>();
-        List<ThEArcanePattern> stored = core.patterns();
-        for (ThEArcanePattern pattern : stored) {
-            ArcanePatternDetails detail =
-                    ArcanePatternDetails.of(pattern, owner.level().registryAccess(), why -> ThELog.LOG.warn(
-                            "[assembler] at {} is not offering the stored pattern for {}: {}",
-                            owner.getBlockPos(),
-                            pattern.result(),
-                            why));
-            if (detail != null) {
-                details.add(detail);
-            }
-        }
-        if (details.size() < stored.size()) {
-            // Otherwise invisible: the machine just offers fewer recipes than the core holds.
-            ThELog.LOG.warn(
-                    "[assembler] at {} offers {} of the {} patterns in its knowledge core",
-                    owner.getBlockPos(),
-                    details.size(),
-                    stored.size());
-        }
-        if (core.unreadableCount() > 0) {
-            // Entries this build cannot read: kept in the item, not offered; the core would read as empty.
-            ThELog.LOG.warn(
-                    "[assembler] at {} cannot read {} entr(ies) in its knowledge core; they are kept in the"
-                            + " item and {} pattern(s) are offered",
-                    owner.getBlockPos(),
-                    core.unreadableCount(),
-                    details.size());
-        }
-        owner.cachedPatterns = List.copyOf(details);
-        return true;
-    }
-
-    private @Nullable HandlerKnowledgeCore knowledgeCore() {
-        if (owner.level() == null) {
-            return null;
-        }
-        return HandlerKnowledgeCore.of(
-                owner.inventory.getItem(BlockEntityArcaneAssembler.CORE_SLOT),
-                owner.level().registryAccess());
     }
 
     // ------------------------------------------------------------------

@@ -24,4 +24,20 @@ final class AssemblerNodeListener implements IGridNodeListener<BlockEntityArcane
         // loadAdditional runs before the node exists; this wake has to cover a resumed craft.
         owner.craftJob().updateSleepiness();
     }
+
+    /** Creates the node when the chunk loads. A craft saved mid-flight is picked up here, because
+     * {@code loadAdditional} ran before there was a level to match its result against. */
+    static void attach(BlockEntityArcaneAssembler machine) {
+        if (machine.level() != null && !machine.level().isClientSide()) {
+            machine.mainNode.create(machine.level(), machine.getBlockPos());
+            machine.craftJob().recoverInterruptedCraft();
+        }
+    }
+
+    /** Takes the node down when the chunk unloads. */
+    static void detach(BlockEntityArcaneAssembler machine) {
+        if (machine.mainNode != null) {
+            machine.mainNode.destroy();
+        }
+    }
 }

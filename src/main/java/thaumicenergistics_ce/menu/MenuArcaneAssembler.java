@@ -423,7 +423,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
             if (!merged && AEItems.SPEED_CARD.is(stack)) {
                 merged = moveItemStackTo(stack, IDX_UPGRADE_START, IDX_UPGRADE_END, false);
             }
-            if (!merged && !BlockEntityArcaneAssembler.isGearItem(stack)) {
+            if (!merged && !GearSlots.isGear(stack)) {
                 // Fall through to the normal inventory shuffle.
             }
             if (!merged) {

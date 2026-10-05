@@ -147,15 +147,13 @@ final class AssemblerDisplaySync {
         if (owner.level() == null) {
             return;
         }
-        if (owner.patternsDirty) {
-            owner.patternsDirty = !owner.rebuildPatterns();
-        }
+        owner.patternCache.refresh();
         owner.suppressNotify = true;
         try {
             for (int i = 0; i < BlockEntityArcaneAssembler.PATTERN_SLOT_COUNT; i++) {
                 ItemStack stack = ItemStack.EMPTY;
-                if (i < owner.cachedPatterns.size()) {
-                    List<GenericStack> outputs = owner.cachedPatterns.get(i).getOutputs();
+                if (i < owner.patternCache.patterns().size()) {
+                    List<GenericStack> outputs = owner.patternCache.patterns().get(i).getOutputs();
                     if (!outputs.isEmpty() && outputs.getFirst().what() instanceof AEItemKey key) {
                         stack = key.getReadOnlyStack();
                     }

@@ -30,7 +30,6 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -43,7 +42,6 @@ import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.ModItems;
-import thaumicenergistics_ce.inventory.GearSlots;
 import thaumicenergistics_ce.menu.MenuArcaneAssembler;
 import thaumicenergistics_ce.util.ThELog;
 
@@ -90,6 +88,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     final AssemblerDisplaySync displaySync;
     final AssemblerVisSource vis;
     final AssemblerUpgrades upgrades;
+    final AssemblerPatternCache patternCache;
 
     private AssemblerCraftJob craftJob;
 
@@ -112,10 +111,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return level;
     }
 
-    boolean patternsDirty = true;
     boolean suppressNotify;
-
-    List<IPatternDetails> cachedPatterns = List.of();
 
     public BlockEntityArcaneAssembler(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ARCANE_ASSEMBLER.get(), pos, state);
@@ -124,6 +120,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         this.craft = new AssemblerCraftState();
         this.vis = new AssemblerVisSource(this);
         this.upgrades = new AssemblerUpgrades(this);
+        this.patternCache = new AssemblerPatternCache(this);
 
         this.mainNode = GridHelper.createManagedNode(this, AssemblerNodeListener.INSTANCE)
                 .setVisualRepresentation(ModItems.ARCANE_ASSEMBLER.get())
@@ -144,19 +141,13 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     @Override
     public void onLoad() {
         super.onLoad();
-        if (level != null && !level.isClientSide()) {
-            mainNode.create(level, getBlockPos());
-            // loadAdditional ran before setLevel, so a restored craft had no world to match against.
-            craftJob().recoverInterruptedCraft();
-        }
+        AssemblerNodeListener.attach(this);
     }
 
     @Override
     public void setRemoved() {
         super.setRemoved();
-        if (mainNode != null) {
-            mainNode.destroy();
-        }
+        AssemblerNodeListener.detach(this);
     }
 
     /** Drops what the player owns - the core, the gear and the cards - and nothing else: the mirror,
@@ -226,12 +217,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return craftJob().craftCost(pattern);
     }
 
-    /** Whether {@code stack} belongs in a gear slot at all; shift-click routing uses this, while the
-     * per-slot check additionally requires the right equipment type. */
-    public static boolean isGearItem(ItemStack stack) {
-        return GearSlots.isGear(stack);
-    }
-
     // ------------------------------------------------------------------
     // AE2 grid plumbing
     // ------------------------------------------------------------------
@@ -262,9 +247,9 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         if (level == null || level.isClientSide()) {
             return TickRateModulation.SLEEP;
         }
-        if (patternsDirty) {
-            // Settled only on a successful read, so a rebuild with no level yet retries. See rebuildPatterns.
-            patternsDirty = !rebuildPatterns();
+        if (patternCache.isStale()) {
+            // Settled only on a successful read, so a rebuild with no level yet retries. See refresh().
+            patternCache.refresh();
             ICraftingProvider.requestUpdate(mainNode);
         }
         if (!mainNode.isActive()) {
@@ -301,11 +286,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
     @Override
     public List<IPatternDetails> getAvailablePatterns() {
-        if (patternsDirty) {
-            // Only a rebuild that could read the core settles it: AE2 asks while loading, with no level yet.
-            patternsDirty = !rebuildPatterns();
-        }
-        return cachedPatterns;
+        patternCache.refresh();
+        return patternCache.patterns();
     }
 
     @Override
@@ -340,28 +322,17 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return craftJob().acceptFromMachine(patternDetails);
     }
 
-    // ------------------------------------------------------------------
-    // Pattern cache
-    // ------------------------------------------------------------------
-
-    /** Rebuilds the advertised set from the core, not the live recipe manager: a core needs registry
-     * access, so clear {@code patternsDirty} only when this returns {@code true}.
-     * @return {@code true} when the core was readable and the cache is complete */
-    boolean rebuildPatterns() {
-        return craftJob().rebuildPatterns();
-    }
-
     private void onInventoryChanged() {
         if (suppressNotify) {
             return;
         }
-        patternsDirty = true;
+        patternCache.invalidate();
         // The cards sit in the machine's own slots now, so their count is read off the inventory.
         upgrades.refreshSpeedUpgrades();
         upgrades.recalculateGearDiscount();
         setChanged();
         if (level != null && !level.isClientSide() && mainNode.getGrid() != null) {
-            patternsDirty = !rebuildPatterns();
+            patternCache.refresh();
             ICraftingProvider.requestUpdate(mainNode);
         }
         if (level != null && !level.isClientSide()) {
@@ -376,21 +347,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        mainNode.loadFromNBT(tag);
-        craft.readNbt(tag, registries);
-        upgrades.readNbt(tag);
-        vis.readNbt(tag);
-        suppressNotify = true;
-        try {
-            ContainerHelper.loadAllItems(tag, inventory.getItems(), registries);
-        } finally {
-            suppressNotify = false;
-        }
-        upgrades.recalculateGearDiscount();
-        // After the items, not before: the count comes from the cards that just loaded, not from the
-        // saved number a menu-local container used to write.
-        upgrades.recountSpeedUpgrades();
-        patternsDirty = true;
+        AssemblerPersistence.load(this, tag, registries);
     }
 
     public static int visBufferTarget() {
@@ -400,12 +357,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        mainNode.saveToNBT(tag);
-        upgrades.writeNbt(tag);
-        vis.writeNbt(tag);
-        // Saved with the craft, so finishing it after a reload needs nothing but this tag and the well.
-        craft.writeNbt(tag, registries);
-        ContainerHelper.saveAllItems(tag, inventory.getItems(), registries);
+        AssemblerPersistence.save(this, tag, registries);
     }
 
     @Override
@@ -426,10 +378,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     @Override
     public void onDataPacket(
             Connection net, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider registries) {
-        CompoundTag tag = packet.getTag();
-        if (tag != null) {
-            displaySync.applySyncedState(tag, registries);
-        }
+        AssemblerPersistence.applyPacket(this, packet, registries);
     }
 
     // ------------------------------------------------------------------
