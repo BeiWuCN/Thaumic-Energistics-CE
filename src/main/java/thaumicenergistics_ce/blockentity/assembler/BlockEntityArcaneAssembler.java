@@ -3,9 +3,6 @@ package thaumicenergistics_ce.blockentity.assembler;
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.implementations.blockentities.ICraftingMachine;
 import appeng.api.implementations.blockentities.PatternContainerGroup;
-import appeng.api.networking.GridFlags;
-import appeng.api.networking.GridHelper;
-import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.IInWorldGridNodeHost;
 import appeng.api.networking.IManagedGridNode;
@@ -15,12 +12,10 @@ import appeng.api.networking.security.IActionSource;
 import appeng.api.networking.ticking.IGridTickable;
 import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
-import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.util.AECableType;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.aspect.TCAspects;
-import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -42,20 +37,15 @@ import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
-import thaumicenergistics_ce.init.ModItems;
-import thaumicenergistics_ce.util.ThELog;
 
 /**
- * An AE2 crafting machine that runs Thaumaturge arcane recipes on demand, paying in ambient vis.
- * <ul>
- *   <li>Is its own {@link ICraftingProvider} and an {@link ICraftingMachine} a provider can drive.
- *   <li>Priced as the workbench does: base vis plus crystal vis, surcharged, less gear discounts.
- * </ul>
+ * An AE2 crafting machine that runs Thaumaturge arcane recipes on demand, paying in ambient vis: its own
+ * {@link ICraftingProvider} and an {@link ICraftingMachine} a provider on the same grid can drive, priced
+ * as the workbench is - base vis plus crystal vis, surcharged, less the gear discount.
  */
 public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         implements IInWorldGridNodeHost, IActionHost, IGridTickable, ICraftingProvider, ICraftingMachine {
 
-    // ---- Inventory layout -------------------------------------------------
     public static final int CORE_SLOT = 0;
     public static final int PATTERN_SLOT_START = 1;
     public static final int PATTERN_SLOT_COUNT = 21;
@@ -77,10 +67,12 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     public static final List<ResourceKey<IAspect>> PRIMALS = TCAspects.PRIMALS;
 
     final SimpleContainer inventory = new AssemblerInventoryLayout(this::onInventoryChanged);
+    private final AssemblerCraftParts craftParts = new AssemblerCraftParts(this);
 
     final IManagedGridNode mainNode;
     final IActionSource actionSource;
     boolean active;
+    boolean suppressNotify;
 
     // Built in the constructor, not here: a helper that reads this machine is built in order, and the
     // fields below it are the ones it reads.
@@ -90,25 +82,9 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     final AssemblerUpgrades upgrades;
     final AssemblerPatternCache patternCache;
 
-    private AssemblerCraftJob craftJob;
+    AssemblerCraftJob craftJob() { return craftParts.job(); }
 
-    AssemblerCraftJob craftJob() {
-        if (craftJob == null) {
-            craftJob = new AssemblerCraftJob(this);
-        }
-        return craftJob;
-    }
-
-    private AssemblerCraftRunner craftRunner;
-
-    AssemblerCraftRunner craftRunner() {
-        if (craftRunner == null) {
-            craftRunner = new AssemblerCraftRunner(this);
-        }
-        return craftRunner;
-    }
-
-    boolean suppressNotify;
+    AssemblerCraftRunner craftRunner() { return craftParts.runner(); }
 
     public BlockEntityArcaneAssembler(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ARCANE_ASSEMBLER.get(), pos, state);
@@ -119,21 +95,9 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         this.upgrades = new AssemblerUpgrades(this);
         this.patternCache = new AssemblerPatternCache(this);
 
-        this.mainNode = GridHelper.createManagedNode(this, AssemblerNodeListener.INSTANCE)
-                .setVisualRepresentation(ModItems.ARCANE_ASSEMBLER.get())
-                .setInWorldNode(true)
-                .setTagName("proxy")
-                .setFlags(GridFlags.REQUIRE_CHANNEL)
-                .setExposedOnSides(EnumSet.allOf(Direction.class))
-                .setIdlePowerUsage(0.0)
-                .addService(IGridTickable.class, this)
-                .addService(ICraftingProvider.class, this);
+        this.mainNode = AssemblerGridNode.create(this);
         this.actionSource = IActionSource.ofMachine(this);
     }
-
-    // ------------------------------------------------------------------
-    // Lifecycle
-    // ------------------------------------------------------------------
 
     @Override
     public void onLoad() {
@@ -148,56 +112,25 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     }
 
     /** Drops what the player owns - the core, the gear and the cards - and nothing else: the mirror,
-     * target and preview bands hold copies the machine made, so dropping them would hand out unpaid
-     * items. */
-    public void dropContents() {
-        AssemblerContents.drop(this);
-    }
+     * target and preview bands hold copies the machine made, so dropping them hands out unpaid items. */
+    public void dropContents() { AssemblerContents.drop(this); }
 
-    public SimpleContainer getInventory() {
-        return inventory;
-    }
-
-    public boolean isCrafting() {
-        return craft.isCrafting();
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public int getBufferedVis() {
-        return vis.bufferedVis();
-    }
-
-    public int getAspectVis(int index) {
-        return vis.aspectVis(index);
-    }
-
-    public String aspectVisTrace() {
-        return vis.aspectVisTrace();
-    }
-
-    public float getAuraAround() {
-        return vis.auraAround();
-    }
-
-    public int getAuraCapacity() {
-        return vis.auraCapacity();
-    }
+    public SimpleContainer getInventory() { return inventory; }
+    public boolean isCrafting() { return craft.isCrafting(); }
+    public boolean isActive() { return active; }
+    public int getBufferedVis() { return vis.bufferedVis(); }
+    public int getAspectVis(int index) { return vis.aspectVis(index); }
+    public String aspectVisTrace() { return vis.aspectVisTrace(); }
+    public float getAuraAround() { return vis.auraAround(); }
+    public int getAuraCapacity() { return vis.auraCapacity(); }
+    public int getCraftTicks() { return craft.craftTicks(); }
+    public int getTicksPerCraft() { return upgrades.ticksPerCraft(); }
+    public ItemStack previewStack() { return displaySync.previewStack(); }
+    public @Nullable Component waitReason() { return craft.isCrafting() ? craft.lastWait() : null; }
+    public @Nullable Component refusalReason() { return craft.lastRefusal(); }
 
     /** The speed upgrades and the gear discount, read by the menu and the Jade provider. */
-    public AssemblerUpgrades upgrades() {
-        return upgrades;
-    }
-
-    public int getCraftTicks() {
-        return craft.craftTicks();
-    }
-
-    public int getTicksPerCraft() {
-        return upgrades.ticksPerCraft();
-    }
+    public AssemblerUpgrades upgrades() { return upgrades; }
 
     public float getCraftProgress() {
         int total = upgrades.ticksPerCraft();
@@ -205,33 +138,17 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                 : 0.0F;
     }
 
-    public ItemStack previewStack() {
-        return displaySync.previewStack();
-    }
-
     /** The vis a craft of {@code pattern} is charged, after the gear discount. */
-    public int craftCost(ThEArcanePattern pattern) {
-        return craftJob().craftCost(pattern);
-    }
-
-    // ------------------------------------------------------------------
-    // AE2 grid plumbing
-    // ------------------------------------------------------------------
+    public int craftCost(ThEArcanePattern pattern) { return craftJob().craftCost(pattern); }
 
     @Override
-    public @Nullable IGridNode getGridNode(Direction dir) {
-        return mainNode.getNode();
-    }
+    public @Nullable IGridNode getGridNode(Direction dir) { return mainNode.getNode(); }
 
     @Override
-    public @Nullable IGridNode getActionableNode() {
-        return mainNode.getNode();
-    }
+    public @Nullable IGridNode getActionableNode() { return mainNode.getNode(); }
 
     @Override
-    public AECableType getCableConnectionType(Direction dir) {
-        return AECableType.SMART;
-    }
+    public AECableType getCableConnectionType(Direction dir) { return AECableType.SMART; }
 
     @Override
     public TickingRequest getTickingRequest(IGridNode node) {
@@ -241,45 +158,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
     @Override
     public TickRateModulation tickingRequest(IGridNode node, int ticksSinceLast) {
-        if (level == null || level.isClientSide()) {
-            return TickRateModulation.SLEEP;
-        }
-        if (patternCache.isStale()) {
-            // Settled only on a successful read, so a rebuild with no level yet retries. See refresh().
-            patternCache.refresh();
-            ICraftingProvider.requestUpdate(mainNode);
-        }
-        if (!mainNode.isActive()) {
-            return TickRateModulation.IDLE;
-        }
-        if (vis.bufferedVis() < vis.visTarget(craft.isCrafting(), craft.craftPrice())) {
-            vis.replenishVis();
-        }
-        if (!craft.isCrafting()) {
-            return TickRateModulation.IDLE;
-        }
-        IGrid grid = node.getGrid();
-        if (grid == null) {
-            return TickRateModulation.IDLE;
-        }
-        return craftRunner().craftingTick(grid, ticksSinceLast);
+        return AssemblerGridTick.advance(this, node, ticksSinceLast);
     }
-
-    // ------------------------------------------------------------------
-    // Crafting
-    // ------------------------------------------------------------------
-
-    public @Nullable Component waitReason() {
-        return craft.isCrafting() ? craft.lastWait() : null;
-    }
-
-    public @Nullable Component refusalReason() {
-        return craft.lastRefusal();
-    }
-
-    // ------------------------------------------------------------------
-    // ICraftingProvider
-    // ------------------------------------------------------------------
 
     @Override
     public List<IPatternDetails> getAvailablePatterns() {
@@ -293,26 +173,13 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     }
 
     @Override
-    public boolean isBusy() {
-        return craft.isCrafting();
-    }
+    public boolean isBusy() { return craft.isCrafting(); }
 
     @Override
-    public PatternContainerGroup getCraftingMachineInfo() {
-        return new PatternContainerGroup(
-                AEItemKey.of(ModItems.ARCANE_ASSEMBLER.get()),
-                Component.translatable("block.thaumicenergistics_ce.arcane_assembler"),
-                List.of());
-    }
+    public PatternContainerGroup getCraftingMachineInfo() { return AssemblerGridNode.machineInfo(); }
 
     @Override
-    public boolean acceptsPlans() {
-        return !craft.isCrafting();
-    }
-
-    // ------------------------------------------------------------------
-    // ICraftingMachine, for a colocated AE2 pattern provider
-    // ------------------------------------------------------------------
+    public boolean acceptsPlans() { return !craft.isCrafting(); }
 
     @Override
     public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputs, Direction ejectionDirection) {
@@ -320,26 +187,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     }
 
     private void onInventoryChanged() {
-        if (suppressNotify) {
-            return;
-        }
-        patternCache.invalidate();
-        // The cards sit in the machine's own slots now, so their count is read off the inventory.
-        upgrades.refreshSpeedUpgrades();
-        upgrades.recalculateGearDiscount();
-        setChanged();
-        if (level != null && !level.isClientSide() && mainNode.getGrid() != null) {
-            patternCache.refresh();
-            ICraftingProvider.requestUpdate(mainNode);
-        }
-        if (level != null && !level.isClientSide()) {
-            displaySync.refreshPatternSlots();
-        }
+        AssemblerInventoryWatcher.changed(this);
     }
-
-    // ------------------------------------------------------------------
-    // Persistence and sync
-    // ------------------------------------------------------------------
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
@@ -347,9 +196,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         AssemblerPersistence.load(this, tag, registries);
     }
 
-    public static int visBufferTarget() {
-        return AssemblerVisPool.IDLE_TARGET;
-    }
+    public static int visBufferTarget() { return AssemblerVisPool.IDLE_TARGET; }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
@@ -377,10 +224,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
             Connection net, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider registries) {
         AssemblerPersistence.applyPacket(this, packet, registries);
     }
-
-    // ------------------------------------------------------------------
-    // Menu
-    // ------------------------------------------------------------------
 
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
