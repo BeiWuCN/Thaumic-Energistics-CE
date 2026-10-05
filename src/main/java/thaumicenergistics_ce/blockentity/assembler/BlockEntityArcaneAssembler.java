@@ -380,7 +380,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         return new MenuArcaneAssembler(containerId, playerInventory, this);
     }
 
-    public static void serverTick(Level level, BlockPos pos, BlockState state, BlockEntityArcaneAssembler be) {
+    public static void serverTick(
+            Level level, BlockPos pos, BlockState state, BlockEntityArcaneAssembler assembler) {
         // Intentionally empty: the AE2 grid tick is the machine's only clock.
     }
 }
