@@ -16,7 +16,7 @@ import net.minecraft.world.inventory.Slot;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
-import thaumicenergistics_ce.gui.GuiLayout;
+import thaumicenergistics_ce.layout.GuiLayout;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.menu.MenuArcaneAssembler;
 import thaumicenergistics_ce.util.ThELog;

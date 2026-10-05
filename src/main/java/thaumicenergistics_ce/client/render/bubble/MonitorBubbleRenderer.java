@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.client.render;
+package thaumicenergistics_ce.client.render.bubble;
 
 import com.leclowndu93150.thaumaturge.api.aspect.AspectKnowledgeAccess;
 import com.leclowndu93150.thaumaturge.api.client.AspectRendering;
@@ -13,9 +13,9 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
-import thaumicenergistics_ce.client.render.BubbleCells.Cell;
-import thaumicenergistics_ce.client.render.BubbleCells.ChipCell;
-import thaumicenergistics_ce.client.render.BubbleCells.TextCell;
+import thaumicenergistics_ce.client.render.bubble.BubbleCells.Cell;
+import thaumicenergistics_ce.client.render.bubble.BubbleCells.ChipCell;
+import thaumicenergistics_ce.client.render.bubble.BubbleCells.TextCell;
 import thaumicenergistics_ce.util.ThELog;
 
 /**

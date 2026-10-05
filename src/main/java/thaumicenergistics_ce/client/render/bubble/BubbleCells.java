@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.client.render;
+package thaumicenergistics_ce.client.render.bubble;
 
 import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;

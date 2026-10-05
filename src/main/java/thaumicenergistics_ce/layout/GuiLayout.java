@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.gui;
+package thaumicenergistics_ce.layout;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
