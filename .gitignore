@@ -25,3 +25,8 @@ thaumaturge-src/
 hs_err_pid*.log
 replay_pid*.log
 *.log
+
+# Working notes for whoever is picking the tree up locally: the comment conventions checklist and the
+# arcane crafting terminal's design notes. Neither is the mod's source nor anything a player or a
+# pack author needs, so they stay out of the public repository and live on disk only.
+docs/
