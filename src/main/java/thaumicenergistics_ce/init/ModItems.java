@@ -18,7 +18,6 @@ import thaumicenergistics_ce.item.ItemEssentiaTerminal;
 import thaumicenergistics_ce.item.ItemFocusAEWrench;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.item.ItemKnowledgeCore;
-import thaumicenergistics_ce.item.ItemMachineBlock;
 import thaumicenergistics_ce.item.ItemVisInterface;
 import thaumicenergistics_ce.item.ItemWirelessArcaneCraftingTerminal;
 import thaumicenergistics_ce.item.ItemWirelessConnector;
@@ -53,59 +52,23 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> ESSENTIA_CELL_WORKBENCH =
             REGISTRY.registerSimpleBlockItem(ModBlocks.ESSENTIA_CELL_WORKBENCH);
 
-    public static final DeferredItem<BlockItem> ESSENTIA_VIBRATION_CHAMBER = REGISTRY.registerItem(
-            "essentia_vibration_chamber",
-            properties -> new ItemMachineBlock(
-                    ModBlocks.ESSENTIA_VIBRATION_CHAMBER.get(),
-                    properties,
-                    "tooltip.thaumicenergistics_ce.essentia_vibration_chamber.desc",
-                    "tooltip.thaumicenergistics_ce.essentia_vibration_chamber.hint"),
-            new Item.Properties());
+    public static final DeferredItem<BlockItem> ESSENTIA_VIBRATION_CHAMBER =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.ESSENTIA_VIBRATION_CHAMBER);
 
-    public static final DeferredItem<BlockItem> ESSENTIA_PROVIDER = REGISTRY.registerItem(
-            "essentia_provider",
-            properties -> new ItemMachineBlock(
-                    ModBlocks.ESSENTIA_PROVIDER.get(),
-                    properties,
-                    "tooltip.thaumicenergistics_ce.essentia_provider.desc",
-                    "tooltip.thaumicenergistics_ce.essentia_provider.hint"),
-            new Item.Properties());
+    public static final DeferredItem<BlockItem> ESSENTIA_PROVIDER =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.ESSENTIA_PROVIDER);
 
-    public static final DeferredItem<BlockItem> INFUSION_PROVIDER = REGISTRY.registerItem(
-            "infusion_provider",
-            properties -> new ItemMachineBlock(
-                    ModBlocks.INFUSION_PROVIDER.get(),
-                    properties,
-                    "tooltip.thaumicenergistics_ce.infusion_provider.desc",
-                    "tooltip.thaumicenergistics_ce.infusion_provider.hint"),
-            new Item.Properties());
+    public static final DeferredItem<BlockItem> INFUSION_PROVIDER =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.INFUSION_PROVIDER);
 
-    public static final DeferredItem<BlockItem> DISTILLATION_ENCODER = REGISTRY.registerItem(
-            "distillation_encoder",
-            properties -> new ItemMachineBlock(
-                    ModBlocks.DISTILLATION_ENCODER.get(),
-                    properties,
-                    "tooltip.thaumicenergistics_ce.distillation_encoder.desc",
-                    "tooltip.thaumicenergistics_ce.distillation_encoder.hint"),
-            new Item.Properties());
+    public static final DeferredItem<BlockItem> DISTILLATION_ENCODER =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.DISTILLATION_ENCODER);
 
-    public static final DeferredItem<BlockItem> INFUSION_MONITOR = REGISTRY.registerItem(
-            "infusion_monitor",
-            properties -> new ItemMachineBlock(
-                    ModBlocks.INFUSION_MONITOR.get(),
-                    properties,
-                    "tooltip.thaumicenergistics_ce.infusion_monitor.desc",
-                    "tooltip.thaumicenergistics_ce.infusion_monitor.hint"),
-            new Item.Properties());
+    public static final DeferredItem<BlockItem> INFUSION_MONITOR =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.INFUSION_MONITOR);
 
-    public static final DeferredItem<BlockItem> ESSENTIA_PROVIDER_CONNECTION = REGISTRY.registerItem(
-            "essentia_provider_connection",
-            properties -> new ItemMachineBlock(
-                    ModBlocks.ESSENTIA_PROVIDER_CONNECTION.get(),
-                    properties,
-                    "tooltip.thaumicenergistics_ce.essentia_provider_connection.desc",
-                    "tooltip.thaumicenergistics_ce.essentia_provider_connection.hint"),
-            new Item.Properties());
+    public static final DeferredItem<BlockItem> ESSENTIA_PROVIDER_CONNECTION =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.ESSENTIA_PROVIDER_CONNECTION);
 
     public static final DeferredItem<ItemWirelessConnector> WIRELESS_CONNECTOR = REGISTRY.registerItem(
             "wireless_connector", ItemWirelessConnector::new, new Item.Properties());

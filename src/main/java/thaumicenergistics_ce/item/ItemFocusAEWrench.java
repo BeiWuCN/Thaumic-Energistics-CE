@@ -4,9 +4,6 @@ import com.leclowndu93150.thaumaturge.api.casters.FocusEngine;
 import com.leclowndu93150.thaumaturge.api.casters.FocusPackage;
 import com.leclowndu93150.thaumaturge.api.casters.FocusSettings;
 import com.leclowndu93150.thaumaturge.content.casters.ItemFocus;
-import java.util.List;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -16,7 +13,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import thaumicenergistics_ce.compat.thaumaturge.TcWand;
 import thaumicenergistics_ce.focus.FocusEffectAEWrench;
@@ -122,14 +118,5 @@ public class ItemFocusAEWrench extends ItemFocus {
             }
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
-    }
-
-    @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("item.thaumicenergistics_ce.focus_aewrench.desc")
-                .withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.translatable("item.thaumicenergistics_ce.focus_aewrench.install")
-                .withStyle(ChatFormatting.DARK_GRAY));
-        super.appendHoverText(stack, context, tooltip, flag);
     }
 }

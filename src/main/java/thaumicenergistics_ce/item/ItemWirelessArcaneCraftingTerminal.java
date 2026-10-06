@@ -170,17 +170,12 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
             List<Component> tooltip,
             TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
-        tooltip.add(Component.translatable(
-                "tooltip.thaumicenergistics_ce.wireless_arcane_crafting_terminal.desc"));
         CompoundTag tag = bindingTag(stack);
         if (tag != null && tag.contains(NBT_POS)) {
             BlockPos pos = BlockPos.of(tag.getLong(NBT_POS));
             tooltip.add(Component.translatable(
                     "tooltip.thaumicenergistics_ce.wireless_arcane_crafting_terminal.paired",
                     pos.getX(), pos.getY(), pos.getZ()));
-        } else {
-            tooltip.add(Component.translatable(
-                    "tooltip.thaumicenergistics_ce.wireless_arcane_crafting_terminal.hint"));
         }
     }
 }
