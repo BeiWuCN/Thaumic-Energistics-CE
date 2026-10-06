@@ -202,7 +202,7 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
                 buffer.remove(aspect);
                 continue;
             }
-            int accepted = provider.insert(aspect, held, false);
+            int accepted = provider.insertFromLink(aspect, held, false);
             if (accepted > 0) {
                 moved = true;
             }

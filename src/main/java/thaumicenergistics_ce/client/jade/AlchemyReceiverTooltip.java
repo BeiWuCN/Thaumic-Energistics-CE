@@ -10,13 +10,14 @@ import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.IElementHelper;
+import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider;
 import thaumicenergistics_ce.integration.jade.AlchemyReceiverProvider;
 
 /**
  * The Alchemy Receiver's Jade tooltip: the provider it is bound to, or how to bind one.
  * <ul>
  *   <li>The drawing half of {@link AlchemyReceiverProvider}, paired with it by the shared UID.
- *   <li>No grid state line: the receiver is never on a cable, so the link is all it can report.
+ *   <li>No grid state line: the receiver is never on a cable, so the link and its price are what it reports.
  * </ul>
  */
 public final class AlchemyReceiverTooltip implements IBlockComponentProvider {
@@ -36,6 +37,10 @@ public final class AlchemyReceiverTooltip implements IBlockComponentProvider {
                     .translatable("thaumicenergistics_ce.jade.alchemy_receiver.bound",
                             provider.getX(), provider.getY(), provider.getZ())
                     .withStyle(ChatFormatting.WHITE)));
+            tooltip.add(helper.text(Component
+                    .translatable("thaumicenergistics_ce.jade.alchemy_receiver.cost",
+                            (int) BlockEntityAlchemyProvider.AE_PER_ESSENTIA)
+                    .withStyle(ChatFormatting.GRAY)));
             return;
         }
         tooltip.add(helper.text(Component

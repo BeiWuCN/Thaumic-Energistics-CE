@@ -36,7 +36,7 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
  *
  * <ul><li>The buffer is a waypoint, not storage: inserted essentia is pushed to a neighbour on the
  * next tick and is never persisted.</li><li>A provider with nothing attached refuses everything, while a
- * machine that wants essentia is served straight from the grid.</li></ul>
+ * machine that wants essentia is served from the grid, through a reserve the grid keeps filled.</li></ul>
  */
 public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         implements IStorageProvider, IGridTickable, IEssentiaStorage {
@@ -51,10 +51,16 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
     /** What a unit of essentia costs the grid on its way out through a link, the rate a bus pays. */
     public static final double AE_PER_ESSENTIA = 10.0;
 
+    /** The reserve a link spends from, filled from the grid: the number the Jade tooltip reports. */
+    public static final double AE_CACHE = 40.0;
+
     private static final int TICK_RATE_ACTIVE = 10;
     private static final int TICK_RATE_IDLE = 40;
 
     private final AlchemyProviderBuffer buffer = new AlchemyProviderBuffer(this);
+
+    /** Held AE: it covers what the grid will not pay for, so an unpowered grid carries nothing. */
+    private double cacheAE;
 
     private final ReceiverLinks links = new ReceiverLinks(this);
 
@@ -85,6 +91,7 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         if (level == null || level.isClientSide()) {
             return TickRateModulation.IDLE;
         }
+        fillCache();
         if (!getMainNode().isActive() || !buffer.hasWork()) {
             // A receiver may have been broken; paying for a missing one is invisible to the player.
             if (pruneDeadReceivers()) {
@@ -103,6 +110,22 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
     @Override
     public int insert(Holder<IAspect> aspect, int amount, boolean simulate) {
         return buffer.insert(aspect, amount, simulate);
+    }
+
+    /**
+     * An insert from a bound receiver: the link's traffic, which pays per unit as a take does, so a grid
+     * that cannot pay carries nothing in either direction.
+     */
+    public int insertFromLink(Holder<IAspect> aspect, int amount, boolean simulate) {
+        if (aspect == null || amount <= 0) {
+            return 0;
+        }
+        int accepted = buffer.insert(aspect, amount, true);
+        if (accepted <= 0 || simulate) {
+            return accepted;
+        }
+        int paid = chargeForLink(accepted);
+        return paid <= 0 ? 0 : buffer.insert(aspect, paid, false);
     }
 
     @Override
@@ -169,7 +192,11 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         }
         int wanted = amount;
         if (!simulate) {
-            wanted = paidUnits(storage, key, amount);
+            long available = storage.extract(key, amount, Actionable.SIMULATE, actionSource);
+            if (available <= 0) {
+                return 0;
+            }
+            wanted = chargeForLink((int) Math.min(available, amount));
             if (wanted <= 0) {
                 return 0;
             }
@@ -184,28 +211,45 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         return (int) Math.min(moved, Integer.MAX_VALUE);
     }
 
-    /** The units this link can pay for, capped by what the grid holds; 0 when it cannot pay. */
-    private int paidUnits(MEStorage storage, AEssentiaKey key, int amount) {
+    /** The level of the reserve, which the Jade tooltip reports. */
+    public int cachedAE() {
+        return (int) Math.floor(cacheAE);
+    }
+
+    /** Tops the reserve up from the grid: full while the grid can pay, empty while it cannot. */
+    private void fillCache() {
+        if (cacheAE >= AE_CACHE) {
+            return;
+        }
+        IEnergyService energy = networkEnergy();
+        if (energy == null) {
+            return;
+        }
+        cacheAE += energy.extractAEPower(AE_CACHE - cacheAE, Actionable.MODULATE,
+                PowerMultiplier.CONFIG);
+    }
+
+    /** Pays a unit at a time, the grid first and the reserve for the rest; stops when neither can. */
+    private int chargeForLink(int units) {
         IEnergyService energy = networkEnergy();
         if (energy == null) {
             return 0;
         }
-        long available = storage.extract(key, amount, Actionable.SIMULATE, actionSource);
-        if (available <= 0) {
-            return 0;
+        int paid = 0;
+        while (paid < units) {
+            double offered = energy.extractAEPower(AE_PER_ESSENTIA, Actionable.SIMULATE,
+                    PowerMultiplier.CONFIG);
+            double shortfall = AE_PER_ESSENTIA - offered;
+            if (shortfall > cacheAE) {
+                break;
+            }
+            if (offered > 0) {
+                energy.extractAEPower(offered, Actionable.MODULATE, PowerMultiplier.CONFIG);
+            }
+            cacheAE -= shortfall;
+            paid++;
         }
-        int wanted = (int) Math.min(available, amount);
-        double payable = energy.extractAEPower(wanted * AE_PER_ESSENTIA, Actionable.SIMULATE,
-                PowerMultiplier.CONFIG);
-        int affordable = (int) (payable / AE_PER_ESSENTIA);
-        if (affordable <= 0) {
-            return 0;
-        }
-        int buy = Math.min(wanted, affordable);
-        // Paid before the essentia leaves: a unit the grid cannot pay for is never taken.
-        double paid = energy.extractAEPower(buy * AE_PER_ESSENTIA, Actionable.MODULATE,
-                PowerMultiplier.CONFIG);
-        return (int) Math.min(buy, paid / AE_PER_ESSENTIA);
+        return paid;
     }
 
     private @Nullable IGrid networkGrid() {
@@ -238,6 +282,7 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
             receivers.add(LongTag.valueOf(pos.asLong()));
         }
         tag.put("LinkedReceivers", receivers);
+        tag.putDouble("CacheAE", cacheAE);
     }
 
     @Override
@@ -252,6 +297,7 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         }
         links.replace(positions);
         links.updateIdlePower();
+        cacheAE = tag.getDouble("CacheAE");
         buffer.clear();
     }
 }

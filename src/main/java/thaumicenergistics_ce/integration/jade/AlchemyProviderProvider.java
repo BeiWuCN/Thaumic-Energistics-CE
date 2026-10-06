@@ -26,6 +26,9 @@ public class AlchemyProviderProvider implements IServerDataProvider<BlockAccesso
     /** The wire format of {@link #appendServerData}. The tooltip half reads it back. */
     public static final String TAG_RECEIVERS = "Receivers";
 
+    /** The AE the provider is holding: an unpowered grid leaves the reserve empty, and it is shown. */
+    public static final String TAG_CACHE = "Cache";
+
     @Override
     public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
         if (!(accessor.getBlockEntity() instanceof BlockEntityAlchemyProvider provider)) {
@@ -34,6 +37,7 @@ public class AlchemyProviderProvider implements IServerDataProvider<BlockAccesso
         IGridNode node = provider.getActionableNode();
         JadeGridState.of(node).write(tag, node);
         tag.putInt(TAG_RECEIVERS, provider.linkedReceiverCount());
+        tag.putInt(TAG_CACHE, provider.cachedAE());
     }
 
     @Override
