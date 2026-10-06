@@ -1,8 +1,10 @@
 package thaumicenergistics_ce.blockentity.alchemyprovider;
 
 import appeng.api.config.Actionable;
+import appeng.api.config.PowerMultiplier;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
+import appeng.api.networking.energy.IEnergyService;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.networking.storage.IStorageService;
 import appeng.api.networking.ticking.IGridTickable;
@@ -45,6 +47,9 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
     public static final int MAX_LINKED_RECEIVERS = 8;
 
     public static final int MAX_LINK_DISTANCE = 32;
+
+    /** What a unit of essentia costs the grid on its way out through a link, the rate a bus pays. */
+    public static final double AE_PER_ESSENTIA = 10.0;
 
     private static final int TICK_RATE_ACTIVE = 10;
     private static final int TICK_RATE_IDLE = 40;
@@ -147,8 +152,8 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
     }
 
     /**
-     * Lets a bound receiver take essentia from the network on behalf of its own neighbours. It goes
-     * to the grid, not to {@link #extract}: the buffer holds essentia on its way into the world.
+     * Lets a bound receiver take essentia from the grid rather than {@link #extract}, which serves
+     * the buffer. It pays per unit carried, so a grid without power moves nothing.
      */
     public int takeForLink(Holder<IAspect> aspect, int amount, boolean simulate) {
         if (aspect == null || amount <= 0 || !getMainNode().isActive()) {
@@ -158,32 +163,69 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         if (storage == null) {
             return 0;
         }
-        Actionable mode = simulate
-                ? Actionable.SIMULATE
-                : Actionable.MODULATE;
         AEssentiaKey key = AEssentiaKey.of(aspect);
         if (key == null) {
             return 0;
         }
-        long moved = storage.extract(key, amount, mode, actionSource);
+        int wanted = amount;
+        if (!simulate) {
+            wanted = paidUnits(storage, key, amount);
+            if (wanted <= 0) {
+                return 0;
+            }
+        }
+        Actionable mode = simulate
+                ? Actionable.SIMULATE
+                : Actionable.MODULATE;
+        long moved = storage.extract(key, wanted, mode, actionSource);
         if (!simulate && moved > 0) {
             setChanged();
         }
         return (int) Math.min(moved, Integer.MAX_VALUE);
     }
 
-    private MEStorage networkStorage() {
-        IGridNode node = getMainNode().getNode();
-        if (node == null) {
-            return null;
+    /** The units this link can pay for, capped by what the grid holds; 0 when it cannot pay. */
+    private int paidUnits(MEStorage storage, AEssentiaKey key, int amount) {
+        IEnergyService energy = networkEnergy();
+        if (energy == null) {
+            return 0;
         }
-        IGrid grid = node.getGrid();
+        long available = storage.extract(key, amount, Actionable.SIMULATE, actionSource);
+        if (available <= 0) {
+            return 0;
+        }
+        int wanted = (int) Math.min(available, amount);
+        double payable = energy.extractAEPower(wanted * AE_PER_ESSENTIA, Actionable.SIMULATE,
+                PowerMultiplier.CONFIG);
+        int affordable = (int) (payable / AE_PER_ESSENTIA);
+        if (affordable <= 0) {
+            return 0;
+        }
+        int buy = Math.min(wanted, affordable);
+        // Paid before the essentia leaves: a unit the grid cannot pay for is never taken.
+        double paid = energy.extractAEPower(buy * AE_PER_ESSENTIA, Actionable.MODULATE,
+                PowerMultiplier.CONFIG);
+        return (int) Math.min(buy, paid / AE_PER_ESSENTIA);
+    }
+
+    private @Nullable IGrid networkGrid() {
+        IGridNode node = getMainNode().getNode();
+        return node == null ? null : node.getGrid();
+    }
+
+    private @Nullable MEStorage networkStorage() {
+        IGrid grid = networkGrid();
         if (grid == null) {
             return null;
         }
         IStorageService service =
                 grid.getService(IStorageService.class);
         return service == null ? null : service.getInventory();
+    }
+
+    private @Nullable IEnergyService networkEnergy() {
+        IGrid grid = networkGrid();
+        return grid == null ? null : grid.getService(IEnergyService.class);
     }
 
     // Persistence: the links only. The buffer is a waypoint and is not saved.
