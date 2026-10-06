@@ -52,6 +52,9 @@ public final class EssentiaInterfaceAccess {
     private final InterfaceLogicHost host;
     private final IManagedGridNode node;
 
+    /** Set by the first round, which is the only one that clears an earlier build's marks. */
+    private boolean storageRowCleared;
+
     /**
      * Binds a controller to a live host. The host is held rather than looked up again so a round cannot
      * chase an interface that was broken between two ticks.
@@ -84,7 +87,9 @@ public final class EssentiaInterfaceAccess {
         if (be == null || grid == null || !(be.getLevel() instanceof ServerLevel level)) {
             return;
         }
-        MEStorage network = logic.getInventory();
+        // The grid's own storage, not logic.getInventory(): with a config row that one answers with the
+        // interface's storage row, so the same point lands in the network and in the interface at once.
+        MEStorage network = grid.getStorageService().getInventory();
         IEnergyService energy = grid.getService(IEnergyService.class);
         if (network == null || energy == null) {
             return;
@@ -128,10 +133,14 @@ public final class EssentiaInterfaceAccess {
     }
 
     /**
-     * Drops aspects an earlier build of this card let JEI write into the storage row. AE2 reads that row
-     * as what the interface holds, so an aspect left in it could be taken out of nothing.
+     * Drops aspects an earlier build of this card let JEI write into the storage row. Once only: later
+     * rounds leave the row alone, since an aspect in it may be AE2's own stock of the mark by then.
      */
     private void cleanStorageRow(ConfigInventory storage) {
+        if (storageRowCleared) {
+            return;
+        }
+        storageRowCleared = true;
         for (int slot = 0; slot < storage.size(); slot++) {
             if (storage.getKey(slot) instanceof AEssentiaKey) {
                 ThELog.LOG.info("[essentia-interface] clearing a stale aspect in storage slot {}", slot);
