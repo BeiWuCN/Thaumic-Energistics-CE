@@ -52,12 +52,31 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * A sneak onto a cable has to reach the part, since that is where the pairing gesture lives. Anywhere
-     * else the sneak is left alone, which is what keeps a chest opening as it always did.
+     * Only a block that already carries an Arcane Crafting Terminal is worth handing the sneak to: on any
+     * other part the click would reach a machine the player was not aiming at.
      */
     @Override
     public boolean doesSneakBypassUse(ItemStack stack, LevelReader level, BlockPos pos, Player player) {
-        return level.getBlockEntity(pos) instanceof IPartHost;
+        return holdsArcaneTerminal(level, pos);
+    }
+
+    /**
+     * True when that block carries the terminal on any face. The face itself is not in the signature, so
+     * a cable holding one is opened up as a whole; the click still only pairs on the face that holds it.
+     */
+    private static boolean holdsArcaneTerminal(LevelReader level, BlockPos pos) {
+        if (!(level.getBlockEntity(pos) instanceof IPartHost host)) {
+            return false;
+        }
+        if (host.getPart(null) instanceof PartArcaneCraftingTerminal) {
+            return true;
+        }
+        for (Direction side : Direction.values()) {
+            if (host.getPart(side) instanceof PartArcaneCraftingTerminal) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
