@@ -33,7 +33,7 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
 
     public static final int BOOK_SLOT = 0;
 
-    private static final double IDLE_POWER = 32.0;
+    private static final double IDLE_POWER = 64.0;
 
     /** How long the finished-craft pulse stands, in game ticks. Half a second is one clean flash. */
     static final int PULSE_TICKS = 10;
