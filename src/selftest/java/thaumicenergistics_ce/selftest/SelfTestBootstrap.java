@@ -63,5 +63,8 @@ public final class SelfTestBootstrap implements SelfTestProvider {
         // The wireless arcane terminal's access card: the AE2 registration, the item's two upgrade slots
         // and the card that has to ride on the item's own stack. No player, no screen, no live grid.
         NeoForge.EVENT_BUS.addListener(WirelessArcaneEssentiaSelfTest::run);
+        // The vis connection card: whether the card rides the wireless arcane terminal's own slots, and
+        // whether the aura path answers the same across the two passes one craft makes.
+        NeoForge.EVENT_BUS.addListener(VisConnectionSelfTest::run);
     }
 }

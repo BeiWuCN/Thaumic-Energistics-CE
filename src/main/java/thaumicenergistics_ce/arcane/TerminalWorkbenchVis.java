@@ -17,6 +17,7 @@ import thaumicenergistics_ce.util.ThELog;
 /**
  * Lets the Arcane Crafting Terminal pay an arcane craft's untyped vis cost out of the network.
  * Without it nothing crafts: {@code baseVis} comes from a workbench's aura, which a cable has none of.
+ * A terminal holding the vis connection card takes that aura straight, spending no power on it.
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class TerminalWorkbenchVis {
@@ -66,6 +67,10 @@ public final class TerminalWorkbenchVis {
         IEnergySource payer = terminal.payer();
         if (payer != null && !player.level().isClientSide) {
             // A handheld terminal has no block: its aura is the one around the player carrying it.
+            if (terminal.visConnection()) {
+                // No energy source reaches this call at all, so a carded craft has no power left to spend.
+                return TerminalAuraPayment.payAura(player.level(), player.blockPosition(), need, simulate);
+            }
             return TerminalAuraPayment.pay(player.level(), player.blockPosition(), payer, need, simulate);
         }
         return part.supplyAura(need, simulate);

@@ -216,7 +216,11 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
             crystals.add(part.crystalInventory().getStackInSlot(i));
         }
-        return new TerminalArcaneCraftingInput(cells, serverPlayer, wand, crystals, part, ownerMenu.auraPayer());
+        // The card is read once, here: both aura passes of one craft then read this frozen answer instead
+        // of asking the slot again, which is what keeps the commit from disagreeing with the simulation.
+        boolean visConnection = ownerMenu.hasVisConnectionCard();
+        return new TerminalArcaneCraftingInput(
+                cells, serverPlayer, wand, crystals, part, ownerMenu.auraPayer(), visConnection);
     }
 
     /** Hands the player whatever the recipe kept and leaves the grid alone: the network already paid, so

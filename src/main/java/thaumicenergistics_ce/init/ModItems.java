@@ -181,13 +181,13 @@ public final class ModItems {
                             () -> ItemWirelessArcaneCraftingTerminal.POWER_CAPACITY, properties),
                     new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
 
-    // Two upgrade cards, named and obtainable but not yet read by anything: the machines that will take
-    // them are the next piece of work. The card must be AE2's own class - isUpgradeCardItem asks that.
+    // Two upgrade cards, both read now: the access card gates the essentia gestures, the vis card moves a
+    // craft's untyped vis onto the aura. AE2's isUpgradeCardItem asks for its own class, hence the factory.
     public static final DeferredItem<Item> ESSENTIA_ACCESS_CARD = REGISTRY.registerItem(
             "essentia_access_card", Upgrades::createUpgradeCardItem, new Item.Properties().stacksTo(64));
 
     public static final DeferredItem<Item> VIS_CONNECTION_CARD = REGISTRY.registerItem(
-            "vis_connection_card", Item::new, new Item.Properties().stacksTo(64));
+            "vis_connection_card", Upgrades::createUpgradeCardItem, new Item.Properties().stacksTo(64));
 
     private ModItems() {}
 

@@ -39,6 +39,12 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
     private final @Nullable IEnergySource payer;
 
     /**
+     * Frozen here because Thaumaturge asks an aura source twice per craft and both passes must agree;
+     * reading the card again inside the supply call could answer differently halfway through a craft.
+     */
+    private final boolean visConnection;
+
+    /**
      * Collects the crystal payment from the terminal's own crystal slots, never from the grid: a crystal
      * in the grid also counts towards {@code ingredientCount}, which makes such recipes unmatchable.
      */
@@ -62,7 +68,7 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
             ItemStack wand,
             List<ItemStack> crystalSlots,
             @Nullable PartArcaneCraftingTerminal part) {
-        this(grid, player, wand, crystalSlots, part, null);
+        this(grid, player, wand, crystalSlots, part, null, false);
     }
 
     /**
@@ -76,12 +82,28 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
             List<ItemStack> crystalSlots,
             @Nullable PartArcaneCraftingTerminal part,
             @Nullable IEnergySource payer) {
+        this(grid, player, wand, crystalSlots, part, payer, false);
+    }
+
+    /**
+     * The full form: {@code visConnection} is whether the terminal carried the vis connection card when
+     * this input was built, so both of one craft's aura passes answer with the same number.
+     */
+    public TerminalArcaneCraftingInput(
+            List<ItemStack> grid,
+            Player player,
+            ItemStack wand,
+            List<ItemStack> crystalSlots,
+            @Nullable PartArcaneCraftingTerminal part,
+            @Nullable IEnergySource payer,
+            boolean visConnection) {
         this.grid = List.copyOf(grid);
         this.player = player;
         this.wand = wand == null ? ItemStack.EMPTY : wand;
         this.crystals = crystalsIn(crystalSlots);
         this.part = part;
         this.payer = payer;
+        this.visConnection = visConnection;
 
         // All nine cells, not just the occupied ones: the count is what a recipe's ingredient list is
         // compared against, and the contents are what its ingredient matching reads.
@@ -109,6 +131,14 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
      */
     public @Nullable IEnergySource payer() {
         return payer;
+    }
+
+    /**
+     * Whether the terminal this craft came from carried the vis connection card: {@code true} moves the
+     * untyped vis onto the aura around the player, {@code false} keeps buying it with network power.
+     */
+    public boolean visConnection() {
+        return visConnection;
     }
 
     // ---- IArcaneCraftingInput -------------------------------------------------

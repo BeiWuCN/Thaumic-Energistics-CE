@@ -1,6 +1,7 @@
 package thaumicenergistics_ce.menu;
 
 import appeng.api.implementations.menuobjects.IPortableTerminal;
+import appeng.api.implementations.menuobjects.ItemMenuHost;
 import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.energy.IEnergySource;
@@ -22,6 +23,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ArcaneTerminalHost;
+import thaumicenergistics_ce.arcane.TerminalAuraPayment;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.menu.slot.ArcaneCraftingResultSlot;
@@ -244,6 +246,13 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     /** The screen asks this only to hide the gesture; the server asks again before it moves anything. */
     public boolean hasEssentiaAccessCard() {
         return essentiaAccessGranted();
+    }
+
+    /** Whether the vis card rides in the terminal the player opened, asked of that very stack, so that a
+     * second terminal in the bag cannot answer for the one being used. */
+    public boolean hasVisConnectionCard() {
+        return getHost() instanceof ItemMenuHost<?> itemHost
+                && TerminalAuraPayment.visConnectionInstalled(itemHost.getItemStack());
     }
 
     /** Not persisted: the result is derived from the grid, and a saved one would outlive it. */

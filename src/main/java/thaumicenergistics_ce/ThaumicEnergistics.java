@@ -232,6 +232,13 @@ public final class ThaumicEnergistics {
                 ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                 1,
                 ARCANE_TERMINAL_UPGRADE_NAME);
+        // The vis connection card in the same two slots: without its own line AE2's slot filter refuses
+        // it, and with it the craft takes its untyped vis from the aura instead of the network's power.
+        Upgrades.add(
+                ModItems.VIS_CONNECTION_CARD.get(),
+                ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
+                1,
+                ARCANE_TERMINAL_UPGRADE_NAME);
     }
 
     /** The four upgrade slots every essentia bus has; the same number {@code Upgrades.add} should report. */
