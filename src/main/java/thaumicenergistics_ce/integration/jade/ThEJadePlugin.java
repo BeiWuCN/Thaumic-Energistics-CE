@@ -3,6 +3,7 @@ package thaumicenergistics_ce.integration.jade;
 import snownee.jade.api.IWailaCommonRegistration;
 import snownee.jade.api.IWailaPlugin;
 import snownee.jade.api.WailaPlugin;
+import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider;
 import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
@@ -25,5 +26,7 @@ public class ThEJadePlugin implements IWailaPlugin {
                 InfusionMonitorProvider.INSTANCE, BlockEntityInfusionMonitor.class);
         registration.registerBlockDataProvider(
                 InfusionProviderProvider.INSTANCE, BlockEntityInfusionProvider.class);
+        registration.registerBlockDataProvider(
+                AlchemyProviderProvider.INSTANCE, BlockEntityAlchemyProvider.class);
     }
 }

@@ -119,6 +119,11 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         return buffer.buffered(aspect);
     }
 
+    /** True when some neighbour takes essentia: a container to fill, or a machine whose suction asks. */
+    public boolean hasOutput() {
+        return buffer.hasAnyTarget();
+    }
+
     // The bound receivers
 
     /** A refusal, or null when the link was made; the message is what the connector shows. */
