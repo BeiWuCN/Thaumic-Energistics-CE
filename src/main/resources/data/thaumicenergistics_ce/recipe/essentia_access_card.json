@@ -1,26 +1,25 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "category": "misc",
-  "_note": "AE2's own advanced card silhouette (data/ae2/recipe/materials/advancedcard.json) with thaumium where its gem goes and a diffusion core where its processor does: this card is the essentia half of that same upgrade, and thaumium is the machine frame this mod already builds in.",
-  "key": {
-    "a": {
-      "item": "thaumaturge:ingot_thaumium"
-    },
-    "b": {
-      "item": "minecraft:iron_ingot"
-    },
-    "c": {
-      "item": "thaumicenergistics_ce:diffusion_core"
-    },
-    "d": {
-      "item": "ae2:calculation_processor"
-    }
-  },
-  "pattern": [
-    "ab ",
-    "cdb",
-    "ab "
+  "type": "thaumaturge:infusion",
+  "_note": "Every AE2 upgrade card is one of its basic cards plus an ingredient - AE2's own capacity and redstone cards are exactly that - so the access card is a basic card plus a reader: a diffusion core for the essentia side and a calculation processor for the network side, with thaumium and iron around them as in the crafting-grid recipe this replaces. A card that speaks a second language is put together at the altar, not on a workbench.",
+  "_iron": "The iron the grid recipe used is kept as pedestal stock, so the price of the card does not move when the recipe does. Iron is declared twice because the grid recipe used two.",
+  "aspects": [
+    { "aspect": "thaumaturge:cognitio", "amount": 16 },
+    { "aspect": "thaumaturge:fabrico", "amount": 16 },
+    { "aspect": "thaumaturge:permutatio", "amount": 8 },
+    { "aspect": "thaumaturge:metallum", "amount": 8 },
+    { "aspect": "thaumaturge:praecantatio", "amount": 8 }
   ],
+  "catalyst": { "item": "ae2:basic_card" },
+  "components": [
+    { "item": "thaumicenergistics_ce:diffusion_core" },
+    { "item": "ae2:calculation_processor" },
+    { "item": "thaumaturge:ingot_thaumium" },
+    { "item": "thaumaturge:ingot_thaumium" },
+    { "item": "minecraft:iron_ingot" },
+    { "item": "minecraft:iron_ingot" },
+    { "item": "thaumaturge:salis_mundus" }
+  ],
+  "instability": 2,
   "result": {
     "id": "thaumicenergistics_ce:essentia_access_card",
     "count": 1
