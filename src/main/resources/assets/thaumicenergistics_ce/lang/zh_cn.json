@@ -209,7 +209,6 @@
   "thaumicenergistics_ce.jade.alchemy_provider.reserve": "%s / %s AE",
   "config.jade.plugin_thaumicenergistics_ce.alchemy_provider": "炼金供应器",
   "thaumicenergistics_ce.jade.alchemy_receiver.bound": "绑定到 (%s, %s, %s) 的炼金供应器",
-  "thaumicenergistics_ce.jade.alchemy_receiver.hint": "用无线绑定工具 Shift+右击这里，再 Shift+右击供应器",
   "thaumicenergistics_ce.jade.alchemy_receiver.unbound": "未绑定炼金供应器",
   "config.jade.plugin_thaumicenergistics_ce.alchemy_receiver": "炼金无线接收器",
   "thaumicenergistics_ce.jade.infusion_provider.aspect": "%s  %s",
