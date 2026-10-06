@@ -1,5 +1,6 @@
 package thaumicenergistics_ce.arcane;
 
+import appeng.api.networking.energy.IEnergySource;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneWorkbenchContext;
 import com.leclowndu93150.thaumaturge.api.recipe.IArcaneWorkbench;
 import com.leclowndu93150.thaumaturge.api.recipe.IWorkbenchAuraSource;
@@ -59,6 +60,14 @@ public final class TerminalWorkbenchVis {
             return 0;
         }
         PartArcaneCraftingTerminal part = terminal.part();
-        return part == null ? 0 : part.supplyAura(need, simulate);
+        if (part == null) {
+            return 0;
+        }
+        IEnergySource payer = terminal.payer();
+        if (payer != null && !player.level().isClientSide) {
+            // A handheld terminal has no block: its aura is the one around the player carrying it.
+            return TerminalAuraPayment.pay(player.level(), player.blockPosition(), payer, need, simulate);
+        }
+        return part.supplyAura(need, simulate);
     }
 }

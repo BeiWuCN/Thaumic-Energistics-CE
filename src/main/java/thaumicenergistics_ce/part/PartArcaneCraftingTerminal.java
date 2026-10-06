@@ -1,7 +1,5 @@
 package thaumicenergistics_ce.part;
 
-import appeng.api.config.Actionable;
-import appeng.api.config.PowerMultiplier;
 import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
@@ -21,7 +19,9 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
@@ -29,8 +29,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
+import thaumicenergistics_ce.arcane.ArcaneTerminalHost;
+import thaumicenergistics_ce.arcane.ArcaneTerminalLink;
 import thaumicenergistics_ce.arcane.EssentiaCrystals;
-import thaumicenergistics_ce.compat.thaumaturge.TcAura;
+import thaumicenergistics_ce.arcane.TerminalAuraPayment;
 import thaumicenergistics_ce.compat.thaumaturge.TcWand;
 import thaumicenergistics_ce.init.ModMenuTypes;
 
@@ -42,7 +44,8 @@ import thaumicenergistics_ce.init.ModMenuTypes;
  *       arranging right now, which the network must not be able to take.
  * </ul>
  */
-public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
+public class PartArcaneCraftingTerminal extends AbstractTerminalPart
+        implements ArcaneTerminalHost {
 
     public static final ResourceLocation INV_CRAFTING = AppEng.makeId("arcane_crafting_terminal_crafting");
 
@@ -139,6 +142,30 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
         return true;
     }
 
+    /** Writes the pairing when a linking item is sneaked onto this part; without the sneak nothing is
+     * written, since a walk past the terminal with the item in hand must not rebind it. */
+    @Override
+    public boolean onUseItemOn(ItemStack held, Player player, InteractionHand hand, Vec3 pos) {
+        if (!(held.getItem() instanceof ArcaneTerminalLink link) || !player.isSecondaryUseActive()) {
+            return super.onUseItemOn(held, player, hand, pos);
+        }
+        BlockPos where = getBlockEntity().getBlockPos();
+        if (!player.level().isClientSide) {
+            link.pairWith(held, player.level(), where, getSide());
+        }
+        player.displayClientMessage(
+                Component.translatable(
+                        "item.thaumicenergistics_ce.wireless_arcane_crafting_terminal.paired",
+                        where.getX(), where.getY(), where.getZ()),
+                true);
+        return true;
+    }
+
+    @Override
+    public PartArcaneCraftingTerminal arcaneTerminal() {
+        return this;
+    }
+
     public AppEngInternalInventory craftingGrid() {
         return craftingGrid;
     }
@@ -155,10 +182,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
         IGridNode node = getMainNode().getNode();
         return node == null ? null : node.getGrid();
     }
-
-    private static final double AE_PER_VIS = 1_000.0;
-
-    private static final int CENTIVIS_PER_VIS = 100;
 
     /**
      * Offers the aura's vis toward a craft, simulated then committed; without it Thaumaturge refuses with
@@ -182,38 +205,9 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart {
         if (energy == null) {
             return 0;
         }
-
-        BlockPos pos = getBlockEntity().getBlockPos();
-        float wanted = (float) needCentivis / CENTIVIS_PER_VIS;
-        float available = TcAura.drainVis(level, pos, wanted, true);
-        if (available <= 0.0F) {
-            return 0;
-        }
-        int offered = Math.min(needCentivis, Math.round(available * CENTIVIS_PER_VIS));
-        double cost = AE_PER_VIS * offered / CENTIVIS_PER_VIS;
-
-        double payable = energy.extractAEPower(cost, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-        if (payable < cost) {
-            offered = (int) Math.floor(payable / AE_PER_VIS * CENTIVIS_PER_VIS);
-            if (offered <= 0) {
-                return 0;
-            }
-            cost = AE_PER_VIS * offered / CENTIVIS_PER_VIS;
-        }
-        if (offered <= 0) {
-            return 0;
-        }
-        if (simulate) {
-            return offered;
-        }
-
-        // All or nothing: check the power first, or a short commit throws out of the handler.
-        if (energy.extractAEPower(cost, Actionable.SIMULATE, PowerMultiplier.CONFIG) < cost) {
-            return 0;
-        }
-        TcAura.drainVis(level, pos, (float) offered / CENTIVIS_PER_VIS, false);
-        energy.extractAEPower(cost, Actionable.MODULATE, PowerMultiplier.CONFIG);
-        return offered;
+        // The aura around the cable, paid for with the network's power: the wireless terminal pays the
+        // same rate, but from the aura around its player. See TerminalAuraPayment.
+        return TerminalAuraPayment.pay(level, getBlockEntity().getBlockPos(), energy, needCentivis, simulate);
     }
 
     @Override

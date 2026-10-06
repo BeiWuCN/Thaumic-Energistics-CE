@@ -6,6 +6,7 @@ import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.resources.ResourceLocation;
 import thaumicenergistics_ce.ThEIds;
+import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
@@ -45,11 +46,24 @@ public class ThEJeiPlugin implements IModPlugin {
         // And the Arcane Crafting Terminal's grid, from the same category; a second handler, not a shared
         // one, because the inscriber's grid is a ghost grid and the terminal's is real.
         registration.addRecipeTransferHandler(
-                new ArcaneCraftingRecipeTransfer(registration.getTransferHelper()),
+                new ArcaneCraftingRecipeTransfer(
+                        registration.getTransferHelper(), ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get()),
                 ArcaneJeiRecipeType.arcane());
         // Ordinary crafting recipes too. The terminal's grid is nine ordinary slots, so a player who opens a
         // plank recipe and finds no transfer button would reasonably read it as a broken terminal.
         registration.addRecipeTransferHandler(
-                new CraftingRecipeTransfer(registration.getTransferHelper()), RecipeTypes.CRAFTING);
+                new CraftingRecipeTransfer(
+                        registration.getTransferHelper(), ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get()),
+                RecipeTypes.CRAFTING);
+        // The wireless terminal opens the same menu class under a menu type of its own, and JEI keys handlers
+        // by that type: without a second pair here the hand-held terminal shows no transfer button.
+        registration.addRecipeTransferHandler(
+                new ArcaneCraftingRecipeTransfer(
+                        registration.getTransferHelper(), ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()),
+                ArcaneJeiRecipeType.arcane());
+        registration.addRecipeTransferHandler(
+                new CraftingRecipeTransfer(
+                        registration.getTransferHelper(), ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()),
+                RecipeTypes.CRAFTING);
     }
 }

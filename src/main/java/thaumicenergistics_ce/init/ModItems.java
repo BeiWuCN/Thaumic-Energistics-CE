@@ -20,6 +20,7 @@ import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.item.ItemKnowledgeCore;
 import thaumicenergistics_ce.item.ItemMachineBlock;
 import thaumicenergistics_ce.item.ItemVisInterface;
+import thaumicenergistics_ce.item.ItemWirelessArcaneCraftingTerminal;
 import thaumicenergistics_ce.item.ItemWirelessConnector;
 import thaumicenergistics_ce.item.ItemWirelessEssentiaTerminal;
 
@@ -208,6 +209,21 @@ public final class ModItems {
                     properties -> new ItemWirelessEssentiaTerminal(
                             () -> ItemWirelessEssentiaTerminal.POWER_CAPACITY, properties),
                     new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
+
+    public static final DeferredItem<ItemWirelessArcaneCraftingTerminal> WIRELESS_ARCANE_CRAFTING_TERMINAL =
+            REGISTRY.registerItem(
+                    "wireless_arcane_crafting_terminal",
+                    properties -> new ItemWirelessArcaneCraftingTerminal(
+                            () -> ItemWirelessArcaneCraftingTerminal.POWER_CAPACITY, properties),
+                    new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
+
+    // Two upgrade cards, named and obtainable but not yet read by anything: the machines that will take
+    // them are the next piece of work, and an item in the tab is what lets the art be looked at meanwhile.
+    public static final DeferredItem<Item> ESSENTIA_ACCESS_CARD = REGISTRY.registerItem(
+            "essentia_access_card", Item::new, new Item.Properties().stacksTo(64));
+
+    public static final DeferredItem<Item> VIS_CONNECTION_CARD = REGISTRY.registerItem(
+            "vis_connection_card", Item::new, new Item.Properties().stacksTo(64));
 
     private ModItems() {}
 

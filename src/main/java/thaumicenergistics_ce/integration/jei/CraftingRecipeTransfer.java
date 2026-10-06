@@ -21,7 +21,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
@@ -41,9 +40,16 @@ public class CraftingRecipeTransfer
     private static final int GRID_HEIGHT = 3;
 
     private final IRecipeTransferHandlerHelper helper;
+    private final MenuType<MenuArcaneCraftingTerminal> menuType;
 
-    public CraftingRecipeTransfer(IRecipeTransferHandlerHelper helper) {
+    /**
+     * The menu type is handed in rather than read from the registry: the wired and the wireless terminals
+     * share this menu class, so which of the two screen types is being served is the caller's to say.
+     */
+    public CraftingRecipeTransfer(
+            IRecipeTransferHandlerHelper helper, MenuType<MenuArcaneCraftingTerminal> menuType) {
         this.helper = helper;
+        this.menuType = menuType;
     }
 
     // ---- IRecipeTransferInfo -------------------------------------------
@@ -55,7 +61,7 @@ public class CraftingRecipeTransfer
 
     @Override
     public Optional<MenuType<MenuArcaneCraftingTerminal>> getMenuType() {
-        return Optional.of(ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get());
+        return Optional.of(menuType);
     }
 
     @Override

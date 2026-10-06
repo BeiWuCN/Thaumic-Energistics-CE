@@ -54,5 +54,8 @@ public final class SelfTestBootstrap implements SelfTestProvider {
         // itself a tick later. A stuck signal is what a player cannot fix, so it waits and looks.
         NeoForge.EVENT_BUS.addListener(MonitorPulseSelfTest::run);
         NeoForge.EVENT_BUS.addListener(MonitorPulseSelfTest::onServerTick);
+        // What the wireless arcane terminal writes when it is paired: the menu test needs a player to log
+        // in, and this half - the item's own tag - is exactly the half a headless server can hold.
+        NeoForge.EVENT_BUS.addListener(WirelessArcaneBindingSelfTest::run);
     }
 }

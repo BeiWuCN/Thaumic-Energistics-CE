@@ -1,5 +1,6 @@
 package thaumicenergistics_ce.arcane;
 
+import appeng.api.networking.energy.IEnergySource;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.recipe.IArcaneCraftingInput;
@@ -35,6 +36,7 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
     private final ItemStack wand;
     private final AspectList crystals;
     private final @Nullable PartArcaneCraftingTerminal part;
+    private final @Nullable IEnergySource payer;
 
     /**
      * Collects the crystal payment from the terminal's own crystal slots, never from the grid: a crystal
@@ -60,11 +62,26 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
             ItemStack wand,
             List<ItemStack> crystalSlots,
             @Nullable PartArcaneCraftingTerminal part) {
+        this(grid, player, wand, crystalSlots, part, null);
+    }
+
+    /**
+     * A payer means a wireless terminal's craft: the vis then comes from the aura around that player
+     * rather than around a cable. See {@link #payer()}.
+     */
+    public TerminalArcaneCraftingInput(
+            List<ItemStack> grid,
+            Player player,
+            ItemStack wand,
+            List<ItemStack> crystalSlots,
+            @Nullable PartArcaneCraftingTerminal part,
+            @Nullable IEnergySource payer) {
         this.grid = List.copyOf(grid);
         this.player = player;
         this.wand = wand == null ? ItemStack.EMPTY : wand;
         this.crystals = crystalsIn(crystalSlots);
         this.part = part;
+        this.payer = payer;
 
         // All nine cells, not just the occupied ones: the count is what a recipe's ingredient list is
         // compared against, and the contents are what its ingredient matching reads.
@@ -84,6 +101,14 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
      */
     public @Nullable PartArcaneCraftingTerminal part() {
         return part;
+    }
+
+    /**
+     * Who pays for the vis when the craft comes from a handheld item: its own battery, and the aura is
+     * then the one around the player. {@code null} for a placed part, which pays from its network.
+     */
+    public @Nullable IEnergySource payer() {
+        return payer;
     }
 
     // ---- IArcaneCraftingInput -------------------------------------------------

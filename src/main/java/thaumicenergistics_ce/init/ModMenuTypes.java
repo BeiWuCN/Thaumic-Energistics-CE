@@ -95,6 +95,18 @@ public final class ModMenuTypes {
                             .buildUnregistered(ThEIds.id("wireless_essentia_terminal")));
 
     /**
+     * The Wireless Arcane Crafting Terminal's screen: the same menu as the wired terminal, opened from a
+     * handheld item, which is why the host class - not a second menu class - is what differs.
+     */
+    public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneCraftingTerminal>>
+            WIRELESS_ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
+                    "wireless_arcane_crafting_terminal",
+                    () -> MenuTypeBuilder.create(MenuArcaneCraftingTerminal::new, IPortableTerminal.class)
+                            .withMenuTitle(host -> Component.translatable(
+                                    "gui.thaumicenergistics_ce.wireless_arcane_crafting_terminal"))
+                            .buildUnregistered(ThEIds.id("wireless_arcane_crafting_terminal")));
+
+    /**
      * The Essentia Import Bus screen; the part is the host encoded into the open packet. The title is
      * is explicit: the builder would caption it with AE2's generic {@code gui.ae2.ImportBus}.
      */

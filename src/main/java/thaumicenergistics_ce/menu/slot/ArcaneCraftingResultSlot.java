@@ -216,7 +216,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
             crystals.add(part.crystalInventory().getStackInSlot(i));
         }
-        return new TerminalArcaneCraftingInput(cells, serverPlayer, wand, crystals, part);
+        return new TerminalArcaneCraftingInput(cells, serverPlayer, wand, crystals, part, ownerMenu.auraPayer());
     }
 
     /** Hands the player whatever the recipe kept and leaves the grid alone: the network already paid, so

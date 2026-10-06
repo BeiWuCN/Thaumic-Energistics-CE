@@ -1,7 +1,9 @@
 package thaumicenergistics_ce.menu;
 
+import appeng.api.implementations.menuobjects.IPortableTerminal;
 import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.IGridNode;
+import appeng.api.networking.energy.IEnergySource;
 import appeng.api.storage.ITerminalHost;
 import appeng.helpers.ICraftingGridMenu;
 import appeng.menu.SlotSemantic;
@@ -20,6 +22,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import org.jspecify.annotations.Nullable;
+import thaumicenergistics_ce.arcane.ArcaneTerminalHost;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import thaumicenergistics_ce.menu.slot.ArcaneCraftingResultSlot;
 import thaumicenergistics_ce.menu.slot.CrystalSlot;
@@ -27,7 +30,7 @@ import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * The Arcane Crafting Terminal's menu: an ME storage terminal holding an arcane workbench.
+ * The Arcane Crafting Terminal's menu, reached through the placed part or through a paired item.
  * <ul>
  *   <li>Nine crafting cells, six crystal slots three down each side, a result and a wand slot.
  *   <li>Modelled on AE2's {@code CraftingTermMenu}; a {@code CraftingRecipe} never matches an arcane one.
@@ -59,7 +62,27 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
     private static final int CRYSTALS_LEFT_X = 8;
     private static final int CRYSTALS_RIGHT_X = 80;
 
-    private final PartArcaneCraftingTerminal part;
+    private final @Nullable PartArcaneCraftingTerminal part;
+
+    /**
+     * Stand-ins for the three containers while no terminal is resolved: the slots always exist, since a
+     * client that cannot see the bound chunk would otherwise build a different menu from the server's.
+     */
+    private final AppEngInternalInventory gridFallback = new AppEngInternalInventory(this, GRID_SIZE);
+
+    private final AppEngInternalInventory wandFallback = new AppEngInternalInventory(this, 1);
+
+    private final AppEngInternalInventory crystalFallback =
+            new AppEngInternalInventory(this, PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
+
+    private final InternalInventory craftingGrid;
+
+    private final InternalInventory wandInventory;
+
+    private final InternalInventory crystals;
+
+    /** Set for a wireless terminal alone: it buys the aura, and the aura is the one around its player. */
+    private final @Nullable IEnergySource auraPayer;
 
     private final AppEngInternalInventory resultInventory =
             new AppEngInternalInventory(this, 1);
@@ -71,19 +94,17 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
     public MenuArcaneCraftingTerminal(
             MenuType<?> menuType, int id, Inventory playerInventory, ITerminalHost host) {
         super(menuType, id, playerInventory, host, false);
-        this.part = host instanceof PartArcaneCraftingTerminal terminal ? terminal : null;
-
-        if (part == null) {
-            // Not our part: no grid, so build the menu empty and return.
-            createPlayerInventorySlots(playerInventory);
-            return;
-        }
+        this.part = host instanceof ArcaneTerminalHost arcane ? arcane.arcaneTerminal() : null;
+        this.auraPayer = host instanceof IPortableTerminal portable ? portable : null;
+        this.craftingGrid = part == null ? gridFallback : part.craftingGrid();
+        this.wandInventory = part == null ? wandFallback : part.wandInventory();
+        this.crystals = part == null ? crystalFallback : part.crystalInventory();
 
         // 1. The workbench cells.
         for (int i = 0; i < GRID_SIZE; i++) {
             int column = i % GRID_COLS;
             int row = i / GRID_COLS;
-            Slot cell = addSlot(new AppEngSlot(part.craftingGrid(), i), SlotSemantics.CRAFTING_GRID);
+            Slot cell = addSlot(new AppEngSlot(craftingGrid, i), SlotSemantics.CRAFTING_GRID);
             // AE2 replaces these from the screen style; set anyway for a slot read before then.
             cell.x = GRID_X + column * GRID_PITCH;
             cell.y = GRID_Y + row * GRID_PITCH;
@@ -91,7 +112,7 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
 
         // 2. The wand slot. STORAGE: AE2 has no semantic for a tool; this one positions and shift-clicks.
         Slot wandSlot = addSlot(
-                new AppEngSlot(part.wandInventory(), PartArcaneCraftingTerminal.WAND_SLOT),
+                new AppEngSlot(wandInventory, PartArcaneCraftingTerminal.WAND_SLOT),
                 SlotSemantics.STORAGE);
         wandSlot.x = WAND_X;
         wandSlot.y = WAND_Y;
@@ -99,13 +120,13 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
         // 3. The six crystal slots, three down each side of the grid. Each is pinned to one primal aspect
         // in Thaumaturge's own order, and a crystal in the grid counts twice. See CrystalSlot.
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_COLUMN; i++) {
-            Slot slot = addSlot(new CrystalSlot(part.crystalInventory(), i, aspectOf(i)), CRYSTALS_LEFT);
+            Slot slot = addSlot(new CrystalSlot(crystals, i, aspectOf(i)), CRYSTALS_LEFT);
             slot.x = CRYSTALS_LEFT_X;
             slot.y = GRID_Y + i * GRID_PITCH;
         }
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_COLUMN; i++) {
             int index = PartArcaneCraftingTerminal.CRYSTAL_COLUMN + i;
-            Slot slot = addSlot(new CrystalSlot(part.crystalInventory(), index, aspectOf(index)), CRYSTALS_RIGHT);
+            Slot slot = addSlot(new CrystalSlot(crystals, index, aspectOf(index)), CRYSTALS_RIGHT);
             slot.x = CRYSTALS_RIGHT_X;
             slot.y = GRID_Y + i * GRID_PITCH;
         }
@@ -116,7 +137,7 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
                 getActionSource(),
                 energySource,
                 storage,
-                part.craftingGrid(),
+                craftingGrid,
                 resultInventory,
                 this,
                 part);
@@ -139,7 +160,7 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
 
     @Override
     public InternalInventory getCraftingMatrix() {
-        return part == null ? null : part.craftingGrid();
+        return craftingGrid;
     }
 
     @Override
@@ -153,7 +174,7 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
     @Override
     public void broadcastChanges() {
         super.broadcastChanges();
-        if (resultSlot == null || part == null) {
+        if (resultSlot == null) {
             return;
         }
         int signature = craftInputSignature();
@@ -166,20 +187,25 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
     private int craftInputSignature() {
         int hash = 1;
         for (int i = 0; i < PartArcaneCraftingTerminal.GRID_SIZE; i++) {
-            hash = 31 * hash + StackSignatures.of(part.craftingGrid().getStackInSlot(i));
+            hash = 31 * hash + StackSignatures.of(craftingGrid.getStackInSlot(i));
         }
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
-            hash = 31 * hash + StackSignatures.of(part.crystalInventory().getStackInSlot(i));
+            hash = 31 * hash + StackSignatures.of(crystals.getStackInSlot(i));
         }
-        return 31 * hash + StackSignatures.of(part.wandInventory().getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT));
+        return 31 * hash + StackSignatures.of(wandInventory.getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT));
     }
 
-    public PartArcaneCraftingTerminal part() {
+    public @Nullable PartArcaneCraftingTerminal part() {
         return part;
     }
 
     public @Nullable ArcaneCraftingResultSlot resultSlot() {
         return resultSlot;
+    }
+
+    /** The wireless terminal's battery, or {@code null} for a placed one, whose vis the network buys. */
+    public @Nullable IEnergySource auraPayer() {
+        return auraPayer;
     }
 
     public static ResourceKey<IAspect> aspectOf(int crystalIndex) {

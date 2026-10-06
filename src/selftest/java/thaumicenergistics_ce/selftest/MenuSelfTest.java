@@ -1,6 +1,7 @@
 package thaumicenergistics_ce.selftest;
 
 import appeng.api.implementations.menuobjects.IPortableTerminal;
+import appeng.menu.SlotSemantics;
 import appeng.menu.locator.ItemMenuHostLocator;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
@@ -98,6 +99,30 @@ public final class MenuSelfTest {
                     ModMenuTypes.ESSENTIA_TERMINAL.get(), 0, inventory, host));
         }
 
+        // The wireless arcane terminal is the same menu under a menu type of its own, so it gets its own
+        // host and its own look at the grid: a second menu type with no slots would still open blank.
+        ItemStack wirelessArcane = new ItemStack(ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get());
+        ItemMenuHostLocator arcaneLocator = new ItemMenuHostLocator() {
+            @Override
+            public ItemStack locateItem(Player player) {
+                return wirelessArcane;
+            }
+
+            @Override
+            public @Nullable BlockHitResult hitResult() {
+                return null;
+            }
+        };
+        IPortableTerminal arcaneHost = arcaneLocator.locate(player, IPortableTerminal.class);
+        if (arcaneHost == null) {
+            failures.add("WIRELESS_ARCANE_CRAFTING_TERMINAL offers no IPortableTerminal menu host, so the"
+                    + " carried terminal cannot be opened at all");
+        } else {
+            check(failures, "WIRELESS_ARCANE_CRAFTING_TERMINAL", () -> new MenuArcaneCraftingTerminal(
+                    ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(), 0, inventory, arcaneHost));
+            checkUnpairedWirelessTerminalShowsItsGrid(failures, inventory, arcaneHost);
+        }
+
         PartArcaneCraftingTerminal actPart =
                 new PartArcaneCraftingTerminal(ModItems.ARCANE_CRAFTING_TERMINAL.get());
         check(failures, "ARCANE_CRAFTING_TERMINAL (with its part)", () -> new MenuArcaneCraftingTerminal(
@@ -113,8 +138,7 @@ public final class MenuSelfTest {
         report(failures);
     }
 
-    private static void checkCraftReachesTheResult(
-            ServerLevel level, ServerPlayer player, Inventory inventory, List<String> failures) {
+    private static void checkCraftReachesTheResult(            ServerLevel level, ServerPlayer player, Inventory inventory, List<String> failures) {
         ThEArcanePattern pattern = null;
         for (RecipeHolder<?> holder : level.getRecipeManager().getRecipes()) {
             if (!(holder.value() instanceof IArcaneRecipe arcane)) {
@@ -249,6 +273,41 @@ public final class MenuSelfTest {
             System.out.println("[menu] note: " + pattern.result()
                     + " is craftable without its crystals (a wand or a vis source is covering the cost)");
         }
+    }
+
+    /**
+     * A wireless terminal with nothing paired still shows the whole workbench. A menu that decided its
+     * slots from whether the placed part resolved would drop them on a client that cannot see that chunk,
+     * which is every client that is far enough away for a wireless terminal to be worth carrying.
+     */
+    private static void checkUnpairedWirelessTerminalShowsItsGrid(
+            List<String> failures, Inventory inventory, IPortableTerminal host) {
+        MenuArcaneCraftingTerminal menu = new MenuArcaneCraftingTerminal(
+                ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(), 0, inventory, host);
+        if (menu.part() != null) {
+            failures.add("the wireless arcane terminal resolved a placed terminal with nothing paired, so the"
+                    + " grid it shows is not the one an unpaired client would get");
+        }
+        int grid = menu.getSlots(SlotSemantics.CRAFTING_GRID).size();
+        if (grid != PartArcaneCraftingTerminal.GRID_SIZE) {
+            failures.add("the unpaired wireless arcane terminal has " + grid + " grid slots, expected "
+                    + PartArcaneCraftingTerminal.GRID_SIZE);
+            dumpSlots(menu);
+            return;
+        }
+        if (menu.crystalSlots().size() != PartArcaneCraftingTerminal.CRYSTAL_SLOTS) {
+            failures.add("the unpaired wireless arcane terminal has " + menu.crystalSlots().size()
+                    + " crystal slots, expected " + PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
+            dumpSlots(menu);
+            return;
+        }
+        if (menu.wandSlot() == null || menu.resultSlot() == null) {
+            failures.add("the unpaired wireless arcane terminal is missing its wand slot or its result slot");
+            dumpSlots(menu);
+            return;
+        }
+        ThELog.LOG.info("[menu] unpaired wireless terminal: {} grid slots, {} crystal slots, wand and result",
+                grid, menu.crystalSlots().size());
     }
 
     private static void dumpSlots(AbstractContainerMenu menu) {
