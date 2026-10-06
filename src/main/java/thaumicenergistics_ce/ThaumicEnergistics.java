@@ -44,8 +44,8 @@ import thaumicenergistics_ce.init.capability.ThEItemCapabilities;
 import thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceRegistry;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
-import thaumicenergistics_ce.part.PartEssentiaStorageBus;
 import thaumicenergistics_ce.part.PartEssentiaTerminal;
+import thaumicenergistics_ce.part.PartFluxTransferInterface;
 import thaumicenergistics_ce.part.PartVisInterface;
 import thaumicenergistics_ce.util.ThELog;
 
@@ -87,7 +87,7 @@ public final class ThaumicEnergistics {
     private static void registerPartModels() {
         List<ResourceLocation> models = new ArrayList<>();
         models.addAll(PartEssentiaTerminal.MODEL_LOCATIONS);
-        models.addAll(PartEssentiaStorageBus.MODEL_LOCATIONS);
+        models.addAll(PartFluxTransferInterface.MODEL_LOCATIONS);
         models.addAll(PartEssentiaLevelEmitter.MODEL_LOCATIONS);
         models.addAll(PartArcaneCraftingTerminal.MODEL_LOCATIONS);
         // The P2P part draws itself with AE2's own P2P set, status models included.
@@ -153,10 +153,6 @@ public final class ThaumicEnergistics {
      */
     public static void registerPartCapabilities(RegisterPartCapabilitiesEvent event) {
         TcAura.registerVisSource(event, PartVisInterface.class);
-        // A pipe asks a neighbour only for the transport capability, so without this the essentia
-        // storage bus can see a tube but a tube cannot see it. The port is rebuilt per query, not held.
-        event.register(EssentiaCapabilities.TRANSPORT, (part, context) -> part.transportView(),
-                PartEssentiaStorageBus.class);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

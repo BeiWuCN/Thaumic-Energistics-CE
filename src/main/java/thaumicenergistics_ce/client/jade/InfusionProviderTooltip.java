@@ -109,17 +109,20 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
 
         private static final int CHIP = 16;
         private static final int GAP = 1;
+        /** Smaller than the chip, so a row of figures sits under its icons rather than beside them. */
+        private static final float BADGE_SCALE = 0.75F;
 
         private final Holder<IAspect> aspect;
         private final String badge;
         private final Vec2 size;
 
         private AspectIcon(Holder<IAspect> aspect, String badge) {
+            Font font = Minecraft.getInstance().font;
             this.aspect = aspect;
             this.badge = badge;
             // The badge is part of the width: Jade lays a row out by the sizes elements report, and the
             // first version reported only the chip's 16 pixels, so numbers printed on top of the next chip.
-            this.size = new Vec2(CHIP + GAP + Minecraft.getInstance().font.width(badge), CHIP);
+            this.size = new Vec2(CHIP + GAP + Math.round(font.width(badge) * BADGE_SCALE), CHIP);
         }
 
         @Override
@@ -128,7 +131,11 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
             AspectRendering.renderGui(graphics, font, (int) x, (int) y, aspect, 0.0F);
             // The chip's bottom line, so a row reads as one band of numbers. The amount above is zero
             // because this badge is the number, not the chip's own label.
-            graphics.drawString(font, badge, (int) x + CHIP + GAP, (int) y + 9, 0xFFFFFFFF, true);
+            graphics.pose().pushPose();
+            graphics.pose().translate(x + CHIP + GAP, y + 9, 0.0F);
+            graphics.pose().scale(BADGE_SCALE, BADGE_SCALE, 1.0F);
+            graphics.drawString(font, badge, 0, 0, 0xFFFFFFFF, true);
+            graphics.pose().popPose();
         }
 
         @Override

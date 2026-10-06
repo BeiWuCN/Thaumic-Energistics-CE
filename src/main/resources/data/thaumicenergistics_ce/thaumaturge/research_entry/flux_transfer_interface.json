@@ -1,20 +1,21 @@
 {
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
-  "name": "tc.research_name.VISINTERFACE",
+  "name": "tc.research_name.FLUXTRANSFERINTERFACE",
   "parents": [
-    "thaumicenergistics_ce:essentia_terminal"
+    "thaumicenergistics_ce:vis_interface",
+    "thaumaturge:flux"
   ],
   "column": -4,
-  "row": -4,
+  "row": -8,
   "meta": [
     "round"
   ],
   "icons": [
-    "thaumicenergistics_ce:vis_interface"
+    "thaumicenergistics_ce:flux_transfer_interface"
   ],
   "stages": [
     {
-      "text": "tc.research_text.VISINTERFACE",
+      "text": "tc.research_text.FLUXTRANSFERINTERFACE.stage.1",
       "required_knowledge": [
         {
           "type": "theory",
@@ -29,9 +30,16 @@
       ]
     },
     {
-      "text": "tc.research_text.VISINTERFACE",
+      "text": "tc.research_text.FLUXTRANSFERINTERFACE.stage.2",
       "recipes": [
-        "thaumicenergistics_ce:vis_interface"
+        "thaumicenergistics_ce:flux_transfer_interface"
+      ],
+      "knowledge": [
+        {
+          "type": "observation",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
       ]
     }
   ],
@@ -41,11 +49,11 @@
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:potentia",
+      "aspect": "thaumaturge:machina",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:vacuos",
+      "aspect": "thaumaturge:ordo",
       "amount": 1
     }
   ],

@@ -4,7 +4,7 @@
   "textures": {
     "sides": "ae2:part/storage_bus_sides",
     "back": "ae2:part/storage_bus_back",
-    "front": "thaumicenergistics_ce:part/essentia_storage_bus_face"
+    "front": "thaumicenergistics_ce:part/flux_transfer_interface_face"
   },
   "elements": [
     {
