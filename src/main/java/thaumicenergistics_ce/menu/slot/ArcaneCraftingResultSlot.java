@@ -7,23 +7,18 @@ import appeng.api.storage.MEStorage;
 import appeng.helpers.ICraftingGridMenu;
 import appeng.helpers.InventoryAction;
 import appeng.menu.slot.CraftingTermSlot;
-import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
-import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftCost;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftingTransaction;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneWorkbenchContext;
 import com.leclowndu93150.thaumaturge.api.recipe.IArcaneCraftingInput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
-import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.arcane.EssentiaCrystals;
-import thaumicenergistics_ce.arcane.NetworkArcaneCraftingStore;
 import thaumicenergistics_ce.arcane.TerminalArcaneCraftingInput;
+import thaumicenergistics_ce.arcane.TerminalArcaneCraftingStore;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.util.ThELog;
 
@@ -32,16 +27,15 @@ import thaumicenergistics_ce.util.ThELog;
  * <ul>
  *   <li>Extends {@code CraftingTermSlot} because {@code doClick}, the craft entry point, is declared there.
  *   <li>{@code ArcaneCraftingTransaction} matches and charges; {@link #refresh} previews without paying.
+ *   <li>The payment is the terminal's own grid, crystal and wand slots, as on Thaumaturge's workbench:
+ *       a recipe only matches when the grid holds its ingredients, so the network is never asked for
+ *       them - see {@link TerminalArcaneCraftingStore}.
  * </ul>
  */
 public class ArcaneCraftingResultSlot extends CraftingTermSlot {
 
     private final @Nullable ServerPlayer serverPlayer;
     private final @Nullable PartArcaneCraftingTerminal part;
-
-    private final MEStorage storage;
-    private final IEnergySource energySource;
-    private final IActionSource actionSource;
 
     /** Concrete rather than {@link ICraftingGridMenu}: sending the vis cost to the screen needs the menu. */
     private final thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal ownerMenu;
@@ -61,9 +55,6 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         super(player, actionSource, energySource, storage, craftingGrid, resultInventory, ownerMenu);
         this.serverPlayer = player instanceof ServerPlayer server ? server : null;
         this.part = part;
-        this.storage = storage;
-        this.energySource = energySource;
-        this.actionSource = actionSource;
         this.ownerMenu = ownerMenu;
     }
 
@@ -101,7 +92,8 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
 
     @Override
     public void doClick(InventoryAction action, Player who) {
-        if (part == null || !(who instanceof ServerPlayer server)) {
+        PartArcaneCraftingTerminal terminal = part;
+        if (terminal == null || !(who instanceof ServerPlayer server)) {
             return;
         }
         int attempts = switch (action) {
@@ -114,7 +106,11 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
             if (input == null || input.isEmpty()) {
                 break;
             }
-            var store = new NetworkArcaneCraftingStore(storage, energySource, actionSource);
+            // The terminal's own containers pay, as on Thaumaturge's workbench: the grid, the crystal slots
+            // and the wand. Charging the network for the ingredients as well would ask for a second copy of
+            // what the player has already arranged, which is what refused a craft the grid could afford.
+            var store = new TerminalArcaneCraftingStore(
+                    terminal.craftingGrid(), terminal.crystalInventory(), terminal.wandInventory(), who);
             var result = ArcaneCraftingTransaction.craft(workbenchContext(), server, input, store, false);
             if (!result.successful()) {
                 ThELog.LOG.info(
@@ -123,9 +119,8 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
                 break;
             }
 
-            settleRemainders(result.remainders(), who);
-            consumeCrystals(result.cost());
-
+            // The grid, the crystals and the wand are already charged by the store; the remainders went
+            // back to their own cells with it.
             ItemStack output = result.output().copy();
             // Read before handing over: Inventory#add sets the count to what did NOT fit.
             String produced = output.toString();
@@ -172,33 +167,6 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         return false;
     }
 
-    /** Takes {@code crystalsNeeded} - what the wand could not cover and the network store ignores - out of
-     * the six crystal slots, by aspect, clamped to what each stack holds. */
-    private void consumeCrystals(@Nullable ArcaneCraftCost cost) {
-        if (cost == null || part == null) {
-            return;
-        }
-        AspectList needed = cost.crystalsNeeded();
-        if (needed.isEmpty()) {
-            return;
-        }
-        // Aspects outer: one aspect can sit in several slots, and a slot pass would take the full requirement
-        // from each.
-        for (Holder<IAspect> aspect : needed.aspects()) {
-            int outstanding = needed.amountOf(aspect);
-            for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS && outstanding > 0; i++) {
-                ItemStack stack = part.crystalInventory().getStackInSlot(i);
-                Holder<IAspect> carried = EssentiaCrystals.aspectOf(stack);
-                if (carried == null || !carried.equals(aspect)) {
-                    continue;
-                }
-                int take = Math.min(outstanding, stack.getCount());
-                stack.shrink(take);
-                outstanding -= take;
-            }
-        }
-    }
-
     /** Builds the input for the current grid, or {@code null} when there is nothing to match. */
     private @Nullable IArcaneCraftingInput buildInput() {
         if (part == null) {
@@ -221,20 +189,6 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         boolean visConnection = ownerMenu.hasVisConnectionCard();
         return new TerminalArcaneCraftingInput(
                 cells, serverPlayer, wand, crystals, part, ownerMenu.auraPayer(), visConnection);
-    }
-
-    /** Hands the player whatever the recipe kept and leaves the grid alone: the network already paid, so
-     * consuming the grid too would charge twice; {@code remainders()} is per slot, so catalysts return. */
-    private void settleRemainders(List<ItemStack> remainders, Player who) {
-        for (ItemStack keeps : remainders) {
-            if (keeps.isEmpty()) {
-                continue;
-            }
-            // Handed over as a copy: Inventory#add consumes what it is given.
-            if (!who.getInventory().add(keeps.copy())) {
-                who.drop(keeps.copy(), false);
-            }
-        }
     }
 
     /** A virtual workbench owned by this machine and player: a terminal on a cable has no block to point

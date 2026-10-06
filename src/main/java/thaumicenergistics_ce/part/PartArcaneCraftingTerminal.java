@@ -39,11 +39,14 @@ import thaumicenergistics_ce.compat.thaumaturge.TcWand;
 import thaumicenergistics_ce.init.ModMenuTypes;
 
 /**
- * An ME crafting terminal on a cable whose crafting grid is an arcane workbench's; the network supplies
- * what the recipe needs that the player did not bring, paying vis from the wand in the wand slot.
+ * An ME crafting terminal on a cable whose crafting grid is an arcane workbench's: the grid, the crystal
+ * slots and the wand pay for the craft exactly as they would on a workbench, while the network only
+ * covers what the bench cannot - the vis, either from the wand in the wand slot or from the grid's power.
  * <ul>
  *   <li>The inventories are the part's own, not the network's: a crafting grid holds what the player is
  *       arranging right now, which the network must not be able to take.
+ *   <li>A recipe matches only once its ingredients are arranged in the grid, so the ingredients are never
+ *       taken from the network - filling the grid is what the item list and the JEI transfer are for.
  * </ul>
  */
 public class PartArcaneCraftingTerminal extends AbstractTerminalPart
