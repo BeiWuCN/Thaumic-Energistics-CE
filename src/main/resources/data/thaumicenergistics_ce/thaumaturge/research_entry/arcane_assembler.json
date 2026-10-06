@@ -5,8 +5,8 @@
     "thaumicenergistics_ce:essentia_terminal",
     "thaumicenergistics_ce:digisentia"
   ],
-  "column": 2,
-  "row": 0,
+  "column": 0,
+  "row": -4,
   "meta": [
     "round",
     "hidden"
@@ -18,6 +18,11 @@
     {
       "text": "tc.research_text.ARCANEASSEMBLER.stage.1",
       "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        },
         {
           "type": "observation",
           "category": "thaumicenergistics_ce:thaumicenergistics_ce",
@@ -42,6 +47,24 @@
       "recipes": [
         "thaumicenergistics_ce:arcane_assembler"
       ]
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:fabrico",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:machina",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:cognitio",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:auram",
+      "amount": 2
     }
   ],
   "complexity": 3

@@ -8,22 +8,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
 
 /**
- * "Draw this aspect out of the network and into my container", sent by the Essentia Terminal's
- * left-click on a list entry.
- *
- * <p>The aspect travels by id rather than as an {@code AEssentiaKey}, because an id is what the client is
- * sure of - the entry it clicked carries one - and the server rebuilds the key from it. Sending the key
- * would mean the client asserting a type, and a key it built wrong would be a key the server cannot match
- * against its own storage.
- *
- * <p>{@code where} names the container the essentia is wanted in - the cursor stack or the main hand, see
- * {@link ContainerSlot} - and {@code stack} travels as a hint the server checks itself against rather than
- * trusts: it fills the stack it finds at that place, not the one it was sent.
+ * "Draw this aspect out of the network into my container", sent by the Essentia Terminal's
+ * left-click. {@code aspectId} travels as an id because a key the client built wrong would not
+ * match server storage, {@code where} names the container slot, and {@code stack} is only a
+ * hint on the client side; {@code wholeStack} is the shift-click that fills the held stack
+ * rather than one item of it.
  */
-public record EssentiaFillPayload(int containerId, ResourceLocation aspectId, int where, ItemStack stack)
+public record EssentiaFillPayload(
+        int containerId, ResourceLocation aspectId, int where, ItemStack stack, boolean wholeStack)
         implements CustomPacketPayload {
 
     public static final Type<EssentiaFillPayload> TYPE =
@@ -39,6 +33,8 @@ public record EssentiaFillPayload(int containerId, ResourceLocation aspectId, in
                     EssentiaFillPayload::where,
                     ItemStack.OPTIONAL_STREAM_CODEC,
                     EssentiaFillPayload::stack,
+                    ByteBufCodecs.BOOL,
+                    EssentiaFillPayload::wholeStack,
                     EssentiaFillPayload::new);
 
     @Override
@@ -47,8 +43,10 @@ public record EssentiaFillPayload(int containerId, ResourceLocation aspectId, in
     }
 
     public void handle(Player player) {
-        if (player.containerMenu instanceof MenuEssentiaTerminal menu && menu.containerId == containerId) {
-            menu.fillFromNetwork(player, where, aspectId);
+        // The stack field of this record is a client-side hint and is not read here.
+        if (player.containerMenu instanceof EssentiaTerminalReceiver receiver
+                && receiver.containerId() == containerId) {
+            receiver.fillFromNetwork(player, where, aspectId, wholeStack);
         }
     }
 }

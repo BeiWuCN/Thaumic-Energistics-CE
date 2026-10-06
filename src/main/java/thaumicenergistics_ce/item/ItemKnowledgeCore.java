@@ -11,10 +11,9 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 
 /**
- * A knowledge core: the portable list of arcane recipes an Arcane Assembler can perform.
- *
- * <p>The item is a plain {@link Item}; everything it holds lives in its custom data, written by
- * {@link HandlerKnowledgeCore}. This class only reports that contents in the tooltip.
+ * A knowledge core: the portable list of arcane recipes an Arcane Assembler can perform; the item
+ * is a plain {@link Item} whose contents live in custom data written by
+ * {@link HandlerKnowledgeCore}, and this class only reports them in the tooltip.
  */
 public class ItemKnowledgeCore extends Item {
 
@@ -38,7 +37,6 @@ public class ItemKnowledgeCore extends Item {
         lines.addAll(core.describeUnreadable());
     }
 
-    /** Convenience for callers that only have a stack. */
     public static @Nullable HandlerKnowledgeCore handler(ItemStack stack, Level level) {
         return HandlerKnowledgeCore.of(stack, level.registryAccess());
     }

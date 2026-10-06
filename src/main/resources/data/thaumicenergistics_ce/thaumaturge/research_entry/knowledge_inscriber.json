@@ -4,8 +4,8 @@
   "parents": [
     "thaumicenergistics_ce:arcane_assembler"
   ],
-  "column": 4,
-  "row": 4,
+  "column": 0,
+  "row": -8,
   "meta": [
     "round"
   ],
@@ -22,7 +22,7 @@
           "amount": 1
         },
         {
-          "type": "theory",
+          "type": "observation",
           "category": "thaumicenergistics_ce:thaumicenergistics_ce",
           "amount": 1
         }
@@ -41,6 +41,20 @@
       "recipes": [
         "thaumicenergistics_ce:knowledge_inscriber"
       ]
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:cognitio",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:machina",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:fabrico",
+      "amount": 1
     }
   ],
   "complexity": 2

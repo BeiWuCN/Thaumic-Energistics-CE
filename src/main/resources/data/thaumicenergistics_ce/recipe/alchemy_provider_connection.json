@@ -1,0 +1,35 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "_note": "The Alchemy Provider Connection, the receiving end of a wireless link. Two salis mundus for the pair of ends, a diffusion core to move essentia across the gap, an essentia crystal to hold the link, and thaumium for the casing. 40 vis - the same band as the provider it serves.",
+  "crystals": [],
+  "key": {
+    "S": {
+      "item": "thaumaturge:salis_mundus"
+    },
+    "T": {
+      "item": "thaumaturge:ingot_thaumium"
+    },
+    "D": {
+      "item": "thaumicenergistics_ce:diffusion_core"
+    },
+    "E": {
+      "type": "neoforge:components",
+      "items": "thaumaturge:essentia_crystal",
+      "components": {
+        "thaumaturge:crystal_aspect": {
+          "aspect": "thaumaturge:permutatio"
+        }
+      }
+    }
+  },
+  "pattern": [
+    "TET",
+    "SDS",
+    " T "
+  ],
+  "vis": 40,
+  "result": {
+    "id": "thaumicenergistics_ce:alchemy_provider_connection",
+    "count": 2
+  }
+}

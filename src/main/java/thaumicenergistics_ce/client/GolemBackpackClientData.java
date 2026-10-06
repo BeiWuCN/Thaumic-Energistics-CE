@@ -10,10 +10,8 @@ import thaumicenergistics_ce.network.GolemBackpackPayload;
 
 /**
  * The client's copy of which golems are wearing a backpack, and what it looks like.
- *
- * <p>Weakly keyed by the entity, so a golem that leaves the world takes its entry with it; an id-keyed map
- * would need an unloader, and the entity is what the renderer has in hand anyway. An unknown golem reads as
- * "no backpack", which is what makes the renderer safe to run from the first frame.
+ * Keyed weakly by the entity, so a golem that leaves the world takes its entry with it, and an
+ * unknown golem reads as "no backpack", so the renderer is safe from the first frame.
  */
 public final class GolemBackpackClientData {
 
@@ -22,7 +20,6 @@ public final class GolemBackpackClientData {
 
     private GolemBackpackClientData() {}
 
-    /** Applies a payload, on the client thread. */
     public static void accept(GolemBackpackPayload payload) {
         if (Minecraft.getInstance().level == null) {
             return;

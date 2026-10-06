@@ -7,15 +7,15 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.blockentity.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProvider;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProviderConnection;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
-import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider;
+import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
+import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
+import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
-import thaumicenergistics_ce.blockentity.BlockEntityKnowledgeInscriber;
+import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
+import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
 /** Block entity type registration. */
 public final class ModBlockEntities {
@@ -52,12 +52,12 @@ public final class ModBlockEntities {
                             Set.of(ModBlocks.ESSENTIA_VIBRATION_CHAMBER.get()),
                             null));
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityEssentiaProvider>>
-            ESSENTIA_PROVIDER = REGISTRY.register(
-                    "essentia_provider",
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityAlchemyProvider>>
+            ALCHEMY_PROVIDER = REGISTRY.register(
+                    "alchemy_provider",
                     () -> new BlockEntityType<>(
-                            BlockEntityEssentiaProvider::new,
-                            Set.of(ModBlocks.ESSENTIA_PROVIDER.get()),
+                            BlockEntityAlchemyProvider::new,
+                            Set.of(ModBlocks.ALCHEMY_PROVIDER.get()),
                             null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityInfusionProvider>>
@@ -76,20 +76,20 @@ public final class ModBlockEntities {
                             Set.of(ModBlocks.DISTILLATION_ENCODER.get()),
                             null));
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityInfusionMonitor>>
-            INFUSION_MONITOR = REGISTRY.register(
-                    "infusion_monitor",
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityOccultMonitor>>
+            OCCULT_MONITOR = REGISTRY.register(
+                    "occult_monitor",
                     () -> new BlockEntityType<>(
-                            BlockEntityInfusionMonitor::new,
-                            Set.of(ModBlocks.INFUSION_MONITOR.get()),
+                            BlockEntityOccultMonitor::new,
+                            Set.of(ModBlocks.OCCULT_MONITOR.get()),
                             null));
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityEssentiaProviderConnection>>
-            ESSENTIA_PROVIDER_CONNECTION = REGISTRY.register(
-                    "essentia_provider_connection",
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityAlchemyProviderConnection>>
+            ALCHEMY_PROVIDER_CONNECTION = REGISTRY.register(
+                    "alchemy_provider_connection",
                     () -> new BlockEntityType<>(
-                            BlockEntityEssentiaProviderConnection::new,
-                            Set.of(ModBlocks.ESSENTIA_PROVIDER_CONNECTION.get()),
+                            BlockEntityAlchemyProviderConnection::new,
+                            Set.of(ModBlocks.ALCHEMY_PROVIDER_CONNECTION.get()),
                             null));
 
     private ModBlockEntities() {}

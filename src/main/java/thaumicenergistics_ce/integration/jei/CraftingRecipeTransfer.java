@@ -21,32 +21,20 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
  * Lets JEI fill the Arcane Crafting Terminal's grid from an ordinary crafting recipe.
- *
- * <p>A second handler beside the arcane one, because a terminal's grid is nine ordinary slots and will
- * happily craft a vanilla recipe - a player who opens a plank recipe in JEI and finds the button missing
- * would reasonably read it as a broken terminal.
- *
- * <p>Unlike the arcane handler, this one <em>does</em> pass the recipe id, and that is not a difference in
- * taste: an ordinary crafting recipe is in the vanilla recipe manager, so
- * {@link FillCraftingGridFromRecipePacket} can look it up and read the ingredients itself. Handing it the
- * templates as well would be a second copy of an answer it already has.
- *
- * <p>Written out rather than left to JEI's own transfer handler. JEI can move stacks between slots, but it
- * only knows about the player's inventory - and on an ME crafting terminal the ingredients are supposed to
- * come out of the network. Sending AE2's packet means a terminal fills the same way whichever kind of
- * recipe is on screen.
+ * A second handler beside the arcane one, without which a missing JEI button reads as broken.
+ * Unlike the arcane handler it passes the recipe id, which AE2 resolves in the vanilla recipe
+ * manager. The transfer is written out rather than left to JEI, which only knows the player's
+ * inventory and not the network.
  */
 public class CraftingRecipeTransfer
         implements IRecipeTransferInfo<MenuArcaneCraftingTerminal, RecipeHolder<CraftingRecipe>>,
                 IRecipeTransferHandler<MenuArcaneCraftingTerminal, RecipeHolder<CraftingRecipe>> {
 
-    /** The grid is 3x3, and a recipe that needs more than that cannot be laid out here at all. */
     private static final int GRID_WIDTH = 3;
     private static final int GRID_HEIGHT = 3;
 
@@ -63,9 +51,13 @@ public class CraftingRecipeTransfer
         return MenuArcaneCraftingTerminal.class;
     }
 
+    /**
+     * Any menu type of this menu class: the wired and the wireless terminals share it, so naming one menu
+     * type would leave the other without a transfer button.
+     */
     @Override
     public Optional<MenuType<MenuArcaneCraftingTerminal>> getMenuType() {
-        return Optional.of(ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get());
+        return Optional.empty();
     }
 
     @Override
@@ -74,10 +66,8 @@ public class CraftingRecipeTransfer
     }
 
     /**
-     * Whether this recipe can be laid out in the grid.
-     *
-     * <p>Asked of the recipe rather than of the ingredient list, because a shaped recipe's dimensions are
-     * its own business and a 3x3 check on the flat list would accept a recipe that is 4 wide.
+     * Whether this recipe can be laid out in the grid. Asked of the recipe, not of the flat ingredient
+     * list: a 3x3 check on the list would accept a recipe that is 4 wide.
      */
     @Override
     public boolean canHandle(MenuArcaneCraftingTerminal menu, RecipeHolder<CraftingRecipe> recipe) {
@@ -97,7 +87,9 @@ public class CraftingRecipeTransfer
 
     // ---- IRecipeTransferHandler ----------------------------------------
 
+    // old 6-arg transferRecipe is the interface's only abstract method in JEI 19.57
     @Override
+    @SuppressWarnings("removal")
     public @Nullable IRecipeTransferError transferRecipe(
             MenuArcaneCraftingTerminal menu,
             RecipeHolder<CraftingRecipe> holder,
@@ -116,9 +108,8 @@ public class CraftingRecipeTransfer
             return null;
         }
 
-        // The templates travel empty on purpose: the packet resolves the recipe by id and reads its own
-        // ingredients, and a recipe that would not resolve is refused above. Handing over a second copy
-        // would be an answer the packet did not ask for.
+        // The templates travel empty: the packet resolves the recipe by id and reads its own ingredients,
+        // and a non-resolving recipe was refused above. A second copy would answer a question never asked.
         NonNullList<ItemStack> templates =
                 NonNullList.withSize(PartArcaneCraftingTerminal.GRID_SIZE, ItemStack.EMPTY);
         PacketDistributor.sendToServer(

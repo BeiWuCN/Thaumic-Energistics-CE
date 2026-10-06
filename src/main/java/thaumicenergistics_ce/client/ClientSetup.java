@@ -3,66 +3,104 @@ package thaumicenergistics_ce.client;
 import appeng.api.client.AEKeyRendering;
 import appeng.client.gui.implementations.UpgradeableScreen;
 import appeng.client.gui.style.StyleManager;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
+import thaumicenergistics_ce.client.gui.ScreenArcaneAssembler;
+import thaumicenergistics_ce.client.gui.ScreenArcaneCraftingTerminal;
+import thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
+import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
+import thaumicenergistics_ce.client.gui.ScreenEssentiaStorageBus;
+import thaumicenergistics_ce.client.gui.ScreenEssentiaTerminal;
+import thaumicenergistics_ce.client.gui.ScreenEssentiaVibrationChamber;
+import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 import thaumicenergistics_ce.client.render.ArcaneAssemblerRenderer;
+import thaumicenergistics_ce.client.render.EssentiaKeyRenderHandler;
+import thaumicenergistics_ce.client.render.bubble.OccultMonitorBubbleRenderer;
+import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
-import thaumicenergistics_ce.menu.MenuEssentiaExportBus;
-import thaumicenergistics_ce.menu.MenuEssentiaImportBus;
+import thaumicenergistics_ce.integration.ae2.ClientRegistries;
+import thaumicenergistics_ce.integration.ae2.ClientRegistrySource;
+import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
+import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 import thaumicenergistics_ce.menu.MenuEssentiaLevelEmitter;
 import thaumicenergistics_ce.menu.MenuEssentiaStorageBus;
-import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
+import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
+import thaumicenergistics_ce.network.ClientSinks;
+import thaumicenergistics_ce.network.ClientboundReceiver;
+import thaumicenergistics_ce.network.GolemBackpackPayload;
 
 /**
- * Client-only wiring.
- *
- * <p>Kept behind {@link Dist#CLIENT} so the dedicated server never loads a screen class, which would
- * pull in client-only Minecraft types.
+ * Client-only wiring, kept behind {@link Dist#CLIENT} so the dedicated server never loads a screen
+ * class and with it client-only Minecraft types.
  */
-@EventBusSubscriber(modid = ThEIds.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = ThEIds.MODID, value = Dist.CLIENT)
 public final class ClientSetup {
     private ClientSetup() {}
 
     /**
-     * Tells AE2 how to draw an essentia key.
-     *
-     * <p>On {@code FMLClientSetupEvent} rather than with the screens, because it must be in place before
-     * anything draws a key - a terminal row or a storage cell's tooltip - and that can happen the moment
-     * a world is joined. Enqueued onto the client thread, as the event requires.
+     * Tells AE2 how to draw an essentia key, on {@code FMLClientSetupEvent} rather than with the
+     * screens because it must be in place before anything draws a key. Enqueued onto the client thread.
      */
     @SubscribeEvent
     public static void registerKeyRendering(FMLClientSetupEvent event) {
+        // The screens and the client cache are the only receivers this side has, so this is where the
+        // protocol package learns about them; on a dedicated server nothing is installed.
+        ClientSinks.install(new ClientboundReceiver() {
+            @Override
+            public void acceptArcaneCraftCost(ArcaneCraftCostPayload payload) {
+                ScreenArcaneCraftingTerminal.acceptCost(payload);
+            }
+
+            @Override
+            public void acceptGolemBackpack(GolemBackpackPayload payload) {
+                GolemBackpackClientData.accept(payload);
+            }
+        });
+        // The key type asks for this side's registries through here rather than naming a client class,
+        // so it must be in place before the first key is resolved.
+        ClientRegistries.install(new ClientRegistrySource() {
+            @Override
+            public @Nullable RegistryAccess registries() {
+                var minecraft = Minecraft.getInstance();
+                if (minecraft == null) {
+                    return null;
+                }
+                // Field, not a getter: this Minecraft has no getLevel, and asking for one throws.
+                var level = minecraft.level;
+                if (level != null) {
+                    return level.registryAccess();
+                }
+                // Before a level exists, the connection's registries are already the server's.
+                var connection = minecraft.getConnection();
+                return connection == null ? null : connection.registryAccess();
+            }
+        });
         event.enqueueWork(() -> {
             AEKeyRendering.register(
                     AEssentiaKeyType.INSTANCE, AEssentiaKey.class, new EssentiaKeyRenderHandler());
         });
     }
 
-    /**
-     * The Infusion Monitor's risk bubble, drawn above the block.
-     *
-     * <p>A block entity renderer rather than an entity: see {@link MonitorBubbleRenderer} for why the
-     * reference build's {@code TextDisplay} is not the shape this should have been.
-     */
     @SubscribeEvent
     public static void registerRenderers(
-            net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
+            EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(
-                thaumicenergistics_ce.init.ModBlockEntities.INFUSION_MONITOR.get(), MonitorBubbleRenderer::new);
-        // And the assembler's product, drawn inside the block while a craft runs - the molecular
-        // assembler's own arrangement, and for the same reason: what a machine is doing should be
-        // legible from outside it.
+                ModBlockEntities.OCCULT_MONITOR.get(), OccultMonitorBubbleRenderer::new);
         event.registerBlockEntityRenderer(
-                thaumicenergistics_ce.init.ModBlockEntities.ARCANE_ASSEMBLER.get(),
+                ModBlockEntities.ARCANE_ASSEMBLER.get(),
                 ArcaneAssemblerRenderer::new);
     }
 
@@ -70,17 +108,18 @@ public final class ClientSetup {
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenuTypes.ARCANE_ASSEMBLER.get(), ScreenArcaneAssembler::new);
         event.register(ModMenuTypes.KNOWLEDGE_INSCRIBER.get(), ScreenKnowledgeInscriber::new);
-        // Draws its own art rather than using a screen style - see the class.
-        event.register(ModMenuTypes.ESSENTIA_CELL_WORKBENCH.get(), ScreenEssentiaCellWorkbench::new);
+        // The cell workbench is an AE2 upgradeable screen, so its art and its slots come from a style.
+        event.register(
+                ModMenuTypes.ESSENTIA_CELL_WORKBENCH.get(),
+                (MenuEssentiaCellWorkbench menu, Inventory inventory, Component title) ->
+                        new ScreenEssentiaCellWorkbench(
+                                menu,
+                                inventory,
+                                title,
+                                StyleManager.loadStyleDoc("/screens/essentia_cell_workbench.json")));
         event.register(ModMenuTypes.DISTILLATION_ENCODER.get(), ScreenDistillationEncoder::new);
-        // Draws its own window rather than blitting one: the machine's art is a widget, not a panel.
         event.register(ModMenuTypes.ESSENTIA_VIBRATION_CHAMBER.get(), ScreenEssentiaVibrationChamber::new);
-        // AE2's own terminal layout, not a style of ours: the terminal looks like every other AE2
-        // terminal, which is the point - a player already knows how to read one. The reference build
-        // loads the same document for its essentia terminal.
-        //
-        // The lambda names its parameter types because the event's register method is generic over both
-        // the menu and the screen, and a bare lambda leaves Java nothing to infer them from.
+        // The lambda names its parameter types because register is generic over menu and screen.
         event.register(
                 ModMenuTypes.ESSENTIA_TERMINAL.get(),
                 (MenuEssentiaTerminal menu, Inventory inventory, Component title) ->
@@ -89,8 +128,7 @@ public final class ClientSetup {
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/terminals/terminal.json")));
-        // The Arcane Crafting Terminal's style is resolved out of AE2's namespace on purpose - its
-        // StyleManager only looks there - so the path carries no namespace of its own.
+        // AE2's StyleManager only resolves its own namespace, hence the path carries none.
         event.register(
                 ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get(),
                 (MenuArcaneCraftingTerminal menu, Inventory inventory, Component title) ->
@@ -99,8 +137,6 @@ public final class ClientSetup {
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/arcane_crafting_terminal.json")));
-        // The wireless one is the same screen: the two menus differ in how the network is reached, not in
-        // what is drawn. AE2's wireless terminal layout is used so the power bar is where players expect.
         event.register(
                 ModMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get(),
                 (MenuEssentiaTerminal menu, Inventory inventory, Component title) ->
@@ -109,22 +145,15 @@ public final class ClientSetup {
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/terminals/wireless_terminal.json")));
-        // The bus screens are AE2's own upgradeable screens, and AE2's own style documents with them.
-        // StyleManager resolves a style inside AE2's namespace only, so a document under this mod's assets
-        // cannot be loaded at all - which is why these name AE2's files rather than copies of them.
-        //
-        // The import and export buses use named screen classes because JEI's ghost ingredient handler
-        // registers against a screen class, and a generic screen has none to register against.
+        // The wireless terminal draws the same workbench, so it layers a title over that style.
         event.register(
-                ModMenuTypes.ESSENTIA_IMPORT_BUS.get(),
-                (MenuEssentiaImportBus menu, Inventory inventory, Component title) ->
-                        new ScreenEssentiaImportBus(
-                                menu, inventory, title, StyleManager.loadStyleDoc("/screens/import_bus.json")));
-        event.register(
-                ModMenuTypes.ESSENTIA_EXPORT_BUS.get(),
-                (MenuEssentiaExportBus menu, Inventory inventory, Component title) ->
-                        new ScreenEssentiaExportBus(
-                                menu, inventory, title, StyleManager.loadStyleDoc("/screens/export_bus.json")));
+                ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
+                (MenuArcaneCraftingTerminal menu, Inventory inventory, Component title) ->
+                        new ScreenArcaneCraftingTerminal(
+                                menu,
+                                inventory,
+                                title,
+                                StyleManager.loadStyleDoc("/screens/wireless_arcane_crafting_terminal.json")));
         event.register(
                 ModMenuTypes.ESSENTIA_STORAGE_BUS.get(),
                 (MenuEssentiaStorageBus menu, Inventory inventory, Component title) ->

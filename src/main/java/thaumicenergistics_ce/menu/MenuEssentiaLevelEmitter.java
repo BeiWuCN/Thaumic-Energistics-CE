@@ -6,20 +6,16 @@ import appeng.menu.SlotSemantics;
 import appeng.menu.implementations.UpgradeableMenu;
 import appeng.menu.slot.FakeSlot;
 import appeng.util.ConfigMenuInventory;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 
 /**
- * The Essentia Level Emitter's screen.
- *
- * <p>One config slot holding the aspect to watch, and a number the player sets. The number travels as a
- * client action rather than through a synced field, which is how AE2's own level emitter does it: a
- * setting the player types is a command, and a command that also arrives from the server would fight with
- * what the player is typing.
- *
- * <p>The reporting value is sent once when the menu opens, so the box shows what the emitter is actually
- * set to rather than a default.
+ * The Essentia Level Emitter's screen: one config slot for the aspect, plus a settable number.
+ * The number is a client action rather than a synced field, since what the player types is a
+ * command, and the reporting value is sent once when the menu opens so the box shows the real
+ * value.
  */
 public class MenuEssentiaLevelEmitter extends UpgradeableMenu<PartEssentiaLevelEmitter> {
 
@@ -33,21 +29,16 @@ public class MenuEssentiaLevelEmitter extends UpgradeableMenu<PartEssentiaLevelE
         registerClientAction(ACTION_SET_REPORTING_VALUE, Long.class, this::setValue);
     }
 
-    /** The value the player has set, on either side. */
     public long getReportingValue() {
         return reportingValue;
     }
 
-    /** The network's current total for the watched aspect, for the screen to show. */
     public long getCurrentLevel() {
         return getHost().getCurrentLevel();
     }
 
     /**
-     * Sets the threshold.
-     *
-     * <p>Called on the client by the screen, which forwards it to the server as a client action; called on
-     * the server by that action, which is where the emitter is actually changed.
+     * Sets the threshold: the client forwards a client action, the server action applies it.
      */
     public void setValue(long value) {
         if (isClientSide()) {
@@ -75,8 +66,7 @@ public class MenuEssentiaLevelEmitter extends UpgradeableMenu<PartEssentiaLevelE
         setRedStoneMode(settings.getSetting(Settings.REDSTONE_EMITTER));
     }
 
-    /** The aspect the player picked, for the screen's label. */
-    public net.minecraft.resources.ResourceLocation getConfiguredAspect() {
+    public ResourceLocation getConfiguredAspect() {
         var key = getHost().getConfiguredKey();
         return key == null ? null : key.getId();
     }

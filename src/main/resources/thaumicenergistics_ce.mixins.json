@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"package": "thaumicenergistics_ce.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"InterfaceLogicMixin"
+	],
+	"client": [
+		"PageLineStyleMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"minVersion": "0.8"
+}

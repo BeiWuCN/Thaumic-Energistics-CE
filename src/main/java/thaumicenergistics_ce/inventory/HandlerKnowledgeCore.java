@@ -16,20 +16,17 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.ThaumicEnergistics;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The arcane patterns stored inside one knowledge core.
- *
- * <p>A value object over the core's item stack: it reads and writes the patterns in the stack's own
- * {@link CustomData}, so a knowledge core stays a single portable item with no side inventory. This is
- * how the reference build stores them too, and it keeps the data out of the item's component registry.
+ * The arcane patterns stored inside one knowledge core: a value object over the core's item stack.
+ * It reads and writes the stack's own {@link CustomData}, so a core stays one portable item with
+ * no side inventory, and the data stays out of the item's component registry.
  */
 public final class HandlerKnowledgeCore {
 
-    /** Tag key holding the pattern list inside the stack's custom data. */
     private static final String NBT_PATTERNS = "Patterns";
 
     /** Patterns one core holds. Matches the assembler GUI's 7x3 read-only grid. */
@@ -40,13 +37,8 @@ public final class HandlerKnowledgeCore {
     private final List<ThEArcanePattern> patterns = new ArrayList<>(MAXIMUM_STORED_PATTERNS);
 
     /**
-     * Entries this build could not read, kept exactly as they were found.
-     *
-     * <p>{@link #save} rewrites the whole list, so an entry dropped by {@link #load} is an entry deleted by
-     * the next store or delete. That is how a core written by a different schema - or holding a result item
-     * that is no longer registered - lost that entry without a word, and how a core whose every entry failed
-     * to read came back from a save looking emptied. Kept verbatim and written back, so a pattern this build
-     * cannot understand is a pattern it does not touch.
+     * Entries this build could not read, kept exactly as found and written back verbatim.
+     * {@link #save} rewrites the whole list, so dropping one here deletes it on the next store.
      */
     private final List<CompoundTag> unreadable = new ArrayList<>();
 
@@ -56,11 +48,6 @@ public final class HandlerKnowledgeCore {
         load();
     }
 
-    /**
-     * Wraps a stack if it is a knowledge core.
-     *
-     * @return the handler, or {@code null} when the stack is not a core
-     */
     public static @Nullable HandlerKnowledgeCore of(ItemStack stack, HolderLookup.Provider registries) {
         if (stack.isEmpty() || !stack.is(ModItems.KNOWLEDGE_CORE.get())) {
             return null;
@@ -84,7 +71,6 @@ public final class HandlerKnowledgeCore {
         return patterns.size();
     }
 
-    /** The stored pattern producing {@code result}, or {@code null} when the core has none. */
     public @Nullable ThEArcanePattern patternFor(ItemStack result) {
         for (ThEArcanePattern pattern : patterns) {
             if (ItemStack.isSameItemSameComponents(pattern.result(), result)) {
@@ -96,7 +82,6 @@ public final class HandlerKnowledgeCore {
 
     /**
      * Stores a pattern, replacing any existing entry for the same result.
-     *
      * @return {@code false} when the core is full and holds no entry for that result
      */
     public boolean store(ThEArcanePattern pattern) {
@@ -118,16 +103,6 @@ public final class HandlerKnowledgeCore {
         return removed;
     }
 
-    /**
-     * Removes the entry whose result is {@code result}.
-     *
-     * <p>Keyed by result rather than by the pattern object because a stored entry cannot always be
-     * identified by value: deleting what was just saved has nothing but the result to point with, the
-     * recipe that produced it having been read back out of the core rather than kept. The core holds at
-     * most one entry per result, so a result names one entry exactly.
-     *
-     * @return {@code false} when the core holds no entry for that result
-     */
     public boolean removeByResult(ItemStack result) {
         ThEArcanePattern stored = patternFor(result);
         if (stored == null) {
@@ -136,7 +111,6 @@ public final class HandlerKnowledgeCore {
         return remove(stored);
     }
 
-    /** One result stack per stored pattern, in storage order. */
     public List<ItemStack> storedOutputs() {
         List<ItemStack> outputs = new ArrayList<>(patterns.size());
         for (ThEArcanePattern pattern : patterns) {
@@ -145,7 +119,6 @@ public final class HandlerKnowledgeCore {
         return outputs;
     }
 
-    /** Total vis the stored patterns would cost, for the tooltip. */
     public int totalVis() {
         int total = 0;
         for (ThEArcanePattern pattern : patterns) {
@@ -164,16 +137,14 @@ public final class HandlerKnowledgeCore {
         CompoundTag tag = core.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         ListTag list = tag.getList(NBT_PATTERNS, Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
-            // Copied, not referenced: this entry may be written straight back by save, and the tag it came
-            // from belongs to the stack.
+            // Copied, not referenced: save may write this entry back, and the tag belongs to the stack.
             CompoundTag entry = list.getCompound(i).copy();
             ThEArcanePattern pattern =
                     patterns.size() < MAXIMUM_STORED_PATTERNS ? ThEArcanePattern.load(registries, entry) : null;
             if (pattern != null) {
                 patterns.add(pattern);
             } else {
-                // Past the cap as well as unreadable: either way it is the player's pattern, not this
-                // object's to throw away.
+                // Past the cap as well as unreadable: the entry is the player's, not ours to drop.
                 unreadable.add(entry);
             }
         }
@@ -185,14 +156,13 @@ public final class HandlerKnowledgeCore {
         for (ThEArcanePattern pattern : patterns) {
             list.add(pattern.save(registries));
         }
-        // Put back, unchanged, whatever this build could not read: this write replaces the whole list, so
-        // leaving them out would delete them. This is the only way a core loses patterns with nothing to
-        // show for it, and the log line below is what makes it visible.
+        // Put back unchanged whatever this build could not read: this write replaces the whole list,
+        // so leaving them out deletes them.
         for (CompoundTag entry : unreadable) {
             list.add(entry.copy());
         }
         if (!unreadable.isEmpty()) {
-            ThaumicEnergistics.LOG.warn(
+            ThELog.LOG.warn(
                     "[core] writing {} pattern(s) and keeping {} entr(ies) this build cannot read; they would"
                             + " otherwise be deleted by this save",
                     patterns.size(),
@@ -202,7 +172,6 @@ public final class HandlerKnowledgeCore {
         core.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
-    /** Entries the core holds that this build cannot read. They are kept, and never offered as patterns. */
     public int unreadableCount() {
         return unreadable.size();
     }
@@ -217,10 +186,8 @@ public final class HandlerKnowledgeCore {
     }
 
     /**
-     * A warning naming the entries this build cannot read, or nothing when it can read every one of them.
-     *
-     * <p>Shown to the player because nothing else on their side would: the entries are still in the core and
-     * are never written away, so without this line the only sign of them is a shorter list than they wrote.
+     * A warning naming the entries this build cannot read, or nothing when it can read them all.
+     * Shown because the entries stay in the core, so without it the player's list just looks shorter.
      */
     public List<Component> describeUnreadable() {
         if (unreadable.isEmpty()) {
@@ -263,10 +230,8 @@ public final class HandlerKnowledgeCore {
     }
 
     /**
-     * Applies one text colour.
-     *
-     * <p>Wrapped rather than calling {@code withStyle} inline: that method is varargs, and the overload
-     * resolution against {@code ChatFormatting} does not settle on this toolchain.
+     * Applies one text colour. Wrapped rather than calling {@code withStyle} inline: that method is
+     * varargs, and overload resolution against {@code ChatFormatting} does not settle on this toolchain.
      */
     private static MutableComponent styled(Component text, ChatFormatting colour) {
         MutableComponent mutable = text.copy();
@@ -274,7 +239,6 @@ public final class HandlerKnowledgeCore {
         return mutable;
     }
 
-    /** The aspect's display name, from Thaumaturge's own translation keys. */
     private static Component aspectName(AspectInstance entry) {
         var id = entry.aspect().getKey().location();
         return Component.translatable("aspect." + id.getNamespace() + "." + id.getPath());

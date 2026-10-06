@@ -3,7 +3,11 @@ package thaumicenergistics_ce.block;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -12,27 +16,20 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaVibrationChamber;
+import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
 
 /**
- * The Essentia Vibration Chamber block.
- *
- * <p>Has a facing, unlike the cell workbench, because its model is not symmetric: the front face is the
- * one with the animated aspect texture, and the top is the input. The blockstate file in the mod's assets
- * already carries the four horizontal variants, so the property has to exist and has to be named exactly
- * {@code facing} for those variants to be reachable at all - a blockstate whose variants no state can match
- * is a missing-texture cube.
- *
- * <p>Horizontal only. The model is a full cube with a distinct top and bottom, so a vertical facing would
- * put the input texture on a side and the front on the top, which is not what the art draws.
+ * The Essentia Vibration Chamber block: horizontal facing only, because its model is not symmetric.
+ * Its front carries the animated aspect texture and its top the input, so a vertical facing would
+ * swap them. {@code facing} must be the exact property name, or the variants are unreachable.
  */
 public class BlockEssentiaVibrationChamber extends ThEBaseEntityBlock {
 
     public static final MapCodec<BlockEssentiaVibrationChamber> CODEC =
             simpleCodec(BlockEssentiaVibrationChamber::new);
 
-    /** Which way the animated front face points. Matches the blockstate variants. */
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public BlockEssentiaVibrationChamber(Properties properties) {
@@ -50,7 +47,6 @@ public class BlockEssentiaVibrationChamber extends ThEBaseEntityBlock {
         builder.add(FACING);
     }
 
-    /** Placed facing the player, so the animated face is the one you see when you put it down. */
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
         return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
@@ -67,28 +63,25 @@ public class BlockEssentiaVibrationChamber extends ThEBaseEntityBlock {
     }
 
     /**
-     * Right-clicking opens the machine's screen.
-     *
-     * <p>Overridden rather than inherited: {@code ThEBaseEntityBlock} opens a menu for the machines built on
-     * {@code ThEBaseBlockEntity}, and this one is a grid machine and so is built on AE2's block entity
-     * instead. It is a {@code MenuProvider} all the same, and this is the one line that says so.
+     * Right-clicking opens the machine's screen: this is a grid machine built on AE2's block entity, not
+     * {@code ThEBaseBlockEntity}, so the base block's menu path does not reach it.
      */
     @Override
-    protected net.minecraft.world.InteractionResult useWithoutItem(
+    protected InteractionResult useWithoutItem(
             BlockState state,
-            net.minecraft.world.level.Level level,
+            Level level,
             BlockPos pos,
-            net.minecraft.world.entity.player.Player player,
-            net.minecraft.world.phys.BlockHitResult hit) {
+            Player player,
+            BlockHitResult hit) {
         if (level.isClientSide()) {
-            return net.minecraft.world.InteractionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
         if (level.getBlockEntity(pos) instanceof BlockEntityEssentiaVibrationChamber chamber
-                && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+                && player instanceof ServerPlayer serverPlayer) {
             serverPlayer.openMenu(chamber, buffer -> buffer.writeBlockPos(pos));
-            return net.minecraft.world.InteractionResult.CONSUME;
+            return InteractionResult.CONSUME;
         }
-        return net.minecraft.world.InteractionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override

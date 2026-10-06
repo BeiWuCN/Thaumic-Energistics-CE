@@ -1,8 +1,10 @@
 package thaumicenergistics_ce.integration.jei;
 
+import appeng.api.stacks.AEItemKey;
 import appeng.core.network.serverbound.FillCraftingGridFromRecipePacket;
 import appeng.menu.SlotSemantics;
-import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
+import appeng.menu.me.common.GridInventoryEntry;
+import appeng.menu.me.common.IClientRepo;
 import java.util.List;
 import java.util.Optional;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -17,38 +19,20 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * Lets JEI fill the Arcane Crafting Terminal's grid from an arcane workbench recipe.
- *
- * <p>Registered for Thaumaturge's own arcane category, so a player opens a recipe the way they always do
- * and presses the transfer button. As with the Knowledge Inscriber, the transfer reads the recipe rather
- * than mirroring JEI's drawn slots: an arcane recipe's view carries its crystal requirement as ingredient
- * slots of its own, and only the nine grid cells are filled here - the terminal's six crystal slots, three
- * down each side of the grid, are left to the player, which is the gap recorded in
- * docs/ARCANE-CRAFTING-TERMINAL.md.
- *
- * <p><b>Where the slots are found.</b> By {@link SlotSemantics}, not by counting. The terminal's menu is not
- * the Knowledge Inscriber's and never will be - it inherits a terminal's layout, a result slot and a wand
- * slot - so any constant worked out from one of them would be wrong for the other. Asking AE2 which slots
- * are the crafting grid cannot drift from how AE2 laid that grid out.
- *
- * <p><b>The filling is AE2's, not this class's.</b> {@link FillCraftingGridFromRecipePacket} takes nine
- * ingredient templates and puts them in the grid, taking what the player does not have out of the ME
- * network and charging the network for it. Writing that here would be a second implementation of exactly
- * what an ME crafting terminal does, and it would be worse: a hand-written version can only reach the
- * player's inventory, which is the one place a terminal's ingredients are not supposed to come from.
- *
- * <p>The packet is given no recipe id, deliberately. It resolves an id through the vanilla recipe manager,
- * and an arcane recipe is not in there; passing one would have the packet find nothing and fill the grid
- * with empty ingredients. With no id it falls back to the templates, which is the path an arcane recipe
- * needs - confirmed by reading the packet's own {@code getDesiredIngredients}.
+ * Fills the Arcane Crafting Terminal's grid from an arcane workbench recipe. It handles
+ * Thaumaturge's own category, so the button appears where players look; slots come from
+ * SlotSemantics. No recipe id is passed, as an arcane recipe is not in the vanilla recipe
+ * manager. Each cell's template is the variant with stock behind it, not the one the recipe
+ * lists first, because the packet resolves a template itself and never learns the ingredient
+ * was a tag. One handler serves both terminals: JEI keys by container class and recipe type only.
  */
 public class ArcaneCraftingRecipeTransfer
         implements IRecipeTransferInfo<MenuArcaneCraftingTerminal, RecipeHolder<?>>,
@@ -67,14 +51,18 @@ public class ArcaneCraftingRecipeTransfer
         return MenuArcaneCraftingTerminal.class;
     }
 
+    /**
+     * Any menu type of this menu class: the wired and the wireless terminals share it, so naming one menu
+     * type would leave the other without a transfer button.
+     */
     @Override
     public Optional<MenuType<MenuArcaneCraftingTerminal>> getMenuType() {
-        return Optional.of(ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get());
+        return Optional.empty();
     }
 
     @Override
     public RecipeType<RecipeHolder<?>> getRecipeType() {
-        return ArcaneRecipeTypes.arcane();
+        return ArcaneJeiRecipeType.arcane();
     }
 
     @Override
@@ -82,7 +70,6 @@ public class ArcaneCraftingRecipeTransfer
         return ArcaneRecipeTypes.fitsGrid(recipe);
     }
 
-    /** The nine workbench cells, asked for by semantic. */
     @Override
     public List<Slot> getRecipeSlots(MenuArcaneCraftingTerminal menu, RecipeHolder<?> recipe) {
         List<Slot> grid = menu.getSlots(SlotSemantics.CRAFTING_GRID);
@@ -96,7 +83,9 @@ public class ArcaneCraftingRecipeTransfer
 
     // ---- IRecipeTransferHandler ----------------------------------------
 
+    // JEI 19.57 leaves this 6-arg transferRecipe as the interface's only abstract method.
     @Override
+    @SuppressWarnings("removal")
     public @Nullable IRecipeTransferError transferRecipe(
             MenuArcaneCraftingTerminal menu,
             RecipeHolder<?> holder,
@@ -112,27 +101,21 @@ public class ArcaneCraftingRecipeTransfer
             return helper.createInternalError();
         }
 
-        // One template per cell, alongside which of them the player cannot supply. The packet decides what
-        // to do about the missing ones; this only reports them, so the button can say why it will not work
-        // rather than appearing to do nothing.
+        // One template per cell, picked as the variant the player or the network can supply: the packet's
+        // template path knows nothing of tags, so a tag's first member may well be the one not in stock.
+        IClientRepo repo = menu.getClientRepo();
         NonNullList<ItemStack> templates = NonNullList.withSize(PartArcaneCraftingTerminal.GRID_SIZE, ItemStack.EMPTY);
         boolean missing = false;
         for (int cell = 0; cell < PartArcaneCraftingTerminal.GRID_SIZE; cell++) {
             List<ItemStack> variants = cell < cells.size() ? cells.get(cell) : List.of();
-            for (ItemStack variant : variants) {
-                if (!variant.isEmpty()) {
-                    templates.set(cell, variant.copyWithCount(1));
-                    break;
-                }
-            }
-            if (templates.get(cell).isEmpty() && !variants.isEmpty()) {
+            templates.set(cell, pickSuppliable(variants, repo, player));
+            if (templates.get(cell).isEmpty() && asksForSomething(variants)) {
                 missing = true;
             }
         }
 
-        // A recipe whose ingredients cannot be laid out is refused outright. The packet would fill what it
-        // can, and a partly filled grid reads as "this terminal cannot craft that" rather than "you are
-        // short of something" - a misleading thing to show for a fixable problem.
+        // A recipe that cannot be laid out is refused rather than partly filled: a partly filled grid
+        // reads as "this terminal cannot craft that", not "you are short of it".
         if (missing) {
             return helper.createUserErrorWithTooltip(
                     Component.translatable("thaumicenergistics_ce.jei.transfer.missing_ingredients"));
@@ -141,9 +124,60 @@ public class ArcaneCraftingRecipeTransfer
             return null;
         }
 
-        // No recipe id: an arcane recipe is not in the vanilla manager, and the packet's template fallback
-        // is the path that fits. See the class note.
+        // No recipe id: the recipe is not in the vanilla manager, so the packet's template path is used.
         PacketDistributor.sendToServer(new FillCraftingGridFromRecipePacket(null, templates, false));
         return null;
+    }
+
+    // ---- templates -----------------------------------------------------
+
+    /**
+     * The template for one cell: the variant with the most supply behind it, so a tag whose first member is
+     * not stocked but whose others are still transfers. Empty when nothing can supply the cell.
+     */
+    private static ItemStack pickSuppliable(List<ItemStack> variants, @Nullable IClientRepo repo, Player player) {
+        ItemStack best = ItemStack.EMPTY;
+        long bestSupply = 0;
+        for (ItemStack variant : variants) {
+            if (variant.isEmpty()) {
+                continue;
+            }
+            long supply = supplyOf(variant, repo, player);
+            if (supply > bestSupply) {
+                best = variant.copyWithCount(1);
+                bestSupply = supply;
+            }
+        }
+        return best;
+    }
+
+    /** What the network reports of this exact item, plus what the player carries. */
+    private static long supplyOf(ItemStack variant, @Nullable IClientRepo repo, Player player) {
+        long supply = 0;
+        AEItemKey wanted = AEItemKey.of(variant);
+        if (repo != null && wanted != null) {
+            for (GridInventoryEntry entry : repo.getByIngredient(Ingredient.of(variant))) {
+                if (wanted.equals(entry.getWhat())) {
+                    supply += entry.getStoredAmount();
+                }
+            }
+        }
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            ItemStack carried = player.getInventory().getItem(slot);
+            if (ItemStack.isSameItemSameComponents(carried, variant)) {
+                supply += carried.getCount();
+            }
+        }
+        return supply;
+    }
+
+    /** Whether the cell asks for anything at all: an empty cell of the layout must not read as missing. */
+    private static boolean asksForSomething(List<ItemStack> variants) {
+        for (ItemStack variant : variants) {
+            if (!variant.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

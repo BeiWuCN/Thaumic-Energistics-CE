@@ -1,45 +1,33 @@
 package thaumicenergistics_ce.integration.jade;
 
-import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.IWailaCommonRegistration;
 import snownee.jade.api.IWailaPlugin;
 import snownee.jade.api.WailaPlugin;
-import thaumicenergistics_ce.block.BlockArcaneAssembler;
-import thaumicenergistics_ce.block.BlockEssentiaVibrationChamber;
-import thaumicenergistics_ce.block.BlockInfusionMonitor;
-import thaumicenergistics_ce.block.BlockInfusionProvider;
-import thaumicenergistics_ce.blockentity.BlockEntityArcaneAssembler;
-import thaumicenergistics_ce.blockentity.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider;
+import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
+import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
+import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
 /**
- * Registers this mod's Jade providers.
- *
- * <p>Annotated rather than listed in a service file, which is how Jade finds plugins on NeoForge. Jade is
- * an optional dependency and only ever loads this class itself, so a world without Jade never reaches it.
+ * Registers this mod's Jade providers: the server data half, which Jade asks for on both sides.
+ * The class is annotated rather than listed in a service file, because that is how Jade finds plugins
+ * on NeoForge, and Jade is optional, so the class is loaded only when Jade is present. The block
+ * components, drawn on a client, are registered by {@code client.jade.ThEJadeClientPlugin}.
  */
 @WailaPlugin
 public class ThEJadePlugin implements IWailaPlugin {
 
-    /** Server side: the machines' own numbers, read where they are true. */
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(ArcaneAssemblerProvider.INSTANCE, BlockEntityArcaneAssembler.class);
         registration.registerBlockDataProvider(
-                InfusionMonitorProvider.INSTANCE, BlockEntityInfusionMonitor.class);
+                OccultMonitorProvider.INSTANCE, BlockEntityOccultMonitor.class);
         registration.registerBlockDataProvider(
                 InfusionProviderProvider.INSTANCE, BlockEntityInfusionProvider.class);
-    }
-
-    /** Client side: the same providers, drawing what the server sent. */
-    @Override
-    public void registerClient(IWailaClientRegistration registration) {
-        registration.registerBlockComponent(ArcaneAssemblerProvider.INSTANCE, BlockArcaneAssembler.class);
-        registration.registerBlockComponent(
-                VibrationChamberProvider.INSTANCE, BlockEssentiaVibrationChamber.class);
-        registration.registerBlockComponent(
-                InfusionMonitorProvider.INSTANCE, BlockInfusionMonitor.class);
-        registration.registerBlockComponent(
-                InfusionProviderProvider.INSTANCE, BlockInfusionProvider.class);
+        registration.registerBlockDataProvider(
+                AlchemyProviderProvider.INSTANCE, BlockEntityAlchemyProvider.class);
+        registration.registerBlockDataProvider(
+                AlchemyReceiverProvider.INSTANCE, BlockEntityAlchemyProviderConnection.class);
     }
 }

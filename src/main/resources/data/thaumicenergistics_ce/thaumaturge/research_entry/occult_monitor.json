@@ -1,0 +1,55 @@
+{
+  "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+  "name": "tc.research_name.OCCULTMONITOR",
+  "parents": [
+    "thaumicenergistics_ce:infusion_provider",
+    "thaumaturge:infusion"
+  ],
+  "column": 2,
+  "row": -6,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics_ce:occult_monitor"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.OCCULTMONITOR.stage.1",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        },
+        {
+          "type": "observation",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.OCCULTMONITOR.stage.2",
+      "recipes": [
+        "thaumicenergistics_ce:occult_monitor"
+      ],
+      "warp": 1
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:machina",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:sensus",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
+      "amount": 1
+    }
+  ],
+  "complexity": 3
+}

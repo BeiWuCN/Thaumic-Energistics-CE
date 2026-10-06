@@ -8,6 +8,7 @@ import appeng.menu.MenuOpener;
 import appeng.menu.locator.MenuLocators;
 import appeng.parts.PartModel;
 import appeng.parts.reporting.AbstractTerminalPart;
+import java.util.List;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -19,16 +20,11 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
- * The Essentia Terminal, as a part that goes on a cable.
- *
- * <p>An AE2 terminal with one thing changed: it lists essentia and nothing else. That is expressed through
- * {@link KeyTypeSelection}, which is the interface AE2 already uses to decide which key types a terminal
- * offers - so the filtering is AE2's own machinery rather than a special case bolted onto its item list.
- *
- * <p>The parent part keeps a selection that allows every type. Ours replaces it, and the selection also
- * has to be read and written by hand for that to stick: the parent's fields are private, so its own
- * read/write would otherwise save the permissive selection over ours on every load and save. The
- * reference build carries the same pair of overrides for the same reason.
+ * The Essentia Terminal as a cable part: an AE2 terminal that lists essentia and nothing else.
+ * Filtering uses {@link KeyTypeSelection}, AE2's own channel for a terminal's key types, but
+ * the parent's selection allows every type while ours replaces it, so the field is read and
+ * written by hand. It has to be: the parent's fields are private and its read/write would
+ * save the permissive selection instead.
  */
 public class PartEssentiaTerminal extends AbstractTerminalPart {
 
@@ -44,12 +40,14 @@ public class PartEssentiaTerminal extends AbstractTerminalPart {
     @PartModels
     public static final ResourceLocation MODEL_HAS_CHANNEL = ThEIds.id("parts/essentia_terminal_has_channel");
 
+    public static final List<ResourceLocation> MODEL_LOCATIONS =
+            List.of(MODEL_BASE, MODEL_OFF, MODEL_ON, MODEL_HAS_CHANNEL);
+
     private static final IPartModel MODELS_OFF = new PartModel(MODEL_BASE, MODEL_OFF, MODEL_STATUS_OFF);
     private static final IPartModel MODELS_ON = new PartModel(MODEL_BASE, MODEL_ON, MODEL_STATUS_ON);
     private static final IPartModel MODELS_HAS_CHANNEL =
             new PartModel(MODEL_BASE, MODEL_ON, MODEL_STATUS_HAS_CHANNEL);
 
-    /** Essentia only. Everything else the terminal would list - items, fluids - is filtered out. */
     private final KeyTypeSelection essentiaOnly =
             new KeyTypeSelection(this::saveChanges, keyType -> keyType == AEssentiaKeyType.INSTANCE);
 
@@ -83,14 +81,12 @@ public class PartEssentiaTerminal extends AbstractTerminalPart {
     @Override
     public void readFromNBT(CompoundTag data, HolderLookup.Provider registries) {
         super.readFromNBT(data, registries);
-        // After the parent, so ours is the selection NBT is read into.
         essentiaOnly.readFromNBT(data, registries);
     }
 
     @Override
     public void writeToNBT(CompoundTag data, HolderLookup.Provider registries) {
         super.writeToNBT(data, registries);
-        // After the parent, so ours overwrites what the parent wrote for its own selection.
         essentiaOnly.writeToNBT(data);
     }
 }

@@ -9,18 +9,13 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
 import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
 
 /**
- * Presents a Thaumaturge essentia container to the ME network as storage.
- *
- * <p>This is what lets a jar be part of the network rather than merely something a bus shuttles essentia
- * into and out of. A storage bus mounts one of these, and from then on the jar's contents are listed in
- * the terminal, count towards what the network holds, and can be inserted into and extracted from like
- * any other storage.
- *
- * <p>Amounts are {@code int} on the Thaumaturge side and {@code long} on the ME side. Every conversion
- * here is the narrowing direction, so each one is clamped - a container cannot hold more than
- * {@code Integer.MAX_VALUE} of anything, and asking it to would wrap to a negative amount.
+ * Presents a Thaumaturge essentia container to the ME network as storage. A storage bus mounts
+ * one of these, and the jar's contents are then listed in the terminal, count towards what the
+ * network holds, and insert and extract like any other storage. Amounts are {@code int} on one
+ * side and {@code long} on the other, so every conversion is clamped.
  */
 public final class EssentiaMEStorage implements MEStorage {
 
@@ -30,7 +25,6 @@ public final class EssentiaMEStorage implements MEStorage {
         this.storage = storage;
     }
 
-    /** The container behind this view, for a caller that needs to talk to it directly. */
     public IEssentiaStorage container() {
         return storage;
     }
@@ -58,8 +52,8 @@ public final class EssentiaMEStorage implements MEStorage {
             return 0;
         }
         int wanted = (int) Math.min(amount, Integer.MAX_VALUE);
-        // Thaumaturge reports what it took rather than what it was offered, and the simulate flag is its
-        // own - so a dry run and a real one are the same call with a different last argument.
+        // Thaumaturge reports what it took, and the simulate flag is its own; a dry run and a real one
+        // are the same call with a different last argument.
         boolean simulate = mode == Actionable.SIMULATE;
         return storage.insert(aspect, wanted, simulate);
     }
@@ -78,20 +72,16 @@ public final class EssentiaMEStorage implements MEStorage {
         return storage.extract(aspect, wanted, simulate);
     }
 
-    /** A version counter the network can watch instead of polling contents. */
     public long contentRevision() {
         return storage.contentRevision();
     }
 
     /**
-     * What this storage is, for AE2's diagnostic output.
-     *
-     * <p>A plain description rather than the container's own name: the container is a block, and asking it
-     * for a name would mean asking the block entity - which this adapter deliberately does not hold, so
-     * that it cannot go stale when the container is replaced.
+     * What this storage is, for AE2's diagnostic output: a plain description rather than the container's
+     * own name, which would mean asking its block entity, a thing this adapter deliberately does not hold.
      */
     @Override
-    public net.minecraft.network.chat.Component getDescription() {
-        return net.minecraft.network.chat.Component.translatable("gui.thaumicenergistics_ce.essentia_storage");
+    public Component getDescription() {
+        return Component.translatable("gui.thaumicenergistics_ce.essentia_storage");
     }
 }

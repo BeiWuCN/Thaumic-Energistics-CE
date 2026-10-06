@@ -1,0 +1,10 @@
+# The tree is stored as LF, everywhere, on purpose: tools/fetch-thaumaturge.sh is run directly by
+# CI and by Linux and macOS builders, and a checkout that hands it CRLF line endings stops at the
+# first line with a "not found" that names no file. Keeping one ending for the whole tree also means
+# the working folder and the committed bytes agree, which is what the byte-for-byte comparisons in
+# this repository rely on.
+* text=auto eol=lf
+
+# Compiled artifacts carry bytes that no line-ending rule may touch.
+*.jar binary
+*.png binary

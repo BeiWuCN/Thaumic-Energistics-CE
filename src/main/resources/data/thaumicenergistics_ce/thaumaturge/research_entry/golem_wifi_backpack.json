@@ -3,10 +3,10 @@
   "name": "tc.research_name.GOLEMWIFI",
   "parents": [
     "thaumicenergistics_ce:essentia_terminal",
-    "thaumicenergistics_ce:essentia_provider"
+    "thaumicenergistics_ce:alchemy_provider"
   ],
-  "column": 4,
-  "row": -4,
+  "column": 2,
+  "row": 0,
   "meta": [
     "round"
   ],
@@ -23,12 +23,7 @@
           "amount": 1
         },
         {
-          "type": "theory",
-          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
-          "amount": 1
-        },
-        {
-          "type": "theory",
+          "type": "observation",
           "category": "thaumicenergistics_ce:thaumicenergistics_ce",
           "amount": 1
         }
@@ -39,6 +34,24 @@
       "recipes": [
         "thaumicenergistics_ce:golem_wifi_backpack"
       ]
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:potentia",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:auram",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:humanus",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:motus",
+      "amount": 1
     }
   ],
   "complexity": 3

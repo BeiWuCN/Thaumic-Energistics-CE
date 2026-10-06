@@ -6,7 +6,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -18,11 +17,8 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 
 /**
- * The Distillation Encoder block.
- *
- * <p>Facing, because the art has a front. The blockstate in this mod's assets declares the four horizontal
- * variants against a {@code facing} property, and a blockstate whose variants no state can match renders as
- * a missing-texture cube.
+ * The Distillation Encoder block. It faces horizontally because the art has a front, and the four
+ * declared horizontal variants need {@code facing}, else they render as a missing-texture cube.
  */
 public class BlockDistillationEncoder extends ThEBaseEntityBlock {
 

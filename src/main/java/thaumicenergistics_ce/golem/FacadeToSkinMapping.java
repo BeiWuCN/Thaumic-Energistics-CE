@@ -12,20 +12,15 @@ import org.jetbrains.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * Which backpack skin a block asks for.
- *
- * <p>Thaumium and tallow have no vanilla block to their name, so those are matched by the block's id inside
- * Thaumaturge's namespace, and on substrings ("thaumium", "greatwood", "flesh") on purpose: a block, a
- * plank, a log and a set of stairs all mean the same material to a player pointing at them.
- *
- * <p>AE2 facades are unwrapped first, a facade being how a player clicks a golem with a block while holding
- * something that is not one. Anything not in the list returns null, which leaves the skin alone.
+ * Which backpack skin a block asks for. Matching is by block id inside Thaumaturge's namespace
+ * and by substring on purpose, since a block, a plank, a log and a set of stairs all mean the
+ * same material to a player pointing at them. AE2 facades are unwrapped first, and anything not
+ * listed returns null, leaving the skin alone.
  */
 public final class FacadeToSkinMapping {
 
     private FacadeToSkinMapping() {}
 
-    /** The skin this stack asks for, or null if it does not name one. */
     @Nullable
     public static BackpackSkins skinFor(ItemStack stack) {
         Block block = blockOf(stack);
@@ -71,14 +66,6 @@ public final class FacadeToSkinMapping {
         return null;
     }
 
-    /**
-     * The block behind a stack: the item itself, or the block an AE2 facade is pretending to be.
-     *
-     * <p>Both routes are tried because both are clicks a player will make. The facade route can throw
-     * rather than return null - AE2 reads the facade's own data component and does not promise anything
-     * about a stack that has lost it - and a click that throws in an event handler is a crash, so it is
-     * caught here rather than trusted.
-     */
     @Nullable
     private static Block blockOf(ItemStack stack) {
         if (stack.isEmpty()) {

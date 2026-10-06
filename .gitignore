@@ -11,8 +11,15 @@ logs/
 .idea/
 *.iml
 
-# Vendored dependency jars (see libs/README.md for where to get them)
+# The one dependency that cannot come from maven (see libs/README.md for why, and for how to build
+# it). Its jar is All Rights Reserved and must never be committed.
 libs/*.jar
+
+# Where tools/fetch-thaumaturge.* checks Thaumaturge out. CI points it at the workspace root so the
+# path is stable for the run; it is deliberately not cached (see .github/workflows/build.yml, which
+# explains why a Thaumaturge checkout must not end up in this repository's Actions cache). Not a
+# dot-directory: Gradle refuses to configure a project whose directory name begins with a dot.
+thaumaturge-src/
 
 # JVM crash logs
 hs_err_pid*.log

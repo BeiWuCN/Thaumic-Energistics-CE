@@ -26,16 +26,15 @@
       "bottom": 163
     }
   },
+  "widgets": {
+    "visCraftCost": {
+      "left": 97,
+      "bottom": 120,
+      "width": 69,
+      "height": 21
+    }
+  },
   "text": {
-    "dialog_title": {
-      "text": {
-        "translate": "item.thaumicenergistics_ce.arcane_crafting_terminal"
-      },
-      "position": {
-        "left": 8,
-        "top": 6
-      }
-    },
     "crafting_grid_title": {
       "text": {
         "translate": "gui.thaumicenergistics_ce.ArcaneCraftingTerminal"
@@ -45,7 +44,7 @@
         "bottom": 179
       }
     },
-	"player_inventory_title": {
+    "player_inventory_title": {
       "text": {
         "translate": "container.inventory"
       },

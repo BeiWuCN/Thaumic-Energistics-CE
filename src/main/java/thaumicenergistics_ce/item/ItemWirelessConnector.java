@@ -1,43 +1,32 @@
 package thaumicenergistics_ce.item;
 
-import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProvider;
-import thaumicenergistics_ce.blockentity.BlockEntityEssentiaProviderConnection;
+import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider;
+import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
 
 /**
- * The Wireless Essentia Binding Tool: makes and breaks the links an Essentia Provider uses.
- *
- * <p>A two-ended link needs something to carry the identity of one end to the other, and this is it. The
- * tool holds one coordinate at a time - a receiver that has been selected but not yet bound - and the
- * second click completes the pair.
- *
- * <p>Sneak is the difference between reading and writing, which is the arrangement the reference build
- * uses and the one that survives contact with a player: a plain right-click on either end reports where it
- * is and what it is bound to, and only a deliberate sneak acts. Without that split, walking past an altar
- * with the tool in hand would rebind things.
- *
- * <p>The selected coordinate is stored under a single key and is only ever meaningful as a pair of clicks.
- * A selection that is never completed simply expires the next time a different receiver is selected.
+ * The Wireless Binding Tool: makes and breaks the links an Alchemy Provider uses.
+ * A two-ended link needs something to carry the identity of one end to the other, so the tool
+ * holds one coordinate - a receiver selected but not yet bound - and the second click completes
+ * the pair. Sneaking splits reading from writing; without it, walking past an altar would rebind
+ * things.
  */
 public class ItemWirelessConnector extends Item {
 
-    /** The receiver waiting to be bound, as a packed BlockPos. */
     private static final String NBT_SELECTED = "SelectedReceiver";
 
-    /** The dimension the selection was made in, so a selection does not carry across worlds. */
     private static final String NBT_DIMENSION = "SelectedDimension";
 
     public ItemWirelessConnector(Properties properties) {
@@ -54,8 +43,8 @@ public class ItemWirelessConnector extends Item {
             return InteractionResult.PASS;
         }
 
-        boolean isReceiver = level.getBlockEntity(clicked) instanceof BlockEntityEssentiaProviderConnection;
-        boolean isProvider = level.getBlockEntity(clicked) instanceof BlockEntityEssentiaProvider;
+        boolean isReceiver = level.getBlockEntity(clicked) instanceof BlockEntityAlchemyProviderConnection;
+        boolean isProvider = level.getBlockEntity(clicked) instanceof BlockEntityAlchemyProvider;
         if (!isReceiver && !isProvider) {
             return InteractionResult.PASS;
         }
@@ -77,8 +66,7 @@ public class ItemWirelessConnector extends Item {
         return InteractionResult.SUCCESS;
     }
 
-    /** Points the tool at a receiver and remembers where it is. */
-    private static void select(Level level, BlockPos receiver, ItemStack tool, net.minecraft.world.entity.player.Player player) {
+    private static void select(Level level, BlockPos receiver, ItemStack tool, Player player) {
         setSelection(tool, receiver, level.dimension().location().toString());
         player.displayClientMessage(
                 Component.translatable("item.thaumicenergistics_ce.wireless_connector.selected",
@@ -87,10 +75,8 @@ public class ItemWirelessConnector extends Item {
     }
 
     /**
-     * The receiver this tool is holding, or {@code null}.
-     *
-     * <p>Read through the custom-data component rather than a raw NBT tag: 1.21 removed the direct tag
-     * accessors from {@link ItemStack}, and the component is what actually travels with the stack now.
+     * The receiver this tool is holding, or {@code null}: read through the custom-data component, since
+     * 1.21 removed the direct tag accessors from {@link ItemStack} and the component is what travels.
      */
     private static @Nullable CompoundTag selection(ItemStack tool) {
         CustomData data = tool.get(DataComponents.CUSTOM_DATA);
@@ -116,14 +102,7 @@ public class ItemWirelessConnector extends Item {
         tool.set(DataComponents.CUSTOM_DATA, CustomData.of(updated));
     }
 
-    /**
-     * Binds the remembered receiver to the provider that was clicked.
-     *
-     * <p>The receiver does the work and reports why it refused - the provider enforces how many receivers
-     * it will serve and how far away they may be - so the player is told which limit they hit rather than
-     * just that nothing happened.
-     */
-    private static void bind(Level level, BlockPos provider, ItemStack tool, net.minecraft.world.entity.player.Player player) {
+    private static void bind(Level level, BlockPos provider, ItemStack tool, Player player) {
         CompoundTag tag = selection(tool);
         if (tag == null || !tag.contains(NBT_SELECTED)) {
             player.displayClientMessage(
@@ -131,8 +110,6 @@ public class ItemWirelessConnector extends Item {
                     true);
             return;
         }
-        // A selection made in another dimension is not a selection: the coordinates would resolve to a
-        // different block, or to nothing.
         String dimension = level.dimension().location().toString();
         if (!dimension.equals(tag.getString(NBT_DIMENSION))) {
             player.displayClientMessage(
@@ -142,7 +119,7 @@ public class ItemWirelessConnector extends Item {
         }
 
         BlockPos receiverPos = BlockPos.of(tag.getLong(NBT_SELECTED));
-        if (!(level.getBlockEntity(receiverPos) instanceof BlockEntityEssentiaProviderConnection receiver)) {
+        if (!(level.getBlockEntity(receiverPos) instanceof BlockEntityAlchemyProviderConnection receiver)) {
             player.displayClientMessage(
                     Component.translatable("item.thaumicenergistics_ce.wireless_connector.receiver_gone"),
                     true);
@@ -160,10 +137,9 @@ public class ItemWirelessConnector extends Item {
                 Component.translatable("item.thaumicenergistics_ce.wireless_connector.linked"), true);
     }
 
-    /** Says where this end is and what it is bound to. */
-    private static void report(Level level, BlockPos pos, net.minecraft.world.entity.player.Player player,
+    private static void report(Level level, BlockPos pos, Player player,
             boolean isReceiver, boolean isProvider) {
-        if (isReceiver && level.getBlockEntity(pos) instanceof BlockEntityEssentiaProviderConnection receiver) {
+        if (isReceiver && level.getBlockEntity(pos) instanceof BlockEntityAlchemyProviderConnection receiver) {
             BlockPos provider = receiver.linkedProvider();
             player.displayClientMessage(provider == null
                     ? Component.translatable("item.thaumicenergistics_ce.wireless_connector.receiver_unbound",
@@ -172,24 +148,13 @@ public class ItemWirelessConnector extends Item {
                             pos.getX(), pos.getY(), pos.getZ(),
                             provider.getX(), provider.getY(), provider.getZ()),
                     false);
-        } else if (level.getBlockEntity(pos) instanceof BlockEntityEssentiaProvider provider) {
+        } else if (level.getBlockEntity(pos) instanceof BlockEntityAlchemyProvider provider) {
             player.displayClientMessage(
                     Component.translatable("item.thaumicenergistics_ce.wireless_connector.provider_report",
                             pos.getX(), pos.getY(), pos.getZ(),
                             provider.linkedReceiverCount(),
-                            BlockEntityEssentiaProvider.MAX_LINKED_RECEIVERS),
+                            BlockEntityAlchemyProvider.MAX_LINKED_RECEIVERS),
                     false);
         }
-    }
-
-    @Override
-    public void appendHoverText(
-            ItemStack stack,
-            @Nullable TooltipContext context,
-            List<Component> tooltip,
-            TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
-        tooltip.add(Component.translatable("tooltip.thaumicenergistics_ce.wireless_connector.desc"));
-        tooltip.add(Component.translatable("tooltip.thaumicenergistics_ce.wireless_connector.hint"));
     }
 }

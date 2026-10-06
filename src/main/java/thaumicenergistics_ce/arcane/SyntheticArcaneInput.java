@@ -13,19 +13,14 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A minimal {@link IArcaneCraftingInput} for machines, and for validating recipes outside a workbench.
- *
- * <p>Slot order matches {@code InventoryArcaneWorkbench}: nine grid slots, then six crystal slots, then
- * the wand slot. The wand slot is always empty here because a machine pays with vis, not with a wand.
+ * A minimal {@link IArcaneCraftingInput} for machines and for validating recipes off a workbench.
+ * Slot order matches {@code InventoryArcaneWorkbench}: nine grid slots, then six crystal slots,
+ * then the wand slot - always empty here, because a machine pays with vis, not with a wand.
  */
 public final class SyntheticArcaneInput implements IArcaneCraftingInput {
-    /** Grid slots, matching {@code InventoryArcaneWorkbench.CRAFTING_SLOTS}. */
     public static final int GRID_SLOTS = 9;
-    /** Crystal slots, matching {@code InventoryArcaneWorkbench.CRYSTAL_SLOTS}. */
     public static final int CRYSTAL_SLOTS = 6;
-    /** Wand slot index. */
     public static final int WAND_SLOT = GRID_SLOTS + CRYSTAL_SLOTS;
-    /** Total slot count. */
     public static final int SIZE = WAND_SLOT + 1;
 
     private final int width;
@@ -51,7 +46,6 @@ public final class SyntheticArcaneInput implements IArcaneCraftingInput {
         this.ingredientCount = count;
     }
 
-    /** Builds an input from a flat slot list; missing slots are padded with empties. */
     public static SyntheticArcaneInput of(int width, int height, List<ItemStack> items) {
         List<ItemStack> padded = new ArrayList<>(SIZE);
         for (int i = 0; i < SIZE; i++) {
@@ -63,7 +57,7 @@ public final class SyntheticArcaneInput implements IArcaneCraftingInput {
     /**
      * Builds an input from a pattern's grid plus the crystal stacks to expose in the crystal slots.
      *
-     * @param crystals up to six stacks; further entries are ignored
+     * @param crystals up to six stacks, further entries are ignored
      */
     public static SyntheticArcaneInput of(ThEArcanePattern pattern, List<ItemStack> crystals) {
         List<ItemStack> items = new ArrayList<>(SIZE);
@@ -153,7 +147,6 @@ public final class SyntheticArcaneInput implements IArcaneCraftingInput {
         return ItemStack.EMPTY;
     }
 
-    /** Aspect entries of the crystals held in this input, for reporting and tooltips. */
     public List<AspectInstance> crystalEntries() {
         return availableCrystals().entries();
     }

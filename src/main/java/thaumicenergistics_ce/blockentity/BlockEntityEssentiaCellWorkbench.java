@@ -2,6 +2,9 @@ package thaumicenergistics_ce.blockentity;
 
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
+import appeng.api.upgrades.IUpgradeInventory;
+import appeng.api.upgrades.IUpgradeableObject;
+import appeng.api.upgrades.UpgradeInventories;
 import appeng.util.ConfigInventory;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
@@ -9,33 +12,29 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
+import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
 
 /**
- * The Essentia Cell Workbench: where a storage cell is told which aspects it may hold.
- *
- * <p>A cell's partition is stored on the cell item itself, as AE2's own cells do - that is what lets a
- * partitioned cell keep its setting in a drive, a chest, or a player's hand. The workbench is the place to
- * edit it, not the place to keep it.
- *
- * <p>So this block holds two things: the cell, and a working copy of its partition. The copy exists
- * because the grid of wells on screen has to be edited slot by slot and a player expects the edit to be
- * immediate; writing through to the item on every keystroke would mean rebuilding a data component per
- * slot. Inserting a cell loads its partition into the copy, and editing the copy writes back.
- *
- * <p>The write-back is guarded against re-entering itself. Writing the copy fires its change listener,
- * which writes the cell, which changes the cell's components - and a naive implementation would treat
- * that as a new cell and reload the copy from it, discarding the edit in progress.
+ * Where a storage cell is told which aspects it may hold. The partition lives on the cell item, as
+ * AE2's own cells do, so it survives a drive or a chest; the block holds the cell plus a working
+ * copy, because a write-back rebuilds a data component. The syncing flag guards load and
+ * write-back, since a write changes components that a naive reload misreads.
  */
-public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
+public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity implements IUpgradeableObject {
 
-    /** The one machine slot: the cell being configured. */
     public static final int CELL_SLOT = 0;
 
     /** Partition entries, matching AE2's own cell workbench and the 7x9 grid in the screen's art. */
@@ -58,17 +57,76 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         }
     };
 
-    /**
-     * The partition being edited.
-     *
-     * <p>Essentia only: the wells must not offer items or fluids this cell cannot hold.
-     */
     private final ConfigInventory partition = ConfigInventory.configTypes(PARTITION_SLOTS)
             .supportedTypes(Set.of(AEssentiaKeyType.INSTANCE))
             .changeListener(this::storePartitionInCell)
             .build();
 
-    /** True while this block is copying between the cell and the partition, to stop the loop. */
+    /** The cell's own upgrade slots, re-read per call so a cell swapped inside a menu cannot go stale. */
+    private final IUpgradeInventory upgrades = new IUpgradeInventory() {
+
+        @Override
+        public int size() {
+            // Three even with no cell, because the client builds its own slots from this number.
+            return ItemEssentiaCell.UPGRADE_SLOTS;
+        }
+
+        @Override
+        public ItemStack getStackInSlot(int slot) {
+            IUpgradeInventory cell = upgradesOfCell();
+            return slot < cell.size() ? cell.getStackInSlot(slot) : ItemStack.EMPTY;
+        }
+
+        @Override
+        public int getSlotLimit(int slot) {
+            // A card slot takes its stack size from the inventory, and the interface's own default is 99,
+            // so without this one slot swallows a whole stack of cards. One card per slot, as AE2's own.
+            IUpgradeInventory cell = upgradesOfCell();
+            return slot < cell.size() ? cell.getSlotLimit(slot) : 1;
+        }
+
+        @Override
+        public void setItemDirect(int slot, ItemStack stack) {
+            IUpgradeInventory cell = upgradesOfCell();
+            if (slot >= cell.size()) {
+                return;
+            }
+            // Onto the cell item the block holds, which is then saved with it.
+            cell.setItemDirect(slot, stack);
+            BlockEntityEssentiaCellWorkbench.this.setChanged();
+        }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return upgradesOfCell().isItemValid(slot, stack);
+        }
+
+        @Override
+        public ItemLike getUpgradableItem() {
+            return hasCell() ? getCell().getItem() : Items.AIR;
+        }
+
+        @Override
+        public int getInstalledUpgrades(ItemLike item) {
+            return upgradesOfCell().getInstalledUpgrades(item);
+        }
+
+        @Override
+        public int getMaxInstalled(ItemLike item) {
+            return upgradesOfCell().getMaxInstalled(item);
+        }
+
+        @Override
+        public void readFromNBT(CompoundTag tag, String key, HolderLookup.Provider registries) {
+            // Nothing to read: the cards sit in the cell item's own components, saved along with it.
+        }
+
+        @Override
+        public void writeToNBT(CompoundTag tag, String key, HolderLookup.Provider registries) {
+            // Nothing to write, for the same reason.
+        }
+    };
+
     private boolean syncing;
 
     public BlockEntityEssentiaCellWorkbench(BlockPos pos, BlockState state) {
@@ -79,12 +137,10 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         return inventory;
     }
 
-    /** The partition being edited, for the menu's grid. */
     public ConfigInventory getPartition() {
         return partition;
     }
 
-    /** The cell in the slot, or empty. */
     public ItemStack getCell() {
         return inventory.getItem(CELL_SLOT);
     }
@@ -93,16 +149,6 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         return getCell().getItem() instanceof ItemEssentiaCell;
     }
 
-    // ------------------------------------------------------------------
-    // Keeping the partition and the cell in step
-    // ------------------------------------------------------------------
-
-    /**
-     * Replaces the partition being edited with whatever the inserted cell holds.
-     *
-     * <p>An empty slot clears the grid rather than leaving the previous cell's partition on screen, which
-     * would let a player partition a cell that is no longer there.
-     */
     private void loadPartitionFromCell() {
         syncing = true;
         try {
@@ -127,12 +173,6 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         }
     }
 
-    /**
-     * Writes the edited partition back onto the cell.
-     *
-     * <p>Through the cell's own config inventory rather than by rebuilding its data component: that is the
-     * same object AE2 reads when the cell is used, so there is one representation rather than two.
-     */
     private void storePartitionInCell() {
         if (syncing || !hasCell()) {
             return;
@@ -153,37 +193,34 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         }
     }
 
-    /** Asks the cell whether an aspect is one it will accept. Used by the screen's labels. */
+    @Override
+    public IUpgradeInventory getUpgrades() {
+        return upgrades;
+    }
+
+    private IUpgradeInventory upgradesOfCell() {
+        if (!hasCell() || !(getCell().getItem() instanceof ItemEssentiaCell cell)) {
+            return UpgradeInventories.empty();
+        }
+        return cell.getUpgrades(getCell());
+    }
+
     public boolean accepts(AEKey key) {
         return key != null && key.getType() == AEssentiaKeyType.INSTANCE;
     }
 
     @Override
-    public net.minecraft.world.inventory.AbstractContainerMenu createMenu(
-            int containerId, net.minecraft.world.entity.player.Inventory playerInventory,
-            net.minecraft.world.entity.player.Player player) {
-        return new thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench(containerId, playerInventory, this);
+    public AbstractContainerMenu createMenu(
+            int containerId, Inventory playerInventory,
+            Player player) {
+        return MachineMenus.essentiaCellWorkbench(containerId, playerInventory, this);
     }
 
-    // ------------------------------------------------------------------
-    // Persistence
-    // ------------------------------------------------------------------
 
-    /**
-     * Only the cell is saved.
-     *
-     * <p>The partition is not stored here, and that is deliberate: it lives on the cell item, which is
-     * what has to survive being taken out and put in a drive. Writing a second copy into the block would
-     * be a second thing to keep in step, and the one that loses would be whichever was read last.
-     */
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        // ContainerHelper, not SimpleContainer.createTag. createTag writes a bare list of the non-empty slots
-        // with no index on any entry, so reading it back by position is right only while no slot before a full
-        // one can ever be empty. One slot makes that true here - which is the kind of true that stops being
-        // true the day a second slot is added, and by then the worlds are already saved. The index costs
-        // nothing and is the form the Distillation Encoder and the Knowledge Inscriber write.
+        // ContainerHelper, not createTag: createTag writes no index, so any gap shifts every item.
         ContainerHelper.saveAllItems(tag, inventory.getItems(), registries);
     }
 
@@ -193,25 +230,23 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity {
         if (tag.contains(ContainerHelper.TAG_ITEMS, Tag.TAG_LIST)) {
             ContainerHelper.loadAllItems(tag, inventory.getItems(), registries);
         } else {
-            // A world saved before this change kept the bare list under "Inventory". There is one slot, so the
-            // cell is at position 0 or nowhere, and reading it there cannot be wrong.
+            // Old worlds kept a bare list under "Inventory"; one slot means position 0 or nothing.
             var list = tag.getList("Inventory", CompoundTag.TAG_COMPOUND);
             if (!list.isEmpty()) {
                 inventory.setItem(CELL_SLOT, ItemStack.parseOptional(registries, list.getCompound(0)));
             }
         }
-        // After the inventory, so a cell that was saved comes back with its partition on screen.
+        // After the inventory, so a saved cell comes back with its partition on screen.
         loadPartitionFromCell();
     }
 
-    /** Drops the cell when the block is broken. */
     public void dropContents() {
         if (level == null) {
             return;
         }
         var stack = inventory.getItem(CELL_SLOT);
         if (!stack.isEmpty()) {
-            net.minecraft.world.Containers.dropItemStack(
+            Containers.dropItemStack(
                     level,
                     worldPosition.getX() + 0.5,
                     worldPosition.getY() + 0.5,

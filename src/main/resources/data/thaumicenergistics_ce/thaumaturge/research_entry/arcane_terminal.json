@@ -23,7 +23,7 @@
           "amount": 1
         },
         {
-          "type": "theory",
+          "type": "observation",
           "category": "thaumicenergistics_ce:thaumicenergistics_ce",
           "amount": 1
         }
@@ -34,6 +34,20 @@
       "recipes": [
         "thaumicenergistics_ce:arcane_crafting_terminal"
       ]
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:fabrico",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:potentia",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:machina",
+      "amount": 1
     }
   ],
   "complexity": 2

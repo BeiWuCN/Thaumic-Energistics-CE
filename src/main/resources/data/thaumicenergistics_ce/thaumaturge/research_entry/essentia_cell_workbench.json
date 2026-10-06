@@ -17,7 +17,7 @@
       "text": "tc.research_text.ESSENTIACELLWORKBENCH.stage.1",
       "required_knowledge": [
         {
-          "type": "observation",
+          "type": "theory",
           "category": "thaumicenergistics_ce:thaumicenergistics_ce",
           "amount": 1
         }

@@ -14,37 +14,25 @@ import org.joml.Vector4f;
 
 /**
  * The backpack: a box with an antenna, and a pearl that says whether the network is there.
- *
- * <p>Baked from a {@link LayerDefinition} rather than registered as a model layer - the golem's renderer
- * draws a mesh and knows nothing about layers - and drawn in the world by {@link GolemBackpackRenderer}.
- *
- * <p>The three boxes are the reference build's, in its own units and rotations, because the ten skin
- * textures are drawn for exactly them. They are authored lying sideways (the pack is two pixels thick along
- * <em>X</em>), so the renderer turns the model a quarter turn about Y; swapping the box dimensions instead
- * would have rotated the texture on every face.
- *
- * <p>The pearl is four double-sided faces around the antenna's tip, built by hand so that it can be red as
- * easily as it can be green.
+ * It is baked from a {@link LayerDefinition}, not a registered model layer. The three boxes are the
+ * reference build's own units and rotations, matching the ten skin textures, and lie sideways: the
+ * renderer turns the model a quarter turn about Y, and swapping the box dimensions instead would
+ * rotate the texture on every face. The pearl is four double-sided faces built by hand, so it can
+ * be red as easily as green.
  */
 public final class GolemBackpackModel {
 
-    /** Texture size, in the units a layer definition is authored against. */
     private static final int TEXTURE_WIDTH = 16;
     private static final int TEXTURE_HEIGHT = 16;
 
-    /** The pearl's size in blocks: two pixels. */
     private static final float PEARL_SIZE = 0.125F;
 
     /**
-     * How far above the pack's origin the pearl's underside sits, in the pearl's own units - the ones the
-     * scale in {@link #renderPearl} establishes, which are eight times the model's.
-     *
-     * <p>The antenna's tip is three sixteenths of a block up, which is 3.0 in these units; 2.85 leaves the
-     * pearl sitting on the tip rather than floating above it.
+     * How far above the pack's origin the pearl's underside sits, in the pearl's own units: 2.85 puts it on
+     * the antenna's tip (3.0 in these units) rather than floating above it.
      */
     private static final float PEARL_BOTTOM = 2.85F;
 
-    /** Half the antenna's thickness, plus the gap that keeps the pearl's faces clear of it. */
     private static final float PEARL_HALF_WIDTH = 0.55F;
 
     /** The pearl's corner in the skin texture, in sixteenths. */
@@ -59,7 +47,6 @@ public final class GolemBackpackModel {
         this.root = root;
     }
 
-    /** Bakes the model, once, at class load. */
     public static GolemBackpackModel create() {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition parts = mesh.getRoot();
@@ -78,21 +65,10 @@ public final class GolemBackpackModel {
                 LayerDefinition.create(mesh, TEXTURE_WIDTH, TEXTURE_HEIGHT).bakeRoot());
     }
 
-    /** Draws the antenna and the two pack boxes. */
     public void renderPack(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay) {
         root.render(poseStack, buffer, packedLight, packedOverlay);
     }
 
-    /**
-     * Draws the pearl above the antenna.
-     *
-     * <p>Four faces, each drawn from both sides, at the four points of the compass around the antenna's tip
-     * - a closed little cube. Green means the golem can reach its network, red means it cannot, and that is
-     * the whole status display: it is the one thing about a backpack that changes while a player watches.
-     *
-     * @param spin the pearl's rotation in degrees, which the caller advances with time
-     * @param inRange whether the linked network is reachable from where the golem is standing
-     */
     public void renderPearl(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
             float spin, boolean inRange) {
         int red = 255;
@@ -118,13 +94,6 @@ public final class GolemBackpackModel {
         poseStack.popPose();
     }
 
-    /**
-     * One face of the pearl, drawn twice: once facing out and once facing in.
-     *
-     * <p>Vertices are transformed by hand because the quad is written in the pearl's unit square - four
-     * corners at plus or minus a half - and the pose stack's matrix is what turns those into the positions
-     * the buffer wants. That is what lets one method describe all four faces.
-     */
     private static void drawPearlFace(PoseStack poseStack, VertexConsumer buffer, int packedLight,
             int packedOverlay, int red, int green, int blue) {
         Matrix4f matrix = poseStack.last().pose();
@@ -147,10 +116,8 @@ public final class GolemBackpackModel {
     }
 
     /**
-     * One corner, transformed and written.
-     *
-     * <p>The scratch vector is reused rather than allocated: this runs once per vertex per golem per frame,
-     * and a backpack should not be the reason a player's frame time moves.
+     * One corner, transformed and written. The scratch vector is reused rather than allocated: this runs
+     * once per vertex per golem per frame, and a backpack should not be the reason frame time moves.
      */
     private static void addVertex(VertexConsumer buffer, Matrix4f matrix, Vector4f scratch, float[] corner,
             float[] uv, int red, int green, int blue, int packedLight, int packedOverlay, float normal) {

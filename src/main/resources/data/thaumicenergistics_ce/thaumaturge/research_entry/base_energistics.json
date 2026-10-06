@@ -10,11 +10,14 @@
     "round"
   ],
   "icons": [
-    "thaumicenergistics_ce:essentia_import_bus"
+    "thaumicenergistics_ce:essentia_storage_bus"
   ],
   "stages": [
     {
-      "text": "tc.research_text.BASEENERGISTICS"
+      "text": "tc.research_text.BASEENERGISTICS",
+      "recipes": [
+        "thaumicenergistics_ce:essentia_storage_bus"
+      ]
     }
   ],
   "complexity": 1

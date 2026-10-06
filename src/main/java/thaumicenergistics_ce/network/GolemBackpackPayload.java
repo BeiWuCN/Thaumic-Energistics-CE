@@ -3,17 +3,12 @@ package thaumicenergistics_ce.network;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * What a golem's backpack looks like, told to the players watching it.
- *
- * <p>The only way the client can know: a backpack lives in the golem's persistent data, which vanilla never
- * syncs. Three numbers, which is all the renderer needs.
- *
- * <p>Sent on a timer rather than on change, because the change that matters - a golem walking in or out of
- * an access point's range - is not something anyone is watching for.
+ * What a golem's backpack looks like, told to the players watching it: the backpack lives in the
+ * golem's persistent data, which vanilla never syncs, and it is sent on a timer rather than on change.
  *
  * @param entityId the golem
  * @param status {@link #STATUS_NO_BACKPACK}, {@link #STATUS_IN_RANGE} or {@link #STATUS_OUT_OF_RANGE}
@@ -41,14 +36,9 @@ public record GolemBackpackPayload(int entityId, int status, int skinOrdinal) im
         return TYPE;
     }
 
-    /**
-     * Hands the payload to the client cache.
-     *
-     * <p>On the client thread, as anything touching entities has to be: the payload arrives while the
-     * client is mid-tick, and resolving an entity id against the level from there is the kind of thing
-     * that works until it does not.
-     */
-    public static void handle(GolemBackpackPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> thaumicenergistics_ce.client.GolemBackpackClientData.accept(payload));
+    /** Hands the payload to whatever the client installed as its receiver. The protocol package names no
+     * client class, and the registrar already runs handlers on the main thread - no second enqueue here. */
+    public void handleOnClient(Player player) {
+        ClientSinks.acceptGolemBackpack(this);
     }
 }

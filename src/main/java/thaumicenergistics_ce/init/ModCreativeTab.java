@@ -25,14 +25,13 @@ public final class ModCreativeTab {
                         output.accept(ModItems.KNOWLEDGE_INSCRIBER.get());
                         output.accept(ModItems.ESSENTIA_CELL_WORKBENCH.get());
                         output.accept(ModItems.ESSENTIA_VIBRATION_CHAMBER.get());
-                        output.accept(ModItems.ESSENTIA_PROVIDER.get());
+                        output.accept(ModItems.ALCHEMY_PROVIDER.get());
                         output.accept(ModItems.INFUSION_PROVIDER.get());
                         output.accept(ModItems.DISTILLATION_ENCODER.get());
-                        output.accept(ModItems.INFUSION_MONITOR.get());
-                        output.accept(ModItems.ESSENTIA_PROVIDER_CONNECTION.get());
+                        output.accept(ModItems.OCCULT_MONITOR.get());
+                        output.accept(ModItems.ALCHEMY_PROVIDER_CONNECTION.get());
                         output.accept(ModItems.WIRELESS_CONNECTOR.get());
                         output.accept(ModItems.ALKUSURE86_FUMO.get());
-                        // Essentia storage, smallest first, so the tier order reads down the tab.
                         output.accept(ModItems.STORAGE_CASING.get());
                         output.accept(ModItems.STORAGE_COMPONENT_1K.get());
                         output.accept(ModItems.STORAGE_COMPONENT_4K.get());
@@ -48,14 +47,14 @@ public final class ModCreativeTab {
                         output.accept(ModItems.VIS_INTERFACE.get());
                         output.accept(ModItems.DIFFUSION_CORE.get());
                         output.accept(ModItems.COALESCENCE_CORE.get());
-                        output.accept(ModItems.ESSENTIA_IMPORT_BUS.get());
-                        output.accept(ModItems.ESSENTIA_EXPORT_BUS.get());
                         output.accept(ModItems.ESSENTIA_STORAGE_BUS.get());
                         output.accept(ModItems.ESSENTIA_LEVEL_EMITTER.get());
                         output.accept(ModItems.WIRELESS_ESSENTIA_TERMINAL.get());
-                        // Accepted through the same call the item uses, so the stack in the tab is not a
-                        // second, unassembled way to get this item. A creative-tab stack is never ticked
-                        // and never passes through a recipe, so nothing else would fix it up.
+                        output.accept(ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get());
+                        output.accept(ModItems.ESSENTIA_ACCESS_CARD.get());
+                        output.accept(ModItems.VIS_CONNECTION_CARD.get());
+                        // Same call the item uses, so the tab stack is not a second, unassembled copy:
+                        // a tab stack is never ticked and never passes a recipe, so nothing else fixes it up.
                         output.accept(thaumicenergistics_ce.item.ItemFocusAEWrench.assembledStack());
                         output.accept(ModItems.GOLEM_WIFI_BACKPACK.get());
                     })

@@ -65,5 +65,19 @@
       ]
     }
   ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:cognitio",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:fabrico",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:permutatio",
+      "amount": 1
+    }
+  ],
   "complexity": 1
 }

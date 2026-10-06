@@ -23,7 +23,7 @@
           "amount": 1
         },
         {
-          "type": "theory",
+          "type": "observation",
           "category": "thaumicenergistics_ce:thaumicenergistics_ce",
           "amount": 1
         }
@@ -68,6 +68,20 @@
           "amount": 2
         }
       ]
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:vacuos",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:potentia",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:vitreus",
+      "amount": 2
     }
   ]
 }

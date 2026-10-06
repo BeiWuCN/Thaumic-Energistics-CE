@@ -19,16 +19,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * One golem's way into an ME network, resolved on use and thrown away afterwards.
- *
- * <p>A backpack holds a {@link GlobalPos} and nothing else, so reaching the network means resolving that
- * position: the block at the link has to be a wireless access point with a grid, and the golem has to be
- * within range of an active access point on that grid. Resolved per operation rather than cached, because a
- * golem walks and a cached grid would keep working after it had wandered out of range.
- *
- * <p>Only items move. A Thaumaturge golem has no hold for fluids or essentia, so the reference build's
- * fluid and essentia transfers would have nothing to travel through. Energy is not checked here either:
- * every transfer goes through AE2's powered helpers, so a network that cannot pay moves nothing.
+ * One golem's resolved route into an ME network: a link to an access point, thrown away after
+ * use. A backpack holds a {@link GlobalPos} and nothing else, so the block there must be an
+ * access point with a grid in range of the golem, resolved per operation so that walking away
+ * is noticed at once. Only items move, and a network that cannot pay moves nothing, since
+ * AE2's powered helpers decide.
  */
 public final class GolemWirelessLink {
 
@@ -45,7 +40,6 @@ public final class GolemWirelessLink {
         this.source = source;
     }
 
-    /** The network behind this golem's link, or null if it cannot be reached from where the golem is. */
     @Nullable
     public static GolemWirelessLink open(EntityThaumaturgeGolem golem, GlobalPos target) {
         Level level = golem.level();
@@ -66,8 +60,8 @@ public final class GolemWirelessLink {
             return null;
         }
 
-        // The access point is the machine the transfer is billed to, and it is an action host, which is
-        // what AE2's security and channel accounting expect for anything acting on a grid's behalf.
+        // The access point is billed for the transfer, and is an action host, which AE2's security and
+        // channel accounting expect for anything acting on a grid's behalf.
         return new GolemWirelessLink(
                 grid.getStorageService().getInventory(),
                 grid.getEnergyService(),
@@ -75,12 +69,8 @@ public final class GolemWirelessLink {
     }
 
     /**
-     * Puts as much of a stack into the network as it will take, and shrinks the stack by that much.
-     *
-     * <p>Shrinking the caller's stack is safe because the stack is the golem's own held item, not a copy:
-     * {@code getCarrying()} hands out the live stacks. That is also why this takes a stack rather than
-     * returning one - a golem's hand is the one place the transfer's two halves have to meet, and a copy
-     * would leave the golem holding what the network had already been given.
+     * Puts as much of a stack into the network as it will take, and shrinks the stack by that much. Safe
+     * because {@code getCarrying()} hands out the golem's own live stacks, so the caller is shrunk in place.
      *
      * @return how many items were accepted, which is zero for a network that is full or out of power.
      */
@@ -96,25 +86,14 @@ public final class GolemWirelessLink {
         return inserted;
     }
 
-    /** Items per operation for this golem. */
     public static int itemRate(EntityThaumaturgeGolem golem) {
         int rank = Math.max(0, Math.min(ITEM_RATES.length - 1, golem.getProperties().getRank()));
         return ITEM_RATES[rank];
     }
 
     /**
-     * Whether the golem is in range of an active access point on the grid it is linked to.
-     *
-     * <p>Range belongs to the access point, not to the link: a network can have several, and a golem is
-     * connected if any one of them reaches it. The linked access point is the one that gets billed.
-     *
-     * <p><b>The class asked for here has to be the concrete one.</b> A grid's machine map is keyed by
-     * {@code owner.getClass()} - the exact class of the block entity - so
-     * {@code getMachines(IWirelessAccessPoint.class)} returns an empty set on every network there is, and a
-     * range check built on it says "out of range" for a golem standing on top of the access point. AE2's own
-     * wireless terminal asks for {@code WirelessAccessPointBlockEntity.class} for exactly this reason, and
-     * this does the same. Whether the block entity <em>is</em> an access point is a different question,
-     * asked with {@code instanceof} when the link is resolved.
+     * Whether the golem is in range of an active access point on the grid it is linked to. The class
+     * asked for has to be the concrete one - see the note on {@code owner.getClass()}.
      */
     private static boolean inRange(ServerLevel level, IGrid grid, EntityThaumaturgeGolem golem) {
         for (WirelessAccessPointBlockEntity accessPoint : grid.getMachines(WirelessAccessPointBlockEntity.class)) {
@@ -135,12 +114,8 @@ public final class GolemWirelessLink {
     }
 
     /**
-     * Why {@link #open} refused this golem, in words, for the trace.
-     *
-     * <p>Written as a second pass over the same checks rather than as a status carried out of {@code open},
-     * because {@code open} runs twice a second per golem and the words are only ever wanted when someone is
-     * reading a log. "Nothing happened" is not a report; "the block at the link is not a wireless access
-     * point" is.
+     * Why {@link #open} refused this golem, in words, for the trace. A second pass over the same checks
+     * rather than a status carried out of {@code open}: "nothing happened" is not a report.
      */
     static String refusal(EntityThaumaturgeGolem golem, GlobalPos target) {
         if (!(golem.level() instanceof ServerLevel serverLevel)) {

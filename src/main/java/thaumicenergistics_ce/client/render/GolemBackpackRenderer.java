@@ -25,16 +25,11 @@ import thaumicenergistics_ce.client.GolemBackpackClientData;
 import thaumicenergistics_ce.golem.BackpackSkins;
 
 /**
- * Draws every visible backpack once per frame, from the world stage rather than from the golem's renderer.
- *
- * <p>There is no way into the golem's own render frame: Thaumaturge's golem renderer is an
- * {@code EntityRenderer} rather than the living kind NeoForge lets a mod add a layer to, and its mesh parts
- * come from a private map of the five built-ins. So the pack is drawn beside the golem, in the same body
- * rotation its renderer uses - which is why {@link #PACK_HEIGHT} and {@link #PACK_DEPTH} had to be placed by
- * eye rather than inherited from the golem's model.
- *
- * <p>Drawn at {@code AFTER_ENTITIES}, with the golems the packs belong to and before anything transparent
- * goes over the world. The batch is ended here because the stage's buffer is not this code's to leave open.
+ * Draws every visible backpack once per frame, from the world stage rather than the golem's own
+ * renderer. There is no hook into that frame, because Thaumaturge's golem renderer is not the
+ * living kind NeoForge can add a layer to, which is why {@link #PACK_HEIGHT} and
+ * {@link #PACK_DEPTH} are placed by eye. It is drawn at AFTER_ENTITIES, and the batch is ended
+ * here rather than left open.
  */
 @EventBusSubscriber(modid = ThEIds.MODID, value = Dist.CLIENT)
 public final class GolemBackpackRenderer {
@@ -42,23 +37,17 @@ public final class GolemBackpackRenderer {
     /** How high up the golem's body the pack sits, in blocks above its feet. */
     private static final float PACK_HEIGHT = 0.42F;
 
-    /** How far behind the golem's centre the pack sits, in blocks. */
     private static final float PACK_DEPTH = 0.16F;
 
-    /** The pack's scale. One, because the model is already authored in blocks. */
     private static final float PACK_SCALE = 1.0F;
 
-    /** Degrees per tick the pearl turns. */
     private static final float PEARL_SPIN_PER_TICK = 2.0F;
 
     private static final GolemBackpackModel MODEL = GolemBackpackModel.create();
 
     /**
-     * Render types by skin, built once each.
-     *
-     * <p>{@code RenderType.entityCutoutNoCull(texture)} builds a new object every call, so asking for one
-     * per golem per frame is a per-frame allocation for each visible golem - and, worse, a type switch in
-     * the buffer source, which flushes the batch it was in the middle of. Ten skins, ten types.
+     * Render types by skin, built once each: {@code RenderType.entityCutoutNoCull(texture)} allocates a
+     * new object per call, and switching type mid-batch flushes the buffer source's pending batch.
      */
     private static final Map<BackpackSkins, RenderType> PACK_TYPES = new EnumMap<>(BackpackSkins.class);
     private static final Map<BackpackSkins, RenderType> PEARL_TYPES = new EnumMap<>(BackpackSkins.class);
@@ -79,8 +68,7 @@ public final class GolemBackpackRenderer {
 
         PoseStack poseStack = event.getPoseStack();
         Vec3 camera = event.getCamera().getPosition();
-        // The frame's fraction of a tick, which is what makes an interpolated golem position land
-        // between two ticks rather than snapping to the last one.
+        // The frame's fraction of a tick: what makes an interpolated golem position land between ticks.
         float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         BufferSource buffers = minecraft.renderBuffers().bufferSource();
         boolean drewAny = false;
@@ -102,13 +90,11 @@ public final class GolemBackpackRenderer {
 
             poseStack.pushPose();
             poseStack.translate(x, y, z);
-            // The golem renderer's own body rotation. Model space's +Z is the golem's back, which is why
-            // the pack is placed at a positive depth below.
+            // The golem renderer's own body rotation; model space's +Z is the golem's back, hence +depth.
             poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - bodyRotation));
             poseStack.translate(0.0F, PACK_HEIGHT, PACK_DEPTH);
-            // A quarter turn, because the model's boxes are authored lying sideways: the pack is two pixels
-            // thick along X, which without this turn stands across the golem's back like a plank. The turn
-            // is here and not in the model so the skin textures keep matching the faces they were drawn for.
+            // Quarter turn: the model's boxes are authored two pixels thick along X. Kept here, not in
+            // the model, so the skin textures keep matching the faces they were drawn for.
             poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
             poseStack.scale(PACK_SCALE, PACK_SCALE, PACK_SCALE);
 

@@ -28,13 +28,24 @@ Plus a full Thaumonomicon tree, in English and Chinese.
 
 ## Building
 
-JDK 21 and `gradlew build`. Dependencies are not resolved from maven; they are read from `libs/`:
+JDK 21 and `gradlew build`.
 
-- Thaumaturge: <https://github.com/Leclowndu93150/Thaumaturge/> — get it from their repo or releases rather than redistributing it here
+Eight of the dependencies are ordinary maven coordinates, pinned to exact versions in `gradle.properties` and resolved from the Modrinth maven repository. A fresh clone builds with nothing staged by hand:
+
 - Applied Energistics 2 19.2.17: <https://modrinth.com/mod/ae2>
-- GuideME 21.1.x: <https://modrinth.com/mod/guideme>
+- GuideME 21.1.17: <https://modrinth.com/mod/guideme>
+- JEI 19.57.0.444: <https://modrinth.com/mod/jei> — the recipe transfer button
+- Jade 15.10.6: <https://modrinth.com/mod/jade> — the block info overlay
+- Curios 9.5.1 / TerraBlender 4.1.0.8 / Lithostitched 1.8.0 / Apollib 1.2.0: Thaumaturge's runtime prerequisites; this mod imports none of them
 
-Curios, TerraBlender and JEI are needed for dev runs only and are publicly resolvable.
+**Thaumaturge itself is the one you have to build once.** It is All Rights Reserved: it publishes no maven artifact, and its licence forbids publishing the mod or any binary built from it (§3.1 names "GitHub Releases on a fork" outright), so this repository cannot carry it for you. §2.4 does allow building it for your own use. Run one of these:
+
+```sh
+tools/fetch-thaumaturge.sh                      # Linux, macOS, CI
+powershell -File tools/fetch-thaumaturge.ps1    # Windows
+```
+
+It clones <https://github.com/Leclowndu93150/Thaumaturge/> at the commit pinned as `thaumaturge_commit` in `gradle.properties` and leaves the jar it builds in `libs/`. Without that jar `gradlew build` fails the configuration with a pointer to these commands rather than degrading into hundreds of unresolved-symbol errors. **Do not commit the jar and do not pass it on.**
 
 ## Credits
 
@@ -42,4 +53,4 @@ The original Thaumic Energistics is by Nividica and contributors; this CE contin
 
 ## License
 
-MIT, see `LICENSE`. The code derives from Thaumic Energistics, published under LGPL-3.0 — that part is still the original authors' copyright, so honour that license too when redistributing.
+MIT, see `LICENSE`. The code derives from Thaumic Energistics by Nividica, which is MIT as well (the upstream `LICENSE` credits Chris and BrockWS). That part is still the original authors' copyright, so the upstream notice is carried in `LICENSE` too - keep it there when redistributing.

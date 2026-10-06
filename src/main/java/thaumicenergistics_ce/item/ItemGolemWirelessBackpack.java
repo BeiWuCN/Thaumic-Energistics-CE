@@ -13,23 +13,10 @@ import net.minecraft.world.item.TooltipFlag;
 
 /**
  * A wireless link to an ME network, in a form a golem can carry.
- *
- * <p>What this item is, precisely, is AE2's ordinary wireless link: a {@link GlobalPos} stored under
- * {@link AEComponents#WIRELESS_LINK_TARGET}, put there by a memory card and read back by whoever holds the
- * stack. {@link #LINKABLE_HANDLER} is what the memory card asks for, and registering it is the whole of
- * the linking side - the same three calls {@code WirelessTerminalItem} makes.
- *
- * <h2>The golem half</h2>
- *
- * <p>Equipping one is a click on the golem - see {@code GolemBackpackHandler}, which also takes it off
- * again with a golem bell and repaints it with a block. The golem then reaches the network from wherever
- * it is standing, through the access point the item was linked to, and tips in whatever it is carrying
- * that no seal asked for - see {@code GolemBackpackTickHandler}.
- *
- * <p>Not through Thaumaturge's accessory registry, which is the obvious home for something worn by a
- * golem and is not usable here: {@code GolemAccessories} entries are drawn from one fixed atlas of five
- * ids, and the item that equips them, {@code ItemGolemAccessory}, is final and has no room for a link.
- * The backpack is stored in the golem's own persistent data instead.
+ * The link is AE2's own, a {@link GlobalPos} in {@link AEComponents#WIRELESS_LINK_TARGET}, and
+ * {@link #LINKABLE_HANDLER} is what the memory card asks for; equipping is a click on the golem.
+ * It is not Thaumaturge's accessory registry, because {@code ItemGolemAccessory} is final, so the
+ * link lives in the golem's data.
  */
 public class ItemGolemWirelessBackpack extends Item {
 
@@ -40,7 +27,6 @@ public class ItemGolemWirelessBackpack extends Item {
         super(properties.stacksTo(1));
     }
 
-    /** The network this backpack points at, or null if it has never been linked. */
     public GlobalPos getLinkedPosition(ItemStack stack) {
         return stack.get(AEComponents.WIRELESS_LINK_TARGET);
     }
@@ -58,7 +44,6 @@ public class ItemGolemWirelessBackpack extends Item {
                 : Tooltips.of(GuiText.Unlinked, Tooltips.RED));
     }
 
-    /** Straight from the reference implementation, and the only shape AE2's interface allows. */
     private static final class LinkableHandler implements IGridLinkableHandler {
         @Override
         public boolean canLink(ItemStack stack) {
