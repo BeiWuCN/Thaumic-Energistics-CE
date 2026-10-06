@@ -57,5 +57,8 @@ public final class SelfTestBootstrap implements SelfTestProvider {
         // What the wireless arcane terminal writes when it is paired: the menu test needs a player to log
         // in, and this half - the item's own tag - is exactly the half a headless server can hold.
         NeoForge.EVENT_BUS.addListener(WirelessArcaneBindingSelfTest::run);
+        // The ME interface's access card: which aspects a mark lets in, and the rates a round moves them
+        // at. Nothing here needs a level, which is the half a headless gate can check.
+        NeoForge.EVENT_BUS.addListener(EssentiaInterfaceSelfTest::run);
     }
 }

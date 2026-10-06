@@ -1,5 +1,6 @@
 package thaumicenergistics_ce.init;
 
+import appeng.api.upgrades.Upgrades;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
@@ -181,9 +182,9 @@ public final class ModItems {
                     new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
 
     // Two upgrade cards, named and obtainable but not yet read by anything: the machines that will take
-    // them are the next piece of work, and an item in the tab is what lets the art be looked at meanwhile.
+    // them are the next piece of work. The card must be AE2's own class - isUpgradeCardItem asks that.
     public static final DeferredItem<Item> ESSENTIA_ACCESS_CARD = REGISTRY.registerItem(
-            "essentia_access_card", Item::new, new Item.Properties().stacksTo(64));
+            "essentia_access_card", Upgrades::createUpgradeCardItem, new Item.Properties().stacksTo(64));
 
     public static final DeferredItem<Item> VIS_CONNECTION_CARD = REGISTRY.registerItem(
             "vis_connection_card", Item::new, new Item.Properties().stacksTo(64));

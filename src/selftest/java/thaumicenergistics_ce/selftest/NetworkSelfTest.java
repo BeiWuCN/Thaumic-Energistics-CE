@@ -21,11 +21,13 @@ import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
+import thaumicenergistics_ce.network.ArcaneUnbindPayload;
 import thaumicenergistics_ce.network.EncoderActionPayload;
 import thaumicenergistics_ce.network.EncoderSourcePayload;
 import thaumicenergistics_ce.network.EssentiaBusConfigPayload;
 import thaumicenergistics_ce.network.EssentiaDepositPayload;
 import thaumicenergistics_ce.network.EssentiaFillPayload;
+import thaumicenergistics_ce.network.EssentiaInterfaceMarkPayload;
 import thaumicenergistics_ce.network.GolemBackpackPayload;
 import thaumicenergistics_ce.network.InscriberGridFillPayload;
 import thaumicenergistics_ce.network.InscriberGridPayload;
@@ -36,7 +38,7 @@ import thaumicenergistics_ce.util.ThELog;
  * Asserts the wire contract of every payload: a codec that lost a field round trips into a record that
  * lies, and a package move cannot be seen by a compiler. Each codec must survive a write and a read with
  * nothing left in the buffer - ItemStack has no equals, so stacks go through ItemStack.matches - and the
- * ten agreed wire ids must all be the ones NeoForge holds for this mod. Runs only behind its own env var.
+ * twelve agreed wire ids must all be the ones NeoForge holds for this mod. Runs only behind its own env var.
  */
 public final class NetworkSelfTest {
 
@@ -100,11 +102,13 @@ public final class NetworkSelfTest {
             ThEIds.id("essentia_terminal_fill"),
             ThEIds.id("essentia_terminal_deposit"),
             ThEIds.id("essentia_bus_config"),
+            ThEIds.id("essentia_interface_mark"),
             ThEIds.id("partition_well"),
             ThEIds.id("encoder_source"),
             ThEIds.id("encoder_action"),
             ThEIds.id("arcane_craft_cost"),
-            ThEIds.id("golem_backpack"));
+            ThEIds.id("golem_backpack"),
+            ThEIds.id("arcane_terminal_unbind"));
 
     /** A payload built with the wrong namespace is not a compile error, only a connection error later. */
     private static List<ResourceLocation> checkWireIds(List<ResourceLocation> admitted, List<String> failures) {
@@ -119,10 +123,12 @@ public final class NetworkSelfTest {
                 EssentiaFillPayload.TYPE,
                 EssentiaDepositPayload.TYPE,
                 EssentiaBusConfigPayload.TYPE,
+                EssentiaInterfaceMarkPayload.TYPE,
                 PartitionWellPayload.TYPE,
                 EncoderSourcePayload.TYPE,
                 EncoderActionPayload.TYPE,
                 ArcaneCraftCostPayload.TYPE,
+                ArcaneUnbindPayload.TYPE,
                 GolemBackpackPayload.TYPE)) {
             declared.put(type.id().getPath(), type.id());
         }

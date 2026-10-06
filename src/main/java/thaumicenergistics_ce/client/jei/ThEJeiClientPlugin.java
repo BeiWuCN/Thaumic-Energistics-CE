@@ -1,5 +1,6 @@
 package thaumicenergistics_ce.client.jei;
 
+import appeng.client.gui.implementations.InterfaceScreen;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
@@ -55,5 +56,9 @@ public class ThEJeiClientPlugin implements IModPlugin {
         // fetched from a terminal by hand.
         registration.addGhostIngredientHandler(
                 ScreenDistillationEncoder.class, new DistillationEncoderGhostIngredientHandler());
+        // AE2's own ME interface, once our access card is in it: both host forms share this one screen,
+        // so this single line covers the block and the cable part.
+        registration.addGhostIngredientHandler(
+                InterfaceScreen.class, new EssentiaInterfaceGhostIngredientHandler());
     }
 }

@@ -8,7 +8,9 @@ import appeng.api.parts.RegisterPartCapabilitiesEvent;
 import appeng.api.stacks.AEKeyType;
 import appeng.api.stacks.AEKeyTypes;
 import appeng.api.upgrades.Upgrades;
+import appeng.core.definitions.AEBlocks;
 import appeng.core.definitions.AEItems;
+import appeng.core.definitions.AEParts;
 import appeng.items.tools.powered.WirelessTerminalItem;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectCapabilities;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspectSource;
@@ -38,6 +40,7 @@ import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.init.ModNetwork;
 import thaumicenergistics_ce.init.SelfTestHook;
 import thaumicenergistics_ce.init.capability.ThEItemCapabilities;
+import thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceRegistry;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartEssentiaExportBus;
 import thaumicenergistics_ce.part.PartEssentiaImportBus;
@@ -75,6 +78,9 @@ public final class ThaumicEnergistics {
         modBus.addListener(this::commonSetup);
 
         registerPartModels();
+        // The ME interface's access card works on the game bus rather than a grid tickable, since AE2
+        // reports nothing when a card goes in or out - see EssentiaInterfaceRegistry.
+        EssentiaInterfaceRegistry.register();
         SelfTestHook.install();
     }
 
@@ -215,6 +221,10 @@ public final class ThaumicEnergistics {
             Upgrades.add(AEItems.SPEED_CARD, bus, BUS_UPGRADE_SLOTS);
             Upgrades.add(AEItems.REDSTONE_CARD, bus, 1);
         }
+        // One access card per ME interface, block form and cable part alike: without these two AE2's
+        // upgrade slot refuses our card and the interface's rows can never be marked.
+        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEBlocks.INTERFACE, 1);
+        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEParts.INTERFACE, 1);
     }
 
     /** The four upgrade slots every essentia bus has; the same number {@code Upgrades.add} should report. */

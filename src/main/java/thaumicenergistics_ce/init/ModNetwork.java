@@ -10,6 +10,7 @@ import thaumicenergistics_ce.network.EncoderSourcePayload;
 import thaumicenergistics_ce.network.EssentiaBusConfigPayload;
 import thaumicenergistics_ce.network.EssentiaDepositPayload;
 import thaumicenergistics_ce.network.EssentiaFillPayload;
+import thaumicenergistics_ce.network.EssentiaInterfaceMarkPayload;
 import thaumicenergistics_ce.network.GolemBackpackPayload;
 import thaumicenergistics_ce.network.InscriberGridFillPayload;
 import thaumicenergistics_ce.network.InscriberGridPayload;
@@ -60,6 +61,12 @@ public final class ModNetwork {
         registrar.playToServer(
                 EssentiaBusConfigPayload.TYPE,
                 EssentiaBusConfigPayload.CODEC,
+                (payload, context) -> payload.handle(context.player()));
+        // A mark dropped onto an ME interface's own config or storage row. Serverbound for the bus above's
+        // reason, and it is refused server-side unless the access card is in that interface.
+        registrar.playToServer(
+                EssentiaInterfaceMarkPayload.TYPE,
+                EssentiaInterfaceMarkPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
         // A cell workbench partition well set from JEI. Serverbound like the bus above, and for a second
         // reason: AE2's grid packet reaches a fake slot only through AEBaseMenu - see PartitionWellPayload.
