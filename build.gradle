@@ -17,14 +17,10 @@ java {
 }
 
 repositories {
-    // The mod dependencies are ordinary maven coordinates, pinned to exact versions in
-    // gradle.properties. Scoped by group so this repository can never answer for anything else.
     maven {
         url = 'https://api.modrinth.com/maven'
         content { includeGroup 'maven.modrinth' }
     }
-    // NeoForge itself arrives through the moddev plugin, which adds maven.neoforged.net over in
-    // settings.gradle. These two cover the build plugins and the optional local mirror.
     mavenLocal()
     mavenCentral()
     // maven { url = '../local-maven' }
@@ -33,8 +29,8 @@ repositories {
 neoForge {
     version = project.neo_version
 
-    // Makes Slot's position fields writable, so a screen of ours can place an AE2 fake slot - which has
-    // no coordinate parameter of its own. See src/main/resources/META-INF/accesstransformer.cfg.
+    // Slot's position fields are not writable without this, which would leave AE2's fake slot with no
+    // way to be placed. See src/main/resources/META-INF/accesstransformer.cfg.
     accessTransformers.from 'src/main/resources/META-INF/accesstransformer.cfg'
 
     parchment {
@@ -42,13 +38,6 @@ neoForge {
         minecraftVersion = project.parchment_minecraft_version
     }
 
-    // Declare OUR source set and nothing else. Thaumaturge needs no entry here: it reaches the run
-    // as an ordinary dependency, and ModDevGradle derives the run config from the jar it finds.
-    //
-    // This block used to also map "thaumaturge" onto sourceSets.main, which is wrong: a mod entry
-    // contributes its source set's class folders to the run, so that entry handed the loader this
-    // project's own output under Thaumaturge's name - the mod was reported loaded twice, once as
-    // ours and once as Thaumaturge's.
     mods {
         "${mod_id}" {
             sourceSet(sourceSets.main)
@@ -58,27 +47,14 @@ neoForge {
     runs {
         client {
             client()
-            // There is no switch to run without this mod, and there cannot be one here. Both the
-            // environment variable (MOD_CLASSES) and RunModel.loadedMods were tried: the first leaves
-            // the mod's class output on the run classpath, where its neoforge.mods.toml is discovered
-            // regardless of the coordinates; the second does remove the mod, but then its datapack
-            // still loads through the pack finder while none of its items, blocks or aspect keys are
-            // ever registered. Every research entry naming one of them then fails to resolve:
+            // A run without this mod cannot be produced: its classes stay on the run classpath, and with
+            // the mod gone its datapack still loads, so research entries naming its items fail:
             //
             //     Failed to parse .../research_entry/arcane_assembler.json from pack mod/thaumicenergistics
             //     Caused by: Failed to get element thaumicenergistics_ce:essentia_terminal
             //
-            // and the world refuses to load. A run that produces a broken world is worse than no switch.
-            // To see the mod absent, build a jar and drop it into a separate profile with no
-            // Thaumaturge - but note that Thaumaturge is a hard dependency, so the loader refuses
-            // before any of this is even reached.
-            //
-            // Quick-play into the existing dev world when asked, since a menu needs a player to exist and
-            // every menu takes an Inventory. With this the world loads straight in:
-            //
+            // Quick-play into the existing dev world on request; off by default:
             //     ./gradlew runClient -PquickPlay="New World"
-            //
-            // Left out by default so the plain run still stops at the title screen.
             if (project.hasProperty('quickPlay')) {
                 programArguments.addAll '--quickPlaySingleplayer', project.property('quickPlay')
             }
@@ -87,19 +63,9 @@ neoForge {
             server()
             programArgument '--nogui'
 
-            // A client and a dedicated server cannot share a directory. Both used to work in `run/`,
-            // so whichever one started second died on the world lock:
-            //
-            //     java.io.IOException: another process has locked a portion of the file
-            //     [net.minecraft.server.Main/FATAL]: Failed to start the minecraft server
-            //
-            // which is indistinguishable from a real crash and wasted two runs on 2026-10-04. The
-            // server also recycles latest.log on every start, so a client run in between destroys the
-            // previous server's evidence - the Done line a gate reads to call the run a pass.
-            // Separating the two costs one line and removes the whole failure mode.
-            //
-            // The client stays in `run/`, where its world and logs already are. A gate that looks for
-            // server output now reads run/server/logs/latest.log.
+            // A client and a dedicated server cannot share a directory: whichever starts second dies on
+            // the world lock, and the server recycles latest.log on every start, destroying the previous
+            // run's evidence. The client stays in run/; server output is run/server/logs/latest.log.
             gameDirectory.set(layout.projectDirectory.dir('run/server'))
         }
         data {
@@ -112,17 +78,8 @@ neoForge {
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             logLevel = org.slf4j.event.Level.DEBUG
 
-            // The trace switches are read from the environment, and a forked run does not inherit the
-            // shell's. Passing them through is what makes the documented
-            //
-            //     THAUMICENERGISTICS_MONITOR_TRACE=true ./gradlew runClient
-            //
-            // actually print anything: without this the variable is set in the shell, silently dropped by
-            // the fork, and the run is quiet - which looks exactly like a switch that never fires.
-            //
-            // By prefix, not by a list: a new switch is a one-word addition in the code and needs no
-            // change here. The list this replaces had to be extended for every switch and did not
-            // always get extended, so a switch could be live in the code and dead in the run.
+            // A forked run does not inherit the shell's environment, so the THAUMICENERGISTICS_* trace
+            // switches are passed through by prefix: a new switch in the code needs no change here.
             System.getenv().each { name, value ->
                 if (name.startsWith('THAUMICENERGISTICS_')) {
                     environment name, value
@@ -136,11 +93,8 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 
 // ---- Thaumaturge: built by the builder, never shipped ---------------------
-// It is All Rights Reserved. Its LICENSE forbids publishing the mod or any binary built from it and
-// names "GitHub Releases on a fork" as forbidden, so this repository cannot carry the jar, and it
-// publishes no maven artifact either, so it cannot be resolved. Section 2.4 does allow building it
-// for your own use, which is what tools/fetch-thaumaturge.* does: once, from the canonical
-// repository, at the commit pinned in gradle.properties. See libs/README.md.
+// All Rights Reserved, and no maven artifact, so it is compiled by tools/fetch-thaumaturge.* at the
+// commit pinned in gradle.properties. See libs/README.md.
 def thaumaturgeJars = fileTree(dir: 'libs', include: ['thaumaturge-*.jar'])
 if (thaumaturgeJars.isEmpty()) {
     throw new GradleException("""
@@ -161,11 +115,8 @@ if (thaumaturgeJars.isEmpty()) {
 dependencies {
     compileOnly "org.jspecify:jspecify:1.0.0"
 
-    // ---- Mod dependencies -------------------------------------------------
-    // Pinned in gradle.properties, resolved from the Modrinth maven repository. `implementation`
-    // rather than a split of compile and runtime on purpose: Thaumaturge's and AE2's public
-    // signatures name GuideME, Curios and Jade types, so every one of these has to be on the compile
-    // classpath for this mod to compile at all, and on the runtime classpath for the dev run.
+    // Pinned in gradle.properties. Thaumaturge's and AE2's own signatures name GuideME, Curios and Jade
+    // types, so all of these are needed to compile at all, not just to run.
     implementation "maven.modrinth:ae2:${ae2_version}"
     implementation "maven.modrinth:guideme:${guideme_version}"
     implementation "maven.modrinth:jei:${jei_version}"
@@ -183,19 +134,11 @@ tasks.named('compileJava') {
     options.compilerArgs << '-Xmaxerrs' << '2000'
 }
 
-// ---- Source encoding ------------------------------------------------------
-// Every text file in this tree is UTF-8 (no BOM, LF). Without this javac falls back to the platform
-// default charset, which is GBK on a Chinese Windows box: any non-ASCII comment or string literal
-// then either trips "unmappable character" or is silently written into the class file as mojibake.
-// Every source file happens to be pure ASCII today, so nothing is broken yet - this is here so that
-// the first non-ASCII comment someone writes does not become a build failure.
-//
-// `withType` rather than `named('compileJava')` on purpose: the IDE sync and any future source set
-// add their own JavaCompile tasks, and one of them left without the flag is exactly the failure this
-// prevents. Javadoc reads the same files and gets the same flag.
-//
-// This file itself stays pure ASCII on purpose: Gradle reads build scripts with the platform charset,
-// not necessarily UTF-8, so a non-ASCII comment here can turn into mojibake for the next reader.
+// Every text file in this tree is UTF-8 (no BOM, LF). Without the flag javac falls back to the platform
+// charset, which is GBK on a Chinese Windows box, and a non-ASCII comment or literal then either trips
+// "unmappable character" or lands in the class file as mojibake. `withType` rather than
+// `named('compileJava')` so the IDE sync and any future source set are covered too; Javadoc reads the
+// same files. This file itself stays pure ASCII: Gradle reads build scripts with the platform charset.
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }

@@ -5,13 +5,9 @@ pluginManagement {
         maven { url = 'https://maven.neoforged.net/releases' }
     }
 
-    // If maven.neoforged.net is unreachable from your network (it resets connections intermittently
-    // in some environments), uncomment the line below and populate ../local-maven with the NeoForge
-    // artifacts for your `neo_version`. This repository does not ship such a mirror.
+    // If maven.neoforged.net is unreachable, populate ../local-maven with the NeoForge artifacts for
+    // your neo_version and uncomment the line below. This repository ships no such mirror.
     // maven { url = '../local-maven' }
 }
-
-// Note: no foojay toolchain resolver. The build pins Java 21, so the plugin would only add a
-// dependency on the plugin portal for no benefit.
 
 rootProject.name = 'ThaumicEnergistics'
