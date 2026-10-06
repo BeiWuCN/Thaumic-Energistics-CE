@@ -173,6 +173,11 @@ public final class ThaumicEnergistics {
             GridLinkables.register(
                     ModItems.WIRELESS_ESSENTIA_TERMINAL.get(),
                     WirelessTerminalItem.LINKABLE_HANDLER);
+            // The access point's link slot asks this registry by item, so an unregistered terminal is
+            // refused before the player can drop it in - the same silent break as the line above.
+            GridLinkables.register(
+                    ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
+                    WirelessTerminalItem.LINKABLE_HANDLER);
             registerUpgrades();
             ThELog.LOG.info("ThaumicEnergistics common setup complete");
             // Else every terminal craft fails with PAYMENT_UNAVAILABLE - see TerminalWorkbenchVis.

@@ -180,6 +180,8 @@ public final class GearSelfTest {
         record Wireless(String what, Item item) {}
         List<Wireless> wireless = List.of(
                 new Wireless("the wireless essentia terminal", ModItems.WIRELESS_ESSENTIA_TERMINAL.get()),
+                new Wireless("the wireless arcane crafting terminal",
+                        ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()),
                 new Wireless("the golem wireless backpack", ModItems.GOLEM_WIFI_BACKPACK.get()));
 
         for (Wireless w : wireless) {
