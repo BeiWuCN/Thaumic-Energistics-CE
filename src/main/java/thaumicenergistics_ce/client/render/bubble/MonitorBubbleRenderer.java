@@ -23,8 +23,8 @@ import thaumicenergistics_ce.util.ThELog;
  * The bubble the Infusion Monitor floats above itself: how dangerous the altar is, what it is making,
  * whether the room can finish it, and that it is drawn rather than spawned - a {@code TextDisplay}
  * entity can be left behind by a crash. What it says is {@link BubbleCells}, the box it sits on
- * {@link RoundedPanel}; what is left here is the pose and the two ways a cell is drawn, and the two
- * chunks of range the panel is drawn within.
+ * {@link RoundedPanel}; what is left here is the pose and the two ways a cell is drawn, and the few
+ * blocks of range the panel is drawn within.
  */
 public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInfusionMonitor> {
 
@@ -35,9 +35,9 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
     private static final float PADDING_X = 5.0F;
     private static final float PADDING_Y = 4.0F;
 
-    /** How far the bubble is drawn: two chunks. Past that a player has walked away from the machine,
-     * and the panel is not read - so it is not built, not measured and not drawn. */
-    private static final double CULL_RANGE = 32.0;
+    /** How far the bubble is drawn: eight blocks. Past that a player has walked away from the machine,
+     * so the panel is not built, not measured and not drawn, and it is never handed here at all. */
+    private static final int CULL_RANGE = 8;
 
     /** The colour the through-wall copy of the text is drawn in - vanilla's, from a name tag. */
     private static final int SEE_THROUGH_TEXT = 553648127;
@@ -52,6 +52,14 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
 
     public MonitorBubbleRenderer(BlockEntityRendererProvider.Context context) {}
 
+    /** The same eight blocks, asked before {@link #shouldRender}: the machine is dropped from the list
+     * the client walks at all, not merely skipped once it gets there. */
+    @Override
+    public int getViewDistance() {
+        return CULL_RANGE;
+    }
+
+    /** The near half of the cull: reading distance, measured from the machine's own block. */
     @Override
     public boolean shouldRender(BlockEntityInfusionMonitor monitor, Vec3 cameraPos) {
         return Vec3.atCenterOf(monitor.getBlockPos()).closerThan(cameraPos, CULL_RANGE);
