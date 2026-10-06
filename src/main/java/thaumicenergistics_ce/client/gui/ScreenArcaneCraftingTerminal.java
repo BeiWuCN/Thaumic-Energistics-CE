@@ -1,6 +1,5 @@
 package thaumicenergistics_ce.client.gui;
 
-import appeng.client.gui.me.common.MEStorageScreen;
 import appeng.client.gui.style.ScreenStyle;
 import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
@@ -22,9 +21,10 @@ import thaumicenergistics_ce.network.GolemBackpackPayload;
  * <ul>
  *   <li>No vis display yet, by choice: it ships with the craft, so drawn and charged share one source.
  *   <li>The style document is in AE2's namespace: {@code StyleManager} resolves against its own only.
+ *   <li>The jar and phial gestures come from {@link ScreenEssentiaTerminalBase}, only with the card.
  * </ul>
  */
-public class ScreenArcaneCraftingTerminal extends MEStorageScreen<MenuArcaneCraftingTerminal>
+public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<MenuArcaneCraftingTerminal>
         implements ClientboundReceiver {
 
     private static final int ICON_SIZE = 14;
@@ -39,6 +39,14 @@ public class ScreenArcaneCraftingTerminal extends MEStorageScreen<MenuArcaneCraf
     public ScreenArcaneCraftingTerminal(
             MenuArcaneCraftingTerminal menu, Inventory inventory, Component title, ScreenStyle style) {
         super(menu, inventory, title, style);
+    }
+
+    /** Without the card the terminal is an ordinary one: every gesture falls through to AE2's own. */
+    @Override
+    protected boolean essentiaGesturesAtAll() {
+        // Asked on every click rather than remembered: the menu reads the upgrade slot the player sees, so
+        // a card taken out stops the gestures on the next click and a stale flag could never say otherwise.
+        return menu.hasEssentiaAccessCard();
     }
 
     @Override

@@ -225,6 +225,13 @@ public final class ThaumicEnergistics {
         // upgrade slot refuses our card. One name key keeps the block and the part to a single line.
         Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEBlocks.INTERFACE, 1, INTERFACE_UPGRADE_NAME);
         Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEParts.INTERFACE, 1, INTERFACE_UPGRADE_NAME);
+        // The same card in the wireless arcane terminal's own two slots; without this line AE2's slot
+        // filter refuses it, since an unregistered pair reports room for none.
+        Upgrades.add(
+                ModItems.ESSENTIA_ACCESS_CARD.get(),
+                ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
+                1,
+                ARCANE_TERMINAL_UPGRADE_NAME);
     }
 
     /** The four upgrade slots every essentia bus has; the same number {@code Upgrades.add} should report. */
@@ -235,6 +242,10 @@ public final class ThaumicEnergistics {
 
     /** What the access card's tooltip calls the interface: one name for the block and the part both. */
     private static final String INTERFACE_UPGRADE_NAME = "block.ae2.interface";
+
+    /** What the access card's tooltip calls the wireless arcane terminal: the item's own name key. */
+    private static final String ARCANE_TERMINAL_UPGRADE_NAME =
+            "item.thaumicenergistics_ce.wireless_arcane_crafting_terminal";
 
     /**
      * Adds the essentia key type to AE2's registry. Not from the mod constructor: an {@code AEKeyType}

@@ -60,5 +60,8 @@ public final class SelfTestBootstrap implements SelfTestProvider {
         // The ME interface's access card: which aspects a mark lets in, and the rates a round moves them
         // at. Nothing here needs a level, which is the half a headless gate can check.
         NeoForge.EVENT_BUS.addListener(EssentiaInterfaceSelfTest::run);
+        // The wireless arcane terminal's access card: the AE2 registration, the item's two upgrade slots
+        // and the card that has to ride on the item's own stack. No player, no screen, no live grid.
+        NeoForge.EVENT_BUS.addListener(WirelessArcaneEssentiaSelfTest::run);
     }
 }

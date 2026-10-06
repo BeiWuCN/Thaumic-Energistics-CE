@@ -8,7 +8,6 @@ import appeng.api.storage.ITerminalHost;
 import appeng.helpers.ICraftingGridMenu;
 import appeng.menu.SlotSemantic;
 import appeng.menu.SlotSemantics;
-import appeng.menu.me.common.MEStorageMenu;
 import appeng.menu.slot.AppEngSlot;
 import appeng.util.inv.AppEngInternalInventory;
 import appeng.util.inv.InternalInventoryHost;
@@ -24,6 +23,7 @@ import net.minecraft.world.inventory.Slot;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ArcaneTerminalHost;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
+import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.menu.slot.ArcaneCraftingResultSlot;
 import thaumicenergistics_ce.menu.slot.CrystalSlot;
 import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
@@ -32,12 +32,12 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 /**
  * The Arcane Crafting Terminal's menu, reached through the placed part or through a paired item.
  * <ul>
- *   <li>Nine crafting cells, six crystal slots three down each side, a result and a wand slot.
+ *   <li>Nine crafting cells, a result slot, six side slots where a crystal counts twice, a wand slot.
  *   <li>Modelled on AE2's {@code CraftingTermMenu}; a {@code CraftingRecipe} never matches an arcane one.
- *   <li>A crystal in a grid cell counts twice, so crystals get their own slots, past the pattern's count.
+ *   <li>Its essentia gestures come from {@link MenuEssentiaTerminalBase}, gated on the access card.
  * </ul>
  */
-public class MenuArcaneCraftingTerminal extends MEStorageMenu
+public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         implements ICraftingGridMenu, InternalInventoryHost {
 
     public static final int GRID_SIZE = PartArcaneCraftingTerminal.GRID_SIZE;
@@ -233,6 +233,18 @@ public class MenuArcaneCraftingTerminal extends MEStorageMenu
                 : ArcaneCraftCostPayload.of(containerId, cost.wandCentivis()));
     }
 
+
+    /** The card in the terminal item's own upgrade slot is the whole permission; nothing else is read. */
+    @Override
+    protected boolean essentiaAccessGranted() {
+        // AE2's menu is built from the host's upgrade inventory, so this is the very slot the player sees.
+        return getHost().getUpgrades().isInstalled(ModItems.ESSENTIA_ACCESS_CARD.get());
+    }
+
+    /** The screen asks this only to hide the gesture; the server asks again before it moves anything. */
+    public boolean hasEssentiaAccessCard() {
+        return essentiaAccessGranted();
+    }
 
     /** Not persisted: the result is derived from the grid, and a saved one would outlive it. */
     @Override
