@@ -26,6 +26,11 @@
           "type": "theory",
           "category": "thaumicenergistics_ce:thaumicenergistics_ce",
           "amount": 1
+        },
+        {
+          "type": "observation",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
         }
       ]
     },
@@ -34,6 +39,24 @@
       "recipes": [
         "thaumicenergistics_ce:distillation_encoder"
       ]
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:fabrico",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:permutatio",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:perditio",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:cognitio",
+      "amount": 1
     }
   ],
   "complexity": 3

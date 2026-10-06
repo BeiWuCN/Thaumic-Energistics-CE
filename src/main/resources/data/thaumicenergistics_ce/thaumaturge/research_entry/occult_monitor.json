@@ -28,7 +28,7 @@
           "amount": 1
         },
         {
-          "type": "theory",
+          "type": "observation",
           "category": "thaumicenergistics_ce:thaumicenergistics_ce",
           "amount": 1
         }
@@ -40,6 +40,20 @@
         "thaumicenergistics_ce:occult_monitor"
       ],
       "warp": 1
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:machina",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:sensus",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
+      "amount": 1
     }
   ],
   "complexity": 3

@@ -31,5 +31,19 @@
       ]
     }
   ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:motus",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:permutatio",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:vitreus",
+      "amount": 1
+    }
+  ],
   "complexity": 2
 }

@@ -25,6 +25,11 @@
           "type": "theory",
           "category": "thaumicenergistics_ce:thaumicenergistics_ce",
           "amount": 1
+        },
+        {
+          "type": "observation",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
         }
       ]
     },
@@ -33,6 +38,20 @@
       "recipes": [
         "thaumicenergistics_ce:essentia_vibration_chamber"
       ]
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:machina",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:potentia",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:motus",
+      "amount": 1
     }
   ],
   "complexity": 3

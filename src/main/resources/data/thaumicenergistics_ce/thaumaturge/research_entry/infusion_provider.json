@@ -29,9 +29,9 @@
           "amount": 1
         },
         {
-          "type": "theory",
+          "type": "observation",
           "category": "thaumicenergistics_ce:thaumicenergistics_ce",
-          "amount": 1
+          "amount": 2
         }
       ]
     },
@@ -41,6 +41,24 @@
         "thaumicenergistics_ce:infusion_provider"
       ],
       "warp": 2
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:machina",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:permutatio",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:motus",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:sensus",
+      "amount": 2
     }
   ],
   "complexity": 3

@@ -22,7 +22,7 @@
           "amount": 1
         },
         {
-          "type": "theory",
+          "type": "observation",
           "category": "thaumicenergistics_ce:thaumicenergistics_ce",
           "amount": 1
         }
@@ -40,6 +40,20 @@
           "amount": 1
         }
       ]
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:permutatio",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:auram",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:machina",
+      "amount": 1
     }
   ],
   "complexity": 2
