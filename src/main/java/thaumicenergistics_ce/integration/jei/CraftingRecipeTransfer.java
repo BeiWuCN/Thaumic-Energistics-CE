@@ -40,16 +40,9 @@ public class CraftingRecipeTransfer
     private static final int GRID_HEIGHT = 3;
 
     private final IRecipeTransferHandlerHelper helper;
-    private final MenuType<MenuArcaneCraftingTerminal> menuType;
 
-    /**
-     * The menu type is handed in rather than read from the registry: the wired and the wireless terminals
-     * share this menu class, so which of the two screen types is being served is the caller's to say.
-     */
-    public CraftingRecipeTransfer(
-            IRecipeTransferHandlerHelper helper, MenuType<MenuArcaneCraftingTerminal> menuType) {
+    public CraftingRecipeTransfer(IRecipeTransferHandlerHelper helper) {
         this.helper = helper;
-        this.menuType = menuType;
     }
 
     // ---- IRecipeTransferInfo -------------------------------------------
@@ -59,9 +52,14 @@ public class CraftingRecipeTransfer
         return MenuArcaneCraftingTerminal.class;
     }
 
+    /**
+     * Any menu type of this menu class, deliberately: JEI keys its handlers by container class and recipe
+     * type alone, so a handler naming one menu type would leave the other terminal - the wired and the
+     * wireless terminals share this class - without a transfer button.
+     */
     @Override
     public Optional<MenuType<MenuArcaneCraftingTerminal>> getMenuType() {
-        return Optional.of(menuType);
+        return Optional.empty();
     }
 
     @Override

@@ -1,7 +1,10 @@
 package thaumicenergistics_ce.integration.jei;
 
+import appeng.api.stacks.AEItemKey;
 import appeng.core.network.serverbound.FillCraftingGridFromRecipePacket;
 import appeng.menu.SlotSemantics;
+import appeng.menu.me.common.GridInventoryEntry;
+import appeng.menu.me.common.IClientRepo;
 import java.util.List;
 import java.util.Optional;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -16,6 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
@@ -28,6 +32,9 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
  *   <li>Handles Thaumaturge's own category, so the button shows where players look; slots come from
  *       {@link SlotSemantics}, and the six crystal slots stay the player's.
  *   <li>No recipe id is passed deliberately: an arcane recipe is not in the vanilla recipe manager.
+ *   <li>Each cell's template is the variant with stock behind it, not the one the recipe lists first: the
+ *       packet resolves a template on its own and never learns that the ingredient was a tag.
+ *   <li>One handler serves both terminals: JEI keys these by container class and recipe type only.
  * </ul>
  */
 public class ArcaneCraftingRecipeTransfer
@@ -35,16 +42,9 @@ public class ArcaneCraftingRecipeTransfer
                 IRecipeTransferHandler<MenuArcaneCraftingTerminal, RecipeHolder<?>> {
 
     private final IRecipeTransferHandlerHelper helper;
-    private final MenuType<MenuArcaneCraftingTerminal> menuType;
 
-    /**
-     * The menu type is handed in rather than read from the registry: the wired and the wireless terminals
-     * share this menu class, so which of the two screen types is being served is the caller's to say.
-     */
-    public ArcaneCraftingRecipeTransfer(
-            IRecipeTransferHandlerHelper helper, MenuType<MenuArcaneCraftingTerminal> menuType) {
+    public ArcaneCraftingRecipeTransfer(IRecipeTransferHandlerHelper helper) {
         this.helper = helper;
-        this.menuType = menuType;
     }
 
     // ---- IRecipeTransferInfo -------------------------------------------
@@ -54,9 +54,14 @@ public class ArcaneCraftingRecipeTransfer
         return MenuArcaneCraftingTerminal.class;
     }
 
+    /**
+     * Any menu type of this menu class, deliberately: JEI keys its handlers by container class and recipe
+     * type alone, so a handler naming one menu type would leave the other terminal - the wired and the
+     * wireless terminals share this class - without a transfer button.
+     */
     @Override
     public Optional<MenuType<MenuArcaneCraftingTerminal>> getMenuType() {
-        return Optional.of(menuType);
+        return Optional.empty();
     }
 
     @Override
@@ -100,19 +105,16 @@ public class ArcaneCraftingRecipeTransfer
             return helper.createInternalError();
         }
 
-        // One template per cell, plus which ones the player cannot supply. The packet acts on the missing
-        // ones; this only reports them, so the button can say why instead of doing nothing.
+        // One template per cell, picked as the variant the player or the network can actually supply. The
+        // packet's template path looks each one up by itself and knows nothing of tags, so taking the first
+        // member of a tag - as the recipe lists it - would fail whenever that member is not the one in stock.
+        IClientRepo repo = menu.getClientRepo();
         NonNullList<ItemStack> templates = NonNullList.withSize(PartArcaneCraftingTerminal.GRID_SIZE, ItemStack.EMPTY);
         boolean missing = false;
         for (int cell = 0; cell < PartArcaneCraftingTerminal.GRID_SIZE; cell++) {
             List<ItemStack> variants = cell < cells.size() ? cells.get(cell) : List.of();
-            for (ItemStack variant : variants) {
-                if (!variant.isEmpty()) {
-                    templates.set(cell, variant.copyWithCount(1));
-                    break;
-                }
-            }
-            if (templates.get(cell).isEmpty() && !variants.isEmpty()) {
+            templates.set(cell, pickSuppliable(variants, repo, player));
+            if (templates.get(cell).isEmpty() && asksForSomething(variants)) {
                 missing = true;
             }
         }
@@ -130,5 +132,57 @@ public class ArcaneCraftingRecipeTransfer
         // No recipe id: the recipe is not in the vanilla manager, so the packet's template path is used.
         PacketDistributor.sendToServer(new FillCraftingGridFromRecipePacket(null, templates, false));
         return null;
+    }
+
+    // ---- templates -----------------------------------------------------
+
+    /**
+     * The template for one cell: the variant with the most supply behind it, so a tag whose first member is
+     * not stocked but whose others are still transfers. Empty when nothing can supply the cell.
+     */
+    private static ItemStack pickSuppliable(List<ItemStack> variants, @Nullable IClientRepo repo, Player player) {
+        ItemStack best = ItemStack.EMPTY;
+        long bestSupply = 0;
+        for (ItemStack variant : variants) {
+            if (variant.isEmpty()) {
+                continue;
+            }
+            long supply = supplyOf(variant, repo, player);
+            if (supply > bestSupply) {
+                best = variant.copyWithCount(1);
+                bestSupply = supply;
+            }
+        }
+        return best;
+    }
+
+    /** What the network reports of this exact item, plus what the player carries. */
+    private static long supplyOf(ItemStack variant, @Nullable IClientRepo repo, Player player) {
+        long supply = 0;
+        AEItemKey wanted = AEItemKey.of(variant);
+        if (repo != null && wanted != null) {
+            for (GridInventoryEntry entry : repo.getByIngredient(Ingredient.of(variant))) {
+                if (wanted.equals(entry.getWhat())) {
+                    supply += entry.getStoredAmount();
+                }
+            }
+        }
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            ItemStack carried = player.getInventory().getItem(slot);
+            if (ItemStack.isSameItemSameComponents(carried, variant)) {
+                supply += carried.getCount();
+            }
+        }
+        return supply;
+    }
+
+    /** Whether the cell asks for anything at all: an empty cell of the layout must not read as missing. */
+    private static boolean asksForSomething(List<ItemStack> variants) {
+        for (ItemStack variant : variants) {
+            if (!variant.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
     }
 }
