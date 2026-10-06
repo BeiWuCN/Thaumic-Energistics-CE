@@ -39,11 +39,11 @@ public final class AlchemyProviderTooltip implements IBlockComponentProvider {
             tooltip.add(helper.text(Component
                     .translatable("thaumicenergistics_ce.jade.alchemy_provider.receivers", receivers,
                             BlockEntityAlchemyProvider.MAX_LINKED_RECEIVERS)
-                    .withStyle(ChatFormatting.GRAY)));
+                    .withStyle(ChatFormatting.WHITE)));
         } else {
             tooltip.add(helper.text(Component
                     .translatable("thaumicenergistics_ce.jade.alchemy_provider.no_receivers")
-                    .withStyle(ChatFormatting.DARK_GRAY)));
+                    .withStyle(ChatFormatting.WHITE)));
         }
     }
 
