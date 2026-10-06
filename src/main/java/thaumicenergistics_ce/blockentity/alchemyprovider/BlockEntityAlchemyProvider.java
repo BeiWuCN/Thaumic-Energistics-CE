@@ -30,10 +30,11 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 /**
  * The Alchemy Provider: where the ME network puts essentia meant for the world - the opposite half
- * of the Import Bus, handing essentia to whatever container it touches.
+ * of the Import Bus, handing essentia to whatever container or machine it touches.
  *
  * <ul><li>The buffer is a waypoint, not storage: inserted essentia is pushed to a neighbour on the
- * next tick and is never persisted.</li><li>A provider with nothing attached refuses everything.</li></ul>
+ * next tick and is never persisted.</li><li>A provider with nothing attached refuses everything, while a
+ * machine that wants essentia is served straight from the grid.</li></ul>
  */
 public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         implements IStorageProvider, IGridTickable, IEssentiaStorage {
@@ -79,7 +80,7 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         if (level == null || level.isClientSide()) {
             return TickRateModulation.IDLE;
         }
-        if (!getMainNode().isActive() || buffer.isEmpty()) {
+        if (!getMainNode().isActive() || !buffer.hasWork()) {
             // A receiver may have been broken; paying for a missing one is invisible to the player.
             if (pruneDeadReceivers()) {
                 return TickRateModulation.URGENT;

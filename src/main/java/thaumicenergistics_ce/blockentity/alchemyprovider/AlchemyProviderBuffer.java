@@ -9,13 +9,14 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 
 /**
  * The provider's buffer: essentia held on its way out to the world, one tick at a time.
  * <ul>
  *   <li>A waypoint, not storage: nothing here is saved, and a reload starts empty.
- *   <li>A provider with nothing attached refuses everything, so the grid is never told of room it has.
+ *   <li>A provider with nothing attached refuses everything; a machine's suction is fetched from the grid.
  *   <li>Every change bumps the revision, the one answer a cache of this container needs.
  * </ul>
  */
@@ -84,11 +85,33 @@ final class AlchemyProviderBuffer {
     /** True when any neighbour takes essentia, so an insert has somewhere to go. */
     boolean hasAnyTarget() {
         for (Direction side : Direction.values()) {
-            if (neighbours.storage(side) != null) {
+            if (neighbours.storage(side) != null || SuctionTarget.on(neighbours, side) != null) {
                 return true;
             }
         }
         return false;
+    }
+
+    /** True when there is work: essentia waiting to leave, or a machine asking for some. */
+    boolean hasWork() {
+        if (!buffer.isEmpty()) {
+            return true;
+        }
+        for (Direction side : Direction.values()) {
+            SuctionTarget machine = machine(side);
+            if (machine != null && machine.wants() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** The machine worth feeding on that side: only where no container sits to be inserted into. */
+    private @Nullable SuctionTarget machine(Direction side) {
+        if (neighbours.storage(side) != null) {
+            return null;
+        }
+        return SuctionTarget.on(neighbours, side);
     }
 
     /** Hands the buffer to the neighbours, sides in turn, and says whether anything moved. */
@@ -96,7 +119,7 @@ final class AlchemyProviderBuffer {
         if (provider.getLevel() == null) {
             return false;
         }
-        boolean movedAnything = false;
+        boolean movedAnything = topUpFromNetwork();
 
         var aspects = new ArrayList<>(buffer.keySet());
         for (Holder<IAspect> aspect : aspects) {
@@ -109,11 +132,7 @@ final class AlchemyProviderBuffer {
                 if (remaining <= 0) {
                     break;
                 }
-                IEssentiaStorage target = neighbours.storage(side);
-                if (target == null) {
-                    continue;
-                }
-                int accepted = target.insert(aspect, remaining, false);
+                int accepted = hand(side, aspect, remaining);
                 if (accepted > 0) {
                     remaining -= accepted;
                     movedAnything = true;
@@ -131,5 +150,39 @@ final class AlchemyProviderBuffer {
             provider.setChanged();
         }
         return movedAnything;
+    }
+
+    /** A container takes an insert; a machine that wants essentia is handed the same amount instead. */
+    private int hand(Direction side, Holder<IAspect> aspect, int amount) {
+        IEssentiaStorage target = neighbours.storage(side);
+        if (target != null) {
+            return target.insert(aspect, amount, false);
+        }
+        SuctionTarget machine = SuctionTarget.on(neighbours, side);
+        return machine == null ? 0 : machine.accept(aspect, amount);
+    }
+
+    /**
+     * Fetches what a suction machine asks for: the buffer is a waypoint and the grid is the source, so
+     * a machine with no container beside it would otherwise wait for an insert that never comes.
+     */
+    private boolean topUpFromNetwork() {
+        boolean fetched = false;
+        for (Direction side : Direction.values()) {
+            SuctionTarget machine = machine(side);
+            if (machine == null) {
+                continue;
+            }
+            Holder<IAspect> wanted = machine.wants();
+            if (wanted == null || buffer.getOrDefault(wanted, 0) > 0) {
+                continue;
+            }
+            int taken = provider.takeForLink(wanted, BlockEntityAlchemyProvider.BUFFER_PER_ASPECT, false);
+            if (taken > 0) {
+                buffer.put(wanted, taken);
+                fetched = true;
+            }
+        }
+        return fetched;
     }
 }

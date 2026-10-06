@@ -25,9 +25,9 @@ import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 /**
  * The Alchemy Provider Connection: the far end of a wireless essentia link to a provider.
  * <ul>
- *   <li>It carries essentia, never stores it: what arrives goes to the provider on the next tick.
- *   <li>Bound with the wireless connector up to {@link BlockEntityAlchemyProvider#MAX_LINK_DISTANCE}
- *       blocks away; whichever side sees the other gone clears its own half.
+ *   <li>It carries essentia, never stores it: arrivals go on to the provider next tick.
+ *   <li>Beside a machine that asks, it answers out of the grid, as a cabled provider does.
+ *   <li>Bound within {@link BlockEntityAlchemyProvider#MAX_LINK_DISTANCE} blocks; a lost half clears itself.
  * </ul>
  */
 public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity implements IEssentiaStorage {
@@ -139,6 +139,51 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
         pushBufferToProvider();
         if (isLinked()) {
             drawFromNeighbours();
+            feedSuctionMachines();
+        }
+    }
+
+    /**
+     * Feeds a machine beside the receiver out of the provider's grid: a suction machine offers no
+     * container face, so the container path leaves it waiting. Fetched first, handed over second.
+     */
+    private void feedSuctionMachines() {
+        BlockEntityAlchemyProvider provider = resolveProvider();
+        if (provider == null) {
+            return;
+        }
+        boolean fetched = false;
+        for (Direction side : Direction.values()) {
+            if (neighbours.storage(side) != null) {
+                continue;
+            }
+            SuctionTarget machine = SuctionTarget.on(neighbours, side);
+            if (machine == null) {
+                continue;
+            }
+            Holder<IAspect> wanted = machine.wants();
+            if (wanted == null) {
+                continue;
+            }
+            int room = TRANSFER_LIMIT - buffer.getOrDefault(wanted, 0);
+            if (room <= 0) {
+                continue;
+            }
+            int taken = provider.takeForLink(wanted, room, false);
+            if (taken <= 0) {
+                continue;
+            }
+            fetched = true;
+            int accepted = machine.accept(wanted, taken);
+            // What the machine refused goes on the way in, so an answered request is never thrown away.
+            int left = taken - accepted;
+            if (left > 0) {
+                buffer.put(wanted, buffer.getOrDefault(wanted, 0) + left);
+                revision++;
+            }
+        }
+        if (fetched) {
+            setChanged();
         }
     }
 
