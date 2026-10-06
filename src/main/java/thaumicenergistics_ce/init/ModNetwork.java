@@ -4,6 +4,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
+import thaumicenergistics_ce.network.ArcaneUnbindPayload;
 import thaumicenergistics_ce.network.EncoderActionPayload;
 import thaumicenergistics_ce.network.EncoderSourcePayload;
 import thaumicenergistics_ce.network.EssentiaBusConfigPayload;
@@ -90,5 +91,11 @@ public final class ModNetwork {
                 ArcaneCraftCostPayload.TYPE,
                 ArcaneCraftCostPayload.CODEC,
                 (payload, context) -> payload.handleOnClient(context.player()));
+        // Forgetting the paired terminal: the sneak left-click that asks for it happens on the client,
+        // which is the only side that sees a click into thin air - see ArcaneUnbindPayload.
+        registrar.playToServer(
+                ArcaneUnbindPayload.TYPE,
+                ArcaneUnbindPayload.CODEC,
+                (payload, context) -> payload.handle(context.player()));
     }
 }

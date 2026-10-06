@@ -22,6 +22,8 @@ import thaumicenergistics_ce.util.ThELog;
  *       and a pairing from another dimension. The first two need no second level and are checked here.
  *   <li>The write itself is read back as the item's own tag: a key renamed on one side only would leave
  *       the terminal silently unable to find the one it was pointed at.
+ *   <li>The wipe is checked the same way, from the other end. The two sneak gestures that reach it live
+ *       on the client and can only be pressed in a real game; what is checked here is the state they leave.
  * </ul>
  */
 public final class WirelessArcaneBindingSelfTest {
@@ -75,6 +77,21 @@ public final class WirelessArcaneBindingSelfTest {
         }
         if (ItemWirelessArcaneCraftingTerminal.pairedTerminal(level, terminal) != null) {
             failures.add("a terminal paired over a block that holds no terminal still resolved one");
+        }
+
+        if (!ItemWirelessArcaneCraftingTerminal.unbind(terminal)) {
+            failures.add("unbinding a paired terminal reported that there was nothing to unbind");
+        }
+        CompoundTag leftBehind = tagOf(terminal);
+        if (leftBehind != null && leftBehind.contains("ArcanePos")) {
+            failures.add("unbinding left " + leftBehind + " behind, so the item still names a placed terminal");
+        }
+        if (ItemWirelessArcaneCraftingTerminal.pairedTerminal(level, terminal) != null) {
+            failures.add("a terminal that was unbound still resolved a placed terminal");
+        }
+        if (ItemWirelessArcaneCraftingTerminal.unbind(terminal)) {
+            failures.add("unbinding an unbound terminal reported a second wipe, which would be announced"
+                    + " to the player as if it had done something");
         }
         report(failures);
     }

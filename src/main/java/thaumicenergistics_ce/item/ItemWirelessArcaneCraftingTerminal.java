@@ -1,6 +1,7 @@
 package thaumicenergistics_ce.item;
 
 import appeng.api.parts.IPart;
+import appeng.api.parts.IPartHost;
 import appeng.api.parts.PartHelper;
 import appeng.helpers.WirelessTerminalMenuHost;
 import appeng.items.tools.powered.WirelessTerminalItem;
@@ -12,6 +13,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
@@ -19,6 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ArcaneTerminalLink;
@@ -26,11 +30,11 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * The Wireless Arcane Crafting Terminal: opened from a handheld item, showing the grid of the placed
- * terminal it was paired with.
+ * The Wireless Arcane Crafting Terminal: a carried arcane workbench, showing the grid of the placed
+ * terminal it is bound to.
  * <ul>
- *   <li>Sneaking on a placed terminal pairs the two: one state, seen from two places, never a copy.
- *   <li>Its vis comes from the aura around the player, since a carried workbench has no block to drain.
+ *   <li>Sneaking on that terminal binds the two; a sneak left-click unbinds them - one state, two places.
+ *   <li>Its vis comes from the aura around the player: a carried workbench has no block to drain.
  * </ul>
  */
 public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem implements ArcaneTerminalLink {
@@ -45,6 +49,27 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
 
     public ItemWirelessArcaneCraftingTerminal(DoubleSupplier powerCapacity, Item.Properties properties) {
         super(powerCapacity, properties);
+    }
+
+    /**
+     * A sneak onto a cable has to reach the part, since that is where the pairing gesture lives. Anywhere
+     * else the sneak is left alone, which is what keeps a chest opening as it always did.
+     */
+    @Override
+    public boolean doesSneakBypassUse(ItemStack stack, LevelReader level, BlockPos pos, Player player) {
+        return level.getBlockEntity(pos) instanceof IPartHost;
+    }
+
+    /**
+     * Pairing is a sneak gesture, so a sneak never also opens the screen: without this, one click would
+     * bind the item and leave the player looking at a grid they did not ask for.
+     */
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        if (player.isSecondaryUseActive()) {
+            return InteractionResultHolder.pass(player.getItemInHand(hand));
+        }
+        return super.use(level, player, hand);
     }
 
     @Override
@@ -92,6 +117,26 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
         }
         IPart part = PartHelper.getPart(level, pos, side);
         return part instanceof PartArcaneCraftingTerminal placed ? placed : null;
+    }
+
+    /**
+     * Forgets the paired terminal. True only when there was one to forget, so that a second wipe is not
+     * announced to the player as if it had done something.
+     */
+    public static boolean unbind(ItemStack terminal) {
+        CompoundTag tag = bindingTag(terminal);
+        if (tag == null || !tag.contains(NBT_POS)) {
+            return false;
+        }
+        tag.remove(NBT_DIMENSION);
+        tag.remove(NBT_POS);
+        tag.remove(NBT_SIDE);
+        if (tag.isEmpty()) {
+            terminal.remove(DataComponents.CUSTOM_DATA);
+        } else {
+            terminal.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        }
+        return true;
     }
 
     private static @Nullable CompoundTag bindingTag(ItemStack terminal) {
