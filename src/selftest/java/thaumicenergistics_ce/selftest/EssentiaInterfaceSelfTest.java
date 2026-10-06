@@ -2,7 +2,9 @@ package thaumicenergistics_ce.selftest;
 
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
+import appeng.helpers.InterfaceLogic;
 import io.netty.buffer.Unpooled;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -19,6 +21,7 @@ import thaumicenergistics_ce.util.ThELog;
  * <ul>
  *   <li>Off unless {@code THAUMICENERGISTICS_INTERFACE_SELFTEST=true}; runs on {@code ServerStartedEvent}.
  *   <li>Pure logic only: a headless gate has no player, no live grid and no JEI to drag anything in.
+ *   <li>The AE2 side of the rule is a mixin, so one of the checks is only that it landed on the class.
  * </ul>
  */
 public final class EssentiaInterfaceSelfTest {
@@ -32,13 +35,14 @@ public final class EssentiaInterfaceSelfTest {
             return;
         }
         List<String> failures = new ArrayList<>();
+        checkMixin(failures);
         checkRates(failures);
         checkWhitelist(failures);
         checkClearPayload(event, failures);
         if (failures.isEmpty()) {
             ThELog.LOG.info(
                     "[{}] passed: an empty config row pulls every aspect and a filled one only its own,"
-                            + " {} points move every {} ticks at {} AE each",
+                            + " {} points move every {} ticks at {} AE each, and AE2's plan is off",
                     TAG,
                     EssentiaInterfaceAccess.POINTS_PER_ROUND,
                     EssentiaInterfaceAccess.ROUND_TICKS,
@@ -48,6 +52,24 @@ public final class EssentiaInterfaceSelfTest {
         for (String failure : failures) {
             ThELog.LOG.error("[{}] FAIL {}", TAG, failure);
         }
+    }
+
+    /** Without the mixin AE2 pulls the marked aspect out of the grid and hands out whatever its row holds. */
+    private static void checkMixin(List<String> failures) {
+        // Mixin renames a handler on its way into the target class, so the mixin's own name is a fragment.
+        if (!hasMergedHandler("tce$refuseEssentiaInRow") || !hasMergedHandler("tce$dropEssentiaPlan")) {
+            failures.add("the interface mixin did not apply to AE2's interface logic");
+        }
+    }
+
+    /** True when a handler with this name, however mixin mangled it, is a method of AE2's own class. */
+    private static boolean hasMergedHandler(String name) {
+        for (Method method : InterfaceLogic.class.getDeclaredMethods()) {
+            if (method.getName().contains(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** The three figures the round is priced and paced by, which no other check would notice drifting. */
