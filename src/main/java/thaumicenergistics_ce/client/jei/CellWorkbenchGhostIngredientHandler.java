@@ -17,11 +17,9 @@ import thaumicenergistics_ce.network.PartitionWellPayload;
 
 /**
  * Lets the player drag an aspect from JEI into an Essentia Cell Workbench partition well.
- * <ul>
- *   <li>Dragging is what a player expects from every other filter grid in AE2; these are the same kind.
- *   <li>Only aspects are offered a target: the wells hold keys, so an item has nowhere to go.
- *   <li>The mark is sent to the server, not written into the slot - see {@code PartitionWellPayload}.
- * </ul>
+ * Dragging is what a player expects from every other filter grid in AE2, and these wells are the
+ * same kind: only aspects are offered a target, because the wells hold keys and an item has nowhere
+ * to go. The mark is sent to the server, not written into the slot, in PartitionWellPayload.
  */
 public class CellWorkbenchGhostIngredientHandler
         implements IGhostIngredientHandler<ScreenEssentiaCellWorkbench> {
@@ -66,7 +64,7 @@ public class CellWorkbenchGhostIngredientHandler
         }
 
         /**
-         * Where JEI draws this target, in <em>screen</em> pixels: the GUI's offset is added because JEI fills
+         * Where JEI draws this target, in screen pixels: the GUI's offset is added because JEI fills
          * this rectangle with no translation of its own, while a slot's x and y are relative to the corner.
          */
         @Override

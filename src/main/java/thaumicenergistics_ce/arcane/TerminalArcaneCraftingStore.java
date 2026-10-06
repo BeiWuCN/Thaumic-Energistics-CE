@@ -11,17 +11,12 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * The terminal's own three containers, presented to Thaumaturge as the store an arcane craft works on.
- * <ul>
- *   <li>The grid is the payment, as on Thaumaturge's workbench: one item leaves each occupied cell, the
- *       remainder takes that cell's place, the crystals leave the crystal slots, and the wand goes back
- *       in as the craft leaves it. A recipe only matches when the grid already holds its ingredients, so
- *       charging the network for them too would ask for a second copy of what the player placed.
- *   <li>{@link #consume} runs twice, once simulated and once for real: only the second takes anything,
- *       which is what makes a refused craft cost nothing.
- *   <li>The grid is the terminal's, not the network's: a cell holds what the player is arranging right
- *       now, and the network is never asked for it.
- * </ul>
+ * The terminal's own three containers, presented to Thaumaturge as the store an arcane craft
+ * works on. The grid is the payment, as on Thaumaturge's workbench: a recipe only matches when
+ * the grid already holds its ingredients, so charging the network for them too would ask for a
+ * second copy of what the player placed. {@link #consume} runs twice, once simulated and once
+ * for real, and only the second takes anything, which is what makes a refused craft cost nothing.
+ * The grid is the terminal's, not the network's, and holds what the player is arranging right now.
  */
 public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
 
@@ -39,13 +34,10 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
     }
 
     /**
-     * Checks that the grid still holds what the craft matched and that the crystal slots cover the
-     * crystals it wants, then charges it: one item out of every cell, each remainder into its own cell,
-     * the crystals out of their slots, and {@code consumption.wand()} into the wand slot.
-     *
+     * Checks the grid still holds what the craft matched and the crystals cover it, then charges both.
      * @param consumption what one craft uses up
-     * @param simulate    true to only check the grid against {@link Consumption#grid()} and the crystals
-     * @return whether the containers still matched (and, when not simulating, the change was applied)
+     * @param simulate    true to only check
+     * @return whether the containers still matched, and whether the change was applied when not simulating
      */
     @Override
     public boolean consume(Consumption consumption, boolean simulate) {

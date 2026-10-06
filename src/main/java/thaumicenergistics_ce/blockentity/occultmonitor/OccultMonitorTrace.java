@@ -6,12 +6,9 @@ import thaumicenergistics_ce.infusion.InfusionRisk;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The monitor's one-second trace line: its failure modes - no grid, no power, no book, no altar - all
- * look alike without it.
- * <ul>
- *   <li>Off unless {@code THAUMICENERGISTICS_MONITOR_TRACE=true}, so the line costs nothing.
- *   <li>The labels name what is printed, not what the field that held it was called.
- * </ul>
+ * The monitor's one-second trace line: its failure modes - no grid, no power, no book, no altar -
+ * all look alike without it. The line is off unless THAUMICENERGISTICS_MONITOR_TRACE=true, so it
+ * costs nothing; and the labels name what is printed, not what the field that held it was called.
  */
 final class OccultMonitorTrace {
 

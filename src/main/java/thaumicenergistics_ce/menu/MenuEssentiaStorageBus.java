@@ -14,11 +14,9 @@ import thaumicenergistics_ce.part.PartEssentiaStorageBus;
 
 /**
  * The Essentia Storage Bus's config screen.
- * <ul>
- * <li>The grid is a partition, not a filter: it lists what the network may keep in the bus's container.
- * <li>Grid and slot addressing come from {@link MenuEssentiaBusBase}, which JEI also reads, so player
- *     and bus cannot drift apart.
- * </ul>
+ * The grid is a partition and not a filter: it lists what the network may keep in the bus's
+ * container. Grid and slot addressing come from {@link MenuEssentiaBusBase}, which JEI also
+ * reads, so the player view and the bus cannot drift apart.
  */
 public class MenuEssentiaStorageBus extends MenuEssentiaBusBase<PartEssentiaStorageBus>
         implements KeyTypeSelectionMenu {

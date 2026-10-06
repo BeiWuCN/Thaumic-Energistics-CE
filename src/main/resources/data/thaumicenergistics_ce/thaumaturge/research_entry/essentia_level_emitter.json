@@ -2,9 +2,9 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.ESSENTIALEVELEMITTER",
   "parents": [
-    "thaumicenergistics_ce:essentia_buses"
+    "thaumicenergistics_ce:digisentia"
   ],
-  "column": 6,
+  "column": -8,
   "row": -2,
   "meta": [
     "round"

@@ -19,12 +19,11 @@ import thaumicenergistics_ce.network.EssentiaInterfaceMarkPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Lets the player drag an aspect onto the config row of an ME interface that carries our access card.
- * Both host forms share AE2's one interface screen, so one registration serves the block and the part.
- * <ul>
- *   <li>Without the card there is not one target: a drag shows no drop point, not a swallowing slot.
- *   <li>Raw {@code InterfaceScreen}: JEI pairs a {@code Class<T>} with a handler of that same {@code T}.
- * </ul>
+ * Lets the player drag an aspect onto the config row of an ME interface that carries our access
+ * card. Both host forms share AE2's one interface screen, so one registration serves the block and
+ * the part. Without the card there is not one target: a drag shows no drop point, not a swallowing
+ * slot, and the screen is taken raw as InterfaceScreen, since JEI pairs a Class with a handler of
+ * that same type.
  */
 public class EssentiaInterfaceGhostIngredientHandler implements IGhostIngredientHandler<InterfaceScreen> {
 
@@ -83,7 +82,7 @@ public class EssentiaInterfaceGhostIngredientHandler implements IGhostIngredient
         }
 
         /**
-         * Where JEI draws this target, in <em>screen</em> pixels: a slot's x and y are relative to the GUI
+         * Where JEI draws this target, in screen pixels: a slot's x and y are relative to the GUI
          * corner, and JEI fills the rectangle with no translation of its own.
          */
         @Override

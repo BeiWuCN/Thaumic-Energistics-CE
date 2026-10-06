@@ -19,11 +19,8 @@ import thaumicenergistics_ce.block.BlockInfusionProvider;
 import thaumicenergistics_ce.block.BlockKnowledgeInscriber;
 
 /**
- * Block registration.
- *
- * <ul>
- *   <li>The Arcane Assembler is an AE2 crafting machine that performs Thaumaturge arcane recipes on demand.
- * </ul>
+ * Block registration. The Arcane Assembler is an AE2 crafting machine that performs
+ * Thaumaturge arcane recipes on demand.
  */
 public final class ModBlocks {
     public static final DeferredRegister.Blocks REGISTRY = DeferredRegister.createBlocks(ThEIds.MODID);

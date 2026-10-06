@@ -14,12 +14,10 @@ import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor.
 import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Recipe;
 
 /**
- * Whether the room can pay for the ritual: the containers around the altar, and how far each aspect of the
- * job has got.
- * <ul>
- *   <li>Availability is asked of {@code IAspectSource.containerContains}, which counts our provider.
- *   <li>The container list is cached, empty result included: "nothing in range" is the common case.
- * </ul>
+ * Whether the room can pay for the ritual: the containers around the altar, and how far each
+ * aspect of the job has got. Availability is asked of IAspectSource.containerContains, which
+ * counts our provider; and the container list is cached, empty result included, because "nothing
+ * in range" is the common case.
  */
 final class EssentiaReach {
 

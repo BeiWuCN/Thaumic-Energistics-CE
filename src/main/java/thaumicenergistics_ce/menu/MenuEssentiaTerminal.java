@@ -7,11 +7,9 @@ import net.minecraft.world.inventory.MenuType;
 
 /**
  * The Essentia Terminal's menu, shared by the cable part and the wireless item.
- * <ul>
- *   <li>Everything ordinary comes from AE2's {@link MEStorageMenu}; essentia only adds its key type.
- *   <li>Moving essentia is inherited from {@link MenuEssentiaTerminalBase} and acts only on the
- *       container the player holds; which key types are offered is the host's {@code KeyTypeSelection}.
- * </ul>
+ * Everything ordinary comes from AE2's {@link MEStorageMenu}, and essentia only adds its key
+ * type. Moving essentia is inherited from {@link MenuEssentiaTerminalBase} and acts only on the
+ * container the player holds, while which key types are offered is the host's KeyTypeSelection.
  */
 public class MenuEssentiaTerminal extends MenuEssentiaTerminalBase {
 

@@ -20,15 +20,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
-import thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceAccess;
+import thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceRows;
 
 /**
- * Keeps AE2's own essentia traffic out of an interface that carries the access card: the card moves
- * essentia the other way, so the plan for a marked aspect is dropped and the row refuses aspects.
- * <ul>
- *   <li>Two more hooks undo the card's work when it is pulled, and save the aspects when one is broken.
- *   <li>The rest live behind the card, so an interface without one behaves exactly as AE2 wrote it.
- * </ul>
+ * Keeps AE2's own essentia traffic out of an interface that carries the access card: the card
+ * moves essentia the other way, so the plan for a marked aspect is dropped and the row refuses
+ * aspects. Two more hooks undo the card's work when it is pulled, and save the aspects when one
+ * is broken; the rest live behind the card, so an interface without one behaves exactly as
+ * AE2 wrote it.
  */
 @Mixin(InterfaceLogic.class)
 public abstract class InterfaceLogicMixin {
@@ -81,15 +80,15 @@ public abstract class InterfaceLogicMixin {
      */
     @Inject(method = "onUpgradesChanged()V", at = @At("RETURN"))
     private void tce$releaseRowsWithoutCard(CallbackInfo callback) {
-        if (!tce$hasAccessCard() && EssentiaInterfaceAccess.holdsEssentia(config)) {
-            EssentiaInterfaceAccess.releaseRows(config, storage, networkStorage, tce$source());
+        if (!tce$hasAccessCard() && EssentiaInterfaceRows.holdsEssentia(config)) {
+            EssentiaInterfaceRows.releaseRows(config, storage, networkStorage, tce$source());
         }
     }
 
     /** AE2 turns each key of the storage row into a drop, and an aspect has no item to be dropped as. */
     @Inject(method = "addDrops(Ljava/util/List;)V", at = @At("HEAD"))
     private void tce$rescueEssentiaFromDrops(List<ItemStack> drops, CallbackInfo callback) {
-        EssentiaInterfaceAccess.rescueEssentia(storage, networkStorage, tce$source());
+        EssentiaInterfaceRows.rescueEssentia(storage, networkStorage, tce$source());
     }
 
     @Unique

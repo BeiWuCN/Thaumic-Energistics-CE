@@ -8,11 +8,9 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * One cell of the Knowledge Inscriber's crafting grid, on the side the player is looking at.
- * <ul>
- *   <li>A ghost slot: it records what to encode without taking the item, since the job pays later.
- *   <li>The item never leaves the player, so the write goes as a payload, not through slot sync.
- *   <li>Picking up is allowed so a cell can be cleared by clicking it.
- * </ul>
+ * It is a ghost slot: it records what to encode without taking the item, since the job pays
+ * later, and the item never leaves the player, so the write goes as a payload rather than
+ * through slot sync. Picking up is allowed so that a cell can be cleared by clicking it.
  */
 public class GhostGridSlot extends Slot {
 

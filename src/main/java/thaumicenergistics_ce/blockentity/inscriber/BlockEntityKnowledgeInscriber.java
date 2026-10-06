@@ -18,12 +18,10 @@ import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
- * The Knowledge Inscriber: the slots the player fills and the two answers read off them - what the grid
- * resolves to, and what the button would do with that recipe.
- * <ul>
- *   <li>The slots live in {@link InscriberInventory}, the resolution in {@link InscriberResolution}.
- *   <li>What is left here is the face other packages call: the slots, the codes and the menu.
- * </ul>
+ * The Knowledge Inscriber: the slots the player fills and the two answers read off them - what the
+ * grid resolves to, and what the button would do with that recipe. The slots live in
+ * {@link InscriberInventory} and the resolution in {@link InscriberResolution}, so what is left
+ * here is the face other packages call: the slots, the codes and the menu.
  */
 public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
 

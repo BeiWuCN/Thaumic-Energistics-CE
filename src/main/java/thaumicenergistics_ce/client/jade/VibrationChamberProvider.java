@@ -13,12 +13,11 @@ import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVib
 import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
- * The Essentia Vibration Chamber's Jade tooltip: whether there is a network to burn for, and what it does.
- * <ul>
- * <li><b>Drawn from the client's copy, not server data</b>: Jade collects that data once, so lines freeze.
- * <li>Deliberately not shown: the burn's countdown and slot energy, because both move every tick.
- * <li>Client-only: only ever registered from Jade's {@code registerClient}, which a dedicated server skips.
- * </ul>
+ * The Essentia Vibration Chamber's Jade tooltip: whether there is a network to burn for, and what
+ * it does. Its lines are drawn from the client's copy, not from server data, because Jade collects
+ * that data once and the lines would then freeze; the burn's countdown and slot energy are
+ * deliberately left out, as both move every tick. Client-only: only Jade's registerClient
+ * registers it, which a dedicated server skips.
  */
 public class VibrationChamberProvider implements IBlockComponentProvider {
 

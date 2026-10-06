@@ -17,12 +17,9 @@ import thaumicenergistics_ce.network.InscriberGridPayload;
 import thaumicenergistics_ce.network.PartitionWellPayload;
 
 /**
- * Network registration.
- * <ul>
- * <li>The Knowledge Inscriber's button needs no payload: vanilla's own menu-button packet carries the id.
- * <li>The inscriber's crafting grid does: it is a ghost grid the client fills, and only the server can
- * turn it into a recipe.
- * </ul>
+ * Network registration. The Knowledge Inscriber's button needs no payload, because vanilla's
+ * own menu-button packet carries the id, but the inscriber's crafting grid does: it is a ghost
+ * grid the client fills, and only the server can turn it into a recipe.
  */
 public final class ModNetwork {
 

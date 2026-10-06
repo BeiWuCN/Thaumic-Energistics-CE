@@ -9,12 +9,8 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
 
 /**
- * The Essentia Cell Workbench block.
- *
- * <ul>
- * <li>Where a storage cell is told which aspects it may hold.</li>
- * <li>No facing: the model is symmetric, so a direction property would turn nothing.</li>
- * </ul>
+ * The Essentia Cell Workbench block, where a storage cell is told which aspects it may hold. It
+ * declares no facing because the model is symmetric, so a direction property would turn nothing.
  */
 public class BlockEssentiaCellWorkbench extends ThEBaseEntityBlock {
     public static final MapCodec<BlockEssentiaCellWorkbench> CODEC =

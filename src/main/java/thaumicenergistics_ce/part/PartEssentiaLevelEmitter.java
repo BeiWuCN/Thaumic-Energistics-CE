@@ -20,11 +20,10 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
  * Essentia level emitter: redstone that follows how much of one aspect the network holds.
- * <ul>
- * <li>Redstone, reporting value, upgrade slots and lit-state streaming come from AE2's emitter part.
- * <li>Watching uses the grid's storage watcher, not per-tick polling: AE2 caches the network's contents.</li>
- * <li>The level is the network total, so a bus-mounted jar counts towards it.</li>
- * </ul>
+ * Redstone, the reporting value, the upgrade slots and lit-state streaming all come from AE2's
+ * emitter part. Watching goes through the grid's storage watcher rather than per-tick polling
+ * because AE2 already caches the network's contents. The level is the network total, so a jar
+ * mounted on a storage bus counts towards it.
  */
 public class PartEssentiaLevelEmitter extends AbstractLevelEmitterPart {
 

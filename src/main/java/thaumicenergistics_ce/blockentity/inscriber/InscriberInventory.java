@@ -15,11 +15,9 @@ import net.minecraft.world.level.Level;
 import thaumicenergistics_ce.init.ModItems;
 
 /**
- * The inscriber's slots: the core, the mirrors, and the grid the player assembles in the menu.
- * <ul>
- *   <li>A grid write is one change, not nine: the cells go in with the notifications held back.
- *   <li>Saving keeps slot indices, so a grid with gaps comes back with its gaps.
- * </ul>
+ * The inscriber's slots: the core, the mirrors, and the grid the player assembles in the menu. A
+ * grid write is one change, not nine, because the cells go in with the notifications held back;
+ * saving keeps slot indices, so a grid with gaps comes back with its gaps.
  */
 final class InscriberInventory {
 

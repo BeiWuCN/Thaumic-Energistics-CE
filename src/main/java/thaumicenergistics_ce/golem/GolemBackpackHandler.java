@@ -24,12 +24,11 @@ import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Putting the wireless backpack on a golem, taking it off again, and repainting it.
- * <ul>
- *   <li>Equip with a linked backpack, remove with a sneaking golem bell, repaint with a mapped block.
- *   <li>Not an accessory: those use a fixed five-id atlas and a {@code final} item with no AE2 link.
- *   <li>The link lives in the golem's persistent data, unsynced: {@link GolemBackpackTickHandler} pushes it.
- * </ul>
+ * Putting the wireless backpack on a golem, taking it off again, and repainting it: equip with
+ * a linked backpack, remove with a sneaking golem bell, repaint with a mapped block. It is not
+ * an accessory, since those use a fixed five-id atlas and a {@code final} item with no AE2
+ * link. The link lives in the golem's persistent data, unsynced, and
+ * {@link GolemBackpackTickHandler} pushes it.
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class GolemBackpackHandler {

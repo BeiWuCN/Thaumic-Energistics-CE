@@ -19,12 +19,10 @@ import thaumicenergistics_ce.menu.slot.PreviewSlot;
 import thaumicenergistics_ce.menu.slot.ReadOnlySlot;
 
 /**
- * The Arcane Assembler's menu: pattern mirror, knowledge core, acceleration cards, craft preview and the
- * gear slots whose vis discount applies here.
- * <ul>
- *   <li>Coordinates come from a {@link GuiLayout}, generated from the same constants as the background
- *       texture, so this class holds no client-only resource access and no geometry of its own.
- * </ul>
+ * The Arcane Assembler's menu: pattern mirror, knowledge core, acceleration cards, craft preview
+ * and the gear slots whose vis discount applies here. Coordinates come from a {@link GuiLayout}
+ * generated from the same constants as the background texture, so this class holds no client-only
+ * resource access and no geometry of its own.
  */
 public class MenuArcaneAssembler extends AbstractContainerMenu {
 

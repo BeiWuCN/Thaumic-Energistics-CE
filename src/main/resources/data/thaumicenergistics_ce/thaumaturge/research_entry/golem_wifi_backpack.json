@@ -5,8 +5,8 @@
     "thaumicenergistics_ce:essentia_terminal",
     "thaumicenergistics_ce:alchemy_provider"
   ],
-  "column": 4,
-  "row": -4,
+  "column": 2,
+  "row": 0,
   "meta": [
     "round"
   ],
@@ -17,11 +17,6 @@
     {
       "text": "tc.research_text.GOLEMWIFI",
       "required_knowledge": [
-        {
-          "type": "theory",
-          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
-          "amount": 1
-        },
         {
           "type": "theory",
           "category": "thaumicenergistics_ce:thaumicenergistics_ce",

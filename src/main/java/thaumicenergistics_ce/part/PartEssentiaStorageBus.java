@@ -37,11 +37,9 @@ import thaumicenergistics_ce.integration.ae2.EssentiaMEStorage;
 
 /**
  * The Essentia Storage Bus: makes the essentia container it faces part of the ME network.
- * <ul>
- *   <li>A provider, not a mover: the reference build never implemented {@code IStorageProvider}.
- *   <li>Mounted as storage a jar is listed, counts towards the network, and both fills and drains.
- *   <li>Alone it only announces changes; see {@link #tickingRequest}.
- * </ul>
+ * It is a provider rather than a mover, since the reference build never implemented
+ * IStorageProvider; mounted as storage, a jar is listed, counts towards the network, and both
+ * fills and drains. On its own it only announces changes, as {@link #tickingRequest} explains.
  */
 public class PartEssentiaStorageBus extends UpgradeablePart
         implements IStorageProvider, IGridTickable, KeyTypeSelectionHost {

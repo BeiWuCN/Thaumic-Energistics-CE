@@ -15,11 +15,9 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Geometry for the Arcane Assembler screen, read from {@code arcane_assembler_gui.json} off the classpath.
- * <ul>
- * <li>Coordinates are measured off the GUI art's slot wells, so image wells and menu slots land on the
- * same pixels.
- * <li>Read on both sides with no reload listener, and written by {@code tools/build_assembler_layout.js}.
- * </ul>
+ * Coordinates are measured off the GUI art's slot wells, so image wells and menu slots land on
+ * the same pixels. The layout is read on both sides with no reload listener, and written by
+ * {@code tools/build_assembler_layout.js}.
  */
 public final class GuiLayout {
 

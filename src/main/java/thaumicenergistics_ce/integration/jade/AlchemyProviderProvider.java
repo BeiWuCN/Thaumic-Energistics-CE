@@ -9,11 +9,10 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider;
 
 /**
- * The Alchemy Provider's Jade server data: its grid state and the receivers bound to it.
- * <ul>
- *   <li>AE2 draws its own grid-state line from a package an addon cannot hook, so the line is written here.
- *   <li>The drawing half is {@code client.jade.AlchemyProviderTooltip}; both report {@link #UID}.
- * </ul>
+ * The Alchemy Provider's Jade server data: its grid state and the receivers bound to it. AE2
+ * draws its own grid-state line from a package an addon cannot hook, so the line is written
+ * here. The drawing half is {@code client.jade.AlchemyProviderTooltip}, and both report
+ * {@link #UID}.
  */
 public class AlchemyProviderProvider implements IServerDataProvider<BlockAccessor> {
 

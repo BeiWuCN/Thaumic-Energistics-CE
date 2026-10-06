@@ -16,11 +16,10 @@ import thaumicenergistics_ce.network.EssentiaTerminalReceiver;
 
 /**
  * The essentia half of any terminal that moves a held jar or phial's contents rather than items.
- * <ul>
- *   <li>Two terminals need it: the essentia terminal and the wireless arcane crafting terminal.
- *   <li>Inherited rather than copied: the gesture needs this menu's carried stack, slots and player test.
- *   <li>Asked on every action, never cached, so a card that leaves the slot takes the gestures with it.
- * </ul>
+ * Two terminals need it, the essentia terminal and the wireless arcane crafting terminal, and it is
+ * inherited rather than copied because the gesture needs this menu's carried stack, slots and
+ * player test. It is asked on every action and never cached, so a card that leaves the slot takes
+ * the gestures with it.
  */
 public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements EssentiaTerminalReceiver {
 
@@ -79,7 +78,7 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
     }
 
     @Override
-    public void deposit(Player player, int where, ItemStack claimed) {
+    public void deposit(Player player, int where) {
         if (isClientSide() || !essentiaAccessGranted()) {
             return;
         }

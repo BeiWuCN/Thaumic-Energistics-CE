@@ -10,12 +10,11 @@ import thaumicenergistics_ce.block.BlockEssentiaVibrationChamber;
 import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.block.BlockInfusionProvider;
 /**
- * The client half of {@link thaumicenergistics_ce.integration.jade.ThEJadePlugin}: its four components.
- * <ul>
- *   <li>A second plugin, not a method on the first: {@code IWailaClientRegistration} carries {@code Screen}.
- *   <li>Each component reports the same UID as its server data half in {@code integration.jade}.
- *   <li>Jade asks every {@code @WailaPlugin} on both sides, but only a client for the client half.
- * </ul>
+ * The client half of {@link thaumicenergistics_ce.integration.jade.ThEJadePlugin}: its four
+ * components. It is a second plugin rather than a method on the first, because
+ * IWailaClientRegistration carries Screen; each component reports the same UID as its server data
+ * half in integration.jade. Jade asks every @WailaPlugin on both sides, but a client only for the
+ * client half.
  */
 @WailaPlugin
 public class ThEJadeClientPlugin implements IWailaPlugin {

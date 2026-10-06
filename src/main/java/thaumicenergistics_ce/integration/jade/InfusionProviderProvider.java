@@ -16,11 +16,10 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 /**
  * The Infusion Provider's Jade server data: what the altar beside it can actually draw.
- * <ul>
- *   <li>{@code getAspects} is empty on purpose: the block is a window, not a container, so pipes skip it.
- *   <li>The drawing half is {@code client.jade.InfusionProviderTooltip} - resolving an aspect id needs the
- *       client's level, so it cannot live here. Both report {@link #UID}, which is how Jade pairs the two.
- * </ul>
+ * {@code getAspects} is empty on purpose, because the block is a window rather than a
+ * container and pipes skip it. The drawing half is {@code client.jade.InfusionProviderTooltip},
+ * which cannot live here since resolving an aspect id needs the client's level; both report
+ * {@link #UID}, which is how Jade pairs the two.
  */
 public class InfusionProviderProvider implements IServerDataProvider<BlockAccessor> {
 

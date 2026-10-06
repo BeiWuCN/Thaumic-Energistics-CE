@@ -21,10 +21,8 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * What the inscriber's grid resolves to, and what its button would do with that recipe right now.
- * <ul>
- *   <li>The cache is keyed on the grid <em>and</em> the core: deleting a recipe moves the core, not the grid.
- *   <li>Every code comes from the slots, so a label or a button needs no ticker.
- * </ul>
+ * The cache is keyed on the grid and on the core: deleting a recipe moves the core, not the grid.
+ * Every code comes from the slots, so a label or a button needs no ticker.
  */
 final class InscriberResolution {
 

@@ -25,11 +25,10 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The Vis Interface: lets Thaumaturge machines draw vis out of the ME network's aura.
- * <ul>
- *   <li>An {@link IVisRelaySource} for the block the cable is on: an offer is the smaller of the aspects
- *       the reached node may sell and the centivis the energy service can afford.
- *   <li>Never asks a chain for vis itself - that loop is forbidden - so the vis is made out of AE instead.
- * </ul>
+ * It is an {@link IVisRelaySource} for the block the cable is on, and an offer is the smaller
+ * of the aspects the reached node may sell and the centivis the energy service can afford. It
+ * never asks a vis chain for vis itself - that loop is forbidden - so the vis is made out of
+ * AE instead.
  */
 public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements IVisRelaySource {
 

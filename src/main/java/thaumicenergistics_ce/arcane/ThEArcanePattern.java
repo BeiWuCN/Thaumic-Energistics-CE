@@ -22,11 +22,9 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * One resolved Thaumaturge arcane crafting job: grid layout, vis price, primal crystals.
- * <ul>
- *   <li>Derived from the live {@link RecipeManager}: datapack edits apply on the next reload.
- *   <li>Only {@link #save}/{@link #load} round-trip one into a knowledge core.
- * </ul>
+ * One resolved Thaumaturge arcane crafting job: grid layout, vis price, primal crystals. It is
+ * derived from the live {@link RecipeManager}, so datapack edits apply on the next reload, and only
+ * {@link #save}/{@link #load} round-trip one into a knowledge core.
  */
 public record ThEArcanePattern(
         ItemStack result,

@@ -227,7 +227,7 @@ final class ArcanePatternLookup {
 
     /**
      * A representative stack per ingredient: a pattern carries concrete stacks only, so a multi-item
-     * ingredient takes its first entry, and a tag the <em>display</em> item.
+     * ingredient takes its first entry, and a tag the display item.
      */
     private static ItemStack representative(Optional<Ingredient> ingredient) {
         if (ingredient.isEmpty() || ingredient.get().isEmpty()) {

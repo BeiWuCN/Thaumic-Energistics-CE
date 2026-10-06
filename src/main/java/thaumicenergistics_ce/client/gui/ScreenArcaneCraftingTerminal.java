@@ -22,11 +22,10 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
  * The Arcane Crafting Terminal's screen.
- * <ul>
- *   <li>The cost row in the style's {@code visCraftCost} strip is the whole vis display: no aura, by choice.
- *   <li>The style document is in AE2's namespace: {@code StyleManager} resolves against its own only.
- *   <li>The jar and phial gestures come from {@link ScreenEssentiaTerminalBase}, only with the card.
- * </ul>
+ * The cost row lives in the style's visCraftCost strip and is the whole vis display: no aura, by
+ * choice. The style document is in AE2's namespace, because StyleManager resolves against its own
+ * only. The jar and phial gestures come from {@link ScreenEssentiaTerminalBase}, only with the
+ * card.
  */
 public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<MenuArcaneCraftingTerminal>
         implements ClientboundReceiver {

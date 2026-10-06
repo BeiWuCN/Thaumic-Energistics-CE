@@ -10,11 +10,10 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
  * The menu host behind the Wireless Essentia Terminal.
- * <ul>
- * <li>All the terminal behaviour is AE2's {@link WirelessTerminalMenuHost}; the one override is the keys.
- * <li>Read through the part-based {@code PartEssentiaTerminal}, which makes the same restriction the same
- * way: two terminals that both say "essentia only" should say it through the same mechanism.
- * </ul>
+ * All the terminal behaviour is AE2's {@link WirelessTerminalMenuHost}, and the one override is the
+ * keys. They are read through the part-based {@code PartEssentiaTerminal}, which makes the same
+ * restriction the same way: two terminals that both say "essentia only" should say it through the
+ * same mechanism.
  */
 public class WirelessEssentiaTerminalMenuHost extends WirelessTerminalMenuHost<ItemWirelessEssentiaTerminal> {
 

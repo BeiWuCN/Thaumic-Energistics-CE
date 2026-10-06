@@ -10,11 +10,9 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * One cell of the Knowledge Inscriber's crafting grid, written by the client. The grid is <em>ghost</em>,
- * so the slot cannot be real, and only the slot and stack travel - the server decides what the grid
- * means.
- *
- * @param containerSlot the container index, <em>not</em> the grid index; the receiver owns the offset
+ * One cell of the Knowledge Inscriber's crafting grid, written by the client. The grid is ghost, so the
+ * slot cannot be real, and only the slot and stack travel - the server decides what the grid means.
+ * @param containerSlot the container index, not the grid index; the receiver owns the offset
  */
 public record InscriberGridPayload(int containerId, int containerSlot, ItemStack stack) implements CustomPacketPayload {
 

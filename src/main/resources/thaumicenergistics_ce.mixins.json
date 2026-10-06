@@ -5,6 +5,9 @@
 	"mixins": [
 		"InterfaceLogicMixin"
 	],
+	"client": [
+		"PageLineStyleMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	},

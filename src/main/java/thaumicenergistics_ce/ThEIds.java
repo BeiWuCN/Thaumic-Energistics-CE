@@ -3,12 +3,8 @@ package thaumicenergistics_ce;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * Central identifiers for Thaumic Energistics.
- *
- * <ul>
- * <li>MODID matches upstream Thaumic Energistics.</li>
- * <li>That keeps the reused textures, models, blockstates and lang keys resolving as-is.</li>
- * </ul>
+ * Central identifiers for Thaumic Energistics. MODID matches upstream Thaumic Energistics, which
+ * keeps the reused textures, models, blockstates and lang keys resolving as-is.
  */
 public final class ThEIds {
     public static final String MODID = "thaumicenergistics_ce";

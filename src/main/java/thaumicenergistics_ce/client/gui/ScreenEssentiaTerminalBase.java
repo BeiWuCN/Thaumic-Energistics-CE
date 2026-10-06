@@ -19,11 +19,9 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The jar and phial gestures of any terminal screen that has them.
- * <ul>
- *   <li>Two screens need it: the essentia terminal and the wireless arcane crafting terminal.
- *   <li>Inherited rather than copied: the gestures read {@code hoveredSlot}, which no helper can see.
- *   <li>Nothing here is drawn: a screen that says no to {@link #essentiaGesturesAtAll()} is AE2's own.
- * </ul>
+ * Two screens need it, the essentia terminal and the wireless arcane crafting terminal, and they
+ * inherit rather than copy it, because the gestures read hoveredSlot, which no helper can see.
+ * Nothing is drawn here: a screen that says no to {@link #essentiaGesturesAtAll()} is AE2's own.
  */
 public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalBase>
         extends MEStorageScreen<M> {
@@ -74,7 +72,7 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
                 // The menu's slot id, not the inventory index: AE2 puts view-cell and upgrade slots ahead
                 // of the player's, and the server resolves this against its own slot list.
                 PacketDistributor.sendToServer(new EssentiaDepositPayload(
-                        menu.containerId, menu.slots.indexOf(hoveredSlot), inSlot));
+                        menu.containerId, menu.slots.indexOf(hoveredSlot)));
                 return true;
             }
             return false;
@@ -101,7 +99,7 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
         }
         // Ours and filled: the contents go into the network, from the cursor or from the main hand.
         PacketDistributor.sendToServer(new EssentiaDepositPayload(
-                menu.containerId, whereHeld(), container));
+                menu.containerId, whereHeld()));
         return true;
     }
 

@@ -4,12 +4,10 @@ import net.minecraft.resources.ResourceLocation;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * The skins a golem's wireless backpack can wear: the reference build's ten, by material.
- * <ul>
- * <li>Each is a texture at {@code textures/model/golembackpack/<id>.png}, looked up by the id rather than
- * by the enum's name so the files and the constants can be read against each other.</li>
- * <li>Built lazily, because an enum constant is constructed before the mod's own id is settled.</li>
- * </ul>
+ * The skins a golem's wireless backpack can wear: the reference build's ten, by material. Each
+ * is a texture at {@code textures/model/golembackpack/<id>.png}, looked up by the id rather
+ * than by the enum's name so the files and the constants can be read against each other, and
+ * the set is built lazily because an enum constant is constructed before the mod's id settles.
  */
 public enum BackpackSkins {
 

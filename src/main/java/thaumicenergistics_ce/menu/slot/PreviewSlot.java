@@ -7,11 +7,10 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * A slot that shows an item and does nothing else: no pickup, no placing, no hover highlight.
- * <ul>
- * <li>Used for the Arcane Assembler's preview: the block carries no item data in its update tag,
- * so a slot sync is the only way the server puts an item in front of the client.
- * <li>{@code isHighlightable} is false too: a lit-up preview well reads as somewhere to put things.
- * </ul>
+ * The Arcane Assembler's preview uses it because the block carries no item data in its update
+ * tag, so a slot sync is the only way the server puts an item in front of the client.
+ * {@code isHighlightable} is false too, since a lit-up preview well reads as somewhere to
+ * put things.
  */
 public class PreviewSlot extends Slot {
 

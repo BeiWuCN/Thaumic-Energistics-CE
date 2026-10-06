@@ -20,11 +20,9 @@ import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
  * The Occult Monitor's Jade tooltip: the drawing half of {@link OccultMonitorProvider}.
- * <ul>
- *   <li>The raw numbers come from the server; the words are built here, so they follow the player's
- *       language rather than the server's.
- *   <li>Risk is split as "4 (base 1 + altar 3)" so the player knows which half to fix.
- * </ul>
+ * The raw numbers come from the server, but the words are built here, so they follow the player's
+ * language rather than the server's. Risk is split as "4 (base 1 + altar 3)", so the player knows
+ * which half to fix.
  */
 public final class OccultMonitorTooltip implements IBlockComponentProvider {
 

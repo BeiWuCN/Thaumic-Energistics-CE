@@ -14,10 +14,9 @@ import thaumicenergistics_ce.integration.jade.AlchemyReceiverProvider;
 
 /**
  * The Alchemy Receiver's Jade tooltip: the provider it is bound to, if any.
- * <ul>
- *   <li>The drawing half of {@link AlchemyReceiverProvider}, paired with it by the shared UID.
- *   <li>No grid state line: the receiver is never on a cable, so the link is all it can report.
- * </ul>
+ * It is the drawing half of {@link AlchemyReceiverProvider}, paired with it by the shared UID, and
+ * it shows no grid state line, because the receiver is never on a cable, so the link is all it can
+ * report.
  */
 public final class AlchemyReceiverTooltip implements IBlockComponentProvider {
 

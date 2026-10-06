@@ -15,11 +15,9 @@ import thaumicenergistics_ce.network.PartitionWellPayload;
 
 /**
  * The Essentia Cell Workbench's screen.
- * <ul>
- *   <li>An AE2 upgradeable screen: art, slots, title and the upgrades panel all come from the style.
- *   <li>The cog fills the wells from the cell, the X empties them, and a click takes one mark back out.
- *   <li>AE2's fuzzy and copy-mode switches are left out: an essentia key has no damage or NBT to match.
- * </ul>
+ * An AE2 upgradeable screen, so art, slots, title and the upgrades panel come from the style; the
+ * cog fills the wells from the cell, the X empties them, and a click takes one mark back out. AE2's
+ * fuzzy and copy-mode switches are left out, since an essentia key has no damage or NBT to match.
  */
 public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaCellWorkbench> {
 

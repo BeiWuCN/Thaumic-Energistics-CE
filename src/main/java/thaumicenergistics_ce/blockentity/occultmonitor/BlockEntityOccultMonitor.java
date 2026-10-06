@@ -24,10 +24,8 @@ import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
  * The Occult Monitor: watches an Infusion Altar and reports what the ritual will do to the room.
- * <ul>
- *   <li>{@code InfusionStabilitySurvey} names the blocks that break the altar's symmetry.
- *   <li>A Thaumonomicon must be in the book slot, or {@link #canReport()} stays false.
- * </ul>
+ * InfusionStabilitySurvey names the blocks that break the altar's symmetry, and a Thaumonomicon
+ * must be in the book slot or {@link #canReport()} stays false.
  */
 public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements IGridTickable {
 

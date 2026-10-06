@@ -5,12 +5,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The Arcane Assembler's speed upgrades and the vis discount its worn gear grants.
- * <ul>
- * <li>Both are pure bookkeeping over the machine's own inventory: neither needs the grid, the craft nor
- * the display. The card count is not a number of its own: it is counted off the upgrade slots.
- * <li>Split out of {@link BlockEntityArcaneAssembler}. Public because the menu and the Jade provider read it.
- * </ul>
+ * The Arcane Assembler's speed upgrades and the vis discount its worn gear grants. Both are pure
+ * bookkeeping over the machine's own inventory - neither needs the grid, the craft or the display -
+ * and the card count is not a number of its own, since it is counted off the upgrade slots. Split
+ * out of {@link BlockEntityArcaneAssembler}, public because the menu and Jade provider read it.
  */
 public final class AssemblerUpgrades {
 

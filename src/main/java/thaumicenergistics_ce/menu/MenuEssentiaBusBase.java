@@ -24,11 +24,10 @@ import thaumicenergistics_ce.network.EssentiaBusReceiver;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * What the essentia buses' config screens have in common: the config grid, and how much of it is usable.
- * <ul>
- *   <li>Shared for the slot index, which has to be right: JEI asks this class where a config
- *       slot is, and a second copy of the arithmetic would be a second chance to get it wrong.
- * </ul>
+ * What the essentia buses' config screens have in common: the config grid, and how much of it is
+ * usable. It is shared for the slot index, which has to be right, because JEI asks this class
+ * where a config slot is and a second copy of the arithmetic would be a second chance to get it
+ * wrong.
  */
 public abstract class MenuEssentiaBusBase<T extends IUpgradeableObject> extends UpgradeableMenu<T>
         implements EssentiaBusReceiver {

@@ -23,11 +23,9 @@ import thaumicenergistics_ce.item.ItemWirelessConnector;
 import thaumicenergistics_ce.item.ItemWirelessEssentiaTerminal;
 
 /**
- * Item registration, including the block items for {@link ModBlocks}.
- * <ul>
- *   <li>Block items live here because NeoForge's {@code registerSimpleBlockItem} helpers belong to the item
- *       registry while the block holders come from {@link ModBlocks}, so this class reads both.
- * </ul>
+ * Item registration, including the block items for {@link ModBlocks}. Block items live here
+ * because NeoForge's {@code registerSimpleBlockItem} helpers belong to the item registry while
+ * the block holders come from {@link ModBlocks}, so this class reads both.
  */
 public final class ModItems {
     public static final DeferredRegister.Items REGISTRY = DeferredRegister.createItems(ThEIds.MODID);

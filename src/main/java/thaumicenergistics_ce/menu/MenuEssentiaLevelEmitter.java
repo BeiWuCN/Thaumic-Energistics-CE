@@ -13,11 +13,9 @@ import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 
 /**
  * The Essentia Level Emitter's screen: one config slot for the aspect, plus a settable number.
- *
- * <ul>
- *   <li>The number is a client action, not a synced field: what the player types is a command.
- *   <li>The reporting value is sent once when the menu opens, so the box shows the real value.
- * </ul>
+ * The number is a client action rather than a synced field, since what the player types is a
+ * command, and the reporting value is sent once when the menu opens so the box shows the real
+ * value.
  */
 public class MenuEssentiaLevelEmitter extends UpgradeableMenu<PartEssentiaLevelEmitter> {
 

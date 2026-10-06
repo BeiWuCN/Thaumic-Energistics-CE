@@ -3,12 +3,10 @@ package thaumicenergistics_ce.blockentity.vibrationchamber;
 import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber.BurnState;
 
 /**
- * The chamber's burn: what one unit of fuel is worth and how much of it is left.
- * <ul>
- *   <li>Potentia burns 1.6x duration and power, ignis at the base rate, everything else at half.
- *   <li>{@link BurnState} is worked out from the room left in the energy slot, never from the state before.
- *   <li>{@link #update} tells the client when the state turns; the caller is told when a unit burns out.
- * </ul>
+ * The chamber's burn: what one unit of fuel is worth and how much of it is left. Potentia burns
+ * 1.6x duration and power, ignis at the base rate and everything else at half; BurnState is worked
+ * out from the room left in the energy slot, never from the state before. {@link #update} tells
+ * the client when the state turns, and the caller is told when a unit burns out.
  */
 final class ChamberBurn {
 

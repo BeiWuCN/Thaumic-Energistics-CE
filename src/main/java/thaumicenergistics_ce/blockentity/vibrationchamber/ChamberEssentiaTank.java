@@ -13,12 +13,10 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 
 /**
- * The chamber's fuel slot: a count of essentia under the aspect put in last, and the pulling that fills it.
- * <ul>
- *   <li>The buffer is a count, not an aspect list, so the aspect kept is for display only.
- *   <li>Every change lands here, so the revision bumped with it is the one answer a cache needs.
- *   <li>What a pipe sees - room, suction, contents - is read off this slot, never off the burn.
- * </ul>
+ * The chamber's fuel slot: a count of essentia under the aspect put in last, and the pulling that
+ * fills it. The buffer is a count rather than an aspect list, so the aspect kept is for display
+ * only; every change lands here, so the revision bumped with it is the one answer a cache needs.
+ * What a pipe sees - room, suction, contents - is read off this slot, never off the burn.
  */
 final class ChamberEssentiaTank {
 

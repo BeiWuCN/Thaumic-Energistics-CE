@@ -11,11 +11,9 @@ import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
 /**
  * Registers this mod's Jade providers: the server data half, which Jade asks for on both sides.
- * <ul>
- * <li>Annotated rather than a service file: that is how Jade finds plugins on NeoForge.</li>
- * <li>Jade is optional; this class is only loaded when Jade is present.</li>
- * <li>The block components, drawn on a client, are registered by {@code client.jade.ThEJadeClientPlugin}.
- * </ul>
+ * The class is annotated rather than listed in a service file, because that is how Jade finds plugins
+ * on NeoForge, and Jade is optional, so the class is loaded only when Jade is present. The block
+ * components, drawn on a client, are registered by {@code client.jade.ThEJadeClientPlugin}.
  */
 @WailaPlugin
 public class ThEJadePlugin implements IWailaPlugin {

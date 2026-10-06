@@ -6,12 +6,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Thaumaturge's wand: the focus socketed in it, and the vis it holds for a cast.
- * <ul>
- *   <li>The wand lives in its {@code content} package rather than its {@code api} one, so it moves.
- *   <li>A wand is recognised by item class rather than by tag, which keeps the dependency one-way.
- *   <li>{@code consumeVis}'s flags are named {@link #canPayVis} and {@link #payVis} at our call sites.
- * </ul>
+ * Thaumaturge's wand: the focus socketed in it, and the vis it holds for a cast. The wand lives
+ * in its {@code content} package rather than its {@code api} one, so it moves, and it is
+ * recognised by item class rather than by tag, which keeps the dependency one-way.
+ * {@code consumeVis}'s flags are named {@link #canPayVis} and {@link #payVis} at our call sites.
  */
 public final class TcWand {
     private TcWand() {}

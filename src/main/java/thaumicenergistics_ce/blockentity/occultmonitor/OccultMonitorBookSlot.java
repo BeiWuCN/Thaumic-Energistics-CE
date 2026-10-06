@@ -12,11 +12,9 @@ import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
- * The monitor's one slot, the two blockstates that mirror it, and what a right-click does to the book.
- * <ul>
- *   <li>Only a Thaumonomicon may go in, and only a sneaking player may take it back out.
- *   <li>Both blockstates are written from here, so the block class stays a set of thin overrides.
- * </ul>
+ * The monitor's one slot, the two blockstates that mirror it, and what a right-click does to the
+ * book. Only a Thaumonomicon may go in, and only a sneaking player may take it back out; both
+ * blockstates are written from here, so the block class stays a set of thin overrides.
  */
 final class OccultMonitorBookSlot {
 

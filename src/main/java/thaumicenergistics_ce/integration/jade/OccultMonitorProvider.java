@@ -14,11 +14,9 @@ import thaumicenergistics_ce.infusion.InfusionRisk;
 
 /**
  * The Occult Monitor's Jade server data: whether it can see, and what it sees.
- * <ul>
- *   <li>The server reads the altar and writes the answers into the data tag; stability is server-side.
- *   <li>The drawing half is {@code client.jade.OccultMonitorTooltip}, paired by {@link #UID}. The
- *       numbers travel raw so that half can put them in the player's own words.
- * </ul>
+ * The server reads the altar and writes the answers into the data tag; stability is server-side.
+ * The drawing half is {@code client.jade.OccultMonitorTooltip}, paired by {@link #UID}; the numbers
+ * travel raw so that half can put them in the player's own words.
  */
 public class OccultMonitorProvider implements IServerDataProvider<BlockAccessor> {
 

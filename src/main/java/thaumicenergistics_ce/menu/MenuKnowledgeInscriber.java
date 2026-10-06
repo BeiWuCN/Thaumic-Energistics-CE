@@ -20,9 +20,8 @@ import thaumicenergistics_ce.network.KnowledgeInscriberReceiver;
 /**
  * The Knowledge Inscriber's menu: the core slot, the 7x3 read-only grid of patterns, the player's
  * 3x3 ghost grid and the result well.
- * <ul>
- *   <li>No output slot: the core is the pattern store, see {@code BlockEntityKnowledgeInscriber}.
- * </ul>
+ * There is no output slot, because the core is the pattern store; see
+ * {@code BlockEntityKnowledgeInscriber}.
  */
 public class MenuKnowledgeInscriber extends AbstractContainerMenu implements KnowledgeInscriberReceiver {
 
@@ -100,7 +99,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
     }
 
     /**
-     * Vanilla reads what is <em>in</em> the clicked slot, which lost a placed recipe on the second
+     * Vanilla reads what is in the clicked slot, which lost a placed recipe on the second
      * click; here the carried stack instructs and the slot is only the target.
      */
     @Override

@@ -20,12 +20,11 @@ import thaumicenergistics_ce.network.GolemBackpackPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * What a golem does with its backpack: tips it into the ME network and tells nearby clients when reachable.
- * <ul>
- * <li>An errand is the gate: Thaumaturge golems have no cores, so the core check becomes {@code getTask()},
- * without which the backpack would rob every golem-using seal.
- * <li>The client cannot see the link (unsynced data), so watchers get the skin on its own interval.
- * </ul>
+ * What a golem does with its backpack: tips it into the ME network and tells nearby clients
+ * when reachable. An errand is the gate, because Thaumaturge golems have no cores and the core
+ * check becomes {@code getTask()}, without which the backpack would rob every golem-using
+ * seal. The client cannot see the link (unsynced data), so watchers get the skin on its own
+ * interval.
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class GolemBackpackTickHandler {

@@ -14,11 +14,11 @@ import org.joml.Vector4f;
 
 /**
  * The backpack: a box with an antenna, and a pearl that says whether the network is there.
- * <ul><li>Baked from a {@link LayerDefinition}, not a registered model layer.</li>
- * <li>The three boxes are the reference build's own units and rotations, matching the ten skin
- * textures, and lie sideways: the renderer turns the model a quarter turn about Y. Swapping the box
- * dimensions instead would rotate the texture on every face.</li>
- * <li>The pearl is four double-sided faces built by hand, so it can be red as easily as green.</li></ul>
+ * It is baked from a {@link LayerDefinition}, not a registered model layer. The three boxes are the
+ * reference build's own units and rotations, matching the ten skin textures, and lie sideways: the
+ * renderer turns the model a quarter turn about Y, and swapping the box dimensions instead would
+ * rotate the texture on every face. The pearl is four double-sided faces built by hand, so it can
+ * be red as easily as green.
  */
 public final class GolemBackpackModel {
 

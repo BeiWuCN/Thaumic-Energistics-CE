@@ -21,11 +21,10 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
  * The Essentia Terminal as a cable part: an AE2 terminal that lists essentia and nothing else.
- * <ul>
- * <li>Filtering uses {@link KeyTypeSelection}, AE2's own channel for a terminal's key types.
- * <li>The parent's selection allows every type and ours replaces it, so it is read/written by hand.
- * <li>It must be: the parent's fields are private and its read/write would save the permissive one.
- * </ul>
+ * Filtering uses {@link KeyTypeSelection}, AE2's own channel for a terminal's key types, but
+ * the parent's selection allows every type while ours replaces it, so the field is read and
+ * written by hand. It has to be: the parent's fields are private and its read/write would
+ * save the permissive selection instead.
  */
 public class PartEssentiaTerminal extends AbstractTerminalPart {
 

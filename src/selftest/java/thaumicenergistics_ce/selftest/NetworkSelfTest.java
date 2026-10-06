@@ -200,10 +200,9 @@ public final class NetworkSelfTest {
                                 && sameStack(wrote.stack(), read.stack())),
                 new Roundtrip<>(
                         "EssentiaDepositPayload",
-                        () -> new EssentiaDepositPayload(7, 2, stack),
+                        () -> new EssentiaDepositPayload(7, 2),
                         EssentiaDepositPayload.CODEC,
-                        (wrote, read) -> wrote.containerId() == read.containerId() && wrote.where() == read.where()
-                                && sameStack(wrote.stack(), read.stack())),
+                        (wrote, read) -> wrote.containerId() == read.containerId() && wrote.where() == read.where()),
                 new Roundtrip<>(
                         "EssentiaBusConfigPayload",
                         () -> new EssentiaBusConfigPayload(7, 1, unknown),

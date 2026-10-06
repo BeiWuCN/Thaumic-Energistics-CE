@@ -13,11 +13,9 @@ import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 
 /**
  * The Essentia Vibration Chamber's screen: fuel buffer, energy slot and burn progress.
- * <ul>
- *   <li>The machine's texture is a 60x100 widget - its face, not a window - so this screen draws its
- *       own window out of fills in the game's container colours.
- *   <li>The tank is tinted by its aspect, the energy slot in AE2's red, the burn bar in its own colour.
- * </ul>
+ * The machine's texture is a 60x100 widget of its face, not a window, so this screen draws its own
+ * window out of fills in the game's container colours. The tank is tinted by its aspect, the energy
+ * slot in AE2's red, and the burn bar in its own colour.
  */
 public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<MenuEssentiaVibrationChamber> {
 

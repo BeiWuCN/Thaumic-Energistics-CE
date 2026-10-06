@@ -23,11 +23,9 @@ import thaumicenergistics_ce.network.PartitionWellReceiver;
 
 /**
  * The Essentia Cell Workbench's menu: the cell, its upgrade slots, and the partition being edited.
- * <ul>
- *   <li>An AE2 menu, so the upgrades panel, the cell slot and the wells come with AE2's own handling.
- *   <li>The partition grid is 63 wells; a mark arrives as {@code PartitionWellPayload}.
- *   <li>What the wells hold is the {@link CellPartitionEditor}'s; this menu holds the slots themselves.
- * </ul>
+ * It is an AE2 menu, so the upgrades panel, the cell slot and the wells come with AE2's own
+ * handling. The partition grid is 63 wells and a mark arrives as PartitionWellPayload; what the
+ * wells hold belongs to the {@link CellPartitionEditor}, while this menu holds the slots.
  */
 public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssentiaCellWorkbench>
         implements PartitionWellReceiver, IPartitionSlotHost {

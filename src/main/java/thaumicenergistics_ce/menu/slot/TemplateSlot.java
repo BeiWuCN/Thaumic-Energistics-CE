@@ -6,12 +6,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The Distillation Encoder's source well: a <b>template</b> slot naming the item to distil.
- * <ul>
- *   <li>The item is never handed over - the job pays it - so placing, taking and reading use one stack.
- *   <li>JEI drag safety: an ordinary slot would hand a dragged item over for free, duplicating it.
- *   <li>Unlike a read-only display it still syncs: {@code set} is untouched.
- * </ul>
+ * The Distillation Encoder's source well: a template slot naming the item to distil. The item is
+ * never handed over - the job pays it - so placing, taking and reading use one stack. It is a
+ * JEI drag safety measure: an ordinary slot would hand a dragged item over for free, duplicating
+ * it; unlike a read-only display it still syncs, because {@code set} is untouched.
  */
 public class TemplateSlot extends Slot {
 

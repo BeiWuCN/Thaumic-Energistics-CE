@@ -10,12 +10,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The crystal slots, crystal rule and payment registry of Thaumaturge's arcane workbench.
- *
- * <ul>
- *   <li>All three live in its {@code content} package rather than its {@code api} one, so they move.
- *   <li>This mod's terminal copies the workbench, so it follows those details wherever they go.
- * </ul>
+ * The crystal slots, crystal rule and payment registry of Thaumaturge's arcane workbench. All
+ * three live in its {@code content} package rather than its {@code api} one, so they move, and
+ * this mod's terminal copies the workbench, so it follows those details wherever they go.
  */
 public final class TcWorkbench {
     private TcWorkbench() {}

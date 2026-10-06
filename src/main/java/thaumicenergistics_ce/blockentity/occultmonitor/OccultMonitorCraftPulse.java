@@ -8,12 +8,10 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * What a finished ritual does to the machines that watch it: one redstone pulse each.
- * <ul>
- *   <li>Thaumaturge announces the finish on the game bus from {@code finishCraft}, never from
- *       {@code failCraft}: a ruined ritual raises nothing, so the pulse keeps its meaning.
- *   <li>Only the machines already watching that altar answer; they are found by scanning for it.
- * </ul>
+ * What a finished ritual does to the machines that watch it: one redstone pulse each. Thaumaturge
+ * announces the finish on the game bus from finishCraft, never from failCraft, because a ruined
+ * ritual raises nothing and the pulse keeps its meaning; only the machines already watching that
+ * altar answer, and they are found by scanning for it.
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class OccultMonitorCraftPulse {

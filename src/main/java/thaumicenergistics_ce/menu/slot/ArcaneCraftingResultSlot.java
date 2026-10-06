@@ -23,14 +23,11 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The Arcane Crafting Terminal's result slot.
- * <ul>
- *   <li>Extends {@code CraftingTermSlot} because {@code doClick}, the craft entry point, is declared there.
- *   <li>{@code ArcaneCraftingTransaction} matches and charges; {@link #refresh} previews without paying.
- *   <li>The payment is the terminal's own grid, crystal and wand slots, as on Thaumaturge's workbench:
- *       a recipe only matches when the grid holds its ingredients, so the network is never asked for
- *       them - see {@link TerminalArcaneCraftingStore}.
- * </ul>
+ * The Arcane Crafting Terminal's result slot. It extends {@code CraftingTermSlot} because
+ * {@code doClick}, the craft entry point, is declared there. {@code ArcaneCraftingTransaction}
+ * matches and charges while {@link #refresh} previews without paying, and the payment comes from
+ * the terminal's own grid, crystal and wand slots as on Thaumaturge's workbench: the network is
+ * never asked for the ingredients - see {@link TerminalArcaneCraftingStore}.
  */
 public class ArcaneCraftingResultSlot extends CraftingTermSlot {
 
@@ -107,8 +104,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
                 break;
             }
             // The terminal's own containers pay, as on Thaumaturge's workbench: the grid, the crystal slots
-            // and the wand. Charging the network for the ingredients as well would ask for a second copy of
-            // what the player has already arranged, which is what refused a craft the grid could afford.
+            // and the wand. Charging the network would ask for a second copy of what the player arranged.
             var store = new TerminalArcaneCraftingStore(
                     terminal.craftingGrid(), terminal.crystalInventory(), terminal.wandInventory(), who);
             var result = ArcaneCraftingTransaction.craft(workbenchContext(), server, input, store, false);

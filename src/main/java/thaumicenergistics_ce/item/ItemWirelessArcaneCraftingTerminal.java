@@ -32,10 +32,9 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 /**
  * The Wireless Arcane Crafting Terminal: a carried arcane workbench, showing the grid of the placed
  * terminal it is bound to.
- * <ul>
- *   <li>Sneaking on that terminal binds the two; a sneak left-click unbinds them - one state, two places.
- *   <li>Its vis comes from the aura around the player: a carried workbench has no block to drain.
- * </ul>
+ * Sneaking on that terminal binds the two, and a sneak left-click unbinds them: one state, two
+ * places. Its vis comes from the aura around the player, because a carried workbench has no block
+ * to drain.
  */
 public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem implements ArcaneTerminalLink {
 

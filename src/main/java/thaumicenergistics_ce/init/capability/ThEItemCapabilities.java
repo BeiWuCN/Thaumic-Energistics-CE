@@ -18,12 +18,10 @@ import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber
 import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
- * The mod's machines as item handlers, so a hopper or a pipe can see them.
- * <ul>
- *   <li>Every machine is one flat container on the inside; the bands below are indices into it.
- *   <li>What JEI dragged in, and what the machine writes for itself, is left out of every band.
- *   <li>The assembler answers on its own facing only, so a bank of them does not feed off the front.
- * </ul>
+ * The mod's machines as item handlers, so a hopper or a pipe can see them. Every machine is one
+ * flat container on the inside and the bands below are indices into it, with what JEI dragged
+ * in and what the machine writes for itself left out of every band. The assembler answers on
+ * its own facing only, so a bank of them does not feed off the front.
  */
 public final class ThEItemCapabilities {
 

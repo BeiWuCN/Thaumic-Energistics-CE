@@ -46,7 +46,7 @@ final class AssemblerMenuReadout {
     }
 
     /**
-     * The six bar columns in the order the art paints them, <b>not</b> in {@code PRIMALS} order - indexing
+     * The six bar columns in the order the art paints them, not in {@code PRIMALS} order - indexing
      * one by the other paints two columns with the wrong aspect, every bar right in height.
      */
     private static final int[] BAR_ASPECTS = {

@@ -7,12 +7,10 @@ import net.neoforged.neoforge.items.IItemHandler;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The mod's machines seen as an {@link IItemHandler}, for hoppers and pipes.
- * <ul>
- *   <li>A band can have holes, so a band the machine writes for itself stays out of a pipe's reach.
- *   <li>Not NeoForge's {@code InvWrapper}, which asks a slot's limit how much may come out and so
- *       reports a machine holding one item as able to move a stack.
- * </ul>
+ * The mod's machines seen as an {@link IItemHandler}, for hoppers and pipes. A band can have
+ * holes, so a band the machine writes for itself stays out of a pipe's reach, and this is not
+ * NeoForge's {@code InvWrapper}, which asks a slot's limit how much may come out and so reports
+ * a machine holding one item as able to move a stack.
  */
 public final class SlotRangeItemHandler implements IItemHandler {
 

@@ -9,11 +9,9 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
 
 /**
- * The Alchemy Receiver's Jade server data: the provider it is bound to, if any.
- * <ul>
- *   <li>It holds no grid node, so there is no channel line: the link is the whole state.
- *   <li>The drawing half is {@code client.jade.AlchemyReceiverTooltip}; both report {@link #UID}.
- * </ul>
+ * The Alchemy Receiver's Jade server data: the provider it is bound to, if any. It holds no
+ * grid node, so there is no channel line and the link is the whole state. The drawing half is
+ * {@code client.jade.AlchemyReceiverTooltip}, and both report {@link #UID}.
  */
 public class AlchemyReceiverProvider implements IServerDataProvider<BlockAccessor> {
 

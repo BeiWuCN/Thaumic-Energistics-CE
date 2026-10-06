@@ -18,11 +18,10 @@ import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvi
 
 /**
  * The Wireless Binding Tool: makes and breaks the links an Alchemy Provider uses.
- * <ul>
- * <li>A two-ended link needs something to carry the identity of one end to the other: the tool holds one
- * coordinate - a receiver selected but not yet bound - and the second click completes the pair.
- * <li>Sneak splits reading from writing: without it, walking past an altar would rebind things.
- * </ul>
+ * A two-ended link needs something to carry the identity of one end to the other, so the tool
+ * holds one coordinate - a receiver selected but not yet bound - and the second click completes
+ * the pair. Sneaking splits reading from writing; without it, walking past an altar would rebind
+ * things.
  */
 public class ItemWirelessConnector extends Item {
 

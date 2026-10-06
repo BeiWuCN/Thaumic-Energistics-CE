@@ -10,11 +10,9 @@ import thaumicenergistics_ce.network.InscriberGridPayload;
 
 /**
  * The four requests a menu sends to the server, built in one place.
- * <ul>
- *   <li>A menu is the container's client half, so it asks; this is the only place a menu names a payload.
- *   <li>Here and not in {@code net}, which is what the two sides agree on and so must not know what a
- *       menu decided.
- * </ul>
+ * A menu is the container's client half, so it asks, and this is the only place a menu names a
+ * payload. The requests are built here and not in {@code net}, which is what the two sides agree
+ * on and so must not know what a menu decided.
  */
 public final class MenuNetwork {
 

@@ -5,12 +5,10 @@ import java.util.List;
 import net.minecraft.network.chat.Component;
 
 /**
- * The Arcane Assembler's reason for waiting or for turning a job away, in one place.
- * <ul>
- * <li>The key and its English fallback sit together so a missing translation cannot show a raw key.
- * <li>Split out of {@link BlockEntityArcaneAssembler}; the self-test enumerates the keys from another
- * package, so this class and {@link #tooltipReasonKeys()} are public and the rest is package-private.
- * </ul>
+ * The Arcane Assembler's reason for waiting or for turning a job away, in one place. The key and
+ * its English fallback sit together here, so a missing translation cannot show a raw key. This was
+ * split out of {@link BlockEntityArcaneAssembler}: because the self-test enumerates the keys from
+ * another package, this class and {@link #tooltipReasonKeys()} are public and the rest is not.
  */
 public final class AssemblerStatus {
 

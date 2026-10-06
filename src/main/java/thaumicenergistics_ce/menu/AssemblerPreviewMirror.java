@@ -10,11 +10,9 @@ import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 
 /**
- * The pattern wells and the craft preview as the menu holds them: the wells are derived from the core
- * slot, the preview reads the machine's own slots.
- * <ul>
- *   <li>The wells are derived at most once a tick: the signature walks the whole pattern store.
- * </ul>
+ * The pattern wells and the craft preview as the menu holds them: the wells are derived from the
+ * core slot, and the preview reads the machine's own slots. The wells are re-derived at most once
+ * a tick, because the signature walks the whole pattern store.
  */
 final class AssemblerPreviewMirror {
 

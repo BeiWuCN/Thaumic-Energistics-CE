@@ -22,11 +22,8 @@ import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVib
 
 /**
  * The Essentia Vibration Chamber block: horizontal facing only, because its model is not symmetric.
- *
- * <ul>
- *   <li>Front is the animated aspect texture, top is the input; a vertical facing would swap them.
- *   <li>{@code facing} must be the exact property name, or the variants are unreachable.
- * </ul>
+ * Its front carries the animated aspect texture and its top the input, so a vertical facing would
+ * swap them. {@code facing} must be the exact property name, or the variants are unreachable.
  */
 public class BlockEssentiaVibrationChamber extends ThEBaseEntityBlock {
 

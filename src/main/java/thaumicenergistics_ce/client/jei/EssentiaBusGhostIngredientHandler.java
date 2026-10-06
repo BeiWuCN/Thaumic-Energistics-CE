@@ -20,11 +20,9 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Lets the player drag an aspect from JEI into an essentia bus's config slots.
- * <ul>
- *   <li>Thaumaturge registers {@link AspectIngredientType}; JEI drops only into declared targets.
- *   <li>Written against the buses' shared menu, so one registration serves both directions.
- *   <li>{@link Slot#set} with a stack carrying the key as a data component is AE2's non-item route.
- * </ul>
+ * Thaumaturge registers {@link AspectIngredientType}, and JEI drops only into declared targets; the
+ * handler is written against the buses' shared menu, so one registration serves both directions.
+ * {@link Slot#set} with a stack carrying the key as a data component is AE2's non-item route.
  */
 public class EssentiaBusGhostIngredientHandler<T extends UpgradeableScreen<? extends MenuEssentiaBusBase<?>>>
         implements IGhostIngredientHandler<T> {
@@ -80,7 +78,7 @@ public class EssentiaBusGhostIngredientHandler<T extends UpgradeableScreen<? ext
         }
 
         /**
-         * Where JEI draws this target, in <em>screen</em> pixels: a slot's x and y are relative to the GUI
+         * Where JEI draws this target, in screen pixels: a slot's x and y are relative to the GUI
          * corner, and JEI fills the rectangle with no translation of its own.
          */
         @Override

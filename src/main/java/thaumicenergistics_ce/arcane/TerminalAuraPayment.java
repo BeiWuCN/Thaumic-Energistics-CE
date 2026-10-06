@@ -15,11 +15,9 @@ import thaumicenergistics_ce.init.ModItems;
 
 /**
  * What one aura payment costs: aura at a place, either bought with AE or taken as aura straight.
- * Shared, so the placed and the wireless terminal cannot drift apart on the exchange rate.
- * <ul>
- *   <li>The place is what the two differ by: the placed terminal drains the chunk it stands in, the
- *       wireless one the chunk the player stands in, since a carried workbench has no block of its own.
- * </ul>
+ * Shared, so the placed and the wireless terminal cannot drift apart on the exchange rate. The
+ * place is what the two differ by: the placed terminal drains the chunk it stands in, the wireless
+ * one the chunk the player stands in, since a carried workbench has no block of its own.
  */
 public final class TerminalAuraPayment {
 

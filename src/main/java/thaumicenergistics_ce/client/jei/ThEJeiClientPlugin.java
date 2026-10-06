@@ -12,12 +12,10 @@ import thaumicenergistics_ce.client.gui.ScreenEssentiaStorageBus;
 import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 
 /**
- * The client half of {@link thaumicenergistics_ce.integration.jei.ThEJeiPlugin}: the ghost ingredient
- * handlers, and the screens they drop into.
- * <ul>
- *   <li>A second plugin, because the registration {@code registerGuiHandlers} takes names Screen itself.
- *   <li>JEI reaches it only from its client starter; its UID is its own, separate from the transfer half.
- * </ul>
+ * The client half of {@link thaumicenergistics_ce.integration.jei.ThEJeiPlugin}: the ghost
+ * ingredient handlers, and the screens they drop into. It is a second plugin, because the
+ * registerGuiHandlers registration takes a Screen name itself. JEI reaches it only from its client
+ * starter, and its UID stays separate from the transfer half.
  */
 @JeiPlugin
 public class ThEJeiClientPlugin implements IModPlugin {

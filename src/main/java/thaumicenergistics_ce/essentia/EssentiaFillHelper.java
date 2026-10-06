@@ -23,13 +23,13 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Moving essentia between a container item and the ME network.
- * <ul><li>A port of the reference build's {@code EssentiaFillHelper}. Simulate-then-execute, the rollback
- * on a partial refusal and the copy before shrink all guard against duplication or loss.</li>
- * <li>A phial is filled whole ({@code TcRegistry.phialCapacity()}) or not at all; a jar as far as the
- * network allows, and is not consumed.</li>
- * <li>The label, crystal and mana bean also implement {@code IEssentiaContainerItem}, so
- * {@link #isSupportedContainer} is the one gate.</li></ul> */
+ * Moving essentia between a container item and the ME network, ported from the reference
+ * build's {@code EssentiaFillHelper}: simulate-then-execute, the rollback on a partial refusal
+ * and the copy before shrink all guard against duplication or loss. A phial is filled whole
+ * ({@code TcRegistry.phialCapacity()}) or not at all, while a jar fills as far as the network
+ * allows and is not consumed. The label, crystal and mana bean also implement
+ * {@code IEssentiaContainerItem}, so {@link #isSupportedContainer} is the one gate.
+ */
 public final class EssentiaFillHelper {
 
     private EssentiaFillHelper() {}

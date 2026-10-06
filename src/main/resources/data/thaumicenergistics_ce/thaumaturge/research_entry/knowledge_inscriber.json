@@ -4,8 +4,8 @@
   "parents": [
     "thaumicenergistics_ce:arcane_assembler"
   ],
-  "column": 4,
-  "row": 4,
+  "column": 0,
+  "row": -8,
   "meta": [
     "round"
   ],

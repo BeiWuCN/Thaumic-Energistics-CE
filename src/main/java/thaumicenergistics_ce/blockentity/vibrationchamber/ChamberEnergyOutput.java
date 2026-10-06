@@ -7,12 +7,10 @@ import appeng.api.networking.energy.IAEPowerStorage;
 import appeng.api.networking.energy.IEnergyService;
 
 /**
- * The chamber's energy slot: what the grid takes out of it, and what counts as full.
- * <ul>
- *   <li>AE2 destroys what the grid refuses: only what was accepted leaves the slot.
- *   <li>{@link #isFull()} is a level read off the room left, never a latch, so the screen follows the gauge.
- *   <li>Whether there is a network at all is asked of what the grid holds, not of how big it is.
- * </ul>
+ * The chamber's energy slot: what the grid takes out of it, and what counts as full. AE2 destroys
+ * what the grid refuses, so only what was accepted leaves the slot; {@link #isFull()} is a level
+ * read off the room left rather than a latch, so the screen follows the gauge. Whether there is a
+ * network at all is asked of what the grid holds, not of how big it is.
  */
 final class ChamberEnergyOutput {
 

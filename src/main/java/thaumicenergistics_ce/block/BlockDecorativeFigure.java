@@ -24,12 +24,10 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * The decorative figure block - a plush likeness, not a machine.
- * <ul>
- *   <li>{@code variant} must stay: the blockstate declares four facings times two, so a missing
- *       variant is unreachable and renders as a missing-texture cube.
- *   <li>The figure stays settable: right-click turns it to face the player who asked.
- * </ul>
+ * The decorative figure block - a plush likeness, not a machine. {@code variant} must stay: the
+ * blockstate declares four facings times two, so a missing variant is unreachable and renders as a
+ * missing-texture cube. The figure stays settable, and a right-click turns it to face the player
+ * who asked.
  */
 public class BlockDecorativeFigure extends HorizontalDirectionalBlock {
 

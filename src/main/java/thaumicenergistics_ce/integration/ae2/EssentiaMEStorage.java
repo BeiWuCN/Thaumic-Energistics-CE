@@ -12,12 +12,10 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 
 /**
- * Presents a Thaumaturge essentia container to the ME network as storage.
- * <ul>
- * <li>A storage bus mounts one of these, and the jar's contents are then listed in the terminal, count
- * towards what the network holds, and insert and extract like any other storage.
- * <li>Amounts are {@code int} on one side and {@code long} on the other; every conversion is clamped.
- * </ul>
+ * Presents a Thaumaturge essentia container to the ME network as storage. A storage bus mounts
+ * one of these, and the jar's contents are then listed in the terminal, count towards what the
+ * network holds, and insert and extract like any other storage. Amounts are {@code int} on one
+ * side and {@code long} on the other, so every conversion is clamped.
  */
 public final class EssentiaMEStorage implements MEStorage {
 

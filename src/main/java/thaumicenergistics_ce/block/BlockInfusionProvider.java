@@ -8,12 +8,9 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
 
 /**
- * The Infusion Provider block.
- *
- * <ul>
- * <li>No facing: the altar finds sources by aspect container capability on nearby blocks.</li>
- * <li>The blockstate declares a single unconditional variant.</li>
- * </ul>
+ * The Infusion Provider block. It declares no facing, because the altar finds sources by aspect
+ * container capability on nearby blocks, and its blockstate declares a single unconditional
+ * variant.
  */
 public class BlockInfusionProvider extends ThEBaseEntityBlock {
 

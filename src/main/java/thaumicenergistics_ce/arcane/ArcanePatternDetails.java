@@ -16,12 +16,10 @@ import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
- * Adapts a {@link ThEArcanePattern} to AE2's crafting API.
- * <ul>
- *   <li>Each non-empty grid cell becomes one input, plus any crystal vis cannot pay for.
- *   <li>Vis is not mapped to a synthetic AE2 ingredient: it comes from the aura at craft time.
- *   <li>A primal crystal is paid by vis and stays hidden; a compound one has no vis value, so it appears.
- * </ul>
+ * Adapts a {@link ThEArcanePattern} to AE2's crafting API. Each non-empty grid cell becomes one
+ * input, plus any crystal vis cannot pay for; vis itself is not mapped to a synthetic AE2
+ * ingredient because it comes from the aura at craft time. A primal crystal is paid by vis and
+ * stays hidden, while a compound crystal has no vis value and therefore appears as an input.
  */
 public final class ArcanePatternDetails implements IPatternDetails {
 

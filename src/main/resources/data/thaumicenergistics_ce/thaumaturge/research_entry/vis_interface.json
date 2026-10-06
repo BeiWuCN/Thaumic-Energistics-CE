@@ -4,8 +4,8 @@
   "parents": [
     "thaumicenergistics_ce:essentia_terminal"
   ],
-  "column": 2,
-  "row": -2,
+  "column": -2,
+  "row": -4,
   "meta": [
     "round"
   ],

@@ -4,12 +4,11 @@ import net.minecraft.core.RegistryAccess;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Where the client installs the way to reach its registries, so common code can ask for them without
- * naming a client class - the shape {@code net.ClientSinks} uses, for the same reason.
- * <ul>
- * <li>Installed from {@code ClientSetup} before anything draws a key; a dedicated server installs nothing.
- * <li>The field itself is common: both sides load this class, only one of them sets its value.
- * </ul>
+ * Where the client installs the way to reach its registries, so common code can ask for them
+ * without naming a client class - the shape {@code net.ClientSinks} uses, for the same reason.
+ * It is installed from {@code ClientSetup} before anything draws a key, while a dedicated
+ * server installs nothing. The field itself is common: both sides load this class, only one of
+ * them sets its value.
  */
 public final class ClientRegistries {
 

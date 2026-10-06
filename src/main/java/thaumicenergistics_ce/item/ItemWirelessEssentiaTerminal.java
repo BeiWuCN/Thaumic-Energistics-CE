@@ -13,11 +13,10 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 
 /**
  * The Wireless Essentia Terminal: a terminal that reaches the network from anywhere the player is.
- * <ul>
- * <li>AE2's own wireless terminal in every respect - the power drain, the battery, the range check -
- * because it <em>is</em> AE2's; two things change: which menu opens and which key types it offers.
- * <li>The key-type restriction is what makes it an essentia terminal: otherwise it lists everything.
- * </ul>
+ * This is AE2's own wireless terminal in every respect - the power drain, the battery, the range
+ * check - because it is AE2's; only two things change: which menu opens and which key types it
+ * offers. That key-type restriction is what makes it an essentia terminal, since otherwise it lists
+ * everything.
  */
 public class ItemWirelessEssentiaTerminal extends WirelessTerminalItem {
 

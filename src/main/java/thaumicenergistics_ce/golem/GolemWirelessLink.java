@@ -19,12 +19,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * One golem's resolved route into an ME network: a link to an access point, thrown away after use.
- * <ul>
- * <li>A backpack holds a {@link GlobalPos} and nothing else, so the block there must be an access point
- * with a grid in range of the golem; resolved per operation, so walking away is noticed at once.
- * <li>Only items move, and a network that cannot pay moves nothing: AE2's powered helpers decide.
- * </ul>
+ * One golem's resolved route into an ME network: a link to an access point, thrown away after
+ * use. A backpack holds a {@link GlobalPos} and nothing else, so the block there must be an
+ * access point with a grid in range of the golem, resolved per operation so that walking away
+ * is noticed at once. Only items move, and a network that cannot pay moves nothing, since
+ * AE2's powered helpers decide.
  */
 public final class GolemWirelessLink {
 

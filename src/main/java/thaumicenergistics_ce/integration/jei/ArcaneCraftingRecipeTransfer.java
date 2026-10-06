@@ -27,15 +27,12 @@ import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * Lets JEI's transfer button fill the Arcane Crafting Terminal's grid from an arcane workbench recipe.
- * <ul>
- *   <li>Handles Thaumaturge's own category, so the button shows where players look; slots come from
- *       {@link SlotSemantics}, and the six crystal slots stay the player's.
- *   <li>No recipe id is passed deliberately: an arcane recipe is not in the vanilla recipe manager.
- *   <li>Each cell's template is the variant with stock behind it, not the one the recipe lists first: the
- *       packet resolves a template on its own and never learns that the ingredient was a tag.
- *   <li>One handler serves both terminals: JEI keys these by container class and recipe type only.
- * </ul>
+ * Fills the Arcane Crafting Terminal's grid from an arcane workbench recipe. It handles
+ * Thaumaturge's own category, so the button appears where players look; slots come from
+ * SlotSemantics. No recipe id is passed, as an arcane recipe is not in the vanilla recipe
+ * manager. Each cell's template is the variant with stock behind it, not the one the recipe
+ * lists first, because the packet resolves a template itself and never learns the ingredient
+ * was a tag. One handler serves both terminals: JEI keys by container class and recipe type only.
  */
 public class ArcaneCraftingRecipeTransfer
         implements IRecipeTransferInfo<MenuArcaneCraftingTerminal, RecipeHolder<?>>,
@@ -55,9 +52,8 @@ public class ArcaneCraftingRecipeTransfer
     }
 
     /**
-     * Any menu type of this menu class, deliberately: JEI keys its handlers by container class and recipe
-     * type alone, so a handler naming one menu type would leave the other terminal - the wired and the
-     * wireless terminals share this class - without a transfer button.
+     * Any menu type of this menu class: the wired and the wireless terminals share it, so naming one menu
+     * type would leave the other without a transfer button.
      */
     @Override
     public Optional<MenuType<MenuArcaneCraftingTerminal>> getMenuType() {
@@ -105,9 +101,8 @@ public class ArcaneCraftingRecipeTransfer
             return helper.createInternalError();
         }
 
-        // One template per cell, picked as the variant the player or the network can actually supply. The
-        // packet's template path looks each one up by itself and knows nothing of tags, so taking the first
-        // member of a tag - as the recipe lists it - would fail whenever that member is not the one in stock.
+        // One template per cell, picked as the variant the player or the network can supply: the packet's
+        // template path knows nothing of tags, so a tag's first member may well be the one not in stock.
         IClientRepo repo = menu.getClientRepo();
         NonNullList<ItemStack> templates = NonNullList.withSize(PartArcaneCraftingTerminal.GRID_SIZE, ItemStack.EMPTY);
         boolean missing = false;
@@ -119,8 +114,8 @@ public class ArcaneCraftingRecipeTransfer
             }
         }
 
-        // A recipe that cannot be laid out is refused: the packet would fill what it can, and a
-        // partly filled grid reads as "this terminal cannot craft that", not "you are short of it".
+        // A recipe that cannot be laid out is refused rather than partly filled: a partly filled grid
+        // reads as "this terminal cannot craft that", not "you are short of it".
         if (missing) {
             return helper.createUserErrorWithTooltip(
                     Component.translatable("thaumicenergistics_ce.jei.transfer.missing_ingredients"));

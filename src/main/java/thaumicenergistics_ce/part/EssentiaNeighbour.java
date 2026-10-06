@@ -14,11 +14,10 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Finds the essentia container on the block a bus faces, and asks it the right question.
- * <ul>
- * <li>{@code isConnectable} takes the container's own face: a bus on the north side sits at its SOUTH face.
- * <li>Wrong face is silent: a jar answers true only at {@code UP}, so any other face inserts nothing.
- * <li>Order: transport on the bus's face, then storage on any face accepted, then a transport as storage.
- * </ul>
+ * isConnectable takes the container's own face, so a bus on the north side sits at its SOUTH
+ * face, and a wrong face is silent: a jar answers true only at UP, so any other face inserts
+ * nothing. The lookup order is transport on the bus's face, then storage on any face that
+ * transport accepts, then a transport of its own treated as storage.
  */
 final class EssentiaNeighbour {
 

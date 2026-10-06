@@ -11,11 +11,9 @@ import thaumicenergistics_ce.item.ItemEssentiaCell;
 
 /**
  * Where a shift-clicked stack goes in the cell workbench menu, and the ranges it goes to.
- * <ul>
- *   <li>The player side is the hotbar and the main inventory together, since AE2 adds the hotbar
- *       under its own semantic and that shifts the first main-inventory slot nine slots along.
- *   <li>A card only goes in while a cell is there: the cards ride on the cell.
- * </ul>
+ * The player side is the hotbar and the main inventory together, because AE2 adds the hotbar
+ * under its own semantic, which shifts the first main-inventory slot nine slots along. A card
+ * only goes in while a cell is there: the cards ride on the cell.
  */
 final class CellWorkbenchShiftClick {
 

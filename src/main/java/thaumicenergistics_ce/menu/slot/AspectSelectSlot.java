@@ -7,12 +7,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * One well in the Distillation Encoder's aspect row.
- * <ul>
- *   <li>Nothing may be placed or taken: a click means "use this one", so the menu intercepts it first.
- *   <li>The slot index is the aspect's position in the row: slot {@code i} is the i-th aspect the
- *       source item offers, and {@code -1} marks the picked-aspect display.
- * </ul>
+ * One well in the Distillation Encoder's aspect row. Nothing may be placed in it or taken out of
+ * it, because a click means "use this one" and so the menu intercepts the click first. The slot
+ * index is the aspect's position in the row: slot {@code i} is the i-th aspect the source item
+ * offers, and {@code -1} marks the picked-aspect display.
  */
 public class AspectSelectSlot extends Slot {
 

@@ -12,11 +12,9 @@ import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
 /**
  * Lets the player drag an item from JEI straight into the Knowledge Inscriber's grid.
- * <ul>
- * <li>The grid is the machine's input, so this is the shortest path to using it.</li>
- * <li>Nothing in {@link #onComplete()}: the grid is a ghost grid, so JEI hands nothing over - the cells
- * only note what the player has, and the crafting job pays for the real ingredients.</li>
- * </ul>
+ * The grid is the machine's input, so this is the shortest path to using it. There is nothing in
+ * {@link #onComplete()} because the grid is a ghost grid, so JEI hands nothing over: the cells only
+ * note what the player has, and the crafting job pays for the real ingredients.
  */
 public class KnowledgeInscriberGhostIngredientHandler
         implements IGhostIngredientHandler<ScreenKnowledgeInscriber> {
@@ -50,7 +48,7 @@ public class KnowledgeInscriberGhostIngredientHandler
             implements Target<I> {
 
         /**
-         * Where JEI should draw this target, in <em>screen</em> pixels. Not the slot's x/y: JEI fills the
+         * Where JEI should draw this target, in screen pixels. Not the slot's x/y: JEI fills the
          * rectangle with no translation, while slot x/y are relative to the GUI's top-left.
          */
         @Override

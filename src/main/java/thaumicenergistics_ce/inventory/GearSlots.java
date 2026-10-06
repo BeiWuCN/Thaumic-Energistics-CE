@@ -8,11 +8,9 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * What may go in the Arcane Assembler's four gear slots.
- * <ul>
- *   <li>Shared by the machine's container and the menu's slots: two copies of the rule is how the menu
- *       came to accept anything while the container refused: only {@code mayPlace} sees the click.
- *   <li>Ordering mirrors slots 0..3 as head, chest, legs, feet.
- * </ul>
+ * The rule is shared by the machine's container and the menu's slots, because two copies of it is
+ * how the menu came to accept anything while the container refused: only {@code mayPlace} sees the
+ * click. The ordering mirrors slots 0..3 as head, chest, legs, feet.
  */
 public final class GearSlots {
 

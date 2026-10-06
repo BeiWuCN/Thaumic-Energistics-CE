@@ -28,12 +28,11 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
 
 /**
- * Where a storage cell is told which aspects it may hold.
- * <ul>
- *   <li>The partition lives on the cell item, as AE2's own cells do, so it survives a drive or a chest.
- *   <li>The block holds the cell plus a working copy, because a write-back rebuilds a data component.
- *   <li>{@code syncing} guards load and write-back: a write changes components a naive reload misreads.
- * </ul> */
+ * Where a storage cell is told which aspects it may hold. The partition lives on the cell item, as
+ * AE2's own cells do, so it survives a drive or a chest; the block holds the cell plus a working
+ * copy, because a write-back rebuilds a data component. The syncing flag guards load and
+ * write-back, since a write changes components that a naive reload misreads.
+ */
 public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity implements IUpgradeableObject {
 
     public static final int CELL_SLOT = 0;

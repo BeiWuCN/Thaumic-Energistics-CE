@@ -21,11 +21,9 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * How AE2 draws an essentia key.
- * <ul>
- *   <li>Registration is mandatory: AE2 throws when drawing a key whose type has no handler.
- *   <li>The icon comes from Thaumaturge's {@link AspectRendering}, which knows the aspect textures
- *       and the player's discovery state; a hand-rolled blit loses the masking.
- * </ul>
+ * Registration is mandatory, because AE2 throws when drawing a key whose type has no handler. The
+ * icon comes from Thaumaturge's {@link AspectRendering}, which knows the aspect textures and the
+ * player's discovery state; a hand-rolled blit loses the masking.
  */
 public class EssentiaKeyRenderHandler implements AEKeyRenderHandler<AEssentiaKey> {
 

@@ -7,12 +7,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * A display-only slot that renders a real stack but refuses all interaction.
- * <ul>
- *   <li>Shows real machine state the player must not take, insert into, or have sorted by a mod.
- *   <li>An empty zero-slot container hides {@code slot.index}/{@code slot.container} from automation.
- *   <li>Every mutating entry point is a no-op; {@link #getItem()} reads the real source.
- * </ul>
+ * A display-only slot that renders a real stack but refuses all interaction. It shows real
+ * machine state the player must not take, insert into, or have sorted by a mod. An empty
+ * zero-slot container hides {@code slot.index} and {@code slot.container} from automation.
+ * Every mutating entry point is a no-op, while {@link #getItem()} reads the real source.
  */
 public class ReadOnlySlot extends Slot {
 

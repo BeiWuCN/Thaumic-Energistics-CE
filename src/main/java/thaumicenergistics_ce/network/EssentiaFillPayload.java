@@ -10,12 +10,11 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * "Draw this aspect out of the network into my container", sent by the Essentia Terminal's left-click.
- * <ul>
- *   <li>{@code aspectId} travels by id: a key the client built wrong would not match server storage.
- *   <li>{@code where} names the container slot; {@code stack} is only a hint on the client side.
- *   <li>{@code wholeStack} is the shift-click: fill the held stack, not one item of it.
- * </ul>
+ * "Draw this aspect out of the network into my container", sent by the Essentia Terminal's
+ * left-click. {@code aspectId} travels as an id because a key the client built wrong would not
+ * match server storage, {@code where} names the container slot, and {@code stack} is only a
+ * hint on the client side; {@code wholeStack} is the shift-click that fills the held stack
+ * rather than one item of it.
  */
 public record EssentiaFillPayload(
         int containerId, ResourceLocation aspectId, int where, ItemStack stack, boolean wholeStack)

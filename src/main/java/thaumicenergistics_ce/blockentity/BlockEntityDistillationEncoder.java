@@ -35,12 +35,10 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The Distillation Encoder: writes "this item distils into that essentia" as an ME processing pattern.
- * <ul>
- *   <li>A distillation pattern is no recipe Thaumaturge can look up, so the block writes the statement down.
- *   <li>Only aspects the source item actually holds are offered, and the pattern is tagged with its
- *       research, so a terminal can refuse it for a player who has not learned distillation.
- * </ul>
+ * The Distillation Encoder: writes "this item distils into that essentia" as an ME processing
+ * pattern, because a distillation pattern is no recipe Thaumaturge can look up. Only aspects the
+ * source item actually holds are offered, and the pattern is tagged with its research, so a
+ * terminal can refuse it for a player who has not learned distillation.
  */
 public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
 

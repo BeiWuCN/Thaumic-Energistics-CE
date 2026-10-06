@@ -17,11 +17,9 @@ import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
 /**
  * Draws the product of a running craft inside the Arcane Assembler, as a molecular assembler does.
- * <ul>
- *   <li>The stack comes from the block entity's update tag; the machine's real product stays server-side.
- *   <li>The last product lingers for {@link #LINGER_TICKS} after its craft ends, and nothing depends on
- *       craft progress, which resets every craft and would make the item jump.
- * </ul>
+ * The stack comes from the block entity's update tag, so the machine's real product stays
+ * server-side. The last product lingers for {@link #LINGER_TICKS} after its craft ends, and nothing
+ * depends on craft progress, which resets every craft and would make the item jump.
  */
 public class ArcaneAssemblerRenderer implements BlockEntityRenderer<BlockEntityArcaneAssembler> {
 

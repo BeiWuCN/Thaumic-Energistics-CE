@@ -28,11 +28,9 @@ import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 
 /**
  * The Occult Monitor block: three states, none decorative, and one pulse that is not a state.
- * <ul>
- *   <li>{@code facing} turns the frame, {@code book} is the Thaumonomicon as a real state, and
- *       {@code network} is the ME connection; the models come from those three names.
- *   <li>The pulse: the block asks the machine, and a scheduled tick takes it down again.
- * </ul>
+ * {@code facing} turns the frame, {@code book} is the Thaumonomicon as a real state, and
+ * {@code network} is the ME connection; the models come from those three names. The pulse is asked
+ * of the machine by the block, and a scheduled tick takes it down again.
  */
 public class BlockOccultMonitor extends ThEBaseEntityBlock {
 

@@ -16,11 +16,9 @@ import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber
 
 /**
  * The Knowledge Inscriber block: turns an AE2 pattern into the arcane recipe it encodes and writes
- * that recipe into a knowledge core, which an Arcane Assembler then reads.
- * <ul>
- * <li>{@code FACING} is cosmetic - no sided behaviour - but the model's bright face is the front, so
- * the blockstate rotates the model by this property.</li>
- * </ul>
+ * that recipe into a knowledge core, which an Arcane Assembler then reads. {@code FACING} is
+ * cosmetic, with no sided behaviour, but the model's bright face is the front, so the blockstate
+ * rotates the model by this property.
  */
 public class BlockKnowledgeInscriber extends ThEBaseEntityBlock {
     public static final MapCodec<BlockKnowledgeInscriber> CODEC = simpleCodec(BlockKnowledgeInscriber::new);

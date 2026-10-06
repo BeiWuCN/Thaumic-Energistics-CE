@@ -19,6 +19,7 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceAccess;
+import thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceRows;
 import thaumicenergistics_ce.network.EssentiaInterfaceMarkPayload;
 import thaumicenergistics_ce.util.ThELog;
 
@@ -104,16 +105,16 @@ public final class EssentiaInterfaceSelfTest {
         AEKey other = AEssentiaKey.of(ThEIds.id("selftest_other"));
         // An item key stands for everything in a row that is not ours.
         AEKey stone = AEItemKey.of(Items.STONE);
-        if (!EssentiaInterfaceAccess.mayEnter(List.of(), rune)) {
+        if (!EssentiaInterfaceRows.mayEnter(List.of(), rune)) {
             failures.add("an empty config row refused an aspect");
         }
-        if (!EssentiaInterfaceAccess.mayEnter(List.of(rune), rune)) {
+        if (!EssentiaInterfaceRows.mayEnter(List.of(rune), rune)) {
             failures.add("a row listing an aspect refused that same aspect");
         }
-        if (EssentiaInterfaceAccess.mayEnter(List.of(rune), other)) {
+        if (EssentiaInterfaceRows.mayEnter(List.of(rune), other)) {
             failures.add("a row listing one aspect let a different one in");
         }
-        if (!EssentiaInterfaceAccess.mayEnter(List.of(stone), rune)) {
+        if (!EssentiaInterfaceRows.mayEnter(List.of(stone), rune)) {
             failures.add("a row holding only an item stopped acting as no filter");
         }
     }
@@ -132,7 +133,7 @@ public final class EssentiaInterfaceSelfTest {
         storage.setStack(0, new GenericStack(rune, 4));
         storage.setStack(1, new GenericStack(stone, 2));
         TestStorage grid = new TestStorage(64);
-        EssentiaInterfaceAccess.releaseRows(config, storage, grid, IActionSource.empty());
+        EssentiaInterfaceRows.releaseRows(config, storage, grid, IActionSource.empty());
         if (config.getStack(0) != null) {
             failures.add("the card coming out left a mark in the config row");
         }
@@ -150,7 +151,7 @@ public final class EssentiaInterfaceSelfTest {
         strapped.setStack(0, new GenericStack(rune, 3));
         strapped.setStack(1, new GenericStack(stone, 1));
         TestStorage full = new TestStorage(0);
-        EssentiaInterfaceAccess.releaseRows(config, strapped, full, IActionSource.empty());
+        EssentiaInterfaceRows.releaseRows(config, strapped, full, IActionSource.empty());
         if (strapped.getStack(0) != null) {
             failures.add("a full grid left an aspect where an uncarded interface could hand it out");
         }
@@ -165,7 +166,7 @@ public final class EssentiaInterfaceSelfTest {
         broken.setStack(0, new GenericStack(rune, 3));
         broken.setStack(1, new GenericStack(stone, 1));
         TestStorage half = new TestStorage(1);
-        EssentiaInterfaceAccess.rescueEssentia(broken, half, IActionSource.empty());
+        EssentiaInterfaceRows.rescueEssentia(broken, half, IActionSource.empty());
         if (broken.getStack(0) != null) {
             failures.add("breaking an interface left an aspect in the row, to be dropped");
         }
@@ -178,7 +179,7 @@ public final class EssentiaInterfaceSelfTest {
         // No grid at all: there is nowhere to send it, and it still must not stay in the row.
         ConfigInventory offline = ConfigInventory.storage(9).build();
         offline.setStack(0, new GenericStack(rune, 5));
-        EssentiaInterfaceAccess.rescueEssentia(offline, null, IActionSource.empty());
+        EssentiaInterfaceRows.rescueEssentia(offline, null, IActionSource.empty());
         if (offline.getStack(0) != null) {
             failures.add("breaking an interface with no grid left an aspect to be dropped");
         }

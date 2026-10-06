@@ -22,9 +22,8 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The arcane patterns stored inside one knowledge core: a value object over the core's item stack.
- *
- * <ul><li>Reads and writes the stack's own {@link CustomData}, so a core stays one portable item
- * with no side inventory.</li><li>Data stays out of the item's component registry.</li></ul>
+ * It reads and writes the stack's own {@link CustomData}, so a core stays one portable item with
+ * no side inventory, and the data stays out of the item's component registry.
  */
 public final class HandlerKnowledgeCore {
 

@@ -11,12 +11,10 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * The Knowledge Inscriber's whole 3x3 grid, written by the client in one go.
- * <ul>
- * <li>Per-cell updates are visible and make the machine re-resolve the grid nine times over.
- * <li>The client applies the same nine stacks to its own container copy first, so both sides agree.
- * <li>{@code cells} is exactly nine stacks in reading order; a shorter list is padded with empties.
- * </ul>
+ * The Knowledge Inscriber's whole 3x3 grid, written by the client in one go, because per-cell
+ * updates are visible and make the machine re-resolve the grid nine times over. The client applies
+ * the same nine stacks to its own container copy first, so both sides agree. {@code cells} is
+ * exactly nine stacks in reading order and a shorter list is padded with empties.
  */
 public record InscriberGridFillPayload(int containerId, List<ItemStack> cells) implements CustomPacketPayload {
 

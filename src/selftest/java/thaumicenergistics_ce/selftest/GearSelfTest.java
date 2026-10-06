@@ -6,8 +6,12 @@ import com.leclowndu93150.thaumaturge.api.casters.FocusElementType;
 import com.leclowndu93150.thaumaturge.api.casters.FocusEngine;
 import com.leclowndu93150.thaumaturge.api.casters.FocusMedium;
 import com.leclowndu93150.thaumaturge.content.casters.ItemFocus;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
@@ -17,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import thaumicenergistics_ce.focus.AEWrench;
+import thaumicenergistics_ce.focus.AEWrenchActions;
 import thaumicenergistics_ce.focus.FocusEffectAEWrench;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.item.ItemFocusAEWrench;
@@ -33,6 +38,13 @@ import thaumicenergistics_ce.util.ThELog;
  */
 public final class GearSelfTest {
 
+    /** The names the client guard and the left-click handler share; see {@link #checkWrenchLeftClickShape}. */
+    private static final Set<String> WRENCH_ENTRY_POINTS =
+            Set.of("matches", "wouldTurn", "operate", "onLeftClickBlock", "rotateBlock");
+
+    /** The part half of the same chain, declared on {@link AEWrench} because it talks to AE2. */
+    private static final Set<String> WRENCH_PART_ENTRY_POINTS = Set.of("wouldRotatePart", "rotateSelectedPart");
+
     private GearSelfTest() {}
 
     public static void run(ServerStartedEvent event) {
@@ -46,6 +58,7 @@ public final class GearSelfTest {
 
         List<String> failures = new ArrayList<>();
         checkWrenchTag(failures);
+        checkWrenchLeftClickShape(failures);
         checkFocusElementRegistered(event, failures);
         checkFocusItemAssembled(failures);
         checkBackpackLinkHandler(failures);
@@ -66,6 +79,42 @@ public final class GearSelfTest {
         if (!AEWrench.isWrench(wrench)) {
             failures.add("AE2's quartz wrench is not in c:tools/wrench - the focus would borrow a wrench "
                     + "AE2 does not recognise, and do nothing");
+        }
+    }
+
+    /**
+     * The sneak left-click turn is the one gesture with two halves that must agree: the client half only
+     * cancels its own mining once the shared answer says the turn will happen. If a name in that chain is
+     * renamed or dropped the two halves stop agreeing, and the failure is silent - the click simply never
+     * turns anything, or mining stops working on whatever the client misjudged.
+     */
+    private static void checkWrenchLeftClickShape(List<String> failures) {
+        if (!Modifier.isPublic(AEWrenchActions.class.getModifiers())) {
+            failures.add("AEWrenchActions is not public, so the client half cannot run its checks");
+            return;
+        }
+
+        Set<String> names = new HashSet<>();
+        for (Method method : AEWrenchActions.class.getDeclaredMethods()) {
+            names.add(method.getName());
+        }
+        // The shared answer the client guard calls, then the handler that runs it on both sides.
+        for (String required : WRENCH_ENTRY_POINTS) {
+            if (!names.contains(required)) {
+                failures.add("AEWrenchActions no longer declares " + required
+                        + " - the client half and the server half would stop agreeing about the turn");
+            }
+        }
+
+        names.clear();
+        for (Method method : AEWrench.class.getDeclaredMethods()) {
+            names.add(method.getName());
+        }
+        for (String required : WRENCH_PART_ENTRY_POINTS) {
+            if (!names.contains(required)) {
+                failures.add("AEWrench no longer declares " + required
+                        + " - a left-click on a cable part would have nothing to call");
+            }
         }
     }
 

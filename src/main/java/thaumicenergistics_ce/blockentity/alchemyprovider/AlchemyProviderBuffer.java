@@ -13,12 +13,10 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 
 /**
- * The provider's buffer: essentia held on its way out to the world, one tick at a time.
- * <ul>
- *   <li>A waypoint, not storage: nothing here is saved, and a reload starts empty.
- *   <li>A provider with nothing attached refuses everything; a machine's suction is fetched from the grid.
- *   <li>Every change bumps the revision, the one answer a cache of this container needs.
- * </ul>
+ * The provider's buffer: essentia held on its way out to the world, one tick at a time. It is a
+ * waypoint rather than storage, because nothing here is saved and a reload starts empty. A
+ * provider with nothing attached refuses everything, and a machine's suction is fetched from the
+ * grid. Every change bumps the revision, the one answer a cache of this container needs.
  */
 final class AlchemyProviderBuffer {
 

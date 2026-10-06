@@ -19,11 +19,10 @@ import thaumicenergistics_ce.focus.FocusEffectAEWrench;
 
 /**
  * The AE2 wrench as a wand focus; the item half, {@link FocusEffectAEWrench} is what it does.
- * <ul>
- *   <li>Written onto the stack, not built at a manipulator: {@link #assemble} installs it on every tick.
- *   <li>Not installed from {@code getDefaultInstance}: it returns {@code new ItemStack(this)}, whose
- *       constructor copies that stack's components, so a component set on it never reaches the caller.
- * </ul>
+ * This half is written onto the stack rather than built at a manipulator, because {@link #assemble}
+ * installs it on every tick. It is not installed from {@code getDefaultInstance}, which returns
+ * {@code new ItemStack(this)}: that constructor copies the stack's components, so a component set
+ * on it never reaches the caller.
  */
 public class ItemFocusAEWrench extends ItemFocus {
 

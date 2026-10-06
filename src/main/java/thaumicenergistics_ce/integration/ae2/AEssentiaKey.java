@@ -23,12 +23,10 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * One aspect as an ME network sees it: immutable, interned by registry id.
- * <ul>
- * <li>Identity by id makes a key off the network equal one read back from a cell; else two of everything.
- * <li>Only the id is held: name, colour and discovery state resolve on demand, since keys are built
- * where there is no level (NBT, packet, crafting planner).
- * </ul>
+ * One aspect as an ME network sees it: immutable, interned by registry id. Identity by id makes
+ * a key off the network equal one read back from a cell, without which there would be two of
+ * everything. Only the id is held, since name, colour and discovery state resolve on demand,
+ * and keys are built where there is no level (NBT, packet, crafting planner).
  */
 public final class AEssentiaKey extends AEKey {
 

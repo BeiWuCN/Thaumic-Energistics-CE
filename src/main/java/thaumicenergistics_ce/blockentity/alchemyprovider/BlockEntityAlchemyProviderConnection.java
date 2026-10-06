@@ -23,12 +23,10 @@ import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 
 /**
- * The Alchemy Provider Connection: the far end of a wireless essentia link to a provider.
- * <ul>
- *   <li>It carries essentia, never stores it: arrivals go on to the provider next tick.
- *   <li>Beside a machine that asks, it answers out of the grid, as a cabled provider does.
- *   <li>Bound within {@link BlockEntityAlchemyProvider#MAX_LINK_DISTANCE} blocks; a lost half clears itself.
- * </ul>
+ * The Alchemy Provider Connection: the far end of a wireless essentia link to a provider. It
+ * carries essentia, never stores it, since arrivals go on to the provider on the next tick; beside
+ * a machine that asks, it answers out of the grid as a cabled provider does. It is bound within
+ * {@link BlockEntityAlchemyProvider#MAX_LINK_DISTANCE} blocks, and a lost half clears itself.
  */
 public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity implements IEssentiaStorage {
 
@@ -281,7 +279,7 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
 
     /**
      * Serves a neighbouring container out of the provider's network, not the buffer: the buffer holds what
-     * is on its way <em>in</em>, so giving it back out would put the same essentia on both paths.
+     * is on its way in, so giving it back out would put the same essentia on both paths.
      */
     @Override
     public int extract(Holder<IAspect> aspect, int amount, boolean simulate) {

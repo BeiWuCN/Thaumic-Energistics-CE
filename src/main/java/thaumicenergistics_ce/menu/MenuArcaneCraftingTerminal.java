@@ -32,11 +32,10 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
  * The Arcane Crafting Terminal's menu, reached through the placed part or through a paired item.
- * <ul>
- *   <li>Nine crafting cells, a result slot, six side slots where a crystal counts twice, a wand slot.
- *   <li>Modelled on AE2's {@code CraftingTermMenu}; a {@code CraftingRecipe} never matches an arcane one.
- *   <li>Its essentia gestures come from {@link MenuEssentiaTerminalBase}, gated on the access card.
- * </ul>
+ * It holds nine crafting cells, a result slot, six side slots where a crystal counts twice and a
+ * wand slot, and it is modelled on AE2's {@code CraftingTermMenu}, because a CraftingRecipe never
+ * matches an arcane one. Its essentia gestures come from {@link MenuEssentiaTerminalBase}, gated
+ * on the access card.
  */
 public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         implements ICraftingGridMenu, InternalInventoryHost {

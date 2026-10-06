@@ -14,12 +14,9 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Thaumaturge's item registry, and the stacks this mod builds out of it.
- *
- * <ul>
- *   <li>{@code TCItems.ALCHEMICAL_FURNACE} was deleted outright in 0.4.7 - registry entries move.
- *   <li>Nothing outside this package names a {@code TCItems} field or a {@code TCDataComponents} one.
- * </ul>
+ * Thaumaturge's item registry, and the stacks this mod builds out of it. Registry entries move,
+ * so {@code TCItems.ALCHEMICAL_FURNACE} was deleted outright in 0.4.7, and nothing outside
+ * this package names a {@code TCItems} field or a {@code TCDataComponents} one.
  */
 public final class TcRegistry {
     private TcRegistry() {}

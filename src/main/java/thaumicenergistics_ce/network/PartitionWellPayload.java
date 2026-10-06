@@ -10,11 +10,9 @@ import thaumicenergistics_ce.ThEIds;
 
 /**
  * "Put this aspect in that partition well", sent by the screen when a player drops one out of JEI.
- * <ul>
- *   <li>A slot write cannot work: {@code FakeSlot.set} stops at the screen it ran on, and AE2's own
- *       {@code InventoryActionPacket} is discarded for any menu that is not an {@code AEBaseMenu}.
- *   <li>The aspect travels as an id, so the receiver can resolve it and say why a dropped one is dropped.
- * </ul>
+ * A slot write cannot work: {@code FakeSlot.set} stops at the screen it ran on, and AE2's own
+ * {@code InventoryActionPacket} is discarded for any menu that is not an {@code AEBaseMenu}.
+ * The aspect travels as an id so the receiver can resolve it and say why a dropped one is dropped.
  */
 public record PartitionWellPayload(int containerId, int well, ResourceLocation aspectId)
         implements CustomPacketPayload {

@@ -13,12 +13,10 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber.BurnState;
 
 /**
- * The one place that says how the Essentia Vibration Chamber is read, sent and saved.
- * <ul>
- * <li>The menu's readings are listed here, in the order {@code ContainerData} carries them, and the
- *     byte order of {@link #writeStream} is fixed with it: both are contracts with open screens.
- * <li>The save tag, AE2's byte stream and the menu readings used to encode the same state apart.
- * </ul>
+ * The one place that says how the Essentia Vibration Chamber is read, sent and saved. The menu's
+ * readings are listed here in the order ContainerData carries them, and the byte order of
+ * {@link #writeStream} is fixed with it, because both are contracts with open screens; the save
+ * tag, AE2's byte stream and the menu readings used to encode the same state apart.
  */
 public final class VibrationChamberSync {
 

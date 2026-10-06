@@ -30,11 +30,9 @@ import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
  * The Infusion Provider's Jade tooltip: what the altar beside it can actually draw.
- * <ul>
- *   <li>The drawing half of {@link InfusionProviderProvider}. Both report the same {@link #getUid() UID},
- *       which is how Jade pairs the server data with this.
- *   <li>One aspect per entry: a chip with the amount in the corner, {@link AmountFormat#SLOT} figures.
- * </ul>
+ * It is the drawing half of {@link InfusionProviderProvider}, and both report the same
+ * {@link #getUid() UID}, which is how Jade pairs the server data with this. Entries come one aspect
+ * at a time: a chip with the amount in the corner, in {@link AmountFormat#SLOT} figures.
  */
 public final class InfusionProviderTooltip implements IBlockComponentProvider {
 

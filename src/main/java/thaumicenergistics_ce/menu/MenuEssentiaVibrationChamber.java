@@ -15,11 +15,10 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 
 /**
  * The Essentia Vibration Chamber's menu: the player's inventory, and the machine's three readings.
- * <ul>
- * <li>The machine has no slots: fuel arrives by pipe or from the ME network, and power leaves by cable.
- * <li>The readings travel as {@link ContainerData} because they change every tick; a screen reading its
- * own copy of the block entity would show whatever the last block update happened to carry.
- * </ul>
+ * The machine has no slots, because fuel arrives by pipe or from the ME network and power leaves by
+ * cable. Its readings travel as {@link ContainerData} because they change every tick; a screen
+ * reading its own copy of the block entity would show whatever the last block update happened to
+ * carry.
  */
 public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
 

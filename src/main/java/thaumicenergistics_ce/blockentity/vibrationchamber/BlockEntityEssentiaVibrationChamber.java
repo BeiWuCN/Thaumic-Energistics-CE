@@ -29,11 +29,9 @@ import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
  * The Essentia Vibration Chamber burns essentia to generate AE, ticking the three parts beside it.
- * <ul>
- *   <li>Potentia burns 1.6x duration and power, ignis at the base rate, everything else at half.
- *   <li>The buffer is a count, not an aspect list; the aspect kept is for display only.
- *   <li>{@link BurnState} is the one answer to the burn; AE2 destroys what the grid refuses.
- * </ul>
+ * Potentia burns 1.6x duration and power, ignis at the base rate and everything else at half; the
+ * buffer is a count rather than an aspect list, so the aspect kept is for display only, and
+ * {@link BurnState} is the one answer to the burn. AE2 destroys what the grid refuses.
  */
 public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         implements IGridTickable, IEssentiaStorage, IEssentiaTransport, MenuProvider {

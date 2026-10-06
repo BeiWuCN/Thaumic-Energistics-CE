@@ -20,12 +20,11 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
 
 /**
- * The Alchemy Provider Connection: the receiving end of a wireless essentia link.
- * <ul>
- *   <li>{@code facing} points the plug at the surface it is mounted on; the blockstate in this mod's
- *       assets declares all six directions against it, so both the property and its name are load-bearing.
- *   <li>{@code connected} is whether a link exists, and it mounts on any surface, up and down included.
- * </ul>
+ * The Alchemy Provider Connection: the receiving end of a wireless essentia link. {@code facing}
+ * points the plug at the surface it is mounted on, and the blockstate in this mod's assets
+ * declares all six directions against it, so both the property and its name are load-bearing.
+ * {@code connected} is whether a link exists, and the plug mounts on any surface, up and down
+ * included.
  */
 public class BlockAlchemyProviderConnection extends ThEBaseEntityBlock {
 

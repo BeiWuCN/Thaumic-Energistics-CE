@@ -13,12 +13,10 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * The Arcane Crafting Terminal's grid, presented to Thaumaturge as a workbench's input.
- * <ul>
- *   <li><b>The grid stays nine cells, empty ones included.</b> Vanilla's {@code CraftingInput.of} shrinks
- *       to the non-empty rectangle, which throws out of Thaumaturge's menu constructor.
- *   <li>Adds what a plain grid lacks: the crafting player, and the wand and crystals a machine supplies.
- * </ul>
+ * The Arcane Crafting Terminal's grid, presented to Thaumaturge as a workbench's input. The grid
+ * stays nine cells, empty ones included, because vanilla's {@code CraftingInput.of} shrinks to the
+ * non-empty rectangle and that throws out of Thaumaturge's menu constructor. It also adds what a
+ * plain grid lacks: the crafting player, and the wand and crystals a machine supplies.
  */
 public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
 

@@ -18,12 +18,11 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
- * The AE2 key type for Thaumaturge essentia.
- * <ul>
- * <li>Registering this makes essentia first-class: cells, buses, terminals and the planner all dispatch.
- * <li>{@code AMOUNT_PER_BYTE = 8} matches Thaumaturge: a jar holds 250, a phial 10 (see {@code TcRegistry}).
- * <li>Measured in this build, not the reference's 64: a 1k component is 1024 bytes, 8192 essentia.
- * </ul>
+ * The AE2 key type for Thaumaturge essentia. Registering this makes essentia first-class, so
+ * cells, buses, terminals and the planner all dispatch. {@code AMOUNT_PER_BYTE = 8} matches
+ * Thaumaturge, where a jar holds 250 and a phial 10 (see {@code TcRegistry}); it was measured
+ * in this build rather than taken from the reference's 64, and a 1k component is 1024 bytes,
+ * 8192 essentia.
  */
 public final class AEssentiaKeyType extends AEKeyType {
 

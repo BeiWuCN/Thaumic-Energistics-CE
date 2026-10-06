@@ -10,11 +10,10 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Thaumic Energistics' JEI plugin: the recipe transfer half, which JEI asks for on both sides.
- * <ul>
- *   <li>Names no screen class, because this is the half a dedicated server also runs. The ghost ingredient
- *       handlers live in {@code client.jei.ThEJeiClientPlugin}, a second plugin with a UID of its own.
- *   <li>Both use Thaumaturge's arcane recipe category: the Inscriber encodes exactly what it crafts.
- * </ul>
+ * It names no screen class, because this is the half a dedicated server also runs: the ghost
+ * ingredient handlers live in {@code client.jei.ThEJeiClientPlugin}, a second plugin with a UID of
+ * its own. Both use Thaumaturge's arcane recipe category, so the Inscriber encodes exactly what it
+ * crafts.
  */
 @JeiPlugin
 public class ThEJeiPlugin implements IModPlugin {
@@ -47,12 +46,11 @@ public class ThEJeiPlugin implements IModPlugin {
         registration.addRecipeTransferHandler(
                 new ArcaneCraftingRecipeTransfer(registration.getTransferHelper()),
                 ArcaneJeiRecipeType.arcane());
-        // Ordinary crafting recipes too. The terminal's grid is nine ordinary slots, so a player who opens a
-        // plank recipe and finds no transfer button would reasonably read it as a broken terminal.
+        // Ordinary crafting recipes too: the terminal's grid is nine ordinary slots, so a player who opens
+        // a plank recipe and finds no transfer button would reasonably read it as a broken terminal.
         registration.addRecipeTransferHandler(
                 new CraftingRecipeTransfer(registration.getTransferHelper()), RecipeTypes.CRAFTING);
-        // One handler per recipe type serves both terminals. JEI keys its table by container class and recipe
-        // type alone - not by menu type - so registering the wired and the wireless terminal separately would
-        // only replace one with the other, leaving the first without its transfer button.
+        // One handler per recipe type serves both terminals: registering the wired and the wireless
+        // terminal separately would only replace one with the other.
     }
 }

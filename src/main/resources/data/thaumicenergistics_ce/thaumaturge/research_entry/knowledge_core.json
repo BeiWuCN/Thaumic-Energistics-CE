@@ -4,8 +4,8 @@
   "parents": [
     "thaumicenergistics_ce:arcane_assembler"
   ],
-  "column": 4,
-  "row": 2,
+  "column": -2,
+  "row": -6,
   "meta": [
     "round",
     "spiky",
@@ -18,11 +18,6 @@
     {
       "text": "tc.research_text.KNOWLEDGECORE",
       "required_knowledge": [
-        {
-          "type": "theory",
-          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
-          "amount": 1
-        },
         {
           "type": "theory",
           "category": "thaumicenergistics_ce:thaumicenergistics_ce",

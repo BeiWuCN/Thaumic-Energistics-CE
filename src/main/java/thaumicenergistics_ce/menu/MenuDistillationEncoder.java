@@ -23,10 +23,8 @@ import thaumicenergistics_ce.network.DistillationEncoderReceiver;
 
 /**
  * The Distillation Encoder's menu: the item, its aspects, the picked one and the pattern wells.
- * <ul>
- *   <li>Both sides <em>derive</em> the aspect row from the synced item, so the two cannot disagree.
- *   <li>The pick is not synced: an instruction to the server, mirrored only to draw the highlight.
- * </ul>
+ * Both sides derive the aspect row from the synced item, so the two cannot disagree. The pick is
+ * not synced: it is an instruction to the server, mirrored back only to draw the highlight.
  */
 public class MenuDistillationEncoder extends AbstractContainerMenu implements DistillationEncoderReceiver {
 

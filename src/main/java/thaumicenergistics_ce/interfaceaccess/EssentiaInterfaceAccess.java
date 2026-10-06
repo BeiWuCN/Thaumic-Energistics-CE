@@ -7,37 +7,29 @@ import appeng.api.networking.IManagedGridNode;
 import appeng.api.networking.energy.IEnergyService;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEKey;
-import appeng.api.stacks.GenericStack;
 import appeng.api.storage.MEStorage;
 import appeng.helpers.InterfaceLogic;
 import appeng.helpers.InterfaceLogicHost;
 import appeng.parts.misc.InterfacePart;
 import appeng.util.ConfigInventory;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
-import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
-import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
-import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
  * One ME interface that carries our access card: pulls essentia from the containers it touches into the
- * network, and empties both rows when the card comes out. The marks live in the config row and stay.
- * <ul>
- *   <li>One direction only: the essentia terminal already takes essentia out of the network.
- *   <li>Driven by the registry's round rather than AE2's tickable service, so a pulled card stops it.
- * </ul>
+ * network, and empties both rows when the card comes out. The marks live in the config row and
+ * stay. The flow is one direction only, because the essentia terminal already takes essentia out of
+ * the network. The access is driven by the registry's round rather than AE2's tickable service, so
+ * a pulled card stops it.
  */
 public final class EssentiaInterfaceAccess {
 
@@ -112,28 +104,6 @@ public final class EssentiaInterfaceAccess {
     }
 
     /**
-     * The essentia storage a face gives back, or {@code null} for a face that has none. Items are never
-     * asked for: the player's rule is that this card moves essentia, not what a chest would take.
-     */
-    private @Nullable IEssentiaStorage essentiaAt(Direction face) {
-        BlockEntity be = host.getBlockEntity();
-        if (be == null || !(be.getLevel() instanceof ServerLevel level)) {
-            return null;
-        }
-        BlockPos neighbour = be.getBlockPos().relative(face);
-        Direction from = face.getOpposite();
-        if (!level.isLoaded(neighbour)) {
-            return null;
-        }
-        // A pipe answers TRANSPORT rather than STORAGE, so it is asked first and wrapped to fit.
-        IEssentiaTransport tube = level.getCapability(EssentiaCapabilities.TRANSPORT, neighbour, from);
-        if (tube != null && tube.isConnectable(from)) {
-            return new TubeStorage(tube, from);
-        }
-        return level.getCapability(EssentiaCapabilities.STORAGE, neighbour, from);
-    }
-
-    /**
      * Drops aspects an earlier build of this card let JEI write into the storage row. Once only: later
      * rounds leave the row alone, since an aspect in it may be AE2's own stock of the mark by then.
      */
@@ -142,12 +112,7 @@ public final class EssentiaInterfaceAccess {
             return;
         }
         storageRowCleared = true;
-        for (int slot = 0; slot < storage.size(); slot++) {
-            if (storage.getKey(slot) instanceof AEssentiaKey) {
-                ThELog.LOG.info("[essentia-interface] clearing a stale aspect in storage slot {}", slot);
-                storage.setStack(slot, null);
-            }
-        }
+        EssentiaInterfaceRows.dropStaleAspects(storage);
     }
 
     /**
@@ -159,9 +124,9 @@ public final class EssentiaInterfaceAccess {
             ConfigInventory config,
             MEStorage network,
             IEnergyService energy) {
-        List<AEKey> allowed = whitelist(config);
+        List<AEKey> allowed = EssentiaInterfaceRows.whitelist(config);
         for (Direction face : faces) {
-            IEssentiaStorage neighbour = essentiaAt(face);
+            IEssentiaStorage neighbour = EssentiaNeighbour.at(host, face);
             if (neighbour == null) {
                 continue;
             }
@@ -175,113 +140,12 @@ public final class EssentiaInterfaceAccess {
                     continue;
                 }
                 AEssentiaKey key = AEssentiaKey.of(aspect);
-                if (key == null || !mayEnter(allowed, key)) {
+                if (key == null || !EssentiaInterfaceRows.mayEnter(allowed, key)) {
                     continue;
                 }
                 budget -= pull(neighbour, network, aspect, Math.min(budget, entry.amount()), energy);
             }
         }
-    }
-
-    /** The config row reduced to its essentia keys; an empty answer stands for "no filter at all". */
-    private List<AEKey> whitelist(ConfigInventory row) {
-        List<AEKey> listed = new ArrayList<>();
-        for (int slot = 0; slot < row.size(); slot++) {
-            AEKey key = row.getKey(slot);
-            if (key instanceof AEssentiaKey) {
-                listed.add(key);
-            }
-        }
-        return listed;
-    }
-
-    /**
-     * Whether the config row lets a key in. An empty row is no filter at all: entries that are not
-     * essentia never count, so a row holding only items or fluids behaves like an empty one.
-     */
-    public static boolean mayEnter(List<AEKey> allowed, AEKey key) {
-        boolean filtered = false;
-        for (AEKey entry : allowed) {
-            if (!(entry instanceof AEssentiaKey)) {
-                continue;
-            }
-            filtered = true;
-            if (entry.equals(key)) {
-                return true;
-            }
-        }
-        return !filtered;
-    }
-
-    /**
-     * Empties both rows of an interface whose card has just come out: the marks go, and the storage row
-     * is handed back to the grid. An aspect the grid refuses is dropped; a key of another type stays.
-     */
-    public static void releaseRows(
-            ConfigInventory config,
-            ConfigInventory storage,
-            @Nullable MEStorage network,
-            IActionSource source) {
-        config.clear();
-        for (int slot = 0; slot < storage.size(); slot++) {
-            GenericStack held = storage.getStack(slot);
-            if (held == null) {
-                continue;
-            }
-            long rest = held.amount() - returnToNetwork(held, network, source);
-            if (rest <= 0) {
-                storage.setStack(slot, null);
-            } else if (held.what() instanceof AEssentiaKey) {
-                ThELog.LOG.info(
-                        "[essentia-interface] discarding {} of {} as the card comes out", rest, held.what());
-                storage.setStack(slot, null);
-            } else {
-                storage.setStack(slot, new GenericStack(held.what(), rest));
-            }
-        }
-    }
-
-    /**
-     * Clears the aspects out of a storage row that is about to be dropped, so that breaking an interface
-     * never puts one on the ground. An aspect has no item to be dropped as; the rest goes to the grid.
-     */
-    public static void rescueEssentia(
-            ConfigInventory storage,
-            @Nullable MEStorage network,
-            IActionSource source) {
-        for (int slot = 0; slot < storage.size(); slot++) {
-            GenericStack held = storage.getStack(slot);
-            if (held == null || !(held.what() instanceof AEssentiaKey)) {
-                continue;
-            }
-            long rest = held.amount() - returnToNetwork(held, network, source);
-            if (rest > 0) {
-                ThELog.LOG.info(
-                        "[essentia-interface] discarding {} of {} as the interface goes", rest, held.what());
-            }
-            storage.setStack(slot, null);
-        }
-    }
-
-    /** Whether a row holds an aspect, which is how an interface of ours is told from a plain one. */
-    public static boolean holdsEssentia(ConfigInventory row) {
-        for (int slot = 0; slot < row.size(); slot++) {
-            if (row.getKey(slot) instanceof AEssentiaKey) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /** What the grid takes of a held stack; a grid that is gone or full takes nothing. */
-    private static long returnToNetwork(
-            GenericStack held,
-            @Nullable MEStorage network,
-            IActionSource source) {
-        if (network == null) {
-            return 0;
-        }
-        return network.insert(held.what(), held.amount(), Actionable.MODULATE, source);
     }
 
     /** Neighbour to network: the pay-first order that keeps a refused insert from eating the essentia. */
@@ -336,34 +200,5 @@ public final class EssentiaInterfaceAccess {
     private IActionSource actionSource() {
         // The node is the machine here; IActionHost is that one accessor, so the lambda is the whole of it.
         return IActionSource.ofMachine(() -> node.getNode());
-    }
-
-    /**
-     * A pipe read as a container. Essentia on a pipe lives per face rather than as one store, so one
-     * adapter serves one face and its revision is of no use to a caller that reads every round.
-     */
-    private record TubeStorage(IEssentiaTransport transport, Direction face) implements IEssentiaStorage {
-
-        @Override
-        public AspectList contents() {
-            Holder<IAspect> held = transport.getEssentiaType(face);
-            int amount = transport.getEssentiaAmount(face);
-            return held == null || amount <= 0 ? AspectList.EMPTY : AspectList.EMPTY.add(held, amount);
-        }
-
-        @Override
-        public int insert(Holder<IAspect> aspect, int amount, boolean simulate) {
-            return transport.addEssentia(aspect, amount, face, simulate);
-        }
-
-        @Override
-        public int extract(Holder<IAspect> aspect, int amount, boolean simulate) {
-            return transport.takeEssentia(aspect, amount, face, simulate);
-        }
-
-        @Override
-        public long contentRevision() {
-            return 0;
-        }
     }
 }

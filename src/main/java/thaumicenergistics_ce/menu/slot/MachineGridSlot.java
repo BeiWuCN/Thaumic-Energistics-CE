@@ -6,12 +6,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The server's half of the Knowledge Inscriber's crafting grid.
- * <ul>
- *   <li>Same shape as {@link GhostGridSlot} and no payload: the server already holds the grid the
- *       machine reads, and both sides must lay out the same slot count.
- *   <li>Picking up is refused: here a click would let a player pull out ingredients they never put in.
- * </ul>
+ * The server's half of the Knowledge Inscriber's crafting grid. It has the same shape as
+ * {@link GhostGridSlot} and no payload, because the server already holds the grid the machine
+ * reads and both sides must lay out the same slot count. Picking up is refused, since here a
+ * click would let a player pull out ingredients they never put in.
  */
 public class MachineGridSlot extends Slot {
 

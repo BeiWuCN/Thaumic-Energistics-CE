@@ -13,12 +13,10 @@ import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Recipe;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 
 /**
- * Finds the altar the monitor watches and reads it: the room's symmetry, the ritual's instability and the
- * catalyst the ritual is about to consume.
- * <ul>
- *   <li>A found altar is re-checked in place; a miss backs off, because the cube is 15,625 lookups.
- *   <li>The survey describes the room, not the ritual, so it runs even between rituals.
- * </ul>
+ * Finds the altar the monitor watches and reads it: the room's symmetry, the ritual's instability
+ * and the catalyst the ritual is about to consume. A found altar is re-checked in place, while a
+ * miss backs off, because the cube is 15,625 lookups; and the survey describes the room, not the
+ * ritual, so it runs even between rituals.
  */
 final class AltarSurvey {
 

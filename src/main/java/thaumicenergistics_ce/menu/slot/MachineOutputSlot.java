@@ -6,12 +6,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * A well the machine writes into and the player empties: the Distillation Encoder's written pattern.
- * <ul>
- * <li>Refuses placement, allows pickup: only {@code encode()} writes the pattern.
- * <li>Not a {@code ReadOnlySlot}: a no-op {@code set} swallows the client's
+ * A well the machine writes into and the player empties: the Distillation Encoder's written
+ * pattern. It refuses placement and allows pickup, because only {@code encode()} writes the
+ * pattern. It is not a {@code ReadOnlySlot}: a no-op {@code set} swallows the client's
  * {@code AbstractContainerMenu.setItem} write, so the pattern never reaches the screen.
- * </ul>
  */
 public class MachineOutputSlot extends Slot {
 

@@ -12,12 +12,10 @@ import org.jetbrains.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * Which backpack skin a block asks for.
- * <ul>
- *   <li>Matched by block id inside Thaumaturge's namespace, by substring on purpose: a block, a
- *       plank, a log and a set of stairs all mean the same material to a player pointing at them.
- *   <li>AE2 facades are unwrapped first; anything not listed returns null, leaving the skin alone.
- * </ul>
+ * Which backpack skin a block asks for. Matching is by block id inside Thaumaturge's namespace
+ * and by substring on purpose, since a block, a plank, a log and a set of stairs all mean the
+ * same material to a player pointing at them. AE2 facades are unwrapped first, and anything not
+ * listed returns null, leaving the skin alone.
  */
 public final class FacadeToSkinMapping {
 

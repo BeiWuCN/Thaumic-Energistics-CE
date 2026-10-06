@@ -10,11 +10,9 @@ import thaumicenergistics_ce.ThEIds;
 
 /**
  * "Put this aspect in that config slot", sent by a bus screen when a player drops one out of JEI.
- * <ul>
- *   <li>A slot write cannot work: {@code ConfigMenuInventory} converts through {@code AEItemKey}, so
- *       a non-item key is dropped and the mark vanishes when the server answers.
- *   <li>The aspect therefore travels as an id; an empty {@link ResourceLocation} clears the slot.
- * </ul>
+ * A slot write cannot work, because {@code ConfigMenuInventory} converts through {@code AEItemKey},
+ * so a non-item key is dropped and the mark vanishes when the server answers. The aspect therefore
+ * travels as an id, and an empty {@link ResourceLocation} clears the slot.
  */
 public record EssentiaBusConfigPayload(int containerId, int configSlot, ResourceLocation aspectId)
         implements CustomPacketPayload {

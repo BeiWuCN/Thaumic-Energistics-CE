@@ -39,15 +39,12 @@ import thaumicenergistics_ce.compat.thaumaturge.TcWand;
 import thaumicenergistics_ce.init.ModMenuTypes;
 
 /**
- * An ME crafting terminal on a cable whose crafting grid is an arcane workbench's: the grid, the crystal
- * slots and the wand pay for the craft exactly as they would on a workbench, while the network only
- * covers what the bench cannot - the vis, either from the wand in the wand slot or from the grid's power.
- * <ul>
- *   <li>The inventories are the part's own, not the network's: a crafting grid holds what the player is
- *       arranging right now, which the network must not be able to take.
- *   <li>A recipe matches only once its ingredients are arranged in the grid, so the ingredients are never
- *       taken from the network - filling the grid is what the item list and the JEI transfer are for.
- * </ul>
+ * An ME crafting terminal whose crafting grid is an arcane workbench's: the grid, crystal slots
+ * and the wand pay for the craft as on a workbench, while the network covers only the vis, from
+ * the wand in the wand slot or from the grid's power. The inventories are the part's own, not the
+ * network's, since a crafting grid holds what the player is arranging right now and the network
+ * must not take it. A recipe matches only once its ingredients sit in the grid, so ingredients are
+ * never pulled from the network; filling the grid is what the item list and JEI transfer are for.
  */
 public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         implements ArcaneTerminalHost {
@@ -57,7 +54,7 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
     public static final ResourceLocation INV_WAND = ThEIds.id("arcane_crafting_terminal_wand");
 
     /**
-     * A crystal placed <em>in the grid</em> cannot pay a recipe's crystal cost: counted twice, as ingredient
+     * A crystal placed in the grid cannot pay a recipe's crystal cost: counted twice, as ingredient
      * and payment, {@code ArcaneShapedRecipePattern.matches} rejects every recipe wanting a crystal.
      */
     public static final ResourceLocation INV_CRYSTALS = ThEIds.id("arcane_crafting_terminal_crystals");

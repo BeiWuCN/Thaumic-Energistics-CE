@@ -24,11 +24,9 @@ import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
  * The Arcane Assembler's Jade tooltip: the drawing half of {@link ArcaneAssemblerProvider}.
- * <ul>
- *   <li>Everything it needs is in the data tag the server wrote; the registry lookups are the client's
- *       own, which is why this half lives in the client tree.
- *   <li>Both halves report {@link ArcaneAssemblerProvider#UID}, which is how Jade pairs them.
- * </ul>
+ * Everything it needs is in the data tag the server wrote, and the registry lookups are the
+ * client's own, which is why this half lives in the client tree. Both halves report
+ * {@link ArcaneAssemblerProvider#UID}, which is how Jade pairs them.
  */
 public final class ArcaneAssemblerTooltip implements IBlockComponentProvider {
 

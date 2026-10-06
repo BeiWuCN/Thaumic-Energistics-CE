@@ -26,9 +26,11 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
+import thaumicenergistics_ce.focus.AEWrenchActions;
 import thaumicenergistics_ce.focus.FocusElements;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.ModBlocks;
@@ -50,11 +52,9 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Thaumic Energistics - bridges Thaumaturge essentia with Applied Energistics 2 ME networks.
- * <ul>
- *   <li>Target: Minecraft 1.21.1, NeoForge 21.1.250, Thaumaturge, AE2 19.2.x.</li>
- *   <li>Arcane autocrafting: the Knowledge Inscriber stores an ingredient grid as an AE2 pattern in a
- *       knowledge core; that machine advertises those recipes and runs them for ambient vis.</li>
- * </ul>
+ * Target: Minecraft 1.21.1, NeoForge 21.1.250, Thaumaturge, AE2 19.2.x. For arcane autocrafting
+ * the Knowledge Inscriber stores an ingredient grid as an AE2 pattern in a knowledge core; that
+ * machine advertises those recipes and runs them for ambient vis.
  */
 @Mod(ThEIds.MODID)
 public final class ThaumicEnergistics {
@@ -83,8 +83,8 @@ public final class ThaumicEnergistics {
     }
 
     /**
-     * Registers every part model. The {@code @PartModels} annotation is only a marker in AE2 19, and a
-     * location the renderer cannot find is a crash the moment the part is placed, so this walks them.
+     * Registers every part model: in AE2 19 {@code @PartModels} is only a marker, and a location the
+     * renderer cannot find is a crash the moment the part is placed.
      */
     private static void registerPartModels() {
         List<ResourceLocation> models = new ArrayList<>();
@@ -102,7 +102,7 @@ public final class ThaumicEnergistics {
      * machine forms its own isolated grid and the ME terminal never learns about it.
      */
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        // Implementing the interface is not enough; an unregistered capability leaves it inert.
+        // Implementing the interface is not enough; an unregistered capability stays inert.
         for (BlockEntityType<?> type : List.of(
                 ModBlockEntities.ARCANE_ASSEMBLER.get(),
                 ModBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(),
@@ -150,15 +150,13 @@ public final class ThaumicEnergistics {
     }
 
     /**
-     * Exposes TECE's own parts to the rest of the game. Parts are not block entities, so this needs
-     * AE2's own event, and the lookup is answered through the cable bus the part sits on. Static and
-     * public so the self-test source set can run the very event a part AE2 refuses would throw from.
+     * Exposes TECE's own parts through AE2's own event, since parts are not block entities and the lookup
+     * goes through the cable bus. Static and public so the self-test source set can run the event.
      */
     public static void registerPartCapabilities(RegisterPartCapabilitiesEvent event) {
         TcAura.registerVisSource(event, PartVisInterface.class);
         // A pipe asks a neighbour only for the transport capability, so without this the essentia
-        // storage bus can see a tube but a tube cannot see it. The port is whatever the bus faces,
-        // which is why it is rebuilt per query rather than held.
+        // storage bus can see a tube but a tube cannot see it. The port is rebuilt per query, not held.
         event.register(EssentiaCapabilities.TRANSPORT, (part, context) -> part.transportView(),
                 PartEssentiaStorageBus.class);
     }

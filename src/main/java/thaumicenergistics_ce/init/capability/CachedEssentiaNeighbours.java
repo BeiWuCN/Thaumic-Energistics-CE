@@ -12,12 +12,10 @@ import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The six neighbours of one block entity, remembered instead of re-asked every tick.
- * <ul>
- *   <li>A cache per face, created on first use and dropped when the block entity is removed.
- *   <li>A world signal - a block placed, broken, or a chunk loaded - invalidates it, so a
- *       neighbour that appears later is still found. Per machine, never shared.
- * </ul>
+ * The six neighbours of one block entity, remembered instead of re-asked every tick: a cache
+ * per face, created on first use and dropped when the block entity is removed. A world signal
+ * - a block placed, broken, or a chunk loaded - invalidates it, so a neighbour that appears
+ * later is still found. The cache is per machine and never shared.
  */
 public final class CachedEssentiaNeighbours {
 

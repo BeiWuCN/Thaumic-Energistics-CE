@@ -8,11 +8,9 @@ import thaumicenergistics_ce.menu.MenuEssentiaStorageBus;
 
 /**
  * The Essentia Storage Bus's screen.
- * <ul>
- *   <li>A named class because JEI's ghost ingredient handler registers against a screen class.
- *   <li>Left on AE2's {@code UpgradeableScreen}, its config grid was the one grid an aspect could
- *       not be dragged into.
- * </ul>
+ * It exists as a named class because JEI's ghost ingredient handler registers against a screen
+ * class; left on AE2's UpgradeableScreen, its config grid was the one grid an aspect could not be
+ * dragged into.
  */
 public class ScreenEssentiaStorageBus extends UpgradeableScreen<MenuEssentiaStorageBus> {
 

@@ -21,12 +21,11 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * "Put this aspect in that interface slot", sent when a player drops one out of JEI onto an interface.
- * <ul>
- *   <li>The slot is always in the config row, the row whose marks the card pulls neighbours in with.
- *   <li>An aspect travels as an id: a slot write goes through {@code AEItemKey}, which drops a key that
- *       is not an item - the same reason {@code EssentiaBusConfigPayload} exists.
- * </ul>
+ * "Put this aspect in that interface slot", sent when a player drops one out of JEI onto
+ * an interface. The slot is always in the config row, the row whose marks the card pulls
+ * neighbours in with. An aspect travels as an id, because a slot write goes through
+ * {@code AEItemKey}, which drops a key that is not an item - the same reason
+ * {@code EssentiaBusConfigPayload} exists.
  */
 public record EssentiaInterfaceMarkPayload(int containerId, int index, ResourceLocation aspectId)
         implements CustomPacketPayload {

@@ -11,12 +11,11 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.item.ItemWirelessArcaneCraftingTerminal;
 
 /**
- * "Forget the terminal this item was bound to", sent when the player sneaks and left-clicks with it.
- * <ul>
- *   <li>A left-click into thin air exists only on the client, so the server hears about it only here.
- *   <li>Nothing is carried: the wipe happens on the stack that is held, read again on the server rather
- *       than named by the client - a replayed packet cannot clear a stack the sender never held.
- * </ul>
+ * "Forget the terminal this item was bound to", sent when a player sneaks and left-clicks with it.
+ * A left-click into thin air exists only on the client, so the server hears about it only here.
+ * The payload carries nothing: the wipe happens on the stack that is held, read again on the
+ * server rather than named by the client, so a replayed packet cannot clear a stack the sender
+ * never held.
  */
 public record ArcaneUnbindPayload() implements CustomPacketPayload {
 

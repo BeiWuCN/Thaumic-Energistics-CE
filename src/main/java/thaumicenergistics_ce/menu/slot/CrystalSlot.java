@@ -9,11 +9,9 @@ import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 
 /**
  * One of the Arcane Crafting Terminal's six crystal slots, pinned to a single primal aspect.
- *
- * <ul>
- * <li>Refusal delegates to {@code TcWorkbench.isValidCrystal}, the workbench's own rule
+ * Refusal delegates to {@code TcWorkbench.isValidCrystal}, the workbench's own rule
  * ({@code MenuArcaneWorkbench.addSlots}), so the terminal accepts what the workbench accepts.
- * <li>{@code mayPlace} is the whole gate: every route into the slot goes through it.</ul>
+ * {@code mayPlace} is the whole gate: every route into the slot goes through it.
  */
 public class CrystalSlot extends AppEngSlot {
     private final ResourceKey<IAspect> required;

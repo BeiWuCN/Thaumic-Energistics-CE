@@ -8,11 +8,9 @@ import net.minecraft.resources.ResourceLocation;
 
 /**
  * The Distillation Encoder's Encode button, from the reference build's own two-state sprite.
- * <ul>
- *   <li>Disabled is veiled: the sheet has no disabled frame and "Encode" says nothing on its own.
- *   <li>Drawn 34x14, not the native 32x13, because the reference stretches it to the panel band.
- *   <li>The label is centred, 3 pixels from the top, as the inscriber's label is.
- * </ul>
+ * Disabled is veiled, as the sheet has no disabled frame and "Encode" says nothing on its own; it
+ * is drawn 34x14, not the native 32x13, because the reference stretches it to the panel band. The
+ * label is centred 3 pixels from the top, as the inscriber's label is.
  */
 public class EncodeButton extends Button {
 

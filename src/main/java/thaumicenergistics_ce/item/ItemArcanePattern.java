@@ -11,12 +11,11 @@ import thaumicenergistics_ce.arcane.ArcanePatternDetails;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 
 /**
- * Item form of an arcane pattern, needed so a pending AE2 crafting plan survives a save. AE2 reloads a
- * saved task through {@link PatternDetailsHelper#decodePattern}, which wants an {@code EncodedPatternItem}.
- * <ul>
- *   <li>The definition carries the recipe, not the result: results are not unique among recipes.
- *   <li>Equality matters as much as decoding: the provider index is a {@code HashMap} keyed by both.
- * </ul>
+ * Item form of an arcane pattern, needed so a pending AE2 crafting plan survives a save. AE2
+ * reloads a saved task through {@link PatternDetailsHelper#decodePattern}, which wants an
+ * {@code EncodedPatternItem}. The definition carries the recipe, not the result, because results
+ * are not unique among recipes. Equality matters as much as decoding, because the provider index
+ * is a {@code HashMap} keyed by both.
  */
 public final class ItemArcanePattern extends Item {
 

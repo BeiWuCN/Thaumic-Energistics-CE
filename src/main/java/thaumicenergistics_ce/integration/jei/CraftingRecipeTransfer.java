@@ -26,11 +26,10 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
  * Lets JEI fill the Arcane Crafting Terminal's grid from an ordinary crafting recipe.
- * <ul>
- * <li>A second handler beside the arcane one: without it a missing JEI button reads as broken.
- * <li>Unlike the arcane handler it passes the recipe id, which AE2 resolves in the vanilla recipe manager.
- * <li>Written out rather than left to JEI, which only knows the player's inventory and not the network.
- * </ul>
+ * A second handler beside the arcane one, without which a missing JEI button reads as broken.
+ * Unlike the arcane handler it passes the recipe id, which AE2 resolves in the vanilla recipe
+ * manager. The transfer is written out rather than left to JEI, which only knows the player's
+ * inventory and not the network.
  */
 public class CraftingRecipeTransfer
         implements IRecipeTransferInfo<MenuArcaneCraftingTerminal, RecipeHolder<CraftingRecipe>>,
@@ -53,9 +52,8 @@ public class CraftingRecipeTransfer
     }
 
     /**
-     * Any menu type of this menu class, deliberately: JEI keys its handlers by container class and recipe
-     * type alone, so a handler naming one menu type would leave the other terminal - the wired and the
-     * wireless terminals share this class - without a transfer button.
+     * Any menu type of this menu class: the wired and the wireless terminals share it, so naming one menu
+     * type would leave the other without a transfer button.
      */
     @Override
     public Optional<MenuType<MenuArcaneCraftingTerminal>> getMenuType() {

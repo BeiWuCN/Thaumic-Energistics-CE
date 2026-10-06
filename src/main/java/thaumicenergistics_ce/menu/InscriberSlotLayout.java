@@ -15,11 +15,9 @@ import thaumicenergistics_ce.menu.slot.ReadOnlySlot;
 
 /**
  * The menu's slot bands and the geometry they are laid out on, taken from the reference container:
- * a well's interior, not its frame.
- * <ul>
- *   <li>Band order is the menu's slot order, which both sides match by index.
- *   <li>The add itself stays in the menu: {@code addSlot} is protected, so only the menu can call it.
- * </ul>
+ * a well's interior, not its frame. Band order is the menu's slot order, which both sides match
+ * by index. The add itself stays in the menu, because addSlot is protected and only the menu can
+ * call it.
  */
 final class InscriberSlotLayout {
 

@@ -12,11 +12,9 @@ import net.minecraft.resources.ResourceLocation;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 /**
- * The provider seen as an ME inventory: what the grid hands over, for the world to take away.
- * <ul>
- *   <li>The buffer holds the essentia; everything asked here is asked of it.
- *   <li>Extraction is refused: essentia in the buffer is on its way out, never back in.
- * </ul>
+ * The provider seen as an ME inventory: what the grid hands over, for the world to take away. The
+ * buffer holds the essentia, so everything asked here is asked of it, and extraction is refused
+ * because essentia in the buffer is on its way out and never comes back in.
  */
 final class AlchemyProviderStorage implements MEStorage {
 

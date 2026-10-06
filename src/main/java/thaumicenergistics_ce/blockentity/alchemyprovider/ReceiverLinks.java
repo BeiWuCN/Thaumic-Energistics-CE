@@ -7,12 +7,10 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The receivers one provider serves, and the idle power they cost it.
- * <ul>
- *   <li>A link is refused with the reason as its message: already linked, too far, or one link too many.
- *   <li>Positions are stored immutable: a receiver that moves is a different receiver.
- *   <li>Idle power is the base plus a share per link, set on every change and never saved.
- * </ul>
+ * The receivers one provider serves, and the idle power they cost it. A link is refused with the
+ * reason as its message - already linked, too far, or one link too many - and positions are stored
+ * immutable, so a receiver that moves is a different receiver. Idle power is the base plus a share
+ * per link, set on every change and never saved.
  */
 final class ReceiverLinks {
 

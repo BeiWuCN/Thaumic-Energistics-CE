@@ -4,12 +4,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Cheap change-detection keys for stacks and grids.
- * <ul>
- *   <li>Each replaced a string from {@code getComponentsPatch()}, which serialises every component
- *       to SNBT - a once-a-frame path re-serialised sixty times a second.
- *   <li>An int hash can collide, but a collision costs one skipped recomputation, not a wrong answer.
- * </ul>
+ * Cheap change-detection keys for stacks and grids. Each one replaced a string from
+ * {@code getComponentsPatch()}, which serialises every component to SNBT and ran on a
+ * once-a-frame path, re-serialising sixty times a second. An int hash can collide, but a
+ * collision costs one skipped recomputation rather than a wrong answer.
  */
 public final class StackSignatures {
 

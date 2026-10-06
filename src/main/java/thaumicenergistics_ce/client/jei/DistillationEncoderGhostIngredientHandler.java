@@ -15,11 +15,9 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * Lets the player drag an item from JEI into the Distillation Encoder's source well.
- * <ul>
- *   <li>The well names the item to distil; the dragged stack is <em>not</em> taken, per {@code TemplateSlot}.
- *   <li><b>The two wells are not the same kind of drop:</b> the source well takes an instruction, while
- *       the blank well takes a real pattern out of the inventory, because what lands there is spent.
- * </ul>
+ * The well only names the item to distil: the dragged stack is not taken, as in TemplateSlot. The
+ * two wells are not the same kind of drop, though - the source well takes an instruction, while the
+ * blank well takes a real pattern out of the inventory, because what lands there is spent.
  */
 public class DistillationEncoderGhostIngredientHandler
         implements IGhostIngredientHandler<ScreenDistillationEncoder> {
@@ -86,7 +84,7 @@ public class DistillationEncoderGhostIngredientHandler
     private record SourceTarget<I>(MenuDistillationEncoder menu, int guiLeft, int guiTop) implements Target<I> {
 
         /**
-         * Where JEI draws this target, in <em>screen</em> pixels: the GUI's offset is added because JEI fills
+         * Where JEI draws this target, in screen pixels: the GUI's offset is added because JEI fills
          * this rectangle with no translation of its own, while a slot's x and y are relative to the corner.
          */
         @Override

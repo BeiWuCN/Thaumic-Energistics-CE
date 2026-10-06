@@ -22,11 +22,9 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 /**
  * The Infusion Provider: lets an Infusion Altar draw essentia straight out of the ME network.
- * <ul>
- *   <li>Nothing is buffered - the block is a window onto the network, not a tank.
- *   <li>{@link #getAspects()} answers empty so no pipe treats it as a container to pump.
- *   <li>{@link #takeFromContainer} is all-or-nothing; a partial take is put back and reported as failure.
- * </ul>
+ * Nothing is buffered, because the block is a window onto the network rather than a tank, and
+ * {@link #getAspects()} answers empty so no pipe treats it as a container to pump. A take through
+ * {@link #takeFromContainer} is all-or-nothing: a partial take is put back and reported as failure.
  */
 public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implements IAspectSource {
 

@@ -7,12 +7,10 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * Thaumaturge's focus element registry, as seen from this mod.
- * <ul>
- * <li>{@code FocusElementType} is a NeoForge registry, so register a {@link DeferredRegister} of your
- * own over the same {@code REGISTRY_KEY} - no addon hook, nothing to mix into.
- * <li>Thaumaturge binds it into {@code FocusEngine} before any addon's constructor runs.
- * </ul>
+ * Thaumaturge's focus element registry, as seen from this mod. {@code FocusElementType} is a
+ * NeoForge registry, so register a {@link DeferredRegister} of your own over the same
+ * {@code REGISTRY_KEY}, with no addon hook and nothing to mix into. Thaumaturge binds it into
+ * {@code FocusEngine} before any addon's constructor runs.
  */
 public final class FocusElements {
 

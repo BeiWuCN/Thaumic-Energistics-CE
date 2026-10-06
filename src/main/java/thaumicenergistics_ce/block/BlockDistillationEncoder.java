@@ -17,12 +17,8 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 
 /**
- * The Distillation Encoder block.
- *
- * <ul>
- * <li>Faces horizontally: the art has a front.</li>
- * <li>The four declared horizontal variants need {@code facing}, else missing-texture.</li>
- * </ul>
+ * The Distillation Encoder block. It faces horizontally because the art has a front, and the four
+ * declared horizontal variants need {@code facing}, else they render as a missing-texture cube.
  */
 public class BlockDistillationEncoder extends ThEBaseEntityBlock {
 

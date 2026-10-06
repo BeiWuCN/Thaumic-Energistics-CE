@@ -9,10 +9,9 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Presents an essentia storage as the transport port a pipe expects at a given face.
- * <ul>
- * <li>A pipe asks a neighbour only for {@code EssentiaCapabilities.TRANSPORT}.
- * <li>Suction follows Thaumaturge's own jar, so a pipe may push into the bus or draw from it.
- * </ul>
+ * A pipe asks a neighbour only for EssentiaCapabilities.TRANSPORT, so this port has to exist
+ * for the bus to be seen at all; the suction it reports follows Thaumaturge's own jar, which
+ * is what lets a pipe both push into the bus and draw from it.
  */
 final class EssentiaTransportView implements IEssentiaTransport {
 

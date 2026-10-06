@@ -17,10 +17,9 @@ import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
  * The Alchemy Provider's Jade tooltip: whether the grid reaches it and who it hands essentia to.
- * <ul>
- *   <li>The drawing half of {@link AlchemyProviderProvider}, paired with it by the shared UID.
- *   <li>Three lines: the grid state, the bound receivers, and a bar for the reserve the link spends.
- * </ul>
+ * It is the drawing half of {@link AlchemyProviderProvider}, paired with it by the shared UID. It
+ * draws three lines: the grid state, the bound receivers, and a bar for the reserve the link
+ * spends.
  */
 public final class AlchemyProviderTooltip implements IBlockComponentProvider {
 

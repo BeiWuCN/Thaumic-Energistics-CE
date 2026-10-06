@@ -32,11 +32,10 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 /**
  * The Alchemy Provider: where the ME network puts essentia meant for the world - the opposite half
- * of the Import Bus, handing essentia to whatever container or machine it touches.
- *
- * <ul><li>The buffer is a waypoint, not storage: inserted essentia is pushed to a neighbour on the
- * next tick and is never persisted.</li><li>A provider with nothing attached refuses everything, while a
- * machine that wants essentia is served from the grid, through a reserve the grid keeps filled.</li></ul>
+ * of the Import Bus, handing essentia to whatever container or machine it touches. The buffer is a
+ * waypoint, not storage: inserted essentia is pushed to a neighbour on the next tick and is never
+ * persisted. A provider with nothing attached refuses everything, while a machine that wants
+ * essentia is served from the grid, through a reserve the grid keeps filled.
  */
 public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         implements IStorageProvider, IGridTickable, IEssentiaStorage {

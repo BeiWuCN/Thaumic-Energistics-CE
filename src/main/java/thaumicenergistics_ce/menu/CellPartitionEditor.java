@@ -18,11 +18,9 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The partition grid the cell workbench shows: what the cell holds and what a client marks in it.
- * <ul>
- *   <li>A mark reaches the server only as {@code PartitionWellPayload}; a well the client draws is
- *       a view of the cell, never a source of writes.
- *   <li>Every write goes through the menu's cell and the block entity is told the cell changed.
- * </ul>
+ * A mark reaches the server only as PartitionWellPayload, since a well the client draws is a view
+ * of the cell and never a source of writes. Every write goes through the menu's cell, and the
+ * block entity is then told the cell changed.
  */
 final class CellPartitionEditor {
 

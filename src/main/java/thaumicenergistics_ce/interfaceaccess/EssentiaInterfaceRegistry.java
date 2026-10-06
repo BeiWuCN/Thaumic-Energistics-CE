@@ -23,15 +23,14 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
  * Every ME interface that carries our access card, plus the rounds that drive them. A chunk load and a
  * menu opening each admit a host; a sweep then revisits the loaded chunks, one per tick.
- * <ul>
- *   <li>Nothing here is ever saved: the catalog is rebuilt from what is in the world.
- *   <li>An entry whose host is gone is dropped on the first round that notices it.
- * </ul>
+ * Nothing here is ever saved, since the catalog is rebuilt from what is in the world, and an entry
+ * whose host is gone is dropped on the first round that notices it.
  */
 public final class EssentiaInterfaceRegistry {
 
@@ -54,6 +53,7 @@ public final class EssentiaInterfaceRegistry {
         NeoForge.EVENT_BUS.addListener(EssentiaInterfaceRegistry::onChunkUnload);
         NeoForge.EVENT_BUS.addListener(EssentiaInterfaceRegistry::onContainerOpen);
         NeoForge.EVENT_BUS.addListener(EssentiaInterfaceRegistry::onServerTick);
+        NeoForge.EVENT_BUS.addListener(EssentiaInterfaceRegistry::onServerStopped);
     }
 
     /**
@@ -94,6 +94,16 @@ public final class EssentiaInterfaceRegistry {
     public static void onServerTick(ServerTickEvent.Post event) {
         sweep(event.getServer().getAllLevels());
         dispatchRounds(event.getServer().getTickCount());
+    }
+
+    /**
+     * A stopped server takes the catalog with it: the entries name block entities of a world that is gone,
+     * and the chunk list is keyed by dimension, so the next world would inherit the previous one's.
+     */
+    public static void onServerStopped(ServerStoppedEvent event) {
+        ENTRIES.clear();
+        LOADED.clear();
+        cursor = 0;
     }
 
     /**

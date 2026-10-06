@@ -10,10 +10,8 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The bubble's read face: what the monitor last sent to a client, and the snapshot that sends it.
- * <ul>
- *   <li>Read through, never computed here: the bubble the player sees is the server's snapshot.
- *   <li>The book is not part of it - it travels as a blockstate.
- * </ul>
+ * It is read through and never computed here, so the bubble the player sees is the server's
+ * snapshot; the book is not part of it, because it travels as a blockstate.
  */
 final class OccultMonitorReadings {
 
