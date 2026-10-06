@@ -17,7 +17,7 @@ import thaumicenergistics_ce.integration.jade.JadeGridState;
  * The Alchemy Provider's Jade tooltip: whether the grid reaches it and who it hands essentia to.
  * <ul>
  *   <li>The drawing half of {@link AlchemyProviderProvider}, paired with it by the shared UID.
- *   <li>Three lines: the grid state, the bound receivers, and the AE the link still has to spend.
+ *   <li>Three lines: the grid state, the bound receivers, and a bar for the reserve the link spends.
  * </ul>
  */
 public final class AlchemyProviderTooltip implements IBlockComponentProvider {
@@ -46,12 +46,11 @@ public final class AlchemyProviderTooltip implements IBlockComponentProvider {
                     .withStyle(ChatFormatting.WHITE)));
         }
 
-        // An empty reserve is why nothing is moving, so it is drawn red rather than as a plain number.
+        // A bar rather than a number: how full the reserve is says whether the link can still pay,
+        // and an empty bar is read at a glance where "0 / 40 AE" had to be read word by word.
         int cache = tag.getInt(AlchemyProviderProvider.TAG_CACHE);
-        tooltip.add(helper.text(Component
-                .translatable("thaumicenergistics_ce.jade.alchemy_provider.cache", cache,
-                        (int) BlockEntityAlchemyProvider.AE_CACHE)
-                .withStyle(cache > 0 ? ChatFormatting.WHITE : ChatFormatting.RED)));
+        tooltip.add(helper.progress(
+                (float) Math.min(1.0, cache / BlockEntityAlchemyProvider.AE_CACHE)));
     }
 
     @Override
