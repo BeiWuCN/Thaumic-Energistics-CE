@@ -145,7 +145,7 @@ public final class ClientSetup {
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/terminals/wireless_terminal.json")));
-        // The wireless arcane terminal draws the same workbench, so it reuses the wired terminal's style.
+        // The wireless terminal draws the same workbench, so it layers a title over that style.
         event.register(
                 ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                 (MenuArcaneCraftingTerminal menu, Inventory inventory, Component title) ->
@@ -153,7 +153,7 @@ public final class ClientSetup {
                                 menu,
                                 inventory,
                                 title,
-                                StyleManager.loadStyleDoc("/screens/arcane_crafting_terminal.json")));
+                                StyleManager.loadStyleDoc("/screens/wireless_arcane_crafting_terminal.json")));
         event.register(
                 ModMenuTypes.ESSENTIA_STORAGE_BUS.get(),
                 (MenuEssentiaStorageBus menu, Inventory inventory, Component title) ->

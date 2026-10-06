@@ -28,6 +28,12 @@ public final class ModMenuTypes {
     public static final DeferredRegister<MenuType<?>> REGISTRY =
             DeferredRegister.create(Registries.MENU, ThEIds.MODID);
 
+    /**
+     * AE2's name for a terminal, "终端". The header names only the storage half; which crafting half hangs off
+     * it is the section title the style draws above the grid.
+     */
+    private static final String TERMINAL_TITLE = "gui.ae2.Terminal";
+
     public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneAssembler>> ARCANE_ASSEMBLER =
             REGISTRY.register(
                     "arcane_assembler", () -> IMenuTypeExtension.create(MenuArcaneAssembler::new));
@@ -63,8 +69,7 @@ public final class ModMenuTypes {
                                     (menuType, id, playerInventory, host) ->
                                             new MenuArcaneCraftingTerminal(menuType, id, playerInventory, host),
                                     ITerminalHost.class)
-                            .withMenuTitle(host -> Component.translatable(
-                                    "gui.thaumicenergistics_ce.ArcaneCraftingTerminal"))
+                            .withMenuTitle(host -> Component.translatable(TERMINAL_TITLE))
                             .buildUnregistered(ThEIds.id("arcane_crafting_terminal")));
 
     /**
@@ -98,8 +103,7 @@ public final class ModMenuTypes {
             WIRELESS_ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
                     "wireless_arcane_crafting_terminal",
                     () -> MenuTypeBuilder.create(MenuArcaneCraftingTerminal::new, IPortableTerminal.class)
-                            .withMenuTitle(host -> Component.translatable(
-                                    "gui.thaumicenergistics_ce.wireless_arcane_crafting_terminal"))
+                            .withMenuTitle(host -> Component.translatable(TERMINAL_TITLE))
                             .buildUnregistered(ThEIds.id("wireless_arcane_crafting_terminal")));
 
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaStorageBus>> ESSENTIA_STORAGE_BUS =

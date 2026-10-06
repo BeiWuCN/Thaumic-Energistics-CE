@@ -1,0 +1,15 @@
+{
+  "$schema": "../schema.json",
+  "includes": ["arcane_crafting_terminal.json"],
+  "text": {
+    "crafting_grid_title": {
+      "text": {
+        "translate": "gui.thaumicenergistics_ce.wireless_arcane_crafting_terminal"
+      },
+      "position": {
+        "left": 8,
+        "bottom": 179
+      }
+    }
+  }
+}
