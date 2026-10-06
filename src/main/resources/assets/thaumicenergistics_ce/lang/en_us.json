@@ -206,6 +206,7 @@
   "thaumicenergistics_ce.jade.essentia_stored": "Essentia: %d / %d",
   "thaumicenergistics_ce.jade.alchemy_provider.no_receivers": "Wireless receivers: none",
   "thaumicenergistics_ce.jade.alchemy_provider.receivers": "Wireless receivers: %s / %s",
+  "thaumicenergistics_ce.jade.alchemy_provider.reserve": "%s / %s AE",
   "config.jade.plugin_thaumicenergistics_ce.alchemy_provider": "Alchemy Provider",
   "thaumicenergistics_ce.jade.alchemy_receiver.bound": "Bound to the Alchemy Provider at (%s, %s, %s)",
   "thaumicenergistics_ce.jade.alchemy_receiver.hint": "Select here with the Wireless Linker, then Shift-right-click the provider",

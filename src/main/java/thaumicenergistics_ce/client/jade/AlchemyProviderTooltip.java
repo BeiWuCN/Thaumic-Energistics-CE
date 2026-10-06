@@ -8,7 +8,9 @@ import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.config.IPluginConfig;
+import snownee.jade.api.ui.BoxStyle;
 import snownee.jade.api.ui.IElementHelper;
+import snownee.jade.api.ui.ProgressStyle;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider;
 import thaumicenergistics_ce.integration.jade.AlchemyProviderProvider;
 import thaumicenergistics_ce.integration.jade.JadeGridState;
@@ -46,11 +48,15 @@ public final class AlchemyProviderTooltip implements IBlockComponentProvider {
                     .withStyle(ChatFormatting.WHITE)));
         }
 
-        // A bar rather than a number: how full the reserve is says whether the link can still pay,
-        // and an empty bar is read at a glance where "0 / 40 AE" had to be read word by word.
+        // A bar rather than a number, in the shape Jade draws for an energy buffer: plain progress()
+        // is its arrow gauge, so the reserve gets a striped bar with the numbers written across it.
         int cache = tag.getInt(AlchemyProviderProvider.TAG_CACHE);
+        ProgressStyle style = helper.progressStyle().color(0xFFAA0000, 0xFF660000);
         tooltip.add(helper.progress(
-                (float) Math.min(1.0, cache / BlockEntityAlchemyProvider.AE_CACHE)));
+                (float) Math.min(1.0, cache / BlockEntityAlchemyProvider.AE_CACHE),
+                Component.translatable("thaumicenergistics_ce.jade.alchemy_provider.reserve", cache,
+                        (int) BlockEntityAlchemyProvider.AE_CACHE),
+                style, BoxStyle.getNestedBox(), true));
     }
 
     @Override
