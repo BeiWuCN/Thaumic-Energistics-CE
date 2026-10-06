@@ -22,6 +22,7 @@ import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaTerminal;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaVibrationChamber;
 import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
+import thaumicenergistics_ce.client.jade.FluxTransferTooltip;
 import thaumicenergistics_ce.client.render.ArcaneAssemblerRenderer;
 import thaumicenergistics_ce.client.render.EssentiaKeyRenderHandler;
 import thaumicenergistics_ce.client.render.bubble.OccultMonitorBubbleRenderer;
@@ -49,8 +50,8 @@ public final class ClientSetup {
     private ClientSetup() {}
 
     /**
-     * Tells AE2 how to draw an essentia key, on {@code FMLClientSetupEvent} rather than with the
-     * screens because it must be in place before anything draws a key. Enqueued onto the client thread.
+     * Client-side AE2 registrations, on {@code FMLClientSetupEvent} rather than with the screens because both
+     * must be in place before anything draws: the essentia key's renderer and the part tooltip body.
      */
     @SubscribeEvent
     public static void registerKeyRendering(FMLClientSetupEvent event) {
@@ -89,6 +90,9 @@ public final class ClientSetup {
         event.enqueueWork(() -> {
             AEKeyRendering.register(
                     AEssentiaKeyType.INSTANCE, AEssentiaKey.class, new EssentiaKeyRenderHandler());
+            // The part's tooltip body belongs on this side with the rest of the drawing code; the
+            // server half is registered from the mod constructor.
+            FluxTransferTooltip.register();
         });
     }
 

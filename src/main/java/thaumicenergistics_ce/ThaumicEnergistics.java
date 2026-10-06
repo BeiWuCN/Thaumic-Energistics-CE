@@ -38,6 +38,7 @@ import thaumicenergistics_ce.init.ModCreativeTab;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
+import thaumicenergistics_ce.integration.jade.FluxTransferStatusProvider;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.init.ModNetwork;
 import thaumicenergistics_ce.init.capability.ThEItemCapabilities;
@@ -75,6 +76,9 @@ public final class ThaumicEnergistics {
         modBus.addListener(this::commonSetup);
 
         registerPartModels();
+        // The flux transfer interface reports its own tooltip lines through AE2's part registry
+        // rather than Jade's, since Jade only sees block entities.
+        FluxTransferStatusProvider.register();
         // The ME interface's access card works on the game bus rather than a grid tickable, since AE2
         // reports nothing when a card goes in or out - see EssentiaInterfaceRegistry.
         EssentiaInterfaceRegistry.register();

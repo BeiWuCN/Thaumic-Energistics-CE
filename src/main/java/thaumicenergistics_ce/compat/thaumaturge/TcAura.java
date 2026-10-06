@@ -41,6 +41,24 @@ public final class TcAura {
         return AuraHelper.drainVis(level, pos, want, simulate);
     }
 
+    /** The chunk's flux over its base. At or above 1.0 the chunk is at the rift threshold, which is
+     * as full as the flux transfer interface is willing to make it. */
+    public static float fluxSaturation(Level level, BlockPos pos) {
+        return AuraHelper.getFluxSaturation(level, pos);
+    }
+
+    /** Flux is a number on the chunk, not a thing in a slot: adding it conjures it, and there is no
+     * upstream to ask whether it fits - hence {@link #fluxSaturation} as the only back pressure. */
+    public static void addFlux(Level level, BlockPos pos, float amount) {
+        AuraHelper.addFlux(level, pos, amount);
+    }
+
+    /** Takes up to {@code want} flux off the chunk and reports what actually came: the drawing end's
+     * source is the chunk it stands in, so a short answer means there was nothing there to move. */
+    public static float drainFlux(Level level, BlockPos pos, float want, boolean simulate) {
+        return AuraHelper.drainFlux(level, pos, want, simulate);
+    }
+
     // -- vis relay chain -----------------------------------------------------
 
     public static boolean relayWithinReach(ServerLevel level, BlockPos consumer) {
