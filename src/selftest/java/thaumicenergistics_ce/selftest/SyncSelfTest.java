@@ -23,7 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
-import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 import thaumicenergistics_ce.blockentity.vibrationchamber.VibrationChamberSync;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
@@ -178,8 +178,8 @@ public final class SyncSelfTest {
      * A machine outside a world has no level, so the write half and the read tail both routes share run here.
      */
     private static int checkBubbleTag(HolderLookup.Provider registries, List<String> failures) {
-        Object bubble = syncUnit("infusionmonitor.InfusionMonitorSync", failures);
-        Method write = reach("thaumicenergistics_ce.blockentity.infusionmonitor.InfusionMonitorSync", "write",
+        Object bubble = syncUnit("occultmonitor.OccultMonitorSync", failures);
+        Method write = reach("thaumicenergistics_ce.blockentity.occultmonitor.OccultMonitorSync", "write",
                 CompoundTag.class, HolderLookup.Provider.class, failures);
         CompoundTag tag = new CompoundTag();
         if (bubble != null && write != null) {
@@ -208,8 +208,8 @@ public final class SyncSelfTest {
         lines.add(line);
         tag.put("BubbleEssentia", lines);
 
-        BlockEntityInfusionMonitor reader = newMonitor();
-        Method apply = reach("thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor", "applyBubbleState",
+        BlockEntityOccultMonitor reader = newMonitor();
+        Method apply = reach("thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor", "applyBubbleState",
                 CompoundTag.class, HolderLookup.Provider.class, failures);
         if (apply != null) {
             try {
@@ -237,7 +237,7 @@ public final class SyncSelfTest {
             failures.add("a bubble's craft came back as " + reader.bubbleCraft() + ", not 3 stone");
         }
         compared++;
-        if (!reader.bubbleEssentia().equals(List.of(new BlockEntityInfusionMonitor.EssentiaLine("x", 1, 2)))) {
+        if (!reader.bubbleEssentia().equals(List.of(new BlockEntityOccultMonitor.EssentiaLine("x", 1, 2)))) {
             failures.add("a one line bubble came back as " + reader.bubbleEssentia());
         }
         compared++;
@@ -387,8 +387,8 @@ public final class SyncSelfTest {
         compared += sameWord("the speed upgrades", key(jade + "ArcaneAssemblerProvider", "TAG_SPEED", failures),
                 key(machine + "assembler.AssemblerUpgrades", "TAG_SPEED_UPGRADES", failures), failures);
         compared += sameWord("the monitor's reporting flag",
-                key(jade + "InfusionMonitorProvider", "TAG_REPORTING", failures),
-                key(machine + "infusionmonitor.InfusionMonitorSync", "TAG_REPORTING", failures), failures);
+                key(jade + "OccultMonitorProvider", "TAG_REPORTING", failures),
+                key(machine + "occultmonitor.OccultMonitorSync", "TAG_REPORTING", failures), failures);
         return compared;
     }
 
@@ -418,9 +418,9 @@ public final class SyncSelfTest {
                 BlockPos.ZERO, ModBlocks.ESSENTIA_VIBRATION_CHAMBER.get().defaultBlockState());
     }
 
-    private static BlockEntityInfusionMonitor newMonitor() {
-        return new BlockEntityInfusionMonitor(
-                BlockPos.ZERO, ModBlocks.INFUSION_MONITOR.get().defaultBlockState());
+    private static BlockEntityOccultMonitor newMonitor() {
+        return new BlockEntityOccultMonitor(
+                BlockPos.ZERO, ModBlocks.OCCULT_MONITOR.get().defaultBlockState());
     }
 
     private static Holder<IAspect> aspect(ServerLevel level, String path) {

@@ -13,7 +13,7 @@ import thaumicenergistics_ce.block.BlockArcaneAssembler;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
-import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
@@ -38,7 +38,7 @@ public final class ThEItemCapabilities {
         event.registerBlockEntity(ITEM, ModBlockEntities.KNOWLEDGE_INSCRIBER.get(),
                 (machine, side) -> inscriber(machine));
         event.registerBlockEntity(ITEM, ModBlockEntities.ESSENTIA_CELL_WORKBENCH.get(), (machine, side) -> workbench(machine));
-        event.registerBlockEntity(ITEM, ModBlockEntities.INFUSION_MONITOR.get(), (machine, side) -> monitor(machine.getInventory()));
+        event.registerBlockEntity(ITEM, ModBlockEntities.OCCULT_MONITOR.get(), (machine, side) -> monitor(machine.getInventory()));
         event.registerBlockEntity(ITEM, ModBlockEntities.ARCANE_ASSEMBLER.get(), (machine, side) -> assembler(machine, side));
     }
 
@@ -62,7 +62,7 @@ public final class ThEItemCapabilities {
     }
 
     private static SlotRangeItemHandler monitor(SimpleContainer bookSlot) {
-        return new SlotRangeItemHandler(bookSlot, BlockEntityInfusionMonitor.BOOK_SLOT, 1);
+        return new SlotRangeItemHandler(bookSlot, BlockEntityOccultMonitor.BOOK_SLOT, 1);
     }
 
     static SlotRangeItemHandler assembler(BlockEntityArcaneAssembler machine, @Nullable Direction side) {

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity.infusionmonitor;
+package thaumicenergistics_ce.blockentity.occultmonitor;
 
 import appeng.api.networking.IGridNode;
 import net.minecraft.world.level.Level;
@@ -13,16 +13,16 @@ import thaumicenergistics_ce.util.ThELog;
  *   <li>The labels name what is printed, not what the field that held it was called.
  * </ul>
  */
-final class MonitorTrace {
+final class OccultMonitorTrace {
 
     static final boolean TRACE = "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_MONITOR_TRACE"));
 
-    private final BlockEntityInfusionMonitor monitor;
+    private final BlockEntityOccultMonitor monitor;
     private final AltarSurvey survey;
 
     private long nextTrace;
 
-    MonitorTrace(BlockEntityInfusionMonitor monitor, AltarSurvey survey) {
+    OccultMonitorTrace(BlockEntityOccultMonitor monitor, AltarSurvey survey) {
         this.monitor = monitor;
         this.survey = survey;
     }
@@ -37,7 +37,7 @@ final class MonitorTrace {
             return;
         }
         nextTrace = now + 20;
-        BlockEntityInfusionMonitor.Report report = survey.report();
+        BlockEntityOccultMonitor.Report report = survey.report();
         InfusionRisk risk = survey.risk();
         ThELog.LOG.info(
                 "[mon] at {} node={} book={} found={} searched={} altar={} crafting={} problems={} base={}"

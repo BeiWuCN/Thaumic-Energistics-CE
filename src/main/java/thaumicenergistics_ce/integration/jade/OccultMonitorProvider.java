@@ -9,28 +9,28 @@ import net.minecraft.resources.ResourceLocation;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IServerDataProvider;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 
 /**
- * The Infusion Monitor's Jade server data: whether it can see, and what it sees.
+ * The Occult Monitor's Jade server data: whether it can see, and what it sees.
  * <ul>
  *   <li>The server reads the altar and writes the answers into the data tag; stability is server-side.
- *   <li>The drawing half is {@code client.jade.InfusionMonitorTooltip}, paired by {@link #UID}. The
+ *   <li>The drawing half is {@code client.jade.OccultMonitorTooltip}, paired by {@link #UID}. The
  *       numbers travel raw so that half can put them in the player's own words.
  * </ul>
  */
-public class InfusionMonitorProvider implements IServerDataProvider<BlockAccessor> {
+public class OccultMonitorProvider implements IServerDataProvider<BlockAccessor> {
 
-    public static final InfusionMonitorProvider INSTANCE = new InfusionMonitorProvider();
+    public static final OccultMonitorProvider INSTANCE = new OccultMonitorProvider();
 
-    /** Shared with {@code client.jade.InfusionMonitorTooltip}: Jade pairs the two halves by UID. */
+    /** Shared with {@code client.jade.OccultMonitorTooltip}: Jade pairs the two halves by UID. */
     public static final ResourceLocation UID =
-            ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "infusion_monitor");
+            ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "occult_monitor");
 
     /** Whether the monitor has its book and an altar - without both it says nothing about risk.
      * The bubble the machine syncs to its own renderer spells this word too
-     * ({@code InfusionMonitorSync.TAG_REPORTING}); the two are separate documents, so
+     * ({@code OccultMonitorSync.TAG_REPORTING}); the two are separate documents, so
      * {@code SyncSelfTest} asserts they stay equal. */
     public static final String TAG_REPORTING = "Reporting";
     public static final String TAG_FOUND_ALTAR = "FoundAltar";
@@ -49,14 +49,14 @@ public class InfusionMonitorProvider implements IServerDataProvider<BlockAccesso
 
     @Override
     public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
-        if (!(accessor.getBlockEntity() instanceof BlockEntityInfusionMonitor monitor)) {
+        if (!(accessor.getBlockEntity() instanceof BlockEntityOccultMonitor monitor)) {
             return;
         }
         IGridNode node = monitor.getActionableNode();
         JadeGridState.of(node).write(tag, node);
 
         tag.putBoolean(TAG_REPORTING, monitor.canReport());
-        BlockEntityInfusionMonitor.Report report = monitor.report();
+        BlockEntityOccultMonitor.Report report = monitor.report();
         tag.putBoolean(TAG_FOUND_ALTAR, report.foundAltar());
         tag.putBoolean(TAG_SEARCHED, monitor.hasSearchedAltar());
         tag.putBoolean(TAG_HAS_BOOK, monitor.hasBook());

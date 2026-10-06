@@ -1,6 +1,6 @@
 {
   "type": "thaumaturge:arcane_workbench_shaped",
-  "_note": "The Infusion Monitor. Takes the Thaumonomicon as its key - the book is what gives it sight, and the recipe says so by consuming one. A coalescence core to read the altar's aura, an infusion altar's own pillar stone for the frame, and salis mundus to bind the book to the machine. 50 vis, with warp: the 1.12.2 tree puts this behind the infusion provider and gives it a cost in more than materials.",
+  "_note": "The Occult Monitor. Takes the Thaumonomicon as its key - the book is what gives it sight, and the recipe says so by consuming one. A coalescence core to read the altar's aura, an infusion altar's own pillar stone for the frame, and salis mundus to bind the book to the machine. 50 vis, with warp: the 1.12.2 tree puts this behind the infusion provider and gives it a cost in more than materials.",
   "crystals": [],
   "key": {
     "S": {
@@ -26,7 +26,7 @@
   ],
   "vis": 50,
   "result": {
-    "id": "thaumicenergistics_ce:infusion_monitor",
+    "id": "thaumicenergistics_ce:occult_monitor",
     "count": 1
   }
 }

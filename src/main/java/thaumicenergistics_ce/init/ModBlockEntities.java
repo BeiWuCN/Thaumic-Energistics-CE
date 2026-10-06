@@ -12,7 +12,7 @@ import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
 import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
-import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
@@ -76,12 +76,12 @@ public final class ModBlockEntities {
                             Set.of(ModBlocks.DISTILLATION_ENCODER.get()),
                             null));
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityInfusionMonitor>>
-            INFUSION_MONITOR = REGISTRY.register(
-                    "infusion_monitor",
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityOccultMonitor>>
+            OCCULT_MONITOR = REGISTRY.register(
+                    "occult_monitor",
                     () -> new BlockEntityType<>(
-                            BlockEntityInfusionMonitor::new,
-                            Set.of(ModBlocks.INFUSION_MONITOR.get()),
+                            BlockEntityOccultMonitor::new,
+                            Set.of(ModBlocks.OCCULT_MONITOR.get()),
                             null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityAlchemyProviderConnection>>

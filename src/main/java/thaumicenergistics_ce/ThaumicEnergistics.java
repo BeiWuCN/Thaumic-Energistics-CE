@@ -106,7 +106,7 @@ public final class ThaumicEnergistics {
                 ModBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(),
                 ModBlockEntities.ALCHEMY_PROVIDER.get(),
                 ModBlockEntities.INFUSION_PROVIDER.get(),
-                ModBlockEntities.INFUSION_MONITOR.get())) {
+                ModBlockEntities.OCCULT_MONITOR.get())) {
             event.registerBlockEntity(
                     AECapabilities.IN_WORLD_GRID_NODE_HOST,
                     type,

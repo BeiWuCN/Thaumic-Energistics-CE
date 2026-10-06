@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity.infusionmonitor;
+package thaumicenergistics_ce.blockentity.occultmonitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +21,12 @@ import thaumicenergistics_ce.util.ThELog;
  * takes the pulse down never came.
  * </ul>
  */
-public final class MonitorPulseSelfTest {
+public final class OccultMonitorPulseSelfTest {
 
     private static final String TAG = "monitor-pulse";
 
     /** How long to wait before the pulse must be down: the pulse itself, plus a tick of slack. */
-    private static final int WAIT_TICKS = BlockEntityInfusionMonitor.PULSE_TICKS + 10;
+    private static final int WAIT_TICKS = BlockEntityOccultMonitor.PULSE_TICKS + 10;
 
     private static boolean hasRun;
 
@@ -36,7 +36,7 @@ public final class MonitorPulseSelfTest {
 
     private static final List<String> failures = new ArrayList<>();
 
-    private MonitorPulseSelfTest() {}
+    private OccultMonitorPulseSelfTest() {}
 
     public static void run(ServerStartedEvent event) {
         if (hasRun) {
@@ -68,8 +68,8 @@ public final class MonitorPulseSelfTest {
     private static void place(ServerLevel world) {
         BlockPos at = world.getSharedSpawnPos().above(4);
         pos = at;
-        world.setBlockAndUpdate(at, ModBlocks.INFUSION_MONITOR.get().defaultBlockState());
-        if (!(world.getBlockEntity(at) instanceof BlockEntityInfusionMonitor monitor)) {
+        world.setBlockAndUpdate(at, ModBlocks.OCCULT_MONITOR.get().defaultBlockState());
+        if (!(world.getBlockEntity(at) instanceof BlockEntityOccultMonitor monitor)) {
             failures.add("the monitor block came up without its machine, so nothing could be pulsed");
             return;
         }
@@ -93,7 +93,7 @@ public final class MonitorPulseSelfTest {
         if (signal != 0) {
             failures.add("the pulse still reads " + signal + " after " + WAIT_TICKS + " ticks");
         }
-        if (world.getBlockEntity(at) instanceof BlockEntityInfusionMonitor monitor && monitor.pulsing()) {
+        if (world.getBlockEntity(at) instanceof BlockEntityOccultMonitor monitor && monitor.pulsing()) {
             failures.add("the machine still calls itself pulsing once the pulse should be over");
         }
         world.removeBlock(at, false);

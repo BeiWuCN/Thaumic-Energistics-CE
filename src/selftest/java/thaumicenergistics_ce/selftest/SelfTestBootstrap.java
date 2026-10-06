@@ -3,7 +3,7 @@ package thaumicenergistics_ce.selftest;
 import net.neoforged.neoforge.common.NeoForge;
 import thaumicenergistics_ce.init.SelfTestProvider;
 import thaumicenergistics_ce.blockentity.assembler.AssemblerScanCostSelfTest;
-import thaumicenergistics_ce.blockentity.infusionmonitor.MonitorPulseSelfTest;
+import thaumicenergistics_ce.blockentity.occultmonitor.OccultMonitorPulseSelfTest;
 import thaumicenergistics_ce.init.capability.MachineItemBandSelfTest;
 import thaumicenergistics_ce.part.EssentiaTransportViewSelfTest;
 
@@ -52,8 +52,8 @@ public final class SelfTestBootstrap implements SelfTestProvider {
         NeoForge.EVENT_BUS.addListener(AssemblerScanCostSelfTest::run);
         // The pulse a finished ritual leaves on the machine's block: 15 to a neighbour, and gone by
         // itself a tick later. A stuck signal is what a player cannot fix, so it waits and looks.
-        NeoForge.EVENT_BUS.addListener(MonitorPulseSelfTest::run);
-        NeoForge.EVENT_BUS.addListener(MonitorPulseSelfTest::onServerTick);
+        NeoForge.EVENT_BUS.addListener(OccultMonitorPulseSelfTest::run);
+        NeoForge.EVENT_BUS.addListener(OccultMonitorPulseSelfTest::onServerTick);
         // What the wireless arcane terminal writes when it is paired: the menu test needs a player to log
         // in, and this half - the item's own tag - is exactly the half a headless server can hold.
         NeoForge.EVENT_BUS.addListener(WirelessArcaneBindingSelfTest::run);

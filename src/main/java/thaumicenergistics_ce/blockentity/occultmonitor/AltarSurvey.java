@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity.infusionmonitor;
+package thaumicenergistics_ce.blockentity.occultmonitor;
 
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import java.util.List;
@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor.Report;
+import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor.Report;
 import thaumicenergistics_ce.compat.thaumaturge.TcInfusion;
 import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Altar;
 import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Recipe;
@@ -22,7 +22,7 @@ import thaumicenergistics_ce.infusion.InfusionRisk;
  */
 final class AltarSurvey {
 
-    /** How far off the altar may stand. {@code MonitorCraftPulse} scans the same cube to find the
+    /** How far off the altar may stand. {@code OccultMonitorCraftPulse} scans the same cube to find the
      * machines that answer for it, so the two distances cannot drift apart. */
     static final int ALTAR_SCAN_RANGE = 12;
 
@@ -32,7 +32,7 @@ final class AltarSurvey {
 
     private static final int RECIPE_CACHE_TICKS = 40;
 
-    private final BlockEntityInfusionMonitor monitor;
+    private final BlockEntityOccultMonitor monitor;
     private final EssentiaReach reach;
 
     private @Nullable BlockPos matrixPos;
@@ -41,7 +41,7 @@ final class AltarSurvey {
     private long nextSurvey;
 
     /** Wait before the next search; doubles per miss, so a new altar is found within a second. */
-    private int altarMissBackoff = BlockEntityInfusionMonitor.SCAN_INTERVAL;
+    private int altarMissBackoff = BlockEntityOccultMonitor.SCAN_INTERVAL;
 
     private List<BlockPos> surveyedProblems = List.of();
     /** The altar {@link #surveyedProblems} was taken at. */
@@ -63,7 +63,7 @@ final class AltarSurvey {
 
     private ItemStack craftDisplay = ItemStack.EMPTY;
 
-    AltarSurvey(BlockEntityInfusionMonitor monitor, EssentiaReach reach) {
+    AltarSurvey(BlockEntityOccultMonitor monitor, EssentiaReach reach) {
         this.monitor = monitor;
         this.reach = reach;
     }
@@ -99,7 +99,7 @@ final class AltarSurvey {
             Altar altar = TcInfusion.altarAt(level, pos);
             if (altar != null) {
                 matrixPos = pos.immutable();
-                altarMissBackoff = BlockEntityInfusionMonitor.SCAN_INTERVAL;
+                altarMissBackoff = BlockEntityOccultMonitor.SCAN_INTERVAL;
                 altarSearched = true;
                 report = read(altar, matrixPos);
                 return;

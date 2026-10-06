@@ -1,10 +1,10 @@
-package thaumicenergistics_ce.blockentity.infusionmonitor;
+package thaumicenergistics_ce.blockentity.occultmonitor;
 
 import java.util.List;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor.EssentiaLine;
+import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor.EssentiaLine;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 import thaumicenergistics_ce.util.ThELog;
 
@@ -15,15 +15,15 @@ import thaumicenergistics_ce.util.ThELog;
  *   <li>The book is not part of it - it travels as a blockstate.
  * </ul>
  */
-final class InfusionMonitorReadings {
+final class OccultMonitorReadings {
 
-    private final BlockEntityInfusionMonitor monitor;
+    private final BlockEntityOccultMonitor monitor;
     private final AltarSurvey survey;
     private final EssentiaReach reach;
 
-    private final InfusionMonitorSync bubble = new InfusionMonitorSync();
+    private final OccultMonitorSync bubble = new OccultMonitorSync();
 
-    InfusionMonitorReadings(BlockEntityInfusionMonitor monitor, AltarSurvey survey, EssentiaReach reach) {
+    OccultMonitorReadings(BlockEntityOccultMonitor monitor, AltarSurvey survey, EssentiaReach reach) {
         this.monitor = monitor;
         this.survey = survey;
         this.reach = reach;
@@ -31,7 +31,7 @@ final class InfusionMonitorReadings {
 
     /** Offers the current reading to the sync unit, which sends it only when something moved. */
     void sync(boolean reportable, InfusionRisk risk) {
-        bubble.offer(monitor, new InfusionMonitorSync.Snapshot(
+        bubble.offer(monitor, new OccultMonitorSync.Snapshot(
                 reportable,
                 risk.tier(),
                 risk.instability(),
@@ -74,12 +74,12 @@ final class InfusionMonitorReadings {
     }
 
     void apply(CompoundTag tag, HolderLookup.Provider registries) {
-        if (MonitorTrace.TRACE && monitor.getLevel() != null && monitor.getLevel().isClientSide()) {
+        if (OccultMonitorTrace.TRACE && monitor.getLevel() != null && monitor.getLevel().isClientSide()) {
             ThELog.LOG.info(
                     "[bubble] tag at {} reporting={} tier={} instability={}",
-                    monitor.getBlockPos(), tag.getBoolean(InfusionMonitorSync.TAG_REPORTING),
-                    tag.getInt(InfusionMonitorSync.TAG_TIER),
-                    tag.getInt(InfusionMonitorSync.TAG_INSTABILITY));
+                    monitor.getBlockPos(), tag.getBoolean(OccultMonitorSync.TAG_REPORTING),
+                    tag.getInt(OccultMonitorSync.TAG_TIER),
+                    tag.getInt(OccultMonitorSync.TAG_INSTABILITY));
         }
         bubble.read(tag, registries);
     }

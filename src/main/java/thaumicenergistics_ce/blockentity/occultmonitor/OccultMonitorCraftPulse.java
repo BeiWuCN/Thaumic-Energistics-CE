@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity.infusionmonitor;
+package thaumicenergistics_ce.blockentity.occultmonitor;
 
 import com.leclowndu93150.thaumaturge.api.infusion.InfusionCraftedEvent;
 import net.minecraft.core.BlockPos;
@@ -16,9 +16,9 @@ import thaumicenergistics_ce.ThEIds;
  * </ul>
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
-public final class MonitorCraftPulse {
+public final class OccultMonitorCraftPulse {
 
-    private MonitorCraftPulse() {}
+    private OccultMonitorCraftPulse() {}
 
     @SubscribeEvent
     public static void onCrafted(InfusionCraftedEvent event) {
@@ -27,7 +27,7 @@ public final class MonitorCraftPulse {
         int range = AltarSurvey.ALTAR_SCAN_RANGE;
         for (BlockPos pos : BlockPos.betweenClosed(
                 matrix.offset(-range, -range, -range), matrix.offset(range, range, range))) {
-            if (level.getBlockEntity(pos) instanceof BlockEntityInfusionMonitor monitor
+            if (level.getBlockEntity(pos) instanceof BlockEntityOccultMonitor monitor
                     && monitor.watches(matrix)) {
                 monitor.startPulse();
             }

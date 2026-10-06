@@ -24,19 +24,19 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 
 /**
- * The Infusion Monitor block: three states, none decorative, and one pulse that is not a state.
+ * The Occult Monitor block: three states, none decorative, and one pulse that is not a state.
  * <ul>
  *   <li>{@code facing} turns the frame, {@code book} is the Thaumonomicon as a real state, and
  *       {@code network} is the ME connection; the models come from those three names.
  *   <li>The pulse: the block asks the machine, and a scheduled tick takes it down again.
  * </ul>
  */
-public class BlockInfusionMonitor extends ThEBaseEntityBlock {
+public class BlockOccultMonitor extends ThEBaseEntityBlock {
 
-    public static final MapCodec<BlockInfusionMonitor> CODEC = simpleCodec(BlockInfusionMonitor::new);
+    public static final MapCodec<BlockOccultMonitor> CODEC = simpleCodec(BlockOccultMonitor::new);
 
     /** The strength of the finished-craft pulse, which is a redstone signal and not an analogue read. */
     private static final int SIGNAL_STRENGTH = 15;
@@ -47,7 +47,7 @@ public class BlockInfusionMonitor extends ThEBaseEntityBlock {
 
     public static final BooleanProperty NETWORK = BooleanProperty.create("network");
 
-    public BlockInfusionMonitor(Properties properties) {
+    public BlockOccultMonitor(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
@@ -56,7 +56,7 @@ public class BlockInfusionMonitor extends ThEBaseEntityBlock {
     }
 
     @Override
-    protected MapCodec<? extends BlockInfusionMonitor> codec() {
+    protected MapCodec<? extends BlockOccultMonitor> codec() {
         return CODEC;
     }
 
@@ -110,7 +110,7 @@ public class BlockInfusionMonitor extends ThEBaseEntityBlock {
             // the condition is one both sides know: what is in hand, and whether sneaking.
             return InteractionResult.SUCCESS;
         }
-        if (!(level.getBlockEntity(pos) instanceof BlockEntityInfusionMonitor monitor)) {
+        if (!(level.getBlockEntity(pos) instanceof BlockEntityOccultMonitor monitor)) {
             return InteractionResult.PASS;
         }
         var takenBack = monitor.interact(held, sneaking);
@@ -125,7 +125,7 @@ public class BlockInfusionMonitor extends ThEBaseEntityBlock {
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new BlockEntityInfusionMonitor(pos, state);
+        return new BlockEntityOccultMonitor(pos, state);
     }
 
     @Override
@@ -136,7 +136,7 @@ public class BlockInfusionMonitor extends ThEBaseEntityBlock {
     /** The finished-craft pulse: strength 15 while the machine holds it, nothing otherwise. */
     @Override
     protected int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction side) {
-        return level.getBlockEntity(pos) instanceof BlockEntityInfusionMonitor monitor && monitor.pulsing()
+        return level.getBlockEntity(pos) instanceof BlockEntityOccultMonitor monitor && monitor.pulsing()
                 ? SIGNAL_STRENGTH
                 : 0;
     }
@@ -144,7 +144,7 @@ public class BlockInfusionMonitor extends ThEBaseEntityBlock {
     /** Takes the pulse down: the machine scheduled this tick when the ritual finished. */
     @Override
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        if (level.getBlockEntity(pos) instanceof BlockEntityInfusionMonitor monitor) {
+        if (level.getBlockEntity(pos) instanceof BlockEntityOccultMonitor monitor) {
             monitor.endPulse();
         }
     }
@@ -152,7 +152,7 @@ public class BlockInfusionMonitor extends ThEBaseEntityBlock {
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock())
-                && level.getBlockEntity(pos) instanceof BlockEntityInfusionMonitor monitor) {
+                && level.getBlockEntity(pos) instanceof BlockEntityOccultMonitor monitor) {
             monitor.dropContents();
         }
         super.onRemove(state, level, pos, newState, movedByPiston);

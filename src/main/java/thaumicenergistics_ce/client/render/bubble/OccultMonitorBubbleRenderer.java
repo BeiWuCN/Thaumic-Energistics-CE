@@ -13,20 +13,20 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
-import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 import thaumicenergistics_ce.client.render.bubble.BubbleCells.Cell;
 import thaumicenergistics_ce.client.render.bubble.BubbleCells.ChipCell;
 import thaumicenergistics_ce.client.render.bubble.BubbleCells.TextCell;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The bubble the Infusion Monitor floats above itself: how dangerous the altar is, what it is making,
+ * The bubble the Occult Monitor floats above itself: how dangerous the altar is, what it is making,
  * whether the room can finish it, and that it is drawn rather than spawned - a {@code TextDisplay}
  * entity can be left behind by a crash. What it says is {@link BubbleCells}, the box it sits on
  * {@link RoundedPanel}; what is left here is the pose and the two ways a cell is drawn, and the few
  * blocks of range the panel is drawn within.
  */
-public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInfusionMonitor> {
+public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityOccultMonitor> {
 
     private static final double HEIGHT = 1.7;
 
@@ -50,7 +50,7 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
 
     private final BubbleCells cells = new BubbleCells();
 
-    public MonitorBubbleRenderer(BlockEntityRendererProvider.Context context) {}
+    public OccultMonitorBubbleRenderer(BlockEntityRendererProvider.Context context) {}
 
     /** The same eight blocks, asked before {@link #shouldRender}: the machine is dropped from the list
      * the client walks at all, not merely skipped once it gets there. */
@@ -61,13 +61,13 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
 
     /** The near half of the cull: reading distance, measured from the machine's own block. */
     @Override
-    public boolean shouldRender(BlockEntityInfusionMonitor monitor, Vec3 cameraPos) {
+    public boolean shouldRender(BlockEntityOccultMonitor monitor, Vec3 cameraPos) {
         return Vec3.atCenterOf(monitor.getBlockPos()).closerThan(cameraPos, CULL_RANGE);
     }
 
     @Override
     public void render(
-            BlockEntityInfusionMonitor monitor,
+            BlockEntityOccultMonitor monitor,
             float partialTick,
             PoseStack pose,
             MultiBufferSource buffers,

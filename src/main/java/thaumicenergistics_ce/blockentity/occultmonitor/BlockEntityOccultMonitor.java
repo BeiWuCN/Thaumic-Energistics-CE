@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity.infusionmonitor;
+package thaumicenergistics_ce.blockentity.occultmonitor;
 
 import appeng.api.networking.GridFlags;
 import appeng.api.networking.IGridNode;
@@ -23,17 +23,17 @@ import thaumicenergistics_ce.infusion.InfusionRisk;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
- * The Infusion Monitor: watches an Infusion Altar and reports what the ritual will do to the room.
+ * The Occult Monitor: watches an Infusion Altar and reports what the ritual will do to the room.
  * <ul>
  *   <li>{@code InfusionStabilitySurvey} names the blocks that break the altar's symmetry.
  *   <li>A Thaumonomicon must be in the book slot, or {@link #canReport()} stays false.
  * </ul>
  */
-public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implements IGridTickable {
+public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements IGridTickable {
 
     public static final int BOOK_SLOT = 0;
 
-    private static final double IDLE_POWER = 256.0;
+    private static final double IDLE_POWER = 32.0;
 
     /** How long the finished-craft pulse stands, in game ticks. Half a second is one clean flash. */
     static final int PULSE_TICKS = 10;
@@ -46,7 +46,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
 
     // The book, the two blockstates that mirror it, and the right-click it answers, in one place.
 
-    private final MonitorBookSlot bookSlot = new MonitorBookSlot(this);
+    private final OccultMonitorBookSlot bookSlot = new OccultMonitorBookSlot(this);
 
     // Reading the room is two jobs: finding the altar, and asking what can pay for the ritual.
 
@@ -56,11 +56,11 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
 
     /** One log line a second when {@code THAUMICENERGISTICS_MONITOR_TRACE=true}, because the failure
      * modes - no grid, no power, no book, no altar - otherwise look alike. */
-    private final MonitorTrace trace = new MonitorTrace(this, survey);
+    private final OccultMonitorTrace trace = new OccultMonitorTrace(this, survey);
 
     // The bubble is drawn on the client, so its numbers travel in the update tag.
 
-    private final InfusionMonitorReadings readings = new InfusionMonitorReadings(this, survey, reach);
+    private final OccultMonitorReadings readings = new OccultMonitorReadings(this, survey, reach);
 
     // What a finished ritual leaves behind: one redstone pulse, taken down by a scheduled block tick.
 
@@ -68,8 +68,8 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
      * its ritual - across a reload, say - would be a lie about an altar that is long done. */
     private long pulseUntil;
 
-    public BlockEntityInfusionMonitor(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.INFUSION_MONITOR.get(), pos, state);
+    public BlockEntityOccultMonitor(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.OCCULT_MONITOR.get(), pos, state);
         // REQUIRE_CHANNEL so the monitor shows up in channel readings, as every other machine does.
         getMainNode()
                 .setIdlePowerUsage(IDLE_POWER)
@@ -90,7 +90,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     }
 
     /** Adds the book, or removes it only when the player sneaks - a plain right-click would disarm
-     * the machine. See {@code BlockInfusionMonitor}. */
+     * the machine. See {@code BlockOccultMonitor}. */
     public @Nullable ItemStack interact(ItemStack held, boolean sneaking) {
         return bookSlot.interact(held, sneaking);
     }
@@ -218,7 +218,7 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     }
 
     /** Starts the pulse a completed ritual earns, and tells the redstone around the machine. Called by
-     * {@code MonitorCraftPulse}, which is why it is not public; the block's scheduled tick ends it. */
+     * {@code OccultMonitorCraftPulse}, which is why it is not public; the block's scheduled tick ends it. */
     void startPulse() {
         if (!(level instanceof ServerLevel server)) {
             return;

@@ -15,20 +15,20 @@ import snownee.jade.api.ITooltip;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.IElementHelper;
 import thaumicenergistics_ce.infusion.InfusionRisk;
-import thaumicenergistics_ce.integration.jade.InfusionMonitorProvider;
+import thaumicenergistics_ce.integration.jade.OccultMonitorProvider;
 import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
- * The Infusion Monitor's Jade tooltip: the drawing half of {@link InfusionMonitorProvider}.
+ * The Occult Monitor's Jade tooltip: the drawing half of {@link OccultMonitorProvider}.
  * <ul>
  *   <li>The raw numbers come from the server; the words are built here, so they follow the player's
  *       language rather than the server's.
  *   <li>Risk is split as "4 (base 1 + altar 3)" so the player knows which half to fix.
  * </ul>
  */
-public final class InfusionMonitorTooltip implements IBlockComponentProvider {
+public final class OccultMonitorTooltip implements IBlockComponentProvider {
 
-    public static final InfusionMonitorTooltip INSTANCE = new InfusionMonitorTooltip();
+    public static final OccultMonitorTooltip INSTANCE = new OccultMonitorTooltip();
 
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
@@ -42,20 +42,20 @@ public final class InfusionMonitorTooltip implements IBlockComponentProvider {
 
         // The two faults behind the state line: a missing book is the machine's own fault and the one a
         // player can fix, while "no altar" is a claim about the room that only a search may make.
-        if (!tag.getBoolean(InfusionMonitorProvider.TAG_HAS_BOOK)) {
+        if (!tag.getBoolean(OccultMonitorProvider.TAG_HAS_BOOK)) {
             tooltip.add(helper.text(Component.translatable("thaumicenergistics_ce.jade.monitor.no_book")
                     .withStyle(ChatFormatting.GOLD)));
         }
-        if (!tag.getBoolean(InfusionMonitorProvider.TAG_REPORTING)) {
-            if (tag.getBoolean(InfusionMonitorProvider.TAG_SEARCHED)
-                    && !tag.getBoolean(InfusionMonitorProvider.TAG_FOUND_ALTAR)) {
+        if (!tag.getBoolean(OccultMonitorProvider.TAG_REPORTING)) {
+            if (tag.getBoolean(OccultMonitorProvider.TAG_SEARCHED)
+                    && !tag.getBoolean(OccultMonitorProvider.TAG_FOUND_ALTAR)) {
                 tooltip.add(helper.text(Component.translatable("thaumicenergistics_ce.jade.monitor.no_matrix")
                         .withStyle(ChatFormatting.GRAY)));
             }
             return;
         }
 
-        int tier = Math.max(1, Math.min(InfusionRisk.MAX_TIER, tag.getInt(InfusionMonitorProvider.TAG_TIER)));
+        int tier = Math.max(1, Math.min(InfusionRisk.MAX_TIER, tag.getInt(OccultMonitorProvider.TAG_TIER)));
         tooltip.add(helper.text(Component.translatable(
                         "thaumicenergistics_ce.jade.monitor.tier",
                         Component.translatable("thaumicenergistics_ce.jade.monitor.risk." + tier),
@@ -63,29 +63,29 @@ public final class InfusionMonitorTooltip implements IBlockComponentProvider {
                 .withStyle(colourOf(tier))));
         // The live stability first, because it is the number that moves, then the two behind the ritual.
         // Negative is not an error: the altar clamps from -100 to 25 and throws things below zero.
-        float stability = tag.getInt(InfusionMonitorProvider.TAG_STABILITY) / 10.0F;
+        float stability = tag.getInt(OccultMonitorProvider.TAG_STABILITY) / 10.0F;
         tooltip.add(helper.text(Component.translatable(
                 "thaumicenergistics_ce.jade.monitor.stability",
                 String.format("%.1f", stability),
                 Component.translatable("gui.thaumaturge.infusion.stability." + tierKeyOf(stability)))));
         tooltip.add(helper.text(Component.translatable(
                         "thaumicenergistics_ce.jade.monitor.instability",
-                        tag.getInt(InfusionMonitorProvider.TAG_BASE)
-                                + tag.getInt(InfusionMonitorProvider.TAG_ALTAR),
-                        tag.getInt(InfusionMonitorProvider.TAG_BASE),
-                        tag.getInt(InfusionMonitorProvider.TAG_ALTAR))
+                        tag.getInt(OccultMonitorProvider.TAG_BASE)
+                                + tag.getInt(OccultMonitorProvider.TAG_ALTAR),
+                        tag.getInt(OccultMonitorProvider.TAG_BASE),
+                        tag.getInt(OccultMonitorProvider.TAG_ALTAR))
                 .withStyle(ChatFormatting.GRAY)));
         tooltip.add(helper.text(Component.translatable("thaumicenergistics_ce.jade.monitor.tier." + tier)
                 .withStyle(ChatFormatting.GRAY)));
 
-        if (tag.getBoolean(InfusionMonitorProvider.TAG_CRAFTING)) {
+        if (tag.getBoolean(OccultMonitorProvider.TAG_CRAFTING)) {
             tooltip.add(helper.text(
                     Component.translatable("thaumicenergistics_ce.jade.monitor.crafting")
                             .withStyle(ChatFormatting.WHITE)));
         }
 
         // Built here on the client, so the names come out in the player's language rather than the server's.
-        ListTag wanted = tag.getList(InfusionMonitorProvider.TAG_WANTED, Tag.TAG_STRING);
+        ListTag wanted = tag.getList(OccultMonitorProvider.TAG_WANTED, Tag.TAG_STRING);
         if (!wanted.isEmpty()) {
             List<Component> names = new ArrayList<>();
             for (int i = 0; i < wanted.size(); i++) {
@@ -135,6 +135,6 @@ public final class InfusionMonitorTooltip implements IBlockComponentProvider {
 
     @Override
     public ResourceLocation getUid() {
-        return InfusionMonitorProvider.UID;
+        return OccultMonitorProvider.UID;
     }
 }

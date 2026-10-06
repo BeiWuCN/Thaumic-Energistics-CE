@@ -128,7 +128,7 @@ public final class EssentiaSelfTest {
             "alchemy_provider",
             "infusion_provider",
             "distillation_encoder",
-            "infusion_monitor",
+            "occult_monitor",
             "alchemy_provider_connection",
             "wireless_connector",
             "alkusure86fumo",
@@ -461,26 +461,26 @@ public final class EssentiaSelfTest {
             }
         }
 
-        // The infusion monitor's blockstate needs both properties its model selects on: a missing one does
+        // The occult monitor's blockstate needs both properties its model selects on: a missing one does
         // fail, the variants never match and the block renders with no model.
         expectGridHost(
                 AECapabilities.IN_WORLD_GRID_NODE_HOST,
-                new thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor(
+                new thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor(
                         origin,
-                        thaumicenergistics_ce.init.ModBlocks.INFUSION_MONITOR
+                        thaumicenergistics_ce.init.ModBlocks.OCCULT_MONITOR
                                 .get().defaultBlockState()),
-                "infusion_monitor as a grid node host",
+                "occult_monitor as a grid node host",
                 failures);
-        var monitor = new thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor(
-                origin, thaumicenergistics_ce.init.ModBlocks.INFUSION_MONITOR.get().defaultBlockState());
+        var monitor = new thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor(
+                origin, thaumicenergistics_ce.init.ModBlocks.OCCULT_MONITOR.get().defaultBlockState());
         if (!monitor.hasBook()) {
-            var state = thaumicenergistics_ce.init.ModBlocks.INFUSION_MONITOR.get().defaultBlockState();
-            if (!state.hasProperty(thaumicenergistics_ce.block.BlockInfusionMonitor.BOOK)) {
-                failures.add("the infusion monitor's blockstate is missing its 'book' property - the "
+            var state = thaumicenergistics_ce.init.ModBlocks.OCCULT_MONITOR.get().defaultBlockState();
+            if (!state.hasProperty(thaumicenergistics_ce.block.BlockOccultMonitor.BOOK)) {
+                failures.add("the occult monitor's blockstate is missing its 'book' property - the "
                         + "blockstate file selects a book model on it and would never draw one");
             }
-            if (!state.hasProperty(thaumicenergistics_ce.block.BlockInfusionMonitor.NETWORK)) {
-                failures.add("the infusion monitor's blockstate is missing its 'network' property - the "
+            if (!state.hasProperty(thaumicenergistics_ce.block.BlockOccultMonitor.NETWORK)) {
+                failures.add("the occult monitor's blockstate is missing its 'network' property - the "
                         + "blockstate file lights the model on it and would never light up");
             }
         }

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity.infusionmonitor;
+package thaumicenergistics_ce.blockentity.occultmonitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,14 +11,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import thaumicenergistics_ce.blockentity.ClientSyncSend;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 
-/** The infusion monitor's client copy of the bubble, split out of {@link BlockEntityInfusionMonitor}:
+/** The occult monitor's client copy of the bubble, split out of {@link BlockEntityOccultMonitor}:
  * what the bubble renderer draws, what the altar last handed over, and the tag both sides read. The
  * renderer reads a copy, replaced only when a packet goes out, so a render pass never sees half a
  * bubble; the altar's live numbers are compared against the copy to decide on that packet. */
-final class InfusionMonitorSync {
+final class OccultMonitorSync {
 
     /** The bubble's wire names. The Jade payload spells the first one in its own contract
-     * ({@code InfusionMonitorProvider.TAG_REPORTING}); the sync self-test holds the two equal. */
+     * ({@code OccultMonitorProvider.TAG_REPORTING}); the sync self-test holds the two equal. */
     static final String TAG_REPORTING = "Reporting";
     static final String TAG_TIER = "BubbleTier";
     static final String TAG_INSTABILITY = "BubbleInstability";
@@ -38,7 +38,7 @@ final class InfusionMonitorSync {
     private int stabilityTimesTen = 250;
     private boolean crafting;
     private ItemStack craft = ItemStack.EMPTY;
-    private final List<BlockEntityInfusionMonitor.EssentiaLine> essentia = new ArrayList<>();
+    private final List<BlockEntityOccultMonitor.EssentiaLine> essentia = new ArrayList<>();
 
     private boolean sentReporting;
     private int sentTier = -1;
@@ -53,7 +53,7 @@ final class InfusionMonitorSync {
             int stabilityTimesTen,
             boolean crafting,
             ItemStack craft,
-            List<BlockEntityInfusionMonitor.EssentiaLine> lines) {}
+            List<BlockEntityOccultMonitor.EssentiaLine> lines) {}
 
     boolean reporting() {
         return reporting;
@@ -79,7 +79,7 @@ final class InfusionMonitorSync {
         return craft;
     }
 
-    List<BlockEntityInfusionMonitor.EssentiaLine> essentia() {
+    List<BlockEntityOccultMonitor.EssentiaLine> essentia() {
         return List.copyOf(essentia);
     }
 
@@ -118,7 +118,7 @@ final class InfusionMonitorSync {
         tag.putBoolean(TAG_CRAFTING, crafting);
         tag.put(TAG_CRAFT, craft.saveOptional(registries));
         ListTag lines = new ListTag();
-        for (BlockEntityInfusionMonitor.EssentiaLine line : essentia) {
+        for (BlockEntityOccultMonitor.EssentiaLine line : essentia) {
             CompoundTag entry = new CompoundTag();
             entry.putString(TAG_ASPECT, line.aspect());
             entry.putInt(TAG_DRAWN, line.drawn());
@@ -140,7 +140,7 @@ final class InfusionMonitorSync {
         ListTag lines = tag.getList(TAG_ESSENTIA, Tag.TAG_COMPOUND);
         for (int i = 0; i < lines.size(); i++) {
             CompoundTag entry = lines.getCompound(i);
-            essentia.add(new BlockEntityInfusionMonitor.EssentiaLine(
+            essentia.add(new BlockEntityOccultMonitor.EssentiaLine(
                     entry.getString(TAG_ASPECT), entry.getInt(TAG_DRAWN), entry.getInt(TAG_TOTAL)));
         }
     }

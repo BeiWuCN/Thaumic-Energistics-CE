@@ -64,8 +64,8 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> DISTILLATION_ENCODER =
             REGISTRY.registerSimpleBlockItem(ModBlocks.DISTILLATION_ENCODER);
 
-    public static final DeferredItem<BlockItem> INFUSION_MONITOR =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.INFUSION_MONITOR);
+    public static final DeferredItem<BlockItem> OCCULT_MONITOR =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.OCCULT_MONITOR);
 
     public static final DeferredItem<BlockItem> ALCHEMY_PROVIDER_CONNECTION =
             REGISTRY.registerSimpleBlockItem(ModBlocks.ALCHEMY_PROVIDER_CONNECTION);

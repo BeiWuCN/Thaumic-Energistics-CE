@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
+import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 
 /**
  * What the bubble says, as rows of cells: a chip is an aspect drawn from Thaumaturge's own textures, a text
@@ -39,12 +39,12 @@ final class BubbleCells {
     record ChipCell(Holder<IAspect> aspect) implements Cell {}
 
     private record Built(int tier, String stability, boolean crafting, ItemStack craft,
-            List<BlockEntityInfusionMonitor.EssentiaLine> essentia, List<List<Cell>> rows) {}
+            List<BlockEntityOccultMonitor.EssentiaLine> essentia, List<List<Cell>> rows) {}
 
-    private final Map<BlockEntityInfusionMonitor, Built> built = new WeakHashMap<>();
+    private final Map<BlockEntityOccultMonitor, Built> built = new WeakHashMap<>();
 
-    List<List<Cell>> rowsFor(Font font, BlockEntityInfusionMonitor monitor) {
-        List<BlockEntityInfusionMonitor.EssentiaLine> essentia = monitor.bubbleEssentia();
+    List<List<Cell>> rowsFor(Font font, BlockEntityOccultMonitor monitor) {
+        List<BlockEntityOccultMonitor.EssentiaLine> essentia = monitor.bubbleEssentia();
         ItemStack craft = monitor.bubbleCraft();
         Built previous = built.get(monitor);
         if (previous != null
@@ -61,8 +61,8 @@ final class BubbleCells {
         return rows;
     }
 
-    private static List<List<Cell>> rows(Font font, BlockEntityInfusionMonitor monitor,
-            List<BlockEntityInfusionMonitor.EssentiaLine> essentia, ItemStack craft) {
+    private static List<List<Cell>> rows(Font font, BlockEntityOccultMonitor monitor,
+            List<BlockEntityOccultMonitor.EssentiaLine> essentia, ItemStack craft) {
         List<List<Cell>> rows = new ArrayList<>();
         int tier = monitor.bubbleTier();
         rows.add(List.of(new TextCell(Component.translatable(
@@ -80,7 +80,7 @@ final class BubbleCells {
         }
 
         // One aspect per row; a full one turns green.
-        for (BlockEntityInfusionMonitor.EssentiaLine line : essentia) {
+        for (BlockEntityOccultMonitor.EssentiaLine line : essentia) {
             Holder<IAspect> aspect = aspectOf(line.aspect());
             if (aspect == null) {
                 continue;

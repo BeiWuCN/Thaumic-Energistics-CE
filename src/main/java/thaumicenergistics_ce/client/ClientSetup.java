@@ -27,7 +27,7 @@ import thaumicenergistics_ce.client.gui.ScreenEssentiaVibrationChamber;
 import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 import thaumicenergistics_ce.client.render.ArcaneAssemblerRenderer;
 import thaumicenergistics_ce.client.render.EssentiaKeyRenderHandler;
-import thaumicenergistics_ce.client.render.bubble.MonitorBubbleRenderer;
+import thaumicenergistics_ce.client.render.bubble.OccultMonitorBubbleRenderer;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
@@ -102,7 +102,7 @@ public final class ClientSetup {
     public static void registerRenderers(
             EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(
-                ModBlockEntities.INFUSION_MONITOR.get(), MonitorBubbleRenderer::new);
+                ModBlockEntities.OCCULT_MONITOR.get(), OccultMonitorBubbleRenderer::new);
         event.registerBlockEntityRenderer(
                 ModBlockEntities.ARCANE_ASSEMBLER.get(),
                 ArcaneAssemblerRenderer::new);

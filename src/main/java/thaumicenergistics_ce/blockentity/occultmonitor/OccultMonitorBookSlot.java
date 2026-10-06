@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity.infusionmonitor;
+package thaumicenergistics_ce.blockentity.occultmonitor;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.block.BlockInfusionMonitor;
+import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
@@ -18,16 +18,16 @@ import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
  *   <li>Both blockstates are written from here, so the block class stays a set of thin overrides.
  * </ul>
  */
-final class MonitorBookSlot {
+final class OccultMonitorBookSlot {
 
-    private final BlockEntityInfusionMonitor monitor;
+    private final BlockEntityOccultMonitor monitor;
 
     private final SimpleContainer container = new SimpleContainer(1) {
         @Override
         public void setChanged() {
             super.setChanged();
             monitor.setChanged();
-            MonitorBookSlot.this.updateBlockState();
+            OccultMonitorBookSlot.this.updateBlockState();
         }
 
         @Override
@@ -36,7 +36,7 @@ final class MonitorBookSlot {
         }
     };
 
-    MonitorBookSlot(BlockEntityInfusionMonitor monitor) {
+    OccultMonitorBookSlot(BlockEntityOccultMonitor monitor) {
         this.monitor = monitor;
     }
 
@@ -45,7 +45,7 @@ final class MonitorBookSlot {
     }
 
     ItemStack book() {
-        return container.getItem(BlockEntityInfusionMonitor.BOOK_SLOT);
+        return container.getItem(BlockEntityOccultMonitor.BOOK_SLOT);
     }
 
     boolean has() {
@@ -53,14 +53,14 @@ final class MonitorBookSlot {
     }
 
     /** Adds the book, or removes it only when the player sneaks - a plain right-click would disarm
-     * the machine. See {@code BlockInfusionMonitor}. */
+     * the machine. See {@code BlockOccultMonitor}. */
     @Nullable ItemStack interact(ItemStack held, boolean sneaking) {
         if (has()) {
             if (!sneaking || !held.isEmpty()) {
                 return null;
             }
             ItemStack removed = book().copy();
-            container.setItem(BlockEntityInfusionMonitor.BOOK_SLOT, ItemStack.EMPTY);
+            container.setItem(BlockEntityOccultMonitor.BOOK_SLOT, ItemStack.EMPTY);
             return removed;
         }
         if (held.isEmpty() || !TcRegistry.isThaumonomicon(held)) {
@@ -68,7 +68,7 @@ final class MonitorBookSlot {
         }
         ItemStack placed = held.copyWithCount(1);
         held.shrink(1);
-        container.setItem(BlockEntityInfusionMonitor.BOOK_SLOT, placed);
+        container.setItem(BlockEntityOccultMonitor.BOOK_SLOT, placed);
         return null;
     }
 
@@ -78,12 +78,12 @@ final class MonitorBookSlot {
             return;
         }
         BlockState state = monitor.getBlockState();
-        if (!state.hasProperty(BlockInfusionMonitor.BOOK)) {
+        if (!state.hasProperty(BlockOccultMonitor.BOOK)) {
             return;
         }
         boolean present = has();
-        if (state.getValue(BlockInfusionMonitor.BOOK) != present) {
-            level.setBlock(monitor.getBlockPos(), state.setValue(BlockInfusionMonitor.BOOK, present), 3);
+        if (state.getValue(BlockOccultMonitor.BOOK) != present) {
+            level.setBlock(monitor.getBlockPos(), state.setValue(BlockOccultMonitor.BOOK, present), 3);
         }
     }
 
@@ -93,21 +93,21 @@ final class MonitorBookSlot {
             return;
         }
         BlockState state = monitor.getBlockState();
-        if (!state.hasProperty(BlockInfusionMonitor.NETWORK)) {
+        if (!state.hasProperty(BlockOccultMonitor.NETWORK)) {
             return;
         }
         boolean online = monitor.getMainNode().isActive();
-        if (state.getValue(BlockInfusionMonitor.NETWORK) != online) {
-            level.setBlock(monitor.getBlockPos(), state.setValue(BlockInfusionMonitor.NETWORK, online), 3);
+        if (state.getValue(BlockOccultMonitor.NETWORK) != online) {
+            level.setBlock(monitor.getBlockPos(), state.setValue(BlockOccultMonitor.NETWORK, online), 3);
         }
     }
 
     void save(CompoundTag tag, HolderLookup.Provider registries) {
-        tag.put("Book", container.getItem(BlockEntityInfusionMonitor.BOOK_SLOT).saveOptional(registries));
+        tag.put("Book", container.getItem(BlockEntityOccultMonitor.BOOK_SLOT).saveOptional(registries));
     }
 
     void load(CompoundTag tag, HolderLookup.Provider registries) {
-        container.setItem(BlockEntityInfusionMonitor.BOOK_SLOT,
+        container.setItem(BlockEntityOccultMonitor.BOOK_SLOT,
                 ItemStack.parseOptional(registries, tag.getCompound("Book")));
     }
 
@@ -116,11 +116,11 @@ final class MonitorBookSlot {
         if (level == null) {
             return;
         }
-        ItemStack book = container.getItem(BlockEntityInfusionMonitor.BOOK_SLOT);
+        ItemStack book = container.getItem(BlockEntityOccultMonitor.BOOK_SLOT);
         if (!book.isEmpty()) {
             Containers.dropItemStack(level, monitor.getBlockPos().getX() + 0.5,
                     monitor.getBlockPos().getY() + 0.5, monitor.getBlockPos().getZ() + 0.5, book);
-            container.setItem(BlockEntityInfusionMonitor.BOOK_SLOT, ItemStack.EMPTY);
+            container.setItem(BlockEntityOccultMonitor.BOOK_SLOT, ItemStack.EMPTY);
         }
     }
 }

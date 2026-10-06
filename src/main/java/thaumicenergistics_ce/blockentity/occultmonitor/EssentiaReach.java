@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity.infusionmonitor;
+package thaumicenergistics_ce.blockentity.occultmonitor;
 
 import com.leclowndu93150.thaumaturge.api.aspect.AspectCapabilities;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor.EssentiaLine;
+import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor.EssentiaLine;
 import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Recipe;
 
 /**
@@ -26,7 +26,7 @@ final class EssentiaReach {
     /** Search radius around an altar: twelve, {@code EssentiaSources}' own container range. */
     private static final int SOURCE_RANGE = 12;
 
-    private final BlockEntityInfusionMonitor monitor;
+    private final BlockEntityOccultMonitor monitor;
 
     /** Containers found around the altar; also when they were last looked for. See {@link #shortOf}. */
     private final List<BlockPos> sourceCache = new ArrayList<>();
@@ -34,7 +34,7 @@ final class EssentiaReach {
 
     private final List<EssentiaLine> essentia = new ArrayList<>();
 
-    EssentiaReach(BlockEntityInfusionMonitor monitor) {
+    EssentiaReach(BlockEntityOccultMonitor monitor) {
         this.monitor = monitor;
     }
 

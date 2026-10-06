@@ -14,7 +14,7 @@ import thaumicenergistics_ce.block.BlockEssentiaCellWorkbench;
 import thaumicenergistics_ce.block.BlockAlchemyProvider;
 import thaumicenergistics_ce.block.BlockAlchemyProviderConnection;
 import thaumicenergistics_ce.block.BlockEssentiaVibrationChamber;
-import thaumicenergistics_ce.block.BlockInfusionMonitor;
+import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.block.BlockInfusionProvider;
 import thaumicenergistics_ce.block.BlockKnowledgeInscriber;
 
@@ -96,9 +96,9 @@ public final class ModBlocks {
                     .sound(SoundType.METAL)
                     .requiresCorrectToolForDrops()));
 
-    public static final DeferredBlock<BlockInfusionMonitor> INFUSION_MONITOR = REGISTRY.register(
-            "infusion_monitor",
-            () -> new BlockInfusionMonitor(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<BlockOccultMonitor> OCCULT_MONITOR = REGISTRY.register(
+            "occult_monitor",
+            () -> new BlockOccultMonitor(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.METAL)
                     .strength(3.0F, 7.0F)
                     .sound(SoundType.METAL)
