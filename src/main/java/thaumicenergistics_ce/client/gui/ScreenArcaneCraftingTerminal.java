@@ -19,7 +19,7 @@ import thaumicenergistics_ce.network.GolemBackpackPayload;
 /**
  * The Arcane Crafting Terminal's screen.
  * <ul>
- *   <li>No vis display yet, by choice: it ships with the craft, so drawn and charged share one source.
+ *   <li>The cost row in the strip under the craft result is the whole vis display: no aura, by choice.
  *   <li>The style document is in AE2's namespace: {@code StyleManager} resolves against its own only.
  *   <li>The jar and phial gestures come from {@link ScreenEssentiaTerminalBase}, only with the card.
  * </ul>
@@ -27,10 +27,18 @@ import thaumicenergistics_ce.network.GolemBackpackPayload;
 public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<MenuArcaneCraftingTerminal>
         implements ClientboundReceiver {
 
-    private static final int ICON_SIZE = 14;
+    private static final int CHIP_UNITS = AspectRendering.GUI_ICON_SIZE;
 
-    private static final int COST_X = 108;
-    private static final int COST_Y = 96;
+    private static final int COST_ICON = 11;
+
+    /**
+     * The strip the chips go in, in window coordinates: the style's bottom section draws its art from the
+     * texture row 71 down, and the strip is texture x 97..166, y 134..151 there.
+     */
+    private static final int COST_LEFT = 97;
+    private static final int COST_RIGHT = 166;
+    private static final int COST_STRIP_HEIGHT = 17;
+    private static final int COST_STRIP_FROM_BOTTOM = 117;
 
     private static @Nullable ScreenArcaneCraftingTerminal open;
 
@@ -92,25 +100,33 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         if (costs.isEmpty()) {
             return;
         }
-        int x = leftPos + COST_X;
-        int y = topPos + COST_Y;
+        // Right to left: the first aspect holds the strip's right end and the rest run back along it,
+        // so a one aspect recipe always lands in the same place instead of drifting with the list length.
+        int y = topPos + imageHeight - COST_STRIP_FROM_BOTTOM + (COST_STRIP_HEIGHT - COST_ICON) / 2;
+        int x = leftPos + COST_RIGHT - COST_ICON;
+        // Thaumaturge's renderer draws a chip at CHIP_UNITS square whatever the screen wants, so the pose
+        // shrinks it to COST_ICON: six primal aspects come to 66 of the strip's 69 columns.
+        float shrink = (float) COST_ICON / CHIP_UNITS;
         for (ArcaneCraftCostPayload.AspectCost cost : costs) {
-            if (x + ICON_SIZE > leftPos + imageWidth) {
+            if (x < leftPos + COST_LEFT) {
                 break;
             }
             var aspect = Aspects.resolve(
                     menu.getPlayer().level(), ResourceKey.create(
                             IAspect.REGISTRY_KEY, cost.aspect()));
             if (aspect != null) {
-                AspectRendering.renderGui(graphics, font, x, y, aspect, 0.0F);
+                graphics.pose().pushPose();
+                graphics.pose().translate(x, y, 0.0F);
+                graphics.pose().scale(shrink, shrink, 1.0F);
+                AspectRendering.renderGui(graphics, font, 0, 0, aspect, 0.0F);
                 // Centivis to whole vis, rounded up: a cost of 1 centivis still needs a vis to pay it, and
-                // showing 0 would say it is free.
-                int vis = (cost.centivis() + 99) / 100;
-                String text = String.valueOf(vis);
+                // showing 0 would say it is free. The number sits in chip units; the pose scales it down.
+                String text = String.valueOf((cost.centivis() + 99) / 100);
                 graphics.drawString(
-                        font, text, x + ICON_SIZE - font.width(text) + 1, y + ICON_SIZE - 6, 0xFFFFFF, true);
+                        font, text, CHIP_UNITS - font.width(text) + 1, CHIP_UNITS - 6, 0xFFFFFF, true);
+                graphics.pose().popPose();
             }
-            x += ICON_SIZE + 2;
+            x -= COST_ICON;
         }
     }
 }
