@@ -119,8 +119,6 @@ public final class EssentiaSelfTest {
             "diffusion_core",
             "coalescence_core",
             "essentia_terminal",
-            "essentia_import_bus",
-            "essentia_export_bus",
             "essentia_storage_bus",
             "essentia_level_emitter",
             "essentia_cell_workbench",

@@ -8,8 +8,6 @@ import net.minecraft.resources.ResourceLocation;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
-import thaumicenergistics_ce.client.gui.ScreenEssentiaExportBus;
-import thaumicenergistics_ce.client.gui.ScreenEssentiaImportBus;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaStorageBus;
 import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 
@@ -36,16 +34,8 @@ public class ThEJeiClientPlugin implements IModPlugin {
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
         registration.addGhostIngredientHandler(
                 ScreenKnowledgeInscriber.class, new KnowledgeInscriberGhostIngredientHandler());
-        // Buses take essentia, not items, so their drag targets accept Thaumaturge's aspect ingredient.
-        // One handler per concrete screen class: JEI pairs a Class with a handler of that same type.
-        registration.addGhostIngredientHandler(
-                ScreenEssentiaImportBus.class,
-                new EssentiaBusGhostIngredientHandler<ScreenEssentiaImportBus>());
-        registration.addGhostIngredientHandler(
-                ScreenEssentiaExportBus.class,
-                new EssentiaBusGhostIngredientHandler<ScreenEssentiaExportBus>());
-        // The storage bus too: while its screen was AE2's UpgradeableScreen there was no class to register
-        // against, so an aspect could not be dragged into its config grid.
+        // Buses take essentia, not items, so their drag targets accept Thaumaturge's aspect ingredient. One
+        // handler per concrete screen class: JEI pairs a Class with a handler of that same type.
         registration.addGhostIngredientHandler(
                 ScreenEssentiaStorageBus.class,
                 new EssentiaBusGhostIngredientHandler<ScreenEssentiaStorageBus>());

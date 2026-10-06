@@ -153,7 +153,7 @@ public final class EssentiaTransportViewSelfTest {
                             + "part stopped feeding a vis relay", failures);
         }
 
-        for (Class<?> partClass : List.of(PartEssentiaStorageBus.class, PartEssentiaImportBus.class, PartEssentiaExportBus.class)) {
+        for (Class<?> partClass : List.of(PartEssentiaStorageBus.class)) {
             if (partClass.isInterface() || Modifier.isAbstract(partClass.getModifiers())) {
                 failures.add(partClass.getSimpleName() + " is not a concrete class, which AE2's part "
                         + "registration refuses outright - the bus would throw the server out on start");
@@ -172,10 +172,6 @@ public final class EssentiaTransportViewSelfTest {
 
         expectPortOf(EssentiaCapabilities.TRANSPORT,
                 new PartEssentiaStorageBus(ModItems.ESSENTIA_STORAGE_BUS.get()), "an essentia storage bus", failures);
-        expectPortOf(EssentiaCapabilities.TRANSPORT,
-                new PartEssentiaImportBus(ModItems.ESSENTIA_IMPORT_BUS.get()), "an essentia import bus", failures);
-        expectPortOf(EssentiaCapabilities.TRANSPORT,
-                new PartEssentiaExportBus(ModItems.ESSENTIA_EXPORT_BUS.get()), "an essentia export bus", failures);
     }
 
     /**

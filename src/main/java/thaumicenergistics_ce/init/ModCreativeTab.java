@@ -47,8 +47,6 @@ public final class ModCreativeTab {
                         output.accept(ModItems.VIS_INTERFACE.get());
                         output.accept(ModItems.DIFFUSION_CORE.get());
                         output.accept(ModItems.COALESCENCE_CORE.get());
-                        output.accept(ModItems.ESSENTIA_IMPORT_BUS.get());
-                        output.accept(ModItems.ESSENTIA_EXPORT_BUS.get());
                         output.accept(ModItems.ESSENTIA_STORAGE_BUS.get());
                         output.accept(ModItems.ESSENTIA_LEVEL_EMITTER.get());
                         output.accept(ModItems.WIRELESS_ESSENTIA_TERMINAL.get());

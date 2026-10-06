@@ -15,15 +15,11 @@ import thaumicenergistics_ce.menu.MenuArcaneAssembler;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
-import thaumicenergistics_ce.menu.MenuEssentiaExportBus;
-import thaumicenergistics_ce.menu.MenuEssentiaImportBus;
 import thaumicenergistics_ce.menu.MenuEssentiaLevelEmitter;
 import thaumicenergistics_ce.menu.MenuEssentiaStorageBus;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
 import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
-import thaumicenergistics_ce.part.PartEssentiaExportBus;
-import thaumicenergistics_ce.part.PartEssentiaImportBus;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 import thaumicenergistics_ce.part.PartEssentiaStorageBus;
 
@@ -105,28 +101,6 @@ public final class ModMenuTypes {
                             .withMenuTitle(host -> Component.translatable(
                                     "gui.thaumicenergistics_ce.wireless_arcane_crafting_terminal"))
                             .buildUnregistered(ThEIds.id("wireless_arcane_crafting_terminal")));
-
-    /**
-     * The Essentia Import Bus screen; the part is the host encoded into the open packet. The title is
-     * is explicit: the builder would caption it with AE2's generic {@code gui.ae2.ImportBus}.
-     */
-    public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaImportBus>> ESSENTIA_IMPORT_BUS =
-            REGISTRY.register(
-                    "essentia_import_bus",
-                    () -> MenuTypeBuilder.create(
-                                    MenuEssentiaImportBus::new, PartEssentiaImportBus.class)
-                            .withMenuTitle(host -> Component.translatable(
-                                    "gui.thaumicenergistics_ce.essentia_import_bus"))
-                            .buildUnregistered(ThEIds.id("essentia_import_bus")));
-
-    public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaExportBus>> ESSENTIA_EXPORT_BUS =
-            REGISTRY.register(
-                    "essentia_export_bus",
-                    () -> MenuTypeBuilder.create(
-                                    MenuEssentiaExportBus::new, PartEssentiaExportBus.class)
-                            .withMenuTitle(host -> Component.translatable(
-                                    "gui.thaumicenergistics_ce.essentia_export_bus"))
-                            .buildUnregistered(ThEIds.id("essentia_export_bus")));
 
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaStorageBus>> ESSENTIA_STORAGE_BUS =
             REGISTRY.register(

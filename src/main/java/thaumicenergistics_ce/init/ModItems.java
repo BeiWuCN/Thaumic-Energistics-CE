@@ -11,8 +11,6 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.item.ItemArcaneCraftingTerminal;
 import thaumicenergistics_ce.item.ItemArcanePattern;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
-import thaumicenergistics_ce.item.ItemEssentiaExportBus;
-import thaumicenergistics_ce.item.ItemEssentiaImportBus;
 import thaumicenergistics_ce.item.ItemEssentiaLevelEmitter;
 import thaumicenergistics_ce.item.ItemEssentiaStorageBus;
 import thaumicenergistics_ce.item.ItemEssentiaTerminal;
@@ -146,16 +144,6 @@ public final class ModItems {
 
     public static final DeferredItem<Item> COALESCENCE_CORE = REGISTRY.registerItem(
             "coalescence_core", Item::new, new Item.Properties().stacksTo(64));
-
-    public static final DeferredItem<ItemEssentiaImportBus> ESSENTIA_IMPORT_BUS = REGISTRY.registerItem(
-            "essentia_import_bus",
-            ItemEssentiaImportBus::new,
-            new Item.Properties().stacksTo(64).rarity(Rarity.RARE));
-
-    public static final DeferredItem<ItemEssentiaExportBus> ESSENTIA_EXPORT_BUS = REGISTRY.registerItem(
-            "essentia_export_bus",
-            ItemEssentiaExportBus::new,
-            new Item.Properties().stacksTo(64).rarity(Rarity.RARE));
 
     public static final DeferredItem<ItemEssentiaStorageBus> ESSENTIA_STORAGE_BUS = REGISTRY.registerItem(
             "essentia_storage_bus",

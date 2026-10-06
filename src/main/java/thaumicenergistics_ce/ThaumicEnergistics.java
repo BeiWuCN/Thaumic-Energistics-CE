@@ -42,8 +42,6 @@ import thaumicenergistics_ce.init.SelfTestHook;
 import thaumicenergistics_ce.init.capability.ThEItemCapabilities;
 import thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceRegistry;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
-import thaumicenergistics_ce.part.PartEssentiaExportBus;
-import thaumicenergistics_ce.part.PartEssentiaImportBus;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 import thaumicenergistics_ce.part.PartEssentiaStorageBus;
 import thaumicenergistics_ce.part.PartEssentiaTerminal;
@@ -91,8 +89,6 @@ public final class ThaumicEnergistics {
     private static void registerPartModels() {
         List<ResourceLocation> models = new ArrayList<>();
         models.addAll(PartEssentiaTerminal.MODEL_LOCATIONS);
-        models.addAll(PartEssentiaImportBus.MODEL_LOCATIONS);
-        models.addAll(PartEssentiaExportBus.MODEL_LOCATIONS);
         models.addAll(PartEssentiaStorageBus.MODEL_LOCATIONS);
         models.addAll(PartEssentiaLevelEmitter.MODEL_LOCATIONS);
         models.addAll(PartArcaneCraftingTerminal.MODEL_LOCATIONS);
@@ -160,15 +156,11 @@ public final class ThaumicEnergistics {
      */
     public static void registerPartCapabilities(RegisterPartCapabilitiesEvent event) {
         TcAura.registerVisSource(event, PartVisInterface.class);
-        // A pipe asks a neighbour only for the transport capability, so without these three the
-        // essentia buses can see a tube but a tube cannot see them. The port is whatever the bus
-        // faces, which is why it is rebuilt per query rather than held.
+        // A pipe asks a neighbour only for the transport capability, so without this the essentia
+        // storage bus can see a tube but a tube cannot see it. The port is whatever the bus faces,
+        // which is why it is rebuilt per query rather than held.
         event.register(EssentiaCapabilities.TRANSPORT, (part, context) -> part.transportView(),
                 PartEssentiaStorageBus.class);
-        event.register(EssentiaCapabilities.TRANSPORT, (part, context) -> part.transportView(),
-                PartEssentiaImportBus.class);
-        event.register(EssentiaCapabilities.TRANSPORT, (part, context) -> part.transportView(),
-                PartEssentiaExportBus.class);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -213,14 +205,6 @@ public final class ThaumicEnergistics {
                 AEItems.SPEED_CARD,
                 ModItems.ARCANE_ASSEMBLER.get(),
                 BlockEntityArcaneAssembler.UPGRADE_SLOT_COUNT);
-        // The count is the bus's own slot count (PartEssentiaImportBus#getUpgradeSlots); capacity is
-        // absent because MenuEssentiaBusBase keeps 18 fixed config slots and never reads the card.
-        for (var bus : List.of(
-                ModItems.ESSENTIA_IMPORT_BUS.get(),
-                ModItems.ESSENTIA_EXPORT_BUS.get())) {
-            Upgrades.add(AEItems.SPEED_CARD, bus, BUS_UPGRADE_SLOTS);
-            Upgrades.add(AEItems.REDSTONE_CARD, bus, 1);
-        }
         // One access card per ME interface, block form and cable part alike: without these two AE2's
         // upgrade slot refuses our card. One name key keeps the block and the part to a single line.
         Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEBlocks.INTERFACE, 1, INTERFACE_UPGRADE_NAME);
@@ -247,9 +231,6 @@ public final class ThaumicEnergistics {
                 1,
                 ARCANE_TERMINAL_PART_UPGRADE_NAME);
     }
-
-    /** The four upgrade slots every essentia bus has; the same number {@code Upgrades.add} should report. */
-    private static final int BUS_UPGRADE_SLOTS = 4;
 
     /** What a card's tooltip calls the whole essentia cell family, at every size. */
     private static final String CELL_UPGRADE_NAME = "item.thaumicenergistics_ce.essentia_cell";

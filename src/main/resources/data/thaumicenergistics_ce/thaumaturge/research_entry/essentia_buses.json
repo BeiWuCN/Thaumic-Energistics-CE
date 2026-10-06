@@ -10,8 +10,6 @@
     "round"
   ],
   "icons": [
-    "thaumicenergistics_ce:essentia_import_bus",
-    "thaumicenergistics_ce:essentia_export_bus",
     "thaumicenergistics_ce:essentia_storage_bus"
   ],
   "stages": [
@@ -28,8 +26,6 @@
     {
       "text": "tc.research_text.ESSENTIABUSES.stage.2",
       "recipes": [
-        "thaumicenergistics_ce:essentia_import_bus",
-        "thaumicenergistics_ce:essentia_export_bus",
         "thaumicenergistics_ce:essentia_storage_bus"
       ]
     }

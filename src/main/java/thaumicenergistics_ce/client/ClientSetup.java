@@ -19,8 +19,6 @@ import thaumicenergistics_ce.client.gui.ScreenArcaneAssembler;
 import thaumicenergistics_ce.client.gui.ScreenArcaneCraftingTerminal;
 import thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
-import thaumicenergistics_ce.client.gui.ScreenEssentiaExportBus;
-import thaumicenergistics_ce.client.gui.ScreenEssentiaImportBus;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaStorageBus;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaTerminal;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaVibrationChamber;
@@ -36,8 +34,6 @@ import thaumicenergistics_ce.integration.ae2.ClientRegistries;
 import thaumicenergistics_ce.integration.ae2.ClientRegistrySource;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
-import thaumicenergistics_ce.menu.MenuEssentiaExportBus;
-import thaumicenergistics_ce.menu.MenuEssentiaImportBus;
 import thaumicenergistics_ce.menu.MenuEssentiaLevelEmitter;
 import thaumicenergistics_ce.menu.MenuEssentiaStorageBus;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
@@ -158,16 +154,6 @@ public final class ClientSetup {
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/arcane_crafting_terminal.json")));
-        event.register(
-                ModMenuTypes.ESSENTIA_IMPORT_BUS.get(),
-                (MenuEssentiaImportBus menu, Inventory inventory, Component title) ->
-                        new ScreenEssentiaImportBus(
-                                menu, inventory, title, StyleManager.loadStyleDoc("/screens/import_bus.json")));
-        event.register(
-                ModMenuTypes.ESSENTIA_EXPORT_BUS.get(),
-                (MenuEssentiaExportBus menu, Inventory inventory, Component title) ->
-                        new ScreenEssentiaExportBus(
-                                menu, inventory, title, StyleManager.loadStyleDoc("/screens/export_bus.json")));
         event.register(
                 ModMenuTypes.ESSENTIA_STORAGE_BUS.get(),
                 (MenuEssentiaStorageBus menu, Inventory inventory, Component title) ->
