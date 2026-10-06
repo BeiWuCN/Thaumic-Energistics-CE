@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity.essentiaprovider;
+package thaumicenergistics_ce.blockentity.alchemyprovider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,11 +20,11 @@ final class ReceiverLinks {
 
     private static final double POWER_PER_RECEIVER = 5.0;
 
-    private final BlockEntityEssentiaProvider provider;
+    private final BlockEntityAlchemyProvider provider;
 
     private final List<BlockPos> linked = new ArrayList<>();
 
-    ReceiverLinks(BlockEntityEssentiaProvider provider) {
+    ReceiverLinks(BlockEntityAlchemyProvider provider) {
         this.provider = provider;
     }
 
@@ -33,14 +33,14 @@ final class ReceiverLinks {
         if (linked.contains(receiver)) {
             return null;
         }
-        if (linked.size() >= BlockEntityEssentiaProvider.MAX_LINKED_RECEIVERS) {
-            return "provider is already serving " + BlockEntityEssentiaProvider.MAX_LINKED_RECEIVERS
+        if (linked.size() >= BlockEntityAlchemyProvider.MAX_LINKED_RECEIVERS) {
+            return "provider is already serving " + BlockEntityAlchemyProvider.MAX_LINKED_RECEIVERS
                     + " receivers";
         }
         double distance = Math.sqrt(provider.getBlockPos().distSqr(receiver));
-        if (distance > BlockEntityEssentiaProvider.MAX_LINK_DISTANCE) {
+        if (distance > BlockEntityAlchemyProvider.MAX_LINK_DISTANCE) {
             return "receiver is " + (int) Math.ceil(distance) + " blocks away, further than "
-                    + BlockEntityEssentiaProvider.MAX_LINK_DISTANCE;
+                    + BlockEntityAlchemyProvider.MAX_LINK_DISTANCE;
         }
         linked.add(receiver.immutable());
         provider.setChanged();
@@ -76,7 +76,7 @@ final class ReceiverLinks {
             return false;
         }
         boolean removed = linked.removeIf(pos ->
-                !(level.getBlockEntity(pos) instanceof BlockEntityEssentiaProviderConnection));
+                !(level.getBlockEntity(pos) instanceof BlockEntityAlchemyProviderConnection));
         if (removed) {
             provider.setChanged();
             updateIdlePower();

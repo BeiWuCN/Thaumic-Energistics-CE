@@ -3,7 +3,7 @@
   "name": "tc.research_name.GOLEMWIFI",
   "parents": [
     "thaumicenergistics_ce:essentia_terminal",
-    "thaumicenergistics_ce:essentia_provider"
+    "thaumicenergistics_ce:alchemy_provider"
   ],
   "column": 4,
   "row": -4,

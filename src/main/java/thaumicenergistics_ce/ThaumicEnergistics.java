@@ -104,7 +104,7 @@ public final class ThaumicEnergistics {
         for (BlockEntityType<?> type : List.of(
                 ModBlockEntities.ARCANE_ASSEMBLER.get(),
                 ModBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(),
-                ModBlockEntities.ESSENTIA_PROVIDER.get(),
+                ModBlockEntities.ALCHEMY_PROVIDER.get(),
                 ModBlockEntities.INFUSION_PROVIDER.get(),
                 ModBlockEntities.INFUSION_MONITOR.get())) {
             event.registerBlockEntity(
@@ -116,14 +116,14 @@ public final class ThaumicEnergistics {
         // Same STORAGE capability Thaumaturge's jars expose; pipes and neighbours treat it as one.
         event.registerBlockEntity(
                 EssentiaCapabilities.STORAGE,
-                ModBlockEntities.ESSENTIA_PROVIDER.get(),
+                ModBlockEntities.ALCHEMY_PROVIDER.get(),
                 (blockEntity, context) -> (IEssentiaStorage)
                         blockEntity);
 
         // A container to its neighbours: a jar beside it fills, an alembic beside it empties.
         event.registerBlockEntity(
                 EssentiaCapabilities.STORAGE,
-                ModBlockEntities.ESSENTIA_PROVIDER_CONNECTION.get(),
+                ModBlockEntities.ALCHEMY_PROVIDER_CONNECTION.get(),
                 (blockEntity, context) -> (IEssentiaStorage)
                         blockEntity);
 

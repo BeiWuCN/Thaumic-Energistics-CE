@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity.essentiaprovider;
+package thaumicenergistics_ce.blockentity.alchemyprovider;
 
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
@@ -17,20 +17,20 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.block.BlockEssentiaProviderConnection;
+import thaumicenergistics_ce.block.BlockAlchemyProviderConnection;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 
 /**
- * The Essentia Provider Connection: the far end of a wireless essentia link to a provider.
+ * The Alchemy Provider Connection: the far end of a wireless essentia link to a provider.
  * <ul>
  *   <li>It carries essentia, never stores it: what arrives goes to the provider on the next tick.
- *   <li>Bound with the wireless connector up to {@link BlockEntityEssentiaProvider#MAX_LINK_DISTANCE}
+ *   <li>Bound with the wireless connector up to {@link BlockEntityAlchemyProvider#MAX_LINK_DISTANCE}
  *       blocks away; whichever side sees the other gone clears its own half.
  * </ul>
  */
-public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity implements IEssentiaStorage {
+public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity implements IEssentiaStorage {
 
     public static final int TRANSFER_LIMIT = 16;
 
@@ -45,8 +45,8 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
     private long revision;
     private int tickCounter;
 
-    public BlockEntityEssentiaProviderConnection(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.ESSENTIA_PROVIDER_CONNECTION.get(), pos, state);
+    public BlockEntityAlchemyProviderConnection(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.ALCHEMY_PROVIDER_CONNECTION.get(), pos, state);
     }
 
 
@@ -68,10 +68,10 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
         if (level == null || level.isClientSide()) {
             return null;
         }
-        if (!(level.getBlockEntity(toProvider) instanceof BlockEntityEssentiaProvider provider)) {
+        if (!(level.getBlockEntity(toProvider) instanceof BlockEntityAlchemyProvider provider)) {
             return "not a provider";
         }
-        if (!(level.getBlockEntity(worldPosition) instanceof BlockEntityEssentiaProviderConnection)) {
+        if (!(level.getBlockEntity(worldPosition) instanceof BlockEntityAlchemyProviderConnection)) {
             return "receiver is gone";
         }
         String refusal = provider.addLinkedReceiver(worldPosition);
@@ -86,7 +86,7 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
 
     public void unlink() {
         if (level != null && !level.isClientSide() && providerPos != null
-                && level.getBlockEntity(providerPos) instanceof BlockEntityEssentiaProvider provider) {
+                && level.getBlockEntity(providerPos) instanceof BlockEntityAlchemyProvider provider) {
             provider.removeLinkedReceiver(worldPosition);
         }
         providerPos = null;
@@ -95,11 +95,11 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
         updateConnectedState();
     }
 
-    public @Nullable BlockEntityEssentiaProvider resolveProvider() {
+    public @Nullable BlockEntityAlchemyProvider resolveProvider() {
         if (level == null || level.isClientSide() || providerPos == null) {
             return null;
         }
-        if (level.getBlockEntity(providerPos) instanceof BlockEntityEssentiaProvider provider) {
+        if (level.getBlockEntity(providerPos) instanceof BlockEntityAlchemyProvider provider) {
             // Self-healing: put the receiver back if the provider's list lost it, e.g. after an older save.
             if (!provider.isLinkedReceiver(worldPosition)) {
                 provider.addLinkedReceiver(worldPosition);
@@ -117,12 +117,12 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
             return;
         }
         BlockState state = getBlockState();
-        if (!state.hasProperty(BlockEssentiaProviderConnection.CONNECTED)) {
+        if (!state.hasProperty(BlockAlchemyProviderConnection.CONNECTED)) {
             return;
         }
         boolean connected = providerPos != null;
-        if (state.getValue(BlockEssentiaProviderConnection.CONNECTED) != connected) {
-            level.setBlock(worldPosition, state.setValue(BlockEssentiaProviderConnection.CONNECTED, connected), 3);
+        if (state.getValue(BlockAlchemyProviderConnection.CONNECTED) != connected) {
+            level.setBlock(worldPosition, state.setValue(BlockAlchemyProviderConnection.CONNECTED, connected), 3);
         }
     }
 
@@ -146,7 +146,7 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
         if (buffer.isEmpty()) {
             return;
         }
-        BlockEntityEssentiaProvider provider = resolveProvider();
+        BlockEntityAlchemyProvider provider = resolveProvider();
         if (provider == null) {
             return;
         }
@@ -243,7 +243,7 @@ public class BlockEntityEssentiaProviderConnection extends ThEBaseBlockEntity im
         if (aspect == null || amount <= 0) {
             return 0;
         }
-        BlockEntityEssentiaProvider provider = resolveProvider();
+        BlockEntityAlchemyProvider provider = resolveProvider();
         if (provider == null) {
             return 0;
         }

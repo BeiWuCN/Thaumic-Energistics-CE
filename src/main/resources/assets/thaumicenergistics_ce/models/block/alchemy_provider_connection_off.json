@@ -2,7 +2,7 @@
 	"format_version": "1.9.0",
 	"credit": "Made with _leng",
 	"textures": {
-		"particle": "thaumicenergistics_ce:block/essentia_provider_connection"
+		"particle": "thaumicenergistics_ce:block/alchemy_provider_connection"
 	},
 	"elements": [
 		{

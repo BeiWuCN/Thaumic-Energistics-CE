@@ -3,7 +3,7 @@
   "name": "tc.research_name.DISTILLATIONENCODER",
   "parents": [
     "thaumicenergistics_ce:digisentia",
-    "thaumicenergistics_ce:essentia_provider"
+    "thaumicenergistics_ce:alchemy_provider"
   ],
   "column": -2,
   "row": 4,

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity.essentiaprovider;
+package thaumicenergistics_ce.blockentity.alchemyprovider;
 
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
@@ -19,9 +19,9 @@ import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
  *   <li>Every change bumps the revision, the one answer a cache of this container needs.
  * </ul>
  */
-final class EssentiaProviderBuffer {
+final class AlchemyProviderBuffer {
 
-    private final BlockEntityEssentiaProvider provider;
+    private final BlockEntityAlchemyProvider provider;
 
     private final Map<Holder<IAspect>, Integer> buffer = new HashMap<>();
 
@@ -29,7 +29,7 @@ final class EssentiaProviderBuffer {
 
     private long revision;
 
-    EssentiaProviderBuffer(BlockEntityEssentiaProvider provider) {
+    AlchemyProviderBuffer(BlockEntityAlchemyProvider provider) {
         this.provider = provider;
         this.neighbours = new CachedEssentiaNeighbours(provider);
     }
@@ -55,7 +55,7 @@ final class EssentiaProviderBuffer {
             return 0;
         }
         int held = buffer.getOrDefault(aspect, 0);
-        int space = BlockEntityEssentiaProvider.BUFFER_PER_ASPECT - held;
+        int space = BlockEntityAlchemyProvider.BUFFER_PER_ASPECT - held;
         if (space <= 0) {
             return 0;
         }

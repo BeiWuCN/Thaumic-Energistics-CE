@@ -125,11 +125,11 @@ public final class EssentiaSelfTest {
             "essentia_level_emitter",
             "essentia_cell_workbench",
             "essentia_vibration_chamber",
-            "essentia_provider",
+            "alchemy_provider",
             "infusion_provider",
             "distillation_encoder",
             "infusion_monitor",
-            "essentia_provider_connection",
+            "alchemy_provider_connection",
             "wireless_connector",
             "alkusure86fumo",
             "arcane_crafting_terminal",
@@ -403,11 +403,11 @@ public final class EssentiaSelfTest {
                 failures);
         expectGridHost(
                 AECapabilities.IN_WORLD_GRID_NODE_HOST,
-                new thaumicenergistics_ce.blockentity.essentiaprovider.BlockEntityEssentiaProvider(
+                new thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider(
                         origin,
-                        thaumicenergistics_ce.init.ModBlocks.ESSENTIA_PROVIDER
+                        thaumicenergistics_ce.init.ModBlocks.ALCHEMY_PROVIDER
                                 .get().defaultBlockState()),
-                "essentia_provider",
+                "alchemy_provider",
                 failures);
         expectGridHost(
                 AECapabilities.IN_WORLD_GRID_NODE_HOST,
@@ -420,11 +420,11 @@ public final class EssentiaSelfTest {
 
         expectGridHost(
                 EssentiaCapabilities.STORAGE,
-                new thaumicenergistics_ce.blockentity.essentiaprovider.BlockEntityEssentiaProvider(
+                new thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider(
                         origin,
-                        thaumicenergistics_ce.init.ModBlocks.ESSENTIA_PROVIDER
+                        thaumicenergistics_ce.init.ModBlocks.ALCHEMY_PROVIDER
                                 .get().defaultBlockState()),
-                "essentia_provider as an essentia container",
+                "alchemy_provider as an essentia container",
                 failures);
 
         expectGridHost(

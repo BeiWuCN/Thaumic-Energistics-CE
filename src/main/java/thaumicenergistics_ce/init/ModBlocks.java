@@ -11,8 +11,8 @@ import thaumicenergistics_ce.block.BlockArcaneAssembler;
 import thaumicenergistics_ce.block.BlockDecorativeFigure;
 import thaumicenergistics_ce.block.BlockDistillationEncoder;
 import thaumicenergistics_ce.block.BlockEssentiaCellWorkbench;
-import thaumicenergistics_ce.block.BlockEssentiaProvider;
-import thaumicenergistics_ce.block.BlockEssentiaProviderConnection;
+import thaumicenergistics_ce.block.BlockAlchemyProvider;
+import thaumicenergistics_ce.block.BlockAlchemyProviderConnection;
 import thaumicenergistics_ce.block.BlockEssentiaVibrationChamber;
 import thaumicenergistics_ce.block.BlockInfusionMonitor;
 import thaumicenergistics_ce.block.BlockInfusionProvider;
@@ -72,9 +72,9 @@ public final class ModBlocks {
                     "essentia_vibration_chamber",
                     () -> new BlockEssentiaVibrationChamber(VIBRATION_PROPERTIES));
 
-    public static final DeferredBlock<BlockEssentiaProvider> ESSENTIA_PROVIDER = REGISTRY.register(
-            "essentia_provider",
-            () -> new BlockEssentiaProvider(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<BlockAlchemyProvider> ALCHEMY_PROVIDER = REGISTRY.register(
+            "alchemy_provider",
+            () -> new BlockAlchemyProvider(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.METAL)
                     .strength(3.0F, 7.0F)
                     .sound(SoundType.METAL)
@@ -109,10 +109,10 @@ public final class ModBlocks {
      * The far end of a wireless essentia link. {@code noOcclusion()} as on the Arcane Assembler: the plug
      * model has gaps, so the touching face of the block behind it would be culled.
      */
-    public static final DeferredBlock<BlockEssentiaProviderConnection> ESSENTIA_PROVIDER_CONNECTION =
+    public static final DeferredBlock<BlockAlchemyProviderConnection> ALCHEMY_PROVIDER_CONNECTION =
             REGISTRY.register(
-                    "essentia_provider_connection",
-                    () -> new BlockEssentiaProviderConnection(BlockBehaviour.Properties.of()
+                    "alchemy_provider_connection",
+                    () -> new BlockAlchemyProviderConnection(BlockBehaviour.Properties.of()
                             .mapColor(MapColor.METAL)
                             .strength(2.0F, 6.0F)
                             .sound(SoundType.METAL)

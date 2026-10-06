@@ -55,8 +55,8 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> ESSENTIA_VIBRATION_CHAMBER =
             REGISTRY.registerSimpleBlockItem(ModBlocks.ESSENTIA_VIBRATION_CHAMBER);
 
-    public static final DeferredItem<BlockItem> ESSENTIA_PROVIDER =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.ESSENTIA_PROVIDER);
+    public static final DeferredItem<BlockItem> ALCHEMY_PROVIDER =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.ALCHEMY_PROVIDER);
 
     public static final DeferredItem<BlockItem> INFUSION_PROVIDER =
             REGISTRY.registerSimpleBlockItem(ModBlocks.INFUSION_PROVIDER);
@@ -67,8 +67,8 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> INFUSION_MONITOR =
             REGISTRY.registerSimpleBlockItem(ModBlocks.INFUSION_MONITOR);
 
-    public static final DeferredItem<BlockItem> ESSENTIA_PROVIDER_CONNECTION =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.ESSENTIA_PROVIDER_CONNECTION);
+    public static final DeferredItem<BlockItem> ALCHEMY_PROVIDER_CONNECTION =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.ALCHEMY_PROVIDER_CONNECTION);
 
     public static final DeferredItem<ItemWirelessConnector> WIRELESS_CONNECTOR = REGISTRY.registerItem(
             "wireless_connector", ItemWirelessConnector::new, new Item.Properties());

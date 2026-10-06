@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "thaumicenergistics_ce:block/essentia_provider"
+    "all": "thaumicenergistics_ce:block/alchemy_provider"
   }
 }

@@ -13,11 +13,11 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.essentiaprovider.BlockEntityEssentiaProvider;
-import thaumicenergistics_ce.blockentity.essentiaprovider.BlockEntityEssentiaProviderConnection;
+import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider;
+import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
 
 /**
- * The Wireless Essentia Binding Tool: makes and breaks the links an Essentia Provider uses.
+ * The Wireless Binding Tool: makes and breaks the links an Alchemy Provider uses.
  * <ul>
  * <li>A two-ended link needs something to carry the identity of one end to the other: the tool holds one
  * coordinate - a receiver selected but not yet bound - and the second click completes the pair.
@@ -44,8 +44,8 @@ public class ItemWirelessConnector extends Item {
             return InteractionResult.PASS;
         }
 
-        boolean isReceiver = level.getBlockEntity(clicked) instanceof BlockEntityEssentiaProviderConnection;
-        boolean isProvider = level.getBlockEntity(clicked) instanceof BlockEntityEssentiaProvider;
+        boolean isReceiver = level.getBlockEntity(clicked) instanceof BlockEntityAlchemyProviderConnection;
+        boolean isProvider = level.getBlockEntity(clicked) instanceof BlockEntityAlchemyProvider;
         if (!isReceiver && !isProvider) {
             return InteractionResult.PASS;
         }
@@ -120,7 +120,7 @@ public class ItemWirelessConnector extends Item {
         }
 
         BlockPos receiverPos = BlockPos.of(tag.getLong(NBT_SELECTED));
-        if (!(level.getBlockEntity(receiverPos) instanceof BlockEntityEssentiaProviderConnection receiver)) {
+        if (!(level.getBlockEntity(receiverPos) instanceof BlockEntityAlchemyProviderConnection receiver)) {
             player.displayClientMessage(
                     Component.translatable("item.thaumicenergistics_ce.wireless_connector.receiver_gone"),
                     true);
@@ -140,7 +140,7 @@ public class ItemWirelessConnector extends Item {
 
     private static void report(Level level, BlockPos pos, Player player,
             boolean isReceiver, boolean isProvider) {
-        if (isReceiver && level.getBlockEntity(pos) instanceof BlockEntityEssentiaProviderConnection receiver) {
+        if (isReceiver && level.getBlockEntity(pos) instanceof BlockEntityAlchemyProviderConnection receiver) {
             BlockPos provider = receiver.linkedProvider();
             player.displayClientMessage(provider == null
                     ? Component.translatable("item.thaumicenergistics_ce.wireless_connector.receiver_unbound",
@@ -149,12 +149,12 @@ public class ItemWirelessConnector extends Item {
                             pos.getX(), pos.getY(), pos.getZ(),
                             provider.getX(), provider.getY(), provider.getZ()),
                     false);
-        } else if (level.getBlockEntity(pos) instanceof BlockEntityEssentiaProvider provider) {
+        } else if (level.getBlockEntity(pos) instanceof BlockEntityAlchemyProvider provider) {
             player.displayClientMessage(
                     Component.translatable("item.thaumicenergistics_ce.wireless_connector.provider_report",
                             pos.getX(), pos.getY(), pos.getZ(),
                             provider.linkedReceiverCount(),
-                            BlockEntityEssentiaProvider.MAX_LINKED_RECEIVERS),
+                            BlockEntityAlchemyProvider.MAX_LINKED_RECEIVERS),
                     false);
         }
     }

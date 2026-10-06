@@ -17,26 +17,26 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.blockentity.essentiaprovider.BlockEntityEssentiaProviderConnection;
+import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
 
 /**
- * The Essentia Provider Connection: the receiving end of a wireless essentia link.
+ * The Alchemy Provider Connection: the receiving end of a wireless essentia link.
  * <ul>
  *   <li>{@code facing} points the plug at the surface it is mounted on; the blockstate in this mod's
  *       assets declares all six directions against it, so both the property and its name are load-bearing.
  *   <li>{@code connected} is whether a link exists, and it mounts on any surface, up and down included.
  * </ul>
  */
-public class BlockEssentiaProviderConnection extends ThEBaseEntityBlock {
+public class BlockAlchemyProviderConnection extends ThEBaseEntityBlock {
 
-    public static final MapCodec<BlockEssentiaProviderConnection> CODEC =
-            simpleCodec(BlockEssentiaProviderConnection::new);
+    public static final MapCodec<BlockAlchemyProviderConnection> CODEC =
+            simpleCodec(BlockAlchemyProviderConnection::new);
 
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
     public static final BooleanProperty CONNECTED = BooleanProperty.create("connected");
 
-    public BlockEssentiaProviderConnection(Properties properties) {
+    public BlockAlchemyProviderConnection(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
@@ -44,7 +44,7 @@ public class BlockEssentiaProviderConnection extends ThEBaseEntityBlock {
     }
 
     @Override
-    protected MapCodec<? extends BlockEssentiaProviderConnection> codec() {
+    protected MapCodec<? extends BlockAlchemyProviderConnection> codec() {
         return CODEC;
     }
 
@@ -70,7 +70,7 @@ public class BlockEssentiaProviderConnection extends ThEBaseEntityBlock {
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new BlockEntityEssentiaProviderConnection(pos, state);
+        return new BlockEntityAlchemyProviderConnection(pos, state);
     }
 
     /**
@@ -84,7 +84,7 @@ public class BlockEssentiaProviderConnection extends ThEBaseEntityBlock {
             return null;
         }
         return (tickLevel, pos, tickState, blockEntity) -> {
-            if (blockEntity instanceof BlockEntityEssentiaProviderConnection receiver) {
+            if (blockEntity instanceof BlockEntityAlchemyProviderConnection receiver) {
                 receiver.serverTick();
             }
         };

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity.essentiaprovider;
+package thaumicenergistics_ce.blockentity.alchemyprovider;
 
 import appeng.api.config.Actionable;
 import appeng.api.networking.security.IActionSource;
@@ -18,11 +18,11 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
  *   <li>Extraction is refused: essentia in the buffer is on its way out, never back in.
  * </ul>
  */
-final class EssentiaProviderStorage implements MEStorage {
+final class AlchemyProviderStorage implements MEStorage {
 
-    private final BlockEntityEssentiaProvider provider;
+    private final BlockEntityAlchemyProvider provider;
 
-    EssentiaProviderStorage(BlockEntityEssentiaProvider provider) {
+    AlchemyProviderStorage(BlockEntityAlchemyProvider provider) {
         this.provider = provider;
     }
 
@@ -65,7 +65,7 @@ final class EssentiaProviderStorage implements MEStorage {
     @Override
     public Component getDescription() {
         return Component.translatable(
-                "block.thaumicenergistics_ce.essentia_provider");
+                "block.thaumicenergistics_ce.alchemy_provider");
     }
 
     /** The buffer holds ints; a single AE insert cannot exceed what one aspect slot allows anyway. */

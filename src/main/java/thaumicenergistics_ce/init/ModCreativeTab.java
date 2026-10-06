@@ -25,11 +25,11 @@ public final class ModCreativeTab {
                         output.accept(ModItems.KNOWLEDGE_INSCRIBER.get());
                         output.accept(ModItems.ESSENTIA_CELL_WORKBENCH.get());
                         output.accept(ModItems.ESSENTIA_VIBRATION_CHAMBER.get());
-                        output.accept(ModItems.ESSENTIA_PROVIDER.get());
+                        output.accept(ModItems.ALCHEMY_PROVIDER.get());
                         output.accept(ModItems.INFUSION_PROVIDER.get());
                         output.accept(ModItems.DISTILLATION_ENCODER.get());
                         output.accept(ModItems.INFUSION_MONITOR.get());
-                        output.accept(ModItems.ESSENTIA_PROVIDER_CONNECTION.get());
+                        output.accept(ModItems.ALCHEMY_PROVIDER_CONNECTION.get());
                         output.accept(ModItems.WIRELESS_CONNECTOR.get());
                         output.accept(ModItems.ALKUSURE86_FUMO.get());
                         output.accept(ModItems.STORAGE_CASING.get());

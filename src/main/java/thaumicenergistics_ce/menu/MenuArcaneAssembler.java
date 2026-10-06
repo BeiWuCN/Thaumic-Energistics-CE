@@ -43,7 +43,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
 
     /** The vis pool as one number: the total the six per-aspect slots below break down. */
     public static final int DATA_BUFFERED_VIS = 0;
-    /** The six primals, one slot each, in {@link #BAR_ASPECTS} order; a shared pool drew all bars equal. */
+    /** The six primals, one slot each, in {@code BAR_ASPECTS} order; a shared pool drew all bars equal. */
     public static final int DATA_ASPECT_AIR = 1;
     public static final int DATA_ASPECT_WATER = 2;
     public static final int DATA_ASPECT_FIRE = 3;

@@ -1,4 +1,4 @@
-package thaumicenergistics_ce.blockentity.essentiaprovider;
+package thaumicenergistics_ce.blockentity.alchemyprovider;
 
 import appeng.api.config.Actionable;
 import appeng.api.networking.IGrid;
@@ -29,13 +29,13 @@ import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 /**
- * The Essentia Provider: where the ME network puts essentia meant for the world - the opposite half
+ * The Alchemy Provider: where the ME network puts essentia meant for the world - the opposite half
  * of the Import Bus, handing essentia to whatever container it touches.
  *
  * <ul><li>The buffer is a waypoint, not storage: inserted essentia is pushed to a neighbour on the
  * next tick and is never persisted.</li><li>A provider with nothing attached refuses everything.</li></ul>
  */
-public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
+public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         implements IStorageProvider, IGridTickable, IEssentiaStorage {
 
     public static final int BUFFER_PER_ASPECT = 16;
@@ -48,15 +48,15 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
     private static final int TICK_RATE_ACTIVE = 10;
     private static final int TICK_RATE_IDLE = 40;
 
-    private final EssentiaProviderBuffer buffer = new EssentiaProviderBuffer(this);
+    private final AlchemyProviderBuffer buffer = new AlchemyProviderBuffer(this);
 
     private final ReceiverLinks links = new ReceiverLinks(this);
 
     private final IActionSource actionSource =
             IActionSource.ofMachine(this);
 
-    public BlockEntityEssentiaProvider(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.ESSENTIA_PROVIDER.get(), pos, state);
+    public BlockEntityAlchemyProvider(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.ALCHEMY_PROVIDER.get(), pos, state);
         // Asked of the links so the idle power has one author: with none, they set the base figure.
         links.updateIdlePower();
         getMainNode()
@@ -66,7 +66,7 @@ public class BlockEntityEssentiaProvider extends AENetworkedBlockEntity
 
     @Override
     public void mountInventories(IStorageMounts mounts) {
-        mounts.mount(new EssentiaProviderStorage(this));
+        mounts.mount(new AlchemyProviderStorage(this));
     }
 
     @Override
