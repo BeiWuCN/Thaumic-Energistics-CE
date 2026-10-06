@@ -1,7 +1,6 @@
 package thaumicenergistics_ce.client.jei;
 
 import appeng.client.gui.implementations.InterfaceScreen;
-import appeng.menu.SlotSemantic;
 import appeng.menu.SlotSemantics;
 import appeng.menu.implementations.InterfaceMenu;
 import appeng.menu.slot.AppEngSlot;
@@ -20,8 +19,8 @@ import thaumicenergistics_ce.network.EssentiaInterfaceMarkPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Lets the player drag an aspect from JEI onto an ME interface that carries our access card. Both host
- * forms share AE2's one interface screen, so one registration serves the block and the cable part.
+ * Lets the player drag an aspect onto the config row of an ME interface that carries our access card.
+ * Both host forms share AE2's one interface screen, so one registration serves the block and the part.
  * <ul>
  *   <li>Without the card there is not one target: a drag shows no drop point, not a swallowing slot.
  *   <li>Raw {@code InterfaceScreen}: JEI pairs a {@code Class<T>} with a handler of that same {@code T}.
@@ -43,8 +42,7 @@ public class EssentiaInterfaceGhostIngredientHandler implements IGhostIngredient
                 || !menu.getUpgrades().isInstalled(ModItems.ESSENTIA_ACCESS_CARD.get())) {
             return targets;
         }
-        addRow(targets, menu, screen, EssentiaInterfaceMarkPayload.CONFIG);
-        addRow(targets, menu, screen, EssentiaInterfaceMarkPayload.STORAGE);
+        addRow(targets, menu, screen);
         return targets;
     }
 
@@ -53,43 +51,34 @@ public class EssentiaInterfaceGhostIngredientHandler implements IGhostIngredient
         // Nothing to release: an interface slot never took an item from the player.
     }
 
-    /** Offers every live slot of one of the interface's two rows. */
-    private static <I> void addRow(
-            List<Target<I>> targets, InterfaceMenu menu, InterfaceScreen screen, int row) {
-        for (Slot slot : slotsOf(menu, row)) {
-            MarkTarget<I> target = MarkTarget.of(menu, screen, row, slot);
+    /** Offers every live slot of the config row. */
+    private static <I> void addRow(List<Target<I>> targets, InterfaceMenu menu, InterfaceScreen screen) {
+        for (Slot slot : menu.getSlots(SlotSemantics.CONFIG)) {
+            MarkTarget<I> target = MarkTarget.of(menu, screen, slot);
             if (target != null) {
                 targets.add(target);
             }
         }
     }
 
-    private static List<Slot> slotsOf(InterfaceMenu menu, int row) {
-        return menu.getSlots(rowSemantic(row));
-    }
-
-    private static SlotSemantic rowSemantic(int row) {
-        return row == EssentiaInterfaceMarkPayload.STORAGE ? SlotSemantics.STORAGE : SlotSemantics.CONFIG;
-    }
-
-    /** One drop point, sent to the server: the client never writes the interface's own rows. */
-    private record MarkTarget<I>(int row, int index, int x, int y, int containerId) implements Target<I> {
+    /** One drop point, sent to the server: the client never writes the interface's own config row. */
+    private record MarkTarget<I>(int index, int x, int y, int containerId) implements Target<I> {
 
         /**
-         * A target for one row slot, or {@code null}: it must be a live {@link AppEngSlot} over a
+         * A target for one config slot, or {@code null}: it must be a live {@link AppEngSlot} over a
          * {@link ConfigMenuInventory}, since a locked row sits off-panel and the index is not an offset.
          */
-        static <I> MarkTarget<I> of(InterfaceMenu menu, InterfaceScreen screen, int row, Slot slot) {
+        static <I> MarkTarget<I> of(InterfaceMenu menu, InterfaceScreen screen, Slot slot) {
             if (!(slot instanceof AppEngSlot appEngSlot)
                     || !(appEngSlot.getInventory() instanceof ConfigMenuInventory)
                     || !appEngSlot.isActive()) {
                 return null;
             }
-            int index = menu.getSlots(rowSemantic(row)).indexOf(slot);
+            int index = menu.getSlots(SlotSemantics.CONFIG).indexOf(slot);
             if (index < 0) {
                 return null;
             }
-            return new MarkTarget<>(row, index, screen.getGuiLeft() + slot.x, screen.getGuiTop() + slot.y,
+            return new MarkTarget<>(index, screen.getGuiLeft() + slot.x, screen.getGuiTop() + slot.y,
                     menu.containerId);
         }
 
@@ -116,8 +105,8 @@ public class EssentiaInterfaceGhostIngredientHandler implements IGhostIngredient
                 ThELog.LOG.warn("[essentia-interface] drag produced an aspect with no registry id");
                 return;
             }
-            ThELog.LOG.info("[essentia-interface] sending row {} slot {} <- {}", row, index, id);
-            PacketDistributor.sendToServer(new EssentiaInterfaceMarkPayload(containerId, row, index, id));
+            ThELog.LOG.info("[essentia-interface] sending config slot {} <- {}", index, id);
+            PacketDistributor.sendToServer(new EssentiaInterfaceMarkPayload(containerId, index, id));
         }
     }
 }

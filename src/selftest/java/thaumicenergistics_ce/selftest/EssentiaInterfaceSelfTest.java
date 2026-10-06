@@ -15,7 +15,7 @@ import thaumicenergistics_ce.network.EssentiaInterfaceMarkPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Self-test for the ME interface's access card: the whitelist rule and the rates the round moves at.
+ * Self-test for the ME interface's access card: the config row's whitelist rule and the round's rates.
  * <ul>
  *   <li>Off unless {@code THAUMICENERGISTICS_INTERFACE_SELFTEST=true}; runs on {@code ServerStartedEvent}.
  *   <li>Pure logic only: a headless gate has no player, no live grid and no JEI to drag anything in.
@@ -37,8 +37,8 @@ public final class EssentiaInterfaceSelfTest {
         checkClearPayload(event, failures);
         if (failures.isEmpty()) {
             ThELog.LOG.info(
-                    "[{}] passed: an empty storage row takes every aspect, a filled one only its own,"
-                            + " {} points move per direction every {} ticks at {} AE each",
+                    "[{}] passed: an empty config row pulls every aspect and a filled one only its own,"
+                            + " {} points move every {} ticks at {} AE each",
                     TAG,
                     EssentiaInterfaceAccess.POINTS_PER_ROUND,
                     EssentiaInterfaceAccess.ROUND_TICKS,
@@ -71,7 +71,7 @@ public final class EssentiaInterfaceSelfTest {
         // An item key stands for everything in a row that is not ours.
         AEKey stone = AEItemKey.of(Items.STONE);
         if (!EssentiaInterfaceAccess.mayEnter(List.of(), rune)) {
-            failures.add("an empty storage row refused an aspect");
+            failures.add("an empty config row refused an aspect");
         }
         if (!EssentiaInterfaceAccess.mayEnter(List.of(rune), rune)) {
             failures.add("a row listing an aspect refused that same aspect");
@@ -86,8 +86,7 @@ public final class EssentiaInterfaceSelfTest {
 
     /** The clearing mark, out and back: a field lost here is a slot a player cannot empty from JEI. */
     private static void checkClearPayload(ServerStartedEvent event, List<String> failures) {
-        var sent = new EssentiaInterfaceMarkPayload(7, EssentiaInterfaceMarkPayload.CONFIG, 3,
-                EssentiaInterfaceMarkPayload.CLEAR);
+        var sent = new EssentiaInterfaceMarkPayload(7, 3, EssentiaInterfaceMarkPayload.CLEAR);
         try {
             RegistryFriendlyByteBuf buffer =
                     new RegistryFriendlyByteBuf(Unpooled.buffer(), event.getServer().registryAccess());

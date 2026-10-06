@@ -31,11 +31,11 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * One ME interface that carries our access card: moves essentia between the network and its neighbours.
+ * One ME interface that carries our access card: pulls essentia from the containers it touches into the
+ * network. The marks it reads live in the interface's own config row, so a reload keeps them.
  * <ul>
- *   <li>Runs from {@link EssentiaInterfaceRegistry}'s round, not from AE2's grid tickable service, so a
- *       card pulled out stops it without any alert from AE2.
- *   <li>Speed and cost are fixed here: {@link #ROUND_TICKS} and {@link #POINTS_PER_ROUND} per direction.
+ *   <li>One direction only: the essentia terminal already takes essentia out of the network.
+ *   <li>Driven by the registry's round rather than AE2's tickable service, so a pulled card stops it.
  * </ul>
  */
 public final class EssentiaInterfaceAccess {
@@ -43,7 +43,7 @@ public final class EssentiaInterfaceAccess {
     /** Ticks between rounds. Same order as the essentia buses; AE2's own interfaces run at 5 too. */
     public static final int ROUND_TICKS = 5;
 
-    /** Essentia, in points, moved per direction per round: 8 out and 8 in, never more. */
+    /** Essentia, in points, pulled out of the neighbours per round: 8, never more. */
     public static final int POINTS_PER_ROUND = 8;
 
     /** AE, per point moved, priced to match {@code BlockEntityAlchemyProvider.AE_PER_ESSENTIA}. */
@@ -70,8 +70,8 @@ public final class EssentiaInterfaceAccess {
     }
 
     /**
-     * One round of both directions: out of the network into a neighbour, then out of a neighbour into the
-     * network. Any shortfall cancels that direction, never a half move.
+     * One round: every marked aspect is pulled out of one neighbour into the network, and a shortfall
+     * cancels that move rather than halving it.
      */
     public void runRound() {
         InterfaceLogic logic = host.getInterfaceLogic();
@@ -89,9 +89,8 @@ public final class EssentiaInterfaceAccess {
         if (network == null || energy == null) {
             return;
         }
-        Direction[] faces = faces();
-        export(faces, logic.getConfig(), network, energy);
-        absorb(faces, logic.getStorage(), network, energy);
+        cleanStorageRow(logic.getStorage());
+        absorb(faces(), logic.getConfig(), network, energy);
     }
 
     /**
@@ -128,44 +127,29 @@ public final class EssentiaInterfaceAccess {
         return level.getCapability(EssentiaCapabilities.STORAGE, neighbour, from);
     }
 
-    /** The config row: every essentia mark in it is pushed out of the network into a neighbour. */
-    private void export(
-            Direction[] faces,
-            ConfigInventory config,
-            MEStorage network,
-            IEnergyService energy) {
-        for (int slot = 0; slot < config.size(); slot++) {
-            AEKey key = config.getKey(slot);
-            if (!(key instanceof AEssentiaKey essentia)) {
-                continue;
-            }
-            Holder<IAspect> aspect = essentia.resolveAspect();
-            if (aspect == null) {
-                continue;
-            }
-            for (Direction face : faces) {
-                IEssentiaStorage storage = essentiaAt(face);
-                if (storage == null) {
-                    continue;
-                }
-                int moved = push(network, storage, aspect, energy);
-                if (moved > 0) {
-                    break;
-                }
+    /**
+     * Drops aspects an earlier build of this card let JEI write into the storage row. AE2 reads that row
+     * as what the interface holds, so an aspect left in it could be taken out of nothing.
+     */
+    private void cleanStorageRow(ConfigInventory storage) {
+        for (int slot = 0; slot < storage.size(); slot++) {
+            if (storage.getKey(slot) instanceof AEssentiaKey) {
+                ThELog.LOG.info("[essentia-interface] clearing a stale aspect in storage slot {}", slot);
+                storage.setStack(slot, null);
             }
         }
     }
 
     /**
-     * The storage row as a whitelist. All nine empty means every aspect is let in; otherwise only the
-     * aspects the row lists are. Keys of other types are not ours and are passed over.
+     * The config row as a whitelist. A row with no aspect in it pulls every aspect; otherwise only the
+     * aspects it lists are. Keys of other types are not ours and are passed over.
      */
     private void absorb(
             Direction[] faces,
-            ConfigInventory storage,
+            ConfigInventory config,
             MEStorage network,
             IEnergyService energy) {
-        List<AEKey> allowed = whitelist(storage);
+        List<AEKey> allowed = whitelist(config);
         for (Direction face : faces) {
             IEssentiaStorage neighbour = essentiaAt(face);
             if (neighbour == null) {
@@ -189,11 +173,11 @@ public final class EssentiaInterfaceAccess {
         }
     }
 
-    /** The storage row reduced to its essentia keys; an empty answer stands for "no filter at all". */
-    private List<AEKey> whitelist(ConfigInventory storage) {
+    /** The config row reduced to its essentia keys; an empty answer stands for "no filter at all". */
+    private List<AEKey> whitelist(ConfigInventory row) {
         List<AEKey> listed = new ArrayList<>();
-        for (int slot = 0; slot < storage.size(); slot++) {
-            AEKey key = storage.getKey(slot);
+        for (int slot = 0; slot < row.size(); slot++) {
+            AEKey key = row.getKey(slot);
             if (key instanceof AEssentiaKey) {
                 listed.add(key);
             }
@@ -202,7 +186,7 @@ public final class EssentiaInterfaceAccess {
     }
 
     /**
-     * Whether the storage row lets a key in. An empty row is no filter at all: entries that are not
+     * Whether the config row lets a key in. An empty row is no filter at all: entries that are not
      * essentia never count, so a row holding only items or fluids behaves like an empty one.
      */
     public static boolean mayEnter(List<AEKey> allowed, AEKey key) {
@@ -217,31 +201,6 @@ public final class EssentiaInterfaceAccess {
             }
         }
         return !filtered;
-    }
-
-    /** Network to neighbour: pay first, then take only what was paid for, then give it away. */
-    private int push(
-            MEStorage network, IEssentiaStorage storage, Holder<IAspect> aspect, IEnergyService energy) {
-        int affordable = affordable(POINTS_PER_ROUND, energy);
-        if (affordable <= 0) {
-            return 0;
-        }
-        long fit = storage.insert(aspect, affordable, true);
-        long have = network.extract(AEssentiaKey.of(aspect), affordable, Actionable.SIMULATE, actionSource());
-        int wanted = (int) Math.min(Math.min(fit, have), affordable);
-        if (wanted <= 0 || !pay(wanted, energy)) {
-            return 0;
-        }
-        long taken = network.extract(AEssentiaKey.of(aspect), wanted, Actionable.MODULATE, actionSource());
-        int given = (int) Math.min(taken, Integer.MAX_VALUE);
-        if (given <= 0) {
-            return 0;
-        }
-        int accepted = storage.insert(aspect, given, false);
-        if (accepted < given) {
-            network.insert(AEssentiaKey.of(aspect), given - accepted, Actionable.MODULATE, actionSource());
-        }
-        return accepted;
     }
 
     /** Neighbour to network: the pay-first order that keeps a refused insert from eating the essentia. */

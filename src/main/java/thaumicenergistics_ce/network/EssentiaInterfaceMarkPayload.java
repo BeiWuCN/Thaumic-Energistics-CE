@@ -23,12 +23,12 @@ import thaumicenergistics_ce.util.ThELog;
 /**
  * "Put this aspect in that interface slot", sent when a player drops one out of JEI onto an interface.
  * <ul>
- *   <li>The row is the interface's own two: 0 is the config row, 1 the storage row.
+ *   <li>The slot is always in the config row, the row whose marks the card pulls neighbours in with.
  *   <li>An aspect travels as an id: a slot write goes through {@code AEItemKey}, which drops a key that
  *       is not an item - the same reason {@code EssentiaBusConfigPayload} exists.
  * </ul>
  */
-public record EssentiaInterfaceMarkPayload(int containerId, int row, int index, ResourceLocation aspectId)
+public record EssentiaInterfaceMarkPayload(int containerId, int index, ResourceLocation aspectId)
         implements CustomPacketPayload {
 
     public static final Type<EssentiaInterfaceMarkPayload> TYPE =
@@ -39,20 +39,12 @@ public record EssentiaInterfaceMarkPayload(int containerId, int row, int index, 
                     ByteBufCodecs.VAR_INT,
                     EssentiaInterfaceMarkPayload::containerId,
                     ByteBufCodecs.VAR_INT,
-                    EssentiaInterfaceMarkPayload::row,
-                    ByteBufCodecs.VAR_INT,
                     EssentiaInterfaceMarkPayload::index,
                     ResourceLocation.STREAM_CODEC,
                     EssentiaInterfaceMarkPayload::aspectId,
                     EssentiaInterfaceMarkPayload::new);
 
     public static final ResourceLocation CLEAR = ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "clear");
-
-    /** The config row, the one the interface pulls out of the network. */
-    public static final int CONFIG = 0;
-
-    /** The storage row, the one it lets back in. */
-    public static final int STORAGE = 1;
 
     @Override
     public Type<EssentiaInterfaceMarkPayload> type() {
@@ -64,7 +56,7 @@ public record EssentiaInterfaceMarkPayload(int containerId, int row, int index, 
         if (!(player.containerMenu instanceof InterfaceMenu menu) || menu.containerId != containerId) {
             return;
         }
-        // Without the card the rows are AE2's own and an essentia key in them would have no meaning.
+        // Without the card the row is AE2's own and an essentia key in it would have no meaning.
         if (!menu.getUpgrades().isInstalled(ModItems.ESSENTIA_ACCESS_CARD.get())) {
             return;
         }
@@ -72,10 +64,9 @@ public record EssentiaInterfaceMarkPayload(int containerId, int row, int index, 
             return;
         }
         InterfaceLogic logic = host.getInterfaceLogic();
-        ConfigInventory target =
-                row == CONFIG ? logic.getConfig() : row == STORAGE ? logic.getStorage() : null;
-        if (target == null || index < 0 || index >= target.size()) {
-            ThELog.LOG.debug("[essentia-interface] mark {} in row {} is out of range", index, row);
+        ConfigInventory target = logic.getConfig();
+        if (index < 0 || index >= target.size()) {
+            ThELog.LOG.debug("[essentia-interface] mark {} is out of range", index);
             return;
         }
         if (CLEAR.equals(aspectId)) {

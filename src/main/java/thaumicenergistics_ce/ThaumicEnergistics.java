@@ -222,9 +222,9 @@ public final class ThaumicEnergistics {
             Upgrades.add(AEItems.REDSTONE_CARD, bus, 1);
         }
         // One access card per ME interface, block form and cable part alike: without these two AE2's
-        // upgrade slot refuses our card and the interface's rows can never be marked.
-        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEBlocks.INTERFACE, 1);
-        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEParts.INTERFACE, 1);
+        // upgrade slot refuses our card. One name key keeps the block and the part to a single line.
+        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEBlocks.INTERFACE, 1, INTERFACE_UPGRADE_NAME);
+        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEParts.INTERFACE, 1, INTERFACE_UPGRADE_NAME);
     }
 
     /** The four upgrade slots every essentia bus has; the same number {@code Upgrades.add} should report. */
@@ -232,6 +232,9 @@ public final class ThaumicEnergistics {
 
     /** What a card's tooltip calls the whole essentia cell family, at every size. */
     private static final String CELL_UPGRADE_NAME = "item.thaumicenergistics_ce.essentia_cell";
+
+    /** What the access card's tooltip calls the interface: one name for the block and the part both. */
+    private static final String INTERFACE_UPGRADE_NAME = "block.ae2.interface";
 
     /**
      * Adds the essentia key type to AE2's registry. Not from the mod constructor: an {@code AEKeyType}
