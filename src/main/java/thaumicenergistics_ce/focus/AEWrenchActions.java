@@ -47,7 +47,7 @@ import thaumicenergistics_ce.util.ThELog;
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class AEWrenchActions {
 
-    /** Set {@code -Dthaumicenergistics.aewrench.debug=true} to trace why a left-click did or did not turn. */
+    /** Set {@code -Dthaumicenergistics.aewrench.debug=true} to log why a left-click was or was not a turn. */
     private static final boolean DEBUG = Boolean.getBoolean("thaumicenergistics.aewrench.debug");
 
     /** Whether {@link #debug} will print; the event handler asks before building a line. */

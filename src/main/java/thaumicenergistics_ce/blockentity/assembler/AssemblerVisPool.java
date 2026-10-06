@@ -11,7 +11,7 @@ final class AssemblerVisPool {
     static final int IDLE_TARGET = 512;
 
     /** The names the pool is written under. The save tag and the update tag share them, and the Jade
-     * payload spells the first one in its own contract: the sync self-test holds the two equal. */
+     * payload spells the first one in its own contract; the two must stay equal. */
     private static final String TAG_BUFFERED_VIS = "BufferedVis";
     private static final String TAG_ASPECT_VIS = "AspectVis";
 

@@ -102,22 +102,6 @@ final class AssemblerMenuReadout {
         return Math.max(live, mirrored);
     }
 
-    /** The progress the screen's traced bar reads, live and mirrored side by side; only the
-     * {@code THAUMICENERGISTICS_ASSEMBLER_SELFTEST} trace calls this. */
-    String progressTrace() {
-        BlockEntityArcaneAssembler machine = machineView();
-        String live = machine == null
-                ? "no block entity at " + clientPos
-                : "craft=" + machine.isCrafting() + " ticks=" + machine.getCraftTicks()
-                        + " prog=" + machine.getCraftProgress();
-        int total = Math.max(1, data.get(MenuArcaneAssembler.DATA_TICKS_PER_CRAFT));
-        String mirrored = "craft=" + (data.get(MenuArcaneAssembler.DATA_CRAFTING) != 0) + " tick="
-                + data.get(MenuArcaneAssembler.DATA_CRAFT_TICK) + "/" + total + " prog="
-                + Math.min(1.0F, data.get(MenuArcaneAssembler.DATA_CRAFT_TICK) / (float) total);
-        return "live[" + live + "] slot[" + mirrored + "] union[craft=" + isCrafting()
-                + " prog=" + getProgress() + "]";
-    }
-
     /**
      * The machine as this side can see it, or null when there is none. On the client it is looked up from
      * the position the server sent; an unloaded chunk answers null, which is what the data slots are for.

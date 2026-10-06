@@ -21,7 +21,7 @@ final class AssemblerDisplaySync {
     private static final int UPDATE_INTERVAL = 4;
 
     /** The wire names. The first is spelled the same way by the Jade payload
-     * ({@code ArcaneAssemblerProvider.TAG_DISCOUNT}); the sync self-test holds the two equal. */
+     * ({@code ArcaneAssemblerProvider.TAG_DISCOUNT}); the two are a pair and must stay equal. */
     private static final String TAG_GEAR_DISCOUNT = "GearDiscount";
     /** The product the renderer previews: sent on a slower clock, so an absent key means "unchanged". */
     private static final String TAG_PREVIEW = "Preview";

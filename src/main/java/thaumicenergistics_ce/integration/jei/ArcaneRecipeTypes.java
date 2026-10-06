@@ -17,8 +17,8 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * How to read a Thaumaturge arcane recipe's grid: the nine cells a transfer would fill, and whether one
- * fits. It names no JEI type, because the recipe self-test reads this on a dedicated server; borrowing
- * Thaumaturge's JEI recipe type is {@code ArcaneJeiRecipeType}'s job.
+ * fits. It names no JEI type, because a dedicated server has no JEI to borrow one from; that is
+ * {@code ArcaneJeiRecipeType}'s job.
  */
 public final class ArcaneRecipeTypes {
 
@@ -107,22 +107,6 @@ public final class ArcaneRecipeTypes {
             }
         }
         return used > 0;
-    }
-
-    /**
-     * The grid a transfer would fill, as plain stacks, for the self-test: each cell's first variant,
-     * the transfer's own fallback. A mismatch here reads as a matcher that does not work.
-     */
-    public static List<ItemStack> templateFor(RecipeHolder<?> holder) {
-        List<List<ItemStack>> cells = cellsFor(holder);
-        if (cells == null) {
-            return List.of();
-        }
-        List<ItemStack> template = new ArrayList<>(cells.size());
-        for (List<ItemStack> variants : cells) {
-            template.add(variants.isEmpty() ? ItemStack.EMPTY : variants.getFirst());
-        }
-        return template;
     }
 
     /**

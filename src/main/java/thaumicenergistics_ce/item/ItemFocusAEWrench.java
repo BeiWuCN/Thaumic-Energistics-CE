@@ -67,8 +67,8 @@ public class ItemFocusAEWrench extends ItemFocus {
         return true;
     }
 
-    /** A stack with the package already written, for callers with no tick to hang assembly off (creative
-     * tab, self-test). */
+    /** A stack with the package already written, for callers with no tick to hang assembly off (the
+     * creative tab). */
     public static ItemStack assembledStack() {
         ItemStack stack = new ItemStack(thaumicenergistics_ce.init.ModItems.FOCUS_AEWRENCH.get());
         assemble(stack);

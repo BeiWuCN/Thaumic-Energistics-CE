@@ -127,12 +127,4 @@ public final class AEWrench {
     public static ItemStack wrenchStack() {
         return AEItems.CERTUS_QUARTZ_WRENCH.stack();
     }
-
-    /**
-     * Whether AE2 would treat a stack as a wrench; used by the self-test. A rename of
-     * {@code c:tools/wrench} would make this focus do nothing, silently.
-     */
-    public static boolean isWrench(ItemStack stack) {
-        return InteractionUtil.canWrenchDisassemble(stack);
-    }
 }

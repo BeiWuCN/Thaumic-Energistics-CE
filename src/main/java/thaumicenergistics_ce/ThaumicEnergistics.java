@@ -40,7 +40,6 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.init.ModNetwork;
-import thaumicenergistics_ce.init.SelfTestHook;
 import thaumicenergistics_ce.init.capability.ThEItemCapabilities;
 import thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceRegistry;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
@@ -79,7 +78,6 @@ public final class ThaumicEnergistics {
         // The ME interface's access card works on the game bus rather than a grid tickable, since AE2
         // reports nothing when a card goes in or out - see EssentiaInterfaceRegistry.
         EssentiaInterfaceRegistry.register();
-        SelfTestHook.install();
     }
 
     /**
@@ -150,8 +148,8 @@ public final class ThaumicEnergistics {
     }
 
     /**
-     * Exposes TECE's own parts through AE2's own event, since parts are not block entities and the lookup
-     * goes through the cable bus. Static and public so the self-test source set can run the event.
+     * Exposes TECE's own parts through AE2's own event, since parts are not block entities and the
+     * lookup goes through the cable bus. Static because it is handed to the bus as a listener.
      */
     public static void registerPartCapabilities(RegisterPartCapabilitiesEvent event) {
         TcAura.registerVisSource(event, PartVisInterface.class);

@@ -30,23 +30,6 @@ repositories {
     // maven { url = '../local-maven' }
 }
 
-// ---- Self-tests: a diagnostic that must not ship --------------------------
-// They have a source set of their own for one reason: src/main may not reference them, so the jar -
-// which packages main's output alone - cannot carry them. The mod side of the seam is
-// init/SelfTestHook, which finds the provider through ServiceLoader; that provider and the
-// META-INF/services file naming it live in this source set, so neither exists in a release.
-//
-// Declared before neoForge because the mod entry below names it. A dev run reaches it through that
-// entry and not through a dependency: ModDevGradle hands a run its mods as MOD_CLASSES folders.
-sourceSets {
-    // Both directories default to src/selftest/{java,resources}, which is where they live. Naming
-    // them again lists each one twice: javac tolerates that, the resource copy does not - it fails
-    // the run with "Entry META-INF/services/... is a duplicate but no duplicate handling strategy
-    // has been set".
-    selftest
-}
-sourceSets.selftest.compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
-
 neoForge {
     version = project.neo_version
 
@@ -69,11 +52,6 @@ neoForge {
     mods {
         "${mod_id}" {
             sourceSet(sourceSets.main)
-            // The self-tests are a second folder of the SAME mod, which is what puts them in a dev run:
-            // ModDevGradle hands a run its mods as MOD_CLASSES folders, not as a Java classpath, so a
-            // runtimeOnly dependency would never be seen by the loader. The jar packages main's output
-            // alone, so neither folder of this entry reaches a release.
-            sourceSet(sourceSets.selftest)
         }
     }
 
@@ -95,10 +73,8 @@ neoForge {
             // Thaumaturge - but note that Thaumaturge is a hard dependency, so the loader refuses
             // before any of this is even reached.
             //
-            // Quick-play into the existing dev world when asked. `MenuSelfTest` needs a player to exist -
-            // every menu takes an Inventory, and an Inventory needs one - so it skips on a dedicated server
-            // nobody has joined, which is the only way it can otherwise be run here. With this it runs on
-            // world load:
+            // Quick-play into the existing dev world when asked, since a menu needs a player to exist and
+            // every menu takes an Inventory. With this the world loads straight in:
             //
             //     ./gradlew runClient -PquickPlay="New World"
             //
@@ -136,17 +112,17 @@ neoForge {
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             logLevel = org.slf4j.event.Level.DEBUG
 
-            // The self-tests and the trace switches are turned on by environment variables, and a forked
-            // run does not inherit the shell's. Passing them through is what makes the documented
+            // The trace switches are read from the environment, and a forked run does not inherit the
+            // shell's. Passing them through is what makes the documented
             //
-            //     THAUMICENERGISTICS_INSCRIBER_SELFTEST=true ./gradlew runClient -PquickPlay="New World"
+            //     THAUMICENERGISTICS_MONITOR_TRACE=true ./gradlew runClient
             //
-            // actually run anything: without this the variable is set in the shell, silently dropped by
-            // the fork, and every test reports nothing at all - which looks exactly like a pass.
+            // actually print anything: without this the variable is set in the shell, silently dropped by
+            // the fork, and the run is quiet - which looks exactly like a switch that never fires.
             //
-            // By prefix, not by a list. The list this replaces had to be extended for every new switch,
-            // and did not always get extended: the encoder self-test and the whole vis-relay switch were
-            // in the code and absent from it, so both reported nothing and that read as a pass.
+            // By prefix, not by a list: a new switch is a one-word addition in the code and needs no
+            // change here. The list this replaces had to be extended for every switch and did not
+            // always get extended, so a switch could be live in the code and dead in the run.
             System.getenv().each { name, value ->
                 if (name.startsWith('THAUMICENERGISTICS_')) {
                     environment name, value
@@ -248,8 +224,7 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
 sourceSets.main.resources.srcDir generateModMetadata
 neoForge.ideSyncTask generateModMetadata
 
-// The default test task is off: the checks that matter here need a running game, and are a diagnostic
-// inside the mod rather than a unit test - see ThaumicEnergistics.recipeSelfTest.
+// The default test task is off: the checks that matter here need a running game.
 tasks.named('test') {
     enabled = false
 }

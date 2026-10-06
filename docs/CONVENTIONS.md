@@ -49,9 +49,12 @@
 ## 四、改完注释的闸门
 
 1. `build\cmd\comment-audit.ps1` → 规则类（Len/Trail/Run/JBlank/JP/JTall/JMeth）全 0；`Code` 类只报告，不修。
-2. `mc_gradle classes compileSelftestJava` → BUILD SUCCESSFUL。
+2. `mc_gradle classes` → BUILD SUCCESSFUL。
 3. 纯注释改动要证明零字节码影响：`build\cmd\compare-bytecode-per-class.ps1`（吃 jar，不吃目录）或
    `build\cmd\class-surface-diff.ps1`（公开面变化必须逐条列进 `-Allow` / `-AllowPublic`，两条判据互相独立 —— 删掉 public 字段也算公开面变化）。
 4. 行为改动（不只是注释）要另外用 `build\cmd\classify-staged-diff.ps1` 证明 CODE=0，或跑 `server-gate.ps1`。
+
+> 2026-10-06：`src/selftest` 源集、`init/SelfTestHook`、`init/SelfTestProvider` 与全部 `THAUMICENERGISTICS_*_SELFTEST`
+> 开关已从仓库删除（含 `compileSelftestJava` 任务与 `runServer` 自检闸门）。闸门只剩审计脚本、编译、字节码/公开面比对，以及游戏内手测。
 
 更细的历史与踩坑记在 `F:\Deepseek Harness\TECE 2.0\协作须知-给另一个Agent.md` 的 §4b 与 §5。

@@ -18,7 +18,7 @@ import thaumicenergistics_ce.infusion.InfusionRisk;
 final class OccultMonitorSync {
 
     /** The bubble's wire names. The Jade payload spells the first one in its own contract
-     * ({@code OccultMonitorProvider.TAG_REPORTING}); the sync self-test holds the two equal. */
+     * ({@code OccultMonitorProvider.TAG_REPORTING}); the two are a pair and must stay equal. */
     static final String TAG_REPORTING = "Reporting";
     static final String TAG_TIER = "BubbleTier";
     static final String TAG_INSTABILITY = "BubbleInstability";

@@ -19,7 +19,6 @@ import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.layout.GuiLayout;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.menu.MenuArcaneAssembler;
-import thaumicenergistics_ce.util.ThELog;
 
 /**
  * The Arcane Assembler screen: pieces from {@link GuiLayout} composited over the reference's own art.
@@ -45,13 +44,6 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
 
     /** V of the first row of the fill strip that runs along the bottom of the texture. */
     private static final int FILL_TOP = 240;
-
-    /** On only in the assembler's self-test; the column cannot be checked from the server. */
-    private static final boolean TRACE_PROGRESS =
-            "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_ASSEMBLER_SELFTEST"));
-
-    /** Last traced value, so a fifty-tick craft is fifty lines and not three thousand. */
-    private float lastTracedProgress = -1.0F;
 
     private final @Nullable GuiLayout layout = GuiLayout.load();
 
@@ -151,12 +143,7 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
         if (index >= GuiLayout.PRIMAL_COLUMNS) {
             // Craft progress only: "full whenever any vis is buffered" would draw a complete bar on an
             // idle assembler and make a cancelled job look like it was still finishing.
-            float progress = menu.isCrafting() ? menu.getProgress() : 0.0F;
-            if (TRACE_PROGRESS && Math.abs(progress - lastTracedProgress) > 0.001F) {
-                lastTracedProgress = progress;
-                ThELog.LOG.info("[asmtest] bar={} {}", progress, menu.progressTrace());
-            }
-            return progress;
+            return menu.isCrafting() ? menu.getProgress() : 0.0F;
         }
         return Math.min(1.0F, menu.getBarVis(index) / (float) VIS_BAR_MAX_PER_ASPECT);
     }

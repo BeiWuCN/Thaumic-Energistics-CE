@@ -1,14 +1,10 @@
 package thaumicenergistics_ce.blockentity.assembler;
 
-import java.util.ArrayList;
-import java.util.List;
 import net.minecraft.network.chat.Component;
 
 /**
  * The Arcane Assembler's reason for waiting or for turning a job away, in one place. The key and
- * its English fallback sit together here, so a missing translation cannot show a raw key. This was
- * split out of {@link BlockEntityArcaneAssembler}: because the self-test enumerates the keys from
- * another package, this class and {@link #tooltipReasonKeys()} are public and the rest is not.
+ * its English fallback sit together here, so a missing translation cannot show a raw key.
  */
 public final class AssemblerStatus {
 
@@ -26,7 +22,7 @@ public final class AssemblerStatus {
     }
 
     // ---- The reason keys, named once --------------------------------------
-    // Constants, not literals: the self-test enumerates them to catch a reason key with no translation.
+    // Constants, not literals: each key is spelled once here and joined to its key prefix below.
 
     static final String WAIT_NO_POWER = "no_power";
     static final String WAIT_NO_VIS = "no_vis";
@@ -38,23 +34,6 @@ public final class AssemblerStatus {
     static final String REFUSE_NOT_ARCANE = "not_arcane";
     static final String REFUSE_UNRESOLVED = "unresolved";
     static final String REFUSE_TOO_EXPENSIVE = "too_expensive";
-
-    public static List<String> tooltipReasonKeys() {
-        List<String> keys = new ArrayList<>();
-        for (String key : List.of(
-                WAIT_NO_POWER, WAIT_NO_VIS, WAIT_NO_CRYSTALS, WAIT_NO_CRYSTALS_RECHECK, WAIT_NO_ROOM)) {
-            keys.add("jade.thaumicenergistics_ce.arcane_assembler.wait_reason." + key);
-        }
-        for (String key : List.of(
-                REFUSE_NODE_INACTIVE,
-                REFUSE_BUSY,
-                REFUSE_NOT_ARCANE,
-                REFUSE_UNRESOLVED,
-                REFUSE_TOO_EXPENSIVE)) {
-            keys.add("jade.thaumicenergistics_ce.arcane_assembler.refuse_reason." + key);
-        }
-        return keys;
-    }
 
     /** The refusal for a recipe whose vis cost is more than this chunk's aura can ever hold. */
     static Component tooExpensive(int price, int capacity) {

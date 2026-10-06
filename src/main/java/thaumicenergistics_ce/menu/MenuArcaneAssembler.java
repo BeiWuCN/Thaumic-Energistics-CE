@@ -231,10 +231,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         return readout.getProgress();
     }
 
-    public String progressTrace() {
-        return readout.progressTrace();
-    }
-
     public int getGearDiscount() {
         return readout.getGearDiscount();
     }

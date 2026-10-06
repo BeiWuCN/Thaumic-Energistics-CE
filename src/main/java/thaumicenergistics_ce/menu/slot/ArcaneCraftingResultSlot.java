@@ -37,7 +37,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
     /** Concrete rather than {@link ICraftingGridMenu}: sending the vis cost to the screen needs the menu. */
     private final thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal ownerMenu;
 
-    /** Why the last {@link #refresh()} offered nothing, or {@code NONE}; the self-test reads it. */
+    /** Why the last {@link #refresh()} offered nothing, or {@code NONE}. */
     private ArcaneCraftingTransaction.Failure lastFailure = ArcaneCraftingTransaction.Failure.NONE;
 
     public ArcaneCraftingResultSlot(
