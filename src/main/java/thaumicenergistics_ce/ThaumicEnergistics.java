@@ -239,6 +239,13 @@ public final class ThaumicEnergistics {
                 ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                 1,
                 ARCANE_TERMINAL_UPGRADE_NAME);
+        // The same card on the terminal placed on a cable: it has one upgrade slot too, and with the card
+        // in it the craft takes its vis from the aura around the cable instead of the network's power.
+        Upgrades.add(
+                ModItems.VIS_CONNECTION_CARD.get(),
+                ModItems.ARCANE_CRAFTING_TERMINAL.get(),
+                1,
+                ARCANE_TERMINAL_PART_UPGRADE_NAME);
     }
 
     /** The four upgrade slots every essentia bus has; the same number {@code Upgrades.add} should report. */
@@ -253,6 +260,10 @@ public final class ThaumicEnergistics {
     /** What the access card's tooltip calls the wireless arcane terminal: the item's own name key. */
     private static final String ARCANE_TERMINAL_UPGRADE_NAME =
             "item.thaumicenergistics_ce.wireless_arcane_crafting_terminal";
+
+    /** The same terminal on a cable is a separate item, so its tooltip line needs its own name key. */
+    private static final String ARCANE_TERMINAL_PART_UPGRADE_NAME =
+            "item.thaumicenergistics_ce.arcane_crafting_terminal";
 
     /**
      * Adds the essentia key type to AE2's registry. Not from the mod constructor: an {@code AEKeyType}

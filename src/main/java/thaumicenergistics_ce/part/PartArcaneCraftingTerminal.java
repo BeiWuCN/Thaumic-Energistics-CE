@@ -6,6 +6,8 @@ import appeng.api.networking.IGridNode;
 import appeng.api.networking.energy.IEnergyService;
 import appeng.api.parts.IPartItem;
 import appeng.api.parts.IPartModel;
+import appeng.api.upgrades.IUpgradeInventory;
+import appeng.api.upgrades.UpgradeInventories;
 import appeng.core.AppEng;
 import appeng.items.parts.PartModels;
 import appeng.menu.MenuOpener;
@@ -98,6 +100,10 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
 
     private final AppEngInternalInventory crystalInv = new AppEngInternalInventory(this, CRYSTAL_SLOTS);
 
+    /** One card, the vis connection card; the slot it goes in is the one AE2 hangs off this part. */
+    private final IUpgradeInventory upgrades =
+            UpgradeInventories.forMachine(getPartItem(), 1, this::onUpgradesChanged);
+
     public PartArcaneCraftingTerminal(IPartItem<?> partItem) {
         super(partItem);
         getMainNode().setIdlePowerUsage(0.5);
@@ -178,6 +184,20 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         return crystalInv;
     }
 
+    /** The part's own upgrade slot: AE2's menu builder reads it here and draws the slot the player uses. */
+    @Override
+    public IUpgradeInventory getUpgrades() {
+        return upgrades;
+    }
+
+    /** AE2 calls this as the card goes in or comes out; the part keeps its own contents in the world. */
+    private void onUpgradesChanged() {
+        // A part standing outside a world has nothing to save, and AE2 calls this during a load too.
+        if (getHost() != null) {
+            saveChanges();
+        }
+    }
+
     private appeng.api.networking.@Nullable IGrid gridOrNull() {
         IGridNode node = getMainNode().getNode();
         return node == null ? null : node.getGrid();
@@ -195,6 +215,11 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         Level level = getLevel();
         if (level == null || level.isClientSide()) {
             return 0;
+        }
+        if (TerminalAuraPayment.visConnectionInstalled(this)) {
+            // The card pays straight out of the aura around the cable, so no grid and no power are asked.
+            return TerminalAuraPayment.payAura(
+                    level, getBlockEntity().getBlockPos(), needCentivis, simulate);
         }
         IGrid grid = gridOrNull();
         if (grid == null) {
@@ -242,6 +267,11 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
                 drops.add(stack);
             }
         }
+        for (ItemStack stack : upgrades) {
+            if (!stack.isEmpty()) {
+                drops.add(stack);
+            }
+        }
     }
 
     @Override
@@ -250,6 +280,7 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         craftingGrid.clear();
         wandInv.clear();
         crystalInv.clear();
+        upgrades.clear();
     }
 
     @Override
@@ -259,6 +290,7 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         wandInv.readFromNBT(data, "wandInv", registries);
         // Old worlds have no such key; a missing key leaves it empty, so this is a safe upgrade.
         crystalInv.readFromNBT(data, "crystalInv", registries);
+        upgrades.readFromNBT(data, "upgrades", registries);
     }
 
     @Override
@@ -267,5 +299,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         craftingGrid.writeToNBT(data, "craftingGrid", registries);
         wandInv.writeToNBT(data, "wandInv", registries);
         crystalInv.writeToNBT(data, "crystalInv", registries);
+        upgrades.writeToNBT(data, "upgrades", registries);
     }
 }

@@ -5,6 +5,7 @@ import appeng.api.config.PowerMultiplier;
 import appeng.api.networking.energy.IEnergySource;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.IUpgradeableItem;
+import appeng.api.upgrades.IUpgradeableObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -74,6 +75,15 @@ public final class TerminalAuraPayment {
             return false;
         }
         IUpgradeInventory upgrades = upgradeable.getUpgrades(terminal);
+        return upgrades != null && upgrades.isInstalled(ModItems.VIS_CONNECTION_CARD.get());
+    }
+
+    /**
+     * Whether the machine the player has open carries the vis connection card; the carried terminal and
+     * the one placed on a cable answer through their own upgrade inventory.
+     */
+    public static boolean visConnectionInstalled(IUpgradeableObject machine) {
+        IUpgradeInventory upgrades = machine.getUpgrades();
         return upgrades != null && upgrades.isInstalled(ModItems.VIS_CONNECTION_CARD.get());
     }
 

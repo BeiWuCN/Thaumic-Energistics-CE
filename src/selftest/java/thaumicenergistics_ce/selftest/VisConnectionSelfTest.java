@@ -14,6 +14,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.TerminalAuraPayment;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
@@ -46,11 +47,13 @@ public final class VisConnectionSelfTest {
         checkEmptyTerminalIgnoresCard(failures);
         checkInsertedCardIsCounted(failures);
         checkEmptiedSlotStopsCounting(failures);
+        checkPlacedPartHasSlot(failures);
         checkAuraPassesAgree(failures, event.getServer().overworld());
         if (failures.isEmpty()) {
-            ThELog.LOG.info("[{}] self-test passed: the vis card is an AE2 upgrade card and fits the"
-                    + " wireless arcane terminal once, a placed vis source pays the aura with no AE"
-                    + " at all, a short aura supplies what it can and a missing card falls back to AE",
+            ThELog.LOG.info("[{}] self-test passed: the vis card is an AE2 upgrade card that both the"
+                    + " wireless and the placed arcane terminal take once, a placed vis source pays the"
+                    + " aura with no AE at all, a short aura supplies what it can and a missing card"
+                    + " falls back to AE",
                     TAG);
             return;
         }
@@ -132,6 +135,47 @@ public final class VisConnectionSelfTest {
         if (TerminalAuraPayment.visConnectionInstalled(TERMINAL)) {
             failures.add("emptying the slot left the vis card counted, so the aura path would outlive"
                     + " the card");
+        }
+    }
+
+    /** The terminal on a cable carries the same card: its own slot, its own aura, no network power. */
+    private static void checkPlacedPartHasSlot(List<String> failures) {
+        int room = Upgrades.getMaxInstallable(
+                ModItems.VIS_CONNECTION_CARD.get(), ModItems.ARCANE_CRAFTING_TERMINAL.get());
+        if (room != 1) {
+            failures.add("the placed arcane terminal accepts " + room
+                    + " of the vis card, not 1 - its upgrade slot would refuse it");
+        }
+        PartArcaneCraftingTerminal part = placedPart(failures);
+        if (part == null) {
+            return;
+        }
+        IUpgradeInventory upgrades = part.getUpgrades();
+        if (upgrades == null || upgrades.size() != 1) {
+            failures.add("the placed arcane terminal reports no upgrade slot of its own");
+            return;
+        }
+        if (TerminalAuraPayment.visConnectionInstalled(part)) {
+            failures.add("a placed terminal with an empty slot reports the vis card installed");
+        }
+        upgrades.setItemDirect(0, new ItemStack(ModItems.VIS_CONNECTION_CARD.get()));
+        if (!TerminalAuraPayment.visConnectionInstalled(part)) {
+            failures.add("a card in the placed terminal's slot is not seen, so its aura path stays off");
+        }
+        upgrades.setItemDirect(0, ItemStack.EMPTY);
+        if (TerminalAuraPayment.visConnectionInstalled(part)) {
+            failures.add("pulling the card from the placed terminal left its aura path on");
+        }
+    }
+
+    /** Builds the part outside a world; a throw here is a failure, not a broken gate. */
+    private static @Nullable PartArcaneCraftingTerminal placedPart(List<String> failures) {
+        try {
+            return new PartArcaneCraftingTerminal(ModItems.ARCANE_CRAFTING_TERMINAL.get());
+        } catch (Throwable thrown) {
+            failures.add("the placed arcane terminal could not be built: "
+                    + thrown.getClass().getSimpleName() + ": " + thrown.getMessage());
+            return null;
         }
     }
 

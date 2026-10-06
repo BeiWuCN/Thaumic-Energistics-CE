@@ -1,7 +1,6 @@
 package thaumicenergistics_ce.menu;
 
 import appeng.api.implementations.menuobjects.IPortableTerminal;
-import appeng.api.implementations.menuobjects.ItemMenuHost;
 import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.energy.IEnergySource;
@@ -248,11 +247,10 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         return essentiaAccessGranted();
     }
 
-    /** Whether the vis card rides in the terminal the player opened, asked of that very stack, so that a
-     * second terminal in the bag cannot answer for the one being used. */
+    /** Whether the vis card rides in the terminal the player opened: the host's own slots answer, so a
+     * second terminal in the bag cannot speak for the one being used. */
     public boolean hasVisConnectionCard() {
-        return getHost() instanceof ItemMenuHost<?> itemHost
-                && TerminalAuraPayment.visConnectionInstalled(itemHost.getItemStack());
+        return TerminalAuraPayment.visConnectionInstalled(getHost());
     }
 
     /** Not persisted: the result is derived from the grid, and a saved one would outlive it. */
