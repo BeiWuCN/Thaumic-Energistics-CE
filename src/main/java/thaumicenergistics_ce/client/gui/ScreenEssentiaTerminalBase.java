@@ -55,9 +55,13 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
 
     @Override
     protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type) {
-        if (essentiaGesturesAtAll() && slot instanceof RepoSlot && cursorIsContainer()) {
-            // Silently: slotClicked fires once per slot the cursor crosses, so a drag would log per cell.
-            return;
+        if (essentiaGesturesAtAll() && slot instanceof RepoSlot repoSlot && cursorIsContainer()) {
+            var entry = repoSlot.getEntry();
+            if (entry != null && entry.getWhat() instanceof AEssentiaKey) {
+                // Ours, with a container on the cursor: the gestures are the only way in, so AE2's own
+                // slot click does not run. Silently - it fires once per cell the cursor crosses.
+                return;
+            }
         }
         super.slotClicked(slot, slotId, mouseButton, type);
     }
@@ -80,49 +84,55 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
         if (container == null) {
             return false;
         }
-        if (!EssentiaFillHelper.isContainerEmpty(container)) {
-            // Filled: the contents go into the network; empty has nothing to deposit.
-            PacketDistributor.sendToServer(new EssentiaDepositPayload(
-                    menu.containerId, whereHeld(), container));
+        boolean overEssentia = false;
+        if (hoveredSlot instanceof RepoSlot repoSlot) {
+            var entry = repoSlot.getEntry();
+            overEssentia = entry != null && entry.getWhat() instanceof AEssentiaKey;
+        }
+        if (!overEssentia) {
+            // Empty space, or an entry of another kind: the click belongs to AE2, so a jar or phial in
+            // hand is put into the network like any other item.
+            return false;
+        }
+        if (EssentiaFillHelper.isContainerEmpty(container)) {
+            // Ours and empty: AE2's right-click would insert the container, and the empty one is the tool
+            // for a left-click, so this click stops here.
             return true;
         }
-        // Swallow it: AE2 reads the right-click as "put this item in the network".
+        // Ours and filled: the contents go into the network, from the cursor or from the main hand.
+        PacketDistributor.sendToServer(new EssentiaDepositPayload(
+                menu.containerId, whereHeld(), container));
         return true;
     }
 
     private boolean handleLeftClick() {
         ItemStack container = heldContainer();
-        if (container == null) {
+        if (container == null || !(hoveredSlot instanceof RepoSlot repoSlot)) {
             return false;
         }
-        if (hoveredSlot instanceof RepoSlot repoSlot) {
-            var entry = repoSlot.getEntry();
-            if (cursorIsContainer() && entry != null && !(entry.getWhat() instanceof AEssentiaKey)) {
-                // Logged only in the surprising case: a container on the cursor over a non-essentia
-                // entry, where the insertion leak used to happen.
-                ThELog.LOG.info(TAG + "entry {} is not essentia ({}), so a held container"
-                        + " cannot be drawn from here", entry.getWhat().getId(),
-                        entry.getWhat().getClass().getSimpleName());
-            }
-            if (entry != null
-                    && entry.getWhat() instanceof AEssentiaKey key
-                    && EssentiaFillHelper.isContainerEmpty(container)) {
-                // Shift turns the same click into "the whole held stack": filled as far as the network pays
-                // for, with the ones it could not cover left where they are.
-                PacketDistributor.sendToServer(new EssentiaFillPayload(
-                        menu.containerId, key.getId(), whereHeld(), container, hasShiftDown()));
-                return true;
-            }
-            // Still a grid entry: AE2 would insert what the cursor holds, one item per click. A jar or
-            // a phial goes in only through the two gestures above.
-            if (cursorIsContainer()) {
-                ThELog.LOG.info(TAG + "entry click refused: the cursor holds a container,"
-                        + " which is never inserted into the network");
-                return true;
-            }
-            // The cursor is empty, so AE2's click is a withdrawal: nothing to leak.
+        var entry = repoSlot.getEntry();
+        if (entry == null) {
             return false;
         }
+        if (entry.getWhat() instanceof AEssentiaKey key && EssentiaFillHelper.isContainerEmpty(container)) {
+            // Shift turns the same click into "the whole held stack": filled as far as the network pays
+            // for, with the ones it could not cover left where they are.
+            PacketDistributor.sendToServer(new EssentiaFillPayload(
+                    menu.containerId, key.getId(), whereHeld(), container, hasShiftDown()));
+            return true;
+        }
+        if (!(entry.getWhat() instanceof AEssentiaKey)) {
+            // An entry of another kind: the container is an ordinary item here, so AE2's click still runs.
+            return false;
+        }
+        if (cursorIsContainer()) {
+            // Ours, with a jar or phial on the cursor: AE2 would insert the container with the essentia
+            // still inside it, and the gesture for that is shift-right-click, so the click stops here.
+            ThELog.LOG.info(TAG + "entry click refused: the cursor holds a container,"
+                    + " which is never inserted into the network");
+            return true;
+        }
+        // The container is in the main hand, not on the cursor, so AE2's click is a withdrawal.
         return false;
     }
 
