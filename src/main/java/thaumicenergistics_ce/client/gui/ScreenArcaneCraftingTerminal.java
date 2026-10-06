@@ -1,11 +1,14 @@
 package thaumicenergistics_ce.client.gui;
 
+import appeng.client.Point;
 import appeng.client.gui.style.ScreenStyle;
+import appeng.client.gui.style.WidgetStyle;
 import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.client.AspectRendering;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Inventory;
@@ -15,11 +18,12 @@ import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
 import thaumicenergistics_ce.network.ClientboundReceiver;
 import thaumicenergistics_ce.network.GolemBackpackPayload;
+import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
  * The Arcane Crafting Terminal's screen.
  * <ul>
- *   <li>The cost row in the strip under the craft result is the whole vis display: no aura, by choice.
+ *   <li>The cost row in the style's {@code visCraftCost} strip is the whole vis display: no aura, by choice.
  *   <li>The style document is in AE2's namespace: {@code StyleManager} resolves against its own only.
  *   <li>The jar and phial gestures come from {@link ScreenEssentiaTerminalBase}, only with the card.
  * </ul>
@@ -29,16 +33,11 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
 
     private static final int CHIP_UNITS = AspectRendering.GUI_ICON_SIZE;
 
-    private static final int COST_ICON = 11;
-
     /**
-     * The strip the chips go in, in window coordinates: the style's bottom section draws its art from the
-     * texture row 71 down, and the strip is texture x 97..166, y 134..151 there.
+     * The style widget naming the wood strip the chips go in. The art says where it is, so a restyled or
+     * rescaled window carries the row with it: {@code widgets.visCraftCost} in the screen's style document.
      */
-    private static final int COST_LEFT = 97;
-    private static final int COST_RIGHT = 166;
-    private static final int COST_STRIP_HEIGHT = 17;
-    private static final int COST_STRIP_FROM_BOTTOM = 117;
+    private static final String VIS_COST_STRIP = "visCraftCost";
 
     private static @Nullable ScreenArcaneCraftingTerminal open;
 
@@ -100,15 +99,28 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         if (costs.isEmpty()) {
             return;
         }
+        // The style places the strip, and the point it resolves is window relative already: drawFG runs
+        // inside the panel-offset pose, so adding leftPos again put the row a window right of the art.
+        WidgetStyle strip = getStyle().getWidget(VIS_COST_STRIP);
+        if (strip == null) {
+            return;
+        }
+        Point at = strip.resolve(new Rect2i(0, 0, imageWidth, imageHeight));
+        // Chips never outnumber the wells a crystal can sit in, so the strip's width over that count is
+        // the widest one may be: the art's 69 columns over six wells come to 11, and six fill 66 of them.
+        int chip = Math.min(strip.getHeight(), strip.getWidth() / PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
+        if (chip <= 0) {
+            return;
+        }
         // Right to left: the first aspect holds the strip's right end and the rest run back along it,
         // so a one aspect recipe always lands in the same place instead of drifting with the list length.
-        int y = topPos + imageHeight - COST_STRIP_FROM_BOTTOM + (COST_STRIP_HEIGHT - COST_ICON) / 2;
-        int x = leftPos + COST_RIGHT - COST_ICON;
+        int y = at.getY() + (strip.getHeight() - chip) / 2;
+        int x = at.getX() + strip.getWidth() - chip;
         // Thaumaturge's renderer draws a chip at CHIP_UNITS square whatever the screen wants, so the pose
-        // shrinks it to COST_ICON: six primal aspects come to 66 of the strip's 69 columns.
-        float shrink = (float) COST_ICON / CHIP_UNITS;
+        // shrinks it to the chip size the strip has room for.
+        float shrink = (float) chip / CHIP_UNITS;
         for (ArcaneCraftCostPayload.AspectCost cost : costs) {
-            if (x < leftPos + COST_LEFT) {
+            if (x < at.getX()) {
                 break;
             }
             var aspect = Aspects.resolve(
@@ -126,7 +138,7 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
                         font, text, CHIP_UNITS - font.width(text) + 1, CHIP_UNITS - 6, 0xFFFFFF, true);
                 graphics.pose().popPose();
             }
-            x -= COST_ICON;
+            x -= chip;
         }
     }
 }
