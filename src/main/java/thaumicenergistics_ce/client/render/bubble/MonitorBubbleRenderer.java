@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
 import thaumicenergistics_ce.client.render.bubble.BubbleCells.Cell;
@@ -22,7 +23,8 @@ import thaumicenergistics_ce.util.ThELog;
  * The bubble the Infusion Monitor floats above itself: how dangerous the altar is, what it is making,
  * whether the room can finish it, and that it is drawn rather than spawned - a {@code TextDisplay}
  * entity can be left behind by a crash. What it says is {@link BubbleCells}, the box it sits on
- * {@link RoundedPanel}; what is left here is the pose and the two ways a cell is drawn.
+ * {@link RoundedPanel}; what is left here is the pose and the two ways a cell is drawn, and the two
+ * chunks of range the panel is drawn within.
  */
 public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInfusionMonitor> {
 
@@ -32,6 +34,10 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
 
     private static final float PADDING_X = 5.0F;
     private static final float PADDING_Y = 4.0F;
+
+    /** How far the bubble is drawn: two chunks. Past that a player has walked away from the machine,
+     * and the panel is not read - so it is not built, not measured and not drawn. */
+    private static final double CULL_RANGE = 32.0;
 
     /** The colour the through-wall copy of the text is drawn in - vanilla's, from a name tag. */
     private static final int SEE_THROUGH_TEXT = 553648127;
@@ -45,6 +51,11 @@ public class MonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityInf
     private final BubbleCells cells = new BubbleCells();
 
     public MonitorBubbleRenderer(BlockEntityRendererProvider.Context context) {}
+
+    @Override
+    public boolean shouldRender(BlockEntityInfusionMonitor monitor, Vec3 cameraPos) {
+        return Vec3.atCenterOf(monitor.getBlockPos()).closerThan(cameraPos, CULL_RANGE);
+    }
 
     @Override
     public void render(

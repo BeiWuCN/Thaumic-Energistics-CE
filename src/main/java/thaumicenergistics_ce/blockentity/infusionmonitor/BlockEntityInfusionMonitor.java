@@ -10,9 +10,11 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -32,6 +34,12 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     public static final int BOOK_SLOT = 0;
 
     private static final double IDLE_POWER = 256.0;
+
+    /** How long the finished-craft pulse stands, in game ticks. Half a second is one clean flash. */
+    static final int PULSE_TICKS = 10;
+
+    /** The dust the pulse leaves over the machine, so a player sees where the signal came from. */
+    private static final int PULSE_PARTICLES = 8;
 
     /** How often the room is looked at. The altar survey backs off from this value after a miss. */
     static final int SCAN_INTERVAL = 10;
@@ -53,6 +61,12 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     // The bubble is drawn on the client, so its numbers travel in the update tag.
 
     private final InfusionMonitorReadings readings = new InfusionMonitorReadings(this, survey, reach);
+
+    // What a finished ritual leaves behind: one redstone pulse, taken down by a scheduled block tick.
+
+    /** The game time the pulse ends at, or zero when none is running. Not saved: a signal that outlived
+     * its ritual - across a reload, say - would be a lie about an altar that is long done. */
+    private long pulseUntil;
 
     public BlockEntityInfusionMonitor(BlockPos pos, BlockState state) {
         super(ModBlockEntities.INFUSION_MONITOR.get(), pos, state);
@@ -191,6 +205,53 @@ public class BlockEntityInfusionMonitor extends AENetworkedBlockEntity implement
     public boolean canReport() {
         // Online too: a bubble left on screen after the network went down would report a stale reading.
         return hasBook() && survey.report().foundAltar() && getMainNode().isActive();
+    }
+
+    /** Whether the finished-craft pulse is up, which is what the block reports as its signal. */
+    public boolean pulsing() {
+        return pulseUntil != 0L && level != null && level.getGameTime() < pulseUntil;
+    }
+
+    /** Whether {@code matrix} is the altar this machine watches, and so whose finished craft it answers. */
+    boolean watches(BlockPos matrix) {
+        return matrix.equals(survey.matrixPos());
+    }
+
+    /** Starts the pulse a completed ritual earns, and tells the redstone around the machine. Called by
+     * {@code MonitorCraftPulse}, which is why it is not public; the block's scheduled tick ends it. */
+    void startPulse() {
+        if (!(level instanceof ServerLevel server)) {
+            return;
+        }
+        pulseUntil = server.getGameTime() + PULSE_TICKS;
+        BlockState state = getBlockState();
+        server.scheduleTick(worldPosition, state.getBlock(), PULSE_TICKS);
+        server.updateNeighborsAt(worldPosition, state.getBlock());
+        // A few particles over the block, so the pulse is seen where it comes from and not just felt.
+        server.sendParticles(
+                DustParticleOptions.REDSTONE,
+                worldPosition.getX() + 0.5,
+                worldPosition.getY() + 1.05,
+                worldPosition.getZ() + 0.5,
+                PULSE_PARTICLES,
+                0.4,
+                0.05,
+                0.4,
+                0.0);
+    }
+
+    /** Ends the pulse, or re-arms the tick when a second ritual finished while this one was still up. */
+    public void endPulse() {
+        if (pulseUntil == 0L || level == null) {
+            return;
+        }
+        long now = level.getGameTime();
+        if (now < pulseUntil) {
+            level.scheduleTick(worldPosition, getBlockState().getBlock(), (int) (pulseUntil - now));
+            return;
+        }
+        pulseUntil = 0L;
+        level.updateNeighborsAt(worldPosition, getBlockState().getBlock());
     }
 
     @Override

@@ -22,7 +22,9 @@ import thaumicenergistics_ce.infusion.InfusionRisk;
  */
 final class AltarSurvey {
 
-    private static final int ALTAR_SCAN_RANGE = 12;
+    /** How far off the altar may stand. {@code MonitorCraftPulse} scans the same cube to find the
+     * machines that answer for it, so the two distances cannot drift apart. */
+    static final int ALTAR_SCAN_RANGE = 12;
 
     private static final int ALTAR_MISS_INTERVAL = 100;
 

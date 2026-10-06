@@ -3,12 +3,15 @@ package thaumicenergistics_ce.block;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
@@ -24,16 +27,19 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.infusionmonitor.BlockEntityInfusionMonitor;
 
 /**
- * The Infusion Monitor block.
+ * The Infusion Monitor block: three states, none decorative, and one pulse that is not a state.
  * <ul>
- *   <li>Three states, none decorative: {@code facing} turns the frame, {@code book} is the
- *       Thaumonomicon and a real state rather than a stored flag, {@code network} is the ME connection.
- *   <li>The blockstate file picks the off, book and lit models from exactly these three names.
+ *   <li>{@code facing} turns the frame, {@code book} is the Thaumonomicon as a real state, and
+ *       {@code network} is the ME connection; the models come from those three names.
+ *   <li>The pulse: the block asks the machine, and a scheduled tick takes it down again.
  * </ul>
  */
 public class BlockInfusionMonitor extends ThEBaseEntityBlock {
 
     public static final MapCodec<BlockInfusionMonitor> CODEC = simpleCodec(BlockInfusionMonitor::new);
+
+    /** The strength of the finished-craft pulse, which is a redstone signal and not an analogue read. */
+    private static final int SIGNAL_STRENGTH = 15;
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
@@ -120,6 +126,27 @@ public class BlockInfusionMonitor extends ThEBaseEntityBlock {
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new BlockEntityInfusionMonitor(pos, state);
+    }
+
+    @Override
+    protected boolean isSignalSource(BlockState state) {
+        return true;
+    }
+
+    /** The finished-craft pulse: strength 15 while the machine holds it, nothing otherwise. */
+    @Override
+    protected int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction side) {
+        return level.getBlockEntity(pos) instanceof BlockEntityInfusionMonitor monitor && monitor.pulsing()
+                ? SIGNAL_STRENGTH
+                : 0;
+    }
+
+    /** Takes the pulse down: the machine scheduled this tick when the ritual finished. */
+    @Override
+    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (level.getBlockEntity(pos) instanceof BlockEntityInfusionMonitor monitor) {
+            monitor.endPulse();
+        }
     }
 
     @Override

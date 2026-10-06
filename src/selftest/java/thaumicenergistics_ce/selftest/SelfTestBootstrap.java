@@ -3,6 +3,7 @@ package thaumicenergistics_ce.selftest;
 import net.neoforged.neoforge.common.NeoForge;
 import thaumicenergistics_ce.init.SelfTestProvider;
 import thaumicenergistics_ce.blockentity.assembler.AssemblerScanCostSelfTest;
+import thaumicenergistics_ce.blockentity.infusionmonitor.MonitorPulseSelfTest;
 import thaumicenergistics_ce.init.capability.MachineItemBandSelfTest;
 import thaumicenergistics_ce.part.EssentiaTransportViewSelfTest;
 
@@ -49,5 +50,9 @@ public final class SelfTestBootstrap implements SelfTestProvider {
         // The assembler's own cube of 4,913 block entity lookups: timed before anyone decides to
         // shrink it or to have the vis interface announce itself instead.
         NeoForge.EVENT_BUS.addListener(AssemblerScanCostSelfTest::run);
+        // The pulse a finished ritual leaves on the machine's block: 15 to a neighbour, and gone by
+        // itself a tick later. A stuck signal is what a player cannot fix, so it waits and looks.
+        NeoForge.EVENT_BUS.addListener(MonitorPulseSelfTest::run);
+        NeoForge.EVENT_BUS.addListener(MonitorPulseSelfTest::onServerTick);
     }
 }
