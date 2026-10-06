@@ -7,6 +7,7 @@ import appeng.api.networking.IManagedGridNode;
 import appeng.api.networking.energy.IEnergyService;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEKey;
+import appeng.api.stacks.GenericStack;
 import appeng.api.storage.MEStorage;
 import appeng.helpers.InterfaceLogic;
 import appeng.helpers.InterfaceLogicHost;
@@ -32,7 +33,7 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * One ME interface that carries our access card: pulls essentia from the containers it touches into the
- * network. The marks it reads live in the interface's own config row, so a reload keeps them.
+ * network, and empties both rows when the card comes out. The marks live in the config row and stay.
  * <ul>
  *   <li>One direction only: the essentia terminal already takes essentia out of the network.
  *   <li>Driven by the registry's round rather than AE2's tickable service, so a pulled card stops it.
@@ -210,6 +211,77 @@ public final class EssentiaInterfaceAccess {
             }
         }
         return !filtered;
+    }
+
+    /**
+     * Empties both rows of an interface whose card has just come out: the marks go, and the storage row
+     * is handed back to the grid. An aspect the grid refuses is dropped; a key of another type stays.
+     */
+    public static void releaseRows(
+            ConfigInventory config,
+            ConfigInventory storage,
+            @Nullable MEStorage network,
+            IActionSource source) {
+        config.clear();
+        for (int slot = 0; slot < storage.size(); slot++) {
+            GenericStack held = storage.getStack(slot);
+            if (held == null) {
+                continue;
+            }
+            long rest = held.amount() - returnToNetwork(held, network, source);
+            if (rest <= 0) {
+                storage.setStack(slot, null);
+            } else if (held.what() instanceof AEssentiaKey) {
+                ThELog.LOG.info(
+                        "[essentia-interface] discarding {} of {} as the card comes out", rest, held.what());
+                storage.setStack(slot, null);
+            } else {
+                storage.setStack(slot, new GenericStack(held.what(), rest));
+            }
+        }
+    }
+
+    /**
+     * Clears the aspects out of a storage row that is about to be dropped, so that breaking an interface
+     * never puts one on the ground. An aspect has no item to be dropped as; the rest goes to the grid.
+     */
+    public static void rescueEssentia(
+            ConfigInventory storage,
+            @Nullable MEStorage network,
+            IActionSource source) {
+        for (int slot = 0; slot < storage.size(); slot++) {
+            GenericStack held = storage.getStack(slot);
+            if (held == null || !(held.what() instanceof AEssentiaKey)) {
+                continue;
+            }
+            long rest = held.amount() - returnToNetwork(held, network, source);
+            if (rest > 0) {
+                ThELog.LOG.info(
+                        "[essentia-interface] discarding {} of {} as the interface goes", rest, held.what());
+            }
+            storage.setStack(slot, null);
+        }
+    }
+
+    /** Whether a row holds an aspect, which is how an interface of ours is told from a plain one. */
+    public static boolean holdsEssentia(ConfigInventory row) {
+        for (int slot = 0; slot < row.size(); slot++) {
+            if (row.getKey(slot) instanceof AEssentiaKey) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** What the grid takes of a held stack; a grid that is gone or full takes nothing. */
+    private static long returnToNetwork(
+            GenericStack held,
+            @Nullable MEStorage network,
+            IActionSource source) {
+        if (network == null) {
+            return 0;
+        }
+        return network.insert(held.what(), held.amount(), Actionable.MODULATE, source);
     }
 
     /** Neighbour to network: the pay-first order that keeps a refused insert from eating the essentia. */
