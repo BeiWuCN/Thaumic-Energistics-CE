@@ -56,9 +56,18 @@ will spend an evening chasing a crash that looks like a bug in this addon.
 ## Why a commit and not a version
 
 The upstream repository has no tags and no releases, so there is no version to pin and no artifact to
-name. `thaumaturge_commit` is the newest source at the time of writing, on branch `1.21.1`. Earlier
-builds (0.4.6 and 0.4.4) were used during development and are kept outside the repository; 0.4.6 is
-the revision that first required Lithostitched.
+name. `thaumaturge_commit` is the head of branch `1.21.1`, which is the 1.21.1 line and currently
+carries `mod_version=1.0.0`. Earlier builds (0.4.6 and 0.4.4) were used during development and are kept
+outside the repository; 0.4.6 is the revision that first required Lithostitched.
+
+The 0.4.x line is no longer usable from here, which is why `neoforge.mods.toml` asks for `[1.0.0,)`.
+Upstream renamed its registry, API and payload classes from a `TC` prefix to `TT` in the same commit
+that set 1.0.0, so this addon's imports name `TTItems`, `TTAspects` and the rest. An older Thaumaturge
+satisfies a looser range and then fails at class load rather than at build time.
+
+The previous pin, `9acb9143`, was a copy of `9be01c76` taken from the feature branch
+`feat/thaumaturgic-integrations-functionality` before it was rebased. It is not an ancestor of `1.21.1`
+any more, so it cannot be used as a base for a diff against the branch.
 
 ## What is no longer here
 

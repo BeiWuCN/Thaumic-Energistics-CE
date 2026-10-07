@@ -31,7 +31,10 @@ side = "BOTH"
 [[dependencies."${mod_id}"]]
 modId = "thaumaturge"
 type = "required"
-versionRange = "[0.4.0,)"
+# 1.0.0 is the floor, not a preference: upstream renamed the registry classes from TC* to TT* in the
+# commit that set that version, and this mod links against the TT* names. An older Thaumaturge
+# satisfies a lower range and then dies at class load with NoClassDefFoundError.
+versionRange = "[1.0.0,)"
 ordering = "AFTER"
 side = "BOTH"
 

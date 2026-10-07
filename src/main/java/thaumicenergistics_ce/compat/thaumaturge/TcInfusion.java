@@ -5,7 +5,7 @@ import com.leclowndu93150.thaumaturge.content.infusion.BlockEntityInfusionMatrix
 import com.leclowndu93150.thaumaturge.content.infusion.BlockEntityPedestal;
 import com.leclowndu93150.thaumaturge.content.infusion.InfusionRecipe;
 import com.leclowndu93150.thaumaturge.content.infusion.InfusionStabilitySurvey;
-import com.leclowndu93150.thaumaturge.registry.TCRecipeTypes;
+import com.leclowndu93150.thaumaturge.registry.TTRecipeTypes;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
@@ -15,7 +15,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * 注魔祭坛，回答本 mod 对它的四个问题。{@code BlockEntityInfusionMatrix} 就是祭坛，
  * 数值经 {@link Altar} 传出；{@code InfusionStabilitySurvey} 知道哪些方块破坏对称性；
- * 催化剂立在矩阵下两格；配方类型是 {@code TCRecipeTypes.INFUSION}。
+ * 催化剂立在矩阵下两格；配方类型是 {@code TTRecipeTypes.INFUSION}。
  */
 public final class TcInfusion {
     private TcInfusion() {}
@@ -64,7 +64,7 @@ public final class TcInfusion {
         if (catalyst.isEmpty()) {
             return null;
         }
-        for (var holder : level.getRecipeManager().getAllRecipesFor(TCRecipeTypes.INFUSION.get())) {
+        for (var holder : level.getRecipeManager().getAllRecipesFor(TTRecipeTypes.INFUSION.get())) {
             InfusionRecipe recipe = holder.value();
             if (recipe.catalyst().test(catalyst)) {
                 return new Recipe(recipe.instability(), recipe.resultItem(), recipe.aspects());
