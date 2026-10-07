@@ -3,10 +3,9 @@ package thaumicenergistics_ce.part;
 import net.minecraft.network.chat.Component;
 
 /**
- * Why a Flux Transfer Interface pair is not moving flux, as the player is told it. The refusals that
- * are meant to be silent - an unbound tunnel, a landing chunk nobody has loaded - are deliberately
- * not in this list. Each key carries its English beside it for the same reason the Arcane Assembler
- * does: a missing translation must never show a raw key.
+ * Why a pair is not moving flux, as the player is told it. Refusals meant to be silent, such as an
+ * unbound tunnel or an unloaded landing chunk, are not in this list. Each key carries its English
+ * beside it so a missing translation never shows a raw key.
  */
 public enum FluxWait {
     NO_FLUX("no_flux", "Not enough flux in this chunk to draw"),

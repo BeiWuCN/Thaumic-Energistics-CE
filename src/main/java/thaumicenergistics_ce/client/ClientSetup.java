@@ -50,8 +50,8 @@ public final class ClientSetup {
     private ClientSetup() {}
 
     /**
-     * Client-side AE2 registrations, on {@code FMLClientSetupEvent} rather than with the screens because both
-     * must be in place before anything draws: the essentia key's renderer and the part tooltip body.
+     * Client-side AE2 registrations, on {@code FMLClientSetupEvent} rather than with the screens
+     * because both must be in place before anything draws.
      */
     @SubscribeEvent
     public static void registerKeyRendering(FMLClientSetupEvent event) {
@@ -90,8 +90,7 @@ public final class ClientSetup {
         event.enqueueWork(() -> {
             AEKeyRendering.register(
                     AEssentiaKeyType.INSTANCE, AEssentiaKey.class, new EssentiaKeyRenderHandler());
-            // The part's tooltip body belongs on this side with the rest of the drawing code; the
-            // server half is registered from the mod constructor.
+            // The tooltip's drawing half; the server half is registered from the mod constructor.
             FluxTransferTooltip.register();
         });
     }

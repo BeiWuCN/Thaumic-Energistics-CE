@@ -76,8 +76,7 @@ public final class ThaumicEnergistics {
         modBus.addListener(this::commonSetup);
 
         registerPartModels();
-        // The flux transfer interface reports its own tooltip lines through AE2's part registry
-        // rather than Jade's, since Jade only sees block entities.
+        // The tooltip's server half goes through AE2's part registry; Jade only sees block entities.
         FluxTransferStatusProvider.register();
         // The ME interface's access card works on the game bus rather than a grid tickable, since AE2
         // reports nothing when a card goes in or out - see EssentiaInterfaceRegistry.

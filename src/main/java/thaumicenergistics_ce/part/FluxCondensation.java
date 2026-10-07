@@ -18,11 +18,10 @@ import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 
 /**
  * The design's condensation table and the hunt for where a spill lands. Every point the machine moves
- * lands somewhere: normally in the release end's own chunk, one time in ten in the network as vitium
- * instead, and one time in about sixty-seven in a controller's chunk. A banked buffer puts its whole
- * batch through a condense or a spill, so nothing here ever makes flux out of thin air. Thaumaturge
- * offers no upstream "may I add flux here" question, so the landing is picked down the design's chain -
- * a controller, then a storage bus or an interface, then the part itself.
+ * lands somewhere: normally in the release end's own chunk, one time in ten in the network as vitium,
+ * and one time in about sixty-seven in a controller's chunk. A banked buffer puts its whole batch
+ * through one roll, so nothing here makes flux out of thin air. Thaumaturge offers no "may I add flux
+ * here" question, so the landing is picked down the design's chain.
  */
 final class FluxCondensation {
 
@@ -32,8 +31,7 @@ final class FluxCondensation {
     /** The design split this by drive, 5% and 40%; the author set a single 1.5% instead. */
     private static final double SPILL_CHANCE = 0.015;
 
-    /** How many banked points a condense or a spill puts through at once: the design's 4, four times
-     * over with the pace. */
+    /** How many banked points a condense or a spill puts through at once. */
     static final int BURST = 16;
 
     /** What a quiet cycle moves on to the release end: the same pace the drawing end banks. */
@@ -41,8 +39,8 @@ final class FluxCondensation {
 
     private FluxCondensation() {}
 
-    /** Disposes of up to {@code budget} banked points, or of the design's single point when the dice
-     * say nothing. {@code take} answers with what the drawing end could really give. */
+    /** Disposes of up to {@code budget} banked points. {@code take} answers with what the drawing end
+     * could really give. */
     static void roll(
             ServerLevel server,
             BlockPos landing,
@@ -100,8 +98,7 @@ final class FluxCondensation {
         }
         Set<ControllerBlockEntity> controllers = grid.getMachines(ControllerBlockEntity.class);
         if (!controllers.isEmpty()) {
-            // A multipart controller answers with several machines and any loaded one will do; a
-            // controller whose chunk is unloaded is not somewhere a vent could land at all.
+            // A multipart controller answers with several machines and any loaded one will do.
             for (ControllerBlockEntity controller : controllers) {
                 if (server.isLoaded(controller.getBlockPos())) {
                     return controller.getBlockPos();

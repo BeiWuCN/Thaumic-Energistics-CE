@@ -34,11 +34,10 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
  * The Flux Transfer Interface: a pair bound with a memory card, moving four points of flux a cycle out
- * of the drawing end's chunk and into the release end's, at the price of auram and ordo drawn out of
- * the ME network. The end the card was saved on draws, pays and holds the buffer; the other end
- * disposes of it, rolling for whether the points land as flux, as vitium in the network, or at a
- * controller. Deliberately not an {@link com.leclowndu93150.thaumaturge.api.aura.IVisRelaySource}: this
- * one moves auric junk rather than selling vis.
+ * of the drawing end's chunk and into the release end's, at the price of auram and ordo drawn from the
+ * ME network. The end the card was saved on draws, pays and holds the buffer; the other end disposes
+ * of it. Not an {@link com.leclowndu93150.thaumaturge.api.aura.IVisRelaySource}: it moves flux rather
+ * than selling vis.
  */
 public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInterface>
         implements IGridTickable {
@@ -65,27 +64,25 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
 
     private static final double IDLE_POWER = 1.0;
 
-    /** A cycle is a second: the beat the design was written around. */
+    /** A cycle is a second. */
     private static final int CYCLE_TICKS = 20;
 
-    /** The flux a cycle moves: the design's one point a second, four times over at the author's ask. */
+    /** The flux a cycle moves. */
     static final int FLUX_PER_CYCLE = 4;
 
-    /** The buffer's ceiling, the design's 64 scaled by the same four: past it the drawing end stops
-     * buying fuel, since nothing is moving out. */
+    /** The buffer's ceiling, the design's 64 scaled by four: at it the drawing end stops buying fuel. */
     private static final int POOL_LIMIT = 256;
 
-    /** At or above this the landing chunk is at the rift threshold: as full as this part will make it. */
+    /** At or above this the landing chunk is at the rift threshold. */
     private static final float RIFT_SATURATION = 1.0f;
 
     private static final String TAG_POOL = "fluxPool";
 
-    /** Flux taken off the drawing end's own chunk and not yet released. It lives on the drawing end, so
-     * it survives exactly as long as that end's chunk does - what "sync the buffer when it loads" means. */
+    /** Taken off the drawing end's chunk and not yet released. It lives on that end, so it survives
+     * exactly as long as that end's chunk does. */
     private int fluxPool;
 
-    /** What this second's cycle has moved so far, cleared at the start of every cycle: the tooltip
-     * reports the current second, and a pair that is blocked is idle again a second later. */
+    /** What this second has moved so far, cleared every cycle: the tooltip reports the second. */
     private boolean workedThisCycle;
 
     public PartFluxTransferInterface(IPartItem<?> partItem) {
@@ -111,8 +108,7 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
 
     // ----- what the pair is telling the player ------------------------------
 
-    /** The line Jade shows, or {@code null} when there is nothing to say. A blocked volume is reported
-     * by the release end alone - it is the end that would be doing the releasing. */
+    /** The line Jade shows, or {@code null} for nothing. The release end reports a blocked volume. */
     public @Nullable FluxWait waitReason() {
         if (!(getLevel() instanceof ServerLevel server) || !getMainNode().isActive()) {
             return FluxWait.NO_NETWORK;
@@ -130,8 +126,7 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         return payer.fuelShort(server);
     }
 
-    /** Whether the pair moved its point this second, whichever end is asked: both ends act on the
-     * drawing end's buffer, so it is the drawing end that knows. */
+    /** Whether the pair moved this second. Both ends act on the drawing end's buffer, which knows. */
     public boolean working() {
         PartFluxTransferInterface payer = drawEnd();
         return payer != null && payer.workedThisCycle;
@@ -178,8 +173,8 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         }
     }
 
-    /** Releases the buffer into this end's chunk and rolls the dice. The fuel was paid for at the
-     * drawing end, so an empty buffer is a wait, not a failure. */
+    /** Releases the buffer into this end's chunk and rolls the dice. The fuel was paid at the drawing
+     * end, so an empty buffer is a wait, not a failure. */
     private void releaseCycle(ServerLevel server) {
         PartFluxTransferInterface payer = drawEnd();
         if (payer == null || !payer.live(server)) {
@@ -220,17 +215,15 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         return !isOutput();
     }
 
-    /** Whether some release end could take a point right now. The drawing end asks this before it
-     * burns a cycle's fuel, so a release that is unloaded, boxed in or already saturated stops the
-     * draw at once instead of filling the buffer with flux that has nowhere to go. */
+    /** Whether some release end could take a point right now. The drawing end asks before burning a
+     * cycle's fuel, so a release that is unloaded, boxed in or saturated stops the draw at once. */
     private boolean releaseEndReady(ServerLevel server) {
         return getOutputStream().anyMatch(output -> output.releaseSite(server) != null);
     }
 
-    /** Whether this end is still a part of {@code server}. A chunk unloading takes the block entity
-     * with it and AE2 destroys the grid node behind it ({@code AEBasePart.removeFromWorld} calls
-     * {@code IManagedGridNode.destroy}), but the pair's buffer lives on the drawing end, so neither
-     * end touches the other's buffer without asking this first. */
+    /** Whether this end is still a part of {@code server}. Unloading takes the block entity with it and
+     * AE2 destroys the grid node behind it, but the buffer lives on the drawing end, so neither end
+     * touches the other's buffer without asking this first. */
     private boolean live(ServerLevel server) {
         return getLevel() == server && !getBlockEntity().isRemoved() && server.isLoaded(fluxPos());
     }
@@ -245,8 +238,8 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         return input == this ? null : input;
     }
 
-    /** Called by the release end, which is the only thing that empties the buffer, and answers with
-     * what it could take. Both ends tick on the server thread, so the buffer needs no lock. */
+    /** Called by the release end, which is the only thing that empties the buffer. Both ends tick on
+     * the server thread, so the buffer needs no lock. */
     int takeFlux(int want) {
         int taken = Math.min(want, fluxPool);
         if (taken <= 0) {
@@ -266,8 +259,7 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
     }
 
     /** The landing this end would vent into right now, or {@code null} when it could not vent at all:
-     * unloaded, inactive, boxed in, or a chunk already at the rift threshold. An inactive node is not
-     * ticked at all, so an end that merely exists there would never take the point. */
+     * unloaded, inactive, boxed in, or a chunk already at the rift threshold. */
     private @Nullable BlockPos releaseSite(ServerLevel server) {
         if (!live(server) || !isActive() || !volumeClear(server)
                 || TcAura.fluxSaturation(server, fluxPos()) >= RIFT_SATURATION) {
@@ -276,8 +268,8 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         return FluxCondensation.landing(server, grid(), fluxPos());
     }
 
-    /** Whether this chunk still holds a whole cycle's worth for the drawing end to take, give or take
-     * float noise. Thaumaturge's own tick refills a chunk from its neighbours, so drained is not empty. */
+    /** Whether this chunk still holds a whole cycle's worth, give or take float noise. Thaumaturge's own
+     * tick refills a chunk from its neighbours, so drained is not empty. */
     private boolean fluxAvailable(ServerLevel server) {
         return TcAura.drainFlux(server, fluxPos(), FLUX_PER_CYCLE, true) >= FLUX_PER_CYCLE - 0.001f;
     }
@@ -292,8 +284,7 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         return grid == null ? null : grid.getService(IEnergyService.class);
     }
 
-    /** The grid's storage, not this part's: the fuel comes out of the network and the condensate
-     * returns to it. */
+    /** The grid's storage, not this part's: the fuel comes out of it and the condensate goes back. */
     private @Nullable MEStorage storage() {
         IGrid grid = grid();
         return grid == null ? null : grid.getStorageService().getInventory();
@@ -307,8 +298,7 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         return getBlockEntity().getBlockPos();
     }
 
-    /** The network stores aspects as keys, so the fuels and vitium resolve through the registries at
-     * hand. */
+    /** The network stores aspects as keys, so the fuels and vitium resolve through the registries. */
     private static @Nullable AEKey aspectKey(Level level, ResourceKey<IAspect> aspect) {
         Holder<IAspect> holder = AEssentiaKeyType.aspectOf(level, aspect.location());
         return holder == null ? null : AEssentiaKey.of(holder);

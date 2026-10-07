@@ -12,12 +12,9 @@ import thaumicenergistics_ce.part.FluxWait;
 import thaumicenergistics_ce.part.PartFluxTransferInterface;
 
 /**
- * The Flux Transfer Interface's tooltip data, written against AE2's part tooltip registry rather than
- * Jade's: Jade only knows block entities, and AE2's bridge hands the part under the crosshair over as
- * if it were one. That is why the two halves are registered from the mod constructor and the client
- * setup rather than from a {@code @WailaPlugin}, and why there is no UID to pair them by. The reason
- * travels as a component, not as its text, since the server picks the reason but cannot know the
- * player's language. The client half is {@code client.jade.FluxTransferTooltip}.
+ * The tooltip's server half, written against AE2's part tooltip registry rather than Jade's: Jade only
+ * knows block entities, and AE2's bridge hands the part under the crosshair over as if it were one.
+ * The reason travels as a component, since the server picks it but cannot know the player's language.
  */
 public final class FluxTransferStatusProvider
         implements ServerDataProvider<PartFluxTransferInterface> {
@@ -31,8 +28,7 @@ public final class FluxTransferStatusProvider
 
     private FluxTransferStatusProvider() {}
 
-    /** Called once, from the mod's constructor: the registry is keyed by part class, so it has to be
-     * filled before any cable bus is looked at, and it is cheap enough to fill unconditionally. */
+    /** Called once from the mod's constructor: the registry is keyed by part class. */
     public static void register() {
         PartTooltips.addServerData(PartFluxTransferInterface.class, INSTANCE);
     }

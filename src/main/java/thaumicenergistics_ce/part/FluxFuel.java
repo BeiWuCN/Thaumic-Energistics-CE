@@ -11,8 +11,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * What a cycle costs the drawing end: a point's worth of auram and ordo, and a hundred AE a point. The
  * AE is handed over before either fuel is touched and given back if the fuel does not follow, so a
- * partial payment can never buy a free cycle - the order the essentia interface already uses when it
- * charges the grid.
+ * partial payment can never buy a free cycle.
  */
 final class FluxFuel {
 

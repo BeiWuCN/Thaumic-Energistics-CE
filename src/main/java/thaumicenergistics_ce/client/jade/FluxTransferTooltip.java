@@ -15,10 +15,8 @@ import thaumicenergistics_ce.integration.jade.FluxTransferStatusProvider;
 import thaumicenergistics_ce.part.PartFluxTransferInterface;
 
 /**
- * The Flux Transfer Interface's tooltip, drawn from what the server sent down: the reason the pair
- * is refusing in red, or whether it moved its point in the second just gone. It never asks the part
- * anything - a part on this side is a shell with no grid behind it - and it is registered from the
- * client setup because AE2's body registry holds drawing code.
+ * The tooltip: the reason the pair is refusing, in red, or whether it moved its point in the second
+ * just gone. It never asks the part anything, since a part on this side is a shell with no grid.
  */
 public final class FluxTransferTooltip implements BodyProvider<PartFluxTransferInterface> {
 
@@ -26,8 +24,7 @@ public final class FluxTransferTooltip implements BodyProvider<PartFluxTransferI
 
     private FluxTransferTooltip() {}
 
-    /** Called once, from the client setup: nothing draws a tooltip before that has run, and the
-     * registry caches per part class, so a late registration would be a tooltip that never appears. */
+    /** Called once from the client setup: the registry caches per part class. */
     public static void register() {
         PartTooltips.addBody(PartFluxTransferInterface.class, INSTANCE);
     }
@@ -48,8 +45,7 @@ public final class FluxTransferTooltip implements BodyProvider<PartFluxTransferI
                 .withStyle(working ? ChatFormatting.GREEN : ChatFormatting.DARK_GRAY));
     }
 
-    /** The component back, or {@code null} when nothing was sent or the tag cannot be read: an empty
-     * red line would read as a refusal with no reason. */
+    /** The component back, or {@code null} when nothing was sent or the tag cannot be read. */
     private static @Nullable Component decode(@Nullable Tag encoded) {
         if (encoded == null) {
             return null;

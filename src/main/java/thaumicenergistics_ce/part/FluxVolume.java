@@ -6,9 +6,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * The room a release needs: three blocks out from the face and three by three across it, counted from
- * the block the face points at. Thaumaturge has no "may this chunk take flux" question to ask, so the
- * volume is the interface's own rule.
+ * The room a release needs: three blocks out from the face and three by three across it. Thaumaturge
+ * has no "may this chunk take flux" question to ask, so the volume is the interface's own rule.
  */
 final class FluxVolume {
 
@@ -30,8 +29,7 @@ final class FluxVolume {
                 Math.max(near.getY(), far.getY()) + across(face.getStepY()),
                 Math.max(near.getZ(), far.getZ()) + across(face.getStepZ()));
         for (BlockPos pos : BlockPos.betweenClosed(from, to)) {
-            // An unloaded position counts as occupied: asking for its state would pull the chunk in,
-            // and a position nobody has loaded cannot be seen to have room either.
+            // An unloaded position counts as occupied: asking for its state would pull the chunk in.
             if (!server.isLoaded(pos)) {
                 return false;
             }
