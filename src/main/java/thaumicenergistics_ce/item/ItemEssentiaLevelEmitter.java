@@ -7,7 +7,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 
-/** 作为物品的源质标准发信器，用于把它放到线缆上。 */
+/** 源质标准发信器的物品形态，把它放到线缆上。 */
 public class ItemEssentiaLevelEmitter extends Item implements IPartItem<PartEssentiaLevelEmitter> {
 
     public ItemEssentiaLevelEmitter(Item.Properties properties) {

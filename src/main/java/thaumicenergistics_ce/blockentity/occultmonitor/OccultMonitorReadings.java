@@ -10,8 +10,8 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * 气泡的读取面：监控器最后一次发给客户端的内容，以及发送它的快照。
- * 这里只被读取，从不计算，所以玩家看到的气泡就是服务端的快照；
- * 书不属于其中，因为它作为方块状态传输。
+ * 这里只被读，从不计算，玩家看到的气泡就是服务端的快照。
+ * 书不在其中，它作为方块状态传输。
  */
 final class OccultMonitorReadings {
 
@@ -27,7 +27,7 @@ final class OccultMonitorReadings {
         this.reach = reach;
     }
 
-    /** 把当前读数交给同步单元，后者只在有变化时才发送。 */
+    /** 把当前读数交给同步单元；它只在有变化时才发。 */
     void sync(boolean reportable, InfusionRisk risk) {
         bubble.offer(monitor, new OccultMonitorSync.Snapshot(
                 reportable,

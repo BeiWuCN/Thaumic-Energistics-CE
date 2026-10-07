@@ -8,9 +8,8 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
 
 /**
- * 注魔供应器方块。它不声明朝向，因为祭坛是通过附近方块上的要素
- * 容器 capability 来寻找来源的，它的方块状态只声明一个无条件
- * 变体。
+ * 注魔供应器方块。不声明朝向：祭坛通过附近方块上的要素容器 capability 找来源，
+ * 它的方块状态只有一个无条件变体。
  */
 public class BlockInfusionProvider extends ThEBaseEntityBlock {
 

@@ -7,8 +7,8 @@ import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.inventory.GearSlots;
 
 /**
- * 机器的物品栏：每个槽段接受什么，以及所有者在一格变化时的回调。
- * 槽位号本身留在 {@link BlockEntityArcaneAssembler} 上，调用方在那里读取。
+ * 机器的物品栏：每个槽段接受什么，以及一格变化时给所有者的回调。
+ * 槽位号留在 {@link BlockEntityArcaneAssembler} 上，调用方从那里读。
  */
 final class AssemblerInventoryLayout extends SimpleContainer {
 
@@ -26,7 +26,7 @@ final class AssemblerInventoryLayout extends SimpleContainer {
             return AEItems.SPEED_CARD.is(stack);
         }
         if (AssemblerDisplaySync.isDisplaySlot(slot)) {
-            // 机器自己的显示：不从玩家那里接收任何物品。
+            // 机器自己的显示；不收玩家放进来的物品。
             return false;
         }
         return switch (slot) {

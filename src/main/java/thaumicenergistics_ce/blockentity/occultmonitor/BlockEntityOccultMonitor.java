@@ -23,9 +23,8 @@ import thaumicenergistics_ce.infusion.InfusionRisk;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
- * 神秘监控器：观察一座注魔祭坛，并报告仪式将对房间做什么。
- * [InfusionStabilitySurvey] 指明破坏祭坛对称性的方块，而且书槽里必须有一本
- * 魔导手册，否则 {@link #canReport()} 保持为 false。
+ * 神秘监控器：看一座注魔祭坛，报告仪式会对房间做什么。
+ * 书槽里没有魔导手册时 {@link #canReport()} 为 false；[InfusionStabilitySurvey] 指出破坏对称性的方块。
  */
 public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements IGridTickable {
 
@@ -33,41 +32,41 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
 
     private static final double IDLE_POWER = 64.0;
 
-    /** 合成完成脉冲持续多久，单位为游戏 tick。半秒恰好是一次干净的闪烁。 */
+    /** 合成完成脉冲时长；10 tick 正好半秒，闪一下干净利落。 */
     static final int PULSE_TICKS = 10;
 
-    /** 脉冲在机器上方留下的粒子，让玩家看见信号是从哪来的。 */
+    /** 脉冲粒子数；撒在机器上方，看得见信号从哪来。 */
     private static final int PULSE_PARTICLES = 8;
 
-    /** 多久查看一次房间。祭坛勘察未命中后会从这个值退避。 */
+    /** 房间扫描间隔 10 tick；祭坛勘察未命中后从这个值退避。 */
     static final int SCAN_INTERVAL = 10;
 
-    // 那本典籍的槽位，以及镜像它的两个方块状态。
+    // 那本书的槽位；两个方块状态镜像它。
 
     private final OccultMonitorBookSlot bookSlot = new OccultMonitorBookSlot(this);
 
-    // 读取房间分两件事：找到祭坛，以及查问什么能为这场仪式付账。
+    // 读取房间分两件事：找祭坛，查什么能为仪式付账。
 
     private final EssentiaReach reach = new EssentiaReach(this);
 
     private final AltarSurvey survey = new AltarSurvey(this, reach);
 
-    /** 当 {@code THAUMICENERGISTICS_MONITOR_TRACE=true} 时每秒一行日志。 */
+    /** {@code THAUMICENERGISTICS_MONITOR_TRACE=true} 时每秒写一行日志。 */
     private final OccultMonitorTrace trace = new OccultMonitorTrace(this, survey);
 
-    // 气泡在客户端绘制，所以它的数字随更新标签一起传输。
+    // 气泡在客户端绘制，数字走更新标签传过去。
 
     private final OccultMonitorReadings readings = new OccultMonitorReadings(this, survey, reach);
 
-    // 一次完成的仪式留下的东西：一次红石脉冲，由预定的方块 tick 撤销。
+    // 完成仪式留下的红石脉冲；由预定的方块 tick 撤销。
 
-    /** 脉冲结束时的游戏时间，没有脉冲运行时为 0。不保存：一个比仪式活得更久的信号——
-     * 比如跨过一次重载——就是对早已结束的祭坛的谎报。 */
+    /** 脉冲结束时的游戏时间，无脉冲为 0。
+     * 刻意不存档：跨过一次重载的信号会谎报早就结束的仪式。 */
     private long pulseUntil;
 
     public BlockEntityOccultMonitor(BlockPos pos, BlockState state) {
         super(ModBlockEntities.OCCULT_MONITOR.get(), pos, state);
-        // [REQUIRE_CHANNEL]，好让监控器像其它所有机器一样出现在频道读数里。
+        // 要 [REQUIRE_CHANNEL]，监控器才会出现在频道读数里。
         getMainNode()
                 .setIdlePowerUsage(IDLE_POWER)
                 .addService(IGridTickable.class, this)
@@ -105,8 +104,8 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
             return TickRateModulation.IDLE;
         }
         updateNetworkState();
-        // 离线：跳过工作，但仍继续 tick（SAME），以便察觉网格恢复。没有做过搜索，
-        // 所以丢弃上一次祭坛读数，而不是把它当作最新数据提供出去。
+        // 离线时跳过工作，仍继续 tick（SAME）以察觉网格恢复。
+        // 这次没搜过，上一次祭坛读数要丢弃，别当最新数据报出去。
         if (!getMainNode().isActive()) {
             survey.forget();
             readings.sync(canReport(), survey.risk());
@@ -151,7 +150,7 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
         return readings.essentia();
     }
 
-    /** 气泡的客户端同步载荷。书不在这里——它作为方块状态传输。 */
+    /** 气泡的客户端同步载荷；书走方块状态，不在这里。 */
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = super.getUpdateTag(registries);
@@ -165,8 +164,8 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
         applyBubbleState(tag, registries);
     }
 
-    /** 实时更新从这里进来；{@code handleUpdateTag} 是区块加载路径。两者都终止于此，
-     * 而不是 {@code loadTag}，后者会加载物品栏。 */
+    /** 实时更新与 {@code handleUpdateTag}（区块加载）都到这里。
+     * 不走 {@code loadTag}，那个会加载物品栏。 */
     @Override
     public void onDataPacket(
             Connection net,
@@ -191,29 +190,28 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
         return survey.report();
     }
 
-    /** 自节点上次活跃以来是否跑过祭坛搜索。只有它为 true 时 Jade 才说“no altar”，
-     * 因为未搜索过的机器对房间一无所知。 */
+    /** 自节点上次活跃以来是否搜过祭坛。Jade 仅在它为 true 时说 “no altar”。 */
     public boolean hasSearchedAltar() {
         return survey.searched();
     }
 
     public boolean canReport() {
-        // 在线时也一样：网络断开后留在屏幕上的气泡会报告过期的读数。
+        // 断网后留在屏幕上的气泡会报过期读数。
         return hasBook() && survey.report().foundAltar() && getMainNode().isActive();
     }
 
-    /** 合成完成脉冲是否处于开启状态，方块正是把它作为信号上报的。 */
+    /** 脉冲是否开着；方块把它的值当红石信号上报。 */
     public boolean pulsing() {
         return pulseUntil != 0L && level != null && level.getGameTime() < pulseUntil;
     }
 
-    /** {@code matrix} 是否是本机器观察的祭坛，也就是它响应谁的合成完成。 */
+    /** 本机是否观察这个 {@code matrix}，即它响应谁的合成完成。 */
     boolean watches(BlockPos matrix) {
         return matrix.equals(survey.matrixPos());
     }
 
-    /** 开启一次完成的仪式所挣得的脉冲，并通知机器周围的红石。由
-     * {@code OccultMonitorCraftPulse} 调用，所以它不是 public；方块的预定 tick 会结束它。 */
+    /** 开启完成仪式的脉冲，并通知周围红石。
+     * 由 {@code OccultMonitorCraftPulse} 调用，不是 public；方块的预定 tick 结束它。 */
     void startPulse() {
         if (!(level instanceof ServerLevel server)) {
             return;
@@ -222,7 +220,6 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
         BlockState state = getBlockState();
         server.scheduleTick(worldPosition, state.getBlock(), PULSE_TICKS);
         server.updateNeighborsAt(worldPosition, state.getBlock());
-        // 方块上方撒几个粒子，让脉冲不只是被感觉到，而是看得见它从哪来。
         server.sendParticles(
                 DustParticleOptions.REDSTONE,
                 worldPosition.getX() + 0.5,
@@ -235,7 +232,7 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
                 0.0);
     }
 
-    /** 结束脉冲；若在本次脉冲仍在时第二次仪式完成，则重新安排 tick。 */
+    /** 结束脉冲；脉冲还在时第二次仪式完成会重排 tick。 */
     public void endPulse() {
         if (pulseUntil == 0L || level == null) {
             return;

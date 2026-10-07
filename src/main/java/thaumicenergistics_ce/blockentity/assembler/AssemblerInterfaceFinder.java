@@ -8,13 +8,13 @@ import net.minecraft.server.level.ServerLevel;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.part.PartVisInterface;
 
-/** 找到最近的活跃 vis 接口并缓存它，扫描无果后逐次退避。 */
+/** 找到最近的活跃 vis 接口并缓存，扫描无果后逐次退避。 */
 final class AssemblerInterfaceFinder {
 
-    /** 机器搜索本 mod 的 vis 接口的距离：中继点自身的覆盖范围。 */
+    /** 机器搜本 mod 的 vis 接口搜多远：中继点自身的覆盖范围。 */
     private static final int INTERFACE_RANGE = 8;
 
-    /** 扫描接口无果后等待多久。该立方体是 4,913 次方块实体查找。 */
+    /** 扫描接口无果后等多久。那个立方体是 4,913 次方块实体查找。 */
     private static final int INTERFACE_MISS_MAX = 200;
 
     private final int pollInterval;

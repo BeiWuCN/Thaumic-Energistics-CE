@@ -22,9 +22,9 @@ import thaumicenergistics_ce.menu.slot.TemplateSlot;
 import thaumicenergistics_ce.network.DistillationEncoderReceiver;
 
 /**
- * 蒸馏编码器的菜单：物品、它的要素、被选中的要素以及样板井。
- * 两侧都从同步的物品推导要素行，因此二者不会不一致。选中项
- * 不做同步：它是对服务端的指令，回映回来只为绘制高亮。
+ * 蒸馏编码器的菜单：物品、它的要素、选中的要素和样板井。
+ * 两侧都从同步的物品推导要素行，结果不会打架。
+ * 选中项不同步：它是对服务端的指令，回映只为画高亮。
  */
 public class MenuDistillationEncoder extends AbstractContainerMenu implements DistillationEncoderReceiver {
 
@@ -42,8 +42,8 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
 
     public static final int IDX_SELECTED = IDX_ASPECT_START + ASPECT_SLOTS;
 
-    /** 该行第一个井的菜单索引：比它的容器索引多 {@link #PLAYER_SLOTS}；点击与
-     * {@code quickMoveStack} 对槽位的编号方式不同。 */
+    /** 该行第一个井的菜单索引，比容器索引多 {@link #PLAYER_SLOTS}；
+     * 点击和 {@code quickMoveStack} 的槽位编号方式不同。 */
     public static final int MENU_ASPECT_START = PLAYER_SLOTS + IDX_ASPECT_START;
     public static final int MENU_SELECTED = PLAYER_SLOTS + IDX_SELECTED;
 
@@ -52,7 +52,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
     public static final int MENU_BLANK = PLAYER_SLOTS + IDX_BLANK;
     public static final int MENU_ENCODED = PLAYER_SLOTS + IDX_ENCODED;
 
-    // 取自参照构建的屏幕美术。
+    // 坐标取自参照构建的屏幕美术。
     private static final int SOURCE_X = 15;
     private static final int SOURCE_Y = 69;
     private static final int ASPECTS_X = 65;
@@ -70,7 +70,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
     private static final int HOTBAR_Y = 208;
     private static final int PITCH = 18;
 
-    // 包级可见，供要素表使用：它从槽位和玩家推导该行。
+    // 包级可见，给要素表用：它从槽位和玩家推导这一行。
     final Player owner;
 
     final @Nullable BlockEntityDistillationEncoder encoder;
@@ -93,7 +93,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
         this.table = new EncoderAspectTable(this, encoder, aspectDisplay, selectedDisplay);
         Container source = encoder == null ? new SimpleContainer(BlockEntityDistillationEncoder.SLOT_COUNT) : encoder.getInventory();
 
-        // 1. 玩家物品栏，和本 mod 其它地方一样放在最前。
+        // 1. 玩家物品栏，跟本 mod 别处一样放在最前。
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
                 addSlot(new Slot(playerInventory, column + row * 9 + 9, INV_X + column * PITCH, INV_Y + row * PITCH));
@@ -103,15 +103,15 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
             addSlot(new Slot(playerInventory, column, INV_X + column * PITCH, HOTBAR_Y));
         }
 
-        // 2. 机器。源井是模板，不是存放处 —— 见 [TemplateSlot]。
+        // 2. 机器。源井是模板，不是存放处，见 [TemplateSlot]。
         addSlot(new TemplateSlot(source, BlockEntityDistillationEncoder.SLOT_SOURCE, SOURCE_X, SOURCE_Y));
         addSlot(new Slot(source, BlockEntityDistillationEncoder.SLOT_BLANK, BLANK_X, BLANK_Y));
-        // 由机器写入，由玩家取走，永不放入 —— 见 [MachineOutputSlot]。
+        // 机器写入、玩家取走，永远放不进去，见 [MachineOutputSlot]。
         addSlot(new MachineOutputSlot(source, BlockEntityDistillationEncoder.SLOT_ENCODED, ENCODED_X, ENCODED_Y));
 
-        // 3. 要素行与选中的要素：由要素表写入的视图，玩家永远写不了。
+        // 3. 要素行和选中的要素：要素表写入的视图，玩家永远写不了。
         for (int i = 0; i < ASPECT_SLOTS; i++) {
-            // 沿面板纵向排列，而非横向。
+            // 沿面板纵向排列。
             addSlot(new AspectSelectSlot(
                     aspectDisplay,
                     i,
@@ -192,14 +192,13 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
 
     @Override
     public void broadcastChanges() {
-        // 只在服务端运行 —— 客户端从不调用它；由 [ensureAspects] 保持其副本最新，
-        // 而不是在这里。
+        // 只在服务端跑，客户端不调它；副本由 [ensureAspects] 更新，不在这里。
         table.ensure();
         super.broadcastChanges();
     }
 
-    /** 拦截对要素行和选中要素显示区的点击：点击其一意为「用这个
-     * 要素」，而落到原版处理会让玩家从显示区里拽出一个幻影物品。 */
+    /** 拦掉对要素行和选中要素显示区的点击：点这里的意思都是「用这个要素」，
+     * 交给原版处理会让玩家从显示区拽出一个幻影物品。 */
     @Override
     public void clicked(int slotId, int dragType, ClickType clickType, Player player) {
         if (EncoderClicks.handles(this, slotId, dragType, clickType, player)) {

@@ -21,10 +21,9 @@ import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 /**
- * 注魔供应器：让注魔祭坛直接从 ME 网络抽取源质。
- * 没有任何缓冲，因为方块是网络的一扇窗而不是一个罐子，并且
- * {@link #getAspects()} 回答空，这样没有管道会把它当成可抽取的容器。经
- * {@link #takeFromContainer} 的取出是全有或全无：部分取出会被放回并报为失败。
+ * 注魔供应器：让注魔祭坛直接从 ME 网络抽源质。
+ * 没有缓冲：方块是网络的一扇窗，不是罐子；{@link #getAspects()} 答空，管道就不会把它当容器抽。
+ * 经 {@link #takeFromContainer} 的取出是全有或全无：部分取出放回去并报失败。
  */
 public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implements IAspectSource {
 
@@ -80,7 +79,7 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
         }
         long taken = storage.extract(key, amount, Actionable.MODULATE, actionSource);
         if (taken < amount) {
-            // 网络在这两次调用之间变了。把确实取出的部分放回，这样不会有东西丢失。
+            // 两次调用之间网络变了：把真取出的那部分放回去，不会有东西丢。
             if (taken > 0) {
                 storage.insert(key, taken, Actionable.MODULATE, actionSource);
             }

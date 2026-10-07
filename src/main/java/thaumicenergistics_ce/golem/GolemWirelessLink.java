@@ -19,15 +19,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * 单个傀儡通往 ME 网络的一条已解析路径：指向某个接入点的链接，用完即弃。
- * 背包只保存一个 {@link GlobalPos}，别无他物，因此那里的方块必须是一个
- * 接入点，且其网格在傀儡的可达范围内；每次操作都重新解析，这样一旦走开
- * 就会立刻被发现。只搬运物品，而付不起能量的网络什么也不搬，
- * 因为这一步由 AE2 的耗能辅助类判定。
+ * 单个傀儡通往 ME 网络的一条已解析路径：指向接入点的链接，用完即弃。
+ * 背包只存一个 {@link GlobalPos}，别无他物，故那格得是接入点、它网格要在傀儡范围内；
+ * 每次操作都重新解析，走开才能马上被发现。只搬物品，付不起的网络什么都不搬，
+ * 这一步由 AE2 的耗能辅助类判定。
  */
 public final class GolemWirelessLink {
 
-    /** 每次操作的物品数，按傀儡等级。参照实现自己的一组数值，按等级选取。 */
+    /** 每次操作的物品数，按傀儡等级取参照实现自己的一组值。 */
     private static final int[] ITEM_RATES = {8, 24, 32};
 
     private final MEStorage storage;
@@ -60,8 +59,7 @@ public final class GolemWirelessLink {
             return null;
         }
 
-        // 这次传输记在接入点账上，而它充当动作宿主，AE2 的安全与
-        // 频道统计正是这样要求任何代表网格行事的对象的。
+        // 这次传输记在接入点账上，它充当动作宿主：AE2 的安全和频道统计要求任何代表网格行事的东西都这。
         return new GolemWirelessLink(
                 grid.getStorageService().getInventory(),
                 grid.getEnergyService(),
@@ -69,10 +67,9 @@ public final class GolemWirelessLink {
     }
 
     /**
-     * 把物品堆里网络愿意收下的那部分放进去，并按该数量缩减这个物品堆。这样做是安全的，
-     * 因为 {@code getCarrying()} 交出的是傀儡自己正在使用的活物品堆，所以调用方会被就地缩减。
-     *
-     * @return 被接收的物品数量；网络已满或电力耗尽时为 0。
+     * 把物品堆里网络愿收的那部分放进去，并按该数量缩减这个堆。安全，
+     * 因 {@code getCarrying()} 交出的是傀儡正在用的活物品堆，调用方会被就地缩减。
+     * @return 被收下的物品数；网络满或没电为 0。
      */
     public long insert(ItemStack stack, int limit) {
         AEItemKey key = AEItemKey.of(stack);
@@ -92,8 +89,8 @@ public final class GolemWirelessLink {
     }
 
     /**
-     * 傀儡是否处在其所链接网格上某个活动接入点的范围内。所查询的类
-     * 必须是具体类——见 {@code owner.getClass()} 处的说明。
+     * 傀儡是否在所链网格上某个活动接入点的范围内。查的类得是具体类。
+     * 见 {@code owner.getClass()} 处的说明。
      */
     private static boolean inRange(ServerLevel level, IGrid grid, EntityThaumaturgeGolem golem) {
         for (WirelessAccessPointBlockEntity accessPoint : grid.getMachines(WirelessAccessPointBlockEntity.class)) {
@@ -114,8 +111,8 @@ public final class GolemWirelessLink {
     }
 
     /**
-     * 以文字说明 {@link #open} 为何拒绝了该傀儡，供追踪使用。再走一遍同样的检查，
-     * 而不是从 {@code open} 带出一个状态：「什么都没发生」不构成一份报告。
+     * 用文字说明 {@link #open} 为什么拒了该傀儡，供 trace 用。再走一遍同样的检查，
+     * 不从 {@code open} 带状态出来：「什么都没发生」不算一份报告。
      */
     static String refusal(EntityThaumaturgeGolem golem, GlobalPos target) {
         if (!(golem.level() instanceof ServerLevel serverLevel)) {

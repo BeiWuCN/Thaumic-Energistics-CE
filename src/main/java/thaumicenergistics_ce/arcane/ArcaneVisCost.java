@@ -4,8 +4,8 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 
 /**
- * 奥术样板的 vis 价格：法杖的基础消耗加上它所替代的元初晶体。
- * 复合晶体按其元初要素计算，Thaumaturge 并不替代复合晶体。
+ * 奥术样板的 vis 价格：法杖基础消耗加上它所替代的元质晶体。
+ * 复合晶体按它的元质算，Thaumaturge 不替代复合晶体。
  */
 final class ArcaneVisCost {
 

@@ -6,10 +6,10 @@ import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber
 import thaumicenergistics_ce.init.ModItems;
 
 /**
- * 菜单交给界面的按钮输入：核心槽位与机器的状态，
- * 经数据槽位镜像，所以客户端读到的是服务端最后解析出的结果。
- * 状态取自机器自身，唯一的例外是不被允许存储该配方的玩家，这一点只有
- * 读数能看到，所以菜单在这里询问而不是去问机器。
+ * 菜单交给界面的按钮输入：核心槽位和机器的状态，经数据槽位镜像，
+ * 客户端读到的是服务端最后解析出的结果。
+ * 状态取自机器自身；唯一例外是不许存该配方的玩家，只有读数能看到，
+ * 这里就问读数，不问机器。
  */
 final class InscriberMenuReadout {
 
@@ -32,8 +32,7 @@ final class InscriberMenuReadout {
     }
 
     /**
-     * 无论配方如何，菜单究竟能否编码。客户端读取同步的数据槽位，
-     * 因为它自己的槽位副本并不总是被可靠地填充。
+     * 不看配方，菜单到底能不能编码。客户端读同步的数据槽位：自己的槽位副本不总是可靠。
      */
     boolean canEncode() {
         if (menu.inscriber == null) {
@@ -50,8 +49,8 @@ final class InscriberMenuReadout {
     }
 
     /**
-     * 按钮将删除而非存储时返回 true，这不是玩家挑选的模式：解析不出任何东西的
-     * 网格就是 Invalid，无论核心持有多少样板。
+     * 按钮是删除不是存储时返回 true。这不是玩家挑的模式：
+     * 解析不出来的网格就是 Invalid，核心存了多少样板都一样。
      */
     boolean isDelete() {
         return data.get(MenuKnowledgeInscriber.DATA_HAS_CORE) != 0

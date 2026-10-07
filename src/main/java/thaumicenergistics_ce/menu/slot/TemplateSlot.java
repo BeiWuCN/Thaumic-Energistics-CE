@@ -6,10 +6,9 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 蒸馏编码器的源槽位：指名要蒸馏何物的模板槽位。物品从不交付——由任务来支付它——
- * 所以放置、取走与读取用的是同一个物品堆。这是一项 JEI 拖拽防护措施：普通槽位会
- * 免费交出被拖入的物品，造成复制；与只读显示不同，
- * 它仍然同步，因为 {@code set} 未被触碰。
+ * 蒸馏编码器的源井：指名要蒸馏何物的模板槽。物品从不交出去，由任务付账，
+ * 故放、取、读用同一个物品堆。这是 JEI 拖拽防护：普通槽会把拖入的物品白送一份，造成复制；
+ * 和只读显示不同，它仍然同步，{@code set} 没被动过。
  */
 public class TemplateSlot extends Slot {
 

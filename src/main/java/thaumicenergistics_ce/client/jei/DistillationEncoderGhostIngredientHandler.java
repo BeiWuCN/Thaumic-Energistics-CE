@@ -15,18 +15,16 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * 让玩家把 JEI 里的物品拖进蒸馏编码台的源格。
- * 该格只是指定要蒸馏哪个物品：拖来的物品堆不会被取走，与 [TemplateSlot] 一样。
- * 不过两个格并不是同一种放下——源格接受一条指示，而空白格要从物品栏里
- * 取走一个真实的样板，因为落在那里就被消耗掉了。
+ * 源格只指定要蒸馏哪个物品，拖来的物品堆不会被取走，与 [TemplateSlot] 一样。
+ * 空白格不同：要从物品栏取走一个真实样板，落在那里就被消耗掉。
  */
 public class DistillationEncoderGhostIngredientHandler
         implements IGhostIngredientHandler<ScreenDistillationEncoder> {
 
     private static final int SLOT_SIZE = 16;
 
-    /** 是否记录 JEI 向本处理器询问过什么；除非像本 mod 其他诊断那样命名，
-     * 否则关闭。“拖拽没反应”和“JEI 从未询问”在界面上一样，但作为 bug
-     * 毫无共同点，值得用开关跑那一次定性测试。 */
+    /** 记录 JEI 向本处理器问过什么，默认关闭；环境变量按本 mod 其他诊断的命名。
+     * “拖拽没反应”和“JEI 从未询问”现象相同、原因完全不同，值得开开关跑一次。 */
     static final boolean TRACE = System.getenv("THAUMICENERGISTICS_ENCODER_TRACE") != null;
 
     @Override
@@ -38,15 +36,13 @@ public class DistillationEncoderGhostIngredientHandler
         }
         MenuDistillationEncoder menu = screen.getMenu();
         targets.add(new SourceTarget<>(menu, screen.getGuiLeft(), screen.getGuiTop()));
-        // 空白格也算，但只在它为空时、且只对空白样板：它是下一次编码会消耗掉的
-        // 真实槽位，所以别的什么都不该放在那里。
+        // 空白格只在它为空且是空白样板时算数：下一次编码会消耗它。
         if (ingredient.getIngredient() instanceof ItemStack stack
                 && AEItems.BLANK_PATTERN.is(stack)
                 && menu.slots.get(MenuDistillationEncoder.MENU_BLANK).getItem().isEmpty()) {
             targets.add(new BlankTarget<>(menu, screen.getGuiLeft(), screen.getGuiTop()));
         }
-        // 只有 JEI 真正开始拖拽时才记录：悬停路径在光标停留于某个原料上的每一帧
-        // 都会调用它，每帧一行会把真正有用的那行埋掉。
+        // 只在真开始拖拽时记录：悬停路径每帧都调用它，每帧一行会埋掉有用的那行。
         if (TRACE && doStart) {
             ThELog.LOG.info(
                     "[encoder] JEI is starting a drag; offering one target at {}", targets.get(0).getArea());
@@ -56,7 +52,6 @@ public class DistillationEncoderGhostIngredientHandler
 
     @Override
     public void onComplete() {
-        // 没有要释放的东西：该格接收的是指示，不是物品。
     }
 
     private record BlankTarget<I>(MenuDistillationEncoder menu, int guiLeft, int guiTop) implements Target<I> {
@@ -69,8 +64,8 @@ public class DistillationEncoderGhostIngredientHandler
         @Override
         public void accept(I ingredient) {
             if (ingredient instanceof ItemStack stack && AEItems.BLANK_PATTERN.is(stack)) {
-                // 这是一次移动，不是幽灵写入：样板必须离开玩家的物品栏，而这只有服务端
-                // 能做，所以直接发给服务端，本地先不显示任何东西。
+                // 这是真移动，不是幽灵写入：样板要离开玩家物品栏，只有服务端做得到。
+                // 直接发服务端，本地先不显示。
                 PacketDistributor.sendToServer(new EncoderActionPayload(
                         menu.containerId, EncoderActionPayload.ACTION_INSERT_BLANK, 0));
                 if (TRACE) {
@@ -80,12 +75,11 @@ public class DistillationEncoderGhostIngredientHandler
         }
     }
 
-    /** 源格作为放置目标：它接收一条指示，而不是物品。 */
     private record SourceTarget<I>(MenuDistillationEncoder menu, int guiLeft, int guiTop) implements Target<I> {
 
         /**
-         * JEI 绘制该目标的位置，单位为屏幕像素：要加上 GUI 的偏移，因为 JEI 填充
-         * 这个矩形时自己不做任何平移，而槽位的 x 和 y 是相对 GUI 角点的。
+         * 给 JEI 的目标矩形，单位屏幕像素。
+         * 槽位 x/y 相对 GUI 角点，JEI 填矩形时不做平移，要自己加 GUI 偏移。
          */
         @Override
         public Rect2i getArea() {
@@ -96,8 +90,8 @@ public class DistillationEncoderGhostIngredientHandler
         @Override
         public void accept(I ingredient) {
             if (ingredient instanceof ItemStack stack && !stack.isEmpty()) {
-                // 该格属于机器，所以要告诉服务端——但写入先在这里发生，
-                // 这样格和要素行会在光标下立即填充，而不用等一个来回。
+                // 该格属于机器，要通知服务端。
+                // 本地先写，格和要素行随即在光标下填充，不用等一个来回。
                 if (TRACE) {
                     ThELog.LOG.info(
                             "[encoder] JEI dropped {} into the source well", stack.getHoverName().getString());

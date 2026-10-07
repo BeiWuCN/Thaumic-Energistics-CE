@@ -14,10 +14,10 @@ import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.init.ModItems;
 
 /**
- * 一次灵气支付的花费：某个位置上的灵气，要么用 AE 购买，要么直接取用灵气。
- * 共用同一份实现，已放置终端与无线终端因此在兑换率上不会走偏。两者的
- * 差别只在这个位置：已放置终端抽取它所在的区块，无线终端抽取玩家
- * 所在的区块，因为随身携带的工作台没有自己的方块。
+ * 一次灵气支付的花费：某个位置的灵气，要么用 AE 买，要么直接取灵气。
+ * 已放置终端和无线终端共用这份实现，兑换率不会走偏。
+ * 两者只差位置：已放置终端抽自己所在的区块，无线终端抽玩家所在的区块，
+ * 随身携带的工作台没有自己的方块。
  */
 public final class TerminalAuraPayment {
 
@@ -28,9 +28,9 @@ public final class TerminalAuraPayment {
     private TerminalAuraPayment() {}
 
     /**
-     * 在 {@code where} 抽取灵气并用 {@code energy} 支付，先模拟后提交；
-     * 全有或全无，因此提交额不足也不会从 Thaumaturge 的支付处理器里抛异常。
-     * @return 提供的 centivis，绝不会超过 {@code needCentivis}
+     * 在 {@code where} 抽灵气，用 {@code energy} 付账，先模拟后提交。
+     * 全有或全无：提交额不足也不会让 Thaumaturge 的支付处理器抛异常。
+     * @return 提供的 centivis，绝不超过 {@code needCentivis}
      */
     public static int pay(
             Level level, BlockPos where, @Nullable IEnergySource energy, int needCentivis, boolean simulate) {
@@ -65,8 +65,8 @@ public final class TerminalAuraPayment {
     }
 
     /**
-     * 终端物品堆是否装有 vis 连接卡：只有装了，合成才会从灵气中取无属性
-     * vis。升级无法读取的物品堆返回 false，保持用电力支付的路径。
+     * 终端物品堆是否装了 vis 连接卡：只有装了，合成才从灵气取无属性 vis。
+     * 升级读不出来的物品堆返回 false，仍走电力支付。
      */
     public static boolean visConnectionInstalled(ItemStack terminal) {
         if (terminal.isEmpty() || !(terminal.getItem() instanceof IUpgradeableItem upgradeable)) {
@@ -77,8 +77,8 @@ public final class TerminalAuraPayment {
     }
 
     /**
-     * 玩家打开的那台机器是否装有 vis 连接卡；随身终端与插在线缆上的终端
-     * 都通过各自的升级物品栏作答。
+     * 玩家打开的那台机器是否装了 vis 连接卡；
+     * 随身终端和插在线缆上的终端各由自己的升级物品栏作答。
      */
     public static boolean visConnectionInstalled(IUpgradeableObject machine) {
         IUpgradeInventory upgrades = machine.getUpgrades();
@@ -86,9 +86,9 @@ public final class TerminalAuraPayment {
     }
 
     /**
-     * 为装有 vis 连接卡的终端在 {@code where} 抽取灵气。没有任何能量源参与，
-     * 因此这次合成的无属性 vis 不花网络一分钱。
-     * @return 提供的 centivis，绝不会超过 {@code needCentivis}
+     * 为装了 vis 连接卡的终端在 {@code where} 抽灵气。没有能量源参与，
+     * 这次合成的无属性 vis 不花网络一分钱。
+     * @return 提供的 centivis，绝不超过 {@code needCentivis}
      */
     public static int payAura(Level level, BlockPos where, int needCentivis, boolean simulate) {
         if (needCentivis <= 0 || level == null || level.isClientSide()) {
@@ -105,8 +105,8 @@ public final class TerminalAuraPayment {
         if (simulate) {
             return offered;
         }
-        // 提交的数额就是上一趟读到的值，而不是重新读取：同一场合成的两次灵气查询
-        // 不一致时 Thaumaturge 会抛异常，所以灵气是刻意只问一次的。
+        // 提交的数额用上一趟读到的值，不重读：同一场合成的两次灵气查询不一致时
+        // Thaumaturge 会抛异常，灵气故意只问一次。
         TcAura.drainVis(level, where, (float) offered / CENTIVIS_PER_VIS, false);
         return offered;
     }

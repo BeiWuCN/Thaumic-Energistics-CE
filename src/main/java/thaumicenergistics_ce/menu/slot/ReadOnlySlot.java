@@ -7,10 +7,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 只用于显示的槽位：渲染真实的物品堆，但拒绝一切交互。它展示玩家不得取走、
- * 插入或被模组排序的真实机器状态。一个空的零槽位容器会对自动化隐藏
- * {@code slot.index} 与 {@code slot.container}。每个会改动状态的入口点都是空操作，
- * 而 {@link #getItem()} 读取真实来源。
+ * 仅供显示的槽位：渲染真实的物品堆，拒绝一切交互。
+ * 它展示玩家不得取走、插入或被模组排序的真实机器状态。
+ * 一个空的零槽位容器会对自动化隐藏 {@code slot.index} 与 {@code slot.container}。
+ * 每个会改动状态的入口点都是空操作，{@link #getItem()} 读取真实来源。
  */
 public class ReadOnlySlot extends Slot {
 

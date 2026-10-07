@@ -8,10 +8,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * 完成的仪式对观察它的机器做什么：各给一次红石脉冲。Thaumaturge 从 [finishCraft]
- * 在游戏总线上宣告完成，绝不从 [failCraft]，因为失败的仪式不会触发任何东西，
- * 脉冲才得以保持其含义；只有已经在观察那座祭坛的机器会响应，它们靠扫描
- * 祭坛找出。
+ * 完成的仪式对看着它的机器做什么：各给一次红石脉冲。Thaumaturge 从 [finishCraft]
+ * 在游戏总线上宣告完成，绝不从 [failCraft]：失败的仪式什么都不触发，脉冲的含义才守得住；
+ * 只有已在看那座祭坛的机器会响应，它们靠扫描祭坛找出。
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class OccultMonitorCraftPulse {

@@ -9,29 +9,24 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.blockentity.ClientSyncSend;
 import thaumicenergistics_ce.util.ThELog;
 
-/** 组装机的显示及其网络同步，从 {@link BlockEntityArcaneAssembler} 拆出：
- * 渲染器和菜单绘制什么、多久发出一次，以及更新标签如何发出与回来。
- * 同包，所以可直接访问机器状态；四个覆写（{@code getUpdateTag}、
- * {@code handleUpdateTag}、{@code onDataPacket}）留在方块实体上并委托到这里。
+/** 组装机的显示与网络同步：渲染器和菜单读这里的字段，更新标签在这里写入和读回。
+ * 四个覆写在方块实体上（{@code getUpdateTag} 等），都转到这个类。
  */
 final class AssemblerDisplaySync {
 
-    /** 对每 tick 显示推送的节流；按每 tick 一个数据包推送合成进度不
-     * 值得，而在这一速率下机器看起来仍是实时的。 */
+    /** 显示推送节流，4 tick 一次；每 tick 一包不值得。 */
     private static final int UPDATE_INTERVAL = 4;
 
-    /** 线格式名称。第一个与 Jade 载荷（{@code ArcaneAssemblerProvider.TAG_DISCOUNT}）
-     * 拼写相同；两者是一对，必须保持相等。 */
+    /** 要与 Jade 载荷 {@code ArcaneAssemblerProvider.TAG_DISCOUNT} 拼写一致，配对写死。 */
     private static final String TAG_GEAR_DISCOUNT = "GearDiscount";
-    /** 渲染器预览的产物：以更慢的时钟发送，所以缺少该键表示"未改变"。 */
+    /** 渲染器预览的产物键。发送时钟比其余键慢，键缺失表示未改变。 */
     private static final String TAG_PREVIEW = "Preview";
 
     private final BlockEntityArcaneAssembler owner;
 
     private long lastUpdate;
 
-    /** 运行中合成产物的仅渲染器副本，从更新标签写入：真实的那份
-     * 在 {@link BlockEntityArcaneAssembler#TARGET_SLOT} 中。 */
+    /** 渲染器用的副本，真实产物在 {@link BlockEntityArcaneAssembler#TARGET_SLOT}。 */
     private ItemStack previewStack = ItemStack.EMPTY;
 
     AssemblerDisplaySync(BlockEntityArcaneAssembler owner) {
@@ -46,8 +41,7 @@ final class AssemblerDisplaySync {
     // 写入与读取
     // ------------------------------------------------------------------
 
-    /** 把机器状态的同步部分加入 {@code tag}：合成、vis 池、装备
-     * 折扣，以及——比其余部分更慢的时钟——渲染器预览的产物。 */
+    /** 把同步的状态写进 {@code tag}：合成、vis 池、装备折扣，以及预览产物（时钟更慢）。 */
     void writeSync(CompoundTag tag, HolderLookup.Provider registries) {
         owner.craft.writeSync(tag);
         owner.vis.writeNbt(tag);
@@ -57,15 +51,14 @@ final class AssemblerDisplaySync {
         }
     }
 
-    /** 在客户端应用更新标签，即每 tick 更新走的路径。数据包落在这里，其
-     * 默认实现最终调用 {@code loadAdditional}，会清空合成状态。 */
+    /** 客户端应用更新标签。基类默认实现会调 {@code loadAdditional} 清掉合成状态，这里要覆写。 */
     void applySyncedState(CompoundTag tag, HolderLookup.Provider registries) {
         owner.suppressNotify = true;
         try {
             owner.craft.readSync(tag);
             owner.vis.readSync(tag);
             owner.upgrades().setGearDiscount(tag.getInt(TAG_GEAR_DISCOUNT));
-            // 显示：缺少该键表示"未改变"，产物以更慢的时钟发出。
+            // 缺少该键表示未改变；产物走更慢的时钟。
             if (tag.contains(TAG_PREVIEW)) {
                 previewStack = ItemStack.parseOptional(registries, tag.getCompound(TAG_PREVIEW));
             }
@@ -78,8 +71,6 @@ final class AssemblerDisplaySync {
     // 显示
     // ------------------------------------------------------------------
 
-    /** 清空目标槽位和预览槽位——渲染器和菜单绘制的内容——仅在
-     * 确实有东西可清空时才报告。 */
     void clearDisplay(boolean report) {
         boolean hadAnything =
                 !owner.inventory.getItem(BlockEntityArcaneAssembler.TARGET_SLOT).isEmpty();
@@ -105,8 +96,8 @@ final class AssemblerDisplaySync {
     // 显示区段
     // ------------------------------------------------------------------
 
-    /** 机器为自己写入的区段：样板镜像、目标槽和预览
-     * 网格。它们原本都不是玩家的物品——玩家持有的是副本——所以都不掉落。 */
+    /** 机器自己写的槽位：样板镜像、目标槽、预览网格。
+     * 玩家手里拿的是副本，这几个槽里的东西不掉落。 */
     static boolean isMachineOwned(int slot) {
         return slot >= BlockEntityArcaneAssembler.PATTERN_SLOT_START
                         && slot < BlockEntityArcaneAssembler.GEAR_SLOT_START
@@ -114,18 +105,15 @@ final class AssemblerDisplaySync {
                         && slot < BlockEntityArcaneAssembler.UPGRADE_SLOT_START;
     }
 
-    /** 该显示中玩家永远不能放入物品的部分：目标槽和预览
-     * 网格，二者都会被运行中的合成覆盖。 */
+    /** 目标槽和预览网格由运行中的合成覆盖，玩家不能放物品。 */
     static boolean isDisplaySlot(int slot) {
         return slot == BlockEntityArcaneAssembler.TARGET_SLOT
                 || slot >= BlockEntityArcaneAssembler.PREVIEW_SLOT_START
                         && slot < BlockEntityArcaneAssembler.UPGRADE_SLOT_START;
     }
 
-    /** 写入运行中合成的显示——产物放入目标槽，3x3 放入预览网格——
-     * 位于 notify 守卫之后：没有它，容器的监听器会把每次写入当成玩家
-     * 在改动机器，并每次都从核心重建样板列表。网格在服务端这里存在，因为
-     * 运行中的合成存在；客户端收到的是副本。 */
+    /** 写入运行中合成的显示：产物进目标槽，3x3 进预览网格。
+     * 要放在 notify 守卫之后，否则容器监听器把每次写入当玩家改动，重从核心重建样板列表。 */
     void refreshDisplaySlots(ItemStack target, List<ItemStack> grid) {
         owner.suppressNotify = true;
         try {
@@ -141,8 +129,7 @@ final class AssemblerDisplaySync {
         }
     }
 
-    /** 从公布的集合重写样板槽位：玩家读到的镜像，不是真实
-     * 物品栏。 */
+    /** 样板槽位是公布集合的镜像，玩家从菜单读到的是它。 */
     void refreshPatternSlots() {
         if (owner.getLevel() == null) {
             return;
@@ -165,7 +152,7 @@ final class AssemblerDisplaySync {
         }
     }
 
-    /** 把显示推送给观看的玩家，最多每 {@link #UPDATE_INTERVAL} tick 一次。 */
+    /** 推送显示给观看的玩家，每 {@link #UPDATE_INTERVAL} tick 最多一次。 */
     void markDisplayForUpdate() {
         if (owner.getLevel() == null) {
             return;

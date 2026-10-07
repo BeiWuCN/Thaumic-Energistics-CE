@@ -30,15 +30,11 @@ import thaumicenergistics_ce.block.BlockGachaBoxAggregator;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
-/** 支撑这个箱子：脑放在自己的槽位里、方块状态镜像它。工作部件都是各自独立的
- * 碎片——脑、卡片、为一次转动存入的 cognitio、进行中的转动、一次转动付出什么、
- * 屏幕背面那个面上的源质端口、它绑定的玩家，以及它从网格取的电——而这个类
- * 保管机器本身：网格节点、每秒一次的 tick、一次转动开始前还缺什么，
- * 以及什么东西必须落盘。 */
+/** 箱子本体。网格节点、每秒一次的 tick、开转前的检查、存档都在这儿；脑、卡片、
+ * cognitio、转动过程、源质端口、绑定玩家、从网格取的电各自分出去当小类。 */
 public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implements IGridTickable {
 
-    /** 转动以秒计，这是设计使用的单位；每秒一次 tick 让模型自身的动画看起来
-     * 是连续的，又不必每一 tick 都唤醒箱子。 */
+    /** 20 tick 即一秒。转动按秒走，每秒醒一次画动画，不必每 tick 唤醒箱子。 */
     private static final int TICKS_PER_SECOND = 20;
 
     private final GachaBrain brain = new GachaBrain(this);
@@ -52,24 +48,22 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
     public BlockEntityGachaBox(BlockPos pos, BlockState state) {
         super(ModBlockEntities.GACHA_BOX.get(), pos, state);
         setInternalMaxPower(GachaPower.ENERGY_CAPACITY);
-        // 缓冲区由箱子自己索取来填充（见 GachaPower.chargeFromGrid），但公开存储也是发电机的
-        // 盈余落进来的地方；WRITE 让箱子始终是索取者，绝不是提供者。
+        // 缓冲区靠箱子自己索取（[GachaPower.chargeFromGrid]）填充；公开存储是 WRITE，
+        // 发电机的盈余能落进来，箱子只当索取者。
         setInternalPublicPowerStorage(true);
         setInternalPowerFlow(AccessRestriction.WRITE);
-        // 一个频道，这样箱子像其他每台机器一样挣得自己的电力，而不是放在哪里都能存电；
-        // 没有频道的话缓冲不动，箱子也不动。
+        // 要一个频道：没频道就不通电，箱子整个不动。
         getMainNode().addService(IGridTickable.class, this).setFlags(GridFlags.REQUIRE_CHANNEL);
     }
 
-    /** AE2 自己的物品栏保持为空：脑的槽位按名字单独给出，四个卡片槽
-     * 由手工填充，所以这里没有任何东西被暴露两次。 */
+    /** AE2 的物品栏留空。脑有独立槽位、卡片走手工填充，这里再暴露一次就是重复。 */
     @Override
     public InternalInventory getInternalInventory() {
         return InternalInventory.empty();
     }
 
-    /** 只有屏幕两侧的面接入网格；屏幕背后的面接收源质，顶面
-     * 承载上半部分。AE2 在构造器里读这个，此时朝向已经在状态里了。 */
+    /** 只有屏幕两侧的面接入网格；背面接源质，顶面放上半部分。
+     * AE2 在构造器里读它，那时朝向已进状态。 */
     @Override
     public Set<Direction> getGridConnectableSides(BlockOrientation orientation) {
         Direction facing = getBlockState().getValue(BlockGachaBox.FACING);
@@ -82,7 +76,7 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         return getBlockState().getValue(BlockGachaBox.JAR);
     }
 
-    /** 上半部分必须坐在箱子上：没有它，没有任何东西驱动机器。 */
+    /** 上半部分坐在箱子上才算完整；缺了它机器不转。 */
     public boolean structureComplete() {
         if (getLevel() == null) {
             return false;
@@ -98,32 +92,30 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         return cards.hasRoom();
     }
 
-    /** 卡片当前的样子，用于 tooltip 的图标行：只读视图，所以不会复制任何东西。 */
+    /** 卡片当前的样子，给 tooltip 的图标行用。只读，不复制。 */
     public List<ItemStack> cards() {
         return cards.view();
     }
 
-    /** 把一张速度卡片放进第一个空槽位；箱子已经装满卡片时返回 false。 */
     public boolean addCard(ItemStack held) {
         return cards.add(held);
     }
 
-    /** 把卡片取出来，给那个从箱子里取走脑的玩家。 */
     public List<ItemStack> takeCards() {
         return cards.take();
     }
 
-    /** 脑的槽位，这样漏斗或管道可以放入或取出一颗。 */
+    /** 脑槽位，漏斗和管道靠它放进或取出一颗脑。 */
     public SimpleContainer brainSlot() {
         return brain.container();
     }
 
-    /** 把一颗脑放进槽位；调用方已经检查过它是缸中之脑。 */
+    /** 放进一颗脑，调用方已确认是缸中之脑。 */
     public void addBrain(ItemStack held) {
         brain.put(held);
     }
 
-    /** 把脑从槽位里取出，这会让箱子解除绑定；原本没有脑时返回空。 */
+    /** 取出脑会解除箱子绑定；槽里没脑时返回空。 */
     public ItemStack takeBrain() {
         return brain.take();
     }
@@ -138,18 +130,15 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         if (!(level instanceof ServerLevel server)) {
             return TickRateModulation.IDLE;
         }
-        // 缓冲区靠索取填充：AE2 机器自己抽取电力，所以一个只等着被充电的箱子
-        // 无论背后网络持有多大都会停在零。
+        // AE2 机器自己抽电，只等着被充电的箱子永远是零，得自己索取。
         if (getMainNode().isActive()) {
             power.chargeFromGrid();
         }
-        // 只要箱子能够转动，储备就会被补满，进行中的转动或一次闪现也算在内：
-        // 管道只在被请求时递送，而一次转动的量是它最多能扣留的。
+        // 能转动就补满储备，进行中的转动和闪现也算在内。
         if (setupReason(server) == null) {
             port.sip(server);
         }
-        // 结果会先停留片刻：否则下一次转动会在玩家看到屏幕上的闪光之前
-        // 就把它覆盖掉。
+        // 结果停留片刻，不然下一次转动会盖掉玩家还没看到的闪光。
         if (turn.flashing()) {
             turn.tickFlash();
             showScreen(turn.earned() ? BlockGachaBox.Screen.SUCCESS : BlockGachaBox.Screen.FAILED);
@@ -157,7 +146,7 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         }
         GachaWait wait = waitReason(server);
         if (wait != null) {
-            // 已经在进行中的转动被保持，而不是重启：回来的所有者会接着它继续。
+            // 所有者回来时接着转，不重启。
             showScreen(wait.blankScreen() ? BlockGachaBox.Screen.OFF : BlockGachaBox.Screen.ON);
             return TickRateModulation.SAME;
         }
@@ -173,14 +162,13 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         return TickRateModulation.SAME;
     }
 
-    /** 第一个挡路的东西，按玩家会修复它们的顺序排列；null 表示可以转动。 */
+    /** 第一个挡路的条件，按玩家会修的先后排；null 表示可以转。 */
     public @Nullable GachaWait waitReason(ServerLevel server) {
         GachaWait setup = setupReason(server);
         if (setup != null) {
             return setup;
         }
-        // 已经在进行中的转动已经付过费了：缺的是下一次转动的燃料，
-        // 箱子会信守承诺，而不是在它已经开始的事情中途停下。
+        // 进行中的转动已经付过费，这里只查下一次的燃料。
         if (turn.running()) {
             return null;
         }
@@ -193,7 +181,7 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         return null;
     }
 
-    /** 箱子自身出了什么问题：没有其中任何一项，就根本没有东西可转。 */
+    /** 箱子自己缺什么，缺一项就没东西可转。 */
     @Nullable GachaWait setupReason(ServerLevel server) {
         if (!structureComplete()) {
             return GachaWait.NO_STRUCTURE;
@@ -201,42 +189,41 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         if (!hasJar()) {
             return GachaWait.NO_BRAIN;
         }
-        // 所有者从未落盘的脑不是缺失的脑：它就搁在那里无人认领，点一下箱子
-        // 就能认领，这比扔掉玩家放置的一个罐要好。
+        // 脑还在原地没人认领，点一下箱子就能认领。
         if (!owner.isBound()) {
             return GachaWait.UNBOUND_BRAIN;
         }
         if (!getMainNode().isActive()) {
             return GachaWait.NO_CHANNEL;
         }
-        // 没有人在那里可以接收任何东西，而设计让箱子等待，而不是把它存起来。
+        // 所有者不在线，箱子就等着，不把产出存起来。
         if (owner.player(server) == null) {
             return GachaWait.OWNER_OFFLINE;
         }
         return null;
     }
 
-    /** 箱子现在是否真的能转一次：端口就是从这个状态得出它的吸力的。 */
+    /** 现在能不能真转一次；源质端口按这个状态算吸力。 */
     boolean canTurnNow() {
         return level instanceof ServerLevel server && setupReason(server) == null;
     }
 
-    /** 已存入的 cognitio，端口读取它来得知一点是否会被接受。 */
+    /** 已存入的 cognitio；端口读它判断一点会不会被接受。 */
     GachaCognitio cognitio() {
         return cognitio;
     }
 
-    /** 源质端口，用于能力查找：其他所有面都完全不回答。 */
+    /** 源质能力只在背面给出，别的面都不回答。 */
     public @Nullable IEssentiaTransport essentiaTransport(@Nullable Direction face) {
         return face == null || port.isConnectable(face) ? port : null;
     }
 
-    /** 屏幕面向放置箱子的玩家，所以源质端口是相反的那个面。 */
+    /** 屏幕朝放置箱子的玩家，背面就是源质端口。 */
     Direction backFace() {
         return getBlockState().getValue(BlockGachaBox.FACING).getOpposite();
     }
 
-    /** 一次抽取同时决定时长和概率，然后在允许转动之前先为它付费。 */
+    /** 一次抽取同时定下时长和概率，付过费才开转。 */
     private void beginTurn(ServerLevel server) {
         GachaOdds.Turn drawn = GachaOdds.roll(server.getRandom(), cardCount());
         if (!payForTurn()) {
@@ -245,7 +232,7 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         turn.start(drawn);
     }
 
-    /** 两点已存入的 cognitio 加上这次转动的电力，否则这次转动根本不开始。 */
+    /** 扣两点 cognitio 加这次转动的电力；付不出就不开转。 */
     private boolean payForTurn() {
         if (!cognitio.ready() || !power.canPay()) {
             return false;
@@ -256,7 +243,7 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         return cognitio.spend();
     }
 
-    /** 分发这次转动抽到的东西，然后把结果留在屏幕上片刻。 */
+    /** 把抽到的东西发出去，结果在屏幕上停片刻。 */
     private void finishTurn(ServerLevel server) {
         turn.settle();
         if (!turn.earned()) {
@@ -268,7 +255,7 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         GachaPayout.grant(player);
     }
 
-    /** 屏幕是一个方块状态，所以方块自己保存改动并把它发给客户端。 */
+    /** 屏幕是方块状态，方块自己落盘并发给客户端。 */
     private void showScreen(BlockGachaBox.Screen screen) {
         BlockState state = getBlockState();
         if (state.getValue(BlockGachaBox.SCREEN) != screen) {
@@ -276,42 +263,39 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         }
     }
 
-    /** 把箱子绑定到放入脑的那个人，并作废上一个所有者留下的转动。 */
+    /** 绑定到放入脑的玩家，作废上一个所有者留下的转动。 */
     public void bind(Player player) {
         owner.bind(player);
         turn.reset();
     }
 
-    /** 解绑把转动丢掉而不是存起来：空的箱子不工作。 */
+    /** 解绑会把转动丢掉，不存起来；空箱子不工作。 */
     public void unbind() {
         owner.unbind();
         turn.reset();
     }
 
-    /** 已绑定玩家的名字，或箱子没有脑时的 null。 */
     public @Nullable String ownerName() {
         return owner.name();
     }
 
-    /** 一颗脑在箱子里但不属于任何人：这是存档中断留下的东西。 */
+    /** 脑在箱子里，不属于任何人：存档中断留下的。 */
     public boolean hasUnboundBrain() {
         return hasJar() && !owner.isBound();
     }
 
-    /** 这个玩家是否可以取回脑：箱子绑定的那个人，或在箱子持有未认领的脑、
-     * 因而还不属于任何人时任何人都可以。 */
+    /** 能不能取回脑：绑定者本人；箱子持未认领的脑时谁都可以。 */
     public boolean mayTakeBrain(Player player) {
         return owner.mayTakeBrain(player);
     }
 
-    /** 倒出箱子持有的东西：脑从其槽位里出来，还有卡片。 */
     public void dropContents(boolean holdsBrain) {
         if (level == null) {
             return;
         }
         ItemStack held = takeBrain();
         if (held.isEmpty() && holdsBrain) {
-            // 来自那种把脑只留在方块状态里的方案的存档仍然欠一颗。
+            // 旧存档把脑只留在方块状态里，这里补一颗。
             held = TcRegistry.jarBrainStack();
         }
         spill(held);
@@ -345,8 +329,7 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
     @Override
     public void loadTag(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadTag(tag, registries);
-        // 状态在槽位之前读取，而加载会清空槽位：只把脑留在方块状态里的存档
-        // 会被转回物品，而不是在那里丢掉。
+        // 状态要在槽位之前读，加载会清空槽位；老存档的脑转回物品，不丢。
         boolean stateHeldBrain = getBlockState().getValue(BlockGachaBox.JAR);
         brain.load(tag, registries);
         if (stateHeldBrain && !brain.has()) {

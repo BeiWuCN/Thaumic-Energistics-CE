@@ -25,32 +25,29 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 一个带我们访问卡的 ME 接口：把它接触到的容器里的源质拉进网络，
- * 取出卡时清空两行。标记留在配置行里，不会被清除。流动只有一个方向，
- * 因为源质终端本来就会把源质从网络里取走。
- * 访问由注册表的轮次驱动，而不是 AE2 的 tickable 服务，
- * 所以拔出的卡会立刻停下它。
+ * 带访问卡的 ME 接口：把碰到的容器里的源质拉进网络；取出卡时清空两行。
+ * 标记留在配置行里，不清除。流向只有一个方向，源质终端本来就会从网络取源质。
+ * 访问由注册表轮次驱动，不走 AE2 的 tickable 服务，拔出卡立刻停。
  */
 public final class EssentiaInterfaceAccess {
 
-    /** 每轮之间的 tick 数。与源质总线的量级相同；AE2 自己的接口也是 5。 */
+    /** 每轮间隔 5 tick。与源质总线同量级，AE2 自己的接口也是 5。 */
     public static final int ROUND_TICKS = 5;
 
-    /** 每轮从邻居抽出的源质，以点计：8，绝不超过。 */
+    /** 每轮从邻居抽 8 点源质，封顶。 */
     public static final int POINTS_PER_ROUND = 8;
 
-    /** 每移动一点所耗的 AE，定价与 [BlockEntityAlchemyProvider.AE_PER_ESSENTIA] 一致。 */
+    /** 每移动一点耗 10 AE，定价与 [BlockEntityAlchemyProvider.AE_PER_ESSENTIA] 一致。 */
     public static final double AE_PER_POINT = 10.0;
 
     private final InterfaceLogicHost host;
     private final IManagedGridNode node;
 
-    /** 由第一轮设置，也只有那一轮会清理早先版本留下的标记。 */
+    /** 第一轮设上；只有那一轮清理旧版本留下的标记。 */
     private boolean storageRowCleared;
 
     /**
-     * 把控制器绑定到一个活着的宿主。宿主是被持有而不是再去查找，这样一轮不会去追一个
-     * 在两个 tick 之间被破坏的接口。
+     * 持有宿主，不再去查找，一轮不会追两个 tick 之间被拆掉的接口。
      */
     public EssentiaInterfaceAccess(InterfaceLogicHost host, IManagedGridNode node) {
         this.host = host;
@@ -58,20 +55,19 @@ public final class EssentiaInterfaceAccess {
     }
 
     /**
-     * 宿主是否还在、还可以工作：level 或节点消失的方块实体或部件必须退出注册表，
-     * 否则每一轮都在走一个幽灵。
+     * 宿主还在不在。level 或节点没了的方块实体和部件要退出注册表，
+     * 不然每轮都在走一个幽灵。
      */
     public boolean stillValid() {
         return host.getBlockEntity() != null && node.getGrid() != null;
     }
 
     /**
-     * 一轮：每个被标记的要素都从一个邻居拉进网络，供给不足时取消这次移动，
-     * 而不是折半。
+     * 一轮：每个被标记的要素从一个邻居拉进网络；供给不足就整次取消，不折半。
      */
     public void runRound() {
         InterfaceLogic logic = host.getInterfaceLogic();
-        // 先拉取且只拉一次，这样卡在轮次中途被取出时，标记仍不会被改动。
+        // 先拉一次，只拉一次；卡在轮次中途被抽出，标记也不动。
         if (!logic.getUpgrades().isInstalled(ModItems.ESSENTIA_ACCESS_CARD.get())) {
             return;
         }
@@ -80,8 +76,8 @@ public final class EssentiaInterfaceAccess {
         if (be == null || grid == null || !(be.getLevel() instanceof ServerLevel level)) {
             return;
         }
-        // 用网格自己的存储，而不是 [logic.getInventory()]：有配置行时后者会给出
-        // 接口的存储行，于是同一个点会同时落进网络和接口里。
+        // 用网格自己的存储，不用 [logic.getInventory()]：有配置行时它给的是接口存储行，
+        // 同一个点会同时落进网络和接口。
         MEStorage network = grid.getStorageService().getInventory();
         IEnergyService energy = grid.getService(IEnergyService.class);
         if (network == null || energy == null) {
@@ -92,8 +88,7 @@ public final class EssentiaInterfaceAccess {
     }
 
     /**
-     * 提供给邻居的面，按一轮访问它们的顺序：接口形态只算它自己那一面，
-     * 方块形态是全部六个。
+     * 按轮次访问顺序列出的邻居面：接口形态只算正面，方块形态六个面全算。
      */
     private Direction[] faces() {
         if (host instanceof InterfacePart part) {
@@ -104,8 +99,8 @@ public final class EssentiaInterfaceAccess {
     }
 
     /**
-     * 丢弃早先版本这张卡让 JEI 写进存储行的要素。只做一次：之后的轮次不再动这一行，
-     * 因为那时里面的要素可能就是 AE2 自己对该标记的存货。
+     * 扔掉旧版本这张卡让 JEI 写进存储行的要素。只做一次：后面各轮不再碰这一行，
+     * 那时里面的要素可能就是 AE2 自己存的货。
      */
     private void cleanStorageRow(ConfigInventory storage) {
         if (storageRowCleared) {
@@ -116,8 +111,8 @@ public final class EssentiaInterfaceAccess {
     }
 
     /**
-     * 把配置行当作白名单。行内没有要素时抽取所有要素；否则只抽取它列出的那些。
-     * 其它类型的键不属于我们，会被跳过。
+     * 配置行当白名单：行里没要素就抽全部，有就只抽列出的那些。
+     * 别的类型的键不归我们管，跳过。
      */
     private void absorb(
             Direction[] faces,
@@ -148,7 +143,7 @@ public final class EssentiaInterfaceAccess {
         }
     }
 
-    /** 邻居到网络：先付费的顺序，避免插入被拒时把源质吃掉。 */
+    /** 从邻居到网络。先付费，插入被拒才不会吞掉源质。 */
     private int pull(
             IEssentiaStorage storage,
             MEStorage network,
@@ -170,13 +165,13 @@ public final class EssentiaInterfaceAccess {
         }
         long inserted = network.insert(AEssentiaKey.of(aspect), taken, Actionable.MODULATE, actionSource());
         if (inserted < taken) {
-            // 网络不肯全收；把余下的还回去，而不是销毁掉。
+            // 网络不肯全收，余下的还回去，不销毁。
             storage.insert(aspect, (int) (taken - inserted), false);
         }
         return (int) inserted;
     }
 
-    /** 网格能付得起多少，只问不花：钳制是为了防止能量充裕的网格溢出。 */
+    /** 网格付得起多少，只问不花。钳制防的是能量充裕的网格溢出。 */
     private int affordable(int units, IEnergyService energy) {
         if (units <= 0) {
             return 0;
@@ -186,7 +181,7 @@ public final class EssentiaInterfaceAccess {
         return (int) Math.min(units, Math.floor(offered / AE_PER_POINT + 1.0e-6));
     }
 
-    /** 为这些单位付费；当网格实际比预演时看到的更穷时返回 false。 */
+    /** 付这些单位的费；网格实际比预演时更穷就返回 false。 */
     private boolean pay(int units, IEnergyService energy) {
         double cost = units * AE_PER_POINT;
         double paid = energy.extractAEPower(cost, Actionable.MODULATE, PowerMultiplier.CONFIG);
@@ -198,7 +193,7 @@ public final class EssentiaInterfaceAccess {
     }
 
     private IActionSource actionSource() {
-        // 这里机器就是节点；[IActionHost] 是那唯一的访问器，所以这个 lambda 就是全部。
+        // 机器就是节点；[IActionHost] 只有这一个访问器，lambda 到此为止。
         return IActionSource.ofMachine(() -> node.getNode());
     }
 }

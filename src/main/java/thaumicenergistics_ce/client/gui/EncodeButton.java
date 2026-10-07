@@ -8,9 +8,9 @@ import net.minecraft.resources.ResourceLocation;
 
 /**
  * 蒸馏编码器的 Encode 按钮，来自参考构建自己的两态贴图。
- * 禁用态覆了一层纱，因为图集里没有禁用帧，而“Encode”本身说明不了什么；它
- * 绘制为 34x14，而不是原生的 32x13，因为参考构建把它拉伸到面板条带。标签
- * 距顶部 3 像素居中，与铭刻机的标签一致。
+ * 禁用态覆一层纱：图集里没有禁用帧，而“Encode”本身说明不了什么。
+ * 绘制成 34x14，不用原生的 32x13：参考构建把它拉伸到面板条带。
+ * 标签距顶部 3 像素居中，与铭刻机的标签一致。
  */
 public class EncodeButton extends Button {
 

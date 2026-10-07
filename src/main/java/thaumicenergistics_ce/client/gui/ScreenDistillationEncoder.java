@@ -17,9 +17,8 @@ import thaumicenergistics_ce.menu.slot.AspectSelectSlot;
 import thaumicenergistics_ce.network.EncoderActionPayload;
 
 /**
- * 蒸馏编码台的界面：整体 blit 本 mod 自己的美术图，槽位由菜单放在美术图所画的坐标上。
- * 之所以直接绘制而不用 AE2 的界面样式系统，是因为它只在 AE2 的命名空间内解析样式
- * 文档，附加模组的贴图没法被它引用。
+ * 蒸馏编码台的界面：整体 blit 本 mod 自己的美术图，槽位由菜单放在美术图画的坐标上。
+ * 不走 AE2 的界面样式系统：它只解析 AE2 命名空间里的样式文档，附加模组的贴图引用不到。
  */
 public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDistillationEncoder> {
 
@@ -28,7 +27,7 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
 
     private static final int WIDTH = 176;
 
-    /** 234 行而不是 229：美术图的不透明像素占 y=0..233，最后五行是底部斜面。 */
+    /** 234 行不是 229：美术图的不透明像素占 y=0..233，最后五行是底部斜面。 */
     private static final int HEIGHT = 234;
 
     private static final int TITLE_X = 8;
@@ -36,10 +35,10 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
     private static final int INVENTORY_LABEL_X = 8;
     private static final int INVENTORY_LABEL_Y = HEIGHT - 94;
 
-    /** 要素在格中绘制的大小。与 Thaumaturge 自己的 GUI 要素尺寸一致。 */
+    /** 要素在格里的绘制大小，和 Thaumaturge 自己的 GUI 要素尺寸一致。 */
     private static final int ASPECT_SIZE = 16;
 
-    /** Encode 按钮的左上角，单位为面板像素：格与格之间那条 34x14 的裸面板。 */
+    /** Encode 按钮左上角，单位是面板像素：格子之间那条 34x14 的裸面板。 */
     private static final int BUTTON_X = 140;
     private static final int BUTTON_Y = 94;
 
@@ -76,7 +75,7 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // 这一行来自源物品，而客户端菜单永远不会被告知它何时到达。
+        // 这一行来自源物品，客户端菜单从不知道它什么时候到。
         menu.ensureAspects();
         renderBackground(graphics, mouseX, mouseY, partialTick);
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -88,8 +87,8 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         graphics.blit(TEXTURE, leftPos, topPos, 0, 0, WIDTH, HEIGHT);
 
-        // 要素全未发现的物品，行是空的，也没有任何东西解释，界面看起来就像坏了。
-        // 这里把该行清空而不是画淡，这样就没有东西盖住这条提示。
+        // 要素全未发现的物品行是空的，也没有解释，界面看着像坏了。
+        // 这里把该行清空，不画淡，免得盖住这条提示。
         if (menu.sourceRevealsNothing()) {
             graphics.drawCenteredString(
                     font,
@@ -107,30 +106,29 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
         List<Holder<IAspect>> aspects = menu.aspects();
         for (Slot slot : menu.slots) {
             if (slot instanceof AspectSelectSlot aspectSlot && aspectSlot.aspectIndex() < 0) {
-                // 选中的格：它的槽位什么都不放，因为这里放的是选择，不是物品堆。
+                // 选中的格：槽位里什么都不放，这里存的是选择，不是物品堆。
                 Holder<IAspect> picked = menu.pickedAspect();
                 if (picked != null) {
-                    // 故意不写数量：这一格本身就是选择，数量由源格显示。
+                    // 故意不写数量：这一格就是选择，数量由源格显示。
                     AspectRendering.renderGui(graphics, font, slot.x, slot.y, picked, 0.0F);
                 }
                 continue;
             }
             if (slot instanceof AspectSelectSlot aspectSlot && aspectSlot.isFilled()) {
                 int index = aspectSlot.aspectIndex();
-                // 未发现的要素在行里保留位置，但不绘制——画出图标就等于宣称玩家拥有
-                // 其并不具备的知识。
+                // 未发现的要素在行里占位但不画：画出图标就等于宣称玩家已经知道它。
                 if (index < 0 || index >= aspects.size() || !menu.isAspectRevealed(index)) {
                     continue;
                 }
-                // 用槽位坐标而不是屏幕坐标：[renderLabels] 已经在面板偏移的位姿内运行，
+                // 用槽位坐标，不用屏幕坐标：[renderLabels] 已在面板偏移的位姿里跑，
                 // 再加一次 [leftPos] 会让每个图标的距离翻倍。
                 int x = slot.x;
                 int y = slot.y;
-                // 数量交给渲染器，由它画在格的角上：即样板的产出数量。
+                // 数量交给渲染器画在格的角上：样板的产出数量。
                 AspectRendering.renderGui(graphics, font, x, y, aspects.get(index), menu.aspectAmountFor(index));
 
                 if (aspectSlot.isSelected()) {
-                    // 选中的格四周加一圈边框，向内缩一格压在边界上；这是绘制出来的，不用美术图。
+                    // 选中的格外加一圈边框，向内缩一格压在边界上；是画的，不用美术图。
                     graphics.renderOutline(x - 1, y - 1, ASPECT_SIZE + 2, ASPECT_SIZE + 2, 0xFFFFD700);
                 }
             }
@@ -147,7 +145,7 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
             }
             return;
         }
-        // 两个样板槽是普通物品槽，tooltip 由原版提供。
+        // 两个样板槽是普通物品槽，tooltip 走原版。
     }
 
 }

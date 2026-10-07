@@ -10,9 +10,9 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 箱子的四个速度卡片槽位，按卡片放入的顺序排列，所以保存的 tag 保持
- * 位置性。数组从不交出去：调用方拿到的是只读视图，或者它正在清空的槽位。
- * 只有卡片住在这里——上面的脑是方块状态，不是物品栏物品。
+ * 箱子的四个速度卡槽，按放入顺序排，存档标记因此是位置性的。
+ * 数组从不外发：调用方拿只读视图，或它正在清空的槽位。
+ * 这里只有卡片。上面的脑是方块状态，不是物品栏物品。
  */
 final class GachaCards {
 
@@ -40,12 +40,12 @@ final class GachaCards {
         return count() < slots.length;
     }
 
-    /** 卡片当前的样子，用于 tooltip 的图标行：只读视图，所以不会复制任何东西。 */
+    /** 卡片当前的样子，给 tooltip 的图标行：只读视图，不复制东西。 */
     List<ItemStack> view() {
         return List.of(slots);
     }
 
-    /** 把一张速度卡片放进第一个空槽位；箱子已经装满卡片时返回 false。 */
+    /** 把一张速度卡放进第一个空槽；箱子已装满卡片则返回 false。 */
     boolean add(ItemStack held) {
         for (int slot = 0; slot < slots.length; slot++) {
             if (slots[slot].isEmpty()) {
@@ -75,8 +75,7 @@ final class GachaCards {
     void save(CompoundTag tag, HolderLookup.Provider registries) {
         ListTag saved = new ListTag();
         for (ItemStack card : slots) {
-            // 空槽位必须走可选形式：普通的保存拒绝编码它，
-            // 而这里抛异常会让整个 tag 一起赔进去，连同缓冲和绑定的所有者。
+            // 空槽得走可选形式：普通保存拒绝编码它，这里抛异常会赔掉整个标签，连同缓冲和绑定的宿主。
             saved.add(card.saveOptional(registries));
         }
         tag.put(TAG_CARDS, saved);

@@ -11,11 +11,9 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.item.ItemWirelessArcaneCraftingTerminal;
 
 /**
- * 「忘记这件物品绑定的终端」，玩家潜行并左键点击它时发出。
- * 朝空气中左键只存在于客户端，所以服务端只能从这里得知。
- * 载荷不携带任何内容：清除作用在手持的那个物品堆上，由服务端重新读取而不是由客户端
- * 指名，因此重放的包无法清除发送者
- * 从未持有过的物品堆。
+ * 「忘记这件物品绑的终端」，玩家潜行左键点它时发出。对空气左键只存在于客户端，
+ * 服务端只能从这里知道。载荷不带东西：清除作用在手持的那个物品堆上，
+ * 由服务端重读不是客户端指名，重放的包清不掉发送者从没拿过的堆。
  */
 public record ArcaneUnbindPayload() implements CustomPacketPayload {
 
@@ -32,7 +30,7 @@ public record ArcaneUnbindPayload() implements CustomPacketPayload {
         return TYPE;
     }
 
-    /** 清除手持终端上的配对并加以告知；未绑定的物品保持沉默。 */
+    /** 清掉手持终端上的配对并告知；没绑定的物品不出声。 */
     public void handle(Player player) {
         ItemStack held = player.getMainHandItem();
         if (held.getItem() instanceof ItemWirelessArcaneCraftingTerminal

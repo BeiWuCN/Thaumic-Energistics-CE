@@ -7,10 +7,9 @@ import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 奥术组装机的四个装备槽里可以放什么。
- * 这条规则由机器的容器与菜单的槽位共用，因为复制的两份规则正是菜单什么都接受、而容器
- * 却拒绝的原因：只有 [mayPlace] 能看到点击。
- * 顺序对应槽位 0..3，即头、胸、腿、脚。
+ * 奥术组装机四个装备槽能放什么。机器容器和菜单槽共用这条规则：
+ * 两份规则正是菜单什么都收而容器拒绝的成因，只有 [mayPlace] 看得见点击。
+ * 顺序对应槽 0..3，头、胸、腿、脚。
  */
 public final class GearSlots {
 

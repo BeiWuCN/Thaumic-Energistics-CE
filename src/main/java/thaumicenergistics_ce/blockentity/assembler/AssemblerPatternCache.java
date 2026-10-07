@@ -10,9 +10,8 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 机器向 AE2 公布的样板集，从知识核心而不是运行中的配方管理器读取。
- * 核心需要注册表访问，所以一次还无法进行的读取会让集合保持过期，
- * 下一次请求会重试。
+ * 机器向 AE2 公布的样板集，从知识核心读取，不读运行中的配方管理器。
+ * 核心要注册表访问，一次还读不了的读取会让集合保持过期，下次请求重试。
  */
 final class AssemblerPatternCache {
 
@@ -25,7 +24,7 @@ final class AssemblerPatternCache {
         this.machine = machine;
     }
 
-    /** 在读取来源发生变化、必须重新读取集合时调用。 */
+    /** 读取来源变了、集合要重读时调用。 */
     void invalidate() {
         stale = true;
     }
@@ -34,12 +33,12 @@ final class AssemblerPatternCache {
         return stale;
     }
 
-    /** 集合当前的样子；{@link #refresh()} 负责把它更新到最新。 */
+    /** 集合当前的样子；{@link #refresh()} 负责更新到最新。 */
     List<IPatternDetails> patterns() {
         return cached;
     }
 
-    /** 集合过期时重建它，只有真正读到核心的那次读取才结算过期标志。 */
+    /** 集合过期时重建它，只有真正读到核心的那次读取才清掉过期标志。 */
     void refresh() {
         if (stale) {
             stale = !rebuild();
@@ -52,7 +51,7 @@ final class AssemblerPatternCache {
         cached = List.of();
         HandlerKnowledgeCore core = knowledgeCore();
         if (core == null) {
-            // 没有核心，或者——更关键的情况——没有可用来读取核心的 level；在可以之前报告失败。
+            // 没有核心，或者没有能读核心的 level；在可以之前报告失败。
             return machine.getLevel() != null;
         }
         List<IPatternDetails> details = new ArrayList<>();
@@ -71,7 +70,7 @@ final class AssemblerPatternCache {
             }
         }
         if (details.size() < stored.size()) {
-            // 否则不可见：机器只是提供的配方比核心持有的少。
+            // 否则不可见：机器提供的配方比核心持有的少。
             ThELog.LOG.warn(
                     "[assembler] at {} offers {} of the {} patterns in its knowledge core",
                     machine.getBlockPos(),
@@ -79,7 +78,7 @@ final class AssemblerPatternCache {
                     stored.size());
         }
         if (core.unreadableCount() > 0) {
-            // 本次构建无法读取的条目：留在物品里但不公布；否则核心会被读成空的。
+            // 本次构建读不了的条目：留在物品里但不公布，否则核心会被读成空的。
             ThELog.LOG.warn(
                     "[assembler] at {} cannot read {} entr(ies) in its knowledge core; they are kept in the"
                             + " item and {} pattern(s) are offered",

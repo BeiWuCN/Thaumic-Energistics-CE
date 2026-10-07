@@ -9,9 +9,9 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
 
 /**
- * 炼金接收器的 Jade 服务端数据：它绑定到的供应器（如果有）。它不持有
- * 网格节点，因此没有频道行，链接就是全部状态。绘制的那一半是
- * {@code client.jade.AlchemyReceiverTooltip}，两者都上报 {@link #UID}。
+ * 炼金接收器的 Jade 服务端数据：它绑到的供应器，没有则为空。它不持网格节点，
+ * 故没有频道行，链路就是全部状态。画的那一半是 {@code client.jade.AlchemyReceiverTooltip}，
+ * 两边都报 {@link #UID}。
  */
 public class AlchemyReceiverProvider implements IServerDataProvider<BlockAccessor> {
 
@@ -21,10 +21,10 @@ public class AlchemyReceiverProvider implements IServerDataProvider<BlockAccesso
     public static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "alchemy_receiver");
 
-    /** {@link #appendServerData} 的传输格式。tooltip 那一半会把它读回。 */
+    /** {@link #appendServerData} 的传输格式，tooltip 那一半读回它。 */
     public static final String TAG_BOUND = "Bound";
 
-    /** 仅在 {@link #TAG_BOUND} 为 true 时写入，这样缺失的坐标永远不会被读成原点。 */
+    /** 只在 {@link #TAG_BOUND} 为 true 时写，缺失的坐标永远不会被读成原点。 */
     public static final String TAG_PROVIDER = "Provider";
 
     @Override
@@ -32,7 +32,7 @@ public class AlchemyReceiverProvider implements IServerDataProvider<BlockAccesso
         if (!(accessor.getBlockEntity() instanceof BlockEntityAlchemyProviderConnection receiver)) {
             return;
         }
-        // 读取字段本身：[resolveProvider()] 会在玩家背后把链接修复或切断。
+        // 读字段本身：[resolveProvider()] 会在玩家背后把链路修好或切断。
         BlockPos provider = receiver.linkedProvider();
         tag.putBoolean(TAG_BOUND, provider != null);
         if (provider != null) {

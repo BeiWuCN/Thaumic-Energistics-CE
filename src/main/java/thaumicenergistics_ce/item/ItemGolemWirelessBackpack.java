@@ -13,14 +13,13 @@ import net.minecraft.world.item.TooltipFlag;
 
 /**
  * 一条通往 ME 网络的无线连接，形态是傀儡能携带的东西。
- * 这条连接是 AE2 自己的，是一个 {@link GlobalPos} 存于 {@link AEComponents#WIRELESS_LINK_TARGET}，
- * 而 {@link #LINKABLE_HANDLER} 是内存卡所请求的对象；装备方式是对傀儡点击一次。
- * 它不走 Thaumaturge 的饰品注册表，因为 {@code ItemGolemAccessory} 是 final 的，所以
- * 这条连接存放在傀儡的数据里。
+ * 连接是 AE2 自己的：一个 {@link GlobalPos} 存在 {@link AEComponents#WIRELESS_LINK_TARGET}。
+ * {@link #LINKABLE_HANDLER} 是内存卡请求的对象；对傀儡点一下就算装备。
+ * Thaumaturge 的饰品注册表用不了，{@code ItemGolemAccessory} 是 final；连接存在傀儡的数据里。
  */
 public class ItemGolemWirelessBackpack extends Item {
 
-    /** 交给 AE2，使内存卡能够链接与解除链接这个物品。 */
+    /** 交给 AE2，内存卡靠它链接与解除链接这个物品。 */
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
 
     public ItemGolemWirelessBackpack(Properties properties) {
@@ -38,7 +37,7 @@ public class ItemGolemWirelessBackpack extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
-        // 这里用 AE2 自己的措辞，好让已链接的背包读起来像已链接的无线终端。
+        // 这里用 AE2 自己的措辞，已链接的背包读起来像已链接的无线终端。
         tooltip.add(isLinked(stack)
                 ? Tooltips.of(GuiText.Linked, Tooltips.GREEN)
                 : Tooltips.of(GuiText.Unlinked, Tooltips.RED));

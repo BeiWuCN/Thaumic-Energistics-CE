@@ -9,8 +9,8 @@ import net.minecraft.server.level.ServerLevel;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 是否每秒记录一次振动室对邻居的所见；由
- * {@code THAUMICENERGISTICS_EVC_TRACE=true} 开启。用于区分管道送不到和被抽走两种情况。
+ * 是否每秒记录一次振动室对邻居的所见，由
+ * {@code THAUMICENERGISTICS_EVC_TRACE=true} 开启。区分管道送不到和被抽走两种情况。
  */
 final class ChamberTrace {
 
@@ -31,7 +31,7 @@ final class ChamberTrace {
         this.burn = burn;
     }
 
-    /** 每秒一行，列出每个提供管道或容器的面以及它给出的答复。 */
+    /** 每秒一行，列出每个给出管道或容器的面，以及对面给出的答复。 */
     void log() {
         if (!TRACE || chamber.getLevel() == null || !(chamber.getLevel() instanceof ServerLevel server)) {
             return;

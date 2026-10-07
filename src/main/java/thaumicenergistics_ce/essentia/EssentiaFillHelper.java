@@ -24,23 +24,21 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 在容器物品与 ME 网络之间搬运源质，移植自参考构建的
- * {@code EssentiaFillHelper}：先模拟后执行、部分拒绝时的回滚
- * 以及缩小前的复制，都是为了防复制或丢失。瓶子要么整瓶填充
- * （{@code TcRegistry.phialCapacity()}）要么完全不填，而罐子按网络允许
- * 的量填充且不被消耗。标签、水晶和魔力豆也实现了
- * {@code IEssentiaContainerItem}，所以 {@link #isSupportedContainer} 是唯一的闸门。
+ * 在容器物品与 ME 网络之间搬源质，移植自参考构建的 {@code EssentiaFillHelper}。
+ * 先模拟后执行，部分拒绝就回滚，缩小前先复制：防复制也防丢失。
+ * 瓶子整瓶填（{@code TcRegistry.phialCapacity()}）或完全不填；罐子按网络允许的量填，不被消耗。
+ * 标签、水晶、魔力豆也是 {@code IEssentiaContainerItem}，{@link #isSupportedContainer} 是唯一的闸门。
  */
 public final class EssentiaFillHelper {
 
     private EssentiaFillHelper() {}
 
-    /** 罐子的容量。取自 Thaumaturge 自身的数值——见 {@code TcRegistry.jarCapacity()}。 */
+    /** 罐子容量，取 Thaumaturge 的数值（{@code TcRegistry.jarCapacity()}）。 */
     public static final int JAR_CAPACITY = TcRegistry.jarCapacity();
 
     public static final int PHIAL_CAPACITY = TcRegistry.phialCapacity();
 
-    /** 不用 {@code instanceof IEssentiaContainerItem}：标签、水晶和魔力豆不可填充。 */
+    /** 不走 {@code instanceof IEssentiaContainerItem}：标签、水晶、魔力豆填不了。 */
     public static boolean isSupportedContainer(ItemStack stack) {
         return TcRegistry.isEssentiaContainer(stack);
     }
@@ -66,8 +64,8 @@ public final class EssentiaFillHelper {
         }
 
         AEssentiaKey key = AEssentiaKey.of(aspectId);
-        // 用模拟抽取，而不是读网络 key 计数的快照：那个计数是每个已装存储元件
-        // 持有的每个 key 的完整拷贝，而这段代码在玩家可以随意重复的点击上运行。
+        // 用模拟抽取。读 key 计数是每个存储元件一份完整拷贝，
+        // 而这里跑在玩家能随便重复的点击上。
         long available = storage.extract(key, Long.MAX_VALUE, Actionable.SIMULATE, source);
         if (available <= 0) {
             log("fill {} refused: the network reports {} available for {}", aspectId, available, key);
@@ -76,15 +74,14 @@ public final class EssentiaFillHelper {
             return false;
         }
 
-        // 两种容器都不接受第二种要素：已经装了东西的瓶子会在其上被抽取
-        // 整整一瓶的量，那就是被销毁的源质。
+        // 容器里已有东西时不再接受第二种要素：照抽一整瓶就是白扔源质。
         if (contents(carried) != null) {
             log("fill {} refused: the held {} already holds {}", aspectId, carried.getItem(), contents(carried));
             tell(player, "thaumicenergistics_ce.gui.essentia.container_not_empty");
             return false;
         }
 
-        // 瓶子要么整瓶填充要么完全不填：返回的是另一个物品堆，而不是被加满的那个。
+        // 瓶子整瓶填或完全不填；返回的是另一个物品堆，不是原来那个。
         if (TcRegistry.isPhial(carried)) {
             Holder<IAspect> aspect = AEssentiaKeyType.aspectOf(level, aspectId);
             if (aspect == null) {
@@ -93,7 +90,7 @@ public final class EssentiaFillHelper {
                 return false;
             }
             if (available < PHIAL_CAPACITY) {
-                // 玩家最常遇到的拒绝：瓶子整瓶填充，所以少于 8 就填不了。
+                // 最常见的拒绝：瓶子要整瓶，网络里不到 8 就填不了。
                 log("fill {} refused: a phial needs {} and the network holds {}", aspectId,
                         PHIAL_CAPACITY, available);
                 tell(player, "thaumicenergistics_ce.gui.essentia.phial_needs", PHIAL_CAPACITY, available);
@@ -101,7 +98,7 @@ public final class EssentiaFillHelper {
             }
             long taken = storage.extract(key, PHIAL_CAPACITY, Actionable.MODULATE, source);
             if (taken < PHIAL_CAPACITY) {
-                // 把已取出的部分放回去，这样部分抽取就不会销毁源质。
+                // 把已取出的部分放回去，别让部分抽取销毁源质。
                 if (taken > 0) {
                     storage.insert(key, taken, Actionable.MODULATE, source);
                 }
@@ -133,8 +130,8 @@ public final class EssentiaFillHelper {
             tell(player, "thaumicenergistics_ce.gui.essentia.no_aspect", aspectId);
             return false;
         }
-        // 在手牌物品堆缩小之前复制：当堆叠数量为 1 时，shrink 会留下空堆
-        // 单例，而 copy() 会把 EMPTY 本身交回去，破坏这个共享常量。
+        // 手牌堆缩小之前先复制。数量为 1 时 [shrink] 留下空堆单例，
+        // [copy()] 会把 [EMPTY] 本身交回来，毁掉这个共享常量。
         ItemStack filled = carried.copyWithCount(1);
         carried.shrink(1);
         container.setAspects(filled, AspectList.of(new AspectInstance(aspect, (int) taken)));
@@ -148,16 +145,16 @@ public final class EssentiaFillHelper {
     }
 
     /**
-     * 把拒绝同时告诉玩家和日志。罐子一直保持满的样子，与
-     * 从未执行的手势完全相同，而这两者之一必是 bug，所以每次拒绝都要自己说出来。
+     * 拒绝同时告诉玩家和日志。罐子看起来一直满，跟手势没跑过一模一样，
+     * 分不清就只能每次都出声。
      */
     private static void tell(Player player, String key, Object... args) {
         player.displayClientMessage(Component.translatable(key, args), true);
     }
 
     /**
-     * 打印存储服务声称持有的所有内容；写它是为了回答为什么屏幕列出了几十种
-     * 要素，而服务端的 available-stacks 调用除最后一次存入外全都答 0。
+     * 打印存储服务声称持有的东西。排查用：屏幕列出几十种要素，
+     * 而服务端的 available-stacks 调用除最后一次存入外全答 0。
      */
     public static void dumpEssentia(MEStorage storage) {
         int total = 0;
@@ -175,9 +172,9 @@ public final class EssentiaFillHelper {
     }
 
     /**
-     * 把源质容器倒空到网络中。先做模拟：一堆罐子共用一个
-     * contents 标签，所以整堆作为一个数量进入，任何一处被拒绝就什么都不移动。
-     * @return 用于放在该容器位置上的物品堆；它不是容器时为 {@code null}
+     * 整堆倒进网络。先模拟：一堆罐子共用一个 [contents] 标签，
+     * 整堆算一个数量，一处被拒就什么都不动。
+     * @return 放在该容器位置上的物品堆；它不是容器时为 {@code null}
      */
     public static @Nullable ItemStack emptyIntoNetwork(
             MEStorage storage,
@@ -209,16 +206,15 @@ public final class EssentiaFillHelper {
             }
             ResourceLocation id = entry.aspect().unwrapKey().map(key -> key.location()).orElse(null);
             if (id == null) {
-                // 没有注册表支撑，所以它没有可存入的 id，整个容器原样保留：
-                // 跳过该条目却照样倒空，就等于把它丢弃。
+                // 没有 id 就没法存，整个容器原样留着；跳过该条目还照倒，就是把它丢了。
                 log("store refused: an aspect of the held {} has no id", stack.getHoverName().getString());
                 return stack;
             }
             long total = (long) perItem * count;
             long accepted = storage.insert(AEssentiaKey.of(id), total, Actionable.SIMULATE, source);
             if (accepted < total) {
-                // 没有地方把它全部装下：宁可让容器原样不动，也不要只倒空一半。这正是
-                // 已满或被过滤的存储元件给出的拒绝，也是过去默默发生的那一种。
+                // 装不下就整个不动，不倒一半。这是已满或被过滤的存储元件给出的拒绝，
+                // 以前这种拒绝是静默的。
                 log("store {} refused: the network can take {} of {}", id, accepted, total);
                 dumpEssentia(storage);
                 tell(player, "thaumicenergistics_ce.gui.essentia.network_full");
@@ -234,7 +230,7 @@ public final class EssentiaFillHelper {
         for (int i = 0; i < keys.size(); i++) {
             long moved = StorageHelper.poweredInsert(energy, storage, keys.get(i), totals.get(i), source);
             if (moved < totals.get(i)) {
-                // 中途电力耗尽：把这一条以及它之前的全部放回去。
+                // 电力中途耗尽：这一条连同它之前的全部放回去。
                 if (moved > 0) {
                     storage.insert(keys.get(i), moved, Actionable.MODULATE, source);
                 }
@@ -248,8 +244,8 @@ public final class EssentiaFillHelper {
             }
         }
 
-        // 已倒空。罐子存活为空罐子，瓶子被消耗，两者物品 id 都与输入相同
-        // （见类注释），所以输入的一份空副本就是全部。
+        // 倒空了。罐子留成空罐子，瓶子被消耗，物品 id 与输入一样，
+        // 拿这份空副本当输出就行。
         for (int i = 0; i < keys.size(); i++) {
             log("store {} ok: {} into the network", keys.get(i), totals.get(i));
         }

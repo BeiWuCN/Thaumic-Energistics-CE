@@ -7,9 +7,8 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 
 /**
- * 菜单对其背后机器的读取：两侧共同用于解析的 level、槽位所持有的
- * 核心，以及方块是否还在原地可供使用。
- * 客户端菜单没有机器，所以每次读取改为从菜单自己的槽位作答。
+ * 菜单对它背后机器的读取：两侧共同给解析的 level、槽位持有的核心、方块还在不在。
+ * 客户端菜单没有机器，每次读取改为从菜单自己的槽位作答。
  */
 final class InscriberMachineAccess {
 

@@ -6,9 +6,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 /**
- * 可与已放置的奥术合成终端配对的物品，打开它时显示的是那个已放置终端的
- * 工作台，而不是第二个工作台。部件调用这个接口而不是写死物品名，
- * 因此将来新增可配对物品时那里无需改动。
+ * 可与已放置的奥术合成终端配对的物品，打开它显示的是那个终端的工作台。
+ * 部件调用这个接口，不写死物品名，以后新增可配对的物品不用改那边。
  */
 public interface ArcaneTerminalLink {
 

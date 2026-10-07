@@ -11,8 +11,9 @@ import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
  * 脑自己的槽位、镜像它的 {@code jar} 方块状态，以及离开槽位意味着什么。
- * 只有缸中之脑可以放入，并且永远不能是一叠。漏斗或管道可以填充这个槽位，
- * 但永远不能清空它：脑由已绑定玩家亲自动手离开，而那一手会解除箱子的绑定。
+ * 只有缸中之脑能放入，且永远不能是一叠。
+ * 漏斗或管道能填这个槽位，永远不能清空它：脑由已绑定玩家亲自动手离开，
+ * 那一手会解除箱子的绑定。
  */
 final class GachaBrain {
 
@@ -51,17 +52,17 @@ final class GachaBrain {
         return !container.getItem(0).isEmpty();
     }
 
-    /** 放入一颗脑，复制一份，这样玩家手里拿着的堆仍然是他自己的。 */
+    /** 放入一颗脑，复制一份，玩家手里拿的堆仍是他自己的。 */
     void put(ItemStack held) {
         container.setItem(0, held.copyWithCount(1));
     }
 
-    /** 凭空放入一颗脑：只把脑留在方块状态里的存档需要这个。 */
+    /** 凭空放入一颗脑：脑只存在方块状态里的存档需要这个。 */
     void adopt() {
         container.setItem(0, TcRegistry.jarBrainStack());
     }
 
-    /** 清空槽位并交回里面原有的东西，或者什么都没有。 */
+    /** 清空槽位，交回里面原有的东西，没有就交回空。 */
     ItemStack take() {
         if (!has()) {
             return ItemStack.EMPTY;
@@ -71,8 +72,8 @@ final class GachaBrain {
         return taken;
     }
 
-    /** 方块状态跟着槽位走，因为那才是客户端看到、渲染器绘制的东西。
-     * 已经被移除的箱子跳过：被拆开之后，它绝不能把自己的方块写回去。 */
+    /** 方块状态跟着槽位走，客户端看到、渲染器画的就是它。
+     * 已经移除的箱子跳过：被拆开之后它绝不能把自己的方块写回去。 */
     private void settled() {
         if (!has()) {
             box.unbind();

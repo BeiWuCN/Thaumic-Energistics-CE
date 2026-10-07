@@ -12,9 +12,8 @@ import net.minecraft.resources.ResourceLocation;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 /**
- * 把供应器当作 ME 物品栏来看：网格交付的东西，供外界取走。
- * 源质存放在缓冲里，所以这里的一切询问都转问缓冲，且拒绝抽取，
- * 因为缓冲中的源质正在往外走，绝不会再回到里面。
+ * 把供应器当 ME 物品栏看：网格交出来的东西，供外界取走。源质放在缓冲里，
+ * 故这里的一切询问都转问缓冲；抽取被拒，缓冲里的源质正在往外走，不会再回来。
  */
 final class AlchemyProviderStorage implements MEStorage {
 
@@ -66,7 +65,7 @@ final class AlchemyProviderStorage implements MEStorage {
                 "block.thaumicenergistics_ce.alchemy_provider");
     }
 
-    /** 缓冲以 int 计量；单次 AE 插入本来也不会超过一个要素槽位所允许的量。 */
+    /** 缓冲以 int 计量；单次 AE 插入本来也超不过一个要素槽允许的量。 */
     private static int clamp(long amount) {
         return (int) Math.min(amount, Integer.MAX_VALUE);
     }

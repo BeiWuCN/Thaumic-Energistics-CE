@@ -20,11 +20,9 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
- * 作为线缆部件的源质终端：一台只列出源质的 AE2 终端。
- * 过滤使用 {@link KeyTypeSelection}，即 AE2 自己用于终端键类型的通道，但
- * 父类的选择允许所有类型，而我们的会替换它，所以该字段由手工读写。
- * 也必须如此：父类的字段是私有的，它的读/写会把那份宽松的选择
- * 保存下来。
+ * 作为线缆部件的源质终端：一台只列源质的 AE2 终端。
+ * 过滤用 {@link KeyTypeSelection}，即 AE2 自己给终端键类型的通道；父类的选择允许所有类型，
+ * 我们这份替换它，字段就由手工读写。父类的字段是私有的，它的读/写会把宽松选择存下来。
  */
 public class PartEssentiaTerminal extends AbstractTerminalPart {
 

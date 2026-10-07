@@ -20,9 +20,9 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 铭刻机的网格解析成什么，以及它的按钮此刻会用那份配方做什么。
- * 缓存以网格与核心为键：删除一份配方移动的是核心，不是网格。
- * 每个状态码都来自槽位，所以标签或按钮不需要 ticker。
+ * 铭刻机网格解析成什么，以及它的按钮此刻会拿那份配方做什么。
+ * 缓存以网格和核心为键：删配方动的是核心，不是网格。状态码都来自槽位，
+ * 故标签和按钮不需要 ticker。
  */
 final class InscriberResolution {
 
@@ -43,8 +43,8 @@ final class InscriberResolution {
         dirty = true;
     }
 
-    /** 机器此刻会做什么，从槽位推导，所以插入核心会立刻更新按钮。
-     * 顺序重要：靠前的检查是玩家必须先解决的那些。 */
+    /** 机器此刻会做什么，从槽位推导，插核心能立刻更新按钮。
+     * 顺序要紧：靠前的检查是玩家得先解决的。 */
     int status() {
         if (inscriber.getLevel() == null) {
             return STATUS_READY;
@@ -75,11 +75,10 @@ final class InscriberResolution {
     }
 
     /** 把解析出的配方存进核心，清空网格。
-     * @return 结果状态码，也可从 {@link #lastResult()} 取得 */
+     * @return 结果状态码，也可从 {@link #lastResult()} 拿 */
     int save(@Nullable Player player) {
         lastResult = status();
-        // 缓存的新鲜度只取决于最后一次改动通知，而过期的缓存让按钮
-        // 什么都不做，屏幕上也没有任何东西说明原因。
+        // 缓存的新鲜度只到上一次改动通知，过期的缓存会让按钮什么都不做，屏幕上还不说原因。
         dirty = true;
         refresh();
         ThEArcanePattern resolved = pattern();
@@ -105,7 +104,7 @@ final class InscriberResolution {
                     HandlerKnowledgeCore.MAXIMUM_STORED_PATTERNS);
             return lastResult = STATUS_CORE_FULL;
         }
-        // 只关于成功路径，所以它必须放在上面的拒绝之后。
+        // 只说成功路径，故得放在上面的拒绝之后。
         ThELog.LOG.info("[inscriber] save at {} stored {} (status {})",
                 inscriber.getBlockPos(), resolved.result(), status());
         dirty = true;
@@ -118,7 +117,7 @@ final class InscriberResolution {
         if (core == null) {
             return lastResult = status();
         }
-        // 只认网格解析出的配方：回退可能删掉玩家从未指名的条目。
+        // 只认网格解析出的配方：回退会删掉玩家没点过名的条目。
         ThEArcanePattern resolved = pattern();
         if (resolved == null) {
             return lastResult = status();
@@ -134,8 +133,8 @@ final class InscriberResolution {
         return lastResult;
     }
 
-    /** 该玩家此刻是否可以存下这个网格，用于菜单的按钮状态。研究属于
-     * 玩家而不属于方块，所以机器自己的状态回答不了这个问题。 */
+    /** 该玩家此刻能不能存下这个网格，供菜单的按钮状态用。研究属于玩家不属于方块，
+     * 机器自己的状态答不了。 */
     boolean canStore(Player player) {
         dirty = true;
         refresh();

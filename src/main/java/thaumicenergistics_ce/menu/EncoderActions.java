@@ -5,9 +5,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-/** 蒸馏编码器的动作主体，从 {@link MenuDistillationEncoder} 中拆出，以使后者
- * 保持在文件行数预算之内。每个方法都是宿主的转发目标，且只在传给它的
- * 宿主实例上运行。 */
+/** 蒸馏编码器的动作主体，从 {@link MenuDistillationEncoder} 拆出来，让后者不超文件行数预算。
+ * 每个方法都是宿主的转发目标，且只在传给它的那个宿主实例上跑。 */
 final class EncoderActions {
 
     private EncoderActions() {}
@@ -16,8 +15,7 @@ final class EncoderActions {
         if (index < -1 || index >= host.table.aspectCount()) {
             return;
         }
-        // 在这里拒绝，而不只是在界面里：动作载荷也会经由这条路径到达，而且
-        // 手工构造的点击不得选中未发现的要素。
+        // 在这里也拒，不只界面里拒：动作载荷也走这条路，手搓的点击不能选中未发现的要素。
         if (index >= 0 && !host.table.isRevealed(index)) {
             return;
         }

@@ -44,21 +44,21 @@ import thaumicenergistics_ce.network.ClientboundReceiver;
 import thaumicenergistics_ce.network.GolemBackpackPayload;
 
 /**
- * 仅客户端的装配，留在 {@link Dist#CLIENT} 之后，使专用服务端绝不会加载界面
- * 类以及随之而来的客户端专有 Minecraft 类型。
+ * 仅客户端的装配：整个类只在 {@link Dist#CLIENT} 侧注册。
+ * 专用服务端不会加载界面类及其带来的客户端专有类型。
  */
 @EventBusSubscriber(modid = ThEIds.MODID, value = Dist.CLIENT)
 public final class ClientSetup {
     private ClientSetup() {}
 
     /**
-     * 客户端的 AE2 注册，挂在 {@code FMLClientSetupEvent} 上而不是跟界面一起，
-     * 因为两者都必须在任何绘制之前就位。
+     * 客户端的 AE2 注册，挂在 {@code FMLClientSetupEvent} 上。
+     * 它和界面都要赶在任何绘制之前就位。
      */
     @SubscribeEvent
     public static void registerKeyRendering(FMLClientSetupEvent event) {
-        // 界面和客户端缓存是本侧仅有的接收者，所以协议包就是在这里认识它们的；
-        // 在专用服务端上什么都不安装。
+        // 界面和客户端缓存只在本侧有接收者，协议包在这里认识它们。
+        // 专用服务端上什么都不装。
         ClientSinks.install(new ClientboundReceiver() {
             @Override
             public void acceptArcaneCraftCost(ArcaneCraftCostPayload payload) {
@@ -70,8 +70,8 @@ public final class ClientSetup {
                 GolemBackpackClientData.accept(payload);
             }
         });
-        // key 类型通过这里索要本侧的注册表，而不是指名某个客户端类，
-        // 因此它必须在第一个 key 被解析之前就位。
+        // key 类型从这里索要本侧的注册表，不指名任何客户端类。
+        // 它要在第一个 key 被解析之前就位。
         ClientRegistries.install(new ClientRegistrySource() {
             @Override
             public @Nullable RegistryAccess registries() {
@@ -79,12 +79,12 @@ public final class ClientSetup {
                 if (minecraft == null) {
                     return null;
                 }
-                // 用字段而不是 getter：这个 Minecraft 没有 [getLevel]，去问它会抛异常。
+                // 读字段，别调 getter：这个 Minecraft 没有 [getLevel]，调用会抛异常。
                 var level = minecraft.level;
                 if (level != null) {
                     return level.registryAccess();
                 }
-                // 在世界存在之前，连接的注册表已经就是服务端的了。
+                // 世界尚未创建，连接上的注册表就已经是服务端的。
                 var connection = minecraft.getConnection();
                 return connection == null ? null : connection.registryAccess();
             }
@@ -92,7 +92,7 @@ public final class ClientSetup {
         event.enqueueWork(() -> {
             AEKeyRendering.register(
                     AEssentiaKeyType.INSTANCE, AEssentiaKey.class, new EssentiaKeyRenderHandler());
-            // tooltip 的绘制那一半；服务端那一半从 mod 构造函数里注册。
+            // tooltip 的绘制一半；服务端一半在 mod 构造函数里注册。
             FluxTransferTooltip.register();
         });
     }
@@ -109,8 +109,8 @@ public final class ClientSetup {
     }
 
     /**
-     * 箱子的核心由 Thaumaturge 的模型类烘焙而来，但套了我们的一层，
-     * 这样它是否存在就不由任何一个 mod 的注册顺序决定。
+     * 箱子的核心由 Thaumaturge 的模型类烘焙，外面套我们的一层。
+     * 是否套上不取决于两个 mod 的注册顺序。
      */
     @SubscribeEvent
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
@@ -121,7 +121,7 @@ public final class ClientSetup {
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(ModMenuTypes.ARCANE_ASSEMBLER.get(), ScreenArcaneAssembler::new);
         event.register(ModMenuTypes.KNOWLEDGE_INSCRIBER.get(), ScreenKnowledgeInscriber::new);
-        // 存储元件工作台是一个 AE2 可升级界面，所以它的美术和槽位来自一个 style。
+        // 存储元件工作台是 AE2 可升级界面，美术和槽位都来自一个 style。
         event.register(
                 ModMenuTypes.ESSENTIA_CELL_WORKBENCH.get(),
                 (MenuEssentiaCellWorkbench menu, Inventory inventory, Component title) ->
@@ -132,7 +132,7 @@ public final class ClientSetup {
                                 StyleManager.loadStyleDoc("/screens/essentia_cell_workbench.json")));
         event.register(ModMenuTypes.DISTILLATION_ENCODER.get(), ScreenDistillationEncoder::new);
         event.register(ModMenuTypes.ESSENTIA_VIBRATION_CHAMBER.get(), ScreenEssentiaVibrationChamber::new);
-        // 这个 lambda 写明了参数类型，因为 register 在菜单和界面上是泛型的。
+        // lambda 写明参数类型：register 在菜单和界面上是泛型的。
         event.register(
                 ModMenuTypes.ESSENTIA_TERMINAL.get(),
                 (MenuEssentiaTerminal menu, Inventory inventory, Component title) ->
@@ -141,7 +141,7 @@ public final class ClientSetup {
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/terminals/terminal.json")));
-        // AE2 的 [StyleManager] 只解析它自己的命名空间，因此路径里不带命名空间。
+        // 路径里不带命名空间：[StyleManager] 只解析它自己的命名空间。
         event.register(
                 ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get(),
                 (MenuArcaneCraftingTerminal menu, Inventory inventory, Component title) ->
@@ -158,7 +158,7 @@ public final class ClientSetup {
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/terminals/wireless_terminal.json")));
-        // 无线终端绘制同一个工作台，所以它在那套 style 之上叠了一个标题。
+        // 无线终端画同一个工作台，在那套 style 之上多叠一个标题。
         event.register(
                 ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                 (MenuArcaneCraftingTerminal menu, Inventory inventory, Component title) ->

@@ -18,17 +18,17 @@ import thaumicenergistics_ce.network.EssentiaFillPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 凡是带罐与药瓶手势的终端界面都用的这一套，由需要它的两个界面继承而不是复制，
- * 因为这些手势要读 [hoveredSlot]，而任何辅助类都看不到它。
- * 光标下的那一行说明从哪里取，容器本身说明往哪个方向：空容器
- * 从该行装入，满容器既能从该行、也能从空存储元件倒空进网络。
- * shift 保持 AE2 的含义——两种点击都作用于整叠手持物品，而在
- * 玩家自己的槽位上 shift 右键则在容器所在处操作。这里不绘制任何东西。
+ * 两个带罐与药瓶手势的终端界面共用这一套。手势要读 [hoveredSlot]，
+ * 辅助类看不到它。
+ * 光标下的那一行说从哪取，容器说往哪去：空容器从该行装入；
+ * 满容器能从该行装入，也能从空存储元件倒空进网络。
+ * shift 保持 AE2 的含义：两种点击都对整叠手持物品生效；
+ * 玩家自己的槽位上 shift 右键则在容器所在处动手。这里不画东西。
  */
 public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalBase>
         extends MEStorageScreen<M> {
 
-    /** 两个界面都用这个日志标签输出，用到它的手势在两边是同一份代码。 */
+    /** 两个界面共用这个日志标签，手势代码只有一份。 */
     protected static final String TAG = "[essentia-terminal] ";
 
     protected ScreenEssentiaTerminalBase(
@@ -36,7 +36,7 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
         super(menu, playerInventory, title, style);
     }
 
-    /** 本界面是否提供罐与药瓶手势；只有装了卡的终端才提供。 */
+    /** 本界面有没有罐与药瓶手势；装了卡的终端才有。 */
     protected abstract boolean essentiaGesturesAtAll();
 
     @Override
@@ -58,8 +58,8 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
         if (essentiaGesturesAtAll() && slot instanceof RepoSlot repoSlot && cursorIsContainer()) {
             var entry = repoSlot.getEntry();
             if (entry != null && entry.getWhat() instanceof AEssentiaKey) {
-                // 光标上有容器且属于我们：手势是唯一的入口，所以 AE2 自己的槽位点击
-                // 不运行。静默处理——光标每经过一格它就会触发一次。
+                // 光标上是我们的容器时就到这里：手势是唯一入口，AE2 自己的槽位点击不跑。
+                // 静默处理，光标每过一格就触发一次。
                 return;
             }
         }
@@ -67,12 +67,12 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
     }
 
     private boolean handleRightClick() {
-        // 在玩家槽位上 shift 右键：在该容器所在处把它倒空。
+        // 玩家槽位上 shift 右键：在容器所在处把它倒空。
         if (hasShiftDown() && hoveredSlot != null && menu.isPlayerSideSlot(hoveredSlot)) {
             ItemStack inSlot = hoveredSlot.getItem();
             if (EssentiaFillHelper.isSupportedContainer(inSlot)) {
-                // 用菜单的槽位 id，而不是物品栏下标：AE2 把视图元件和升级槽排在玩家槽位
-                // 之前，而服务端是按自己的槽位表解析这个 id 的。
+                // 传菜单的槽位 id，不传物品栏下标：AE2 把视图元件和升级槽排在玩家槽位前面，
+                // 服务端按自己的槽位表解析这个 id。
                 log("deposit requested: {} from menu slot {}", inSlot.getHoverName().getString(),
                         menu.slots.indexOf(hoveredSlot));
                 PacketDistributor.sendToServer(new EssentiaDepositPayload(
@@ -94,8 +94,8 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
             }
         }
         if (overKey != null && EssentiaFillHelper.isContainerEmpty(container)) {
-            // 在有可给予之物的行上，空容器就是一次装入，两个键都是：方向由容器决定，
-            // 所以按键只在单个物品和整叠之间做选择。
+            // 行上有东西可给时，空容器就是装入，左右键都算：
+            // 方向由容器决定，按键只在单个物品和整叠之间选。
             log("fill requested: {} into the {} of {} from {}", overKey.getId(),
                     container.getHoverName().getString(),
                     heldName(), hasShiftDown() ? "the whole held stack" : "one item");
@@ -104,11 +104,11 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
             return true;
         }
         if (!(hoveredSlot instanceof RepoSlot)) {
-            // 根本不是网格里的某一格：无论手上拿着什么，这次点击都归 AE2。
+            // 根本不是网格里的格子：手上拿什么都一样，这次点击归 AE2。
             return false;
         }
-        // 满容器从一行倒空进网络，与从什么都不装的存储元件上倒空完全相同：
-        // 从哪儿取由该行决定，往哪个方向由容器决定。
+        // 满容器从一行倒空进网络，跟从空存储元件上倒空一样：
+        // 从哪取由该行决定，往哪走由容器决定。
         log("deposit requested: {} from {}, over a repo cell", container.getHoverName().getString(),
                 heldName());
         PacketDistributor.sendToServer(new EssentiaDepositPayload(
@@ -125,13 +125,12 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
         boolean overEssentia = entry != null && entry.getWhat() instanceof AEssentiaKey;
         if (EssentiaFillHelper.isContainerEmpty(container)) {
             if (!overEssentia) {
-                // 空容器且无物可取：另一种类型的条目就是一次普通物品点击，
-                // 而什么都不装的存储元件没有可取之处。
+                // 空容器又没东西可取：别的类型的条目按普通物品点击处理，空存储元件也没得取。
                 return false;
             }
             AEssentiaKey key = (AEssentiaKey) entry.getWhat();
-            // 按 shift 会把同一次点击变成“整叠手持物品”：按网络付得起的量装满，
-            // 付不起的那些留在原处。
+            // 按住 shift 就把这次点击变成整叠手持物品：装满网络付得起的量，
+            // 付不起的留在原处。
             log("fill requested: {} into the {} of {} from {}", key.getId(),
                     container.getHoverName().getString(),
                     heldName(), hasShiftDown() ? "the whole held stack" : "one item");
@@ -139,8 +138,8 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
                     menu.containerId, key.getId(), whereHeld(), container, hasShiftDown()));
             return true;
         }
-        // 满容器从一行倒空进网络，与从什么都不装的存储元件上倒空完全相同：
-        // 方向由容器决定，所以不询问光标下的那一行。
+        // 满容器从一行倒空进网络，跟从空存储元件上倒空一样：
+        // 方向由容器决定，不看光标下的那一行。
         log("deposit requested: {} from {}, over a repo cell", container.getHoverName().getString(),
                 heldName());
         PacketDistributor.sendToServer(new EssentiaDepositPayload(menu.containerId, whereHeld()));
@@ -169,7 +168,7 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
         return menu.getCarried().isEmpty() ? ContainerSlot.MAIN_HAND : ContainerSlot.CURSOR;
     }
 
-    /** {@link #whereHeld()} 所指的位置，用文字表述，供日志行使用。 */
+    /** {@link #whereHeld()} 的位置写成文字，给日志行用。 */
     private String heldName() {
         return menu.getCarried().isEmpty() ? "the main hand" : "the cursor";
     }

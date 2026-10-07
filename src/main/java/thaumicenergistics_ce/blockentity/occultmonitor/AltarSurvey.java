@@ -13,15 +13,13 @@ import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Recipe;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 
 /**
- * 找到监控器所监视的祭坛并读取它：房间的对称性、仪式的
- * 不稳定度，以及仪式即将消耗的触媒。已找到的祭坛在原地复查，而
- * 未命中则退避，因为这个立方体是 15,625 次查找；并且勘察描述的是
- * 房间而非仪式，所以仪式之间也会运行。
+ * 找到监控器盯着的祭坛并读它：房间对称性、仪式不稳定度、仪式要吃的触媒。
+ * 找到过的原地复查；空搜索退避，一个立方体是 15,625 次查找。
+ * 勘察说的是房间，不是仪式，仪式之间也照跑。
  */
 final class AltarSurvey {
 
-    /** 祭坛可以站多远。{@code OccultMonitorCraftPulse} 扫描同一个立方体来找到
-     * 替它作答的机器，所以这两个距离不能漂移开。 */
+    /** 祭坛能站多远。{@code OccultMonitorCraftPulse} 扫同一个立方体，两个距离不能漂开。 */
     static final int ALTAR_SCAN_RANGE = 12;
 
     private static final int ALTAR_MISS_INTERVAL = 100;
@@ -38,11 +36,11 @@ final class AltarSurvey {
     private long nextCubeScan;
     private long nextSurvey;
 
-    /** 下次搜索前等待多久；每未命中一次翻倍，所以新祭坛一秒内就会被找到。 */
+    /** 下次搜索前等多久；每空一次翻倍，新祭坛一秒内也能找到。 */
     private int altarMissBackoff = BlockEntityOccultMonitor.SCAN_INTERVAL;
 
     private List<BlockPos> surveyedProblems = List.of();
-    /** {@link #surveyedProblems} 取自的那个祭坛。 */
+    /** {@link #surveyedProblems} 读自哪个祭坛。 */
     private @Nullable BlockPos surveyedAt;
 
     private ItemStack cachedCatalyst = ItemStack.EMPTY;
@@ -51,10 +49,8 @@ final class AltarSurvey {
 
     private Report report = Report.NONE;
 
-    /** 自节点上次活跃以来是否搜过祭坛。“没有祭坛”只有在搜索跑过之后
-     * 才是关于房间的事实；在那之前——以及节点离线、完全不做搜索时——
-     * 机器没有搜过，任何东西都不能声称它搜过。不保存：重新加载的世界一开始
-     * 就是没搜过，这是实情。 */
+    /** 节点上次活跃后搜过没有。“没有祭坛”只有搜过后才算事实。
+     * 不落盘：重载的世界就是没搜过。 */
     private boolean altarSearched;
 
     private InfusionRisk risk = InfusionRisk.NONE;
@@ -66,13 +62,13 @@ final class AltarSurvey {
         this.reach = reach;
     }
 
-    /** 找到并读取祭坛；做立方体扫描，因为矩阵的偏移是任意的。 */
+    /** 找祭坛并读它；矩阵偏移任意，只能扫立方体。 */
     void scan() {
         Level level = monitor.getLevel();
         if (level == null) {
             return;
         }
-        // 已找到的祭坛直接复查，不靠每秒两次搜索十二个方块。
+        // 找到过的直接复查，省得每轮搜十二个方块。
         if (matrixPos != null) {
             Altar altar = TcInfusion.altarAt(level, matrixPos);
             if (altar != null) {
@@ -83,7 +79,7 @@ final class AltarSurvey {
         }
         matrixPos = null;
 
-        // 未命中就退避：这个立方体是 15,625 次查找，而没找到不会改变任何东西。
+        // 空一次就退避：一个立方体是 15,625 次查找，找不到也不改变什么。
         long now = level.getGameTime();
         if (now < nextCubeScan) {
             report = Report.NONE;
@@ -105,19 +101,19 @@ final class AltarSurvey {
         }
         nextCubeScan = now + altarMissBackoff;
         altarMissBackoff = Math.min(ALTAR_MISS_INTERVAL, altarMissBackoff * 2);
-        // 立方体搜过了并返回空：这是真实的读数，与从未搜索过的机器不同。
+        // 立方体搜过且是空的：这是真实读数，跟从没搜过的机器不一样。
         altarSearched = true;
         report = Report.NONE;
     }
 
-    /** 读取一个祭坛。仪式之间也运行勘察，因为方块错位正是
-     * 玩家最先修的；不稳定度读的是触媒的，在矩阵下方两格。 */
+    /** 读一个祭坛。方块错位是玩家最先修的，仪式之间也照跑。
+     * 不稳定度读触媒的，取矩阵下方两格。 */
     private Report read(Altar altar, BlockPos pos) {
         boolean crafting = altar.crafting();
         float stability = altar.stability();
         AspectList remaining = altar.remaining();
 
-        // 勘察描述的是房间而不是仪式：每两秒一次，遇到新祭坛立刻做。
+        // 勘察说的是房间，不是仪式：每两秒一次，遇到新祭坛马上做。
         Level level = monitor.getLevel();
         if (level != null) {
             long now = level.getGameTime();
@@ -131,7 +127,7 @@ final class AltarSurvey {
             }
         }
         List<BlockPos> problems = surveyedProblems;
-        // 短缺是祭坛找不到的源质，不是它还没用完的源质。
+        // 短缺指祭坛找不到的源质，不是它还没耗掉的源质。
         boolean shortages = crafting && reach.shortOf(pos, remaining);
         risk = new InfusionRisk(readBaseInstability(pos), problems.size(), shortages, stability);
 
@@ -145,8 +141,8 @@ final class AltarSurvey {
         return new Report(true, crafting, stability, remaining, problems);
     }
 
-    /** 触媒配方的不稳定度，没有则为零。有意忽略研究：还没解锁
-     * 该配方的玩家才是需要这条警告的人。 */
+    /** 触媒配方的不稳定度，没有就是零。刻意不看研究进度：
+     * 还没解锁该配方的玩家才需要这条警告。 */
     private int readBaseInstability(BlockPos pos) {
         ItemStack catalyst = pedestalItem(pos);
         if (catalyst.isEmpty()) {
@@ -156,13 +152,13 @@ final class AltarSurvey {
         return recipe == null ? 0 : recipe.instability();
     }
 
-    /** 触媒的配方，带缓存：每次扫描要问两次，而且是线性遍历。 */
+    /** 触媒的配方，带缓存：一次扫描问两次，而且是线性遍历。 */
     private @Nullable Recipe recipeFor(ItemStack catalyst) {
         Level level = monitor.getLevel();
         if (level == null || catalyst.isEmpty()) {
             return null;
         }
-        // 线性遍历且每次扫描要问两次，所以答案缓存几秒钟。
+        // 一次扫描要问两次，还得线性遍历，答案缓存几秒。
         long now = level.getGameTime();
         if (now - cachedRecipeAt <= RECIPE_CACHE_TICKS
                 && ItemStack.isSameItemSameComponents(cachedCatalyst, catalyst)) {
@@ -184,7 +180,7 @@ final class AltarSurvey {
         if (catalyst.isEmpty()) {
             return ItemStack.EMPTY;
         }
-        // 每次读取都复制：配方在每次调用时都会给出一个新的结果物品堆。
+        // 每次读取都复制：配方每次调用都交出新的结果物品堆。
         return recipe == null ? catalyst : recipe.result().copy();
     }
 
@@ -220,8 +216,8 @@ final class AltarSurvey {
         this.matrixPos = matrixPos;
     }
 
-    /** 节点离线：什么都没搜过，所以丢弃上一次读数，而不是把它当作
-     * 当前读数端出去。风险保留——那是房间的，不是网格的。 */
+    /** 节点离线：没搜过，上一次读数丢掉，不当成当前读数报出去。
+     * 风险留着，那是房间的风险，不是网格的。 */
     void forget() {
         altarSearched = false;
         report = Report.NONE;

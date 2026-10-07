@@ -15,18 +15,16 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 运行组装机持有的合成：为它向网格计费、等待 vis、检查是否有空间、
- * 交付产物，并归还已离开的机器仍持有的物品。从 {@link AssemblerCraftJob} 拆出，
- * 后者负责接收任务并定价；节点的休眠状态也在这里，
- * 因为机器的唤醒与休眠取决于是否有合成在运行。
+ * 跑组装机持有的合成：向网格计费、等 vis、查空间、交付产物，归还机器还拿着的投入物。
+ * {@link AssemblerCraftJob} 负责接收任务与定价；节点的休眠开关也在这里。
  */
 final class AssemblerCraftRunner {
 
     private static final double ACTIVE_POWER = 1.5;
     private static final int STALLED_CRAFT_REPORT_TICKS = 100;
 
-    /** 合成持续停滞多少个 tick 后直接完成：一分钟。AE2 在供应器上没有
-     * 取消回调，而永远等待的合成会一直占用机器。 */
+    /** 停滞 1200 tick 后直接完成，即一分钟。
+     * AE2 供应器没有取消回调，干等的合成会占住机器。 */
     private static final int STALL_RELEASE_TICKS = 1200;
 
     private final BlockEntityArcaneAssembler owner;
@@ -42,7 +40,7 @@ final class AssemblerCraftRunner {
     // ------------------------------------------------------------------
 
     TickRateModulation craftingTick(IGrid grid, int ticksSinceLast) {
-        // 不检查样板是否缺失：一次合成由它产出什么和欠什么定义。
+        // 样板没在核心也无所谓：合成只看产出什么、欠什么。
         if (owner.craft.craftTicks() >= owner.upgrades.ticksPerCraft()) {
             return completeCraft(grid);
         }
@@ -58,13 +56,13 @@ final class AssemblerCraftRunner {
         }
         owner.craft.clearStall();
         owner.craft.addCraftTicks(ticksSinceLast);
-        // 用 URGENT 而非 SAME：按空闲速率，忙碌的合成会慢二十倍。
+        // 用 URGENT；SAME 是空闲速率，忙起来会慢二十倍。
         owner.displaySync.markDisplayForUpdate();
         return TickRateModulation.URGENT;
     }
 
-    /** 只报告一次合成在等待，然后继续等待：AE2 已经提取了原料。
-     * @return 恒为 {@code false}：合成不会因为等待被放弃 */
+    /** 报一次进度，然后接着等；AE2 已经取走原料。
+     * @return 恒为 {@code false}，等待不会放弃合成 */
     private boolean noteStall(Component reason) {
         owner.craft.noteStall(reason);
         if (owner.craft.stalledTicks() == STALLED_CRAFT_REPORT_TICKS) {
@@ -80,16 +78,16 @@ final class AssemblerCraftRunner {
 
     private TickRateModulation completeCraft(IGrid grid) {
         int price = owner.craft.craftPrice();
-        // 等待这个价格是永久的，除非中继点或接口能引来灵气容量装不下的 vis。
+        // 这个价格等不到头，除非中继点或接口能引来超过灵气容量的 vis。
         boolean unpayableForever = price > 0
                 && owner.vis.auraCapacity() > 0
                 && price > owner.vis.auraCapacity()
                 && !owner.vis.relayNetworkInReach()
                 && !owner.vis.interfaceInReach();
-        // 存在但永不付款的中继点也不是承诺——见 STALL_RELEASE_TICKS。
+        // 中继点存在却不付款不算承诺，见 STALL_RELEASE_TICKS。
         boolean stalledOut = !unpayableForever && owner.craft.stalledTicks() >= STALL_RELEASE_TICKS;
         if (owner.vis.bufferedVis() < price && !unpayableForever && !stalledOut) {
-            // 等待 vis；tick 处理器会不断补满缓冲。
+            // 等 vis；tick 处理器会把缓冲补满。
             noteStall(AssemblerStatus.waitReason(
                     AssemblerStatus.WAIT_NO_VIS,
                     "no vis (%s banked of %s needed, target %s)",
@@ -108,7 +106,7 @@ final class AssemblerCraftRunner {
                     price);
         }
         if (owner.vis.bufferedVis() < price) {
-            // 仍然交付，两害相权取其轻：AE2 已经取走原料且等待没有超时。
+            // 照样交付：AE2 已经取走原料，等待也没超时。
             ThELog.LOG.info(
                     "[assembler] at {} delivers {} without charging its {} vis: this chunk's aura can never hold"
                             + " more than {}",
@@ -123,7 +121,7 @@ final class AssemblerCraftRunner {
             return TickRateModulation.IDLE;
         }
 
-        // 产物来自产物槽：制作它的配方可能已经无法读取。
+        // 产物从产物槽取；做出它的配方这时可能已经读不到了。
         ItemStack output = owner.inventory.getItem(BlockEntityArcaneAssembler.TARGET_SLOT).copy();
         AEItemKey outputKey = AEItemKey.of(output);
         if (outputKey == null) {
@@ -131,7 +129,7 @@ final class AssemblerCraftRunner {
             return TickRateModulation.IDLE;
         }
 
-        // 晶体无法用 vis 替代；在插入结果之前检查，绝不之后。
+        // 晶体不能用 vis 顶替；检查要放在插入结果之前。
         if (!hasCrystals(storage)) {
             noteStall(AssemblerStatus.waitReason(AssemblerStatus.WAIT_NO_CRYSTALS, "no crystals"));
             return TickRateModulation.SAME;
@@ -145,14 +143,13 @@ final class AssemblerCraftRunner {
             return TickRateModulation.SAME;
         }
 
-        // 模拟之后重新检查：下面的提取对晶体来说是不可回退的一步。
+        // 模拟之后再查一次；下面的提取拿走晶体，退不回来。
         if (!hasCrystals(storage)) {
             noteStall(AssemblerStatus.waitReason(AssemblerStatus.WAIT_NO_CRYSTALS_RECHECK, "no crystals (recheck)"));
             return TickRateModulation.SAME;
         }
         takeCrystals(storage);
         storage.getInventory().insert(outputKey, output.getCount(), Actionable.MODULATE, owner.actionSource);
-        // 合成仍然欠的部分，不多取。
         owner.vis.spendVis(price);
         finishCraft();
         return TickRateModulation.URGENT;
@@ -183,7 +180,7 @@ final class AssemblerCraftRunner {
         }
     }
 
-    /** 归还合成已经付过款的投入物，先给网络，再给地面。 */
+    /** 归还已经付过款的投入物，先塞回网络，塞不下再丢地上。 */
     void returnHeldInputs() {
         if (owner.craft.heldInputs().isEmpty()) {
             return;
@@ -225,12 +222,12 @@ final class AssemblerCraftRunner {
         owner.displaySync.clearDisplay(false);
         owner.setChanged();
         owner.displaySync.markForUpdate();
-        // 已无合成可运行，所以网格可以停止 tick 这台机器。
+        // 没有合成可跑了，网格可以停掉这台机器的 tick。
         updateSleepiness();
     }
 
-    /** 持有合成时唤醒网格的 tick，没有时让它休眠：从存档恢复的合成
-     * 否则永远不会运行，因为 AE2 按空闲速率 tick 空闲设备。 */
+    /** 有合成就唤醒网格，没有就休眠。
+     * AE2 按空闲速率 tick 空闲设备，从存档恢复的合成要靠唤醒才跑得起来。 */
     void updateSleepiness() {
         if (owner.getLevel() == null || owner.getLevel().isClientSide() || awakeForCraft == owner.craft.isCrafting()) {
             return;

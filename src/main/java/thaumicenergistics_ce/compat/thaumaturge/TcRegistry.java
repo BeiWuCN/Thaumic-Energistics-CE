@@ -16,9 +16,9 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Thaumaturge 的物品注册表，以及本 mod 用它构建的物品堆。注册表条目会变动，
- * 比如 {@code TCItems.ALCHEMICAL_FURNACE} 在 0.4.7 中被直接删除，所以本包之外
- * 没有任何地方指名 {@code TCItems} 或 {@code TCDataComponents} 的字段。
+ * Thaumaturge 的物品注册表，以及本 mod 用它构建的物品堆。
+ * 注册表条目会变动，{@code TCItems.ALCHEMICAL_FURNACE} 在 0.4.7 里被直接删掉。
+ * 本包之外不要指名 {@code TCItems} 或 {@code TCDataComponents} 的字段。
  */
 public final class TcRegistry {
     private TcRegistry() {}
@@ -29,7 +29,7 @@ public final class TcRegistry {
         return !stack.isEmpty() && stack.is(TCItems.ESSENTIA_CRYSTAL.get());
     }
 
-    /** 已配置的水晶携带的要素，空水晶或未配置水晶为 null。 */
+    /** 水晶携带的要素；空水晶或未配置水晶为 null。 */
     public static @Nullable Holder<IAspect> crystalAspect(ItemStack stack) {
         return isCrystal(stack) ? ItemEssentiaCrystal.aspectOf(stack) : null;
     }
@@ -46,14 +46,14 @@ public final class TcRegistry {
 
     // -- 监控器的书 --------------------------------------------------
 
-    /** 监控器据以读取的典籍，按物品而非按类识别。 */
+    /** 监控器据以读取的典籍；按物品识别，不按类。 */
     public static boolean isThaumonomicon(ItemStack stack) {
         return stack.is(TCItems.THAUMONOMICON.get());
     }
 
     // -- 源质容器 -------------------------------------------------
 
-    /** {@code stack} 是罐子还是瓶子，即本 mod 会填充的两种容器。 */
+    /** 只认罐子和瓶子，本 mod 会填充的两种容器。 */
     public static boolean isEssentiaContainer(ItemStack stack) {
         return !stack.isEmpty()
                 && (stack.getItem() instanceof JarItem || stack.getItem() instanceof PhialItem);
@@ -75,7 +75,7 @@ public final class TcRegistry {
         return PhialItem.makeFilled(aspect, amount);
     }
 
-    /** 一堆空瓶子：倒空后的瓶子会消耗回它自己的物品 id，而不是残留下来。 */
+    /** 一堆空瓶子：倒空后瓶子消耗掉自己的物品 id，不会残留。 */
     public static ItemStack emptyPhials(int count) {
         return new ItemStack(TCItems.PHIAL.get(), count);
     }
@@ -87,12 +87,12 @@ public final class TcRegistry {
         return !stack.isEmpty() && stack.is(TCItems.JAR_BRAIN.get());
     }
 
-    /** 缸中之脑被放下时的声音，也就是插入一个时的音效。 */
+    /** 缸中之脑放下的声音，插入时也用这个音效。 */
     public static SoundEvent jarBrainPlaceSound() {
         return TCBlocks.JAR_BRAIN.get().defaultBlockState().getSoundType().getPlaceSound();
     }
 
-    /** 单独的大脑，供把它交还回去的箱子使用。 */
+    /** 单独的大脑，交还回去的箱子要用。 */
     public static ItemStack jarBrainStack() {
         return new ItemStack(TCItems.JAR_BRAIN.get());
     }

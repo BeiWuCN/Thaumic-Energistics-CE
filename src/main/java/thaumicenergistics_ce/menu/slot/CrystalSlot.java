@@ -8,10 +8,9 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 
 /**
- * 奥术合成终端六个水晶槽位之一，固定对应一个元初要素。拒绝与否委托给
- * {@code TcWorkbench.isValidCrystal}，即工作台自己的规则（{@code MenuArcaneWorkbench.addSlots}），
- * 所以终端接受工作台所接受的东西。{@code mayPlace} 就是全部闸门：进入该槽位的每条路径
- * 都要经过它。
+ * 奥术合成终端六个水晶槽之一，钉在一个元质上。拒绝交给 {@code TcWorkbench.isValidCrystal}，
+ * 就是工作台自己的规则（{@code MenuArcaneWorkbench.addSlots}），终端收的东西和工作台一致。
+ * {@code mayPlace} 是全部闸门：进槽的每条路都过它。
  */
 public class CrystalSlot extends AppEngSlot {
     private final ResourceKey<IAspect> required;

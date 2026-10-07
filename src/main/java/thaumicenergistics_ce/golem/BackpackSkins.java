@@ -4,10 +4,9 @@ import net.minecraft.resources.ResourceLocation;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * 傀儡的无线背包可以穿的外观：参照实现中的十种，按材质划分。每一种
- * 都是 {@code textures/model/golembackpack/<id>.png} 处的一张纹理，按 id 而不是
- * 按枚举名查询，这样文件和常量可以互相对照着读；该集合延迟构建，因为枚举常量
- * 的构造早于本 mod 的 id 确定。
+ * 傀儡无线背包能穿的外观：参照实现里的十种，按材质分。每种是
+ * {@code textures/model/golembackpack/<id>.png} 处的一张纹理，按 id 而非枚举名查，
+ * 文件和常量才能对照着读；集合延迟构建，枚举常量的构造早于本 mod 的 id 定下来。
  */
 public enum BackpackSkins {
 

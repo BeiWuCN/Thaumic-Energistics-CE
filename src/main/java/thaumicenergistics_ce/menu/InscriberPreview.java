@@ -9,10 +9,10 @@ import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 
 /**
- * 结果凹槽与 7x3 样板凹槽，两者都是只读的，所以只有绘制它们的那一侧才能决定
- * 它们显示什么：结果来自网格，凹槽来自核心物品。
- * 两者都在发生变化时重算，以签名与游戏 tick 为键，而在无法读取该物品的
- * 那一侧两者都不填充，这就是菜单从不替两侧一次性推导它们的原因。
+ * 结果凹槽和 7x3 样板凹槽，两个都是只读的，显示什么由绘制它的那一侧决定：
+ * 结果来自网格，样板槽来自核心物品。
+ * 两者都在变化时重算，键是签名加游戏 tick；读不到该物品的那一侧两个都不填，
+ * 菜单才不替两侧一次性推导。
  */
 final class InscriberPreview {
 
@@ -37,7 +37,7 @@ final class InscriberPreview {
         this.grid = grid;
     }
 
-    /** 结果凹槽的容器：已解析样板的输出，或空。 */
+    /** 结果凹槽的容器：解析出的样板产物，或空。 */
     SimpleContainer well() {
         return result;
     }
@@ -46,7 +46,7 @@ final class InscriberPreview {
         return mirrors;
     }
 
-    /** 网格当前状态的结果，在本侧解析：这就是凹槽所绘制的内容。 */
+    /** 网格当前状态的结果，在本侧解析，凹槽画的就是它。 */
     void update() {
         int signature = grid.signature();
         if (signature == previewedSignature) {
@@ -64,13 +64,13 @@ final class InscriberPreview {
     }
 
     /**
-     * 从核心填充 7x3 凹槽，每帧都做但只在发生变化时：它们是只读槽位，所以
-     * 只有绘制它们的那一侧才能写入它们显示的内容。
+     * 从核心填 7x3 凹槽，每帧都查、只在变化时写：
+     * 它们是只读槽位，显示什么由绘制它的那一侧写。
      */
     void refreshMirrors() {
         ItemStack core = menu.slotStack(MenuKnowledgeInscriber.IDX_CORE);
-        // 用 int 作键而不是字符串：旧的 getItem() + '|' + getComponentsPatch() 会每秒
-        // 六十次重新序列化核心存储的整个样板列表。
+        // 键用 int 不用字符串：旧的 getItem() + '|' + getComponentsPatch()
+        // 每秒六十次重新序列化核心存的整个样板列表。
         long now = menu.playerInventory.player.level().getGameTime();
         if (now != coreSignatureTick) {
             coreSignatureTick = now;

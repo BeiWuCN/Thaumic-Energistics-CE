@@ -21,15 +21,14 @@ import thaumicenergistics_ce.block.BlockGachaBoxAggregator;
 import thaumicenergistics_ce.block.BlockKnowledgeInscriber;
 
 /**
- * 方块注册。奥术组装机是一台 AE2 合成机器，按需执行
- * Thaumaturge 的奥术配方。
+ * 奥术组装机是一台 AE2 合成机器，按需执行 Thaumaturge 的奥术配方。
  */
 public final class ModBlocks {
     public static final DeferredRegister.Blocks REGISTRY = DeferredRegister.createBlocks(ThEIds.MODID);
 
     /**
-     * 奥术组装机的属性。{@code noOcclusion()} 是功能所需而非外观修饰：带缝隙的开放式
-     * 框架若沿用默认的整方块遮挡形状，其接触面会被剔除。
+     * {@code noOcclusion()} 是功能所需，不是外观修饰。
+     * 带缝隙的开放式框架沿用默认的整方块遮挡形状，接触面会被剔除。
      */
     private static final BlockBehaviour.Properties ASSEMBLER_PROPERTIES = BlockBehaviour.Properties.of()
             .mapColor(MapColor.METAL)
@@ -105,8 +104,8 @@ public final class ModBlocks {
                     .noOcclusion()));
 
     /**
-     * 无线源质链路另一端。与奥术组装机一样使用 {@code noOcclusion()}：插头
-     * 模型带有缝隙，否则其后方方块与之接触的面会被剔除。
+     * 无线源质链路的另一端。与奥术组装机一样用 {@code noOcclusion()}。
+     * 插头模型有缝隙，用默认遮挡形状会让它后方接触的面被剔除。
      */
     public static final DeferredBlock<BlockAlchemyProviderConnection> ALCHEMY_PROVIDER_CONNECTION =
             REGISTRY.register(
@@ -127,8 +126,8 @@ public final class ModBlocks {
                     .noOcclusion()));
 
     /**
-     * Gacha Box 的两个方块：主体，以方块状态携带罐子，以及上半部分。
-     * 与奥术组装机一样使用 {@code noOcclusion()}，因为两者都不是完整的立方体。
+     * Gacha Box 的两个方块：主体（方块状态携带罐子）与上半部分。
+     * 两个都不是完整立方体，与奥术组装机一样要 {@code noOcclusion()}。
      */
     private static final BlockBehaviour.Properties GACHA_BOX_PROPERTIES = BlockBehaviour.Properties.of()
             .mapColor(MapColor.METAL)

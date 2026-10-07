@@ -20,11 +20,10 @@ import thaumicenergistics_ce.network.GolemBackpackPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 傀儡拿背包做什么：把它倒进 ME 网络，并在可达时告知附近的客户端。
- * 门槛是「有差事」，因为 Thaumaturge 的傀儡没有核心，核心检查变成了
- * {@code getTask()}；少了它，背包会把所有用傀儡的
- * 印记都抢走。客户端看不到链接（数据未同步），所以观察者
- * 按自己的间隔收到外观。
+ * 傀儡拿背包做什么：倒进 ME 网络，能碰到时告知附近的客户端。
+ * 门槛是「有差事」：Thaumaturge 的傀儡没有核心，核心检查变成 {@code getTask()}；
+ * 少了它，背包会把所有用傀儡的印记都抢走。
+ * 客户端看不到链接（数据未同步），观察者按自己的间隔收到外观。
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class GolemBackpackTickHandler {
@@ -33,10 +32,10 @@ public final class GolemBackpackTickHandler {
 
     private static final int SYNC_INTERVAL = 100;
 
-    /** 每个傀儡上次发送的状态与外观，这样心跳只在变化时出声。 */
+    /** 每个傀儡上次发出的状态和外观，心跳只在变化时出声。 */
     private static final Map<UUID, int[]> LAST_SENT = Collections.synchronizedMap(new WeakHashMap<>());
 
-    /** 每个傀儡的两个倒计时，使用弱引用键。不放进存档数据：那会每 tick 付出两次 NBT 写入。 */
+    /** 每个傀儡的两个倒计时，弱引用键。不放进存档数据：那会每 tick 付两次 NBT 写入。 */
     private static final Map<UUID, int[]> COOLDOWNS = Collections.synchronizedMap(new WeakHashMap<>());
 
     private static final long ERRAND_TRACE_INTERVAL = 200L;
@@ -79,8 +78,8 @@ public final class GolemBackpackTickHandler {
     }
 
     /**
-     * 把傀儡拿着的东西搬进网络，每次操作一个物品堆：速率由冷却时间决定，
-     * 一次搬两个会让搬运傀儡的速率翻倍，并使速率表随附加 mod 而变。
+     * 把傀儡拿的东西搬进网络，一次一个物品堆：速度由冷却决定。
+     * 一次搬两个会让搬运傀儡的速度翻倍，速率表也就随附加 mod 变。
      */
     private static void deposit(EntityThaumaturgeGolem golem, GolemWirelessLink connection) {
         if (golem.getTask() != null) {
@@ -92,7 +91,7 @@ public final class GolemBackpackTickHandler {
             if (carried.isEmpty()) {
                 continue;
             }
-            // 先记录名称再插入：插入之后，被清空的物品堆会记为 "minecraft:air"。
+            // 先取名字再插入：插入之后物品堆被清空，名字会变成 "minecraft:air"。
             String name = GolemBackpackHandler.TRACE ? itemName(carried) : null;
             long inserted = connection.insert(carried, rate);
             if (inserted > 0L) {
@@ -100,7 +99,7 @@ public final class GolemBackpackTickHandler {
                     ThELog.LOG.info("[pack] golem " + golem.getId() + " put " + inserted + "x "
                             + name + " into the network");
                 }
-                // Thaumaturge 在傀儡递出物品时播放的挥手动作。
+                // Thaumaturge 傀儡递出物品时放的挥手动作。
                 golem.swingArm();
                 return;
             }
@@ -130,7 +129,7 @@ public final class GolemBackpackTickHandler {
             return;
         }
         GolemBackpackPayload payload = payloadFor(golem, link);
-        // 仅在变化时发送；刚开始观察的玩家由 [onStartTracking] 负责，而不是这里。
+        // 只在变化时发；刚来观察的玩家由 [onStartTracking] 负责，不在这里。
         int[] last = LAST_SENT.get(golem.getUUID());
         if (last != null && last[0] == payload.status() && last[1] == payload.skinOrdinal()) {
             return;
@@ -148,8 +147,8 @@ public final class GolemBackpackTickHandler {
     }
 
     /**
-     * 告知刚开始观察某个傀儡的玩家它背上有什么：心跳只在变化时
-     * 出声，所以刚登录的客户端从未收到通知，也就没有画出背包。
+     * 告诉刚来看某个傀儡的玩家它背上有什么：心跳只在变化时出声，
+     * 刚登录的客户端收不到，也就画不出背包。
      */
     @SubscribeEvent
     public static void onStartTracking(PlayerEvent.StartTracking event) {
@@ -161,7 +160,7 @@ public final class GolemBackpackTickHandler {
         }
         GlobalPos link = GolemBackpackHandler.getLink(golem);
         if (link == null) {
-            // 没什么可说的：没人给它装过背包的傀儡就按傀儡绘制。
+            // 没什么可说的：没装背包的傀儡按普通傀儡画。
             return;
         }
         PacketDistributor.sendToPlayer(player, payloadFor(golem, link));

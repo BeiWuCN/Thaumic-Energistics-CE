@@ -12,16 +12,16 @@ import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
 /**
  * 让玩家把 JEI 里的物品直接拖进知识铭刻机的网格。
- * 该网格就是机器的输入，所以这是使用它的最短路径。
- * {@link #onComplete()} 里什么都没有，因为该网格是幽灵网格，JEI 不会交出任何东西：
- * 格中只记录玩家拥有什么，而合成任务才会付出真实原料。
+ * 该网格就是机器的输入，这是使用它的最短路径。
+ * {@link #onComplete()} 里是空的，网格是幽灵网格，JEI 不会交出东西：
+ * 格中只记录玩家拥有什么，付出真实原料的是合成任务。
  */
 public class KnowledgeInscriberGhostIngredientHandler
         implements IGhostIngredientHandler<ScreenKnowledgeInscriber> {
 
     /**
-     * 放置区域，单位为 GUI 像素：一格的内部宽 16、高 15，所以 16 见方的方块正好
-     * 压在它上面——它的最后一行是壁，不是孔。
+     * 放置区域，单位 GUI 像素：一格内部宽 16、高 15，16 见方的方块正好压在上面；
+     * 它的最后一行是壁，不是孔。
      */
     private static final int SLOT_SIZE = 16;
 
@@ -41,15 +41,15 @@ public class KnowledgeInscriberGhostIngredientHandler
 
     @Override
     public void onComplete() {
-        // 没有要释放的东西：网格中的格子从不接收物品。
+        // 没有要释放的东西：网格里的格子从不接收物品。
     }
 
     private record GridTarget<I>(MenuKnowledgeInscriber menu, int cell, int guiLeft, int guiTop)
             implements Target<I> {
 
         /**
-         * JEI 应当绘制该目标的位置，单位为屏幕像素。不是槽位的 x/y：JEI 填充矩形时
-         * 不做平移，而槽位的 x/y 是相对 GUI 左上角的。
+         * JEI 画该目标的位置，单位屏幕像素。不是槽位的 x/y：
+         * JEI 填矩形时不做平移，槽位 x/y 相对 GUI 左上角。
          */
         @Override
         public Rect2i getArea() {
@@ -60,8 +60,8 @@ public class KnowledgeInscriberGhostIngredientHandler
         @Override
         public void accept(I ingredient) {
             if (ingredient instanceof ItemStack stack && !stack.isEmpty()) {
-                // 用槽位而不是容器：容器只到得了客户端的暂存副本。
-                // [GhostGridSlot.set] 会把该格发给服务端。
+                // 用槽位不用容器：容器只到得了客户端的暂存副本。
+                // [GhostGridSlot.set] 把该格发给服务端。
                 menu.slots.get(MenuKnowledgeInscriber.gridSlotIndex(cell))
                         .set(stack.copyWithCount(1));
             }

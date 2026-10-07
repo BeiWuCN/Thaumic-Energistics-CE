@@ -9,8 +9,8 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
 
 /**
- * 源质元件工作台方块，在这里指定存储元件可以存放哪些要素。它
- * 不声明朝向，因为模型是对称的，加方向属性也转不出任何变化。
+ * 源质元件工作台方块，在这里指定存储元件可以存放哪些要素。
+ * 不声明朝向，模型是对称的，加方向属性也转不出任何变化。
  */
 public class BlockEssentiaCellWorkbench extends ThEBaseEntityBlock {
     public static final MapCodec<BlockEssentiaCellWorkbench> CODEC =

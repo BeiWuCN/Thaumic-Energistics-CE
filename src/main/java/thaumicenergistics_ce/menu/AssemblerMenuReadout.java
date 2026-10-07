@@ -9,18 +9,16 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.compat.thaumaturge.TcAspects;
 
-/** 菜单显示的数字。每一个都是机器持有的值与数据槽位
- * 所携带的值中较大的那个：方块实体是机器自身的状态，而尚未跟上的槽位只可能
- * 落后。客户端菜单的机器为 null，所以在那里唯一的来源是数据槽位，通过
- * 打开数据包所携带的位置到达。 */
+/** 菜单显示的数字。每个都取机器持有的值与数据槽携带的值中较大的那个：
+ * 方块实体是机器自身状态，没跟上的槽只可能落后。客户端菜单的机器为 null，
+ * 那里唯一来源是数据槽，靠打开数据包带的位置找到。 */
 final class AssemblerMenuReadout {
 
     private final MenuArcaneAssembler menu;
     private final ContainerData data;
 
     /**
-     * 机器所在的位置，由打开数据包发送：这是客户端菜单对它唯一的抓手，因为它的
-     * 机器为 null，所以没有位置就没有合成进度。
+     * 机器位置，由打开数据包发送：客户端菜单唯一的抓手，它的机器为 null，没有位置就没有合成进度。
      */
     private @Nullable BlockPos clientPos;
 
@@ -31,12 +29,12 @@ final class AssemblerMenuReadout {
         this.data = new ArcaneAssemblerReadings(menu.assembler, this::aspectForSlot);
     }
 
-    /** 服务端填充、客户端读取的表，顺序按 {@code DATA_} 常量所命名。 */
+    /** 服务端填、客户端读的表，顺序按 {@code DATA_} 常量命名。 */
     ContainerData data() {
         return data;
     }
 
-    /** 接收打开数据包所携带的位置，这是客户端通向机器的唯一途径。 */
+    /** 收下打开数据包带的位置，客户端通向机器的唯一途径。 */
     void setClientPos(BlockPos pos) {
         this.clientPos = pos;
     }
@@ -46,8 +44,8 @@ final class AssemblerMenuReadout {
     }
 
     /**
-     * 六个条形列，按素材绘制的顺序排列，而不是按 {@code PRIMALS} 顺序——用其中一个
-     * 去索引另一个，会让两列画上错误的要素，而每根条的高度都对。
+     * 六个条形列，按素材绘制顺序排，不按 {@code PRIMALS} 顺序：拿一个去索引另一个，
+     * 会让两列画上错的要素，而每根条的高度都对。
      */
     private static final int[] BAR_ASPECTS = {
         primalIndex(TcAspects.AER),
@@ -64,21 +62,21 @@ final class AssemblerMenuReadout {
     }
 
     /**
-     * 数据槽位为 {@code index} 的那个条形列所蓄积的 vis，以整数 vis 计，通过
-     * {@link #BAR_ASPECTS} 读取，而不是靠减去槽位常量。
+     * 数据槽位是 {@code index} 的那一列蓄的 vis，单位整数 vis，经 {@link #BAR_ASPECTS} 读，
+     * 不用槽位常量相减。
      */
     private int aspectForSlot(int index) {
         int column = index - MenuArcaneAssembler.DATA_ASPECT_AIR;
         if (column < 0 || column >= BAR_ASPECTS.length) {
             return 0;
         }
-        // 以四为单位取整，与 vis 池相同：这个值每个 tick 都会广播。
+        // 四格一取整，跟 vis 池一样：这个值每 tick 广播。
         return (menu.assembler.getAspectVis(BAR_ASPECTS[column]) / 4) * 4;
     }
 
     /**
-     * 一个条形列持有多少，按素材顺序：0 是风，5 是土。取更大的一方，因为
-     * 方块实体是机器自身的状态，而尚未跟上的数据槽位只可能落后。
+     * 一列持有多少，按素材顺序：0 是风，5 是土。
+     * 取更大的一方：方块实体是机器自身状态，没跟上的槽只可能落后。
      */
     int getBarVis(int column) {
         if (column < 0 || column >= BAR_ASPECTS.length) {
@@ -103,8 +101,8 @@ final class AssemblerMenuReadout {
     }
 
     /**
-     * 这一侧所能看到的机器，没有则为 null。在客户端它由服务端发来的
-     * 位置查找；未加载的区块会返回 null，数据槽位正是为此而设。
+     * 这一侧能看到的机器，没有则为 null。客户端按服务端发的位置查；区块未加载返回 null，
+     * 数据槽就是为此而设。
      */
     private @Nullable BlockEntityArcaneAssembler machineView() {
         if (menu.assembler != null) {

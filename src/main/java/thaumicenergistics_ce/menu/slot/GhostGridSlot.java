@@ -7,10 +7,9 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 知识铭刻机合成网格的一个单元，位于玩家所看的那一侧。它是幽灵槽位：记录要编码什么
- * 而不取走物品，因为任务稍后才付费，且物品从不离开玩家，所以这次写入以载荷形式发出
- * 而不是走槽位同步。
- * 允许取走，这样点击某个单元即可将其清空。
+ * 知识铭刻机合成网格的一个单元，在玩家所看的那一侧。
+ * 它是幽灵槽位：记录要编码什么，不取走物品。任务稍后才付费，物品从不离开玩家，
+ * 这次写入以载荷发出，不走槽位同步。允许取走，点一下单元就把它清空。
  */
 public class GhostGridSlot extends Slot {
 
@@ -41,8 +40,8 @@ public class GhostGridSlot extends Slot {
     @Override
     public void onTake(Player player, ItemStack stack) {
         super.onTake(player, stack);
-        // 发空，而不是被取走的物品堆：机器需要的是该单元的新内容，发送被取走
-        // 的物品堆等于说该单元仍装着玩家刚移走的配方。
+        // 发空，不发被取走的物品堆：机器要的是该单元的新内容，
+        // 发被取走的物品堆等于说该单元还装着玩家刚移走的配方。
         request(ItemStack.EMPTY);
     }
 

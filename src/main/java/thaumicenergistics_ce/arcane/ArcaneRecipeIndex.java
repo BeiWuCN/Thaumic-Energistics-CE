@@ -17,8 +17,8 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import org.jspecify.annotations.Nullable;
 
 /**
- * 记录哪些奥术配方接受哪些物品，使手工填好的网格在匹配前先缩小候选范围。
- * 配方管理器一旦变化就重建，因为每次重载都会给出一个新的管理器。
+ * 记哪些奥术配方收哪些物品，手工填的网格在匹配前先缩候选。配方管理器一换就重建：
+ * 每次重载给出的是新实例。
  */
 final class ArcaneRecipeIndex {
 
@@ -29,8 +29,7 @@ final class ArcaneRecipeIndex {
     private ArcaneRecipeIndex() {}
 
     /**
-     * 把物品登记到所有接受它的材料下：多登记只多一次检测，少登记则会
-     * 悄无声息地丢掉配方。
+     * 把物品登记到所有收它的材料下：多登记只多一次检测，少登记会无声丢配方。
      */
     static void index(RecipeManager manager) {
         if (manager == indexedManager) {

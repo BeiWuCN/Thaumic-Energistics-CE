@@ -13,11 +13,10 @@ import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVib
 import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
- * 源质振动室的 Jade tooltip：有没有可供燃烧的网络，以及它在做什么。
- * 它的各行取自客户端的副本，而不是服务端数据，因为 Jade 只采集一次
- * 数据、之后这些行就会冻住；燃烧倒计时和槽内能量被刻意省略，
- * 因为两者每 tick 都在变。仅客户端：只有 Jade 的 [registerClient] 会注册它，
- * 专用服务端会跳过。
+ * 源质振动室的 Jade tooltip：有没有能烧的网络，机器在做什么。
+ * 各行取自客户端的副本，不用服务端数据：Jade 只采一次数据，之后行就冻住了；
+ * 燃烧倒计时和槽内能量刻意不写，两者每 tick 都在变。
+ * 仅客户端：只有 Jade 的 [registerClient] 注册它，专用服务端跳过。
  */
 public class VibrationChamberProvider implements IBlockComponentProvider {
 
@@ -32,8 +31,7 @@ public class VibrationChamberProvider implements IBlockComponentProvider {
             return;
         }
         IElementHelper helper = IElementHelper.get();
-        // 用 AE2 自己对节点的说法，取自机器状态：不占频道，所以 AE2 的四个说法
-        // 里只会出现这两个，且都不是快照。
+        // 用 AE2 自己描述节点的说法，取自机器状态：不占频道，AE2 的四个说法里只出现这两个，都不是快照。
         JadeGridState word = chamber.getBurnState() == BurnState.NO_NETWORK
                 ? JadeGridState.OFFLINE
                 : JadeGridState.ONLINE;
@@ -53,14 +51,14 @@ public class VibrationChamberProvider implements IBlockComponentProvider {
                 "thaumicenergistics_ce.jade.energy_output",
                 String.format("%.0f", chamber.getMaxOutputPerTick())));
 
-        // 状态放在最后：机器在做什么，或者为什么没在燃烧。
+        // 状态放最后：机器在做什么，或者没烧起来的原因。
         switch (chamber.getBurnState()) {
             case BURNING -> tooltip.add(Component.translatable(
                     "thaumicenergistics_ce.jade.burning", String.format("%.1f", chamber.getAePerTick())));
             case NO_NETWORK -> tooltip.add(Component.translatable("thaumicenergistics_ce.jade.no_network"));
             case PAUSED_FULL -> tooltip.add(Component.translatable("thaumicenergistics_ce.jade.tank_full"));
             case IDLE -> {
-                // 没什么可说：槽里还有空位，也没装任何可烧的东西。
+                // 没什么可说：槽里还有空位，也没装可烧的东西。
             }
         }
     }

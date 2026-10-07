@@ -23,10 +23,9 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 奥术合成终端的产物槽位。它继承 {@code CraftingTermSlot}，因为合成入口点 {@code doClick}
- * 声明在那里。{@code ArcaneCraftingTransaction} 负责匹配并扣费，而 {@link #refresh}
- * 只预览不付费；支付来自终端自身的网格、水晶与法杖槽位，与 Thaumaturge 的工作台一致：
- * 从不像网络索要材料——
+ * 奥术合成终端的产物槽位。合成入口点 {@code doClick} 声明在 {@code CraftingTermSlot}。
+ * {@code ArcaneCraftingTransaction} 匹配配方并扣费；{@link #refresh} 只预览不付费。
+ * 支付来自终端自己的网格、水晶和法杖槽，从不向网络要材料，
  * 见 {@link TerminalArcaneCraftingStore}。
  */
 public class ArcaneCraftingResultSlot extends CraftingTermSlot {
@@ -34,10 +33,10 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
     private final @Nullable ServerPlayer serverPlayer;
     private final @Nullable PartArcaneCraftingTerminal part;
 
-    /** 用具体类型而非 {@link ICraftingGridMenu}：把 vis 开销发给屏幕需要这个菜单。 */
+    /** 用具体菜单类型，不写 {@link ICraftingGridMenu}：把 vis 开销发到屏幕靠它。 */
     private final thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal ownerMenu;
 
-    /** 上次 {@link #refresh()} 为何没给出产物，未失败则为 {@code NONE}。 */
+    /** 上次 {@link #refresh()} 没出产物的原因；没失败就是 {@code NONE}。 */
     private ArcaneCraftingTransaction.Failure lastFailure = ArcaneCraftingTransaction.Failure.NONE;
 
     public ArcaneCraftingResultSlot(
@@ -57,11 +56,11 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
 
     @Override
     public boolean mayPickup(Player player) {
-        // 每次取走都要经过 [doClick]，由它扣费；不能先让原版把产物发出去。
+        // 每次取走都走 [doClick] 扣费；原版不能先把产物发出去。
         return false;
     }
 
-    /** 在变化时重算，不是每帧：一次完整配方匹配外加一次开销计算。 */
+    /** 变化时才重算，不每帧：一次完整配方匹配加一次开销计算。 */
     public void refresh() {
         if (part == null || serverPlayer == null) {
             return;
@@ -79,7 +78,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
             ThELog.LOG.info("[arcane] no craft offered for the grid: {}", result.failure());
         }
         setDisplayedCraftingOutput(result.successful() ? result.output() : ItemStack.EMPTY);
-        // 与结果一同发送，屏幕就不会为一个已经变了的网格画出开销。
+        // 和结果一起发，屏幕就不会给已经变了的网格画开销。
         ownerMenu.sendCraftCost(result.successful() ? result.cost() : null);
     }
 
@@ -103,8 +102,8 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
             if (input == null || input.isEmpty()) {
                 break;
             }
-            // 由终端自身的容器支付，与 Thaumaturge 的工作台一致：网格、水晶槽位
-            // 与法杖。向网络收费等于再要一份玩家已摆好的东西。
+            // 支付来自终端自己的容器：网格、水晶槽、法杖，和 Thaumaturge 工作台一致。
+            // 向网络收费等于再要一份玩家已经摆好的东西。
             var store = new TerminalArcaneCraftingStore(
                     terminal.craftingGrid(), terminal.crystalInventory(), terminal.wandInventory(), who);
             var result = ArcaneCraftingTransaction.craft(workbenchContext(), server, input, store, false);
@@ -115,10 +114,9 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
                 break;
             }
 
-            // 网格、水晶与法杖已由该 store 扣费；剩余物随它
-            // 回到了各自的槽位。
+            // 网格、水晶和法杖已经由 store 扣过；剩余物跟着它回到各自槽位。
             ItemStack output = result.output().copy();
-            // 交付之前先读取：[Inventory#add] 会把数量设成没放进去的部分。
+            // 先读再交付：[Inventory#add] 会把数量改成没放进去的那部分。
             String produced = output.toString();
             boolean placed = deliver(output, action, who);
             ThELog.LOG.info(
@@ -133,11 +131,9 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         }
     }
 
-    /** 普通点击把产物放到光标上，批量合成则填满物品栏；提交时
-     * 已经扣过费。
-     *
-     * @param action 手势，因此 shift 点击仍按玩家预期填满物品栏
-     * @return 产物是去了光标还是物品栏；放不下时为 {@code false} */
+    /** 普通点击把产物放到光标上，批量合成填满物品栏；提交时费用已扣。
+     * @param action 手势，shift 点击按玩家预期填满物品栏
+     * @return 产物去了光标还是物品栏；放不下为 {@code false} */
     private boolean deliver(ItemStack output, InventoryAction action, Player who) {
         if (output.isEmpty()) {
             return true;
@@ -158,37 +154,36 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         if (who.getInventory().add(output)) {
             return true;
         }
-        // 费用已经扣了，产物无论如何都已存在；调用方把这里读作「停」。
+        // 费用已扣、产物已存在；调用方把这里读成「停」。
         who.drop(output.copy(), false);
         return false;
     }
 
-    /** 为当前网格构建输入，无可匹配之物时为 {@code null}。 */
+    /** 按当前网格建输入，没有可匹配的返回 {@code null}。 */
     private @Nullable IArcaneCraftingInput buildInput() {
         if (part == null) {
             return null;
         }
-        // 九个单元，空的也算：Thaumaturge 无论网格里有什么都按九个索引，所以这个
-        // 列表不得裁剪——见 [TerminalArcaneCraftingInput]。
+        // 九个单元，空的也算：Thaumaturge 不管网格里有什么都按九个索引。
+        // 列表不能裁剪，见 [TerminalArcaneCraftingInput]。
         List<ItemStack> cells = IntStream.range(0, PartArcaneCraftingTerminal.GRID_SIZE)
                 .mapToObj(i -> part.craftingGrid().getStackInSlot(i))
                 .toList();
         ItemStack wand = part.wandInventory().getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT);
-        // 水晶只从自己的槽位取，绝不从网格取：网格单元里的水晶是匹配用的
-        // 材料，再把它算作支付会让两者对不上。
+        // 水晶只从自己的槽位取，不从网格取。
+        // 网格单元里的水晶是匹配材料，再算一次支付就对不上了。
         List<ItemStack> crystals = new ArrayList<>(PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
             crystals.add(part.crystalInventory().getStackInSlot(i));
         }
-        // 卡片在这里只读一次：一次合成的两遍灵气处理之后都读这个冻结的答案，
-        // 而不是再问一次槽位，这样提交才不会与模拟对不上。
+        // 卡片只在这里读一次：一次合成的两遍灵气处理都读这个冻结结果，
+        // 不再问槽位，提交才不会和模拟对不上。
         boolean visConnection = ownerMenu.hasVisConnectionCard();
         return new TerminalArcaneCraftingInput(
                 cells, serverPlayer, wand, crystals, part, ownerMenu.auraPayer(), visConnection);
     }
 
-    /** 一个归这台机器与这名玩家所有的虚拟工作台：线缆上的终端没有可指向的
-     * 方块。 */
+    /** 归这台机器和这名玩家的虚拟工作台：线缆上的终端没有方块可指。 */
     private ArcaneWorkbenchContext workbenchContext() {
         return ArcaneWorkbenchContext.virtual(
                 serverPlayer, PartArcaneCraftingTerminal.CONTEXT_HOST, serverPlayer.getUUID());

@@ -2,7 +2,7 @@ package thaumicenergistics_ce.blockentity.gachabox;
 
 import net.minecraft.network.chat.Component;
 
-/** 箱子为什么停着不动：每种拒绝都有原因，所以 "on" 只表示它正处在两次转动之间。 */
+/** 箱子为什么停着不动：每种拒绝都有原因，"on" 只表示正处在两次转动之间。 */
 public enum GachaWait {
     NO_STRUCTURE("no_structure", "The upper half is missing"),
     NO_BRAIN("no_brain", "Not bound"),

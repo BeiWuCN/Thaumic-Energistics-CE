@@ -31,26 +31,24 @@ import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 /**
- * 炼金供应器：ME 网络存放送往外界的源质之处——输入总线的另一半，
- * 把源质交给它所接触到的任何容器或机器。缓冲只是中转点而非存储：
- * 插入的源质在下一个 tick 被推给邻接方，且从不持久化。没有接任何
- * 东西的供应器拒绝一切，而需要源质的机器由网格通过一份网格持续补满的
- * 预留来供给。
+ * 炼金供应器：ME 网络把要送出去的源质放这儿，是输入总线的另一半，
+ * 把源质交给碰到的容器或机器。缓冲只当中转点，不做存储：插入的源质下一 tick 推给邻居，
+ * 不落盘。没接东西的供应器拒收一切；要源质的机器走网格，经一份网格持续补满的预留供给。
  */
 public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         implements IStorageProvider, IGridTickable, IEssentiaStorage {
 
     public static final int BUFFER_PER_ASPECT = 16;
 
-    /** 一个供应器可以服务多少个接收方。每一个都会让供应器多花一份待机电力。 */
+    /** 一个供应器服务几个接收方。每多一个，供应器多花一份待机电力。 */
     public static final int MAX_LINKED_RECEIVERS = 8;
 
     public static final int MAX_LINK_DISTANCE = 32;
 
-    /** 一个单位源质经由链路送出时向网格收取的费用，即总线的费率。 */
+    /** 一单位源质经链路送出的收费，按总线的费率。 */
     public static final double AE_PER_ESSENTIA = 10.0;
 
-    /** 链路动用的预留额度，由网格补满：也就是 Jade tooltip 报告的那个数字。 */
+    /** 链路花的那份预留，由网格补满；[Jade] tooltip 报的就是这个数。 */
     public static final double AE_CACHE = 40.0;
 
     private static final int TICK_RATE_ACTIVE = 10;
@@ -58,7 +56,7 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
 
     private final AlchemyProviderBuffer buffer = new AlchemyProviderBuffer(this);
 
-    /** 自持的 AE：用于覆盖网格不愿支付的部分，因此没有电力的网格什么都搬不动。 */
+    /** 自持的 AE，补网格不付的那部分；网格没电就什么都搬不动。 */
     private double cacheAE;
 
     private final ReceiverLinks links = new ReceiverLinks(this);
@@ -68,7 +66,7 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
 
     public BlockEntityAlchemyProvider(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ALCHEMY_PROVIDER.get(), pos, state);
-        // 向链路询问，使待机电力只有一个作者：没有链路时，它们给出基础数值。
+        // 待机电力统一向链路问，避免两处各写一份；没有链路时用基础值。
         links.updateIdlePower();
         getMainNode()
                 .addService(IStorageProvider.class, this)
@@ -92,7 +90,7 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         }
         fillCache();
         if (!getMainNode().isActive() || !buffer.hasWork()) {
-            // 接收方可能已被破坏；为已不存在的接收方付费，玩家察觉不到。
+            // 接收方可能已被拆掉，为不存在的接收方付费玩家看不出来。
             if (pruneDeadReceivers()) {
                 return TickRateModulation.URGENT;
             }
@@ -100,11 +98,11 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         }
 
         boolean moved = buffer.push();
-        // 仍有东西留在缓冲里说明所有邻接方都满了；更早再查一次也不会把它清空。
+        // 缓冲里还剩东西，说明邻居全满了，早一点再看也清不掉。
         return moved ? TickRateModulation.URGENT : TickRateModulation.SLOWER;
     }
 
-    // [IEssentiaStorage]——网络所见的缓冲
+    // [IEssentiaStorage] 网络看到的这个缓冲
 
     @Override
     public int insert(Holder<IAspect> aspect, int amount, boolean simulate) {
@@ -112,8 +110,7 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
     }
 
     /**
-     * 来自已绑定接收方的插入：属于链路的流量，与取走一样按单位付费，因此
-     * 付不起费用的网格两个方向都搬不动东西。
+     * 已绑定接收方插入的，算链路流量，和取走一样按单位付费；网格付不起，两个方向都搬不动。
      */
     public int insertFromLink(Holder<IAspect> aspect, int amount, boolean simulate) {
         if (aspect == null || amount <= 0) {
@@ -148,7 +145,7 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
 
     // 已绑定的接收方
 
-    /** 拒绝的原因；链路建立成功时为 null；这条消息就是连接器显示的内容。 */
+    /** 拒绝的原因，链路建成时为 null；连接器显示的就是这条消息。 */
     public @Nullable String addLinkedReceiver(BlockPos receiver) {
         return links.add(receiver);
     }
@@ -174,8 +171,8 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
     }
 
     /**
-     * 让已绑定的接收方从网格取源质，而不走 {@link #extract}，后者服务的是
-     * 缓冲。它按搬运的单位付费，因此没有电力的网格什么都搬不动。
+     * 让已绑定接收方直接从网格取源质，不走 {@link #extract}（那个服务缓冲）。
+     * 按搬运单位付费，网格没电就搬不动。
      */
     public int takeForLink(Holder<IAspect> aspect, int amount, boolean simulate) {
         if (aspect == null || amount <= 0 || !getMainNode().isActive()) {
@@ -210,12 +207,12 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         return (int) Math.min(moved, Integer.MAX_VALUE);
     }
 
-    /** 预留额度的水平，由 Jade tooltip 报告。 */
+    /** 预留的水位，[Jade] tooltip 报这个数。 */
     public int cachedAE() {
         return (int) Math.floor(cacheAE);
     }
 
-    /** 从网格把预留补满：网格能付费时是满的，不能付费时是空的。 */
+    /** 从网格把预留补满：网格付得起是满的，付不起是空的。 */
     private void fillCache() {
         if (cacheAE >= AE_CACHE) {
             return;
@@ -228,7 +225,7 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
                 PowerMultiplier.CONFIG);
     }
 
-    /** 一次支付一个单位，先扣网格，其余部分用预留补齐；两者都付不出时停止。 */
+    /** 一次付一个单位，先扣网格，剩下的用预留补；两边都付不出就停。 */
     private int chargeForLink(int units) {
         IEnergyService energy = networkEnergy();
         if (energy == null) {
@@ -271,7 +268,7 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
         return grid == null ? null : grid.getService(IEnergyService.class);
     }
 
-    // 持久化：只保存链路。缓冲只是中转点，不保存。
+    // 只存链路。缓冲是中转点，不入档。
 
     @Override
     public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {

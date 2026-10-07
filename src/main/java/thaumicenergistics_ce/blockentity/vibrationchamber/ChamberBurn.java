@@ -3,10 +3,10 @@ package thaumicenergistics_ce.blockentity.vibrationchamber;
 import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber.BurnState;
 
 /**
- * 振动室的燃烧：一份燃料值多少，它还剩下多少。[Potentia] 燃烧的持续时间和
- * 功率为 1.6 倍，[ignis] 为基础速率，其它一律减半；[BurnState] 由能量槽
- * 剩余的空间推出，绝不沿用之前的状态。{@link #update} 在状态翻转时通知
- * 客户端，而调用方会在一份燃料烧尽时被告知。
+ * 振动室的燃烧：一份燃料值多少，还剩多少。
+ * [Potentia] 的持续时间和功率是 1.6 倍，[ignis] 是基础速率，别的要素一律减半。
+ * [BurnState] 由能量槽剩下的空间推出，不沿用之前的状态。
+ * {@link #update} 在状态翻转时通知客户端，一份燃料烧尽时调用方会被告知。
  */
 final class ChamberBurn {
 
@@ -45,7 +45,7 @@ final class ChamberBurn {
         return state == BurnState.PAUSED_FULL;
     }
 
-    /** 燃烧是否允许进行：要么正在燃烧，要么空闲但有燃料在等。 */
+    /** 允不允许燃烧：正在烧，或者空闲但有燃料在等。 */
     boolean mayBurn() {
         return state.mayBurn();
     }
@@ -67,8 +67,8 @@ final class ChamberBurn {
     }
 
     /**
-     * 根据剩余空间与燃烧读出状态，并在状态翻转时通知客户端。“Full” 是一个
-     * 水平而非锁存，所以状态以及界面据此绘制的线条都随仪表走。
+     * 按剩余空间和燃烧读出状态，状态翻转时通知客户端。
+     * 「Full」是个水平不是锁存，状态和界面据此画的线都跟着仪表走。
      */
     void update(boolean onNetwork) {
         BurnState next;
@@ -89,17 +89,17 @@ final class ChamberBurn {
         }
     }
 
-    /** 一次燃烧的 tick 量，或最小可能燃烧量；绝不为 0，因此 剩余空间/速率 就是 tick 数。 */
+    /** 一次燃烧每 tick 的功率，最少也是这个值；绝不为 0，剩余空间除以速率就是 tick 数。 */
     double tickPower() {
         return burnTicksRemaining > 0 ? Math.max(aePerTick, 1.0) : BASE_AE_PER_TICK / 2.0;
     }
 
-    /** 只烧掉其功率装得下的那些 tick，剩下的以后再说：这份燃料冻结，而不是重新开始。 */
+    /** 只烧功率装得下的那些 tick，剩下的以后再烧：这份燃料冻结，不重新开始。 */
     int ticksThatFit(int ticksSinceLast) {
         return (int) Math.min(burnTicksRemaining, Math.min(ticksSinceLast, energy.room() / tickPower()));
     }
 
-    /** 把烧掉的 tick 从这份燃料上扣掉；烧尽时返回 true，由调用方通知客户端。 */
+    /** 从这份燃料扣掉烧掉的 tick；烧尽返回 true，由调用方通知客户端。 */
     boolean spend(int burntTicks) {
         burnTicksRemaining -= burntTicks;
         if (burnTicksRemaining > 0) {
@@ -110,7 +110,7 @@ final class ChamberBurn {
         return true;
     }
 
-    /** 点燃这份燃料：从槽位取出一份燃料，并把该要素的 tick 数和速率写入燃烧。 */
+    /** 点燃这份燃料：从槽位取一份，把该要素的 tick 数和速率写进燃烧。 */
     void start() {
         int burnTicks = burnTicksFor();
         double power = powerFor();
@@ -153,7 +153,7 @@ final class ChamberBurn {
         aePerTick = rate;
     }
 
-    /** 重载后起始的状态；调用方从槽位推出它，而不是把它读回来。 */
+    /** 重载后起始的状态；调用方从槽位推出，不读回来。 */
     void setState(BurnState restored) {
         state = restored;
     }

@@ -15,8 +15,8 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 样板所依赖的研究，以及它的晶体所代表的实时要素条目。
- * 存进核心的样板只带要素 key，只有查注册表才能把它变成 holder。
+ * 样板所依赖的研究，以及它的晶体代表的实时要素条目。存进核心的样板只带要素 key，
+ * 只有查注册表才能把它变成 holder。
  */
 final class ArcaneResearchGate {
 

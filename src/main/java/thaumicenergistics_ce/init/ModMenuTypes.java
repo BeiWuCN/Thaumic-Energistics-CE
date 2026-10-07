@@ -27,8 +27,8 @@ public final class ModMenuTypes {
             DeferredRegister.create(Registries.MENU, ThEIds.MODID);
 
     /**
-     * AE2 给终端起的名字，"终端"。标题只指明存储那一半；挂在它上面的是哪一半合成，
-     * 由样式在网格上方绘制的分区标题决定。
+     * AE2 给终端起的名字「终端」。标题只指明存储那一半；
+     * 挂在上面的是哪一半合成，由样式画在网格上方的分区标题决定。
      */
     private static final String TERMINAL_TITLE = "gui.ae2.Terminal";
 
@@ -57,8 +57,8 @@ public final class ModMenuTypes {
                     () -> IMenuTypeExtension.create(MenuDistillationEncoder::new));
 
     /**
-     * 奥术合成终端的界面。通过 AE2 的 {@link MenuTypeBuilder} 构建：它会把宿主
-     * 放进打开界面的数据包里，没有它菜单背后就没有网络。
+     * 奥术合成终端的界面。用 AE2 的 {@link MenuTypeBuilder} 构建：
+     * 它把宿主放进打开界面的数据包，没有它菜单背后就没有网络。
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneCraftingTerminal>>
             ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
@@ -71,8 +71,8 @@ public final class ModMenuTypes {
                             .buildUnregistered(ThEIds.id("arcane_crafting_terminal")));
 
     /**
-     * 源质终端。构建器会把宿主——线缆部件，或手中的无线物品——放进
-     * 打开界面的数据包。标题被显式指定，因为 AE2 的终端样式自带 {@code gui.ae2.Terminal}。
+     * 源质终端。构建器把宿主（线缆部件或手中的无线物品）放进打开界面的数据包。
+     * 标题显式指定，AE2 的终端样式自带 {@code gui.ae2.Terminal}。
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaTerminal>> ESSENTIA_TERMINAL =
             REGISTRY.register(
@@ -82,8 +82,8 @@ public final class ModMenuTypes {
                             .buildUnregistered(ThEIds.id("essentia_terminal")));
 
     /**
-     * 无线源质终端的界面。它另设一个菜单类型，而不是复用有线那个：
-     * 构建器会把宿主类编码进打开界面的数据包，而两者的宿主不同。
+     * 无线源质终端的界面。另设一个菜单类型，不复用有线那个：
+     * 构建器把宿主类编进打开界面的数据包，两者宿主不同。
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaTerminal>> WIRELESS_ESSENTIA_TERMINAL =
             REGISTRY.register(
@@ -94,8 +94,8 @@ public final class ModMenuTypes {
                             .buildUnregistered(ThEIds.id("wireless_essentia_terminal")));
 
     /**
-     * 无线奥术合成终端的界面：与有线终端是同一个菜单，只是从手持物品打开，
-     * 所以不同之处在于宿主类，而不在于另设一个菜单类。
+     * 无线奥术合成终端的界面：与有线终端同一个菜单，只是从手持物品打开，
+     * 差别在宿主类，不在另设菜单类。
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneCraftingTerminal>>
             WIRELESS_ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
@@ -105,8 +105,8 @@ public final class ModMenuTypes {
                             .buildUnregistered(ThEIds.id("wireless_arcane_crafting_terminal")));
 
     /**
-     * 源质标准发信器的界面。上报值作为初始数据一并带过去——它是一项设置，而不是
-     * 服务端不断推送的东西——因此阈值框打开时显示的就是发信器当前的设定值。
+     * 源质标准发信器的界面。上报值随初始数据带过去，它是设置，服务端不会一直推：
+     * 阈值框打开时显示的就是发信器当前的设定值。
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaLevelEmitter>> ESSENTIA_LEVEL_EMITTER =
             REGISTRY.register(

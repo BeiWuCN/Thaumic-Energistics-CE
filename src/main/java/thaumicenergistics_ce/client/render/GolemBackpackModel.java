@@ -13,12 +13,10 @@ import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
 /**
- * 背包：一个带天线的盒子，以及一颗表示网络是否在线的珍珠。
- * 它由 {@link LayerDefinition} 烘培而成，不是注册的模型层。三个盒子用的是
- * 参考构建自身的单位和旋转，与十张皮肤纹理对应，并且是侧躺的：
- * 渲染器把模型绕 Y 轴转四分之一圈，而改为交换盒子尺寸
- * 会让每个面上的纹理都转过去。珍珠是手工构建的四个双面面，
- * 所以它变红和变绿一样容易。
+ * 背包：带天线的盒子，加一颗表示网络在不在的珍珠。由 {@link LayerDefinition} 烘出来，
+ * 不是注册的模型层。三个盒子用参考实现自己的单位和旋转，对十张皮肤纹理，而且是侧躺的：
+ * 渲染器把模型绕 Y 轴转四分之一圈，改成交换盒子尺寸会让每个面的纹理都转过去。
+ * 珍珠是手工建的四个双面面，变红和变绿一样容易。
  */
 public final class GolemBackpackModel {
 
@@ -28,14 +26,13 @@ public final class GolemBackpackModel {
     private static final float PEARL_SIZE = 0.125F;
 
     /**
-     * 珍珠底面位于背包原点上方的高度，以珍珠自身的单位计：2.85 让它贴在
-     * 天线尖端（这些单位下为 3.0），而不是悬浮在其上方。
+     * 珍珠底面在背包原点上方多高，按珍珠自己的单位：2.85 让它贴住天线尖端（这单位下 3.0），不浮在上面。
      */
     private static final float PEARL_BOTTOM = 2.85F;
 
     private static final float PEARL_HALF_WIDTH = 0.55F;
 
-    /** 珍珠在皮肤纹理中的一角，以十六分之一为单位。 */
+    /** 珍珠在皮肤纹理里的一角，单位十六分之一。 */
     private static final float PEARL_MIN_U = 8.0F / 16.0F;
     private static final float PEARL_MAX_U = 13.5F / 16.0F;
     private static final float PEARL_MIN_V = 6.0F / 16.0F;
@@ -82,7 +79,7 @@ public final class GolemBackpackModel {
 
         for (int face = 0; face < 4; face++) {
             poseStack.pushPose();
-            // 面 1 和面 3 转四分之一圈，从而落到天线的另外两侧。
+            // 面 1 和面 3 转四分之一圈，落到天线另外两侧。
             if ((face & 1) == 1) {
                 poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
             }
@@ -116,8 +113,8 @@ public final class GolemBackpackModel {
     }
 
     /**
-     * 一个角点，经变换后写出。临时向量复用而不重新分配：这段代码
-     * 每帧对每个傀儡的每个顶点都跑一次，背包不该成为帧时间变化的理由。
+     * 一个角点，变换后写出。临时向量复用不新分配：每帧对每个傀儡的每个顶点都跑一次，
+     * 背包不该是帧时间变化的理由。
      */
     private static void addVertex(VertexConsumer buffer, Matrix4f matrix, Vector4f scratch, float[] corner,
             float[] uv, int red, int green, int blue, int packedLight, int packedOverlay, float normal) {

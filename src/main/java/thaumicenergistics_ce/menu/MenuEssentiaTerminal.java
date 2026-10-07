@@ -7,9 +7,9 @@ import net.minecraft.world.inventory.MenuType;
 
 /**
  * 源质终端的菜单，由线缆部件和无线物品共用。
- * 常规的一切都来自 AE2 的 {@link MEStorageMenu}，源质只增加了它的键
- * 类型。源质搬运继承自 {@link MenuEssentiaTerminalBase}，且只作用于玩家
- * 手持的容器，而提供哪些键类型由宿主的 [KeyTypeSelection] 决定。
+ * 常规的一切都来自 AE2 的 {@link MEStorageMenu}，源质只加上自己的键类型。
+ * 源质搬运继承自 {@link MenuEssentiaTerminalBase}，只管玩家手持的容器；
+ * 提供哪些键类型由宿主的 [KeyTypeSelection] 决定。
  */
 public class MenuEssentiaTerminal extends MenuEssentiaTerminalBase {
 

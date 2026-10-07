@@ -10,10 +10,8 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 菜单的 3x3 配方网格：一次点击所做的写入、已存储样板的回读，以及
- * 说明网格是否仍以同样方式解析的签名。
- * 网格在两侧都存在，客户端的写入是载荷而不是槽位同步——见
- * {@code GhostGridSlot}——所以这里的写入会落到机器的容器上，或作为载荷发送。
+ * 菜单的 3x3 配方网格：点击写入、回读已存样板、判断网格解析方式是否未变的签名。
+ * 两半都持有网格；客户端写入走载荷（见 {@code GhostGridSlot}），落点是机器容器或一个载荷。
  */
 final class InscriberGridState {
 
@@ -30,8 +28,8 @@ final class InscriberGridState {
     }
 
     /**
-     * 一个格位，来自菜单的点击路由：在服务端写机器的容器，在客户端写
-     * 槽位，其载荷由服务端在下一个 tick 变成同样的写入。
+     * 写一个格位，按菜单的点击路由分发：服务端落机器容器，客户端落槽位。
+     * 客户端的写入由服务端在下一个 tick 用载荷补齐。
      */
     void setCell(int cell, ItemStack stack) {
         if (menu.inscriber != null) {
@@ -50,8 +48,8 @@ final class InscriberGridState {
     }
 
     /**
-     * 每个 tick 最多重新采样一次：九个物品堆的组件太多，无法逐帧哈希，所以
-     * 没有推进 tick 的那一帧会复用上一次的答案。
+     * 每个 tick 至多重算一次：九个物品堆的组件逐帧哈希太贵。
+     * 未推进 tick 的帧复用上一次的结果。
      */
     int signature() {
         long now = menu.playerInventory.player.level().getGameTime();
@@ -67,8 +65,8 @@ final class InscriberGridState {
     }
 
     /**
-     * 用配方的布局填充网格，JEI 转移与样板点击都是这么做的，且一次写入完成：
-     * 每个格位一个载荷会让服务端针对一个一半还是旧配方的网格反复解析。
+     * 用配方的布局填网格，JEI 转移和样板点击都走这里，一次写完。
+     * 每格一个载荷会让服务端拿半旧的网格反复解析配方。
      */
     void fillFromRecipe(List<ItemStack> cells) {
         List<ItemStack> full = new ArrayList<>(MenuKnowledgeInscriber.CRAFT_SLOTS);
@@ -77,7 +75,7 @@ final class InscriberGridState {
             full.add(stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1));
         }
 
-        // 1. 本侧的网格，一次遍历完成。写入容器不会发送载荷。
+        // 1. 本侧网格，一次遍历写完；写容器不会发载荷。
         for (int cell = 0; cell < MenuKnowledgeInscriber.CRAFT_SLOTS; cell++) {
             menu.machine.setItem(BlockEntityKnowledgeInscriber.GRID_SLOT_START + cell, full.get(cell));
         }
@@ -90,13 +88,13 @@ final class InscriberGridState {
     }
 
     /**
-     * 把已存储的样板读回网格：按钮在那里起作用，所以这也是删除路径。
-     * 尾部会被清空，因为无序配方的存储网格是一份紧凑的材料清单。
+     * 把已存样板读回网格：按钮落在那里，这同时是删除路径。
+     * 尾部要清空，无序配方的存储网格是一份紧凑的材料清单。
      */
     void loadPattern(int index) {
         List<ItemStack> cells = storedGrid(index);
         if (cells == null) {
-            // 点名了所请求的凹槽，这样空凹槽就能与找错的凹槽区分开。
+            // 日志里点名所请求的凹槽，好把空凹槽与找错的凹槽分开。
             ThELog.LOG.info("[inscriber] pattern well {} holds nothing to load", index);
             return;
         }
@@ -105,13 +103,13 @@ final class InscriberGridState {
                 index,
                 cells.isEmpty() ? "empty grid" : cells.getFirst(),
                 cells.size());
-        // 一次性替换，所以网格绝不会同时持有旧配方与新配方的混合物。
+        // 一次性替换，网格里不会混着旧配方和新配方。
         menu.fillGridFromRecipe(cells);
     }
 
     /**
-     * 某个凹槽中已存储样板的网格，为空时为 {@code null}。按位置从核心读取：
-     * 凹槽自身的槽位从未被填充，所以它们是过时的。
+     * 某个凹槽里已存样板的网格，没有时为 {@code null}。
+     * 按位置从核心读：凹槽自己的槽位从没被填过，是过时的。
      */
     private @Nullable List<ItemStack> storedGrid(int index) {
         if (index < 0) {

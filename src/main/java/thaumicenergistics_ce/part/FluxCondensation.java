@@ -16,7 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 
-/** Thaumaturge 没有「咒波能否落在这里」这一问，所以落点沿一条链逐级挑选。 */
+/** Thaumaturge 不提供「咒波能不能落在这里」这一问，落点沿一条链逐级挑。 */
 final class FluxCondensation {
 
     // 设计写的是 35%；作者取了它的十分之一。
@@ -53,13 +53,13 @@ final class FluxCondensation {
                 return;
             }
             long condensed = storage.insert(vitium, drawn, Actionable.MODULATE, source);
-            // 网络不肯收下的部分回退成咒波，而不是就此消失。
+            // 网络不肯收下的部分回退成咒波，不会就此消失。
             if (condensed < drawn) {
                 TcAura.addFlux(server, landing, drawn - condensed);
             }
             return;
         }
-        // 排空窗口位于凝结窗口之上，所以两条路径排空的都是同样的 1.5%。
+        // 排空窗口在凝结窗口之上，两条路径排空的都是同样的 1.5%。
         double spillCeiling = condensing ? CONDENSE_CHANCE + SPILL_CHANCE : SPILL_CHANCE;
         if (roll < spillCeiling) {
             spill(server, landing, budget, take);

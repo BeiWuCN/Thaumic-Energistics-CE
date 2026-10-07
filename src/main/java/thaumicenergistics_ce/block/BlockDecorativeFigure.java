@@ -24,10 +24,9 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * 装饰人偶方块——一个毛绒模型，不是机器。{@code variant} 必须保留：
- * 方块状态声明了四种朝向乘二，缺少 variant 就不可达，并会渲染成
- * 缺失贴图的立方体。人偶可继续被设置，右键会让它转向
- * 操作它的玩家。
+ * 装饰人偶方块：一个毛绒模型，不是机器。
+ * {@code variant} 要保留：方块状态声明了四种朝向乘二，缺 variant 的不可达，会渲染成缺贴图的立方体。
+ * 右键让它转向操作它的玩家。
  */
 public class BlockDecorativeFigure extends HorizontalDirectionalBlock {
 
@@ -80,7 +79,7 @@ public class BlockDecorativeFigure extends HorizontalDirectionalBlock {
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (player.isShiftKeyDown()) {
             if (!level.isClientSide()) {
-                // 按物品取走而不是破坏（破坏会播放破坏音效）：这只是在搬动摆件。
+                // 按物品取走，不破坏（破坏会播破坏音效）：这只是搬动摆件。
                 if (!player.getAbilities().instabuild) {
                     Block.popResource(level, pos, new ItemStack(asItem()));
                 }

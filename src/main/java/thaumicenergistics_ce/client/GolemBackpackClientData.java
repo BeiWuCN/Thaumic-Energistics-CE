@@ -9,9 +9,8 @@ import thaumicenergistics_ce.golem.BackpackSkins;
 import thaumicenergistics_ce.network.GolemBackpackPayload;
 
 /**
- * 客户端持有的副本：哪些傀儡背着背包，以及它长什么样。
- * 以实体为弱键，所以离开世界的傀儡会带走它的条目，而未知的傀儡
- * 读作“没有背包”，渲染器从第一帧起就是安全的。
+ * 客户端持有的副本：哪些傀儡背着背包，长什么样。以实体为弱键，
+ * 傀儡离开世界就带走它的条目；未知傀儡读作「没有背包」，渲染器从第一帧就安全。
  */
 public final class GolemBackpackClientData {
 

@@ -18,10 +18,10 @@ import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
- * 知识铭刻机：玩家填的槽位，以及从这些槽位读出的两个答案——网格
- * 解析成什么，以及按钮会用那份配方做什么。槽位在
- * {@link InscriberInventory} 里，解析在 {@link InscriberResolution} 里，所以留在这里
- * 的是其它包调用的门面：槽位、状态码和菜单。
+ * 知识铭刻机：玩家填的槽位，以及从槽位读出的两个答案：
+ * 网格解析成什么，按钮拿那份配方做什么。
+ * 槽位在 {@link InscriberInventory}，解析在 {@link InscriberResolution}；
+ * 留在这里的是别的包调用的门面：槽位、状态码和菜单。
  */
 public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
 
@@ -47,7 +47,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         super(ModBlockEntities.KNOWLEDGE_INSCRIBER.get(), pos, state);
     }
 
-    /** 由物品栏在每次改动时调用，但不包括被压住的网格写入。 */
+    /** 物品栏每次改动都调它，被压住的网格写入不调。 */
     void contentsChanged() {
         resolution.markDirty();
         resolution.refresh();
@@ -73,7 +73,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         inventory.setCell(cell, stack);
     }
 
-    /** 一次改动，不是九次：写入网格时把通知压住。 */
+    /** 一次改动，不是九次：写网格期间压住通知。 */
     public void setGrid(List<ItemStack> cells) {
         inventory.setAll(cells);
     }
@@ -157,8 +157,8 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         resolution.readFrom(tag);
     }
 
-    // 没有自定义更新标签：核心由菜单自己的槽位同步保持同步，而把容器
-    // 通过方块更新推过去只会让客户端多一份过期的副本。
+    // 没有自定义更新标签：核心靠菜单自己的槽位同步跟上，
+    // 走方块更新推容器只会在客户端多留一份过期副本。
 
     @Override
     public Component getDisplayName() {

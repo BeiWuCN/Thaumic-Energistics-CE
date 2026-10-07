@@ -6,9 +6,9 @@ import java.util.List;
 import net.minecraft.resources.ResourceKey;
 
 /**
- * 本 mod 用到的要素键。{@code TCAspects} 的常量只出现在方法体里，从不进入本 mod
- * 自己的签名，所以整套转发而不必包装类型本身。上游把注册表类的前缀从 {@code TC}
- * 改成 {@code TT} 时，需要改的只有上面那行 import 和下面这些赋值。
+ * 本 mod 用到的要素键。{@code TCAspects} 的常量只出现在方法体里，
+ * 从不进入本 mod 自己的签名，整套转发，不必包装类型本身。
+ * 上游把注册表类前缀从 {@code TC} 改成 {@code TT} 时，要改的只有上面那行 import 和下面这些赋值。
  */
 public final class TcAspects {
     private TcAspects() {}

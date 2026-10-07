@@ -22,8 +22,8 @@ import net.minecraft.world.item.component.CustomData;
 import org.jspecify.annotations.Nullable;
 
 /**
- * 把样板按标签读写，并将其包装成 AE2 的合成 CPU 保存与解码所用的物品。
- * 知识核心与任务列表共用同一套 {@link #save}/{@link #load} 约定，因此
+ * 把样板按标签读写，并包装成 AE2 合成 CPU 保存与解码所用的物品。
+ * 知识核心和任务列表共用同一套 {@link #save}/{@link #load} 约定，
  * 样板在两者之间不会出现差异。
  */
 final class ArcanePatternTags {
@@ -38,7 +38,7 @@ final class ArcanePatternTags {
         return stack;
     }
 
-    /** 从 {@link #toItem} 产出的物品中读回样板，无法读取时返回 {@code null}。 */
+    /** 从 {@link #toItem} 产出的物品里读回样板，读不出来时返回 {@code null}。 */
     static @Nullable ThEArcanePattern ofItem(ItemStack stack, HolderLookup.Provider registries) {
         if (stack == null || stack.isEmpty()) {
             return null;
@@ -155,7 +155,7 @@ final class ArcanePatternTags {
                 tag.getInt("BaseVis"),
                 research,
                 stage,
-                // 标签会被保留下来，正是上面那个例外：标签无法从配方反推得到。
+                // 标签会保留下来，正是上面那个例外：标签无法从配方反推得到。
                 cellTags);
     }
 }

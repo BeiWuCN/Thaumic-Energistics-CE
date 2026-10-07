@@ -31,11 +31,10 @@ import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * 奥术合成终端的菜单，通过放置的部件或通过配对物品进入。
- * 它包含九个合成单元、一个结果槽、六个侧面槽（其中水晶按两份计）以及
- * 一个法杖槽，其结构仿照 AE2 的 {@code CraftingTermMenu}，因为 [CraftingRecipe] 永远
- * 匹配不上奥术配方。它的源质手势来自 {@link MenuEssentiaTerminalBase}，以
- * 访问卡为门槛。
+ * 奥术合成终端的菜单，来自放置的部件或配对的物品。
+ * 九个合成单元、一个结果槽、六个侧面槽（水晶按两份计）、一个法杖槽。
+ * 结构照抄 AE2 的 {@code CraftingTermMenu}：[CraftingRecipe] 匹配不上奥术配方。
+ * 源质手势来自 {@link MenuEssentiaTerminalBase}，要访问卡。
  */
 public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         implements ICraftingGridMenu, InternalInventoryHost {
@@ -49,7 +48,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     public static final SlotSemantic CRYSTALS_RIGHT =
             SlotSemantics.register("THAUMICENERGISTICS_CRYSTALS_RIGHT", true);
 
-    // 取自屏幕样式，它把网格底部锚定在 26,158，并按三列断开。
+    // 网格底部锚在 26,158，三列一行，取自屏幕样式。
     private static final int GRID_X = 26;
     private static final int GRID_Y = 96;
     private static final int GRID_PITCH = 18;
@@ -65,8 +64,8 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     private final @Nullable PartArcaneCraftingTerminal part;
 
     /**
-     * 尚未解析出终端时，三个容器的替身：槽位始终存在，否则看不到
-     * 所绑区块的客户端会构建出与服务端不同的菜单。
+     * 终端还没解析出来时的替身容器。
+     * 槽位要始终存在，否则看不到所绑区块的客户端会建出和服务端不一样的菜单。
      */
     private final AppEngInternalInventory gridFallback = new AppEngInternalInventory(this, GRID_SIZE);
 
@@ -81,7 +80,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
     private final InternalInventory crystals;
 
-    /** 仅为无线终端设置：它自购灵气，而这份灵气就是其玩家周围的灵气。 */
+    /** 只有无线终端有：自己买灵气，买到的就是玩家周围的灵气。 */
     private final @Nullable IEnergySource auraPayer;
 
     private final AppEngInternalInventory resultInventory =
@@ -105,20 +104,20 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
             int column = i % GRID_COLS;
             int row = i / GRID_COLS;
             Slot cell = addSlot(new AppEngSlot(craftingGrid, i), SlotSemantics.CRAFTING_GRID);
-            // AE2 会用屏幕样式替换这些值；仍先设置，以便在那之前读取槽位。
+            // AE2 随后会用屏幕样式覆盖这些值；先设一次，覆盖之前读槽位才正常。
             cell.x = GRID_X + column * GRID_PITCH;
             cell.y = GRID_Y + row * GRID_PITCH;
         }
 
-        // 2. 法杖槽。[STORAGE]：AE2 对工具没有语义；这个槽负责摆放和 shift 点击。
+        // 2. 法杖槽，[STORAGE] 类型；AE2 对工具没有语义，这个槽只管摆放和 shift 点击。
         Slot wandSlot = addSlot(
                 new AppEngSlot(wandInventory, PartArcaneCraftingTerminal.WAND_SLOT),
                 SlotSemantics.STORAGE);
         wandSlot.x = WAND_X;
         wandSlot.y = WAND_Y;
 
-        // 3. 六个水晶槽，网格每侧竖排三个。每个都固定到 Thaumaturge 自己的
-        // 元要素顺序中的一个，且网格中的水晶按两份计。见 [CrystalSlot]。
+        // 3. 六个水晶槽，网格每侧竖排三个，各自绑死 Thaumaturge 元要素顺序里的一位。
+        // 网格里的水晶按两份计；见 [CrystalSlot]。
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_COLUMN; i++) {
             Slot slot = addSlot(new CrystalSlot(crystals, i, aspectOf(i)), CRYSTALS_LEFT);
             slot.x = CRYSTALS_LEFT_X;
@@ -131,7 +130,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
             slot.y = GRID_Y + i * GRID_PITCH;
         }
 
-        // 4. 结果槽，在它所读取的存储、能量与网格之后。
+        // 4. 结果槽，排在它要读的存储、能量、网格之后。
         this.resultSlot = new ArcaneCraftingResultSlot(
                 playerInventory.player,
                 getActionSource(),
@@ -145,10 +144,10 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         resultSlot.x = RESULT_X;
         resultSlot.y = RESULT_Y;
 
-        // 5. 玩家自己的槽位，最后添加且只加一次 —— 父类调用传入 [createPlayerSlots] = false。
+        // 5. 玩家槽位，最后加，且只加一次；父类调用传 [createPlayerSlots] = false。
         createPlayerInventorySlots(playerInventory);
 
-        // 结果只填一次，这样上次留下的网格在打开时就能显示。
+        // 开菜单时刷一次结果，上次留下的网格才显示得出来。
         resultSlot.refresh();
     }
 
@@ -203,7 +202,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         return resultSlot;
     }
 
-    /** 无线终端的电池；对放置式终端为 {@code null}，后者的 vis 由网络购买。 */
+    /** 无线终端的电池；放置式终端为 {@code null}，它的 vis 找网络买。 */
     public @Nullable IEnergySource auraPayer() {
         return auraPayer;
     }
@@ -234,28 +233,27 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     }
 
 
-    /** 终端物品自带升级槽里的那张卡就是全部权限；不读取其它任何东西。 */
+    /** 权限只看终端物品升级槽里那张卡，别处一概不读。 */
     @Override
     protected boolean essentiaAccessGranted() {
-        // AE2 的菜单是按宿主自己的升级物品栏构建的，所以这就是玩家看到的那个槽。
+        // 玩家看到的就是宿主自己的升级栏；AE2 菜单按它构建。
         return getHost().getUpgrades().isInstalled(ModItems.ESSENTIA_ACCESS_CARD.get());
     }
 
-    /** 屏幕问这个只是为了隐藏手势；服务端在移动任何东西之前会再问一次。 */
+    /** 屏幕问它只为隐藏手势；服务端在动东西之前会再问一次。 */
     public boolean hasEssentiaAccessCard() {
         return essentiaAccessGranted();
     }
 
-    /** vis 卡是否插在玩家打开的那个终端里：由宿主自己的槽位作答，因此包里
-     * 的第二个终端不能替正在使用的那个说话。 */
+    /** vis 卡是否插在打开的那个终端上。
+     * 答话的是宿主自己的槽位，包里第二张终端顶不了。 */
     public boolean hasVisConnectionCard() {
         return TerminalAuraPayment.visConnectionInstalled(getHost());
     }
 
-    /** 不持久化：结果由网格推导而来，保存下来的结果会比网格活得久。 */
+    /** 不写存档：结果由网格推导，存下来的会活得比网格久。 */
     @Override
     public void saveChangedInventory(AppEngInternalInventory inventory) {
-        // 无需保存：结果由网格推导而来。
     }
 
     @Override

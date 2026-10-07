@@ -7,10 +7,10 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * 一个供应器服务的接收端，以及它们给它带来的空闲功耗。链路被拒绝时以原因
- * 作为消息——已绑定、距离太远，或链路过多——位置以不可变方式存储，
- * 所以移动过的接收端就是另一个接收端。空闲功耗是基础值加上每条链路的分摊，
- * 每次变化时设置，从不保存。
+ * 一个供应器服务的接收端，以及它们给它带来的空闲功耗。
+ * 链路被拒绝时以原因作为消息：已绑定、距离太远，或链路过多。
+ * 位置按不可变存储，移动过的接收端就是另一个接收端。
+ * 空闲功耗是基础值加每条链路的分摊，每次变化时设置，从不保存。
  */
 final class ReceiverLinks {
 
@@ -67,7 +67,7 @@ final class ReceiverLinks {
         return List.copyOf(linked);
     }
 
-    /** 丢弃接收端已消失的链路；有链路被丢弃时为 true，这样供应器可以立即重 tick。 */
+    /** 丢弃接收端已消失的链路；有链路被丢弃时为 true，供应器可以立即重 tick。 */
     boolean pruneDead() {
         Level level = provider.getLevel();
         if (level == null || linked.isEmpty()) {
@@ -87,7 +87,7 @@ final class ReceiverLinks {
         linked.addAll(positions);
     }
 
-    /** 基础空闲功耗加上每条链路的分摊：网格向此供应器收取的数值。 */
+    /** 基础空闲功耗加每条链路的分摊：网格向这个供应器收取的数值。 */
     void updateIdlePower() {
         provider.getMainNode().setIdlePowerUsage(IDLE_POWER + POWER_PER_RECEIVER * linked.size());
     }

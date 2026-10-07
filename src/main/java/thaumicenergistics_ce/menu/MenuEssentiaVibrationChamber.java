@@ -14,11 +14,9 @@ import thaumicenergistics_ce.blockentity.vibrationchamber.VibrationChamberSync;
 import thaumicenergistics_ce.init.ModMenuTypes;
 
 /**
- * 源质振动室的菜单：玩家物品栏，以及机器的三项读数。
- * 这台机器没有槽位，因为燃料通过管道或从 ME 网络输入，电力通过
- * 线缆输出。它的读数以 {@link ContainerData} 传输，因为它们每 tick 都变；屏幕
- * 读自己的方块实体副本只会显示最后一次方块更新恰好
- * 带上的值。
+ * 源质振动室的菜单：玩家物品栏，加机器的三项读数。机器没有槽，
+ * 燃料从管道或 ME 网络进，电力从线缆出。读数用 {@link ContainerData} 传，因每 tick 都变；
+ * 屏幕读自己的方块实体副本，只会显示最后一次方块更新恰好带的值。
  */
 public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
 
@@ -29,8 +27,8 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
     private static final int HOTBAR_Y = 142;
     private static final int PITCH = 18;
 
-    // 读数，按屏幕从 [ContainerData] 读出它们的顺序。数字及其
-    // 含义存放在 [VibrationChamberSync]；这些名字保留是因为屏幕会用到它们。
+    // 读数，按屏幕从 [ContainerData] 读出的顺序。数字和含义在 [VibrationChamberSync]；
+    // 这些名字留着是因屏幕要用。
     public static final int DATA_ESSENTIA = VibrationChamberSync.ESSENTIA;
     public static final int DATA_ESSENTIA_MAX = VibrationChamberSync.ESSENTIA_MAX;
     public static final int DATA_ENERGY = VibrationChamberSync.ENERGY;
@@ -104,8 +102,8 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
     }
 
     /**
-     * shift 点击只在玩家物品栏与快捷栏之间搬运物品堆，别的什么都做不了：
-     * 机器没有槽位，所以这不是疏漏，而是能做到的极限。
+     * shift 点击只在玩家物品栏和快捷栏之间搬物品堆，没别的：机器没有槽，
+     * 这不是疏漏，是能做到的极限。
      */
     @Override
     public ItemStack quickMoveStack(Player player, int index) {

@@ -20,10 +20,9 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
  * 源质标准发信器：跟随网络持有某个要素多少的红石信号。
- * 红石、上报值、升级槽位与点亮状态的流式同步都来自 AE2 的
- * 发信器部件。监视经由网格的存储监视器，而不是逐 tick 轮询，
- * 因为 AE2 已经缓存了网络的内容。该数值是网络总量，所以挂在存储总线上的罐子
- * 也计入其中。
+ * 红石、上报值、升级槽位与点亮状态的流式同步都来自 AE2 的发信器部件。
+ * 监视走网格的存储监视器，不逐 tick 轮询，AE2 已经缓存了网络内容。
+ * 该数值是网络总量，挂在存储总线上的罐子也计入。
  */
 public class PartEssentiaLevelEmitter extends AbstractLevelEmitterPart {
 
@@ -107,7 +106,7 @@ public class PartEssentiaLevelEmitter extends AbstractLevelEmitterPart {
                 storageWatcher.add(key);
             }
         }
-        // 立刻询问而不是等待：否则没变化的网络在变动之前不会上报任何东西。
+        // 立刻询问，不等：没变化的网络在变动之前不会上报。
         getMainNode().ifPresent(this::updateReportingValue);
         updateState();
     }

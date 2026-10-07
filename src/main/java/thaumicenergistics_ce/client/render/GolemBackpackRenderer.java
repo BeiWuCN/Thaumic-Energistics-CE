@@ -25,11 +25,10 @@ import thaumicenergistics_ce.client.GolemBackpackClientData;
 import thaumicenergistics_ce.golem.BackpackSkins;
 
 /**
- * 每帧绘制所有可见的背包，从世界渲染阶段而不是傀儡自身的渲染器出发。
- * 那一帧没有可挂的钩子，因为 Thaumaturge 的傀儡渲染器不是 NeoForge
- * 能加层的 living 类型，所以 {@link #PACK_HEIGHT} 和 {@link #PACK_DEPTH} 是目测定的。
- * 它在 AFTER_ENTITIES 阶段绘制，且批次在此收尾而不是
- * 留着不关。
+ * 每帧从世界渲染阶段画出所有可见背包。
+ * Thaumaturge 的傀儡渲染器不是 NeoForge 能加层的 living 类型，没有钩子可挂。
+ * {@link #PACK_HEIGHT} 和 {@link #PACK_DEPTH} 是目测定的。
+ * 绘制在 AFTER_ENTITIES 阶段，批次在这里收尾。
  */
 @EventBusSubscriber(modid = ThEIds.MODID, value = Dist.CLIENT)
 public final class GolemBackpackRenderer {
@@ -46,8 +45,8 @@ public final class GolemBackpackRenderer {
     private static final GolemBackpackModel MODEL = GolemBackpackModel.create();
 
     /**
-     * 按皮肤区分的渲染类型，每种只构建一次：{@code RenderType.entityCutoutNoCull(texture)}
-     * 每次调用都会分配新对象，而在批次中途切换类型会刷新缓冲源的待处理批次。
+     * 按皮肤区分的渲染类型，每种只建一次。
+     * {@code RenderType.entityCutoutNoCull(texture)} 每次调用都分配新对象，批次中途切换类型会刷新待处理批次。
      */
     private static final Map<BackpackSkins, RenderType> PACK_TYPES = new EnumMap<>(BackpackSkins.class);
     private static final Map<BackpackSkins, RenderType> PEARL_TYPES = new EnumMap<>(BackpackSkins.class);
@@ -68,7 +67,7 @@ public final class GolemBackpackRenderer {
 
         PoseStack poseStack = event.getPoseStack();
         Vec3 camera = event.getCamera().getPosition();
-        // 本帧占一个 tick 的比例：它让插值后的傀儡位置落在 tick 之间。
+        // 本帧在 tick 内的比例；插值后的傀儡位置就落在两个 tick 之间。
         float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         BufferSource buffers = minecraft.renderBuffers().bufferSource();
         boolean drewAny = false;
@@ -90,11 +89,11 @@ public final class GolemBackpackRenderer {
 
             poseStack.pushPose();
             poseStack.translate(x, y, z);
-            // 傀儡渲染器自身的主体旋转；模型空间的 +Z 是傀儡的背面，因此是 +depth。
+            // 傀儡渲染器自身的主体旋转；模型空间 +Z 是傀儡背面，取 +depth。
             poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - bodyRotation));
             poseStack.translate(0.0F, PACK_HEIGHT, PACK_DEPTH);
-            // 四分之一圈：模型的盒子是按沿 X 轴两像素厚制作的。这一步留在这里而不放进
-            // 模型，这样皮肤纹理才能继续与它们原本绘制的面匹配。
+            // 四分之一圈：模型盒子按沿 X 轴两像素厚制作。
+            // 放在这里而不写进模型，皮肤纹理才能继续对上它们原本绘制的面。
             poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
             poseStack.scale(PACK_SCALE, PACK_SCALE, PACK_SCALE);
 

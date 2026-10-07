@@ -15,9 +15,9 @@ import net.minecraft.world.level.Level;
 import thaumicenergistics_ce.init.ModItems;
 
 /**
- * 铭刻机的槽位：核心、镜像，以及玩家在菜单里拼出的网格。一次
- * 网格写入是一次改动而不是九次，因为写入元件时把通知压住；
- * 保存会保留槽位索引，所以带空隙的网格回来时仍带空隙。
+ * 铭刻机的槽位：核心、镜像、玩家在菜单里拼出的网格。
+ * 网格一次写完算一次改动；写元件期间通知被压住，否则会解析出半旧的网格。
+ * 保存保留槽位索引，带空隙的网格回来时仍带空隙。
  */
 final class InscriberInventory {
 
@@ -37,15 +37,15 @@ final class InscriberInventory {
 
                 @Override
                 public boolean canPlaceItem(int slot, ItemStack stack) {
-                    // 核心是唯一持有物品的槽位；它旁边的那些槽只镜像
-                    // 核心已经存着的东西，所以完全不许往那里放东西。
+                    // 只有核心槽真正持有物品，旁边的槽只镜像核心已经存着的东西。
+                    // 那些镜像槽不许写入。
                     return slot == BlockEntityKnowledgeInscriber.CORE_SLOT
                             && stack.is(ModItems.KNOWLEDGE_CORE.get());
                 }
             };
 
-    /** 在网格被逐格写入期间为 true：逐格通知会解析出一个换了一半的
-     * 网格，玩家会看着旧配方的物品被一件件挤出去。 */
+    /** 网格正在被逐格写入期间为 true。
+     * 逐格通知会解析出一个换了一半的网格，玩家会看着旧配方的物品一件件被挤出去。 */
     private boolean absorbing;
 
     InscriberInventory(BlockEntityKnowledgeInscriber inscriber) {
@@ -122,8 +122,8 @@ final class InscriberInventory {
     }
 
     void saveItems(CompoundTag tag, HolderLookup.Provider registries) {
-        // 不用 SimpleContainer.createTag：它只写非空槽位且不记录索引，于是网格
-        // 回来时空隙没了，每个物品都往前挪了。
+        // 不用 SimpleContainer.createTag：它只写非空槽位、不记录索引。
+        // 那样网格回来时空隙没了，每个物品都往前挪。
         ContainerHelper.saveAllItems(tag, inventory.getItems(), registries);
     }
 
@@ -131,14 +131,14 @@ final class InscriberInventory {
         if (tag.contains(ContainerHelper.TAG_ITEMS, Tag.TAG_LIST)) {
             ContainerHelper.loadAllItems(tag, inventory.getItems(), registries);
         } else {
-            // 在本次改动之前保存的世界在 "Inventory" 下存的是裸列表，本来就没有空隙：按
-            // 位置读取，下一次保存就会写出新形式。
+            // 本次改动前存档的世界在 "Inventory" 下存的是裸列表，本来就没有空隙。
+            // 按位置读取，下一次保存就会写出新格式。
             loadLegacy(tag.getList("Inventory", Tag.TAG_COMPOUND), registries);
         }
     }
 
-    /** 按位置读取旧的裸列表形式；那种形式丢掉了条目原本来自哪些槽位，而且
-     * 列表指明的槽位可能多于本版本拥有的槽位。 */
+    /** 按位置读旧的裸列表形式。
+     * 那种形式丢掉了条目原本来自哪个槽位，列表里的槽位数还可能多于本版本拥有的。 */
     private void loadLegacy(ListTag list, HolderLookup.Provider registries) {
         int kept = Math.min(list.size(), BlockEntityKnowledgeInscriber.SLOT_COUNT);
         for (int i = 0; i < kept; i++) {
@@ -146,7 +146,7 @@ final class InscriberInventory {
         }
     }
 
-    /** 方块被破坏时掉落核心与镜像。网格是草稿纸，不是存储。 */
+    /** 方块被破坏时掉落核心与镜像；网格是草稿纸，不掉。 */
     void dropItems() {
         Level level = inscriber.getLevel();
         if (level == null) {
@@ -154,7 +154,7 @@ final class InscriberInventory {
         }
         BlockPos pos = inscriber.getBlockPos();
         for (int i = 0; i < BlockEntityKnowledgeInscriber.SLOT_COUNT; i++) {
-            // 网格里放的是玩家仍然持有的物品；掉落它们会把 JEI 拖进来的东西复制一份。
+            // 网格里是玩家本来就有的物品，掉落等于把 JEI 拖进来的东西复制一份。
             if (i >= BlockEntityKnowledgeInscriber.GRID_SLOT_START) {
                 continue;
             }

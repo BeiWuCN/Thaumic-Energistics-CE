@@ -13,15 +13,13 @@ import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
- * 箱子的源质端口，在屏幕背后的那个面上。它既索取也被索取：箱子从贴着那个面
- * 的东西抽取，而它在一次转动缺少 cognitio 时报告的吸力
- * 就是让一条管道线动起来的东西。管道只会朝一个能应答这个能力的邻居长出手臂，
- * 所以端口也是让箱子对一条线可见的东西。
+ * 箱子的源质端口，在屏幕背后那一面。它既抽也被抽：箱子从贴着那面的东西抽，
+ * 转动缺 cognitio 时报的吸力就是让管道线动起来的东西。管子只朝能应答这个 [能力] 的邻居伸臂，
+ * 一条线能不能看见箱子也看它。
  */
 final class GachaEssentiaPort implements IEssentiaTransport {
 
-    /** 箱子在一次转动缺少 cognitio 时报告的吸力：Thaumaturge 自己的源质端口
-     * 索取时用的强度，足以压过一个罐并让整条线动起来。 */
+    /** 转动缺 cognitio 时箱子报的吸力，用 Thaumaturge 自己源质端口的索取强度，压得过罐子，带得动整条线。 */
     private static final int SUCTION = 128;
 
     private final BlockEntityGachaBox box;
@@ -32,7 +30,7 @@ final class GachaEssentiaPort implements IEssentiaTransport {
         this.neighbours = new CachedEssentiaNeighbours(box);
     }
 
-    /** 把箱子背后那个面递出来的东西存入，上限是下一次转动还需要的量。 */
+    /** 把箱子背后那面递出来的东西存进来，上限是下一次转动还缺的量。 */
     void sip(ServerLevel server) {
         int need = box.cognitio().room();
         if (need <= 0) {
@@ -57,8 +55,7 @@ final class GachaEssentiaPort implements IEssentiaTransport {
         box.cognitio().add(got);
     }
 
-    /** 从管道一次一调用地取：一根管道携带一点、每次调用交出一点，
-     * 所以一条管道线会花掉它有多少点可给就有多少秒来填满储备。 */
+    /** 一次一个调用地从管道取：一根管子带一点，每次调用交一点，一条线有多少点可给就花多少秒填满储备。 */
     private static int drainTube(IEssentiaTransport tube, Direction face, Holder<IAspect> aspect, int want) {
         Direction into = face.getOpposite();
         if (!tube.canOutputTo(into) || !aspect.equals(tube.getEssentiaType(into))) {
@@ -75,59 +72,57 @@ final class GachaEssentiaPort implements IEssentiaTransport {
         return got;
     }
 
-    /** 现在一点是否会被接受：箱子能转动并且缺一次转动的燃料。 */
+    /** 这一刻收不收一点：箱子转得动，且缺一次转动的燃料。 */
     private boolean hungry() {
         return box.cognitio().wants() && box.canTurnNow();
     }
 
-    /** cognitio 按 level 给出的形式，用于那些在没有服务端时到达的能力回答。 */
+    /** cognitio 按 level 交出来的形式，给没有服务端就到的能力应答用。 */
     private static @Nullable Holder<IAspect> cognitio(@Nullable Level level) {
         return level == null ? null : AEssentiaKeyType.aspectOf(level, TcAspects.COGNITIO.location());
     }
 
-    /** 源质只经过屏幕背后的那个面到达，不经任何其他面，那也是一条管道线
-     * 必须结束、它的手臂才能形成的地方。 */
+    /** 源质只从屏幕背后那一面进，别处都不进；管道线也只有在那一面才能伸出手臂。 */
     @Override
     public boolean isConnectable(Direction face) {
         return face == box.backFace();
     }
 
-    /** 背面是入口；其他任何位置的管道手臂都不归箱子取用。 */
+    /** 背面是入口，别处的管道臂不归箱子取。 */
     @Override
     public boolean canInputFrom(Direction face) {
         return face == box.backFace();
     }
 
-    /** 绝不把任何东西再抽出去：储备是一次转动的燃料，不是可供分享的存货。 */
+    /** 从不抽回去：储备是转动的燃料，不是拿来分的存货。 */
     @Override
     public boolean canOutputTo(Direction face) {
         return false;
     }
 
-    /** 箱子用这次转动还需要的量自己造出吸力，所以管道设定不了它。 */
+    /** 吸力由箱子按转动还缺的量自己定，管道设不了。 */
     @Override
     public void setSuction(@Nullable Holder<IAspect> aspect, int amount) {}
 
-    /** 箱子在索要什么：cognitio，并且只在它还缺一次转动的量时。 */
+    /** 箱子要的是 cognitio，只在还缺一次转动的量时才要。 */
     @Override
     public @Nullable Holder<IAspect> getSuctionType(Direction face) {
         return face == box.backFace() && hungry() ? cognitio(box.getLevel()) : null;
     }
 
-    /** 让一条线动起来的吸力：管道跟随它最饿的邻居，所以一个转不动的箱子
-     * 什么也不索要，而不是把它还用不上的一个罐抽空。 */
+    /** 带得动一条线的吸力：管子跟着最饿的邻居走；转不动的箱子什么都不索要，省得抽空它还用不上的罐子。 */
     @Override
     public int getSuctionAmount(Direction face) {
         return face == box.backFace() && hungry() ? SUCTION : 0;
     }
 
-    /** 零：箱子持有的每一点都已经被它要支付的下一次转动预定了。 */
+    /** 零：箱子持有的每一点都已许给下一次转动。 */
     @Override
     public int takeEssentia(Holder<IAspect> aspect, int amount, Direction face) {
         return 0;
     }
 
-    /** 把经过背面推入的一点存入，用于一条把它携带的东西交出来的线。 */
+    /** 把背面推进来的一点存下，给那种交出自己携带物的管道线用。 */
     @Override
     public int addEssentia(Holder<IAspect> aspect, int amount, Direction face) {
         int room = spaceFor(aspect, face);
@@ -137,7 +132,7 @@ final class GachaEssentiaPort implements IEssentiaTransport {
         return box.cognitio().add(Math.min(amount, room));
     }
 
-    /** 储备持有的量从不超一次转动的花费，所以余量就是还缺的那部分。 */
+    /** 储备从不超过一次转动的花费，余量就是还缺的那部分。 */
     @Override
     public int spaceFor(Holder<IAspect> aspect, Direction face) {
         if (face != box.backFace() || !hungry() || !aspect.equals(cognitio(box.getLevel()))) {
@@ -146,19 +141,19 @@ final class GachaEssentiaPort implements IEssentiaTransport {
         return box.cognitio().room();
     }
 
-    /** 箱子里没有任何东西可供路由：已经存入的东西不是一个管道能读取的容器。 */
+    /** 箱子里没有可路由的东西：存下的源质不是管道能读的容器。 */
     @Override
     public @Nullable Holder<IAspect> getEssentiaType(Direction face) {
         return null;
     }
 
-    /** 同样的原因，为零：管道读箱子时找不到它可以拿走的东西。 */
+    /** 同样的原因，0：管道读箱子时找不到可拿走的东西。 */
     @Override
     public int getEssentiaAmount(Direction face) {
         return 0;
     }
 
-    /** 没有阈值：一条线可以按自己的条件交过来一点，而不必匹配某个强度。 */
+    /** 没有阈值：管道线交一点过来时按自己的条件，不比对强度。 */
     @Override
     public int getMinimumSuction() {
         return 0;

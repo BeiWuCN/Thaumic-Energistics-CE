@@ -13,9 +13,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
- * Thaumic Energistics 中「机器加菜单」类方块的公共外壳。子类只需
- * 提供方块实体；使用时打开它的菜单，方块按普通模型渲染。
- * 打开流程遵循原版 {@link MenuProvider} 约定，因此基于 AE2 的机器同样适用。
+ * Thaumic Energistics 里「机器加菜单」类方块的公共外壳。
+ * 子类只需提供方块实体；使用时打开它的菜单，方块按普通模型渲染。
+ * 打开流程遵循原版 {@link MenuProvider} 约定，基于 AE2 的机器同样适用。
  */
 public abstract class ThEBaseEntityBlock extends BaseEntityBlock {
 

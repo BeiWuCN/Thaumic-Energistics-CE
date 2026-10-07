@@ -20,8 +20,8 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * 把实时奥术配方变成样板：可按产物、按已编码的样板，或按手工填好的网格。
- * 样板只保存具体的显示物品堆，因此每次重载都会重新查找它背后的配方。
+ * 把实时奥术配方变成样板：按产物、按已编码的样板、或按手工填好的网格。
+ * 样板只存具体的显示物品堆，背后的配方每次重载都要重查。
  */
 final class ArcanePatternLookup {
 
@@ -30,8 +30,7 @@ final class ArcanePatternLookup {
     private ArcanePatternLookup() {}
 
     /**
-     * 把产出 {@code result} 的奥术配方转换为样板；若没有任何配方产出该
-     * 精确物品堆，则返回 {@code null}。
+     * 把产出 {@code result} 的奥术配方转成样板；没有配方产出这个精确物品堆时返回 {@code null}。
      */
     static @Nullable ThEArcanePattern fromResult(@Nullable Level level, ItemStack result) {
         if (level == null || result.isEmpty()) {
@@ -54,8 +53,8 @@ final class ArcanePatternLookup {
     }
 
     /**
-     * 用玩家编码的 AE2 样板所声称编码的奥术配方来校验该样板。
-     * @return 样板；没有奥术配方匹配时返回 {@code null}
+     * 拿样板声称编码的奥术配方校验玩家编码的 [AE2] 样板。
+     * @return 样板；没有奥术配方匹配时为 {@code null}
      */
     static @Nullable ThEArcanePattern fromEncoded(
             @Nullable Level level, List<ItemStack> patternInputs, ItemStack output) {
@@ -98,8 +97,8 @@ final class ArcanePatternLookup {
     }
 
     /**
-     * 找出手工填好的 3x3 网格所代表的奥术配方。
-     * @return 样板；没有奥术配方匹配该网格时返回 {@code null}
+     * 查明手工填好的 3x3 网格代表哪个奥术配方。
+     * @return 样板；没有配方对上这个网格时为 {@code null}
      */
     static @Nullable ThEArcanePattern resolveGrid(@Nullable Level level, List<ItemStack> cells) {
         if (level == null || cells.size() != ThEArcanePattern.MAX_GRID) {
@@ -108,8 +107,8 @@ final class ArcanePatternLookup {
         RecipeManager manager = level.getRecipeManager();
         ArcaneRecipeIndex.index(manager);
 
-        // 对各物品的候选集合取交集：只有接受全部现有物品的配方才留下。某个物品不在
-        // 索引中（索引由默认物品堆构建）时回退到全量扫描，绝不会丢配方。
+        // 按物品取交集，只有收得下全部现有物品的配方留下。
+        // 索引里查不到的物品（索引由默认物品堆建）走全量扫描，不丢配方。
         Set<ResourceLocation> candidates = null;
         for (ItemStack cell : cells) {
             if (cell.isEmpty()) {
@@ -153,9 +152,8 @@ final class ArcanePatternLookup {
     }
 
     /**
-     * 解析外部传入的样板——AE2 的编码终端或样板供应器：它的条目是具体物品堆，
-     * 所以按成员关系匹配，而不是逐格匹配。
-     * @return 样板；没有奥术配方同时匹配产物与输入时返回 {@code null}
+     * 解析外部传进来的样板（[AE2] 编码终端或样板供应器）：它的条目是具体物品堆，按成员关系匹配，不逐格比。
+     * @return 样板；没有配方同时对上产物与输入时为 {@code null}
      */
     static @Nullable ThEArcanePattern resolve(
             @Nullable Level level, List<ItemStack> inputs, ItemStack output) {
@@ -181,8 +179,8 @@ final class ArcanePatternLookup {
     private record Layout(List<ItemStack> cells, List<Ingredient> ingredients, int width, int height) {}
 
     /**
-     * 推导奥术配方的格位布局：有序配方保留真实的宽高，无序配方按
-     * 阅读顺序排布。同时保留显示物品堆和网格匹配所用的材料。
+     * 推出奥术配方的格位布局：有序配方保留真实宽高，无序配方按阅读顺序排。
+     * 显示物品堆和网格匹配用的材料一起留下。
      */
     private static @Nullable Layout layoutOf(IArcaneRecipe recipe) {
         if (recipe instanceof ArcaneShapedCraftingRecipe shaped) {
@@ -196,8 +194,7 @@ final class ArcanePatternLookup {
             if (optional.size() < width * height) {
                 return null;
             }
-            // 材料按配方自身的行来排列，而网格固定三格宽：若沿用配方的步长，
-            // 两格宽配方的第二行会落进网格的第一行。
+            // 材料按配方自己的行排，网格固定三格宽：沿用配方的步长，两格宽配方的第二行会落进网格第一行。
             List<ItemStack> cells = new ArrayList<>(ThEArcanePattern.MAX_GRID);
             List<Ingredient> ingredients = new ArrayList<>(width * height);
             for (int row = 0; row < ThEArcanePattern.GRID_SIDE; row++) {
@@ -226,8 +223,7 @@ final class ArcanePatternLookup {
     }
 
     /**
-     * 为每个材料取一个代表性物品堆：样板只保存具体物品堆，因此多物品材料取
-     * 它的第一个条目，标签则取显示物品。
+     * 每个材料取一个代表物品堆：样板只存具体物品堆，多物品材料取第一项，标签取显示物品。
      */
     private static ItemStack representative(Optional<Ingredient> ingredient) {
         if (ingredient.isEmpty() || ingredient.get().isEmpty()) {
@@ -238,15 +234,15 @@ final class ArcanePatternLookup {
     }
 
     /**
-     * 材料所代表的物品标签；只是普通物品列表时返回 {@code null}：配方表达的是
-     * 「任意铁锭」，而写入列表中第一个成员曾使组装机拒绝另一个成员。
+     * 材料代表的物品标签，普通物品列表返回 {@code null}：配方说的是「任意铁锭」，
+     * 写死列表第一个成员会让组装机拒收别的成员。
      */
     private static @Nullable TagKey<Item> tagOf(Optional<Ingredient> ingredient) {
         if (ingredient.isEmpty() || ingredient.get().isEmpty()) {
             return null;
         }
-        // 已加保护：[Ingredient#getValues] 对非普通物品列表会抛异常，该异常会逃出
-        // [fromRecipe] 与 [resolveGrid]，让一个正确摆放的网格被报成「没有配方」。
+        // [Ingredient#getValues] 对非普通物品列表会抛异常，异常逃得出 [fromRecipe] 和 [resolveGrid]，
+        // 摆得正确的网格会被报成「没有配方」。
         try {
             for (Ingredient.Value value : ingredient.get().getValues()) {
                 if (value instanceof Ingredient.TagValue tagValue) {
@@ -260,8 +256,8 @@ final class ArcanePatternLookup {
     }
 
     /**
-     * 布局在 3x3 网格上的材料标签：有序配方的列表会压缩到它自身的
-     * {@code width x height}，与 {@code layoutOf} 对显示物品堆的处理一致。
+     * 布局放在 3x3 网格上的材料标签：有序配方的列表压到它自己的 {@code width x height}，
+     * 跟 {@code layoutOf} 处理显示物品堆一样。
      */
     private static List<TagKey<Item>> gridTags(Layout layout) {
         List<TagKey<Item>> byCell = new ArrayList<>(ThEArcanePattern.MAX_GRID);

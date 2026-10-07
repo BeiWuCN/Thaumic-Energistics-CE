@@ -15,15 +15,14 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * 奥术组装机界面的几何数据，从 classpath 上的 {@code arcane_assembler_gui.json} 读取。
- * 坐标是照着 GUI 素材的槽位凹槽量出来的，所以图像凹槽与菜单槽位落在
- * 相同的像素上。布局在两侧都会读取，没有重载监听器，由
- * {@code tools/build_assembler_layout.js} 写入。
+ * 坐标照着 GUI 素材的槽位凹槽量出，图像凹槽与菜单槽位落在相同像素上。
+ * 两侧都读取，没有重载监听器，文件由 {@code tools/build_assembler_layout.js} 写入。
  */
 public final class GuiLayout {
 
     private static final String RESOURCE = "/assets/thaumicenergistics_ce/gui/arcane_assembler_gui.json";
 
-    /** 窗口尺寸，与参考界面一致；仅在布局文件无法读取时使用。 */
+    /** 窗口尺寸与参考界面一致，只在布局文件读不出来时用。 */
     private static final int FB_WIDTH = 175;
     private static final int FB_HEIGHT = 231;
 
@@ -76,13 +75,13 @@ public final class GuiLayout {
     public static final int BAR_HEIGHT = 16;
 
     /**
-     * 槽的凹槽从哪里开始，以及它有多少行。素材的第一行精灵是凹槽的
-     * 阴影，所以只有第 1..15 行是凹槽；画满十六行会在满列上重绘阴影。
+     * 凹槽从素材第 1 行开始，共 15 行。
+     * 第一行精灵是凹槽阴影，画满十六行会在满列上重绘阴影。
      */
     public static final int TROUGH_INSET = 1;
     public static final int TROUGH_INTERIOR = BAR_HEIGHT - TROUGH_INSET;
 
-    /** 元初要素列的数量；它们之后的 vis 列是合成进度。 */
+    /** 元初要素 6 列；它们之后的 vis 列是合成进度。 */
     public static final int PRIMAL_COLUMNS = 6;
 
     private final String texture;
@@ -102,8 +101,8 @@ public final class GuiLayout {
     public record PanelPiece(Region source, Anchor destination) {}
 
     private final Anchor hotbar;
-    /** 背景素材中不透明的那些片段，按绘制顺序。若改成一次性贴一个窗口大小的矩形，会
-     * 把侧板右侧的透明区域也画上，并把停在面板下方的条形精灵一并拖进来。 */
+    /** 背景素材里不透明的那些片段，按绘制顺序。改贴一整块窗口大小的矩形
+     * 会把侧板右侧的透明区也画上，并把停在面板下方的条形精灵一并拖进来。 */
     private final List<PanelPiece> panels;
 
     private GuiLayout(JsonObject root) {
@@ -171,8 +170,8 @@ public final class GuiLayout {
     }
 
     /**
-     * 读取 vis 列以及它们之后的合成进度列：每个条目一个 {@code [sourceU, x, y]} 三元组，
-     * 进度放在最后，好让 {@code PRIMAL_COLUMNS} 直接索引到它。刻意不做回退。
+     * 读 vis 列和它们之后的合成进度列：每个条目一个 {@code [sourceU, x, y]} 三元组，
+     * 进度排最后，{@code PRIMAL_COLUMNS} 就能直接索引到它。刻意不做回退。
      */
     private static VisBars visBars(JsonObject root, String key) {
         List<VisBars.Column> columns = new ArrayList<>();
@@ -185,7 +184,7 @@ public final class GuiLayout {
                     columns.add(column(entry));
                 }
             }
-            // 放在最后，使 PRIMAL_COLUMNS 直接索引到它——见 ScreenArcaneAssembler.columnRatio。
+            // 排在最后，PRIMAL_COLUMNS 直接索引到它；见 ScreenArcaneAssembler.columnRatio。
             JsonElement progress = bars.get("progress");
             if (progress != null && progress.isJsonArray()) {
                 columns.add(column(progress));
@@ -208,8 +207,8 @@ public final class GuiLayout {
         return new Region(at(v, 0, 0), at(v, 1, 0), at(v, 2, 0), at(v, 3, 0));
     }
 
-    /** mod 自带的布局，文件无法读取时则用内置的数字：没有槽位
-     * 位置的菜单不成其为菜单，所以文件缺失是一个值得记录日志的打包错误。 */
+    /** 读 mod 自带的布局，文件读不出来就用内置数字。
+     * 缺了槽位位置的菜单没法用：文件缺失是要记日志的打包错误。 */
     public static GuiLayout load() {
         try (InputStream stream = GuiLayout.class.getResourceAsStream(RESOURCE)) {
             if (stream == null) {
@@ -224,8 +223,8 @@ public final class GuiLayout {
         }
     }
 
-    /** 生成文件所携带的槽位几何数据，以代码形式写在这里，用于 load() 无法读取它的情形：仅素材
-     * 使用的字段留空，因为菜单不读取其中任何一个。 */
+    /** 生成文件里那份槽位几何，用代码写在这里，给 load() 读不出来时兜底。
+     * 只有素材用的字段留空，菜单一个都不读。 */
     private static GuiLayout builtIn() {
         JsonObject root = new JsonObject();
         root.add("patternGrid", array(26, 15, 7, 3));
@@ -302,7 +301,7 @@ public final class GuiLayout {
         return previewGrid;
     }
 
-    /** 预览的结果物品绘制在哪里，从其凹槽向内一个像素。 */
+    /** 预览结果物品画在哪：凹槽向内一个像素。 */
     public Anchor previewResult() {
         return previewResult;
     }

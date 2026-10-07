@@ -20,9 +20,8 @@ import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
  * 神秘监控器的 Jade tooltip：{@link OccultMonitorProvider} 的绘制半边。
- * 原始数字来自服务端，但文字在这里拼装，所以跟随玩家而非服务端的
- * 语言。风险拆成“4（基础 1 + 祭坛 3）”，玩家由此知道该修
- * 哪一半。
+ * 数字来自服务端，文字在这里拼，跟随玩家语言。
+ * 风险拆成“4（基础 1 + 祭坛 3）”，玩家才知道该修哪一半。
  */
 public final class OccultMonitorTooltip implements IBlockComponentProvider {
 
@@ -38,8 +37,8 @@ public final class OccultMonitorTooltip implements IBlockComponentProvider {
         JadeGridState state = JadeGridState.read(tag);
         tooltip.add(helper.text(state.label().copy().withStyle(state.colour())));
 
-        // 状态行背后的两种故障：缺少书是机器自身的错，也是玩家能修的那个；
-        // 而“没有祭坛”是关于房间的判断，只有搜索才能下。
+        // 状态行背后有两种故障：缺书是机器自身的毛病，玩家能修。
+        // “没有祭坛”是对房间的判断，只有搜索才能下。
         if (!tag.getBoolean(OccultMonitorProvider.TAG_HAS_BOOK)) {
             tooltip.add(helper.text(Component.translatable("thaumicenergistics_ce.jade.monitor.no_book")
                     .withStyle(ChatFormatting.GOLD)));
@@ -59,8 +58,8 @@ public final class OccultMonitorTooltip implements IBlockComponentProvider {
                         Component.translatable("thaumicenergistics_ce.jade.monitor.risk." + tier),
                         tier)
                 .withStyle(colourOf(tier))));
-        // 先显示实时稳定性，因为它才是会变的数字，然后才是仪式背后的两个。
-        // 负值不是错误：祭坛会把值夹在 -100 到 25 之间，低于零就抛出去。
+        // 先显示实时稳定性，那个数字才在变，仪式背后的两个排在后面。
+        // 负值不是错误：祭坛把值夹在 -100 到 25 之间，低于零就吐出去。
         float stability = tag.getInt(OccultMonitorProvider.TAG_STABILITY) / 10.0F;
         tooltip.add(helper.text(Component.translatable(
                 "thaumicenergistics_ce.jade.monitor.stability",
@@ -82,7 +81,7 @@ public final class OccultMonitorTooltip implements IBlockComponentProvider {
                             .withStyle(ChatFormatting.WHITE)));
         }
 
-        // 在客户端这里构建，所以名称用玩家的语言而不是服务端的。
+        // 在客户端构建，名称用玩家的语言。
         ListTag wanted = tag.getList(OccultMonitorProvider.TAG_WANTED, Tag.TAG_STRING);
         if (!wanted.isEmpty()) {
             List<Component> names = new ArrayList<>();
@@ -98,8 +97,8 @@ public final class OccultMonitorTooltip implements IBlockComponentProvider {
         }
     }
 
-    /** Thaumaturge 自己对稳定度的说法，从它的阈值和翻译键抄来，好让护目镜与
-     * 监控器一致。这些阈值来自 {@code BlockEntityInfusionMatrix.stabilityTierKey}。 */
+    /** Thaumaturge 自己给稳定度的档位说法，抄它的阈值和翻译键，护目镜与监控器才对得上。
+     * 阈值出自 {@code BlockEntityInfusionMatrix.stabilityTierKey}。 */
     private static String tierKeyOf(float stability) {
         if (stability > 12.5F) {
             return "very_stable";

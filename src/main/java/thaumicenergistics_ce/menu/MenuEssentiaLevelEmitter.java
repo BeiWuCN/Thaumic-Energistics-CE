@@ -12,10 +12,8 @@ import net.minecraft.world.inventory.MenuType;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 
 /**
- * 源质标准发信器的屏幕：一个用于要素的配置槽，外加一个可设定的数字。
- * 这个数字是客户端动作而非同步字段，因为玩家输入的内容是一条
- * 指令；上报值在菜单打开时发送一次，使输入框显示真实
- * 值。
+ * 源质标准发信器的界面：一个放要素的配置槽，加一个可设的数字。数字是客户端动作不是同步字段，
+ * 因玩家敲的是一条指令；上报值在菜单打开时发一次，输入框才显示真实值。
  */
 public class MenuEssentiaLevelEmitter extends UpgradeableMenu<PartEssentiaLevelEmitter> {
 
@@ -37,7 +35,7 @@ public class MenuEssentiaLevelEmitter extends UpgradeableMenu<PartEssentiaLevelE
         return getHost().getCurrentLevel();
     }
 
-    /** 设置阈值：客户端转发一条客户端动作，由服务端动作应用它。 */
+    /** 设阈值：客户端转一条客户端动作，服务端动作应用它。 */
     public void setValue(long value) {
         if (isClientSide()) {
             reportingValue = value;
@@ -48,7 +46,7 @@ public class MenuEssentiaLevelEmitter extends UpgradeableMenu<PartEssentiaLevelE
         }
     }
 
-    /** 由服务端在菜单发送前调用，使客户端的输入框从真实值开始。 */
+    /** 服务端在菜单发出前调用，客户端的输入框从真实值开始。 */
     public void setInitialValue(long value) {
         reportingValue = value;
     }

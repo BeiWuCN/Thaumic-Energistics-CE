@@ -16,10 +16,9 @@ import thaumicenergistics_ce.integration.jade.AlchemyProviderProvider;
 import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
- * 炼金供应器的 Jade tooltip：网格是否能够到它，以及它把源质交给谁。
- * 它是 {@link AlchemyProviderProvider} 的绘制半边，两者靠共用的 UID 配对。它画三行：
- * 网格状态、已绑定的无线接收器，以及连接所花费
- * 储备的进度条。
+ * 炼金供应器的 Jade tooltip：网格够不够得到它，它把源质交给谁。
+ * 它是 {@link AlchemyProviderProvider} 的绘制半边，两者靠共用的 UID 配对。
+ * 画三行：网格状态、已绑定的无线接收器，以及连接花掉储备的进度条。
  */
 public final class AlchemyProviderTooltip implements IBlockComponentProvider {
 
@@ -47,8 +46,8 @@ public final class AlchemyProviderTooltip implements IBlockComponentProvider {
                     .withStyle(ChatFormatting.WHITE)));
         }
 
-        // 用进度条而不是数字，形状沿用 Jade 给能量缓冲画的那种：普通的 [progress()]
-        // 是它的箭头仪表，所以储备用带条纹的条，数字直接写在上面。
+        // 用进度条不用数字，形状沿用 Jade 给能量缓冲画的那种：
+        // 普通的 [progress()] 是箭头仪表，储备改用带条纹的条，数字写在条上面。
         int cache = tag.getInt(AlchemyProviderProvider.TAG_CACHE);
         ProgressStyle style = helper.progressStyle().color(0xFFAA0000, 0xFF660000);
         tooltip.add(helper.progress(

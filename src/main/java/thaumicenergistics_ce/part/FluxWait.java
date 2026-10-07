@@ -2,7 +2,7 @@ package thaumicenergistics_ce.part;
 
 import net.minecraft.network.chat.Component;
 
-/** 展示给玩家的原因：tick 做出的每次拒绝都有其一，所以「idle」只可能意味着它成功了。 */
+/** 展示给玩家的原因：tick 做出的每次拒绝各有一条，看到「idle」就只可能是成功了。 */
 public enum FluxWait {
     NO_FLUX("no_flux", "Not enough flux in this chunk to draw"),
     NO_SPACE("no_room", "Not enough clear space in front of the interface"),

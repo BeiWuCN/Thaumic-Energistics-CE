@@ -27,12 +27,12 @@ import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * 用奥术工作台配方填充奥术合成终端的合成网格。它处理 Thaumaturge 自己的分类，
- * 所以按钮出现在玩家会找的地方；槽位来自 SlotSemantics。不传配方 id，因为奥术配方不在原版
- * 配方管理器里。每个格子的模板是背后有库存的那个变体，而不是配方首先列出的那个，
- * 因为数据包自己解析模板，永远不会知道原料原本是个标签。一个处理器服务两个终端：
- * JEI 只按容器类与配方类型索引。
- * JEI 只按容器类与配方类型索引。
+ * 用奥术工作台配方填奥术合成终端的合成网格。
+ * 用 Thaumaturge 自己的分类，玩家才会在惯常位置找到按钮；槽位来自 SlotSemantics。
+ * 不传配方 id：奥术配方不在原版配方管理器里。
+ * 每个格子的模板取背后有库存的那个变体，不取配方首先列出的那个，
+ * 数据包自己解析模板，不会知道原料原本是个标签。
+ * 一个处理器服务两个终端，JEI 只按容器类与配方类型索引。
  */
 public class ArcaneCraftingRecipeTransfer
         implements IRecipeTransferInfo<MenuArcaneCraftingTerminal, RecipeHolder<?>>,
@@ -52,8 +52,8 @@ public class ArcaneCraftingRecipeTransfer
     }
 
     /**
-     * 这个菜单类的任意菜单类型：有线与无线终端共用它，只写一个菜单类型会让另一个没有转移按钮。
-     * 只写一个菜单类型会让另一个没有转移按钮。
+     * 这个菜单类的任意菜单类型：有线与无线终端共用它，
+     * 只写一个菜单类型会让另一个没转移按钮。
      */
     @Override
     public Optional<MenuType<MenuArcaneCraftingTerminal>> getMenuType() {
@@ -83,7 +83,7 @@ public class ArcaneCraftingRecipeTransfer
 
     // ---- IRecipeTransferHandler ----------------------------------------
 
-    // JEI 19.57 只留下这个 6 参数的 [transferRecipe] 作为接口唯一的抽象方法。
+    // JEI 19.57 里这个 6 参数的 [transferRecipe] 是接口唯一的抽象方法。
     @Override
     @SuppressWarnings("removal")
     public @Nullable IRecipeTransferError transferRecipe(
@@ -101,8 +101,8 @@ public class ArcaneCraftingRecipeTransfer
             return helper.createInternalError();
         }
 
-        // 每个格子一个模板，选玩家或网络能供得上的那个变体：数据包的模板路径不认识标签，
-        // 所以标签的第一个成员很可能恰好是没有库存的那个。
+        // 每格一个模板，选玩家或网络供得上的变体：
+        // 数据包的模板路径不认识标签，标签的第一个成员常常正是没库存的那个。
         IClientRepo repo = menu.getClientRepo();
         NonNullList<ItemStack> templates = NonNullList.withSize(PartArcaneCraftingTerminal.GRID_SIZE, ItemStack.EMPTY);
         boolean missing = false;
@@ -114,8 +114,8 @@ public class ArcaneCraftingRecipeTransfer
             }
         }
 
-        // 摆不下的配方宁可拒绝也不部分填充：部分填充的网格读起来是“这个终端合成不了那个”，
-        // 而不是“你缺料”。
+        // 摆不下就整次拒绝，不部分填充：半填的网格看着像是这个终端合成不了，
+        // 不像是在说缺料。
         if (missing) {
             return helper.createUserErrorWithTooltip(
                     Component.translatable("thaumicenergistics_ce.jei.transfer.missing_ingredients"));
@@ -124,7 +124,7 @@ public class ArcaneCraftingRecipeTransfer
             return null;
         }
 
-        // 没有配方 id：该配方不在原版管理器里，所以走数据包的模板路径。
+        // 不传配方 id：配方不在原版管理器里，只能走数据包的模板路径。
         PacketDistributor.sendToServer(new FillCraftingGridFromRecipePacket(null, templates, false));
         return null;
     }
@@ -132,8 +132,8 @@ public class ArcaneCraftingRecipeTransfer
     // ---- templates -----------------------------------------------------
 
     /**
-     * 一个格子的模板：背后供给最多的那个变体，这样即使标签的第一个成员没有库存、其余成员有，
-     * 也仍能转移。没有任何东西能供给这个格子时为空。
+     * 一个格子的模板：背后供给最多的变体，标签第一个成员没库存也能转移。
+     * 没东西能供给这个格子时为空。
      */
     private static ItemStack pickSuppliable(List<ItemStack> variants, @Nullable IClientRepo repo, Player player) {
         ItemStack best = ItemStack.EMPTY;
@@ -151,7 +151,7 @@ public class ArcaneCraftingRecipeTransfer
         return best;
     }
 
-    /** 网络对这一个确切物品报告的数量，加上玩家身上携带的。 */
+    /** 网络对这个确切物品报的数量，加玩家身上带的。 */
     private static long supplyOf(ItemStack variant, @Nullable IClientRepo repo, Player player) {
         long supply = 0;
         AEItemKey wanted = AEItemKey.of(variant);
@@ -171,7 +171,7 @@ public class ArcaneCraftingRecipeTransfer
         return supply;
     }
 
-    /** 这个格子是否要求任何东西：布局中的空格子不能被读成缺料。 */
+    /** 这个格子要不要东西：布局里的空格子不能读成缺料。 */
     private static boolean asksForSomething(List<ItemStack> variants) {
         for (ItemStack variant : variants) {
             if (!variant.isEmpty()) {

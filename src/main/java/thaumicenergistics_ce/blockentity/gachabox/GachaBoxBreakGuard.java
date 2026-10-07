@@ -9,9 +9,8 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.block.BlockGachaBox;
 
 /**
- * 让箱子里的脑跟着它绑定的那个玩家：否则破坏箱子会把脑掉出来
- * 任何人都能捡。创造模式不受限制，这样操作员清理机器时
- * 不必去敲命令。
+ * 让箱子里的脑跟着它绑定的玩家：否则破坏箱子会把脑掉出来，谁都能捡。
+ * 创造模式不受限制，操作员清理机器时不用敲命令。
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class GachaBoxBreakGuard {

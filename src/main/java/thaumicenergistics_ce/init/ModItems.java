@@ -23,9 +23,9 @@ import thaumicenergistics_ce.item.ItemWirelessConnector;
 import thaumicenergistics_ce.item.ItemWirelessEssentiaTerminal;
 
 /**
- * 物品注册，包括 {@link ModBlocks} 的方块物品。方块物品放在这里，
- * 因为 NeoForge 的 {@code registerSimpleBlockItem} 辅助方法属于物品注册表，而
- * 方块持有者来自 {@link ModBlocks}，所以这个类两边都要读。
+ * 物品注册，含 {@link ModBlocks} 的方块物品。
+ * 方块物品放这里：NeoForge 的 {@code registerSimpleBlockItem} 属于物品注册表，
+ * 持有者却来自 {@link ModBlocks}，这个类两边都要读。
  */
 public final class ModItems {
     public static final DeferredRegister.Items REGISTRY = DeferredRegister.createItems(ThEIds.MODID);
@@ -34,8 +34,8 @@ public final class ModItems {
             "knowledge_core", ItemKnowledgeCore::new, new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
 
     /**
-     * 不是普通物品：AE2 的 CPU 把一个任务保存为一个 {@code AEItemKey} 标签，并用
-     * {@code PatternDetailsHelper.decodePattern} 重建它，而后者只对 {@code EncodedPatternItem} 有效。
+     * 要继承 {@code EncodedPatternItem}：AE2 的 CPU 把任务存成 {@code AEItemKey} 标签，
+     * 用 {@code PatternDetailsHelper.decodePattern} 重建，它能识别的只有 {@code EncodedPatternItem}。
      */
     public static final DeferredItem<Item> ARCANE_PATTERN =
             REGISTRY.register("arcane_pattern", () -> ItemArcanePattern.build());
@@ -83,8 +83,8 @@ public final class ModItems {
             REGISTRY.registerItem("vis_interface", ItemVisInterface::new, new Item.Properties());
 
     /**
-     * 作为法杖核心佩戴的 AE2 扳手。不是 {@code PartItem}：它是核心，而 Thaumaturge 的核心
-     * 是普通物品，其行为存放在物品堆上的包组件（package component）中。
+     * 作为法杖核心佩戴的 AE2 扳手。
+     * 不做成 {@code PartItem}：Thaumaturge 的核心是普通物品，行为放在物品堆的包组件里。
      */
     public static final DeferredItem<ItemFocusAEWrench> FOCUS_AEWRENCH = REGISTRY.registerItem(
             "focus_aewrench",
@@ -100,7 +100,7 @@ public final class ModItems {
             REGISTRY.registerItem(
                     "arcane_crafting_terminal", ItemArcaneCraftingTerminal::new, new Item.Properties());
 
-    // 容量单位是字节，与 AE2 一样：以源质计的容量是名称数字的八倍，所以 1k 存 8192。
+    // 容量按字节计，与 AE2 一致：以源质算是名称数字的八倍，1k 存 8192。
 
     public static final DeferredItem<Item> STORAGE_CASING = REGISTRY.registerItem(
             "storage_casing", Item::new, new Item.Properties().stacksTo(64));
@@ -122,7 +122,7 @@ public final class ModItems {
             ItemEssentiaCell::createCreative,
             new Item.Properties().rarity(Rarity.EPIC));
 
-    // 普通物品：容量存在于存储元件中，因此组件只是原料；档位沿用 AE2 的字节数。
+    // 普通物品：容量在存储元件里，组件只是原料；档位沿用 AE2 的字节数。
 
     public static final DeferredItem<Item> STORAGE_COMPONENT_1K = REGISTRY.registerItem(
             "storage_component_1k", Item::new, new Item.Properties().stacksTo(64));
@@ -141,8 +141,7 @@ public final class ModItems {
             ItemEssentiaTerminal::new,
             new Item.Properties().stacksTo(64).rarity(Rarity.RARE));
 
-    // 没有行为的普通物品：终端和各类总线所用的原料，也是 AE2 给自己的
-    // 湮灭核心与成型核心采用的形式。
+    // 没有行为的普通物品：终端和总线用的原料，与 AE2 的湮灭核心、成型核心同一种形式。
     public static final DeferredItem<Item> DIFFUSION_CORE = REGISTRY.registerItem(
             "diffusion_core", Item::new, new Item.Properties().stacksTo(64));
 
@@ -173,8 +172,8 @@ public final class ModItems {
                             () -> ItemWirelessArcaneCraftingTerminal.POWER_CAPACITY, properties),
                     new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
 
-    // 两张升级卡，现在都会被读取：访问卡控制源质手势的开关，vis 卡把一次
-    // 合成中未指定类型的 vis 转移到灵气上。AE2 的 [isUpgradeCardItem] 要求是自己的类，故用工厂。
+    // 两张升级卡都会被读：访问卡开关源质手势，vis 卡把合成中未指定类型的 vis 转到灵气上。
+    // AE2 的 [isUpgradeCardItem] 要求物品是自己的类，故用工厂创建。
     public static final DeferredItem<Item> ESSENTIA_ACCESS_CARD = REGISTRY.registerItem(
             "essentia_access_card", Upgrades::createUpgradeCardItem, new Item.Properties().stacksTo(64));
 

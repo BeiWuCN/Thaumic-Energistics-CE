@@ -20,11 +20,10 @@ import thaumicenergistics_ce.client.render.bubble.BubbleCells.TextCell;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 神秘监控器悬浮在自己上方的气泡：祭坛有多危险、
- * 它正在制作什么、房间能否完成它，以及它是被绘制而非被生成的
- * ——崩溃可能留下一个 {@code TextDisplay} 实体。它显示的内容是
- * {@link BubbleCells}，承载它的框是 {@link RoundedPanel}；留在这里的是姿态、
- * 绘制单元格的两种方式，以及绘制该面板所及的几个方块范围。
+ * 神秘监控器浮在自己上方的气泡：祭坛多危险、在做什么、房间能不能做完，
+ * 以及它是画出来的不是生成的实体，崩溃会漏下 {@code TextDisplay}。内容是
+ * {@link BubbleCells}，底框是 {@link RoundedPanel}；留在这里的是姿态、单元格的两种画法，
+ * 和面板绘制所及的几个方块。
  */
 public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityOccultMonitor> {
 
@@ -35,14 +34,13 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
     private static final float PADDING_X = 5.0F;
     private static final float PADDING_Y = 4.0F;
 
-    /** 气泡绘制的距离：8 个方块。超过这个距离玩家已远离机器，
-     * 所以面板不构建、不测量也不绘制，根本不会传到此处。 */
+    /** 气泡画到多远：8 个方块。超过就是玩家走开了，面板不构建、不测量也不绘制，根本传不到这里。 */
     private static final int CULL_RANGE = 8;
 
-    /** 穿透墙壁的那份文本绘制时所用的颜色——取自命名牌的原版颜色。 */
+    /** 穿墙那份文本的颜色，取自命名牌的原版值。 */
     private static final int SEE_THROUGH_TEXT = 553648127;
 
-    /** 除非 {@code THAUMICENERGISTICS_MONITOR_TRACE=true}，否则关闭；气泡是绘制的，不是发送的。 */
+    /** 默认关，除非 {@code THAUMICENERGISTICS_MONITOR_TRACE=true}；气泡是画出来的，不是发出来的。 */
     private static final boolean TRACE =
             "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_MONITOR_TRACE"));
 
@@ -52,14 +50,13 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
 
     public OccultMonitorBubbleRenderer(BlockEntityRendererProvider.Context context) {}
 
-    /** 同样是这 8 个方块，在 {@link #shouldRender} 之前询问：机器直接从客户端
-     * 遍历的列表中剔除，而不是等遍历到它才跳过。 */
+    /** 同样是 8 个方块，在 {@link #shouldRender} 之前问：机器直接从客户端列表剔除，不是遍历到了才跳过。 */
     @Override
     public int getViewDistance() {
         return CULL_RANGE;
     }
 
-    /** 剔除的近距离一半：阅读距离，从机器自身所在方块起算。 */
+    /** 剔除的近端：阅读距离，从机器自己那格起算。 */
     @Override
     public boolean shouldRender(BlockEntityOccultMonitor monitor, Vec3 cameraPos) {
         return Vec3.atCenterOf(monitor.getBlockPos()).closerThan(cameraPos, CULL_RANGE);
@@ -109,7 +106,7 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
         pose.scale(SCALE, -SCALE, SCALE);
         Matrix4f matrix = pose.last().pose();
 
-        // 以锚点为中心，所以面板向两侧展开，而不是从方块表面向下延伸。
+        // 以锚点居中，面板往两边长，不从方块表面往下伸。
         float left = -panelWidth / 2.0F;
         float top = -panelHeight / 2.0F;
         RoundedPanel.draw(buffers, matrix, left, top, left + panelWidth, top + panelHeight);
@@ -118,7 +115,7 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
         for (List<Cell> row : rows) {
             float rowWidth = BubbleCells.rowWidth(font, row);
             float x = -rowWidth / 2.0F;
-            // 在行内居中：芯片行比文本行更高。
+            // 按行居中：芯片行比文字行高。
             float textY = y + (BubbleCells.rowHeight(row) - font.lineHeight) / 2.0F;
             for (Cell cell : row) {
                 drawCell(pose, buffers, font, cell, x, y, textY, true);
@@ -126,7 +123,7 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
             }
             y += BubbleCells.rowHeight(row);
         }
-        // 关闭深度测试再画一遍文本，让数字能穿墙阅读；芯片不这样处理。
+        // 关掉深度测试再画一遍文字，数字能穿墙看；芯片不重画。
         y = top + PADDING_Y;
         for (List<Cell> row : rows) {
             float rowWidth = BubbleCells.rowWidth(font, row);
@@ -143,7 +140,7 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
         pose.popPose();
     }
 
-    /** 在 {@code x}、{@code y} 处绘制一个单元格——即该行的左上角。 */
+    /** 在 {@code x}、{@code y} 画一个单元格，即该行左上角。 */
     private static void drawCell(
             PoseStack pose,
             MultiBufferSource buffers,
@@ -156,8 +153,8 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
         switch (cell) {
             case TextCell text -> drawText(font, text.text(), x, textY, buffers, pose.last().pose(), solid);
             case ChipCell chip -> {
-                // 由 Thaumaturge 自身的世界渲染器绘制，这样纹理、混合和未发现要素
-                // 遮罩都正确。垂直方向取负缩放：面板姿态是 (x, -y)，会翻转纹理。
+                // 由 Thaumaturge 自己的世界渲染器画，纹理、混合和未发现要素遮罩才对。
+                // 纵向取负缩放：面板姿态是 (x, -y)，纹理会翻。
                 float size = BubbleCells.CHIP;
                 pose.pushPose();
                 pose.translate(x + size / 2.0F, rowTop + size / 2.0F, 0.0F);

@@ -7,10 +7,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * 知识铭刻机的按钮，绘制自参考构建自己的两态贴图。
+ * 知识铭刻机的按钮，贴图来自参考构建的两态图集。
  * 一张 32x32 的图集放两个 32x13 的帧，空闲在 v=0、悬停在 v=15，没有禁用帧：
- * 标签说明哪里不对（“No Core”、“Invalid”、“Full”），所以只要没悬停就画空闲态。
- * 标签向下居中两像素，与参考构建的做法一致：原版居中位置太低。
+ * 标签说明哪里不对（"No Core"、"Invalid"、"Full"），只要没悬停就画空闲态。
+ * 标签向下居中两像素，与参考构建一致：原版居中位置太低。
  */
 public class InscriberButton extends Button {
 

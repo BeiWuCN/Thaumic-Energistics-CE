@@ -13,23 +13,22 @@ import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 
 /**
  * 源质振动室的界面：燃料缓冲、能量槽和燃烧进度。
- * 这台机器的贴图是它正面的 60x100 控件，不是窗口，所以本界面用自己的填充色
- * 画窗口，用的是游戏容器的颜色。储罐按所属要素着色，能量槽用 AE2 的红色，
- * 燃烧条用它自己的颜色。
+ * 机器的贴图是正面 60x100 的控件，不是窗口，本界面拿游戏容器的颜色自己填一个窗口。
+ * 储罐按所属要素着色，能量槽用 AE2 的红色，燃烧条用自己的颜色。
  */
 public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<MenuEssentiaVibrationChamber> {
 
     private static final int WIDTH = 176;
     private static final int HEIGHT = 166;
 
-    /** 窗口自身的颜色，也就是游戏里每个容器绘制所用的颜色。 */
+    /** 窗口自身的颜色，游戏里每个容器画窗口都用它。 */
     private static final int PANEL = 0xFFC6C6C6;
     private static final int PANEL_LIGHT = 0xFFFFFFFF;
     private static final int PANEL_DARK = 0xFF555555;
     private static final int SLOT = 0xFF8B8B8B;
     private static final int SLOT_DARK = 0xFF373737;
 
-    /** 能量槽的颜色，取自 AE2 自己，同时也是燃烧条的颜色。 */
+    /** 能量槽的颜色取自 AE2，燃烧条同色。 */
     private static final int ENERGY = 0xFFAA0000;
     private static final int BURN = 0xFFFFAA00;
     private static final int TANK_EMPTY = 0xFF4B4B4B;
@@ -83,8 +82,8 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
         graphics.fill(x + WIDTH - 1, y, x + WIDTH, y + HEIGHT, PANEL_DARK);
         graphics.fill(x, y + HEIGHT - 1, x + WIDTH, y + HEIGHT, PANEL_DARK);
 
-        // 凹格画在各自槽位左上一像素处，与游戏自身的画法一致；按槽位自身坐标画，
-        // 每个物品都会偏到中心右下各一像素。
+        // 凹格画在各槽位左上偏一像素，和游戏自身的画法一致；
+        // 按槽位自身坐标画，物品会偏到中心右下各一像素。
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
                 slot(graphics, x + 8 + column * 18 - 1, y + 84 + row * 18 - 1);
@@ -94,16 +93,16 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
             slot(graphics, x + 8 + column * 18 - 1, y + 142 - 1);
         }
 
-        // 每条进度条都带边框，所以空的也还是一条条；只画一个凹槽再往上涂填充，
-        // 会让空机器的三条都变成黑块。
+        // 每条进度条都带边框，空着也还是一条条；
+        // 只画一个凹槽再往上涂填充，空机器的三条会变成黑块。
         int aspectColour = menu.reading(MenuEssentiaVibrationChamber.DATA_ASPECT_COLOUR);
         bar(graphics, x + TANK_X, y + GAUGE_Y, GAUGE_W, GAUGE_H, menu.essentiaFill(),
                 aspectColour == 0 ? TANK_EMPTY : aspectColour, true);
         bar(graphics, x + ENERGY_X, y + GAUGE_Y, GAUGE_W, GAUGE_H, menu.energyFill(), ENERGY, true);
         bar(graphics, x + BURN_X, y + BURN_Y, BURN_W, BURN_H, menu.burnProgress(), BURN, false);
 
-        // 数字排在各仪表旁边的一列，而不是它们下面：下面那行是窗口自带的
-        // “Inventory”标签，读数打在那里会直接压穿它。
+        // 数字排在仪表旁边一列，不排在下面：下面那行是窗口自带的「Inventory」标签，
+        // 读数打在那里会压穿它。
         Component essentia = Component.translatable(
                 "thaumicenergistics_ce.gui.vibration_chamber.essentia",
                 menu.reading(MenuEssentiaVibrationChamber.DATA_ESSENTIA),
@@ -115,8 +114,8 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
         graphics.drawString(font, essentia, x + TEXT_X, y + TEXT_Y, 0x404040, false);
         graphics.drawString(font, energy, x + TEXT_X, y + TEXT_Y + 12, 0x404040, false);
 
-        // 先给原因：槽满会暂停燃烧而不是结束它，没接线的机器也不算空闲——
-        // 不写明是哪一种，这行会被读成燃料耗尽。
+        // 先给原因：槽满只是暂停燃烧，没接线的机器也不算空闲；
+        // 不说清是哪一种，这行会被读成燃料耗尽。
         Component state = heldBackLine();
         if (state == null) {
             state = menu.isBurning()
@@ -176,7 +175,7 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
             lines.add(Component.translatable(
                     "thaumicenergistics_ce.gui.vibration_chamber.burn.tip",
                     Math.round(menu.burnProgress() * 100.0F)));
-            // 进度条为何停住：单看百分比分不出燃烧是卡住还是变慢。
+            // 进度条为何停住：只看百分比分不出燃烧是卡住还是变慢。
             MutableComponent reason = heldBackLine();
             if (reason != null) {
                 lines.add(reason.withStyle(ChatFormatting.GRAY));
@@ -186,8 +185,8 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
     }
 
     /**
-     * 机器为何不在燃烧，或为 null（正在燃烧或没有可烧的东西时）：这是方块实体
-     * 做出的判定，绝不是根据读数算出来的满溢状态。
+     * 机器为什么没在燃烧，否则是 null（正在燃烧或没东西可烧）。
+     * 判定由方块实体做出，不是根据读数算出来的满溢状态。
      */
     private @Nullable MutableComponent heldBackLine() {
         return switch (menu.state()) {
@@ -203,7 +202,7 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
         return localX >= x && localX < x + width && localY >= y && localY < y + height;
     }
 
-    /** 能量数值，超过一千时以 kAE 表示——机器自己的 tooltip 已经用这个单位。 */
+    /** 能量数值，超过一千写成 kAE，机器自己的 tooltip 也用这个单位。 */
     private static String formatEnergy(int ae) {
         return ae >= 1000 ? String.format("%.1fkAE", ae / 1000.0) : ae + "AE";
     }

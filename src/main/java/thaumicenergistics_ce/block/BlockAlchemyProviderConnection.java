@@ -20,11 +20,9 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
 
 /**
- * 炼金供应器连接件：无线源质链路的接收端。{@code facing} 把插头指向
- * 它所安装的那个面，本模组资源里的方块状态针对它声明了全部六个
- * 方向，因此这个属性与它的名字都是关键。
- * {@code connected} 表示链路是否存在，插头可安装在任意面上，包括朝上
- * 和朝下。
+ * 炼金供应器连接件：无线源质链路的接收端。{@code facing} 把插头指向它装的那个面，
+ * 本 mod 资源里的方块状态针对它声明了全部六个方向，属性和它的名字都是关键。
+ * {@code connected} 是链路在不在；插头能装在任意面，向上向下都行。
  */
 public class BlockAlchemyProviderConnection extends ThEBaseEntityBlock {
 
@@ -73,8 +71,8 @@ public class BlockAlchemyProviderConnection extends ThEBaseEntityBlock {
     }
 
     /**
-     * 方块 tick 器负责搬运源质：它没有自己的网格节点——它是导线而不是机器——
-     * 所以无法像供应器那样让 AE2 来 tick 它，工作量是每半秒一次传输。
+     * 方块 tick 器搬源质：它没有自己的网格节点，它是线不是机器，故没法像供应器那样让 AE2 来 tick 它；
+     * 工作量是每半秒一次传输。
      */
     @Override
     public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(

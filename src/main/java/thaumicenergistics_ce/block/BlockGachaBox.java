@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.gachabox.BlockEntityGachaBox;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
-/** 方块状态携带 {@code facing} 与 {@code screen}；{@code jar} 镜像槽中的大脑。 */
+/** 方块状态带 {@code facing} 和 {@code screen}；{@code jar} 镜像槽里的大脑。 */
 public class BlockGachaBox extends ThEBaseEntityBlock {
 
     public static final MapCodec<BlockGachaBox> CODEC = simpleCodec(BlockGachaBox::new);
@@ -83,7 +83,7 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
             Player player,
             InteractionHand hand,
             BlockHitResult hit) {
-        // 潜行取回大脑，无论手上拿着什么：空手也必须能操作。
+        // 潜行取回大脑，不管手上拿着什么：空手也得能操作。
         if (player.isShiftKeyDown()) {
             if (!state.getValue(JAR)) {
                 return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
@@ -100,10 +100,10 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
                             true);
                     return ItemInteractionResult.SUCCESS;
                 }
-                // 先解绑盒子：无论取出什么，下一个大脑都将属于新主人。
+                // 先解绑盒子：不管取出什么，下一个大脑归新主人。
                 box.unbind();
                 ItemStack brain = box.takeBrain();
-                // 卡片随大脑一同取出：空盒子没有可加速的对象。
+                // 卡片跟着大脑一起取出：空盒子没有可加速的对象。
                 for (ItemStack card : box.takeCards()) {
                     give(player, card);
                 }
@@ -114,8 +114,8 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
                     Component.translatable("block.thaumicenergistics_ce.gacha_box.lost_target"), true);
             return ItemInteractionResult.SUCCESS;
         }
-        // 盒中残留、不属于任何人的大脑（来自中途失败的存档），由点击盒子的
-        // 玩家认领：不丢弃任何东西，一次点击即可修复。
+        // 盒里残留的无主大脑（来自中途失败的存档）由点击的玩家认领：
+        // 一样都不丢，一次点击就修好了。
         if (level.getBlockEntity(pos) instanceof BlockEntityGachaBox unbound && unbound.hasUnboundBrain()) {
             if (level.isClientSide()) {
                 return ItemInteractionResult.SUCCESS;
@@ -125,15 +125,15 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
                     Component.translatable("block.thaumicenergistics_ce.gacha_box.rebound"), true);
             return ItemInteractionResult.SUCCESS;
         }
-        // 已装大脑的盒子只接受被给的大脑：别的东西都放不进去。
+        // 已装大脑的盒子只收被给的那种大脑，别的放不进去。
         if (!state.getValue(JAR)
                 && TcRegistry.isJarBrain(stack)
                 && level.getBlockEntity(pos) instanceof BlockEntityGachaBox box) {
             if (level.isClientSide()) {
                 return ItemInteractionResult.SUCCESS;
             }
-            // 由槽位触发方块状态变化而不是由方块触发，因此实体保留自己的
-            // 数据，并绑定到放入大脑的玩家。
+            // 状态变化由槽位触发，不由方块触发：
+            // 实体保留自己的数据，绑定到放入大脑的玩家。
             box.addBrain(stack);
             box.bind(player);
             level.playSound(null, pos, TcRegistry.jarBrainPlaceSound(), SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -142,8 +142,8 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
             }
             return ItemInteractionResult.SUCCESS;
         }
-        // 四个槽位只接受加速卡：只有它们能缩短一轮时间。其它任何
-        // 升级，包括容量卡或红石卡，一律拒收而不存入。
+        // 四个槽位只收加速卡，只有它缩短一轮的时间。
+        // 别的升级，容量卡或红石卡，一律拒收不存。
         if (AEItems.SPEED_CARD.is(stack)
                 && level.getBlockEntity(pos) instanceof BlockEntityGachaBox box
                 && box.hasRoomForCard()) {
@@ -160,7 +160,7 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
         return super.useItemOn(stack, state, level, pos, player, hand, hit);
     }
 
-    /** 把物品交给玩家，只有在玩家无处存放时才丢到地上。 */
+    /** 把物品给玩家，实在放不下才丢到地上。 */
     private static void give(Player player, ItemStack stack) {
         if (!player.getInventory().add(stack)) {
             player.drop(stack, false);
@@ -170,8 +170,8 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
     @Override
     public void onRemove(
             BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        // 破坏盒子也会取出其中的大脑，因此 jar 从被替换的那个状态读取，
-        // 而不是从实体读取——实体可能已经被告知了新状态。
+        // 破坏盒子也会取出里面的大脑，{@code jar} 要从被替换的那个状态读，不从实体读：
+        // 实体可能已经拿到新状态了。
         if (!state.is(newState.getBlock())
                 && level.getBlockEntity(pos) instanceof BlockEntityGachaBox box) {
             box.dropContents(state.getValue(JAR));

@@ -21,12 +21,12 @@ final class AssemblerNodeListener implements IGridNodeListener<BlockEntityArcane
             owner.active = owner.mainNode.isActive();
         }
         owner.displaySync.markForUpdate();
-        // loadAdditional 在节点存在之前运行；这次唤醒必须覆盖被恢复的合成。
+        // loadAdditional 在节点存在之前跑；这次唤醒得覆盖被恢复的合成。
         owner.craftRunner().updateSleepiness();
     }
 
-    /** 区块加载时创建节点。存档中途被保存的合成在这里接上，因为
-     * {@code loadAdditional} 运行时还没有 level 可与它的结果比对。 */
+    /** 区块加载时创建节点。存档中途保存的合成在这里接上：
+     * {@code loadAdditional} 跑的时候还没有 level 能跟它的结果比对。 */
     static void attach(BlockEntityArcaneAssembler machine) {
         if (machine.getLevel() != null && !machine.getLevel().isClientSide()) {
             machine.mainNode.create(machine.getLevel(), machine.getBlockPos());

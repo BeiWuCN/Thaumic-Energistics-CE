@@ -53,8 +53,8 @@ public final class ModCreativeTab {
                         output.accept(ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get());
                         output.accept(ModItems.ESSENTIA_ACCESS_CARD.get());
                         output.accept(ModItems.VIS_CONNECTION_CARD.get());
-                        // 与物品使用的是同一个调用，这样标签页里的物品堆就不是第二个未组装的副本：
-                        // 标签页里的物品堆从不 tick，也从不经过配方，否则没有别的机会把它修正过来。
+                        // 与物品用的是同一个调用，标签页里的物品堆不会是第二个未组装的副本：
+                        // 标签页里的物品堆从不 tick，也不经过配方，没有别的机会把它修正过来。
                         output.accept(thaumicenergistics_ce.item.ItemFocusAEWrench.assembledStack());
                         output.accept(ModItems.GOLEM_WIFI_BACKPACK.get());
                         output.accept(ModItems.GACHA_BOX.get());

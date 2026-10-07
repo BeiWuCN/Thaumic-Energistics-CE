@@ -16,9 +16,8 @@ import thaumicenergistics_ce.network.InscriberGridPayload;
 import thaumicenergistics_ce.network.PartitionWellPayload;
 
 /**
- * 网络注册。知识铭刻机的按钮不需要载荷，因为原版自己的菜单按钮数据包
- * 就带着 id，但铭刻机的合成网格需要：它是客户端填充的幽灵网格，
- * 只有服务端能把它变成配方。
+ * 网络注册。铭刻机按钮不用另发载荷，原版菜单按钮包自带 id。
+ * 合成网格要发：那是客户端填的幽灵网格，只有服务端能把它变成配方。
  */
 public final class ModNetwork {
 
@@ -36,14 +35,13 @@ public final class ModNetwork {
                 InscriberGridPayload.TYPE,
                 InscriberGridPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
-        // 一次发送整个网格，用于已保存的配方或 JEI 转移：写九次会让机器去解析
-        // 八个既不是配方、也不会被绘制的网格——见 [InscriberGridFillPayload]。
+        // 整格一次发；写九次会让机器去解析八个既不是配方、也画不出来的网格。
+        // 见 [InscriberGridFillPayload]。
         registrar.playToServer(
                 InscriberGridFillPayload.TYPE,
                 InscriberGridFillPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
-        // 源质终端搬运的是容器内容而不是物品，AE2 自己的终端数据包
-        // 表达不了这种情况——原因见各个载荷。
+        // 源质终端搬的是容器内容而非物品，AE2 自己的终端数据包装不了。
         registrar.playToServer(
                 EssentiaDepositPayload.TYPE,
                 EssentiaDepositPayload.CODEC,
@@ -52,44 +50,40 @@ public final class ModNetwork {
                 EssentiaFillPayload.TYPE,
                 EssentiaFillPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
-        // 落在 ME 接口自身配置行或存储行上的标记。走服务端方向，因为一个源质
-        // 键不是物品，而 AE2 的幽灵槽位通道只能携带物品。
+        // 落在 ME 接口自身配置行或存储行上的标记。
+        // 走服务端方向：源质键不是物品，AE2 的幽灵槽位通道只收物品。
         registrar.playToServer(
                 EssentiaInterfaceMarkPayload.TYPE,
                 EssentiaInterfaceMarkPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
-        // 从 JEI 设置的存储元件工作台分区井。出于同样的理由走服务端方向，还有第二个
-        // 理由：AE2 的网格数据包只有经由 [AEBaseMenu] 才能到达伪槽位——见 [PartitionWellPayload]。
+        // 从 JEI 设置存储元件工作台的分区井，走服务端方向。
+        // AE2 的网格数据包只有经 [AEBaseMenu] 才能到达伪槽位，见 [PartitionWellPayload]。
         registrar.playToServer(
                 PartitionWellPayload.TYPE,
                 PartitionWellPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
-        // 蒸馏编码器的界面没有为它的要素井准备物品槽位——要素不是物品——
-        // 所以选取一个要素和请求一份样板都以指令的形式传输。
+        // 蒸馏编码器的界面里要素井没有物品槽位（要素不是物品），选要素和请求样板都按指令传输。
         registrar.playToServer(
                 EncoderActionPayload.TYPE,
                 EncoderActionPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
-        // 还有来源模板，它是编码器指令中唯一一条参数既不是数字、
-        // 也无法在服务端推导出来的——见 [EncoderSourcePayload]。
+        // 还有来源模板：编码器指令里唯一一条参数不是数字、服务端也推导不出来，见 [EncoderSourcePayload]。
         registrar.playToServer(
                 EncoderSourcePayload.TYPE,
                 EncoderSourcePayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
-        // 傀儡的背包，告知正在观察该傀儡的玩家：它是什么存放在傀儡的
-        // 持久化数据里，原版不会同步，所以仍然需要专门绘制。
+        // 傀儡的背包。内容存在傀儡的持久化数据里，原版不同步，得专门画出来。
         registrar.playToClient(
                 GolemBackpackPayload.TYPE,
                 GolemBackpackPayload.CODEC,
                 (payload, context) -> payload.handleOnClient(context.player()));
-        // 服务端到客户端，也是唯一走这个方向的载荷：奥术配方的 vis 消耗
-        // 只能在服务端算出，而界面需要把它画出来。
+        // 唯一一个服务端到客户端的载荷：奥术配方的 vis 消耗只有服务端算得出，界面要画。
         registrar.playToClient(
                 ArcaneCraftCostPayload.TYPE,
                 ArcaneCraftCostPayload.CODEC,
                 (payload, context) -> payload.handleOnClient(context.player()));
-        // 忘记已配对的终端：请求此操作的潜行左键发生在客户端，
-        // 因为只有客户端能看到点向空处的点击——见 [ArcaneUnbindPayload]。
+        // 忘记已配对的终端。潜行左键在客户端发起，只有客户端看得到点向空处的点击。
+        // 见 [ArcaneUnbindPayload]。
         registrar.playToServer(
                 ArcaneUnbindPayload.TYPE,
                 ArcaneUnbindPayload.CODEC,

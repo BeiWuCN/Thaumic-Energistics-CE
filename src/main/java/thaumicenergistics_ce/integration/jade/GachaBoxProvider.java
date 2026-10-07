@@ -15,7 +15,7 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.gachabox.BlockEntityGachaBox;
 import thaumicenergistics_ce.blockentity.gachabox.GachaWait;
 
-/** Gacha Box 的服务端那一半：它绑定到的玩家，以及它为何不转动。 */
+/** Gacha Box 的服务端半边：它绑定到谁，以及它为何不转。 */
 public class GachaBoxProvider implements IServerDataProvider<BlockAccessor> {
 
     public static final GachaBoxProvider INSTANCE = new GachaBoxProvider();
@@ -41,15 +41,15 @@ public class GachaBoxProvider implements IServerDataProvider<BlockAccessor> {
         if (!box.structureComplete()) {
             tag.putBoolean(TAG_INCOMPLETE, true);
         }
-        // 放在 tooltip 最前：盒子到底有没有接入网络是玩家首先会确认的，
-        // 它同时覆盖了 "no power" 与 "no channel"。
+        // 放在 tooltip 最前：玩家最先要确认盒子有没有接入网络。
+        // 这一条同时覆盖 "no power" 与 "no channel"。
         tag.putBoolean(TAG_ONLINE, box.getMainNode().isActive());
         String owner = box.ownerName();
         if (owner != null) {
             tag.putString(TAG_OWNER, owner);
         }
-        // 以已保存的物品堆形式发送，而不是数量：tooltip 要画出这些卡片，光有 id 画不出来。
-        // 空槽位不发送，所以这一行恰好是盒子里的卡片。
+        // 按已保存的物品堆发送，不发数量：tooltip 要画出这些卡片，光有 id 画不出来。
+        // 空槽位不发，这一行恰好是盒子里的卡片。
         ListTag cards = new ListTag();
         var level = accessor.getLevel();
         if (level != null) {
@@ -61,8 +61,8 @@ public class GachaBoxProvider implements IServerDataProvider<BlockAccessor> {
             }
         }
         tag.put(TAG_CARDS, cards);
-        // 原因作为组件传输，因此客户端用玩家自己的语言渲染它。其中两种原因
-        // 从不传输：缺失的上半部分会自己显现，而节点离线已经在上面说过了。
+        // 原因作为组件传输，客户端用玩家自己的语言渲染。
+        // 两种原因不传：缺失的上半部分会自己显现，节点离线上面已经说过。
         if (box.getLevel() instanceof ServerLevel server) {
             GachaWait wait = box.waitReason(server);
             if (wait != null && wait != GachaWait.NO_STRUCTURE && wait != GachaWait.NO_CHANNEL) {

@@ -24,24 +24,23 @@ import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 给傀儡装上无线背包、再取下、以及重新上色：用已链接的背包装备，用潜行状态下的
- * 傀儡铃取下，用映射到的方块重新上色。它不是饰品——饰品使用固定的五 id 图集
- * 和一个没有 AE2 链接的 {@code final} 物品。链接存放在傀儡的持久化数据里，
- * 不参与同步，由
- * {@link GolemBackpackTickHandler} 推送。
+ * 给傀儡装无线背包、取下、重新上色。
+ * 装备用已链接的背包，取下用潜行状态的傀儡铃，上色用映射到的方块。
+ * 不做成饰品：饰品用固定的五 id 图集、{@code final} 物品，没有 AE2 链接。
+ * 链接存在傀儡的持久化数据里不同步，由 {@link GolemBackpackTickHandler} 推送。
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class GolemBackpackHandler {
 
-    /** 已链接的网络存放在哪里。与 AE2 存储在物品上的结构相同。 */
+    /** 已链接网络的存放位置。与 AE2 存在物品上的结构相同。 */
     static final String KEY_LINK = "ThEWifiBackpackLink";
     static final String KEY_SKIN = "ThEBackpackSkin";
     static final String KEY_FACADE = "ThEBackpackFacade";
 
-    /** 傀儡 UUID 到已解码链接的映射：tick 处理器不能每秒把同一份 NBT 解析二十次。 */
+    /** 傀儡 UUID 到已解码链接的缓存：tick 处理器每秒二十次解析同一份 NBT 太贵。 */
     private static final Map<UUID, GlobalPos> LINK_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
 
-    /** 设置 {@code THAUMICENERGISTICS_BACKPACK_TRACE} 可记录每次装备、取下、重新上色与传输。 */
+    /** 环境变量 {@code THAUMICENERGISTICS_BACKPACK_TRACE} 打开后记录每次装备、取下、上色与传输。 */
     static final boolean TRACE = System.getenv("THAUMICENERGISTICS_BACKPACK_TRACE") != null;
 
     private GolemBackpackHandler() {}
@@ -65,8 +64,8 @@ public final class GolemBackpackHandler {
         }
 
         if (held.getItem() instanceof ItemGolemWirelessBackpack backpack) {
-            // 客户端这边只负责挥手：所有实际动作都在服务端，而且无论怎样原版都会先发交互
-            // 数据包再触发本事件，因此本地取消并不会让服务端看不到这次点击。
+            // 客户端这边只负责挥手，动作全在服务端。
+            // 原版先发交互数据包再触发本事件，本地取消挡不住服务端这次点击。
             if (event.getLevel().isClientSide()) {
                 event.setCancellationResult(InteractionResult.SUCCESS);
                 event.setCanceled(true);
@@ -80,8 +79,8 @@ public final class GolemBackpackHandler {
         }
 
         if (held.getItem() instanceof ItemGolemBell) {
-            // 需要潜行，因为单用铃是 Thaumaturge 的跟随开关；取消才是阻止
-            // 傀儡连同背包一起被收走的原因。
+            // 要求潜行，单用铃是 Thaumaturge 的跟随开关。
+            // 取消事件才拦得住傀儡被连背包一起收走。
             if (!player.isShiftKeyDown()) {
                 return;
             }
@@ -122,7 +121,7 @@ public final class GolemBackpackHandler {
         }
         GlobalPos link = backpack.getLinkedPosition(held);
         if (link == null) {
-            // 予以拒绝：没有网络的背包只是装饰，傀儡永远够不到任何东西。
+            // 拒绝：没有网络的背包傀儡够不到东西，只是装饰。
             return false;
         }
 
@@ -149,7 +148,7 @@ public final class GolemBackpackHandler {
         backpack.set(AEComponents.WIRELESS_LINK_TARGET, link);
         golem.spawnAtLocation(backpack);
 
-        // 方块也会退还：它是玩家实实在在花掉的物品，重新上色不得把它消耗掉。
+        // 方块也退还：那是玩家花掉的物品，重新上色不该消耗它。
         ItemStack facade = getFacade(golem);
         if (!facade.isEmpty() && !player.isCreative()) {
             golem.spawnAtLocation(facade);
@@ -189,8 +188,8 @@ public final class GolemBackpackHandler {
     }
 
     /**
-     * 参照实现所用的音效，玩家已经把它与「给傀儡装上东西」联系在一起。
-     * Thaumaturge 为饰品配了自己的咔嗒声；这是背包，不属于饰品。
+     * 沿用参照实现的音效，玩家已把它和「给傀儡装上东西」绑在一起。
+     * Thaumaturge 给饰品配的是另一个咔嗒声，背包不是饰品。
      */
     private static void playEquipSound(EntityThaumaturgeGolem golem) {
         golem.level().playSound(null, golem.getX(), golem.getY(), golem.getZ(),

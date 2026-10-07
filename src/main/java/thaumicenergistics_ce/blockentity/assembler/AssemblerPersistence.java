@@ -6,9 +6,8 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.ContainerHelper;
 
 /**
- * 机器的保存状态以及数据包发给客户端时携带的标签。放在机器之外，
- * 各部分的依赖顺序——物品之后读取卡数、合成与其产物槽一起写入——能在一处读懂。
- * 一处。
+ * 机器的存档状态，以及数据包发给客户端时带的标签。放在机器之外，
+ * 各部分依赖的顺序：物品之后读卡数、合成与它的井一起写，能在一处看懂。
  */
 final class AssemblerPersistence {
 
@@ -26,8 +25,7 @@ final class AssemblerPersistence {
             machine.suppressNotify = false;
         }
         machine.upgrades.recalculateGearDiscount();
-        // 在物品之后，不是之前：数量来自刚加载的卡，而不是菜单内的
-        // 容器过去写入的已保存数字。
+        // 在物品之后，不在之前：数量来自刚加载的卡，不来自菜单内容器以前写下的已保存数字。
         machine.upgrades.recountSpeedUpgrades();
         machine.patternCache.invalidate();
     }
@@ -36,7 +34,7 @@ final class AssemblerPersistence {
         machine.mainNode.saveToNBT(tag);
         machine.upgrades.writeNbt(tag);
         machine.vis.writeNbt(tag);
-        // 随合成保存，所以重载后完成它只需要这个标签和产物槽。
+        // 与合成一起存：重载后完成它只需要这个标签和井。
         machine.craft.writeNbt(tag, registries);
         ContainerHelper.saveAllItems(tag, machine.inventory.getItems(), registries);
     }

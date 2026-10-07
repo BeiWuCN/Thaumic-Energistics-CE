@@ -13,9 +13,9 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * 供机器使用、以及脱离工作台校验配方的最小 {@link IArcaneCraftingInput}。
- * 槽位顺序与 {@code InventoryArcaneWorkbench} 一致：先九个网格槽，再六个晶体槽，
- * 最后是法杖槽——这里始终为空，因为机器用 vis 支付，不用法杖。
+ * 给机器用、也给脱离工作台校验配方的最小 {@link IArcaneCraftingInput}。
+ * 槽序同 {@code InventoryArcaneWorkbench}：先九格网格，再六格晶体，最后法杖槽。
+ * 这里永远为空，机器用 vis 付账，不用法杖。
  */
 public final class SyntheticArcaneInput implements IArcaneCraftingInput {
     public static final int GRID_SLOTS = 9;
@@ -55,9 +55,8 @@ public final class SyntheticArcaneInput implements IArcaneCraftingInput {
     }
 
     /**
-     * 由样板的网格加上要在晶体槽中暴露的晶体物品堆构建输入。
-     *
-     * @param crystals 最多六个物品堆，多出的条目会被忽略
+     * 由样板的网格加要在晶体槽里露出的晶体堆构建输入。
+     * @param crystals 最多六个物品堆，多的条目忽略
      */
     public static SyntheticArcaneInput of(ThEArcanePattern pattern, List<ItemStack> crystals) {
         List<ItemStack> items = new ArrayList<>(SIZE);

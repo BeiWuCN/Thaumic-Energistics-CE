@@ -30,11 +30,9 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * 无线奥术合成终端：一个可携带的奥术工作台，显示它所绑定的已放置
- * 终端的网格。
- * 在该终端上潜行即可绑定两者，潜行左键则解除绑定：一个状态，两个
- * 位置。它的 vis 来自玩家周围的灵气，因为可携带的工作台没有方块
- * 可供抽取。
+ * 无线奥术合成终端：一个能带走的奥术工作台，显示它所绑定的已放置终端的网格。
+ * 在终端上潜行就绑定，潜行左键解除：一个状态，两个位置。
+ * vis 从玩家周围的灵气取，可携带的工作台没有方块可抽。
  */
 public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem implements ArcaneTerminalLink {
 
@@ -51,8 +49,7 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * 只有已经装有奥术合成终端的方块才值得把潜行交给它：在别的
-     * 部件上，这次点击会打到玩家并未瞄准的机器上。
+     * 只有真装了奥术合成终端的方块才值得把潜行交给它：别的部件上，这一击会打到玩家没瞄的机器。
      */
     @Override
     public boolean doesSneakBypassUse(ItemStack stack, LevelReader level, BlockPos pos, Player player) {
@@ -60,8 +57,8 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * 当该方块在任意一面装有终端时返回 true。方法签名里没有面本身，所以
-     * 装有终端的线缆会被整体打开；点击仍然只在装它的那一面上配对。
+     * 该方块任意一面装有终端就返回 true。签名里没有面，
+     * 装了终端的线缆会被整体打开；配对仍只认装了它的那一面。
      */
     private static boolean holdsArcaneTerminal(LevelReader level, BlockPos pos) {
         if (!(level.getBlockEntity(pos) instanceof IPartHost host)) {
@@ -79,8 +76,8 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * 配对是潜行手势，所以潜行也不再打开界面：没有这一条，一次点击会
-     * 既绑定物品，又让玩家盯着一个并非他要的网格。
+     * 配对是潜行手势，潜行也就不再打开界面：
+     * 没有这一条，一次点击既绑定物品，又让玩家盯着一个不要的网格。
      */
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
@@ -103,8 +100,7 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * 在物品上记住一个已放置的终端；维度也一并保存，因为两个终端可能
-     * 持有相同的坐标。
+     * 在物品上记住一个已放置的终端；维度一起存，两个终端可能坐标相同。
      */
     @Override
     public void pairWith(ItemStack terminal, Level level, BlockPos pos, Direction side) {
@@ -117,8 +113,7 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * 这个物品所配对的已放置终端，或 {@code null}——没有配对、它位于
-     * 另一个维度、或它的区块未加载时。
+     * 这个物品配对的已放置终端；没有配对、在另一个维度、或区块没加载时是 {@code null}。
      */
     public static @Nullable PartArcaneCraftingTerminal pairedTerminal(Level level, ItemStack terminal) {
         CompoundTag tag = bindingTag(terminal);
@@ -138,8 +133,8 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * 忘记已配对的终端。只有当确实有一个可忘记的对象时才返回 true，这样第二次
-     * 清除才不会像是做了什么事一样被通告给玩家。
+     * 忘掉已配对的终端。真有一个可忘的才返回 true，
+     * 第二次清除才不会当成做了事通告给玩家。
      */
     public static boolean unbind(ItemStack terminal) {
         CompoundTag tag = bindingTag(terminal);

@@ -6,10 +6,9 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * 知识铭刻机合成网格的服务端那一半。它与 {@link GhostGridSlot} 形状相同
- * 且没有载荷，因为服务端已持有机器所读的网格，两侧必须布置相同的槽位数量。
- * 拒绝取走，因为在这里
- * 点击会让玩家抽出他们从未放入的材料。
+ * 知识铭刻机合成网格的服务端那一半。
+ * 与 {@link GhostGridSlot} 形状相同且没有载荷：服务端已持有机器所读的网格，两侧的槽位数量要一致。
+ * 拒绝取走：在这里点击会把玩家从未放入的材料抽出来。
  */
 public class MachineGridSlot extends Slot {
 

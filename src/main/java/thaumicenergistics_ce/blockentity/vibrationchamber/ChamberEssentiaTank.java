@@ -14,9 +14,9 @@ import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 
 /**
  * 振动室的燃料槽：以最后放入的要素计数的源质量，以及把它填满的抽取。
- * 缓冲是一个计数而不是要素列表，所以保留的要素只用于显示；每次变化都落在
- * 这里，因此随之递增的 revision 就是缓存唯一需要的答案。管道所见——空间、
- * 吸力、内容——都从这个槽位读出，绝不从燃烧读出。
+ * 缓冲是个计数，不是要素列表，留住要素只为显示；每次变化都落在这里，
+ * 跟着递增的 revision 就是缓存唯一的依据。
+ * 管道看到的空间、吸力、内容都从这个槽位读出，不从燃烧读。
  */
 final class ChamberEssentiaTank {
 
@@ -30,10 +30,10 @@ final class ChamberEssentiaTank {
 
     private @Nullable Holder<IAspect> currentAspect;
 
-    /** 缓冲每次变化都递增，好让本容器内容的缓存察觉。 */
+    /** 缓冲每次变化都加一，容器内容的缓存靠它察觉。 */
     private long revision;
 
-    /** 追踪自上一行以来看到到达的量，以便区分根本送不到的管道。 */
+    /** 记下自上次记录以来到达的量，好区分根本送不到的管道。 */
     private int tracedEssentia;
 
     ChamberEssentiaTank(BlockEntityEssentiaVibrationChamber chamber) {
@@ -69,13 +69,13 @@ final class ChamberEssentiaTank {
         return Math.max(0, BlockEntityEssentiaVibrationChamber.MAX_ESSENTIA - storedEssentia);
     }
 
-    /** 缓冲或能量槽满时返回 0：管道靠这个数字导向，而一台满的机器若宣称
-     * 有吸力，会吸来它烧不掉的源质。 */
+    /** 缓冲或能量槽满就返回 0：管道按这个数字导向，
+     * 满的机器若还宣称有吸力，会吸来它烧不掉的源质。 */
     int suctionAmount(boolean paused) {
         return hasRoom() && !paused ? SUCTION : 0;
     }
 
-    /** 整个缓冲都记在最后放入的要素名下：缓冲是一个计数，所以这个答案是有损的。 */
+    /** 整个缓冲都记在最后放入的要素名下：缓冲是个计数，这个答案是有损的。 */
     AspectList contents() {
         if (storedEssentia <= 0 || currentAspect == null) {
             return AspectList.EMPTY;
@@ -83,14 +83,14 @@ final class ChamberEssentiaTank {
         return AspectList.EMPTY.add(currentAspect, storedEssentia);
     }
 
-    /** 所持要素的 id，没有持有任何东西时为 null。 */
+    /** 持有的要素 id，空的时候为 null。 */
     @Nullable ResourceLocation aspectId() {
         return currentAspect == null
                 ? null
                 : currentAspect.unwrapKey().map(ResourceKey::location).orElse(null);
     }
 
-    /** 所持要素的 path，没有持有任何东西时为空；燃烧的定价取决于它。 */
+    /** 持有的要素 path，空的时候是空串；燃烧的定价看它。 */
     String aspectPath() {
         return currentAspect == null
                 ? ""
@@ -98,8 +98,8 @@ final class ChamberEssentiaTank {
     }
 
     /**
-     * 从相邻容器抽取一份：没有“能装多少抽多少”这种调用，而把多余的退回去
-     * 正是源质丢失的地方。
+     * 从相邻容器抽一份：没有「能装多少抽多少」的调用，
+     * 多抽的部分退回去就会丢源质。
      */
     void pull() {
         if (chamber.getLevel() == null || !hasRoom()) {
@@ -132,8 +132,8 @@ final class ChamberEssentiaTank {
     }
 
     /**
-     * 从 Thaumaturge 的源质管道抽取，它不会向途经的机器推送：目的地是主动
-     * 询问的那一侧，与 Thaumaturge 的端口一致。下面的判断条件就是那个端口的。
+     * 从 Thaumaturge 的源质管道抽，它不向途经的机器推送：
+     * 目的地是主动询问的那一侧，和 Thaumaturge 的端口一致，下面的判断就是那个端口的。
      */
     private boolean pullFromTube(Direction side) {
         Direction facing = side.getOpposite();
@@ -158,7 +158,7 @@ final class ChamberEssentiaTank {
         return false;
     }
 
-    /** 按给出的要素取走装得下的量；缓冲按最后放入的要素来读取。 */
+    /** 按给定要素取走装得下的量；缓冲仍按最后放入的要素读。 */
     void accept(Holder<IAspect> aspect, int amount) {
         int taken = Math.min(amount, space());
         if (taken <= 0) {
@@ -169,17 +169,17 @@ final class ChamberEssentiaTank {
         currentAspect = aspect;
         revision++;
         chamber.setChanged();
-        // tooltip 在客户端读取缓冲；燃料是一次一份到达，而不是每 tick 都到。
+        // tooltip 在客户端读缓冲；燃料一份一份到，不每 tick 都有。
         chamber.markForClientUpdate();
     }
 
-    /** 一次填充会取走多少，已封顶，且仅在非模拟时才真正应用。 */
+    /** 一次填充能取走多少，已封顶；只有非模拟时才真正落账。 */
     int insert(Holder<IAspect> aspect, int amount, boolean simulate, boolean paused) {
-        // 与抽取和吸力同一条规则：满的槽位什么都不收，无论以何种方式提供。
+        // 和抽取、吸力同一条规则：满槽什么都不收，不管从哪条路径来。
         if (aspect == null || amount <= 0 || paused) {
             return 0;
         }
-        // 下限为 0：保存的计数若超过上限会算出负数，被读成“什么都没取”。
+        // 下限取 0：保存的计数超过上限会算出负数，被读成「什么都没取」。
         int accepted = Math.min(amount, space());
         if (accepted > 0 && !simulate) {
             accept(aspect, accepted);
@@ -187,13 +187,13 @@ final class ChamberEssentiaTank {
         return accepted;
     }
 
-    /** 交回一份燃料，与其它任何变化一样计为内容变化。 */
+    /** 退回一份燃料，跟别的内容变化一样算变化。 */
     void revertOne() {
         storedEssentia--;
         revision++;
     }
 
-    /** 按给定值放入计数和要素，无论它们来自线上还是来自保存的标签。 */
+    /** 按给定值写入计数和要素，不管来自网络还是保存的标签。 */
     void set(int essentia, @Nullable Holder<IAspect> aspect) {
         storedEssentia = essentia;
         currentAspect = aspect;

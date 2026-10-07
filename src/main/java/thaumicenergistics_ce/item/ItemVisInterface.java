@@ -8,9 +8,8 @@ import net.minecraft.world.item.context.UseOnContext;
 import thaumicenergistics_ce.part.PartVisInterface;
 
 /**
- * Vis 接口作为物品的形态，用于把它装到线缆上。
- * 直接实现 {@link IPartItem} 正是 AE2 所检查的，所以放置逻辑与部件
- * 工厂都留在这一个类里。
+ * Vis 接口作为物品的形态，可以装到线缆上。
+ * 直接实现 {@link IPartItem} 是 AE2 检查的，放置逻辑与部件工厂都留在这一个类里。
  */
 public class ItemVisInterface extends Item implements IPartItem<PartVisInterface> {
 

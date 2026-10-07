@@ -21,15 +21,15 @@ import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 存在一个知识核心里的奥术样板：核心物品堆之上的值对象。
- * 它读写物品堆自己的 {@link CustomData}，所以核心始终是一件可携带的物品，没有外挂物品栏，
- * 数据也不会进入物品的组件注册表。
+ * 存在知识核心里的奥术样板，是核心物品堆上的值对象。
+ * 读写物品堆自己的 {@link CustomData}，核心始终是一件可携带的物品，
+ * 不挂物品栏，数据也不进物品的组件注册表。
  */
 public final class HandlerKnowledgeCore {
 
     private static final String NBT_PATTERNS = "Patterns";
 
-    /** 一个核心存多少样板。与组装机 GUI 的 7x3 只读网格一致。 */
+    /** 一个核心存 21 个样板，与组装机 GUI 的 7x3 只读网格对齐。 */
     public static final int MAXIMUM_STORED_PATTERNS = 21;
 
     private final ItemStack core;
@@ -37,8 +37,8 @@ public final class HandlerKnowledgeCore {
     private final List<ThEArcanePattern> patterns = new ArrayList<>(MAXIMUM_STORED_PATTERNS);
 
     /**
-     * 本版本读不了的条目，按原样保留并原样写回。
-     * [save] 会重写整个列表，所以在这里丢掉一个条目，下一次存储时它就没了。
+     * 本版本读不了的条目，原样留着并原样写回。
+     * [save] 重写整个列表，丢一个下次存储就没了。
      */
     private final List<CompoundTag> unreadable = new ArrayList<>();
 
@@ -81,7 +81,7 @@ public final class HandlerKnowledgeCore {
     }
 
     /**
-     * 存储一个样板，替换同一结果的已有条目。
+     * 存一个样板，同一结果的已有条目会被替换。
      * @return 核心已满且没有该结果的条目时为 {@code false}
      */
     public boolean store(ThEArcanePattern pattern) {
@@ -137,14 +137,14 @@ public final class HandlerKnowledgeCore {
         CompoundTag tag = core.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         ListTag list = tag.getList(NBT_PATTERNS, Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
-            // 取副本而不是引用：save 可能会写回这个条目，而标签属于物品堆。
+            // 取副本，不取引用：save 会写回这个条目，而标签属于物品堆。
             CompoundTag entry = list.getCompound(i).copy();
             ThEArcanePattern pattern =
                     patterns.size() < MAXIMUM_STORED_PATTERNS ? ThEArcanePattern.load(registries, entry) : null;
             if (pattern != null) {
                 patterns.add(pattern);
             } else {
-                // 既超出上限又读不了：这个条目是玩家的，不该由我们丢弃。
+                // 超出上限又读不了：条目是玩家的，我们不丢。
                 unreadable.add(entry);
             }
         }
@@ -156,8 +156,7 @@ public final class HandlerKnowledgeCore {
         for (ThEArcanePattern pattern : patterns) {
             list.add(pattern.save(registries));
         }
-        // 把本版本读不了的内容原样放回：这次写入替换整个列表，
-        // 漏掉它们就等于删掉它们。
+        // 读不了的内容原样放回：这次写入替换整个列表，漏掉就是删掉。
         for (CompoundTag entry : unreadable) {
             list.add(entry.copy());
         }
@@ -186,8 +185,8 @@ public final class HandlerKnowledgeCore {
     }
 
     /**
-     * 一条警告，列出本版本读不了的条目；全部可读时什么都不显示。
-     * 之所以显示，是因为这些条目仍留在核心里，没有它，玩家的列表只是看起来短了。
+     * 一条警告，列出本版本读不了的条目；全都能读就什么都不显示。
+     * 这些条目还在核心里，不显示的话玩家的列表只是看着变短。
      */
     public List<Component> describeUnreadable() {
         if (unreadable.isEmpty()) {
@@ -230,8 +229,8 @@ public final class HandlerKnowledgeCore {
     }
 
     /**
-     * 应用一种文字颜色。包一层而不是就地调用 [withStyle]：那个方法是
-     * 可变参数的，在这套工具链上针对 {@code ChatFormatting} 的重载解析定不下来。
+     * 上文字颜色。包一层，不直接调 [withStyle]：那个方法是可变参数的，
+     * 这套工具链上针对 {@code ChatFormatting} 的重载解析定不下来。
      */
     private static MutableComponent styled(Component text, ChatFormatting colour) {
         MutableComponent mutable = text.copy();

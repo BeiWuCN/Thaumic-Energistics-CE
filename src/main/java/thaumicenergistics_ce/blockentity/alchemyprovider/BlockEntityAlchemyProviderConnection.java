@@ -23,10 +23,10 @@ import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 
 /**
- * 炼金供应器连接端：通往供应器的无线源质链路的远端。它只输送源质，
- * 从不存储，因为送达的源质会在下一个 tick 继续前往供应器；位于请求的机器旁时，
- * 它像线缆式供应器那样从网格应答。绑定距离不超过
- * [BlockEntityAlchemyProvider#MAX_LINK_DISTANCE] 格，丢失的一半会自行清理。
+ * 炼金供应器连接端：通往供应器的无线源质链路的远端。
+ * 它只过路不存储，送达的源质会在下一个 tick 继续前往供应器；
+ * 贴在请求的机器旁时，它像线缆式供应器那样从网格应答。
+ * 绑定距离不超过 [BlockEntityAlchemyProvider#MAX_LINK_DISTANCE] 格；链路丢了一半会自行清理。
  */
 public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity implements IEssentiaStorage {
 
@@ -57,9 +57,7 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
     }
 
     /**
-     * 把本接收端绑定到一个供应器，先询问供应器是因为它掌握各种限制——服务多少
-     * 个接收端、距离多远——所以被拒绝的链路不会改动任何一方。
-     *
+     * 把本接收端绑到供应器上；限制（连多少个、多远）在供应器那边，先问它，被拒时不改动任何一方。
      * @return 链路被拒绝的原因，成功时为 {@code null}
      */
     public @Nullable String link(BlockPos toProvider) {
@@ -98,7 +96,7 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
             return null;
         }
         if (level.getBlockEntity(providerPos) instanceof BlockEntityAlchemyProvider provider) {
-            // 自愈：供应器的列表把接收端丢了时把它放回去，例如来自旧存档的存档。
+            // 自愈：供应器的列表丢了本接收端就补回去（旧存档如此）。
             if (!provider.isLinkedReceiver(worldPosition)) {
                 provider.addLinkedReceiver(worldPosition);
             }
@@ -142,8 +140,8 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
     }
 
     /**
-     * 从供应器的网格为接收端旁的机器供料：抽吸型机器不提供容器面，
-     * 所以容器路径会一直让它等待。先取出，再交付。
+     * 从供应器的网格给接收端旁的机器供料。
+     * 抽吸型机器没有容器面，容器路径会让它一直等；先取出再交付。
      */
     private void feedSuctionMachines() {
         BlockEntityAlchemyProvider provider = resolveProvider();
@@ -173,7 +171,7 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
             }
             fetched = true;
             int accepted = machine.accept(wanted, taken);
-            // 机器拒收的源质留在输入端，所以已应答的请求永远不会被丢弃。
+            // 机器拒收的源质留在输入端，已应答的请求就不会被丢弃。
             int left = taken - accepted;
             if (left > 0) {
                 buffer.put(wanted, buffer.getOrDefault(wanted, 0) + left);
@@ -218,8 +216,8 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
     }
 
     /**
-     * 从相邻容器取走源质，仅在已绑定链路时进行：没有供应器就无处可去，
-     * 硬取只会让一个永远排不空的缓冲变大。
+     * 从相邻容器取走源质，只在链路已绑定时做。
+     * 没有供应器就无处可去，硬取只会把缓冲撑大。
      */
     private void drawFromNeighbours() {
         if (level == null) {
@@ -241,8 +239,8 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
                 if (space <= 0) {
                     continue;
                 }
-                // 容器只返回一次内容快照，所以一次请求多于 1 会透支它。
-                // 每次只取 1 个单位，与供应器自身的取用保持同步。
+                // 容器一次只给一份内容快照，一次要多于 1 就是透支。
+                // 每次取 1 个单位，与供应器自身的取用一致。
                 int taken = source.extract(aspect, 1, false);
                 if (taken > 0) {
                     buffer.put(aspect, held + taken);
@@ -251,7 +249,7 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
                 }
             }
         }
-        // 每次访问一次，而不是每移动一个单位一次：每次 setChanged() 都会把区块标记为待保存。
+        // 每次访问标一次待保存；每个单位标一次会让区块反复进保存队列。
         if (moved) {
             setChanged();
         }
@@ -278,8 +276,8 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
     }
 
     /**
-     * 从供应器的网络而非缓冲区为相邻容器供料：缓冲区装着正在送入的源质，
-     * 把它再发出去会让同一份源质同时出现在两条路径上。
+     * 从供应器的网络取源质给相邻容器，不动缓冲区。
+     * 缓冲区装的是正在送入的源质，再发出去会让同一份源质走两条路径。
      */
     @Override
     public int extract(Holder<IAspect> aspect, int amount, boolean simulate) {
@@ -319,7 +317,7 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
         if (providerPos != null) {
             tag.putLong("ProviderPos", providerPos.asLong());
         }
-        // 缓冲区刻意不写入：这是进行中的传输，不是要累积的容器。
+        // 缓冲区不写入：它只装进行中的传输，不累积。
     }
 
     @Override

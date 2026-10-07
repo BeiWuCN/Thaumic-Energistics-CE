@@ -7,10 +7,9 @@ import net.neoforged.neoforge.items.IItemHandler;
 import org.jspecify.annotations.Nullable;
 
 /**
- * 本 mod 的机器以 {@link IItemHandler} 的形式呈现，供漏斗和管道使用。一个区段可以带
- * 空洞，因此机器自己写入的区段不会被管道够到；这也不是 NeoForge 的 {@code InvWrapper}，
- * 后者会向槽位的上限询问能取出多少，于是把只装着一个物品的
- * 机器报成能搬走一整堆。
+ * 本 mod 的机器以 {@link IItemHandler} 暴露给漏斗和管道。
+ * 区段可以带空洞，机器自己写入的区段不会被管道够到。
+ * 不用 NeoForge 的 {@code InvWrapper}：它问的是槽位的上限，会把只装一个物品的机器报成能搬走一整堆。
  */
 public final class SlotRangeItemHandler implements IItemHandler {
 
@@ -24,12 +23,12 @@ public final class SlotRangeItemHandler implements IItemHandler {
         this(container, firstSlot, slotCount, slot -> true);
     }
 
-    /** 只能被填充的区段：与管道能看到的槽位相同，但取不出任何东西。 */
+    /** 只可填充的区段：槽位与管道看到的一样，但取不出东西。 */
     public static SlotRangeItemHandler inputOnly(Container container, int firstSlot, int slotCount) {
         return new SlotRangeItemHandler(container, firstSlot, slotCount, slot -> true, true);
     }
 
-    /** 带空洞的区段：{@code band} 收到的是容器自身的索引。 */
+    /** 带空洞的区段；{@code band} 收到的是容器自身的索引。 */
     public SlotRangeItemHandler(Container container, int firstSlot, int slotCount, IntPredicate band) {
         this(container, firstSlot, slotCount, band, false);
     }
@@ -43,7 +42,7 @@ public final class SlotRangeItemHandler implements IItemHandler {
         this.slotCount = Math.min(slotCount, container.getContainerSize() - firstSlot);
     }
 
-    /** 该区段是否覆盖此处理器索引：在范围内，且不是它的空洞之一。 */
+    /** 该区段是否覆盖此处理器索引：在范围内，且不是空洞。 */
     private boolean reaches(int slot) {
         return slot >= 0 && slot < slotCount && band.test(firstSlot + slot);
     }
@@ -84,7 +83,7 @@ public final class SlotRangeItemHandler implements IItemHandler {
         return takeFromSlot(firstSlot + slot, amount, simulate);
     }
 
-    /** 插入到整个区段，这是漏斗或管道不指定槽位时所做的搬运。 */
+    /** 插入到整个区段；漏斗或管道不指定槽位时走的这条路。 */
     public ItemStack insertEverywhere(ItemStack stack, boolean simulate) {
         if (stack.isEmpty()) {
             return stack;
@@ -133,7 +132,7 @@ public final class SlotRangeItemHandler implements IItemHandler {
         return taken;
     }
 
-    /** level 判断把它挡在客户端之外，客户端上的机器从菜单解析自身内容。 */
+    /** level 判断把插入挡在客户端之外；客户端的机器从菜单解析自身内容。 */
     private boolean insertable(int containerSlot, @Nullable ItemStack stack) {
         return stack != null && !stack.isEmpty() && container.canPlaceItem(containerSlot, stack);
     }

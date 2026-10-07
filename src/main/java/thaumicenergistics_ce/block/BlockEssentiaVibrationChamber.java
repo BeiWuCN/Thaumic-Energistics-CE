@@ -21,9 +21,8 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
 
 /**
- * 振动室方块：只做水平朝向，因为它的模型不对称。
- * 正面有动态要素贴图、顶部是输入口，因此竖直朝向会把两者
- * 对调。{@code facing} 必须是准确的属性名，否则这些变体不可达。
+ * 振动室方块：只做水平朝向，模型不对称。正面是动态要素贴图、顶部是输入口，
+ * 竖直朝向会把两者对调。{@code facing} 得是准确的属性名，否则那些变体不可达。
  */
 public class BlockEssentiaVibrationChamber extends ThEBaseEntityBlock {
 
@@ -63,8 +62,8 @@ public class BlockEssentiaVibrationChamber extends ThEBaseEntityBlock {
     }
 
     /**
-     * 右键打开机器界面：这是基于 AE2 方块实体而非 {@code ThEBaseBlockEntity} 的
-     * 网格机器，因此基类的菜单路径到不了它。
+     * 右键打开机器界面：这是建在 AE2 方块实体上不是 {@code ThEBaseBlockEntity} 上的网格机器，
+     * 基类的菜单路径到不了它。
      */
     @Override
     protected InteractionResult useWithoutItem(

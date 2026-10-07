@@ -12,7 +12,7 @@ final class AssemblerContents {
         if (machine.getLevel() == null || machine.getLevel().isClientSide()) {
             return;
         }
-        // 在方块消失前归还网络已经付过款的原料。
+        // 在方块消失前，把网络已经付过款的原料还回去。
         machine.craftRunner().returnHeldInputs();
         machine.suppressNotify = true;
         try {

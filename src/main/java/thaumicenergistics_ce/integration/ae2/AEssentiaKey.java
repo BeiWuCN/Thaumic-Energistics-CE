@@ -23,19 +23,19 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * ME 网络眼中的一种要素：不可变，按注册表 id 做驻留。以 id 为身份，使得
- * 网络之外的一个键与从存储元件读回的键相等，否则一切都会有
- * 两份。只保存 id，因为名称、颜色和发现状态都按需解析，
- * 而且键会在没有 level 的地方构建（NBT、数据包、合成规划器）。
+ * ME 网络眼中的一种要素：不可变，按注册表 id 驻留。
+ * 身份用 id，网络外造的键才等于从存储元件读回的键，否则同一要素会有两份。
+ * 只存 id：名称、颜色、发现状态都按需解析，键还会在没有 level 时构建
+ * （NBT、数据包、合成规划器）。
  */
 public final class AEssentiaKey extends AEKey {
 
-    /** 每个要素 id 一个键，使身份相等与引用相等保持一致。 */
+    /** 每个要素 id 一个键，让身份相等与引用相等一致。 */
     private static final Map<ResourceLocation, AEssentiaKey> CACHE = new ConcurrentHashMap<>();
 
     /**
-     * 解码一律走 {@link #of}，绝不用构造函数：AE2 是按引用在 {@link #getPrimaryKey()} 上映射键的，
-     * 因此新造的实例会答 0，只有在从 NBT 重启之后才显现。
+     * 解码一律走 {@link #of}，绝不用构造函数：AE2 按引用在 {@link #getPrimaryKey()} 上映射键，
+     * 新造的实例会答 0，重启时从 NBT 读回才显现。
      */
     public static final MapCodec<AEssentiaKey> MAP_CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
             ResourceLocation.CODEC.fieldOf("id").forGetter(AEssentiaKey::getId)
@@ -76,8 +76,8 @@ public final class AEssentiaKey extends AEKey {
     }
 
     /**
-     * AE2 用来对键分组的对象：id 本身。它的各个映射以它为键并按引用比较，所以同一要素的
-     * 两个键必须是同一个对象。
+     * AE2 给键分组所用的对象：id 本身。映射按引用比较，
+     * 同一要素的两个键得是同一个对象。
      */
     @Override
     public Object getPrimaryKey() {
@@ -95,8 +95,8 @@ public final class AEssentiaKey extends AEKey {
     }
 
     /**
-     * 该键作为独立标签的形式。通过 {@link AEKey#CODEC} 写出：本类自己的映射编解码器会省略
-     * {@code #t} 类型字段，而 AE2 的读取器会把它解析为内容缺失。
+     * 键作为独立标签的形式。走 {@link AEKey#CODEC} 写出：
+     * 本类自己的映射编解码器会省略 {@code #t} 类型字段，AE2 的读取器会读成内容缺失。
      */
     @Override
     public CompoundTag toTag(HolderLookup.Provider registries) {
@@ -110,8 +110,8 @@ public final class AEssentiaKey extends AEKey {
     }
 
     /**
-     * 真正的名称，而不是 {@code AspectComponents.name}——后者在尚未发现时会给出 "Unknown"。AE2 会把它
-     * 缓存在共享键上，所以先缓存进去的 "Unknown" 会一直留着。
+     * 真正的名称，不用 {@code AspectComponents.name}：后者在未发现时给出 "Unknown"，
+     * AE2 把它缓存在共享键上，先进去的 "Unknown" 会一直留着。
      */
     @Override
     protected Component computeDisplayName() {
@@ -128,7 +128,7 @@ public final class AEssentiaKey extends AEKey {
 
     @Override
     public void addDrops(long amount, List<ItemStack> drops, Level level, BlockPos pos) {
-        // 有意什么都不做。
+        // 有意留空。
     }
 
     @Override

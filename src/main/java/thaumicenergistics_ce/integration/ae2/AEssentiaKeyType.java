@@ -18,15 +18,15 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
- * Thaumaturge 源质对应的 AE2 键类型。注册它之后源质成为一等公民，
- * 存储元件、总线、终端和规划器都能正确分派。{@code AMOUNT_PER_BYTE = 8} 与 Thaumaturge
- * 一致：那里一个罐子装 250，一个小瓶装 10（见 {@code TcRegistry}）；这个值是在
- * 本构建中实测得到的，而不是取自参照实现的 64；一个 1k 组件是 1024 字节，
- * 即 8192 源质。
+ * Thaumaturge 源质对应的 AE2 键类型。注册后源质是一等公民，
+ * 存储元件、总线、终端和规划器都能正确分派。
+ * {@code AMOUNT_PER_BYTE = 8} 与 Thaumaturge 一致：
+ * 一个罐子装 250，一个小瓶装 10（见 {@code TcRegistry}）。
+ * 这个值是本构建实测的，参照实现用的是 64。一个 1k 组件 1024 字节，即 8192 源质。
  */
 public final class AEssentiaKeyType extends AEKeyType {
 
-    /** 存储组件每字节可容纳的源质。 */
+    /** 存储组件每字节装 8 源质。 */
     public static final int AMOUNT_PER_BYTE = 8;
 
     public static final ResourceLocation ID = ThEIds.id("essentia");
@@ -53,8 +53,8 @@ public final class AEssentiaKeyType extends AEKeyType {
     }
 
     /**
-     * 每次操作搬运多少：为 1，即基类的默认值。AE2 据此决定总线一次搬运的量，
-     * 数值更大就会让一条总线瞬间抽空一个罐子。
+     * 每次操作搬运 1 份，基类默认值。AE2 用它决定总线一次搬多少，
+     * 调大就会让一条总线瞬间抽空一个罐子。
      */
     @Override
     public int getAmountPerOperation() {
@@ -66,16 +66,15 @@ public final class AEssentiaKeyType extends AEKeyType {
         return 1;
     }
 
-    /** 不做模糊搜索：模糊匹配需要损伤值或耐久度，而要素两者都没有。 */
+    /** 不做模糊搜索：模糊匹配要损伤值或耐久度，要素两样都没有。 */
     @Override
     public boolean supportsFuzzyRangeSearch() {
         return false;
     }
 
     /**
-     * 用手边拿得到的注册表访问来解析键所指的要素：用注册表而不是
-     * level，因为要素注册表是同步的，客户端在任何 level 存在之前就拥有它。
-     *
+     * 用手边拿得到的注册表访问解析键所指的要素：用注册表不用 level，
+     * 要素注册表是同步的，客户端在任何 level 存在之前就拥有它。
      * @return 该要素；这些注册表里没有对应条目时为 {@code null}
      */
     public static @Nullable Holder<IAspect> aspectOf(HolderLookup.Provider registries, ResourceLocation id) {
@@ -91,8 +90,8 @@ public final class AEssentiaKeyType extends AEKeyType {
         return aspectOf(level.registryAccess(), id);
     }
 
-    /** 可以用于解析要素的注册表，向当前运行的那一侧索取：客户端
-     * 通过 {@link ClientRegistries} 装入自己的；专用服务器则索取服务端的。
+    /** 解析要素要用的注册表，向当前运行的那一侧索取：客户端
+     * 通过 {@link ClientRegistries} 装入自己的，专用服务器则索取服务端的。
      * @return 这些注册表；在任一侧拥有它之前为 {@code null}
      */
     static @Nullable RegistryAccess clientOrServerRegistries() {
@@ -105,8 +104,8 @@ public final class AEssentiaKeyType extends AEKeyType {
     }
 
     /**
-     * 用几个字说明某个要素为何解析不出来。"No registries yet" 与 "not in them"
-     * 从外面看是一样的——都没画出来——但含义正好相反。
+     * 用几个字说明某个要素为什么解析不出来。"No registries yet" 与 "not in them"
+     * 从外面看一样：都没画出来，含义却相反。
      */
     public static String whyNoAspect(ResourceLocation id) {
         RegistryAccess registries = clientOrServerRegistries();
