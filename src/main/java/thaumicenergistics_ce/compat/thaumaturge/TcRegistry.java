@@ -7,9 +7,11 @@ import com.leclowndu93150.thaumaturge.content.essentia.jar.JarItem;
 import com.leclowndu93150.thaumaturge.content.item.PhialItem;
 import com.leclowndu93150.thaumaturge.content.taint.item.EssentiaCrystalFactory;
 import com.leclowndu93150.thaumaturge.content.taint.item.ItemEssentiaCrystal;
+import com.leclowndu93150.thaumaturge.registry.TCBlocks;
 import com.leclowndu93150.thaumaturge.registry.TCDataComponents;
 import com.leclowndu93150.thaumaturge.registry.TCItems;
 import net.minecraft.core.Holder;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -42,12 +44,14 @@ public final class TcRegistry {
         return EssentiaCrystalFactory.of(aspect, amount);
     }
 
-    // -- essentia containers -------------------------------------------------
+    // -- the monitor's book --------------------------------------------------
 
-    /** The research book, recognised by item rather than by class. */
+    /** The tome the monitor reads through, recognised by item rather than by class. */
     public static boolean isThaumonomicon(ItemStack stack) {
         return stack.is(TCItems.THAUMONOMICON.get());
     }
+
+    // -- essentia containers -------------------------------------------------
 
     /** Whether {@code stack} is a jar or a phial, the two container kinds this mod fills. */
     public static boolean isEssentiaContainer(ItemStack stack) {
@@ -74,5 +78,22 @@ public final class TcRegistry {
     /** A stack of empty phials: an emptied one is spent back into its own item id, not left behind. */
     public static ItemStack emptyPhials(int count) {
         return new ItemStack(TCItems.PHIAL.get(), count);
+    }
+
+    // -- brains --------------------------------------------------------------
+
+    /** The brain in a jar, the one item the gacha box takes. */
+    public static boolean isJarBrain(ItemStack stack) {
+        return !stack.isEmpty() && stack.is(TCItems.JAR_BRAIN.get());
+    }
+
+    /** The sound a jar brain makes when it is put down, which is what inserting one sounds like. */
+    public static SoundEvent jarBrainPlaceSound() {
+        return TCBlocks.JAR_BRAIN.get().defaultBlockState().getSoundType().getPlaceSound();
+    }
+
+    /** The brain on its own, for the box that gives it back. */
+    public static ItemStack jarBrainStack() {
+        return new ItemStack(TCItems.JAR_BRAIN.get());
     }
 }

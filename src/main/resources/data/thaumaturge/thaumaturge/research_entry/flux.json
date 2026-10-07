@@ -1,0 +1,36 @@
+{
+  "_note": "Overrides Thaumaturge's own flux entry so that the 咒波 page the flux transfer interface points at is the real thaumaturge:flux research, parked in our category instead of a copy of it. Same path as theirs, and our mod loads AFTER thaumaturge, so this file wins. Dropped from their version: the hidden meta (an entry with no parents and hidden is never drawn) and the stage-0 required_research on thaumaturge:f_toomuchflux, because the page has no prerequisite here.",
+  "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+  "name": "research.thaumaturge.flux.title",
+  "column": -6,
+  "row": -8,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumaturge:textures/research/r_flux.png"
+  ],
+  "stages": [
+    {
+      "text": "research.thaumaturge.flux.stage_0"
+    },
+    {
+      "text": "research.thaumaturge.flux.stage_1"
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:vitium",
+      "amount": 3
+    },
+    {
+      "aspect": "thaumaturge:perditio",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:auram",
+      "amount": 2
+    }
+  ],
+  "complexity": 1
+}

@@ -13,10 +13,12 @@ import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
  * The monitor's one slot, the two blockstates that mirror it, and what a right-click does to the
- * book. Only a Thaumonomicon may go in, and only a sneaking player may take it back out; both
+ * tome. Only a thaumonomicon may go in, and only a sneaking player may take it back out; both
  * blockstates are written from here, so the block class stays a set of thin overrides.
  */
 final class OccultMonitorBookSlot {
+
+    private static final String TAG_BOOK = "Book";
 
     private final BlockEntityOccultMonitor monitor;
 
@@ -50,7 +52,7 @@ final class OccultMonitorBookSlot {
         return TcRegistry.isThaumonomicon(book());
     }
 
-    /** Adds the book, or removes it only when the player sneaks - a plain right-click would disarm
+    /** Adds the tome, or removes it only when the player sneaks - a plain right-click would disarm
      * the machine. See {@code BlockOccultMonitor}. */
     @Nullable ItemStack interact(ItemStack held, boolean sneaking) {
         if (has()) {
@@ -101,12 +103,13 @@ final class OccultMonitorBookSlot {
     }
 
     void save(CompoundTag tag, HolderLookup.Provider registries) {
-        tag.put("Book", container.getItem(BlockEntityOccultMonitor.BOOK_SLOT).saveOptional(registries));
+        tag.put(TAG_BOOK, container.getItem(BlockEntityOccultMonitor.BOOK_SLOT).saveOptional(registries));
     }
 
     void load(CompoundTag tag, HolderLookup.Provider registries) {
-        container.setItem(BlockEntityOccultMonitor.BOOK_SLOT,
-                ItemStack.parseOptional(registries, tag.getCompound("Book")));
+        container.setItem(
+                BlockEntityOccultMonitor.BOOK_SLOT,
+                ItemStack.parseOptional(registries, tag.getCompound(TAG_BOOK)));
     }
 
     void drop() {

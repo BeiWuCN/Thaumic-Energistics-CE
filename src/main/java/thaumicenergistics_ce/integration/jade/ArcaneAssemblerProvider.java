@@ -16,11 +16,11 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
 /**
- * The Arcane Assembler's Jade server data: the numbers a tooltip cannot work out for itself.
- * It is written against Jade's API rather than AE2's, since AE2 registers its grid-state line
- * through the internal {@code appeng.integration.modules.igtooltip} package, which an addon
- * cannot hook. The drawing half is {@code client.jade.ArcaneAssemblerTooltip}, paired by
- * {@link #UID}.
+ * The Arcane Assembler's Jade server data. Written against Jade's API rather than AE2's, since AE2
+ * registers a block entity's grid-state line through the internal
+ * {@code appeng.integration.modules.igtooltip} package, which an addon cannot hook - parts are the
+ * exception and go through AE2's public {@code PartTooltips}. The drawing half is
+ * {@code client.jade.ArcaneAssemblerTooltip}, paired by {@link #UID}.
  */
 public class ArcaneAssemblerProvider implements IServerDataProvider<BlockAccessor> {
 

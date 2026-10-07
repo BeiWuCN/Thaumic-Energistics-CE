@@ -28,7 +28,7 @@ import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 
 /**
  * The Occult Monitor block: three states, none decorative, and one pulse that is not a state.
- * {@code facing} turns the frame, {@code book} is the Thaumonomicon as a real state, and
+ * {@code facing} turns the frame, {@code book} is the thaumonomicon as a real state, and
  * {@code network} is the ME connection; the models come from those three names. The pulse is asked
  * of the machine by the block, and a scheduled tick takes it down again.
  */
@@ -113,7 +113,7 @@ public class BlockOccultMonitor extends ThEBaseEntityBlock {
         }
         var takenBack = monitor.interact(held, sneaking);
         if (takenBack != null) {
-            // The book came off; hand it to the player, or drop it if there is no room.
+            // The tome came off; hand it to the player, or drop it if there is no room.
             if (!player.getInventory().add(takenBack)) {
                 player.drop(takenBack, false);
             }

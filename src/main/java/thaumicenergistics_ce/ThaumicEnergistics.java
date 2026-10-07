@@ -25,6 +25,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.registries.RegisterEvent;
@@ -38,14 +39,15 @@ import thaumicenergistics_ce.init.ModCreativeTab;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
+import thaumicenergistics_ce.integration.jade.FluxTransferStatusProvider;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.init.ModNetwork;
 import thaumicenergistics_ce.init.capability.ThEItemCapabilities;
 import thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceRegistry;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
-import thaumicenergistics_ce.part.PartEssentiaStorageBus;
 import thaumicenergistics_ce.part.PartEssentiaTerminal;
+import thaumicenergistics_ce.part.PartFluxTransferInterface;
 import thaumicenergistics_ce.part.PartVisInterface;
 import thaumicenergistics_ce.util.ThELog;
 
@@ -75,6 +77,8 @@ public final class ThaumicEnergistics {
         modBus.addListener(this::commonSetup);
 
         registerPartModels();
+        // The tooltip's server half goes through AE2's part registry; Jade only sees block entities.
+        FluxTransferStatusProvider.register();
         // The ME interface's access card works on the game bus rather than a grid tickable, since AE2
         // reports nothing when a card goes in or out - see EssentiaInterfaceRegistry.
         EssentiaInterfaceRegistry.register();
@@ -87,7 +91,7 @@ public final class ThaumicEnergistics {
     private static void registerPartModels() {
         List<ResourceLocation> models = new ArrayList<>();
         models.addAll(PartEssentiaTerminal.MODEL_LOCATIONS);
-        models.addAll(PartEssentiaStorageBus.MODEL_LOCATIONS);
+        models.addAll(PartFluxTransferInterface.MODEL_LOCATIONS);
         models.addAll(PartEssentiaLevelEmitter.MODEL_LOCATIONS);
         models.addAll(PartArcaneCraftingTerminal.MODEL_LOCATIONS);
         // The P2P part draws itself with AE2's own P2P set, status models included.
@@ -106,12 +110,20 @@ public final class ThaumicEnergistics {
                 ModBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(),
                 ModBlockEntities.ALCHEMY_PROVIDER.get(),
                 ModBlockEntities.INFUSION_PROVIDER.get(),
-                ModBlockEntities.OCCULT_MONITOR.get())) {
+                ModBlockEntities.OCCULT_MONITOR.get(),
+                ModBlockEntities.GACHA_BOX.get())) {
             event.registerBlockEntity(
                     AECapabilities.IN_WORLD_GRID_NODE_HOST,
                     type,
                     (blockEntity, context) -> (IInWorldGridNodeHost) blockEntity);
         }
+
+        // AE2 bridges only its own block entities to FE, and Jade draws its energy bar off whatever
+        // this capability hands out, so the box's reserve is invisible to both until it is listed.
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK,
+                ModBlockEntities.GACHA_BOX.get(),
+                (blockEntity, context) -> blockEntity.getEnergyStorage(context));
 
         // Same STORAGE capability Thaumaturge's jars expose; pipes and neighbours treat it as one.
         event.registerBlockEntity(
@@ -139,6 +151,13 @@ public final class ThaumicEnergistics {
                 (blockEntity, context) -> (IEssentiaTransport)
                         blockEntity);
 
+        // The box is a consumer: a tube behind the screen grows an arm toward it and follows the
+        // suction the box reports, which is what drags a jar's cognitio down the line and into it.
+        event.registerBlockEntity(
+                EssentiaCapabilities.TRANSPORT,
+                ModBlockEntities.GACHA_BOX.get(),
+                (blockEntity, context) -> blockEntity.essentiaTransport(context));
+
         // Aspect CONTAINER is the capability an Infusion Altar scans for to draw essentia.
         event.registerBlockEntity(
                 AspectCapabilities.CONTAINER,
@@ -153,10 +172,6 @@ public final class ThaumicEnergistics {
      */
     public static void registerPartCapabilities(RegisterPartCapabilitiesEvent event) {
         TcAura.registerVisSource(event, PartVisInterface.class);
-        // A pipe asks a neighbour only for the transport capability, so without this the essentia
-        // storage bus can see a tube but a tube cannot see it. The port is rebuilt per query, not held.
-        event.register(EssentiaCapabilities.TRANSPORT, (part, context) -> part.transportView(),
-                PartEssentiaStorageBus.class);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

@@ -1,0 +1,17 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "thaumicenergistics_ce:block/gacha_box_aggregator"
+      }
+    },
+    {
+      "when": {
+        "stacked": "true"
+      },
+      "apply": {
+        "model": "thaumicenergistics_ce:block/gacha_box_connectors"
+      }
+    }
+  ]
+}

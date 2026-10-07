@@ -1,56 +1,48 @@
-[中文](README.md) · [Repository](https://github.com/beiwucn/Thaumic-Energistics-CE)
+![Thaumic Energistics: CE](https://cdn.jsdelivr.net/gh/BeiWuCN/Thaumic-Energistics-CE@raw/src/main/resources/icon.png)
+
+[中文](README.md) · [Repository](https://github.com/beiwucn/Thaumic-Energistics-CE) · [Issues](https://github.com/beiwucn/Thaumic-Energistics-CE/issues)
 
 # Thaumic Energistics: CE
 
-Bridges Thaumaturge essentia and AE2's ME network, on 1.21.1 / NeoForge.
+## About
 
-The original Thaumic Energistics stopped at 1.12.2. This is that addon redone on top of Thaumaturge — recipes, research and machine screens were mostly rewritten. CE stands for Community Edition: it started as something for our own modpacks.
+A Minecraft mod about essentia and networks. It connects Thaumaturge's essentia to AE2's ME network: aspects are stored on the network, moved by it, and crafted by it.
 
-You need Minecraft 1.21.1, NeoForge 21.1.250+, Applied Energistics 2 19.2.x and Thaumaturge 0.4.4+ (with its dependency GuideME). Drop the jar in `mods/`.
+This mod is the original Thaumic Energistics (stopped at 1.12.2) redone on 1.21.1, written against Thaumaturge's API.
 
-## What's in it
+Requirements: Minecraft 1.21.1, NeoForge 21.1.250 or newer, Applied Energistics 2 19.2.x, Thaumaturge 0.4.4 or newer.
 
-**Storage and buses**: ME essentia storage components in 1k / 4k / 16k / 64k (plus a creative one), essentia storage bus, import bus, export bus and the essentia terminal including the wireless one.
-
-**Machines**:
-
-- Arcane Assembly Chamber — hands arcane workbench recipes to an AE2 crafting CPU, and shows what it is crafting on its face
-- Distillation Encoder — turns an item's essentia composition into a pattern
-- Knowledge Inscriber + Knowledge Core — recipes live on a core, up to 21 per machine
-- Infusion Provider / Infusion Monitor — the first feeds `thaumaturge:infusion`, the second sits by an altar and reports the risk
-- Essentia Vibration Chamber — burns spare essentia into AE
-
-**Wireless**: Essentia Provider with a Wireless Essentia Receiver, and a Golem Wireless Backpack that dumps what a golem carries straight into the network.
-
-**Arcane side**: Arcane Crafting Terminal (craft arcane recipes in the terminal, the network covers the vis you lack), Focus of the AE Wrench, Vis Relay Interface.
-
-Plus a full Thaumonomicon tree, in English and Chinese.
+It contains essentia storage components, the essentia terminal, several essentia machines, wireless links and arcane crafting, plus a complete Thaumaturge research tree.
 
 ## Building
 
-JDK 21 and `gradlew build`.
+Building uses JDK 21 and `gradlew build`.
 
-Eight of the dependencies are ordinary maven coordinates, pinned to exact versions in `gradle.properties` and resolved from the Modrinth maven repository. A fresh clone builds with nothing staged by hand:
+The dependencies come from the Modrinth maven repository with their versions pinned in `gradle.properties`: Applied Energistics 2, JEI, Jade, Thaumaturge.
 
-- Applied Energistics 2 19.2.17: <https://modrinth.com/mod/ae2>
-- GuideME 21.1.17: <https://modrinth.com/mod/guideme>
-- JEI 19.57.0.444: <https://modrinth.com/mod/jei> — the recipe transfer button
-- Jade 15.10.6: <https://modrinth.com/mod/jade> — the block info overlay
-- Curios 9.5.1 / TerraBlender 4.1.0.8 / Lithostitched 1.8.0 / Apollib 1.2.0: Thaumaturge's runtime prerequisites; this mod imports none of them
-
-**Thaumaturge itself is the one you have to build once.** It is All Rights Reserved: it publishes no maven artifact, and its licence forbids publishing the mod or any binary built from it (§3.1 names "GitHub Releases on a fork" outright), so this repository cannot carry it for you. §2.4 does allow building it for your own use. Run one of these:
+Thaumaturge itself has to be built locally once. It ships as All Rights Reserved, publishes no maven artifact, and its licence forbids distributing it or any binary built from it, so this repository does not carry it. Section 2.4 of that licence permits building it for your own use:
 
 ```sh
 tools/fetch-thaumaturge.sh                      # Linux, macOS, CI
 powershell -File tools/fetch-thaumaturge.ps1    # Windows
 ```
 
-It clones <https://github.com/Leclowndu93150/Thaumaturge/> at the commit pinned as `thaumaturge_commit` in `gradle.properties` and leaves the jar it builds in `libs/`. Without that jar `gradlew build` fails the configuration with a pointer to these commands rather than degrading into hundreds of unresolved-symbol errors. **Do not commit the jar and do not pass it on.**
-
-## Credits
-
-The original Thaumic Energistics is by Nividica and contributors; this CE continues the 1.21.1 port. Thaumaturge is Leclowndu93150's project and this addon depends on its API. High-version textures drawn by @麦淇淋.
+The script clones <https://github.com/Leclowndu93150/Thaumaturge/> at the commit named by `thaumaturge_commit` in `gradle.properties` and puts the jar it builds into `libs/`. With that jar present the commands are not needed; without it `gradlew build` stops during configuration and prints them. The jar is never committed and never passed on.
 
 ## License
 
-MIT, see `LICENSE`. The code derives from Thaumic Energistics by Nividica, which is MIT as well (the upstream `LICENSE` credits Chris and BrockWS). That part is still the original authors' copyright, so the upstream notice is carried in `LICENSE` too - keep it there when redistributing.
+MIT, see `LICENSE`.
+
+The code derives from Thaumic Energistics by Nividica, which is MIT as well. That part remains the original authors' copyright, so the upstream notice (Chris and BrockWS) is carried in `LICENSE` too; keep it there when redistributing. Thaumaturge is Leclowndu93150's project. High-version textures are drawn by @麦淇淋.
+
+## Issues
+
+Crashes, suggestions and bugs all go to the [issues page](https://github.com/beiwucn/Thaumic-Energistics-CE/issues).
+
+Before submitting, make sure you are using the latest version, that the issue has not already been answered or fixed, and that it is a valid issue. Anything vanilla Minecraft, AE2 or Thaumaturge can already do is considered an invalid suggestion; asking for a smaller, more compact or more efficient version of something is considered invalid as well.
+
+Click New Issue to start. Where the repository provides a template, fill that in: the template lists the information to add. Then click Submit New Issue and wait for feedback.
+
+The more complete the information, the faster the issue is located and the faster a fixed version arrives. Issues that do not match these requirements may be closed.
+
+This tracker covers the CE version on 1.21.1 / 26.1.2 only. The original Thaumic Energistics, which stopped at 1.12.2, is a different project.

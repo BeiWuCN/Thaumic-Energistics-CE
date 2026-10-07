@@ -3,6 +3,7 @@ package thaumicenergistics_ce.client;
 import appeng.api.client.AEKeyRendering;
 import appeng.client.gui.implementations.UpgradeableScreen;
 import appeng.client.gui.style.StyleManager;
+import com.leclowndu93150.thaumaturge.client.model.entity.BrainModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
@@ -19,12 +20,13 @@ import thaumicenergistics_ce.client.gui.ScreenArcaneAssembler;
 import thaumicenergistics_ce.client.gui.ScreenArcaneCraftingTerminal;
 import thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
-import thaumicenergistics_ce.client.gui.ScreenEssentiaStorageBus;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaTerminal;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaVibrationChamber;
 import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
+import thaumicenergistics_ce.client.jade.FluxTransferTooltip;
 import thaumicenergistics_ce.client.render.ArcaneAssemblerRenderer;
 import thaumicenergistics_ce.client.render.EssentiaKeyRenderHandler;
+import thaumicenergistics_ce.client.render.GachaBoxRenderer;
 import thaumicenergistics_ce.client.render.bubble.OccultMonitorBubbleRenderer;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.ModMenuTypes;
@@ -35,7 +37,6 @@ import thaumicenergistics_ce.integration.ae2.ClientRegistrySource;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 import thaumicenergistics_ce.menu.MenuEssentiaLevelEmitter;
-import thaumicenergistics_ce.menu.MenuEssentiaStorageBus;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
 import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
 import thaumicenergistics_ce.network.ClientSinks;
@@ -51,8 +52,8 @@ public final class ClientSetup {
     private ClientSetup() {}
 
     /**
-     * Tells AE2 how to draw an essentia key, on {@code FMLClientSetupEvent} rather than with the
-     * screens because it must be in place before anything draws a key. Enqueued onto the client thread.
+     * Client-side AE2 registrations, on {@code FMLClientSetupEvent} rather than with the screens
+     * because both must be in place before anything draws.
      */
     @SubscribeEvent
     public static void registerKeyRendering(FMLClientSetupEvent event) {
@@ -91,6 +92,8 @@ public final class ClientSetup {
         event.enqueueWork(() -> {
             AEKeyRendering.register(
                     AEssentiaKeyType.INSTANCE, AEssentiaKey.class, new EssentiaKeyRenderHandler());
+            // The tooltip's drawing half; the server half is registered from the mod constructor.
+            FluxTransferTooltip.register();
         });
     }
 
@@ -102,6 +105,16 @@ public final class ClientSetup {
         event.registerBlockEntityRenderer(
                 ModBlockEntities.ARCANE_ASSEMBLER.get(),
                 ArcaneAssemblerRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.GACHA_BOX.get(), GachaBoxRenderer::new);
+    }
+
+    /**
+     * The box's brain is baked from Thaumaturge's model class, but under a layer of ours so that
+     * neither mod's registration order decides whether it exists.
+     */
+    @SubscribeEvent
+    public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(GachaBoxRenderer.BRAIN_LAYER, BrainModel::createLayer);
     }
 
     @SubscribeEvent
@@ -154,11 +167,6 @@ public final class ClientSetup {
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/wireless_arcane_crafting_terminal.json")));
-        event.register(
-                ModMenuTypes.ESSENTIA_STORAGE_BUS.get(),
-                (MenuEssentiaStorageBus menu, Inventory inventory, Component title) ->
-                        new ScreenEssentiaStorageBus(
-                                menu, inventory, title, StyleManager.loadStyleDoc("/screens/storage_bus.json")));
         event.register(
                 ModMenuTypes.ESSENTIA_LEVEL_EMITTER.get(),
                 (MenuEssentiaLevelEmitter menu, Inventory inventory, Component title) ->

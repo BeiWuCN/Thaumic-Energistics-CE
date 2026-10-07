@@ -12,8 +12,8 @@ import thaumicenergistics_ce.item.ItemArcaneCraftingTerminal;
 import thaumicenergistics_ce.item.ItemArcanePattern;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
 import thaumicenergistics_ce.item.ItemEssentiaLevelEmitter;
-import thaumicenergistics_ce.item.ItemEssentiaStorageBus;
 import thaumicenergistics_ce.item.ItemEssentiaTerminal;
+import thaumicenergistics_ce.item.ItemFluxTransferInterface;
 import thaumicenergistics_ce.item.ItemFocusAEWrench;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.item.ItemKnowledgeCore;
@@ -66,6 +66,12 @@ public final class ModItems {
 
     public static final DeferredItem<BlockItem> ALCHEMY_PROVIDER_CONNECTION =
             REGISTRY.registerSimpleBlockItem(ModBlocks.ALCHEMY_PROVIDER_CONNECTION);
+
+    public static final DeferredItem<BlockItem> GACHA_BOX =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.GACHA_BOX);
+
+    public static final DeferredItem<BlockItem> GACHA_BOX_AGGREGATOR =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.GACHA_BOX_AGGREGATOR);
 
     public static final DeferredItem<ItemWirelessConnector> WIRELESS_CONNECTOR = REGISTRY.registerItem(
             "wireless_connector", ItemWirelessConnector::new, new Item.Properties());
@@ -143,9 +149,9 @@ public final class ModItems {
     public static final DeferredItem<Item> COALESCENCE_CORE = REGISTRY.registerItem(
             "coalescence_core", Item::new, new Item.Properties().stacksTo(64));
 
-    public static final DeferredItem<ItemEssentiaStorageBus> ESSENTIA_STORAGE_BUS = REGISTRY.registerItem(
-            "essentia_storage_bus",
-            ItemEssentiaStorageBus::new,
+    public static final DeferredItem<ItemFluxTransferInterface> FLUX_TRANSFER_INTERFACE = REGISTRY.registerItem(
+            "flux_transfer_interface",
+            ItemFluxTransferInterface::new,
             new Item.Properties().stacksTo(64).rarity(Rarity.RARE));
 
     public static final DeferredItem<ItemEssentiaLevelEmitter> ESSENTIA_LEVEL_EMITTER = REGISTRY.registerItem(

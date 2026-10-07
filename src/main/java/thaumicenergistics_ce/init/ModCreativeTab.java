@@ -47,7 +47,7 @@ public final class ModCreativeTab {
                         output.accept(ModItems.VIS_INTERFACE.get());
                         output.accept(ModItems.DIFFUSION_CORE.get());
                         output.accept(ModItems.COALESCENCE_CORE.get());
-                        output.accept(ModItems.ESSENTIA_STORAGE_BUS.get());
+                        output.accept(ModItems.FLUX_TRANSFER_INTERFACE.get());
                         output.accept(ModItems.ESSENTIA_LEVEL_EMITTER.get());
                         output.accept(ModItems.WIRELESS_ESSENTIA_TERMINAL.get());
                         output.accept(ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get());
@@ -57,6 +57,8 @@ public final class ModCreativeTab {
                         // a tab stack is never ticked and never passes a recipe, so nothing else fixes it up.
                         output.accept(thaumicenergistics_ce.item.ItemFocusAEWrench.assembledStack());
                         output.accept(ModItems.GOLEM_WIFI_BACKPACK.get());
+                        output.accept(ModItems.GACHA_BOX.get());
+                        output.accept(ModItems.GACHA_BOX_AGGREGATOR.get());
                     })
                     .build());
 

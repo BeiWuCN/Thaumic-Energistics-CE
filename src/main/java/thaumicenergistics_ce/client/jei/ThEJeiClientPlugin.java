@@ -8,7 +8,6 @@ import net.minecraft.resources.ResourceLocation;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
-import thaumicenergistics_ce.client.gui.ScreenEssentiaStorageBus;
 import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 
 /**
@@ -32,12 +31,8 @@ public class ThEJeiClientPlugin implements IModPlugin {
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
         registration.addGhostIngredientHandler(
                 ScreenKnowledgeInscriber.class, new KnowledgeInscriberGhostIngredientHandler());
-        // Buses take essentia, not items, so their drag targets accept Thaumaturge's aspect ingredient. One
-        // handler per concrete screen class: JEI pairs a Class with a handler of that same type.
-        registration.addGhostIngredientHandler(
-                ScreenEssentiaStorageBus.class,
-                new EssentiaBusGhostIngredientHandler<ScreenEssentiaStorageBus>());
-        // And the cell workbench's partition wells: the same kind of grid holding the same kind of key.
+        // One handler per concrete screen class: JEI pairs a Class with a handler of that same type, and the
+        // drag target accepts Thaumaturge's aspect ingredient rather than an item.
         registration.addGhostIngredientHandler(
                 ScreenEssentiaCellWorkbench.class, new CellWorkbenchGhostIngredientHandler());
         // And the Distillation Encoder's source well, so the item to distil can be dragged in rather than

@@ -18,10 +18,12 @@ import thaumicenergistics_ce.network.EssentiaFillPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The jar and phial gestures of any terminal screen that has them.
- * Two screens need it, the essentia terminal and the wireless arcane crafting terminal, and they
- * inherit rather than copy it, because the gestures read hoveredSlot, which no helper can see.
- * Nothing is drawn here: a screen that says no to {@link #essentiaGesturesAtAll()} is AE2's own.
+ * The jar and phial gestures of any terminal screen that has them, inherited rather than copied by
+ * the two screens that need them, because the gestures read hoveredSlot, which no helper can see.
+ * The row under the cursor says where from and the container says which way: an empty one is filled
+ * from the row, a filled one is emptied into the network from a row as well as from a blank cell.
+ * Shift keeps AE2's meaning - the whole held stack on either click, and the container where it lies
+ * on a shift right click over the player's own slots. Nothing is drawn here.
  */
 public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalBase>
         extends MEStorageScreen<M> {
@@ -71,6 +73,8 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
             if (EssentiaFillHelper.isSupportedContainer(inSlot)) {
                 // The menu's slot id, not the inventory index: AE2 puts view-cell and upgrade slots ahead
                 // of the player's, and the server resolves this against its own slot list.
+                log("deposit requested: {} from menu slot {}", inSlot.getHoverName().getString(),
+                        menu.slots.indexOf(hoveredSlot));
                 PacketDistributor.sendToServer(new EssentiaDepositPayload(
                         menu.containerId, menu.slots.indexOf(hoveredSlot)));
                 return true;
@@ -82,22 +86,31 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
         if (container == null) {
             return false;
         }
-        boolean overEssentia = false;
+        AEssentiaKey overKey = null;
         if (hoveredSlot instanceof RepoSlot repoSlot) {
             var entry = repoSlot.getEntry();
-            overEssentia = entry != null && entry.getWhat() instanceof AEssentiaKey;
+            if (entry != null && entry.getWhat() instanceof AEssentiaKey key) {
+                overKey = key;
+            }
         }
-        if (!overEssentia) {
-            // Empty space, or an entry of another kind: the click belongs to AE2, so a jar or phial in
-            // hand is put into the network like any other item.
-            return false;
-        }
-        if (EssentiaFillHelper.isContainerEmpty(container)) {
-            // Ours and empty: AE2's right-click would insert the container, and the empty one is the tool
-            // for a left-click, so this click stops here.
+        if (overKey != null && EssentiaFillHelper.isContainerEmpty(container)) {
+            // An empty container on a row that has something to give is a fill, on either button: the
+            // container decides which way, so the button only decides between one item and the stack.
+            log("fill requested: {} into the {} of {} from {}", overKey.getId(),
+                    container.getHoverName().getString(),
+                    heldName(), hasShiftDown() ? "the whole held stack" : "one item");
+            PacketDistributor.sendToServer(new EssentiaFillPayload(
+                    menu.containerId, overKey.getId(), whereHeld(), container, hasShiftDown()));
             return true;
         }
-        // Ours and filled: the contents go into the network, from the cursor or from the main hand.
+        if (!(hoveredSlot instanceof RepoSlot)) {
+            // Not a cell of the grid at all: the click belongs to AE2, whatever is held.
+            return false;
+        }
+        // A filled container is emptied into the network from a row exactly as from a cell that holds
+        // nothing: the row decides where from, the container decides which way.
+        log("deposit requested: {} from {}, over a repo cell", container.getHoverName().getString(),
+                heldName());
         PacketDistributor.sendToServer(new EssentiaDepositPayload(
                 menu.containerId, whereHeld()));
         return true;
@@ -109,29 +122,33 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
             return false;
         }
         var entry = repoSlot.getEntry();
-        if (entry == null) {
-            return false;
-        }
-        if (entry.getWhat() instanceof AEssentiaKey key && EssentiaFillHelper.isContainerEmpty(container)) {
+        boolean overEssentia = entry != null && entry.getWhat() instanceof AEssentiaKey;
+        if (EssentiaFillHelper.isContainerEmpty(container)) {
+            if (!overEssentia) {
+                // An empty container and nothing to take: an entry of another kind is an ordinary item
+                // click, and a cell that holds nothing has nowhere to take from.
+                return false;
+            }
+            AEssentiaKey key = (AEssentiaKey) entry.getWhat();
             // Shift turns the same click into "the whole held stack": filled as far as the network pays
             // for, with the ones it could not cover left where they are.
+            log("fill requested: {} into the {} of {} from {}", key.getId(),
+                    container.getHoverName().getString(),
+                    heldName(), hasShiftDown() ? "the whole held stack" : "one item");
             PacketDistributor.sendToServer(new EssentiaFillPayload(
                     menu.containerId, key.getId(), whereHeld(), container, hasShiftDown()));
             return true;
         }
-        if (!(entry.getWhat() instanceof AEssentiaKey)) {
-            // An entry of another kind: the container is an ordinary item here, so AE2's click still runs.
-            return false;
-        }
-        if (cursorIsContainer()) {
-            // Ours, with a jar or phial on the cursor: AE2 would insert the container with the essentia
-            // still inside it, and the gesture for that is shift-right-click, so the click stops here.
-            ThELog.LOG.info(TAG + "entry click refused: the cursor holds a container,"
-                    + " which is never inserted into the network");
-            return true;
-        }
-        // The container is in the main hand, not on the cursor, so AE2's click is a withdrawal.
-        return false;
+        // A filled container is emptied into the network from a row exactly as from a cell that holds
+        // nothing: the container decides the direction, so the row under the cursor is not asked.
+        log("deposit requested: {} from {}, over a repo cell", container.getHoverName().getString(),
+                heldName());
+        PacketDistributor.sendToServer(new EssentiaDepositPayload(menu.containerId, whereHeld()));
+        return true;
+    }
+
+    private static void log(String message, Object... args) {
+        ThELog.LOG.info(TAG + message, args);
     }
 
     private boolean cursorIsContainer() {
@@ -150,5 +167,10 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
 
     private int whereHeld() {
         return menu.getCarried().isEmpty() ? ContainerSlot.MAIN_HAND : ContainerSlot.CURSOR;
+    }
+
+    /** The place {@link #whereHeld()} names, in words, for the log lines. */
+    private String heldName() {
+        return menu.getCarried().isEmpty() ? "the main hand" : "the cursor";
     }
 }

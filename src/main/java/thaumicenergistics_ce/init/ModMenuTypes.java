@@ -16,12 +16,10 @@ import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 import thaumicenergistics_ce.menu.MenuEssentiaLevelEmitter;
-import thaumicenergistics_ce.menu.MenuEssentiaStorageBus;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
 import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
-import thaumicenergistics_ce.part.PartEssentiaStorageBus;
 
 /** Menu type registration. */
 public final class ModMenuTypes {
@@ -105,15 +103,6 @@ public final class ModMenuTypes {
                     () -> MenuTypeBuilder.create(MenuArcaneCraftingTerminal::new, IPortableTerminal.class)
                             .withMenuTitle(host -> Component.translatable(TERMINAL_TITLE))
                             .buildUnregistered(ThEIds.id("wireless_arcane_crafting_terminal")));
-
-    public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaStorageBus>> ESSENTIA_STORAGE_BUS =
-            REGISTRY.register(
-                    "essentia_storage_bus",
-                    () -> MenuTypeBuilder.create(
-                                    MenuEssentiaStorageBus::new, PartEssentiaStorageBus.class)
-                            .withMenuTitle(host -> Component.translatable(
-                                    "gui.thaumicenergistics_ce.essentia_storage_bus"))
-                            .buildUnregistered(ThEIds.id("essentia_storage_bus")));
 
     /**
      * The Essentia Level Emitter's screen. The reporting value rides along as initial data - a setting, not

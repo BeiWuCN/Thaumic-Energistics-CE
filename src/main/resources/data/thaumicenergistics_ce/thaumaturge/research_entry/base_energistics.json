@@ -10,13 +10,13 @@
     "round"
   ],
   "icons": [
-    "thaumicenergistics_ce:essentia_storage_bus"
+    "thaumicenergistics_ce:storage_casing"
   ],
   "stages": [
     {
       "text": "tc.research_text.BASEENERGISTICS",
       "recipes": [
-        "thaumicenergistics_ce:essentia_storage_bus"
+        "thaumicenergistics_ce:storage_casing"
       ]
     }
   ],

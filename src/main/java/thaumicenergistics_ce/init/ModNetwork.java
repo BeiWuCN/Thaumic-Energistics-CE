@@ -7,7 +7,6 @@ import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
 import thaumicenergistics_ce.network.ArcaneUnbindPayload;
 import thaumicenergistics_ce.network.EncoderActionPayload;
 import thaumicenergistics_ce.network.EncoderSourcePayload;
-import thaumicenergistics_ce.network.EssentiaBusConfigPayload;
 import thaumicenergistics_ce.network.EssentiaDepositPayload;
 import thaumicenergistics_ce.network.EssentiaFillPayload;
 import thaumicenergistics_ce.network.EssentiaInterfaceMarkPayload;
@@ -53,20 +52,14 @@ public final class ModNetwork {
                 EssentiaFillPayload.TYPE,
                 EssentiaFillPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
-        // A bus config slot set from JEI. Serverbound and not a slot write, because an essentia key is not an
-        // item and AE2's ghost-slot route only carries items - see EssentiaBusConfigPayload.
-        registrar.playToServer(
-                EssentiaBusConfigPayload.TYPE,
-                EssentiaBusConfigPayload.CODEC,
-                (payload, context) -> payload.handle(context.player()));
-        // A mark dropped onto an ME interface's own config or storage row. Serverbound for the bus above's
-        // reason, and it is refused server-side unless the access card is in that interface.
+        // A mark dropped onto an ME interface's own config or storage row. Serverbound, because an essentia
+        // key is not an item and AE2's ghost-slot route only carries items.
         registrar.playToServer(
                 EssentiaInterfaceMarkPayload.TYPE,
                 EssentiaInterfaceMarkPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
-        // A cell workbench partition well set from JEI. Serverbound like the bus above, and for a second
-        // reason: AE2's grid packet reaches a fake slot only through AEBaseMenu - see PartitionWellPayload.
+        // A cell workbench partition well set from JEI. Serverbound for the same reason, and for a second
+        // one: AE2's grid packet reaches a fake slot only through AEBaseMenu - see PartitionWellPayload.
         registrar.playToServer(
                 PartitionWellPayload.TYPE,
                 PartitionWellPayload.CODEC,

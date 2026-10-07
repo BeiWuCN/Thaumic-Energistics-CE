@@ -12,6 +12,7 @@ import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaContainerItem;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -71,6 +72,7 @@ public final class EssentiaFillHelper {
         if (available <= 0) {
             log("fill {} refused: the network reports {} available for {}", aspectId, available, key);
             dumpEssentia(storage);
+            tell(player, "thaumicenergistics_ce.gui.essentia.network_empty", key);
             return false;
         }
 
@@ -78,6 +80,7 @@ public final class EssentiaFillHelper {
         // phial's worth extracted over it, which is essentia destroyed.
         if (contents(carried) != null) {
             log("fill {} refused: the held {} already holds {}", aspectId, carried.getItem(), contents(carried));
+            tell(player, "thaumicenergistics_ce.gui.essentia.container_not_empty");
             return false;
         }
 
@@ -86,12 +89,14 @@ public final class EssentiaFillHelper {
             Holder<IAspect> aspect = AEssentiaKeyType.aspectOf(level, aspectId);
             if (aspect == null) {
                 log("fill {} refused: the id resolves to no aspect in this level", aspectId);
+                tell(player, "thaumicenergistics_ce.gui.essentia.no_aspect", aspectId);
                 return false;
             }
             if (available < PHIAL_CAPACITY) {
                 // The refusal a player meets most often: a phial is filled whole, so fewer than 8 cannot.
                 log("fill {} refused: a phial needs {} and the network holds {}", aspectId,
                         PHIAL_CAPACITY, available);
+                tell(player, "thaumicenergistics_ce.gui.essentia.phial_needs", PHIAL_CAPACITY, available);
                 return false;
             }
             long taken = storage.extract(key, PHIAL_CAPACITY, Actionable.MODULATE, source);
@@ -100,6 +105,9 @@ public final class EssentiaFillHelper {
                 if (taken > 0) {
                     storage.insert(key, taken, Actionable.MODULATE, source);
                 }
+                log("fill {} refused: the network gave {} of the {} a phial needs", aspectId,
+                        taken, PHIAL_CAPACITY);
+                tell(player, "thaumicenergistics_ce.gui.essentia.network_empty", key);
                 return false;
             }
             carried.shrink(1);
@@ -114,11 +122,15 @@ public final class EssentiaFillHelper {
         long wanted = Math.min(available, JAR_CAPACITY);
         long taken = storage.extract(key, wanted, Actionable.MODULATE, source);
         if (taken <= 0) {
+            log("fill {} refused: the network gave none of the {} offered", aspectId, wanted);
+            tell(player, "thaumicenergistics_ce.gui.essentia.network_empty", key);
             return false;
         }
         Holder<IAspect> aspect = AEssentiaKeyType.aspectOf(level, aspectId);
         if (aspect == null) {
             storage.insert(key, taken, Actionable.MODULATE, source);
+            log("fill {} refused: the id resolves to no aspect in this level", aspectId);
+            tell(player, "thaumicenergistics_ce.gui.essentia.no_aspect", aspectId);
             return false;
         }
         // Copied before the hand stack shrinks: on a stack of one, shrink would leave the empty-stack
@@ -133,6 +145,14 @@ public final class EssentiaFillHelper {
 
     private static void log(String message, Object... args) {
         ThELog.LOG.info("[essentia-terminal] " + message, args);
+    }
+
+    /**
+     * Answers a refusal to the player as well as to the log. A jar that stays full looks exactly like a
+     * gesture that never ran, and one of the two is a bug, so every refusal says itself out loud.
+     */
+    private static void tell(Player player, String key, Object... args) {
+        player.displayClientMessage(Component.translatable(key, args), true);
     }
 
     /**
@@ -163,6 +183,7 @@ public final class EssentiaFillHelper {
             MEStorage storage,
             IEnergySource energy,
             IActionSource source,
+            Player player,
             ItemStack stack) {
         if (!isSupportedContainer(stack)) {
             return null;
@@ -190,11 +211,17 @@ public final class EssentiaFillHelper {
             if (id == null) {
                 // Not registry-backed, so it has no id to store under and the whole container is left alone:
                 // skipping the entry and emptying anyway would discard it.
+                log("store refused: an aspect of the held {} has no id", stack.getHoverName().getString());
                 return stack;
             }
             long total = (long) perItem * count;
-            if (storage.insert(AEssentiaKey.of(id), total, Actionable.SIMULATE, source) < total) {
-                // Nowhere to put all of it: leave the container alone rather than half-empty it.
+            long accepted = storage.insert(AEssentiaKey.of(id), total, Actionable.SIMULATE, source);
+            if (accepted < total) {
+                // Nowhere to put all of it: leave the container alone rather than half-empty it. This is the
+                // refusal a full or filtered cell gives, and the one that used to happen in silence.
+                log("store {} refused: the network can take {} of {}", id, accepted, total);
+                dumpEssentia(storage);
+                tell(player, "thaumicenergistics_ce.gui.essentia.network_full");
                 return stack;
             }
             keys.add(AEssentiaKey.of(id));
@@ -214,12 +241,18 @@ public final class EssentiaFillHelper {
                 for (int j = 0; j < i; j++) {
                     storage.insert(keys.get(j), totals.get(j), Actionable.MODULATE, source);
                 }
+                log("store {} refused: the powered insert moved {} of {}", keys.get(i), moved, totals.get(i));
+                dumpEssentia(storage);
+                tell(player, "thaumicenergistics_ce.gui.essentia.no_power");
                 return stack;
             }
         }
 
         // Emptied. A jar survives as an empty jar and a phial is spent, both the same item id as the input
         // (see the class note), so an empty copy of the input is the whole of it.
+        for (int i = 0; i < keys.size(); i++) {
+            log("store {} ok: {} into the network", keys.get(i), totals.get(i));
+        }
         if (TcRegistry.isPhial(stack)) {
             return TcRegistry.emptyPhials(count);
         }

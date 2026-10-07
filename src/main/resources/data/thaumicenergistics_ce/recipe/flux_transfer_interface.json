@@ -1,0 +1,67 @@
+{
+  "type": "thaumaturge:infusion",
+  "_note": "Replaces the arcane workbench recipe this id was carried over with from the 1.12.2 build's ESSENTIA_STORAGE_BUS: the same four ingredients survive as the catalyst (ae2:interface) and the two pistons, and the rest is the cost of turning a plain ME interface into a vent that burns the network's aer and ordo into flux. Instability 7 sits with Thaumaturge's more expensive infusions; the vitium and ordo crystals, the annihilation core and the vis relay are what the two ends are made of.",
+  "catalyst": {
+    "item": "ae2:interface"
+  },
+  "components": [
+    {
+      "item": "thaumaturge:vis_relay"
+    },
+    {
+      "item": "thaumaturge:salis_mundus"
+    },
+    {
+      "item": "thaumaturge:salis_mundus"
+    },
+    {
+      "item": "thaumaturge:crystal_ordo"
+    },
+    {
+      "item": "thaumaturge:crystal_vitium"
+    },
+    {
+      "item": "ae2:annihilation_core"
+    },
+    {
+      "item": "minecraft:piston"
+    },
+    {
+      "item": "minecraft:sticky_piston"
+    }
+  ],
+  "aspects": [
+    {
+      "aspect": "thaumaturge:aer",
+      "amount": 24
+    },
+    {
+      "aspect": "thaumaturge:ordo",
+      "amount": 24
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
+      "amount": 12
+    },
+    {
+      "aspect": "thaumaturge:vacuos",
+      "amount": 12
+    },
+    {
+      "aspect": "thaumaturge:vitium",
+      "amount": 8
+    },
+    {
+      "aspect": "thaumaturge:machina",
+      "amount": 8
+    }
+  ],
+  "instability": 7,
+  "result": {
+    "id": "thaumicenergistics_ce:flux_transfer_interface",
+    "count": 1
+  },
+  "research": {
+    "entry": "thaumicenergistics_ce:flux_transfer_interface"
+  }
+}

@@ -16,6 +16,7 @@ import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
+import thaumicenergistics_ce.blockentity.gachabox.BlockEntityGachaBox;
 
 /** Block entity type registration. */
 public final class ModBlockEntities {
@@ -90,6 +91,14 @@ public final class ModBlockEntities {
                     () -> new BlockEntityType<>(
                             BlockEntityAlchemyProviderConnection::new,
                             Set.of(ModBlocks.ALCHEMY_PROVIDER_CONNECTION.get()),
+                            null));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityGachaBox>>
+            GACHA_BOX = REGISTRY.register(
+                    "gacha_box",
+                    () -> new BlockEntityType<>(
+                            BlockEntityGachaBox::new,
+                            Set.of(ModBlocks.GACHA_BOX.get()),
                             null));
 
     private ModBlockEntities() {}
