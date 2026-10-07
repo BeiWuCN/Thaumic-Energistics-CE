@@ -16,31 +16,21 @@ import net.minecraft.server.level.ServerLevel;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 
-/**
- * The design's condensation table and the hunt for where a spill lands. Every point the machine moves
- * lands somewhere: normally in the release end's own chunk, one time in ten in the network as vitium,
- * and one time in about sixty-seven in a controller's chunk. A banked buffer puts its whole batch
- * through one roll, so nothing here makes flux out of thin air. Thaumaturge offers no "may I add flux
- * here" question, so the landing is picked down the design's chain.
- */
+/** Thaumaturge has no "may flux land here" question, so the landing is picked down a chain. */
 final class FluxCondensation {
 
-    /** The design said 35%; the rate is a tenth by author's decision. */
+    // The design said 35%; the author took a tenth of it.
     private static final double CONDENSE_CHANCE = 0.10;
 
-    /** The design split this by drive, 5% and 40%; the author set a single 1.5% instead. */
+    // The design split this by drive, 5% and 40%; the author set a single 1.5%.
     private static final double SPILL_CHANCE = 0.015;
 
-    /** How many banked points a condense or a spill puts through at once. */
     static final int BURST = 16;
 
-    /** What a quiet cycle moves on to the release end: the same pace the drawing end banks. */
     private static final int POINT = PartFluxTransferInterface.FLUX_PER_CYCLE;
 
     private FluxCondensation() {}
 
-    /** Disposes of up to {@code budget} banked points. {@code take} answers with what the drawing end
-     * could really give. */
     static void roll(
             ServerLevel server,
             BlockPos landing,
@@ -69,8 +59,7 @@ final class FluxCondensation {
             }
             return;
         }
-        // The vent window sits above the condense window, so a network that can take vitium vents
-        // 1.5% of cycles and one that cannot vents the same 1.5% from the foot of the roll.
+        // The vent window sits above the condense window, so both paths vent the same 1.5%.
         double spillCeiling = condensing ? CONDENSE_CHANCE + SPILL_CHANCE : SPILL_CHANCE;
         if (roll < spillCeiling) {
             spill(server, landing, budget, take);
@@ -82,7 +71,6 @@ final class FluxCondensation {
         }
     }
 
-    /** A spill drops the whole banked batch in the landing chunk instead of the release end's own. */
     private static void spill(ServerLevel server, BlockPos landing, int budget, IntUnaryOperator take) {
         int drawn = take.applyAsInt(budget);
         if (drawn > 0) {
@@ -90,20 +78,18 @@ final class FluxCondensation {
         }
     }
 
-    /** Where a vent goes: one controller's chunk, or the design's fallback when the network has no
-     * controller, or {@code null} when the controller it should have used is not loaded. */
     static @Nullable BlockPos landing(ServerLevel server, @Nullable IGrid grid, BlockPos self) {
         if (grid == null) {
             return null;
         }
         Set<ControllerBlockEntity> controllers = grid.getMachines(ControllerBlockEntity.class);
         if (!controllers.isEmpty()) {
-            // A multipart controller answers with several machines and any loaded one will do.
             for (ControllerBlockEntity controller : controllers) {
                 if (server.isLoaded(controller.getBlockPos())) {
                     return controller.getBlockPos();
                 }
             }
+            // Unloaded controllers give no landing: no fallback, and no chunk is force-loaded.
             return null;
         }
         for (StorageBusPart bus : grid.getMachines(StorageBusPart.class)) {

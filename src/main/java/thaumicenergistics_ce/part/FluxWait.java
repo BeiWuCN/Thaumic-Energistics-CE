@@ -2,11 +2,7 @@ package thaumicenergistics_ce.part;
 
 import net.minecraft.network.chat.Component;
 
-/**
- * Why a pair is not moving flux, as the player is told it. Refusals meant to be silent, such as an
- * unbound tunnel or an unloaded landing chunk, are not in this list. Each key carries its English
- * beside it so a missing translation never shows a raw key.
- */
+/** Reasons shown to the player: silent refusals such as an unbound tunnel are not in this list. */
 public enum FluxWait {
     NO_FLUX("no_flux", "Not enough flux in this chunk to draw"),
     NO_SPACE("no_room", "Not enough room to vent"),
@@ -25,7 +21,7 @@ public enum FluxWait {
         this.english = english;
     }
 
-    /** Built here because the server picks the reason and only the client knows the player's language. */
+    // The server picks the reason; only the client knows the player's language.
     public Component label() {
         return Component.translatableWithFallback(PREFIX + reason, english);
     }

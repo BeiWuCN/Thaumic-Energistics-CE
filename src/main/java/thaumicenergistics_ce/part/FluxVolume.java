@@ -5,10 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 
-/**
- * The room a release needs: three blocks out from the face and three by three across it. Thaumaturge
- * has no "may this chunk take flux" question to ask, so the volume is the interface's own rule.
- */
+/** The release volume is the interface's own rule: Thaumaturge has no "may flux go here" query. */
 final class FluxVolume {
 
     private static final int DEPTH = 3;
@@ -16,7 +13,6 @@ final class FluxVolume {
 
     private FluxVolume() {}
 
-    /** Whether every block of the volume in front of {@code face}, seen from {@code origin}, is loose. */
     static boolean clear(ServerLevel server, BlockPos origin, Direction face) {
         BlockPos near = origin.relative(face);
         BlockPos far = origin.relative(face, DEPTH);
@@ -41,7 +37,6 @@ final class FluxVolume {
         return true;
     }
 
-    /** One block either side on the two axes the face does not point along. */
     private static int across(int step) {
         return step == 0 ? RADIUS : 0;
     }

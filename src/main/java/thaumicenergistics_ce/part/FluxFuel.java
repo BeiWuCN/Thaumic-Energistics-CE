@@ -8,19 +8,14 @@ import appeng.api.stacks.AEKey;
 import appeng.api.storage.MEStorage;
 import org.jspecify.annotations.Nullable;
 
-/**
- * What a cycle costs the drawing end: a point's worth of auram and ordo, and a hundred AE a point. The
- * AE is handed over before either fuel is touched and given back if the fuel does not follow, so a
- * partial payment can never buy a free cycle.
- */
+/** AE is taken before the fuels and handed back if either fails, so a partial payment buys nothing. */
 final class FluxFuel {
 
-    /** TECE's own rate: the design left the price of a point open. */
+    // TECE's own rate: the design left a point's price open.
     static final double AE_PER_POINT = 100.0;
 
     private FluxFuel() {}
 
-    /** Pays for {@code points} of flux and takes both fuels, or leaves the network as it found it. */
     static boolean take(
             IEnergyService energy,
             MEStorage storage,
@@ -47,7 +42,6 @@ final class FluxFuel {
         return true;
     }
 
-    /** The reason a cycle cannot be paid for, or {@code null} when it can. */
     static @Nullable FluxWait shortOf(
             IEnergyService energy,
             MEStorage storage,

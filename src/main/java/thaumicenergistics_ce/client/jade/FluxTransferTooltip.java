@@ -14,17 +14,13 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.integration.jade.FluxTransferStatusProvider;
 import thaumicenergistics_ce.part.PartFluxTransferInterface;
 
-/**
- * The tooltip: the reason the pair is refusing, in red, or whether it moved its point in the second
- * just gone. It never asks the part anything, since a part on this side is a shell with no grid.
- */
+// Never touches the part: on the client it is a shell with no grid to ask.
 public final class FluxTransferTooltip implements BodyProvider<PartFluxTransferInterface> {
 
     public static final FluxTransferTooltip INSTANCE = new FluxTransferTooltip();
 
     private FluxTransferTooltip() {}
 
-    /** Called once from the client setup: the registry caches per part class. */
     public static void register() {
         PartTooltips.addBody(PartFluxTransferInterface.class, INSTANCE);
     }
@@ -45,7 +41,6 @@ public final class FluxTransferTooltip implements BodyProvider<PartFluxTransferI
                 .withStyle(working ? ChatFormatting.GREEN : ChatFormatting.DARK_GRAY));
     }
 
-    /** The component back, or {@code null} when nothing was sent or the tag cannot be read. */
     private static @Nullable Component decode(@Nullable Tag encoded) {
         if (encoded == null) {
             return null;

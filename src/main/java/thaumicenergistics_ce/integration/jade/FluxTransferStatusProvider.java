@@ -11,24 +11,18 @@ import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.part.FluxWait;
 import thaumicenergistics_ce.part.PartFluxTransferInterface;
 
-/**
- * The tooltip's server half, written against AE2's part tooltip registry rather than Jade's: Jade only
- * knows block entities, and AE2's bridge hands the part under the crosshair over as if it were one.
- * The reason travels as a component, since the server picks it but cannot know the player's language.
- */
+// Goes through AE2's part registry, not Jade's: Jade only knows block entities.
 public final class FluxTransferStatusProvider
         implements ServerDataProvider<PartFluxTransferInterface> {
 
     public static final FluxTransferStatusProvider INSTANCE = new FluxTransferStatusProvider();
 
-    /** Read back by the drawing half, so the two names below are this class's own public contract. */
     public static final String TAG_WAIT = "WaitReason";
 
     public static final String TAG_WORKING = "Working";
 
     private FluxTransferStatusProvider() {}
 
-    /** Called once from the mod's constructor: the registry is keyed by part class. */
     public static void register() {
         PartTooltips.addServerData(PartFluxTransferInterface.class, INSTANCE);
     }
