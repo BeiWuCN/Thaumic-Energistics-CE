@@ -2,11 +2,9 @@
 
 ## 其他（内部重构、构建、文档）
 
-- 完善了 API 隔离层：要素键全部收进 compat/thaumaturge 的 TcAspects 门面。TCAspects 是隔离层唯一没包住的上游类型，此前有 5 个文件在 compat 之外直接点名它、共 19 处引用。现在全部 Thaumaturge 类型名只出现在 compat/thaumaturge 包里，并已逐个编译产物核过：323 个 class 中只剩四个门面自己还带 TC 前缀，隔离层之外一个都不剩
-- 拆分概率之箱的方块实体：它原本 435 行、混了五件互不相干的事，其中两件自带状态与规则，拆为 GachaPower（AE 缓冲与向网格索取）与 GachaOwner（箱子绑定的玩家与取脑规则），方块实体降到 342 行。转动引擎留在原处，因为它需要方块状态、世界与屏幕，拆出去只会把一个长类换成一个宽接口
-- README 的图标改由仓库根目录的 logo.png 提供，原先指向的 raw 分支图片已被上游移走，链接一直是坏的
-- 新增 MOD-DESCRIPTION.md 与 MOD-DESCRIPTION.en.md，用于商店页面的模组介绍
-- 更新了版本号
+- 重构了 API 隔离层，把要素键收进 compat/thaumaturge 的 TcAspects 门面。此前有 5 个文件在隔离层之外直接引用上游的 TCAspects，共 19 处
+- 拆分概率之箱的方块实体，把 AE 缓冲与取电拆为 GachaPower、把归属玩家与取脑规则拆为 GachaOwner，方块实体从 435 行降到 342 行
+- README 的图标改由仓库根目录的 logo.png 提供
 
 ---
 
@@ -14,11 +12,9 @@
 
 ## Other (internal refactors, build, documentation)
 
-- Completed the API isolation layer: every aspect key now goes through the TcAspects facade in compat/thaumaturge. TCAspects was the one upstream type the layer had not wrapped, with five files outside compat/ naming it directly across 19 references. Every Thaumaturge type name now lives inside compat/thaumaturge, checked class by class against the compiled output: of 323 classes only the four facades still carry a TC prefix, and nothing outside the layer names one at all
-- Split the gacha box's block entity: 435 lines covering five unrelated concerns, two of which carry their own state and rules. GachaPower holds the AE buffer and its grid charging, GachaOwner holds the bound player and the rules for taking a brain, and the block entity drops to 342 lines. The turn engine stays, because it needs the block state, the level and the screen, and extracting it would trade a long class for a wide interface
-- The README icon now comes from logo.png at the repository root; the raw-branch image it pointed at had been moved upstream, so the link had been broken
-- Added MOD-DESCRIPTION.md and MOD-DESCRIPTION.en.md for the storefronts
-- Bumped the version number
+- Reworked the API isolation layer so every aspect key goes through the TcAspects facade in compat/thaumaturge. Five files outside the layer had been naming the upstream TCAspects directly, across 19 references
+- Split the gacha box's block entity, moving the AE buffer and its grid charging into GachaPower and the bound player and the brain rules into GachaOwner; the block entity drops from 435 lines to 342
+- The README icon now comes from logo.png at the repository root
 
 ---
 
