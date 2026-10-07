@@ -30,3 +30,8 @@ replay_pid*.log
 # arcane crafting terminal's design notes. Neither is the mod's source nor anything a player or a
 # pack author needs, so they stay out of the public repository and live on disk only.
 docs/
+
+# Storefront copy, in the same category: it is written to be pasted into a mod listing, not to be
+# read from the repository, and it lives on disk only.
+MOD-DESCRIPTION.md
+MOD-DESCRIPTION.en.md
