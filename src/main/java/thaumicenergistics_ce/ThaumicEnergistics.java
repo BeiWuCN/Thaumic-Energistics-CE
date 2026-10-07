@@ -25,6 +25,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.registries.RegisterEvent;
@@ -109,12 +110,20 @@ public final class ThaumicEnergistics {
                 ModBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(),
                 ModBlockEntities.ALCHEMY_PROVIDER.get(),
                 ModBlockEntities.INFUSION_PROVIDER.get(),
-                ModBlockEntities.OCCULT_MONITOR.get())) {
+                ModBlockEntities.OCCULT_MONITOR.get(),
+                ModBlockEntities.GACHA_BOX.get())) {
             event.registerBlockEntity(
                     AECapabilities.IN_WORLD_GRID_NODE_HOST,
                     type,
                     (blockEntity, context) -> (IInWorldGridNodeHost) blockEntity);
         }
+
+        // AE2 bridges only its own block entities to FE, and Jade draws its energy bar off whatever
+        // this capability hands out, so the box's reserve is invisible to both until it is listed.
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK,
+                ModBlockEntities.GACHA_BOX.get(),
+                (blockEntity, context) -> blockEntity.getEnergyStorage(context));
 
         // Same STORAGE capability Thaumaturge's jars expose; pipes and neighbours treat it as one.
         event.registerBlockEntity(
@@ -141,6 +150,13 @@ public final class ThaumicEnergistics {
                 ModBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(),
                 (blockEntity, context) -> (IEssentiaTransport)
                         blockEntity);
+
+        // The box is a consumer: a tube behind the screen grows an arm toward it and follows the
+        // suction the box reports, which is what drags a jar's cognitio down the line and into it.
+        event.registerBlockEntity(
+                EssentiaCapabilities.TRANSPORT,
+                ModBlockEntities.GACHA_BOX.get(),
+                (blockEntity, context) -> blockEntity.essentiaTransport(context));
 
         // Aspect CONTAINER is the capability an Infusion Altar scans for to draw essentia.
         event.registerBlockEntity(

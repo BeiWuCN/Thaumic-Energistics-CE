@@ -67,6 +67,12 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> ALCHEMY_PROVIDER_CONNECTION =
             REGISTRY.registerSimpleBlockItem(ModBlocks.ALCHEMY_PROVIDER_CONNECTION);
 
+    public static final DeferredItem<BlockItem> GACHA_BOX =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.GACHA_BOX);
+
+    public static final DeferredItem<BlockItem> GACHA_BOX_AGGREGATOR =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.GACHA_BOX_AGGREGATOR);
+
     public static final DeferredItem<ItemWirelessConnector> WIRELESS_CONNECTOR = REGISTRY.registerItem(
             "wireless_connector", ItemWirelessConnector::new, new Item.Properties());
 

@@ -97,7 +97,7 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
             if (!EssentiaFillHelper.isSupportedContainer(inSlot)) {
                 return;
             }
-            ItemStack left = emptyIntoNetwork(inSlot);
+            ItemStack left = emptyIntoNetwork(player, inSlot);
             if (left != null) {
                 target.set(left);
                 // The container changed underneath the click, so the client's copy of that slot is stale.
@@ -110,7 +110,7 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
         if (container == null || !EssentiaFillHelper.isSupportedContainer(container)) {
             return;
         }
-        ItemStack left = emptyIntoNetwork(container);
+        ItemStack left = emptyIntoNetwork(player, container);
         if (left == null) {
             return;
         }
@@ -122,11 +122,11 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
         broadcastChanges();
     }
 
-    public ItemStack emptyIntoNetwork(ItemStack stack) {
+    public ItemStack emptyIntoNetwork(Player player, ItemStack stack) {
         if (isClientSide()) {
             return null;
         }
-        return EssentiaFillHelper.emptyIntoNetwork(storage, energySource, getActionSource(), stack);
+        return EssentiaFillHelper.emptyIntoNetwork(storage, energySource, getActionSource(), player, stack);
     }
 
     private @Nullable ItemStack containerAt(Player player, int where) {

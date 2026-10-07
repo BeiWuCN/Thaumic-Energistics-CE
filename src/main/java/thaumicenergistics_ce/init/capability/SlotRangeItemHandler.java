@@ -18,15 +18,27 @@ public final class SlotRangeItemHandler implements IItemHandler {
     private final int firstSlot;
     private final int slotCount;
     private final IntPredicate band;
+    private final boolean inputOnly;
 
     public SlotRangeItemHandler(Container container, int firstSlot, int slotCount) {
         this(container, firstSlot, slotCount, slot -> true);
     }
 
+    /** A band that may only be filled: the same slots a pipe can see, but nothing comes back out. */
+    public static SlotRangeItemHandler inputOnly(Container container, int firstSlot, int slotCount) {
+        return new SlotRangeItemHandler(container, firstSlot, slotCount, slot -> true, true);
+    }
+
     /** A band with holes: {@code band} is asked about the container's own index. */
     public SlotRangeItemHandler(Container container, int firstSlot, int slotCount, IntPredicate band) {
+        this(container, firstSlot, slotCount, band, false);
+    }
+
+    private SlotRangeItemHandler(
+            Container container, int firstSlot, int slotCount, IntPredicate band, boolean inputOnly) {
         this.container = container;
         this.band = band;
+        this.inputOnly = inputOnly;
         this.firstSlot = firstSlot;
         this.slotCount = Math.min(slotCount, container.getContainerSize() - firstSlot);
     }
@@ -66,7 +78,7 @@ public final class SlotRangeItemHandler implements IItemHandler {
 
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        if (amount <= 0 || !reaches(slot)) {
+        if (this.inputOnly || amount <= 0 || !reaches(slot)) {
             return ItemStack.EMPTY;
         }
         return takeFromSlot(firstSlot + slot, amount, simulate);

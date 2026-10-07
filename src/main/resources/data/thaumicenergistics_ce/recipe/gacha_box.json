@@ -1,0 +1,40 @@
+{
+  "type": "thaumaturge:infusion",
+  "_note": "The body of the probability box. It is built around a knowledge core because that is what the machine really is: a core that has been taught to gamble the essentia it is fed against the knowledge it pays out. Everything else is the middle of the mod's own ladder - an entropy core for the chance it takes, a flux crystal for the taint that chance leaves behind, a formation core and a calculation processor for pulling a result out of nothing - so a player with an altar and a first essentia line can build it. Instability 8 is the highest in this mod (the flux interface sits at 7): the box is a gamble, and the altar is meant to feel it.",
+  "_crystal": "The cognitio vis crystal is matched as a component rather than as a plain item, the shape vis_connection_card.json already uses: the aspect lives in a data component, so an item-only ingredient could not name it. It is also the aspect the box runs on, which is what the 32 points of cognitio below are paid in.",
+  "_gate": "Locked on the box's own research entry, which is the entry that asks for a brain in a jar as a parent: the recipe is hidden in JEI and refused by the altar until stage 2 is known.",
+  "_brain": "No jar brain among the components on purpose. The box takes its brain by hand after it is built - the slot, the binding and the owner all come from that click - so an ingredient would charge the player a second brain for the same step.",
+  "catalyst": { "item": "thaumicenergistics_ce:knowledge_core" },
+  "components": [
+    {
+      "type": "neoforge:components",
+      "items": "thaumaturge:essentia_crystal",
+      "components": {
+        "thaumaturge:crystal_aspect": {
+          "aspect": "thaumaturge:cognitio"
+        }
+      }
+    },
+    { "item": "thaumicenergistics_ce:diffusion_core" },
+    { "item": "thaumaturge:crystal_vitium" },
+    { "item": "ae2:formation_core" },
+    { "item": "ae2:calculation_processor" },
+    { "item": "thaumaturge:ingot_thaumium" },
+    { "item": "thaumaturge:ingot_thaumium" },
+    { "item": "thaumaturge:salis_mundus" }
+  ],
+  "aspects": [
+    { "aspect": "thaumaturge:cognitio", "amount": 32 },
+    { "aspect": "thaumaturge:permutatio", "amount": 16 },
+    { "aspect": "thaumaturge:praecantatio", "amount": 16 },
+    { "aspect": "thaumaturge:motus", "amount": 8 },
+    { "aspect": "thaumaturge:machina", "amount": 8 },
+    { "aspect": "thaumaturge:vitium", "amount": 8 }
+  ],
+  "instability": 8,
+  "research": { "entry": "thaumicenergistics_ce:gacha_box" },
+  "result": {
+    "id": "thaumicenergistics_ce:gacha_box",
+    "count": 1
+  }
+}

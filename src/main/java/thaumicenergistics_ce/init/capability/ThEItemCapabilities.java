@@ -21,7 +21,8 @@ import thaumicenergistics_ce.init.ModBlockEntities;
  * The mod's machines as item handlers, so a hopper or a pipe can see them. Every machine is one
  * flat container on the inside and the bands below are indices into it, with what JEI dragged
  * in and what the machine writes for itself left out of every band. The assembler answers on
- * its own facing only, so a bank of them does not feed off the front.
+ * its own facing only, so a bank of them does not feed off the front, and the gacha box answers
+ * with the brain's slot alone, which is a container of its own rather than a band.
  */
 public final class ThEItemCapabilities {
 
@@ -38,6 +39,8 @@ public final class ThEItemCapabilities {
         event.registerBlockEntity(ITEM, ModBlockEntities.ESSENTIA_CELL_WORKBENCH.get(), (machine, side) -> workbench(machine));
         event.registerBlockEntity(ITEM, ModBlockEntities.OCCULT_MONITOR.get(), (machine, side) -> monitor(machine.getInventory()));
         event.registerBlockEntity(ITEM, ModBlockEntities.ARCANE_ASSEMBLER.get(), (machine, side) -> assembler(machine, side));
+        event.registerBlockEntity(ITEM, ModBlockEntities.GACHA_BOX.get(),
+                (machine, side) -> brain(machine.brainSlot()));
     }
 
     /** The pattern wells only: the source well names an item JEI never hands over, so a pipe reaching
@@ -61,6 +64,11 @@ public final class ThEItemCapabilities {
 
     private static SlotRangeItemHandler monitor(SimpleContainer bookSlot) {
         return new SlotRangeItemHandler(bookSlot, BlockEntityOccultMonitor.BOOK_SLOT, 1);
+    }
+
+    /** The brain's slot alone, and input only: a pipe may fill it, never empty it. */
+    private static SlotRangeItemHandler brain(SimpleContainer brainSlot) {
+        return SlotRangeItemHandler.inputOnly(brainSlot, 0, 1);
     }
 
     static SlotRangeItemHandler assembler(BlockEntityArcaneAssembler machine, @Nullable Direction side) {

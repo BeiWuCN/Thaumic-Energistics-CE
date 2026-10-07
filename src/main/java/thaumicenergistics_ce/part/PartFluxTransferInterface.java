@@ -67,8 +67,6 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
     // The design's 64 scaled by four: at this the drawing end stops buying fuel.
     private static final int POOL_LIMIT = 256;
 
-    private static final float RIFT_SATURATION = 1.0f;
-
     private static final String TAG_POOL = "fluxPool";
 
     // Taken off the drawing end's chunk and not yet released; dies with that end's chunk.
@@ -107,13 +105,23 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         if (payer == null || !payer.live(server)) {
             return null;
         }
-        if (!isDrawEnd() && (!volumeClear(server) || !payer.volumeClear(server))) {
+        // Asked at either end and answered for the pair: a refusal the tick makes but this list omits
+        // reads as "idle" over a machine that is doing nothing.
+        if (!payer.volumeClear(server)) {
             return FluxWait.NO_SPACE;
         }
-        if (isDrawEnd() && !fluxAvailable(server)) {
-            return FluxWait.NO_FLUX;
+        FluxWait blocked = payer.releaseBlockedReason(server);
+        if (blocked != null) {
+            return blocked;
         }
-        return payer.fuelShort(server);
+        if (isDrawEnd()) {
+            // Nothing banked yet: why the drawing end is not filling it is the useful answer.
+            return fluxAvailable(server) ? payer.fuelShort(server) : FluxWait.NO_FLUX;
+        }
+        if (payer.fluxPool <= 0) {
+            return fluxAvailable(server) ? payer.fuelShort(server) : FluxWait.NO_FLUX;
+        }
+        return null;
     }
 
     public boolean working() {
@@ -168,8 +176,9 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         if (payer == null || !payer.live(server)) {
             return;
         }
-        BlockPos landing = releaseSite(server);
-        if (landing == null) {
+        // Looked up once and handed to the check: a cycle must not pay for the search twice.
+        BlockPos landing = FluxCondensation.landing(server, grid(), fluxPos());
+        if (releaseBlock(server, landing) != null) {
             return;
         }
         int banked = Math.min(payer.fluxPool, FluxCondensation.BURST);
@@ -203,7 +212,36 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
     }
 
     private boolean releaseEndReady(ServerLevel server) {
-        return getOutputStream().anyMatch(output -> output.releaseSite(server) != null);
+        return releaseBlockedReason(server) == null;
+    }
+
+    // Four different fixes hide behind one refusal, so the pair names the first one it is waiting for.
+    private @Nullable FluxWait releaseBlockedReason(ServerLevel server) {
+        FluxWait first = null;
+        for (PartFluxTransferInterface output : getOutputStream().toList()) {
+            BlockPos landing = FluxCondensation.landing(server, output.grid(), output.fluxPos());
+            FluxWait block = output.releaseBlock(server, landing);
+            if (block == null) {
+                return null;
+            }
+            if (first == null) {
+                first = block;
+            }
+        }
+        return first == null ? FluxWait.NO_PARTNER : first;
+    }
+
+    private @Nullable FluxWait releaseBlock(ServerLevel server, @Nullable BlockPos landing) {
+        if (!live(server)) {
+            return FluxWait.OUT_UNLOADED;
+        }
+        if (!isActive()) {
+            return FluxWait.OUT_OFFLINE;
+        }
+        if (!volumeClear(server)) {
+            return FluxWait.OUT_BLOCKED;
+        }
+        return landing == null ? FluxWait.OUT_NO_LANDING : null;
     }
 
     private boolean live(ServerLevel server) {
@@ -235,14 +273,6 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
 
     private boolean volumeClear(ServerLevel server) {
         return FluxVolume.clear(server, fluxPos(), getSide());
-    }
-
-    private @Nullable BlockPos releaseSite(ServerLevel server) {
-        if (!live(server) || !isActive() || !volumeClear(server)
-                || TcAura.fluxSaturation(server, fluxPos()) >= RIFT_SATURATION) {
-            return null;
-        }
-        return FluxCondensation.landing(server, grid(), fluxPos());
     }
 
     // Thaumaturge refills a chunk from its neighbours each tick, so drained is not empty.

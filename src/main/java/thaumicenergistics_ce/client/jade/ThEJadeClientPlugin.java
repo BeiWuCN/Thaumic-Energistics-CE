@@ -7,6 +7,7 @@ import thaumicenergistics_ce.block.BlockAlchemyProvider;
 import thaumicenergistics_ce.block.BlockAlchemyProviderConnection;
 import thaumicenergistics_ce.block.BlockArcaneAssembler;
 import thaumicenergistics_ce.block.BlockEssentiaVibrationChamber;
+import thaumicenergistics_ce.block.BlockGachaBox;
 import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.block.BlockInfusionProvider;
 /**
@@ -32,5 +33,6 @@ public class ThEJadeClientPlugin implements IWailaPlugin {
                 AlchemyProviderTooltip.INSTANCE, BlockAlchemyProvider.class);
         registration.registerBlockComponent(
                 AlchemyReceiverTooltip.INSTANCE, BlockAlchemyProviderConnection.class);
+        registration.registerBlockComponent(GachaBoxTooltip.INSTANCE, BlockGachaBox.class);
     }
 }

@@ -24,7 +24,7 @@ import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
  * The Occult Monitor: watches an Infusion Altar and reports what the ritual will do to the room.
- * InfusionStabilitySurvey names the blocks that break the altar's symmetry, and a Thaumonomicon
+ * InfusionStabilitySurvey names the blocks that break the altar's symmetry, and a thaumonomicon
  * must be in the book slot or {@link #canReport()} stays false.
  */
 public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements IGridTickable {
@@ -42,7 +42,7 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
     /** How often the room is looked at. The altar survey backs off from this value after a miss. */
     static final int SCAN_INTERVAL = 10;
 
-    // The book, the two blockstates that mirror it, and the right-click it answers, in one place.
+    // The tome's slot and the two blockstates that mirror it.
 
     private final OccultMonitorBookSlot bookSlot = new OccultMonitorBookSlot(this);
 
@@ -52,8 +52,7 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
 
     private final AltarSurvey survey = new AltarSurvey(this, reach);
 
-    /** One log line a second when {@code THAUMICENERGISTICS_MONITOR_TRACE=true}, because the failure
-     * modes - no grid, no power, no book, no altar - otherwise look alike. */
+    /** One log line a second when {@code THAUMICENERGISTICS_MONITOR_TRACE=true}. */
     private final OccultMonitorTrace trace = new OccultMonitorTrace(this, survey);
 
     // The bubble is drawn on the client, so its numbers travel in the update tag.
@@ -87,8 +86,6 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
         return bookSlot.has();
     }
 
-    /** Adds the book, or removes it only when the player sneaks - a plain right-click would disarm
-     * the machine. See {@code BlockOccultMonitor}. */
     public @Nullable ItemStack interact(ItemStack held, boolean sneaking) {
         return bookSlot.interact(held, sneaking);
     }

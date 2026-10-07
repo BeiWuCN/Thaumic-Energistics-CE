@@ -8,6 +8,7 @@ import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvi
 import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
+import thaumicenergistics_ce.blockentity.gachabox.BlockEntityGachaBox;
 
 /**
  * Registers this mod's Jade providers: the server data half, which Jade asks for on both sides.
@@ -29,5 +30,6 @@ public class ThEJadePlugin implements IWailaPlugin {
                 AlchemyProviderProvider.INSTANCE, BlockEntityAlchemyProvider.class);
         registration.registerBlockDataProvider(
                 AlchemyReceiverProvider.INSTANCE, BlockEntityAlchemyProviderConnection.class);
+        registration.registerBlockDataProvider(GachaBoxProvider.INSTANCE, BlockEntityGachaBox.class);
     }
 }

@@ -41,14 +41,8 @@ public final class TcAura {
         return AuraHelper.drainVis(level, pos, want, simulate);
     }
 
-    /** The chunk's flux over its base. At or above 1.0 the chunk is at the rift threshold, which is
-     * as full as the flux transfer interface is willing to make it. */
-    public static float fluxSaturation(Level level, BlockPos pos) {
-        return AuraHelper.getFluxSaturation(level, pos);
-    }
-
     /** Flux is a number on the chunk, not a thing in a slot: adding it conjures it, and there is no
-     * upstream to ask whether it fits - hence {@link #fluxSaturation} as the only back pressure. */
+     * upstream to ask whether it fits. A transfer's job is to make the target hold more, not less. */
     public static void addFlux(Level level, BlockPos pos, float amount) {
         AuraHelper.addFlux(level, pos, amount);
     }

@@ -34,6 +34,7 @@
       "recipes": [
         "thaumicenergistics_ce:flux_transfer_interface"
       ],
+      "warp": 2,
       "knowledge": [
         {
           "type": "observation",

@@ -1,3 +1,5 @@
+![Thaumic Energistics: CE](src/main/resources/icon.png)
+
 [English](README.en.md) · [仓库](https://github.com/beiwucn/Thaumic-Energistics-CE) · [问题反馈](https://github.com/beiwucn/Thaumic-Energistics-CE/issues)
 
 # Thaumic Energistics: CE

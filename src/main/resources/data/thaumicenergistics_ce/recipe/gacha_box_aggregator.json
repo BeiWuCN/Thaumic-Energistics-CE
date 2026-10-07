@@ -1,0 +1,36 @@
+{
+  "type": "thaumaturge:infusion",
+  "_note": "The lid that closes the box's structure, so it is priced as a fitting and not as a machine: arcane brick for the frame it copies, thaumium and quicksilver for the two metal halves, an ordo vis crystal for the order it imposes on what the box below does. Instability 6 keeps it above the two cards and below the box itself - the risk sits in the machine, not in its lid.",
+  "_crystal": "Matched as a component rather than as a plain item, as in vis_connection_card.json: the ordo aspect lives in a data component.",
+  "_gate": "Gated on the box's own research: the lid is useless without the machine it closes, and stage 2 of that entry lists both recipes.",
+  "catalyst": { "item": "thaumaturge:stone_arcane_brick" },
+  "components": [
+    {
+      "type": "neoforge:components",
+      "items": "thaumaturge:essentia_crystal",
+      "components": {
+        "thaumaturge:crystal_aspect": {
+          "aspect": "thaumaturge:ordo"
+        }
+      }
+    },
+    { "item": "thaumaturge:ingot_thaumium" },
+    { "item": "thaumaturge:ingot_thaumium" },
+    { "item": "thaumaturge:nugget_quicksilver" },
+    { "item": "thaumaturge:nugget_quicksilver" },
+    { "item": "thaumaturge:salis_mundus" }
+  ],
+  "aspects": [
+    { "aspect": "thaumaturge:ordo", "amount": 16 },
+    { "aspect": "thaumaturge:machina", "amount": 8 },
+    { "aspect": "thaumaturge:metallum", "amount": 8 },
+    { "aspect": "thaumaturge:fabrico", "amount": 8 },
+    { "aspect": "thaumaturge:praecantatio", "amount": 8 }
+  ],
+  "instability": 6,
+  "research": { "entry": "thaumicenergistics_ce:gacha_box" },
+  "result": {
+    "id": "thaumicenergistics_ce:gacha_box_aggregator",
+    "count": 1
+  }
+}

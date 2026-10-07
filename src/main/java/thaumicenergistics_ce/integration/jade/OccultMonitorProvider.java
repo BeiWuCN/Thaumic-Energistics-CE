@@ -34,7 +34,7 @@ public class OccultMonitorProvider implements IServerDataProvider<BlockAccessor>
     /** Whether an altar search has run since the monitor's node was last active. "No altar" is a fact
      * about the room only once the room was searched. */
     public static final String TAG_SEARCHED = "Searched";
-    /** Whether the Thaumonomicon is on the machine. Without it the monitor is blind, not idle. */
+    /** Whether a thaumonomicon is on the machine. Without it the monitor is blind, not idle. */
     public static final String TAG_HAS_BOOK = "HasBook";
     public static final String TAG_CRAFTING = "Crafting";
     public static final String TAG_TIER = "Tier";

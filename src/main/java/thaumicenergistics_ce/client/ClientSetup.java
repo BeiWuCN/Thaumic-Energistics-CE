@@ -3,6 +3,7 @@ package thaumicenergistics_ce.client;
 import appeng.api.client.AEKeyRendering;
 import appeng.client.gui.implementations.UpgradeableScreen;
 import appeng.client.gui.style.StyleManager;
+import com.leclowndu93150.thaumaturge.client.model.entity.BrainModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
@@ -25,6 +26,7 @@ import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 import thaumicenergistics_ce.client.jade.FluxTransferTooltip;
 import thaumicenergistics_ce.client.render.ArcaneAssemblerRenderer;
 import thaumicenergistics_ce.client.render.EssentiaKeyRenderHandler;
+import thaumicenergistics_ce.client.render.GachaBoxRenderer;
 import thaumicenergistics_ce.client.render.bubble.OccultMonitorBubbleRenderer;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.ModMenuTypes;
@@ -103,6 +105,16 @@ public final class ClientSetup {
         event.registerBlockEntityRenderer(
                 ModBlockEntities.ARCANE_ASSEMBLER.get(),
                 ArcaneAssemblerRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.GACHA_BOX.get(), GachaBoxRenderer::new);
+    }
+
+    /**
+     * The box's brain is baked from Thaumaturge's model class, but under a layer of ours so that
+     * neither mod's registration order decides whether it exists.
+     */
+    @SubscribeEvent
+    public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(GachaBoxRenderer.BRAIN_LAYER, BrainModel::createLayer);
     }
 
     @SubscribeEvent

@@ -16,6 +16,8 @@ import thaumicenergistics_ce.block.BlockAlchemyProviderConnection;
 import thaumicenergistics_ce.block.BlockEssentiaVibrationChamber;
 import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.block.BlockInfusionProvider;
+import thaumicenergistics_ce.block.BlockGachaBox;
+import thaumicenergistics_ce.block.BlockGachaBoxAggregator;
 import thaumicenergistics_ce.block.BlockKnowledgeInscriber;
 
 /**
@@ -123,6 +125,25 @@ public final class ModBlocks {
                     .strength(0.5F)
                     .sound(SoundType.WOOL)
                     .noOcclusion()));
+
+    /**
+     * The two blocks of the Gacha Box: the body, which carries the jar as a blockstate, and the upper
+     * half. {@code noOcclusion()} as on the Arcane Assembler, because neither is a full cube.
+     */
+    private static final BlockBehaviour.Properties GACHA_BOX_PROPERTIES = BlockBehaviour.Properties.of()
+            .mapColor(MapColor.METAL)
+            .strength(3.0F, 7.0F)
+            .sound(SoundType.METAL)
+            .requiresCorrectToolForDrops()
+            .noOcclusion();
+
+    public static final DeferredBlock<BlockGachaBox> GACHA_BOX = REGISTRY.register(
+            "gacha_box",
+            () -> new BlockGachaBox(GACHA_BOX_PROPERTIES));
+
+    public static final DeferredBlock<BlockGachaBoxAggregator> GACHA_BOX_AGGREGATOR = REGISTRY.register(
+            "gacha_box_aggregator",
+            () -> new BlockGachaBoxAggregator(GACHA_BOX_PROPERTIES));
 
     private ModBlocks() {}
 
