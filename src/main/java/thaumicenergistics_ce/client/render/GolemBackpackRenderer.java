@@ -25,16 +25,16 @@ import thaumicenergistics_ce.client.GolemBackpackClientData;
 import thaumicenergistics_ce.golem.BackpackSkins;
 
 /**
- * Draws every visible backpack once per frame, from the world stage rather than the golem's own
- * renderer. There is no hook into that frame, because Thaumaturge's golem renderer is not the
- * living kind NeoForge can add a layer to, which is why {@link #PACK_HEIGHT} and
- * {@link #PACK_DEPTH} are placed by eye. It is drawn at AFTER_ENTITIES, and the batch is ended
- * here rather than left open.
+ * 每帧绘制所有可见的背包，从世界渲染阶段而不是傀儡自身的渲染器出发。
+ * 那一帧没有可挂的钩子，因为 Thaumaturge 的傀儡渲染器不是 NeoForge
+ * 能加层的 living 类型，所以 {@link #PACK_HEIGHT} 和 {@link #PACK_DEPTH} 是目测定的。
+ * 它在 AFTER_ENTITIES 阶段绘制，且批次在此收尾而不是
+ * 留着不关。
  */
 @EventBusSubscriber(modid = ThEIds.MODID, value = Dist.CLIENT)
 public final class GolemBackpackRenderer {
 
-    /** How high up the golem's body the pack sits, in blocks above its feet. */
+    /** 背包在傀儡身体上的高度，以脚上方多少方块计。 */
     private static final float PACK_HEIGHT = 0.42F;
 
     private static final float PACK_DEPTH = 0.16F;
@@ -46,8 +46,8 @@ public final class GolemBackpackRenderer {
     private static final GolemBackpackModel MODEL = GolemBackpackModel.create();
 
     /**
-     * Render types by skin, built once each: {@code RenderType.entityCutoutNoCull(texture)} allocates a
-     * new object per call, and switching type mid-batch flushes the buffer source's pending batch.
+     * 按皮肤区分的渲染类型，每种只构建一次：{@code RenderType.entityCutoutNoCull(texture)}
+     * 每次调用都会分配新对象，而在批次中途切换类型会刷新缓冲源的待处理批次。
      */
     private static final Map<BackpackSkins, RenderType> PACK_TYPES = new EnumMap<>(BackpackSkins.class);
     private static final Map<BackpackSkins, RenderType> PEARL_TYPES = new EnumMap<>(BackpackSkins.class);
@@ -68,7 +68,7 @@ public final class GolemBackpackRenderer {
 
         PoseStack poseStack = event.getPoseStack();
         Vec3 camera = event.getCamera().getPosition();
-        // The frame's fraction of a tick: what makes an interpolated golem position land between ticks.
+        // 本帧占一个 tick 的比例：它让插值后的傀儡位置落在 tick 之间。
         float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         BufferSource buffers = minecraft.renderBuffers().bufferSource();
         boolean drewAny = false;
@@ -90,11 +90,11 @@ public final class GolemBackpackRenderer {
 
             poseStack.pushPose();
             poseStack.translate(x, y, z);
-            // The golem renderer's own body rotation; model space's +Z is the golem's back, hence +depth.
+            // 傀儡渲染器自身的主体旋转；模型空间的 +Z 是傀儡的背面，因此是 +depth。
             poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - bodyRotation));
             poseStack.translate(0.0F, PACK_HEIGHT, PACK_DEPTH);
-            // Quarter turn: the model's boxes are authored two pixels thick along X. Kept here, not in
-            // the model, so the skin textures keep matching the faces they were drawn for.
+            // 四分之一圈：模型的盒子是按沿 X 轴两像素厚制作的。这一步留在这里而不放进
+            // 模型，这样皮肤纹理才能继续与它们原本绘制的面匹配。
             poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
             poseStack.scale(PACK_SCALE, PACK_SCALE, PACK_SCALE);
 

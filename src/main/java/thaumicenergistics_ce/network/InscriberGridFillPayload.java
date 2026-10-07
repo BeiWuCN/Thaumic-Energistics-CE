@@ -11,10 +11,10 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * The Knowledge Inscriber's whole 3x3 grid, written by the client in one go, because per-cell
- * updates are visible and make the machine re-resolve the grid nine times over. The client applies
- * the same nine stacks to its own container copy first, so both sides agree. {@code cells} is
- * exactly nine stacks in reading order and a shorter list is padded with empties.
+ * 知识铭刻机整个 3x3 网格，由客户端一次写入，因为逐单元
+ * 更新是可见的，并会让机器把网格重复求解九遍。客户端先把同样的九个物品堆应用到
+ * 自己的容器副本上，使两侧一致。{@code cells} 按阅读顺序恰好是九个物品堆，
+ * 更短的列表用空物品堆补齐。
  */
 public record InscriberGridFillPayload(int containerId, List<ItemStack> cells) implements CustomPacketPayload {
 

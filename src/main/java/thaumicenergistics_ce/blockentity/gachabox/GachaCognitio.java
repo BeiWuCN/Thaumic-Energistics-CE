@@ -3,9 +3,9 @@ package thaumicenergistics_ce.blockentity.gachabox;
 import net.minecraft.nbt.CompoundTag;
 
 /**
- * The cognitio banked toward the next turn. Nobody pays a turn in one go - a jar gives up a point a
- * call and a tube hands over one per call - so the reserve is what lets a run of them add up. It
- * never holds more than one turn costs, and what it holds is fuel: nothing is ever handed back out.
+ * 为下一次转动存入的 cognitio。没有人一次付清一次转动——一个罐每次调用
+ * 放出一点，一根管道每次调用交过来一点——所以储备让一连串调用能累加起来。
+ * 它持有的量从不超一次转动的花费，而它持有的东西是燃料：绝不会被交还出去。
  */
 final class GachaCognitio {
 
@@ -18,22 +18,22 @@ final class GachaCognitio {
         this.box = box;
     }
 
-    /** Whether the next turn is still short of its two points; only then does the box call. */
+    /** 下一次转动是否还差它那两点；只有到那时箱子才会索取。 */
     boolean wants() {
         return banked < GachaOdds.COGNITIO_PER_TURN;
     }
 
-    /** Whether a whole turn is covered, which is the point at which the box may start one. */
+    /** 一整次转动是否已被覆盖，这正是箱子可以开始一次转动的时点。 */
     boolean ready() {
         return !wants();
     }
 
-    /** What the reserve could still take: at most what the next turn is short of. */
+    /** 储备还能接受多少：至多是下一次转动所差的量。 */
     int room() {
         return GachaOdds.COGNITIO_PER_TURN - banked;
     }
 
-    /** Banks up to {@code amount} and answers how much of it was kept. */
+    /** 存入至多 {@code amount} 的点，并回答其中留下了多少。 */
     int add(int amount) {
         int taken = Math.min(amount, room());
         if (taken > 0) {
@@ -43,7 +43,7 @@ final class GachaCognitio {
         return taken;
     }
 
-    /** Spends one turn's worth, which the caller has already checked with {@link #ready()}. */
+    /** 花掉一次转动的量，调用方已经用 {@link #ready()} 检查过了。 */
     boolean spend() {
         if (wants()) {
             return false;

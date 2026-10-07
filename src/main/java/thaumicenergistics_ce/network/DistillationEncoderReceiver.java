@@ -4,8 +4,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The Distillation Encoder's half of the wire contract: the screen sends instructions, never state, since
- * both sides derive the aspect list from the source item the slot sync already carries.
+ * 蒸馏编码器那一半的线上约定：屏幕发送的是指令而非状态，
+ * 因为两侧都从槽位同步已经携带的源物品推导出要素列表。
  */
 public interface DistillationEncoderReceiver extends ThEMenuReceiver {
 

@@ -9,12 +9,12 @@ import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 /**
- * Thaumaturge stores each wrapped page line's leading style and hands it to StringDecomposer as
- * both the starting style and the style a {@code §r} resets to, so a line starting inside a
- * {@code §l} run stays bold past its own reset and, bold advances being wider than the ones the
- * line was wrapped at, is drawn past the text column. Our lines carry formatting as codes in the
- * text, so rewriting that style into equivalent codes and emptying it makes {@code §r} reset to
- * nothing and restores the width the paginator measured for the column.
+ * Thaumaturge 保存每个换行后页面行的起始样式，并把同一样式既作为起始样式、又作为
+ * {@code §r} 重置到的样式交给 StringDecomposer，于是在 {@code §l} 段中途开始的行
+ * 在自己的重置之后仍然保持粗体；而粗体字符的步进比该行换行时所用的更宽，就会被画到
+ * 文本栏之外。我们的行把格式作为代码写在文本里，因此把那个样式改写成等价的代码再
+ * 清空它，就能让 {@code §r} 重置为无，
+ * 并恢复分页器为该栏量出的宽度。
  */
 @Mixin(targets = "com.leclowndu93150.thaumaturge.client.render.research.PageParser$Paginator")
 public abstract class PageLineStyleMixin {
@@ -33,7 +33,7 @@ public abstract class PageLineStyleMixin {
         args.set(1, Style.EMPTY);
     }
 
-    /** Same codes a client would have written by hand, in the order vanilla parses them. */
+    /** 与客户端手写的代码相同，按原版解析它们的顺序排列。 */
     private static String tce$legacyCodes(Style style) {
         StringBuilder codes = new StringBuilder(8);
         TextColor color = style.getColor();

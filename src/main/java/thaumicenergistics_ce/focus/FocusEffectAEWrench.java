@@ -32,15 +32,15 @@ import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.item.ItemFocusAEWrench;
 
 /**
- * The AE2 wrench as a focus effect: a wand right-click disassembles the AE2 block being looked at.
- * No medium, so it acts at once on what the caster looks at; a projectile would delay an aimed tool.
+ * 把 AE2 的扳手做成一种核心效果：法杖右键拆解正被注视的 AE2 方块。
+ * 没有媒介，因此立刻作用于施法者注视的目标；若改用弹射物，会让瞄准工具产生延迟。
  */
 public final class FocusEffectAEWrench implements FocusEffect {
 
-    /** Also the id the {@code FocusElementType} is registered under. */
+    /** 也是 {@code FocusElementType} 注册所用的 id。 */
     public static final ResourceLocation KEY = ThEIds.id("aewrench");
 
-    /** {@code complexity / 5} is the vis price, so this is 2. */
+    /** {@code complexity / 5} 就是 vis 价格，所以这里是 2。 */
     private static final int COMPLEXITY = 10;
 
     private static final double REACH = 24.0;
@@ -52,13 +52,13 @@ public final class FocusEffectAEWrench implements FocusEffect {
 
     @Override
     public ResourceKey<IAspect> aspect() {
-        // potentia is Thaumcraft's Energy aspect under its modern name, as the original focus was tinted.
+        // [potentia] 是 Thaumcraft 的 [Energy] 要素在现代名称下的写法，原本的核心就是按它着色的。
         return TCAspects.POTENTIA;
     }
 
     @Override
     public int complexity(FocusSettings settings) {
-        // No settings: there is nothing to tune about "use a wrench".
+        // 无设置项："use a wrench" 本身没有什么可调的。
         return COMPLEXITY;
     }
 
@@ -76,31 +76,31 @@ public final class FocusEffectAEWrench implements FocusEffect {
     public boolean apply(CastContext ctx, FocusSettings settings, HitResult hit, Trajectory trajectory, int index) {
         Level level = ctx.level();
         if (!(level instanceof ServerLevel)) {
-            // The client runs this too; the wrench action is server-authoritative, so the client half
-            // is a no-op rather than a second attempt that would fight the server's.
+            // 客户端也会执行到这里；扳手动作以服务端为准，因此客户端这一半
+            // 是空操作，而不是会与服务端相争的第二次尝试。
             return false;
         }
         if (!(ctx.caster() instanceof Player player)) {
             return false;
         }
 
-        // Look the target up here rather than rely on the cast: this focus has no medium, so no engine
-        // hit means apply() is never called at all - the "AE wrench focus does nothing" report.
+        // 在这里查找目标，而不要依赖这次施法：该核心没有媒介，所以引擎未命中就意味着
+        // [apply()] 根本不会被调用——也就是 "AE wrench focus does nothing" 那份报告。
         BlockHitResult target = hit instanceof BlockHitResult blockHit ? blockHit : rayTrace(player, level);
         if (target == null) {
             return false;
         }
 
-        // Vis is settled here, not by the wand: its charge runs before the cast and cannot tell a wrench
-        // that will happen from one that will not (see ItemFocusAEWrench.getVisCost). Committed after AE2.
+        // vis 在这里结算，而不是由法杖结算：法杖的充能在施法之前运行，分辨不出
+        // 哪次会真的用扳手（见 [ItemFocusAEWrench.getVisCost]）。在 AE2 之后再提交。
         float cost = ItemFocusAEWrench.visCost();
         if (!pay(player, cost, false)) {
             TcActionBar.sendPurple(player, "tc.wand.notenoughvis");
             return false;
         }
 
-        // The main hand, whichever hand the cast came from: AE2's WrenchHook acts on the main hand alone.
-        // Whatever it held is put back by AEWrench.use.
+        // 无论这次施法出自哪只手，一律取主手：AE2 的 [WrenchHook] 只作用于主手。
+        // 它当时拿着的东西由 [AEWrench.use] 放回。
         if (!AEWrench.use(player, level, InteractionHand.MAIN_HAND, target)) {
             return false;
         }
@@ -111,8 +111,8 @@ public final class FocusEffectAEWrench implements FocusEffect {
     }
 
     /**
-     * Charges the wand casting this, the hand holding a wand with this focus, so the vis comes from the
-     * wand the player used, as the wand's own charge did. A false {@code commit} only asks the price.
+     * 向施放此效果的法杖收费，也就是向持有带该核心的法杖的那只手收费，这样 vis 就来自玩家所用的
+     * 法杖，与法杖自身的充能一致。{@code commit} 为 false 时只是询价。
      */
     private static boolean pay(Player player, float cost, boolean commit) {
         for (InteractionHand hand : InteractionHand.values()) {
@@ -125,8 +125,8 @@ public final class FocusEffectAEWrench implements FocusEffect {
     }
 
     /**
-     * What the caster is looking at, out to a wand's reach. {@code ClipContext.Block.OUTLINE}, not
-     * {@code COLLIDER}: cable parts are not full collision shapes.
+     * 施法者注视的目标，范围到法杖的可及距离。用 {@code ClipContext.Block.OUTLINE} 而不是
+     * {@code COLLIDER}：线缆部件不是完整的碰撞形状。
      */
     private static @Nullable BlockHitResult rayTrace(Player player, Level level) {
         Vec3 eye = player.getEyePosition(1.0F);
@@ -138,12 +138,12 @@ public final class FocusEffectAEWrench implements FocusEffect {
 
     @Override
     public void impactParticles(Level level, Vec3 pos, Vec3 look) {
-        // Nothing: this effect has no projectile, so there is no impact separate from apply()'s.
+        // 什么都不做：该效果没有弹射物，因此不存在独立于 [apply()] 的命中效果。
     }
 
     /**
-     * A beam from the wand to what it just took apart: without it the block just vanishes. Sent per player,
-     * so the beam is private to the caster.
+     * 从法杖射向它刚刚拆解之处的光束：没有它，方块就只是凭空消失。按玩家逐个发送，
+     * 因此这道光束只有施法者本人看得到。
      */
     private static void effect(Level level, Player player, Vec3 target) {
         level.playSound(null, BlockPos.containing(target), SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.PLAYERS,
@@ -163,7 +163,7 @@ public final class FocusEffectAEWrench implements FocusEffect {
         if (distance < 0.5) {
             return;
         }
-        // One particle per half block, so the spacing is the same however far away the target is.
+        // 每半格一个粒子，这样无论目标多远，间距都一致。
         Vec3 step = delta.normalize().scale(0.5);
         Vec3 at = start.add(step);
         for (int i = 0, steps = (int) (distance / 0.5); i < steps; i++, at = at.add(step)) {

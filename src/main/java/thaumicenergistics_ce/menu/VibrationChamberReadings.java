@@ -6,9 +6,9 @@ import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVib
 import thaumicenergistics_ce.blockentity.vibrationchamber.VibrationChamberSync;
 
 /**
- * The vibration chamber's readings, as the menu hands them to the screen: on the server they come off
- * the machine through {@link VibrationChamberSync#reading}, on the client they are what the server
- * last sent, and {@code set} keeps what it is given because a slot sync calls it on the client.
+ * 振动室的读数，由菜单交给屏幕：服务端上它们经 {@link VibrationChamberSync#reading}
+ * 取自机器，客户端上它们就是服务端最后发来的值，而 {@code set} 原样保留传入的值，
+ * 因为客户端上的槽位同步会调用它。
  */
 final class VibrationChamberReadings implements ContainerData {
 

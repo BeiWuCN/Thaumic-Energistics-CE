@@ -13,10 +13,10 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 
 /**
- * The provider's buffer: essentia held on its way out to the world, one tick at a time. It is a
- * waypoint rather than storage, because nothing here is saved and a reload starts empty. A
- * provider with nothing attached refuses everything, and a machine's suction is fetched from the
- * grid. Every change bumps the revision, the one answer a cache of this container needs.
+ * 供应器的缓冲：源质在送往外界途中的暂存，一次一个 tick。它只是
+ * 中转点而不是存储，因为这里什么都不保存，重载后从空开始。没有接
+ * 任何东西的供应器拒绝一切，而机器的抽吸量从网格获取。每次改动都会
+ * 递增 revision，这是这个容器的缓存唯一需要的答案。
  */
 final class AlchemyProviderBuffer {
 
@@ -80,7 +80,7 @@ final class AlchemyProviderBuffer {
         return AspectList.ofEntries(entries);
     }
 
-    /** True when any neighbour takes essentia, so an insert has somewhere to go. */
+    /** 任意一个邻接方接受源质时为 true，这样插入才有去处。 */
     boolean hasAnyTarget() {
         for (Direction side : Direction.values()) {
             if (neighbours.storage(side) != null || SuctionTarget.on(neighbours, side) != null) {
@@ -90,7 +90,7 @@ final class AlchemyProviderBuffer {
         return false;
     }
 
-    /** True when there is work: essentia waiting to leave, or a machine asking for some. */
+    /** 有活可干时为 true：有源质等着送出，或有机器在索要源质。 */
     boolean hasWork() {
         if (!buffer.isEmpty()) {
             return true;
@@ -104,7 +104,7 @@ final class AlchemyProviderBuffer {
         return false;
     }
 
-    /** The machine worth feeding on that side: only where no container sits to be inserted into. */
+    /** 该方向上值得投喂的机器：仅在没有可插入的容器占据该位置时。 */
     private @Nullable SuctionTarget machine(Direction side) {
         if (neighbours.storage(side) != null) {
             return null;
@@ -112,7 +112,7 @@ final class AlchemyProviderBuffer {
         return SuctionTarget.on(neighbours, side);
     }
 
-    /** Hands the buffer to the neighbours, sides in turn, and says whether anything moved. */
+    /** 把缓冲依次交给各个方向的邻接方，并返回是否有东西被移动。 */
     boolean push() {
         if (provider.getLevel() == null) {
             return false;
@@ -150,7 +150,7 @@ final class AlchemyProviderBuffer {
         return movedAnything;
     }
 
-    /** A container takes an insert; a machine that wants essentia is handed the same amount instead. */
+    /** 容器就接受一次插入；而需要源质的机器则改为直接交付相同的量。 */
     private int hand(Direction side, Holder<IAspect> aspect, int amount) {
         IEssentiaStorage target = neighbours.storage(side);
         if (target != null) {
@@ -161,8 +161,8 @@ final class AlchemyProviderBuffer {
     }
 
     /**
-     * Fetches what a suction machine asks for: the buffer is a waypoint and the grid is the source, so
-     * a machine with no container beside it would otherwise wait for an insert that never comes.
+     * 取来抽吸机器所求的量：缓冲只是中转点，网格才是来源，否则
+     * 旁边没有容器的机器会一直等一个永不到来的插入。
      */
     private boolean topUpFromNetwork() {
         boolean fetched = false;

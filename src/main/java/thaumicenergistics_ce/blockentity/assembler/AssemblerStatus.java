@@ -3,14 +3,14 @@ package thaumicenergistics_ce.blockentity.assembler;
 import net.minecraft.network.chat.Component;
 
 /**
- * The Arcane Assembler's reason for waiting or for turning a job away, in one place. The key and
- * its English fallback sit together here, so a missing translation cannot show a raw key.
+ * 奥术组装机等待或拒绝任务的原因，集中在一处。键与
+ * 它的英文回退放在一起，所以缺失的翻译不会显示原始键。
  */
 public final class AssemblerStatus {
 
     private AssemblerStatus() {}
 
-    /** One of this machine's tooltip reasons. */
+    /** 本机器的一个 tooltip 原因。 */
     static Component waitReason(String key, String english, Object... args) {
         return Component.translatableWithFallback(
                 "jade.thaumicenergistics_ce.arcane_assembler.wait_reason." + key, english, args);
@@ -21,8 +21,8 @@ public final class AssemblerStatus {
                 "jade.thaumicenergistics_ce.arcane_assembler.refuse_reason." + key, english, args);
     }
 
-    // ---- The reason keys, named once --------------------------------------
-    // Constants, not literals: each key is spelled once here and joined to its key prefix below.
+    // ---- 原因键，只命名一次 --------------------------------------
+    // 用常量而非字面量：每个键在这里拼写一次，并在下面与键前缀拼接。
 
     static final String WAIT_NO_POWER = "no_power";
     static final String WAIT_NO_VIS = "no_vis";
@@ -35,7 +35,7 @@ public final class AssemblerStatus {
     static final String REFUSE_UNRESOLVED = "unresolved";
     static final String REFUSE_TOO_EXPENSIVE = "too_expensive";
 
-    /** The refusal for a recipe whose vis cost is more than this chunk's aura can ever hold. */
+    /** 对 vis 消耗超过本区块灵气容量上限的配方的拒绝。 */
     static Component tooExpensive(int price, int capacity) {
         return refusalReason(
                 REFUSE_TOO_EXPENSIVE,

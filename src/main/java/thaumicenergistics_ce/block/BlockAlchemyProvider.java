@@ -8,8 +8,8 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider;
 
 /**
- * The Alchemy Provider block: a plain cube with one texture on every side, so it has no properties
- * and no facing, and its blockstate declares a single unconditional variant.
+ * 炼金供应器方块：六个面同一张贴图的普通立方体，因此没有属性、
+ * 没有朝向，它的方块状态只声明一个无条件变体。
  */
 public class BlockAlchemyProvider extends ThEBaseEntityBlock {
 

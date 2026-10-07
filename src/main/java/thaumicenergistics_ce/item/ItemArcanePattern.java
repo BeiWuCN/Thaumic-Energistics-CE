@@ -11,11 +11,11 @@ import thaumicenergistics_ce.arcane.ArcanePatternDetails;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 
 /**
- * Item form of an arcane pattern, needed so a pending AE2 crafting plan survives a save. AE2
- * reloads a saved task through {@link PatternDetailsHelper#decodePattern}, which wants an
- * {@code EncodedPatternItem}. The definition carries the recipe, not the result, because results
- * are not unique among recipes. Equality matters as much as decoding, because the provider index
- * is a {@code HashMap} keyed by both.
+ * 奥术样板的物品形态，为的是让待处理的 AE2 合成计划能挺过一次存档。AE2 通过
+ * {@link PatternDetailsHelper#decodePattern} 重新加载已保存的任务，它要的是
+ * {@code EncodedPatternItem}。定义里带的是配方而不是结果，因为结果在配方之间并不唯一。
+ * 相等性同解码一样重要，因为供应器索引是以两者为键的
+ * {@code HashMap}，所以相等性错了索引就找不到条目。
  */
 public final class ItemArcanePattern extends Item {
 
@@ -23,7 +23,7 @@ public final class ItemArcanePattern extends Item {
         super(properties);
     }
 
-    /** Builds the item through AE2's builder, the only source of the {@code EncodedPatternItem} AE2 takes. */
+    /** 通过 AE2 的 builder 构建该物品，那是 AE2 唯一接受的 {@code EncodedPatternItem} 来源。 */
     public static Item build() {
         return PatternDetailsHelper.encodedPatternItemBuilder(new Decoder()).build();
     }
@@ -40,7 +40,7 @@ public final class ItemArcanePattern extends Item {
             if (pattern == null) {
                 return null;
             }
-            // Passed through as the definition so the decoded task equals this machine's offer.
+            // 作为定义原样传入，使解码出的任务与这台机器提供的相等。
             return ArcanePatternDetails.of(pattern, registries, null, key);
         }
     }

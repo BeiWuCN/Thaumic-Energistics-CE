@@ -9,10 +9,10 @@ import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 
 /**
- * The result well and the 7x3 pattern wells, both read-only, so only the side drawing them can decide
- * what they show: the result from the grid, the wells from the core item.
- * Each is recomputed on a change, keyed by a signature and the game tick, and both are unfilled on
- * the side that cannot read the item, which is why the menu never derives them once for both sides.
+ * 结果凹槽与 7x3 样板凹槽，两者都是只读的，所以只有绘制它们的那一侧才能决定
+ * 它们显示什么：结果来自网格，凹槽来自核心物品。
+ * 两者都在发生变化时重算，以签名与游戏 tick 为键，而在无法读取该物品的
+ * 那一侧两者都不填充，这就是菜单从不替两侧一次性推导它们的原因。
  */
 final class InscriberPreview {
 
@@ -37,7 +37,7 @@ final class InscriberPreview {
         this.grid = grid;
     }
 
-    /** The result well's container: the resolved pattern's output, or empty. */
+    /** 结果凹槽的容器：已解析样板的输出，或空。 */
     SimpleContainer well() {
         return result;
     }
@@ -46,7 +46,7 @@ final class InscriberPreview {
         return mirrors;
     }
 
-    /** The result of the grid as it stands, resolved here on this side: what the well draws. */
+    /** 网格当前状态的结果，在本侧解析：这就是凹槽所绘制的内容。 */
     void update() {
         int signature = grid.signature();
         if (signature == previewedSignature) {
@@ -64,13 +64,13 @@ final class InscriberPreview {
     }
 
     /**
-     * Fills the 7x3 wells from the core, each frame but only on a change: they are read-only slots, so
-     * only the side drawing them can write what they show.
+     * 从核心填充 7x3 凹槽，每帧都做但只在发生变化时：它们是只读槽位，所以
+     * 只有绘制它们的那一侧才能写入它们显示的内容。
      */
     void refreshMirrors() {
         ItemStack core = menu.slotStack(MenuKnowledgeInscriber.IDX_CORE);
-        // An int key, not a string: the old getItem() + '|' + getComponentsPatch() reserialised the
-        // core's whole stored pattern list sixty times a second.
+        // 用 int 作键而不是字符串：旧的 getItem() + '|' + getComponentsPatch() 会每秒
+        // 六十次重新序列化核心存储的整个样板列表。
         long now = menu.playerInventory.player.level().getGameTime();
         if (now != coreSignatureTick) {
             coreSignatureTick = now;

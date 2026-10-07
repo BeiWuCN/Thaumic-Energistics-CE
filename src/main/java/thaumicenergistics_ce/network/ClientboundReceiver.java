@@ -1,8 +1,8 @@
 package thaumicenergistics_ce.network;
 
 /**
- * The wire contract for the two payloads that travel server to client, where the receiver is a screen or a
- * client cache rather than a menu.
+ * 两个从服务端发往客户端的载荷的线上约定，其接收者是屏幕或
+ * 客户端缓存，而不是菜单。
  */
 public interface ClientboundReceiver {
 

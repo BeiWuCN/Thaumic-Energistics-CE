@@ -11,10 +11,10 @@ import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.blockentity.gachabox.BlockEntityGachaBox;
 
 /**
- * Registers this mod's Jade providers: the server data half, which Jade asks for on both sides.
- * The class is annotated rather than listed in a service file, because that is how Jade finds plugins
- * on NeoForge, and Jade is optional, so the class is loaded only when Jade is present. The block
- * components, drawn on a client, are registered by {@code client.jade.ThEJadeClientPlugin}.
+ * 注册本 mod 的 Jade 提供器：服务端数据那一半，两侧 Jade 都会向它索取。
+ * 用注解标记类而不是在 service 文件里列出，因为 NeoForge 上 Jade 就是这样找插件的；
+ * Jade 是可选的，所以只有 Jade 存在时这个类才会被加载。绘制在客户端的方块组件由
+ * [client.jade.ThEJadeClientPlugin] 注册。
  */
 @WailaPlugin
 public class ThEJadePlugin implements IWailaPlugin {

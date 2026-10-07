@@ -17,10 +17,10 @@ import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The Arcane Assembler's craft as a thing to be taken, priced and picked back up: what one costs, which
- * crystals it owes, whether the aura can ever pay, and what happens to one a save interrupted.
- * Split out of {@link BlockEntityArcaneAssembler}, which keeps the inventory, the grid clock and the
- * public face the menu reads; {@link AssemblerCraftRunner} runs the craft this class accepts.
+ * 奥术组装机的合成，作为一个可被接收、定价和取回的对象：一次合成花多少、
+ * 它欠哪些晶体、灵气是否可能付得起，以及被存档打断的那次会怎样。
+ * 从 {@link BlockEntityArcaneAssembler} 拆出，后者保留物品栏、网格时钟和
+ * 菜单读取的公开接口；{@link AssemblerCraftRunner} 运行本类接收的合成。
  */
 final class AssemblerCraftJob {
 
@@ -32,7 +32,7 @@ final class AssemblerCraftJob {
         this.owner = owner;
     }
 
-    /** The crystals a pattern's craft must be handed, as items the network will be asked for. */
+    /** 样板合成必须被交付的晶体，以将向网络请求的物品形式表示。 */
     static List<ItemStack> crystalStacksOf(ThEArcanePattern pattern) {
         List<ItemStack> stacks = new ArrayList<>();
         for (AspectInstance crystal : pattern.crystalItems().entries()) {
@@ -44,18 +44,18 @@ final class AssemblerCraftJob {
         return List.copyOf(stacks);
     }
 
-    /** The vis charged for {@code pattern}, after the gear discount and floored by Thaumaturge's own
-     * {@code MIN_CONSUMPTION_MODIFIER}, so an equipped assembler still pays something. */
+    /** 为 {@code pattern} 收取的 vis，已计入装备折扣，并以 Thaumaturge 自己的
+     * {@code MIN_CONSUMPTION_MODIFIER} 为下限，所以已装备的组装机仍需支付一些。 */
     public int craftCost(ThEArcanePattern pattern) {
         float modifier = Math.max(1.0F - owner.upgrades.gearDiscount() / 100.0F, MIN_CONSUMPTION_MODIFIER);
         return Math.max(1, (int) Math.ceil(pattern.chargedVis() * modifier));
     }
 
-    /** Whether the aura can pay for {@code pattern}. An unpayable job is refused, not held: the CPU
-     * skips a busy provider, so holding it stalls the plan. A low aura waits - its base can rise. */
+    /** 灵气是否能支付 {@code pattern}。付不起的任务会被拒绝而非保留：合成 CPU
+     * 会跳过忙碌的供应器，保留它就会卡住整个计划。灵气低时会等待——其基础值可以上升。 */
     boolean canEverPay(ThEArcanePattern pattern) {
         int capacity = owner.vis.auraCapacity();
-        // Zero means the chunk is not initialised yet; a relay counts too, its vis living in a node.
+        // 0 表示区块尚未初始化；中继点也算，它的 vis 位于节点中。
         return capacity <= 0
                 || owner.vis.relayNetworkInReach()
                 || owner.vis.interfaceInReach()
@@ -67,7 +67,7 @@ final class AssemblerCraftJob {
             return;
         }
         owner.craft.setLastRefusal(why);
-        // getString() resolves against the server's language; every key carries an English fallback.
+        // getString() 按服务端的语言解析；每个键都带英文回退。
         ThELog.LOG.info("[assembler] at {} turned a job away: {}", owner.getBlockPos(), why.getString());
     }
 
@@ -99,7 +99,7 @@ final class AssemblerCraftJob {
             return null;
         }
         if (owner.patternCache.isStale()) {
-            // Rebuild without settling the stale flag: a set read before a level would become final.
+            // 重建但不结算过期标志：在读取 level 之前读到的集合会变成最终结果。
             owner.patternCache.rebuild();
         }
         for (IPatternDetails details : owner.patternCache.patterns()) {
@@ -112,37 +112,37 @@ final class AssemblerCraftJob {
     }
 
     boolean beginCraft(ThEArcanePattern pattern) {
-        // Fixed now, not recomputed at completion, so a craft survives a save without the core: the
-        // price and the crystals are handed over with the pattern.
+        // 现在就固定，而不是完成时重算，这样合成在存档后不依赖核心也能继续：
+        // 价格和晶体随样板一并交付。
         owner.craft.begin(pattern, craftCost(pattern), crystalStacksOf(pattern));
         owner.displaySync.refreshDisplaySlots(pattern.result().copy(), pattern.grid());
         owner.setChanged();
         owner.displaySync.markForUpdate();
-        // Wake the grid: measured, a craft pushed while asleep ticked once a second rather than twenty.
+        // 唤醒网格：实测中，休眠时推入的合成每秒只 tick 一次，而不是 20 次。
         ICraftingProvider.requestUpdate(owner.mainNode);
         owner.craftRunner().updateSleepiness();
         return true;
     }
 
     // ------------------------------------------------------------------
-    // Repairing an interrupted craft
+    // 恢复被中断的合成
     // ------------------------------------------------------------------
 
-    /** Finishes recovering a craft that a save interrupted, once there is a level to read the core with:
-     * not in {@code loadAdditional}, which runs before the block entity has a level. */
+    /** 完成恢复被存档打断的合成，此时已有 level 可用它读取核心：
+     * 不在 {@code loadAdditional} 中做，那里方块实体还没有 level。 */
     void recoverInterruptedCraft() {
         if (owner.getLevel() == null || owner.getLevel().isClientSide()) {
             return;
         }
-        // Driven by the well: only finishCraft empties it, so a product there means a craft did not finish.
+        // 由产物槽驱动：只有 finishCraft 会清空它，所以那里有产物就意味着合成没有完成。
         ItemStack waiting = owner.inventory.getItem(BlockEntityArcaneAssembler.TARGET_SLOT);
         if (!waiting.isEmpty()) {
             owner.craft.setCrafting(true);
-            // Recovered only for the preview grid: the price and crystals were saved with the craft.
+            // 仅为预览网格恢复：价格和晶体已随合成保存。
             ThEArcanePattern recovered = patternForResult(waiting);
             owner.craft.setCurrentPattern(recovered);
             if (recovered != null) {
-                // A readable pattern restates both numbers; the saved ones are the fallback.
+                // 可读取的样板会重述两个数值；保存的数值是回退。
                 owner.craft.setCraftPrice(craftCost(recovered));
                 owner.craft.setCraftCrystals(crystalStacksOf(recovered));
             }
@@ -152,7 +152,7 @@ final class AssemblerCraftJob {
                     waiting.getHoverName().getString(),
                     owner.craft.craftPrice(),
                     recovered == null ? " (the knowledge core no longer has its pattern)" : "");
-            // Deliver on the first tick: the crafting time was served before the save.
+            // 第一个 tick 就交付：合成时间在存档前已经走过。
             owner.craft.setCraftTicks(owner.upgrades.ticksPerCraft());
             owner.craft.clearStall();
         } else {
@@ -162,16 +162,16 @@ final class AssemblerCraftJob {
             owner.craft.setCraftCrystals(List.of());
             owner.displaySync.clearDisplay(true);
         }
-        // Ask to be ticked rather than assuming a later grid event: with no grid yet this is a no-op.
+        // 主动请求被 tick，而不是假定后面会有网格事件：还没有网格时这是空操作。
         owner.craftRunner().updateSleepiness();
     }
 
     // ------------------------------------------------------------------
-    // Taking a job
+    // 接收任务
     // ------------------------------------------------------------------
 
-    /** Why the machine cannot take a job at all, or {@code null} when it can: both entry points ask this
-     * first, so a refusal reads the same whichever way AE2 came in. */
+    /** 机器为何完全无法接收任务，可以接收时为 {@code null}：两个入口点都先问
+     * 这个，所以无论 AE2 从哪条路进来，拒绝的措辞都一样。 */
     private @Nullable Component refusalFor() {
         if (!owner.acceptsPlans()) {
             return AssemblerStatus.refusalReason(AssemblerStatus.REFUSE_BUSY, "it is already holding a craft");
@@ -183,7 +183,7 @@ final class AssemblerCraftJob {
         return null;
     }
 
-    /** Takes the job a pattern provider on the same grid pushed; the inputs are kept only to give back. */
+    /** 接收同一网格上的样板供应器推送的任务；投入物只为归还而保留。 */
     boolean accept(IPatternDetails patternDetails, KeyCounter[] inputHolder) {
         Component refusal = refusalFor();
         if (refusal != null) {
@@ -199,7 +199,7 @@ final class AssemblerCraftJob {
             noteRefusal(cannotPay(craftCost(details.pattern())));
             return false;
         }
-        // What AE2 just extracted. This machine pays in vis and crystals, so keep these only to give back.
+        // AE2 刚提取的物品。本机器以 vis 和晶体支付，所以保留这些只为归还。
         owner.craft.heldInputs().clear();
         for (KeyCounter counter : inputHolder) {
             for (var entry : counter) {
@@ -212,7 +212,7 @@ final class AssemblerCraftJob {
         return beginCraft(details.pattern());
     }
 
-    /** Takes the job a colocated pattern provider pushed; its inputs were extracted before this point. */
+    /** 接收同位置样板供应器推送的任务；其投入物在此刻之前已被提取。 */
     boolean acceptFromMachine(IPatternDetails patternDetails) {
         Component refusal = refusalFor();
         if (refusal != null) {

@@ -17,11 +17,11 @@ import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvi
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
 
 /**
- * The Wireless Binding Tool: makes and breaks the links an Alchemy Provider uses.
- * A two-ended link needs something to carry the identity of one end to the other, so the tool
- * holds one coordinate - a receiver selected but not yet bound - and the second click completes
- * the pair. Sneaking splits reading from writing; without it, walking past an altar would rebind
- * things.
+ * 无线绑定工具：建立与断开炼金供应器所使用的链接。
+ * 两端式的链接需要有个东西把一端的身份带到另一端，所以这个工具
+ * 持有一个坐标——已选中但尚未绑定的接收端——第二次点击才完成
+ * 配对。潜行把读取与写入分开；没有它，走过一座祭坛就会重新绑定
+ * 东西。
  */
 public class ItemWirelessConnector extends Item {
 
@@ -75,8 +75,8 @@ public class ItemWirelessConnector extends Item {
     }
 
     /**
-     * The receiver this tool is holding, or {@code null}: read through the custom-data component, since
-     * 1.21 removed the direct tag accessors from {@link ItemStack} and the component is what travels.
+     * 这个工具当前持有的接收端，或 {@code null}：通过自定义数据组件读取，因为
+     * 1.21 从 {@link ItemStack} 上移除了直接的 tag 访问器，而真正传输的是组件。
      */
     private static @Nullable CompoundTag selection(ItemStack tool) {
         CustomData data = tool.get(DataComponents.CUSTOM_DATA);

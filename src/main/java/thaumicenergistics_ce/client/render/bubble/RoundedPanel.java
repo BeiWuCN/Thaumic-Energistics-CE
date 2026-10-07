@@ -6,32 +6,30 @@ import net.minecraft.client.renderer.RenderType;
 import org.joml.Matrix4f;
 
 /**
- * Every colour the bubble draws in, and the box that uses two of them: a filled rounded rectangle with a
- * one-pixel gradient border, the way Jade draws tooltips. Border and fill sit at different depths, because
- * coplanar quads fight for the same one and flicker.
+ * 气泡绘制所用的全部颜色，以及使用其中两种颜色的框：带 1 像素渐变边框的
+ * 填充圆角矩形，与 Jade 绘制 tooltip 的方式相同。边框与填充位于不同深度，因为
+ * 共面的四边形会争夺同一深度并闪烁。
  */
 final class RoundedPanel {
 
     private static final int PANEL_FILL = 0xF0100010;
     private static final int BORDER_TOP = 0x505000FF;
     private static final int BORDER_BOTTOM = 0x5028007F;
-    /** Corner radius, in panel units: two, matching Jade's box; ten read as far too round. */
+    /** 圆角半径，以面板单位计：2，与 Jade 的框一致；10 看起来圆得过分。 */
     private static final float CORNER_RADIUS = 2.0F;
 
-    /** Border and fill sit at different depths: coplanar quads fight for the same depth and flicker. */
+    /** 边框与填充位于不同深度：共面的四边形会争夺同一深度并闪烁。 */
     private static final float BORDER_Z = -0.08F;
     private static final float FILL_Z = -0.06F;
 
     private RoundedPanel() {}
 
-    /**
-     * Draws the box. {@code debugQuads} takes position and colour only, which is all the panel has to give.
-     */
+    /** 绘制该框。{@code debugQuads} 只接受位置与颜色，这也正是面板能提供的全部内容。 */
     static void draw(
             MultiBufferSource buffers, Matrix4f matrix, float left, float top, float right, float bottom) {
         VertexConsumer quads = buffers.getBuffer(RenderType.debugQuads());
-        // The border is the whole shape in the gradient, the fill the same shape one pixel in, so the radius
-        // is one less. Separate depths because sprites in one plane fight for it and flicker.
+        // 边框是用渐变绘制的整个形状，填充是向内缩 1 像素的同一形状，所以其半径
+        // 小 1。深度分离，因为同一平面上的 sprite 会争夺深度并闪烁。
         roundedFill(quads, matrix, left, top, right, bottom, CORNER_RADIUS, BORDER_TOP, BORDER_BOTTOM, BORDER_Z);
         roundedFill(
                 quads,
@@ -140,7 +138,7 @@ final class RoundedPanel {
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
-    /** The risk tier's colour, from green for a quiet altar to red for one that will not survive it. */
+    /** 风险等级的颜色，从安静祭坛的绿色到无法撑过它的祭坛的红色。 */
     static int colourOf(int tier) {
         return switch (tier) {
             case 1 -> 0xFF55FF55;

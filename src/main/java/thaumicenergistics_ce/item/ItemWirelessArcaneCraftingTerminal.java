@@ -30,11 +30,11 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * The Wireless Arcane Crafting Terminal: a carried arcane workbench, showing the grid of the placed
- * terminal it is bound to.
- * Sneaking on that terminal binds the two, and a sneak left-click unbinds them: one state, two
- * places. Its vis comes from the aura around the player, because a carried workbench has no block
- * to drain.
+ * 无线奥术合成终端：一个可携带的奥术工作台，显示它所绑定的已放置
+ * 终端的网格。
+ * 在该终端上潜行即可绑定两者，潜行左键则解除绑定：一个状态，两个
+ * 位置。它的 vis 来自玩家周围的灵气，因为可携带的工作台没有方块
+ * 可供抽取。
  */
 public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem implements ArcaneTerminalLink {
 
@@ -51,8 +51,8 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * Only a block that already carries an Arcane Crafting Terminal is worth handing the sneak to: on any
-     * other part the click would reach a machine the player was not aiming at.
+     * 只有已经装有奥术合成终端的方块才值得把潜行交给它：在别的
+     * 部件上，这次点击会打到玩家并未瞄准的机器上。
      */
     @Override
     public boolean doesSneakBypassUse(ItemStack stack, LevelReader level, BlockPos pos, Player player) {
@@ -60,8 +60,8 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * True when that block carries the terminal on any face. The face itself is not in the signature, so
-     * a cable holding one is opened up as a whole; the click still only pairs on the face that holds it.
+     * 当该方块在任意一面装有终端时返回 true。方法签名里没有面本身，所以
+     * 装有终端的线缆会被整体打开；点击仍然只在装它的那一面上配对。
      */
     private static boolean holdsArcaneTerminal(LevelReader level, BlockPos pos) {
         if (!(level.getBlockEntity(pos) instanceof IPartHost host)) {
@@ -79,8 +79,8 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * Pairing is a sneak gesture, so a sneak never also opens the screen: without this, one click would
-     * bind the item and leave the player looking at a grid they did not ask for.
+     * 配对是潜行手势，所以潜行也不再打开界面：没有这一条，一次点击会
+     * 既绑定物品，又让玩家盯着一个并非他要的网格。
      */
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
@@ -103,8 +103,8 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * Remembers one placed terminal on the item; the dimension is kept too, since two of them can hold
-     * the same coordinates.
+     * 在物品上记住一个已放置的终端；维度也一并保存，因为两个终端可能
+     * 持有相同的坐标。
      */
     @Override
     public void pairWith(ItemStack terminal, Level level, BlockPos pos, Direction side) {
@@ -117,8 +117,8 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * The placed terminal this item was paired with, or {@code null} when there is none, it stands in
-     * another dimension, or its chunk is not loaded.
+     * 这个物品所配对的已放置终端，或 {@code null}——没有配对、它位于
+     * 另一个维度、或它的区块未加载时。
      */
     public static @Nullable PartArcaneCraftingTerminal pairedTerminal(Level level, ItemStack terminal) {
         CompoundTag tag = bindingTag(terminal);
@@ -138,8 +138,8 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * Forgets the paired terminal. True only when there was one to forget, so that a second wipe is not
-     * announced to the player as if it had done something.
+     * 忘记已配对的终端。只有当确实有一个可忘记的对象时才返回 true，这样第二次
+     * 清除才不会像是做了什么事一样被通告给玩家。
      */
     public static boolean unbind(ItemStack terminal) {
         CompoundTag tag = bindingTag(terminal);

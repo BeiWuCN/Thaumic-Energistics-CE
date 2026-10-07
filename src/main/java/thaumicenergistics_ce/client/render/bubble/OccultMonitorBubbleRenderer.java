@@ -20,11 +20,11 @@ import thaumicenergistics_ce.client.render.bubble.BubbleCells.TextCell;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The bubble the Occult Monitor floats above itself: how dangerous the altar is, what it is making,
- * whether the room can finish it, and that it is drawn rather than spawned - a {@code TextDisplay}
- * entity can be left behind by a crash. What it says is {@link BubbleCells}, the box it sits on
- * {@link RoundedPanel}; what is left here is the pose and the two ways a cell is drawn, and the few
- * blocks of range the panel is drawn within.
+ * 神秘监控器悬浮在自己上方的气泡：祭坛有多危险、
+ * 它正在制作什么、房间能否完成它，以及它是被绘制而非被生成的
+ * ——崩溃可能留下一个 {@code TextDisplay} 实体。它显示的内容是
+ * {@link BubbleCells}，承载它的框是 {@link RoundedPanel}；留在这里的是姿态、
+ * 绘制单元格的两种方式，以及绘制该面板所及的几个方块范围。
  */
 public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityOccultMonitor> {
 
@@ -35,14 +35,14 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
     private static final float PADDING_X = 5.0F;
     private static final float PADDING_Y = 4.0F;
 
-    /** How far the bubble is drawn: eight blocks. Past that a player has walked away from the machine,
-     * so the panel is not built, not measured and not drawn, and it is never handed here at all. */
+    /** 气泡绘制的距离：8 个方块。超过这个距离玩家已远离机器，
+     * 所以面板不构建、不测量也不绘制，根本不会传到此处。 */
     private static final int CULL_RANGE = 8;
 
-    /** The colour the through-wall copy of the text is drawn in - vanilla's, from a name tag. */
+    /** 穿透墙壁的那份文本绘制时所用的颜色——取自命名牌的原版颜色。 */
     private static final int SEE_THROUGH_TEXT = 553648127;
 
-    /** Off unless {@code THAUMICENERGISTICS_MONITOR_TRACE=true}; the bubble is drawn, not sent. */
+    /** 除非 {@code THAUMICENERGISTICS_MONITOR_TRACE=true}，否则关闭；气泡是绘制的，不是发送的。 */
     private static final boolean TRACE =
             "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_MONITOR_TRACE"));
 
@@ -52,14 +52,14 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
 
     public OccultMonitorBubbleRenderer(BlockEntityRendererProvider.Context context) {}
 
-    /** The same eight blocks, asked before {@link #shouldRender}: the machine is dropped from the list
-     * the client walks at all, not merely skipped once it gets there. */
+    /** 同样是这 8 个方块，在 {@link #shouldRender} 之前询问：机器直接从客户端
+     * 遍历的列表中剔除，而不是等遍历到它才跳过。 */
     @Override
     public int getViewDistance() {
         return CULL_RANGE;
     }
 
-    /** The near half of the cull: reading distance, measured from the machine's own block. */
+    /** 剔除的近距离一半：阅读距离，从机器自身所在方块起算。 */
     @Override
     public boolean shouldRender(BlockEntityOccultMonitor monitor, Vec3 cameraPos) {
         return Vec3.atCenterOf(monitor.getBlockPos()).closerThan(cameraPos, CULL_RANGE);
@@ -109,7 +109,7 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
         pose.scale(SCALE, -SCALE, SCALE);
         Matrix4f matrix = pose.last().pose();
 
-        // Centred on the anchor, so the panel grows both ways rather than downwards from the block's face.
+        // 以锚点为中心，所以面板向两侧展开，而不是从方块表面向下延伸。
         float left = -panelWidth / 2.0F;
         float top = -panelHeight / 2.0F;
         RoundedPanel.draw(buffers, matrix, left, top, left + panelWidth, top + panelHeight);
@@ -118,7 +118,7 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
         for (List<Cell> row : rows) {
             float rowWidth = BubbleCells.rowWidth(font, row);
             float x = -rowWidth / 2.0F;
-            // Centred on the row: a chip row is taller than a text row.
+            // 在行内居中：芯片行比文本行更高。
             float textY = y + (BubbleCells.rowHeight(row) - font.lineHeight) / 2.0F;
             for (Cell cell : row) {
                 drawCell(pose, buffers, font, cell, x, y, textY, true);
@@ -126,7 +126,7 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
             }
             y += BubbleCells.rowHeight(row);
         }
-        // The text again with the depth test off, so the numbers read through walls; not the chips.
+        // 关闭深度测试再画一遍文本，让数字能穿墙阅读；芯片不这样处理。
         y = top + PADDING_Y;
         for (List<Cell> row : rows) {
             float rowWidth = BubbleCells.rowWidth(font, row);
@@ -143,7 +143,7 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
         pose.popPose();
     }
 
-    /** Draws one cell at {@code x}, {@code y} - the row's top-left corner. */
+    /** 在 {@code x}、{@code y} 处绘制一个单元格——即该行的左上角。 */
     private static void drawCell(
             PoseStack pose,
             MultiBufferSource buffers,
@@ -156,8 +156,8 @@ public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEnt
         switch (cell) {
             case TextCell text -> drawText(font, text.text(), x, textY, buffers, pose.last().pose(), solid);
             case ChipCell chip -> {
-                // Drawn by Thaumaturge's own world renderer, so texture, blend and the undiscovered-aspect
-                // mask are right. Negative vertical scale: the panel's pose is (x, -y), which flips textures.
+                // 由 Thaumaturge 自身的世界渲染器绘制，这样纹理、混合和未发现要素
+                // 遮罩都正确。垂直方向取负缩放：面板姿态是 (x, -y)，会翻转纹理。
                 float size = BubbleCells.CHIP;
                 pose.pushPose();
                 pose.translate(x + size / 2.0F, rowTop + size / 2.0F, 0.0F);

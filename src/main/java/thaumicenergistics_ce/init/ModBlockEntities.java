@@ -18,7 +18,7 @@ import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.blockentity.gachabox.BlockEntityGachaBox;
 
-/** Block entity type registration. */
+/** 方块实体类型注册。 */
 public final class ModBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> REGISTRY =
             DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, ThEIds.MODID);

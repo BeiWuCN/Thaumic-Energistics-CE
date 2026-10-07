@@ -12,15 +12,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
 /**
- * A wireless link to an ME network, in a form a golem can carry.
- * The link is AE2's own, a {@link GlobalPos} in {@link AEComponents#WIRELESS_LINK_TARGET}, and
- * {@link #LINKABLE_HANDLER} is what the memory card asks for; equipping is a click on the golem.
- * It is not Thaumaturge's accessory registry, because {@code ItemGolemAccessory} is final, so the
- * link lives in the golem's data.
+ * 一条通往 ME 网络的无线连接，形态是傀儡能携带的东西。
+ * 这条连接是 AE2 自己的，是一个 {@link GlobalPos} 存于 {@link AEComponents#WIRELESS_LINK_TARGET}，
+ * 而 {@link #LINKABLE_HANDLER} 是内存卡所请求的对象；装备方式是对傀儡点击一次。
+ * 它不走 Thaumaturge 的饰品注册表，因为 {@code ItemGolemAccessory} 是 final 的，所以
+ * 这条连接存放在傀儡的数据里。
  */
 public class ItemGolemWirelessBackpack extends Item {
 
-    /** Handed to AE2 so a memory card can link and unlink this item. */
+    /** 交给 AE2，使内存卡能够链接与解除链接这个物品。 */
     public static final IGridLinkableHandler LINKABLE_HANDLER = new LinkableHandler();
 
     public ItemGolemWirelessBackpack(Properties properties) {
@@ -38,7 +38,7 @@ public class ItemGolemWirelessBackpack extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
-        // AE2's own wording for this, so a linked backpack reads like a linked wireless terminal.
+        // 这里用 AE2 自己的措辞，好让已链接的背包读起来像已链接的无线终端。
         tooltip.add(isLinked(stack)
                 ? Tooltips.of(GuiText.Linked, Tooltips.GREEN)
                 : Tooltips.of(GuiText.Unlinked, Tooltips.RED));

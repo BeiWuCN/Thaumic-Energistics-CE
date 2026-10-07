@@ -16,20 +16,20 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Thaumaturge's item registry, and the stacks this mod builds out of it. Registry entries move,
- * so {@code TCItems.ALCHEMICAL_FURNACE} was deleted outright in 0.4.7, and nothing outside
- * this package names a {@code TCItems} field or a {@code TCDataComponents} one.
+ * Thaumaturge 的物品注册表，以及本 mod 用它构建的物品堆。注册表条目会变动，
+ * 比如 {@code TCItems.ALCHEMICAL_FURNACE} 在 0.4.7 中被直接删除，所以本包之外
+ * 没有任何地方指名 {@code TCItems} 或 {@code TCDataComponents} 的字段。
  */
 public final class TcRegistry {
     private TcRegistry() {}
 
-    // -- essentia crystals ---------------------------------------------------
+    // -- 源质水晶 ---------------------------------------------------
 
     public static boolean isCrystal(ItemStack stack) {
         return !stack.isEmpty() && stack.is(TCItems.ESSENTIA_CRYSTAL.get());
     }
 
-    /** The aspect a configured crystal carries, or null for an empty or unconfigured crystal. */
+    /** 已配置的水晶携带的要素，空水晶或未配置水晶为 null。 */
     public static @Nullable Holder<IAspect> crystalAspect(ItemStack stack) {
         return isCrystal(stack) ? ItemEssentiaCrystal.aspectOf(stack) : null;
     }
@@ -44,16 +44,16 @@ public final class TcRegistry {
         return EssentiaCrystalFactory.of(aspect, amount);
     }
 
-    // -- the monitor's book --------------------------------------------------
+    // -- 监控器的书 --------------------------------------------------
 
-    /** The tome the monitor reads through, recognised by item rather than by class. */
+    /** 监控器据以读取的典籍，按物品而非按类识别。 */
     public static boolean isThaumonomicon(ItemStack stack) {
         return stack.is(TCItems.THAUMONOMICON.get());
     }
 
-    // -- essentia containers -------------------------------------------------
+    // -- 源质容器 -------------------------------------------------
 
-    /** Whether {@code stack} is a jar or a phial, the two container kinds this mod fills. */
+    /** {@code stack} 是罐子还是瓶子，即本 mod 会填充的两种容器。 */
     public static boolean isEssentiaContainer(ItemStack stack) {
         return !stack.isEmpty()
                 && (stack.getItem() instanceof JarItem || stack.getItem() instanceof PhialItem);
@@ -75,24 +75,24 @@ public final class TcRegistry {
         return PhialItem.makeFilled(aspect, amount);
     }
 
-    /** A stack of empty phials: an emptied one is spent back into its own item id, not left behind. */
+    /** 一堆空瓶子：倒空后的瓶子会消耗回它自己的物品 id，而不是残留下来。 */
     public static ItemStack emptyPhials(int count) {
         return new ItemStack(TCItems.PHIAL.get(), count);
     }
 
-    // -- brains --------------------------------------------------------------
+    // -- 大脑 --------------------------------------------------------------
 
-    /** The brain in a jar, the one item the gacha box takes. */
+    /** 缸中之脑，概率之箱唯一接受的物品。 */
     public static boolean isJarBrain(ItemStack stack) {
         return !stack.isEmpty() && stack.is(TCItems.JAR_BRAIN.get());
     }
 
-    /** The sound a jar brain makes when it is put down, which is what inserting one sounds like. */
+    /** 缸中之脑被放下时的声音，也就是插入一个时的音效。 */
     public static SoundEvent jarBrainPlaceSound() {
         return TCBlocks.JAR_BRAIN.get().defaultBlockState().getSoundType().getPlaceSound();
     }
 
-    /** The brain on its own, for the box that gives it back. */
+    /** 单独的大脑，供把它交还回去的箱子使用。 */
     public static ItemStack jarBrainStack() {
         return new ItemStack(TCItems.JAR_BRAIN.get());
     }

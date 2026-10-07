@@ -3,7 +3,7 @@ package thaumicenergistics_ce.blockentity.assembler;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridNodeListener;
 
-/** Wakes the machine when its grid node changes: power, a redraw, and a craft that was interrupted. */
+/** 网格节点变化时唤醒机器：供电、重绘，以及被中断的合成。 */
 final class AssemblerNodeListener implements IGridNodeListener<BlockEntityArcaneAssembler> {
 
     static final AssemblerNodeListener INSTANCE = new AssemblerNodeListener();
@@ -21,12 +21,12 @@ final class AssemblerNodeListener implements IGridNodeListener<BlockEntityArcane
             owner.active = owner.mainNode.isActive();
         }
         owner.displaySync.markForUpdate();
-        // loadAdditional runs before the node exists; this wake has to cover a resumed craft.
+        // loadAdditional 在节点存在之前运行；这次唤醒必须覆盖被恢复的合成。
         owner.craftRunner().updateSleepiness();
     }
 
-    /** Creates the node when the chunk loads. A craft saved mid-flight is picked up here, because
-     * {@code loadAdditional} ran before there was a level to match its result against. */
+    /** 区块加载时创建节点。存档中途被保存的合成在这里接上，因为
+     * {@code loadAdditional} 运行时还没有 level 可与它的结果比对。 */
     static void attach(BlockEntityArcaneAssembler machine) {
         if (machine.getLevel() != null && !machine.getLevel().isClientSide()) {
             machine.mainNode.create(machine.getLevel(), machine.getBlockPos());
@@ -34,7 +34,7 @@ final class AssemblerNodeListener implements IGridNodeListener<BlockEntityArcane
         }
     }
 
-    /** Takes the node down when the chunk unloads. */
+    /** 区块卸载时移除节点。 */
     static void detach(BlockEntityArcaneAssembler machine) {
         if (machine.mainNode != null) {
             machine.mainNode.destroy();

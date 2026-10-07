@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
-/** The Arcane Assembler block; facing is cosmetic, as it accepts an AE2 connection on every side. */
+/** 奥术组装机方块；朝向只是外观，因为它在每一面都接受 AE2 连接。 */
 public class BlockArcaneAssembler extends ThEBaseEntityBlock {
     public static final MapCodec<BlockArcaneAssembler> CODEC = simpleCodec(BlockArcaneAssembler::new);
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;

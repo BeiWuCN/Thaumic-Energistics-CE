@@ -20,9 +20,9 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * What the inscriber's grid resolves to, and what its button would do with that recipe right now.
- * The cache is keyed on the grid and on the core: deleting a recipe moves the core, not the grid.
- * Every code comes from the slots, so a label or a button needs no ticker.
+ * 铭刻机的网格解析成什么，以及它的按钮此刻会用那份配方做什么。
+ * 缓存以网格与核心为键：删除一份配方移动的是核心，不是网格。
+ * 每个状态码都来自槽位，所以标签或按钮不需要 ticker。
  */
 final class InscriberResolution {
 
@@ -43,8 +43,8 @@ final class InscriberResolution {
         dirty = true;
     }
 
-    /** What the machine would do right now, derived from the slots so inserting a core updates the button
-     * at once. Order matters: the earlier checks are the ones the player must fix first. */
+    /** 机器此刻会做什么，从槽位推导，所以插入核心会立刻更新按钮。
+     * 顺序重要：靠前的检查是玩家必须先解决的那些。 */
     int status() {
         if (inscriber.getLevel() == null) {
             return STATUS_READY;
@@ -74,12 +74,12 @@ final class InscriberResolution {
         return pattern;
     }
 
-    /** Stores the resolved recipe in the core, clears the grid.
-     * @return the resulting status code, also available from {@link #lastResult()} */
+    /** 把解析出的配方存进核心，清空网格。
+     * @return 结果状态码，也可从 {@link #lastResult()} 取得 */
     int save(@Nullable Player player) {
         lastResult = status();
-        // The cache is only as fresh as the last change notification, and a stale one left the button
-        // doing nothing with nothing on screen to say why.
+        // 缓存的新鲜度只取决于最后一次改动通知，而过期的缓存让按钮
+        // 什么都不做，屏幕上也没有任何东西说明原因。
         dirty = true;
         refresh();
         ThEArcanePattern resolved = pattern();
@@ -105,7 +105,7 @@ final class InscriberResolution {
                     HandlerKnowledgeCore.MAXIMUM_STORED_PATTERNS);
             return lastResult = STATUS_CORE_FULL;
         }
-        // About the success path only, so it must sit after the refusals above.
+        // 只关于成功路径，所以它必须放在上面的拒绝之后。
         ThELog.LOG.info("[inscriber] save at {} stored {} (status {})",
                 inscriber.getBlockPos(), resolved.result(), status());
         dirty = true;
@@ -118,7 +118,7 @@ final class InscriberResolution {
         if (core == null) {
             return lastResult = status();
         }
-        // Only the recipe the grid resolves to: a fallback could remove an entry the player never named.
+        // 只认网格解析出的配方：回退可能删掉玩家从未指名的条目。
         ThEArcanePattern resolved = pattern();
         if (resolved == null) {
             return lastResult = status();
@@ -134,8 +134,8 @@ final class InscriberResolution {
         return lastResult;
     }
 
-    /** Whether this player may store the grid as it stands, for the menu's button state. Research belongs to
-     * a player, not a block, so the machine's own status cannot answer this. */
+    /** 该玩家此刻是否可以存下这个网格，用于菜单的按钮状态。研究属于
+     * 玩家而不属于方块，所以机器自己的状态回答不了这个问题。 */
     boolean canStore(Player player) {
         dirty = true;
         refresh();

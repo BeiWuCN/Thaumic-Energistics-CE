@@ -9,9 +9,9 @@ import thaumicenergistics_ce.golem.BackpackSkins;
 import thaumicenergistics_ce.network.GolemBackpackPayload;
 
 /**
- * The client's copy of which golems are wearing a backpack, and what it looks like.
- * Keyed weakly by the entity, so a golem that leaves the world takes its entry with it, and an
- * unknown golem reads as "no backpack", so the renderer is safe from the first frame.
+ * 客户端持有的副本：哪些傀儡背着背包，以及它长什么样。
+ * 以实体为弱键，所以离开世界的傀儡会带走它的条目，而未知的傀儡
+ * 读作“没有背包”，渲染器从第一帧起就是安全的。
  */
 public final class GolemBackpackClientData {
 

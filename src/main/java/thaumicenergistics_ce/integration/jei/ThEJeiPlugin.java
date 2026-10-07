@@ -9,11 +9,11 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Thaumic Energistics' JEI plugin: the recipe transfer half, which JEI asks for on both sides.
- * It names no screen class, because this is the half a dedicated server also runs: the ghost
- * ingredient handlers live in {@code client.jei.ThEJeiClientPlugin}, a second plugin with a UID of
- * its own. Both use Thaumaturge's arcane recipe category, so the Inscriber encodes exactly what it
- * crafts.
+ * Thaumic Energistics 的 JEI 插件：配方转移那一半，两侧 JEI 都会向它索取。
+ * 它不指定任何界面类，因为这是专用服务端也要跑的那一半：幽灵原料处理器在
+ * [client.jei.ThEJeiClientPlugin] 里，那是另一个插件，有自己的 UID。
+ * 两者都用 Thaumaturge 的奥术配方分类，
+ * 好让铭刻机编码的东西与它合成的东西完全一致。
  */
 @JeiPlugin
 public class ThEJeiPlugin implements IModPlugin {
@@ -22,8 +22,8 @@ public class ThEJeiPlugin implements IModPlugin {
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "jei_plugin");
 
     /**
-     * Logs on construction: {@code ForgePluginFinder} reports the plugins it found and never the ones it
-     * missed, so this line tells "not loaded" apart from "loaded and silent" without a debugger.
+     * 构造时打日志：[ForgePluginFinder] 只报告它找到的插件，从不报告漏掉的，
+     * 所以这一行不用调试器就能把“没加载”与“加载了但沉默”区分开。
      */
     public ThEJeiPlugin() {
         ThELog.LOG.info("JEI plugin constructed ({})", UID);
@@ -36,21 +36,21 @@ public class ThEJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
-        // A handler with its own recipe type, not an IRecipeTransferInfo: a bare info is wrapped in JEI's
-        // BasicRecipeTransferHandler, which assumes one slot per container slot and refuses 12 vs 9.
+        // 用一个自带配方类型的处理器，而不是 [IRecipeTransferInfo]：光秃秃的 info 会被 JEI 的
+        // [BasicRecipeTransferHandler] 包裹，后者假定容器槽位与配方槽位一一对应，12 对 9 时就会拒绝。
         registration.addRecipeTransferHandler(
                 new KnowledgeInscriberRecipeTransfer(registration.getTransferHelper()),
                 ArcaneJeiRecipeType.arcane());
-        // And the Arcane Crafting Terminal's grid, from the same category; a second handler, not a shared
-        // one, because the inscriber's grid is a ghost grid and the terminal's is real.
+        // 还有奥术合成终端的网格，来自同一个分类；这是第二个处理器而不是共用一个，
+        // 因为铭刻机的网格是幽灵网格，而终端的是真实的。
         registration.addRecipeTransferHandler(
                 new ArcaneCraftingRecipeTransfer(registration.getTransferHelper()),
                 ArcaneJeiRecipeType.arcane());
-        // Ordinary crafting recipes too: the terminal's grid is nine ordinary slots, so a player who opens
-        // a plank recipe and finds no transfer button would reasonably read it as a broken terminal.
+        // 普通合成配方也要：终端的网格就是九个普通槽位，玩家打开一个木板配方
+        // 发现没有转移按钮，会理所当然地认为终端坏了。
         registration.addRecipeTransferHandler(
                 new CraftingRecipeTransfer(registration.getTransferHelper()), RecipeTypes.CRAFTING);
-        // One handler per recipe type serves both terminals: registering the wired and the wireless
-        // terminal separately would only replace one with the other.
+        // 一个配方类型一个处理器就能服务两个终端：分别注册有线和无线终端，
+        // 只会让其中一个把另一个替换掉。
     }
 }

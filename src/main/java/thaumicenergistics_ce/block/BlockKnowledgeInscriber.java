@@ -15,10 +15,10 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 
 /**
- * The Knowledge Inscriber block: turns an AE2 pattern into the arcane recipe it encodes and writes
- * that recipe into a knowledge core, which an Arcane Assembler then reads. {@code FACING} is
- * cosmetic, with no sided behaviour, but the model's bright face is the front, so the blockstate
- * rotates the model by this property.
+ * 知识铭刻机方块：把 AE2 样板转成它所编码的奥术配方，并写入
+ * 知识核心，随后由奥术组装机读取。{@code FACING} 是
+ * 纯外观属性，没有分面行为，但模型亮的那一面是正面，因此方块状态
+ * 按这个属性旋转模型。
  */
 public class BlockKnowledgeInscriber extends ThEBaseEntityBlock {
     public static final MapCodec<BlockKnowledgeInscriber> CODEC = simpleCodec(BlockKnowledgeInscriber::new);

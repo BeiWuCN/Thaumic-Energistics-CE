@@ -15,21 +15,21 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Lets the Arcane Crafting Terminal pay an arcane craft's untyped vis cost out of the network.
- * Without it nothing crafts: {@code baseVis} comes from a workbench's aura, which a cable has none of.
- * A terminal holding the vis connection card takes that aura straight, spending no power on it.
+ * 让奥术合成终端用网络支付奥术合成的无属性 vis 消耗。
+ * 没有它就无法合成：{@code baseVis} 来自工作台的灵气，而线缆周围没有灵气。
+ * 装有 vis 连接卡的终端会直接取用那份灵气，不为此花费任何电力。
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class TerminalWorkbenchVis {
 
-    /** The single source. Registered exactly once - see {@link #register()}. */
+    /** 唯一的源。只注册一次——见 {@link #register()}。 */
     private static final IWorkbenchAuraSource AURA = TerminalWorkbenchVis::supplyAura;
 
     private TerminalWorkbenchVis() {}
 
     /**
-     * Adds this mod's aura source to Thaumaturge's list. Called from {@code commonSetup}, exactly once: the
-     * planner asks each source in turn without reserving, so two copies would promise vis already spent.
+     * 把本模组的灵气源加入 Thaumaturge 的列表。由 {@code commonSetup} 调用且只调用一次：
+     * 规划器轮流询问每个源而不做预留，两份副本就会承诺已经被花掉的 vis。
      */
     public static void register() {
         TcWorkbench.registerAuraSources(List.of(AURA));
@@ -38,8 +38,8 @@ public final class TerminalWorkbenchVis {
     }
 
     /**
-     * Reports whether the documented registration event reaches this mod. Deliberately does not register, so
-     * it cannot double up with {@link #register()}; the log line is the measurement of the ordering above.
+     * 报告文档所述的那个注册事件是否会到达本模组。刻意不在此注册，
+     * 以免与 {@link #register()} 重复；日志行就是上面那个顺序的实测结果。
      */
     @SubscribeEvent
     public static void onRegisterAuraSources(RegisterWorkbenchAuraSourcesEvent event) {
@@ -48,8 +48,8 @@ public final class TerminalWorkbenchVis {
     }
 
     /**
-     * Supplies the untyped aura part of a craft's price. The context is deliberately unused: the position
-     * needed is the terminal's, which travels on the input rather than in the context.
+     * 提供合成价格中无属性灵气的那部分。刻意不使用 context：需要的是终端的
+     * 位置，它随输入传递，而不在 context 里。
      */
     private static int supplyAura(
             ArcaneWorkbenchContext context,
@@ -66,9 +66,9 @@ public final class TerminalWorkbenchVis {
         }
         IEnergySource payer = terminal.payer();
         if (payer != null && !player.level().isClientSide) {
-            // A handheld terminal has no block: its aura is the one around the player carrying it.
+            // 手持终端没有方块：它的灵气就是携带它的玩家周围的灵气。
             if (terminal.visConnection()) {
-                // No energy source reaches this call at all, so a carded craft has no power left to spend.
+                // 这个调用完全接触不到能量源，因此装了卡片的合成没有电力可花。
                 return TerminalAuraPayment.payAura(player.level(), player.blockPosition(), need, simulate);
             }
             return TerminalAuraPayment.pay(player.level(), player.blockPosition(), payer, need, simulate);

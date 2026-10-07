@@ -15,15 +15,15 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 import thaumicenergistics_ce.util.ThELog;
 
-/** The encoder's aspect row: what the source item offers, how much of each, which wells the player may
- * see and which one is picked. Both sides derive it from the synced item, so the two cannot disagree. */
+/** 编码器的要素行：源物品提供什么、各有多少、玩家可以看到哪些凹槽，
+ * 以及哪一个被选中。两侧都由同步的物品推导它，所以两者不可能不一致。 */
 final class EncoderAspectTable {
 
     private final MenuDistillationEncoder menu;
 
     private final @Nullable BlockEntityDistillationEncoder encoder;
 
-    /** Views written by {@link #refresh}, never by the player. */
+    /** 由 {@link #refresh} 写入的视图，永远不由玩家写入。 */
     private final SimpleContainer aspectDisplay;
 
     private final SimpleContainer selectedDisplay;
@@ -59,9 +59,9 @@ final class EncoderAspectTable {
         this.selectedDisplay = selectedDisplay;
     }
 
-    /** Brings the row up to date if the source item changed. Nothing tells a client menu to derive it
-     * ({@link MenuDistillationEncoder#broadcastChanges} runs from the server's tick), so the screen calls
-     * this before drawing. */
+    /** 源物品变化时把这一行更新到最新。没有任何机制通知客户端菜单去
+     * 推导它（{@link MenuDistillationEncoder#broadcastChanges} 由
+     * 服务端的 tick 驱动），所以界面在绘制之前调用这个方法。 */
     void ensure() {
         if (!ItemStack.matches(menu.slots.get(MenuDistillationEncoder.MENU_SOURCE).getItem(), lastSourceItem)) {
             refresh();
@@ -94,8 +94,8 @@ final class EncoderAspectTable {
 
         aspectAmounts = List.copyOf(foundAmounts);
 
-        // A flag per well, not a shorter list: the pick travels as an index into the row. Both tests are
-        // needed - item scanned and aspect discovered - as Thaumaturge counts every primal as known.
+        // 每个凹槽一个标志，而不是一个更短的列表：选中项以行内索引的形式传输。两个判断
+        // 都需要——物品已扫描与要素已发现——因为 Thaumaturge 把每个元初要素都算作已知。
         ItemStack source = menu.slots.get(MenuDistillationEncoder.MENU_SOURCE).getItem();
         lastSourceItem = source.copy();
         boolean itemScanned = sourceIsScanned(source);
@@ -111,14 +111,14 @@ final class EncoderAspectTable {
         this.revealedWells = revealedWells;
         this.revealedTotal = revealedTotal;
 
-        // Left empty on purpose, as the reference build leaves them: the screen draws the icon, its amount
-        // and the picked frame; a stack here would render an item under the aspect icon.
+        // 刻意留空，参考实现也是这么留的：界面会绘制图标、它的数量
+        // 以及选中框；这里放物品堆会在要素图标下再渲染一个物品。
         for (int i = 0; i < MenuDistillationEncoder.ASPECT_SLOTS; i++) {
             aspectDisplay.setItem(i, ItemStack.EMPTY);
         }
 
         tracePick();
-        // The picked well is emptied too, and drawn by the screen like the others.
+        // 被选中的凹槽也会被清空，并像其它凹槽一样由界面绘制。
         selectedDisplay.setItem(0, ItemStack.EMPTY);
     }
 
@@ -127,8 +127,8 @@ final class EncoderAspectTable {
                 && KnowledgeAccess.of(menu.owner).isResearchKnown(ScanKeys.item(source.getItem()));
     }
 
-    /** Logs what the reveal tests answered, once per source item, when the switch is set: 'the aspects
-     * do not show' has three causes that look alike. */
+    /** 在开关打开时，每个源物品记录一次揭示判断的结果：'要素
+     * 不显示' 有三种看起来相似的成因。 */
     private void traceSource(ItemStack source, boolean itemScanned, int revealedTotal) {
         if (!TRACE || (ItemStack.matches(source, tracedSource) && revealedTotal == tracedRevealed)) {
             return;
@@ -143,7 +143,7 @@ final class EncoderAspectTable {
                 revealedTotal);
     }
 
-    /** Logs a change of pick and why one was refused: either way the well draws nothing. */
+    /** 记录选中项的变更以及某次为何被拒绝：无论哪种情况凹槽都不绘制任何东西。 */
     private void tracePick() {
         int raw = pickedIndexRaw();
         if (!TRACE || raw == tracedPick) {
@@ -164,8 +164,8 @@ final class EncoderAspectTable {
                 encoder != null ? "server" : "client");
     }
 
-    /** True when the source well holds something but nothing can be offered from it; a scanned item is
-     * false, however few aspects it has. */
+    /** 当源凹槽持有东西、但无法由它提供任何要素时返回 true；已扫描的物品一律为
+     * false，无论它的要素多么少。 */
     boolean revealsNothing() {
         return !menu.slots.get(MenuDistillationEncoder.MENU_SOURCE).getItem().isEmpty() && revealedTotal == 0;
     }
@@ -174,8 +174,8 @@ final class EncoderAspectTable {
         return index >= 0 && index < aspectAmounts.size() ? aspectAmounts.get(index) : 0;
     }
 
-    /** Whether the player has discovered the aspect at {@code index}, and so may see and pick it; an
-     * undiscovered well is drawn as nothing and refuses clicks. */
+    /** 玩家是否已发现 {@code index} 处的要素，从而可以看见并选中它；未发现的
+     * 凹槽绘制为空，并拒绝点击。 */
     boolean isRevealed(int index) {
         return index >= 0 && index < revealedWells.length && revealedWells[index];
     }
@@ -184,8 +184,8 @@ final class EncoderAspectTable {
         return revealedTotal;
     }
 
-    /** The picked aspect, read here and not from the slots, which hold nothing; null when none is
-     * picked or the pick may not be seen. */
+    /** 被选中的要素，从这里读取而不是从槽位读取，槽位里没有任何东西；没有选中项、
+     * 或该选中项不可见时为 null。 */
     @Nullable Holder<IAspect> pickedAspect() {
         int picked = pickedIndex();
         return picked >= 0 ? aspects.get(picked) : null;
@@ -195,8 +195,8 @@ final class EncoderAspectTable {
         return amountFor(pickedIndex());
     }
 
-    /** Which aspect is picked, or {@code -1} for none; worked out on demand, not cached, since the pick
-     * changes without anything arriving from the server. */
+    /** 哪一个要素被选中，没有则为 {@code -1}；按需求值，不做缓存，因为选中项
+     * 会在没有任何东西从服务端到达的情况下改变。 */
     int pickedIndex() {
         int picked = pickedIndexRaw();
         return picked >= 0 && picked < aspects.size() && isRevealed(picked) ? picked : -1;
@@ -222,8 +222,8 @@ final class EncoderAspectTable {
         return aspects.size();
     }
 
-    /** The aspects of an item and how much of each it carries, walked once for both; the amounts come out
-     * through {@code amountsOut} since this runs every tick while the screen is open. */
+    /** 一个物品的要素以及各有多少，两者一次遍历得出；数量通过
+     * {@code amountsOut} 输出，因为界面打开时它每个 tick 都会运行。 */
     private static List<Holder<IAspect>> deriveAspects(ItemStack source, List<Integer> amountsOut) {
         if (source.isEmpty()) {
             return List.of();
@@ -241,8 +241,8 @@ final class EncoderAspectTable {
             }
         }
 
-        // Both sides must number the aspects identically, as the pick travels as an index; sorting the
-        // indices rather than the aspects keeps each amount beside its aspect.
+        // 两侧必须以相同的方式给要素编号，因为选中项以索引传输；对索引排序
+        // 而不是对要素排序，可以让每个数量与它的要素待在一起。
         List<Integer> order = new ArrayList<>(found.size());
         for (int i = 0; i < found.size(); i++) {
             order.add(i);

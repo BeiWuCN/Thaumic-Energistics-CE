@@ -15,11 +15,11 @@ import thaumicenergistics_ce.menu.slot.ContainerSlot;
 import thaumicenergistics_ce.network.EssentiaTerminalReceiver;
 
 /**
- * The essentia half of any terminal that moves a held jar or phial's contents rather than items.
- * Two terminals need it, the essentia terminal and the wireless arcane crafting terminal, and it is
- * inherited rather than copied because the gesture needs this menu's carried stack, slots and
- * player test. It is asked on every action and never cached, so a card that leaves the slot takes
- * the gestures with it.
+ * 任何搬运手持罐或瓶的内容物而非物品的终端中，属于源质的那一半。
+ * 有两个终端需要它：源质终端和无线奥术合成终端；它被继承而非复制，
+ * 因为该手势需要这个菜单的携带堆、槽位与玩家判定。
+ * 每次动作都会查询它且从不缓存，所以卡片一离开槽位就
+ * 把那些手势一起带走。
  */
 public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements EssentiaTerminalReceiver {
 
@@ -42,7 +42,7 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
         return this.containerId;
     }
 
-    /** Overridden by a terminal that only offers the gestures while its access card is in the slot. */
+    /** 由这样一个终端覆写：只有当它的访问卡在槽里时才提供这些手势。 */
     protected boolean essentiaAccessGranted() {
         return true;
     }
@@ -56,8 +56,8 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
         if (container == null || !EssentiaFillHelper.isSupportedContainer(container)) {
             return false;
         }
-        // One turn spends one item of the held stack and hands back a filled one, so the whole-stack
-        // click is that turn repeated: it stops at the first refusal and at the last item of the stack.
+        // 一轮消耗手持堆中的一个物品并交回一个已填充的，所以整堆
+        // 点击就是重复这一轮：它在第一次被拒时停下，也在堆的最后一个物品处停下。
         int turns = wholeStack ? container.getCount() : 1;
         boolean moved = false;
         for (int turn = 0; turn < turns; turn++) {
@@ -71,7 +71,7 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
             moved = true;
         }
         if (moved) {
-            // A filled container is replaced by another stack, so the client's copy of both places is stale.
+            // 已填充的容器会被另一个物品堆替换，所以客户端对这两处的副本都过时了。
             broadcastChanges();
         }
         return moved;
@@ -83,13 +83,13 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
             return;
         }
 
-        // A menu slot: shift-right-click on a player slot empties the container sitting in it.
+        // 一个菜单槽位：对玩家槽位 shift 右键，会清空放在其中的容器。
         if (where >= 0) {
             if (where >= slots.size()) {
                 return;
             }
             Slot target = slots.get(where);
-            // Only the player's own slots, so no slot AE2 owns can be emptied from here.
+            // 只限玩家自己的槽位，所以 AE2 拥有的槽位无法从这里被清空。
             if (!isPlayerSideSlot(target)) {
                 return;
             }
@@ -100,7 +100,7 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
             ItemStack left = emptyIntoNetwork(player, inSlot);
             if (left != null) {
                 target.set(left);
-                // The container changed underneath the click, so the client's copy of that slot is stale.
+                // 容器在点击之下发生了变化，所以客户端对该槽位的副本已过时。
                 broadcastChanges();
             }
             return;

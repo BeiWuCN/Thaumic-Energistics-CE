@@ -10,7 +10,7 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
-/** Screen for the Knowledge Inscriber: one panel blitted whole, with the status on the button's label. */
+/** 知识铭刻机的界面：一整块面板 blit 上去，状态显示在按钮标签上。 */
 public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowledgeInscriber> {
 
     private static final ResourceLocation TEXTURE =
@@ -19,7 +19,7 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
     private static final int WIDTH = 175;
     private static final int HEIGHT = 244;
 
-    /** The art is 208 wide; the window only shows the panel part of it. */
+    /** 美术图宽 208；窗口只显示其中的面板部分。 */
     private static final int PANEL_WIDTH = 208;
 
     private static final int TITLE_X = 6;
@@ -53,8 +53,8 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
                 buttonLabel(),
                 button -> {
                     if (minecraft != null && minecraft.gameMode != null) {
-                        // A menu button click, not a custom packet - id and click ride vanilla's.
-                        // Delete is read from the menu, not the selection a save leaves empty.
+                        // 走菜单按钮点击，而不是自定义数据包——id 和点击都沿用原版机制。
+                        // 删除状态从菜单读取，而不是从保存后会清空的选择状态读取。
                         minecraft.gameMode.handleInventoryButtonClick(
                                 menu.containerId, menu.isDelete() ? 1 : 0);
                     }
@@ -65,9 +65,9 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(graphics, mouseX, mouseY, partialTick);
-        // The grid is a ghost grid, so both it and the answer are this side's; the server redoes it.
+        // 该网格是幽灵网格，所以它和结果都在本侧；服务端会重做一遍。
         menu.updatePreview();
-        // The patterns are drawn from the core, and the wells are read-only slots, so this side fills them.
+        // 样板从核心读出，而各格是只读槽位，所以由本侧填充它们。
         menu.refreshMirrors();
         updateSaveButton();
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -90,14 +90,14 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
     }
 
     /**
-     * The label the button carries, refined by the machine's state.
-     * "No Core" and "Invalid" stay separate: merged, inserting a core still read "No Core".
+     * 按钮所带的标签，按机器状态细分。
+     * “No Core”和“Invalid”保持分开：合并后，插入核心时仍显示“No Core”。
      */
     private Component buttonLabel() {
         if (!menu.hasCore()) {
             return label("no_core");
         }
-        // Save and Delete ask the same question of the same grid, read from the action as the click will.
+        // 保存和删除问的是同一个网格的同一个问题，读取方式与点击时将要执行的动作一致。
         if (menu.isDelete()) {
             return label("delete");
         }

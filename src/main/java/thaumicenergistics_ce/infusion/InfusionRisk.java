@@ -1,12 +1,12 @@
 package thaumicenergistics_ce.infusion;
 
 /**
- * How dangerous an infusion is: one number between nought and {@link #CAP}, and the tier of five it falls in.
+ * 一次注魔有多危险：一个介于 0 与 {@link #CAP} 之间的数，以及它所落入的五个档位之一。
  *
- * @param base the instability the recipe itself carries
- * @param altar what the altar's surroundings add, in blocks out of place
- * @param shortages whether the ritual is waiting for essentia it cannot reach
- * @param stability the altar's own stability right now, as it reports it - what the goggles show
+ * @param base 配方本身带有的不稳定度
+ * @param altar 祭坛周边额外增加的量，以摆错位置的方块计
+ * @param shortages 仪式是否正在等待它够不到的源质
+ * @param stability 祭坛此刻自己报告出的稳定度——也就是护目镜显示的值
  */
 public record InfusionRisk(int base, int altar, boolean shortages, float stability) {
 
@@ -23,8 +23,8 @@ public record InfusionRisk(int base, int altar, boolean shortages, float stabili
     }
 
     /**
-     * Which of the five tiers this risk is, from 1 (barely anything) to {@link #MAX_TIER}: read off the
-     * altar's stability at Thaumaturge's own thresholds (12.5, 0, -25), split into five at 20.
+     * 该风险属于五个档位中的哪一档，从 1（几乎没什么）到 {@link #MAX_TIER}：按 Thaumaturge
+     * 自己的阈值（12.5、0、-25）读取祭坛稳定度，再以 20 为间隔切成五档。
      */
     public int tier() {
         int tier;

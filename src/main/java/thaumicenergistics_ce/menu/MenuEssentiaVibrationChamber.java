@@ -14,11 +14,11 @@ import thaumicenergistics_ce.blockentity.vibrationchamber.VibrationChamberSync;
 import thaumicenergistics_ce.init.ModMenuTypes;
 
 /**
- * The Essentia Vibration Chamber's menu: the player's inventory, and the machine's three readings.
- * The machine has no slots, because fuel arrives by pipe or from the ME network and power leaves by
- * cable. Its readings travel as {@link ContainerData} because they change every tick; a screen
- * reading its own copy of the block entity would show whatever the last block update happened to
- * carry.
+ * 源质振动室的菜单：玩家物品栏，以及机器的三项读数。
+ * 这台机器没有槽位，因为燃料通过管道或从 ME 网络输入，电力通过
+ * 线缆输出。它的读数以 {@link ContainerData} 传输，因为它们每 tick 都变；屏幕
+ * 读自己的方块实体副本只会显示最后一次方块更新恰好
+ * 带上的值。
  */
 public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
 
@@ -29,8 +29,8 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
     private static final int HOTBAR_Y = 142;
     private static final int PITCH = 18;
 
-    // The readings, in the order the screen reads them out of ContainerData. The numbers and their
-    // meanings live in VibrationChamberSync; these names stay because the screen reaches for them.
+    // 读数，按屏幕从 [ContainerData] 读出它们的顺序。数字及其
+    // 含义存放在 [VibrationChamberSync]；这些名字保留是因为屏幕会用到它们。
     public static final int DATA_ESSENTIA = VibrationChamberSync.ESSENTIA;
     public static final int DATA_ESSENTIA_MAX = VibrationChamberSync.ESSENTIA_MAX;
     public static final int DATA_ENERGY = VibrationChamberSync.ENERGY;
@@ -104,8 +104,8 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
     }
 
     /**
-     * Shift-clicking moves stacks between the player's inventory and the hotbar, and nothing else: the
-     * machine has no slots, so this is not an omission but the most that can be done.
+     * shift 点击只在玩家物品栏与快捷栏之间搬运物品堆，别的什么都做不了：
+     * 机器没有槽位，所以这不是疏漏，而是能做到的极限。
      */
     @Override
     public ItemStack quickMoveStack(Player player, int index) {

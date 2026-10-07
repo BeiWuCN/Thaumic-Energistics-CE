@@ -9,11 +9,11 @@ import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * "Empty this essentia container into the network", sent by the Essentia Terminal's right-click.
- * It is a payload rather than a menu click because AE2's terminal packets move one item while
- * this empties a container: a jar comes back empty and a phial as glass, which no "transfer
- * slot N" expresses. It names a slot only, and the receiving menu re-reads it, so the payload
- * carries no stack.
+ * 「把这个源质容器倒进网络」，由源质终端的右击发出。
+ * 它是载荷而不是菜单点击，因为 AE2 的终端包只搬运一个物品，
+ * 而这里要倒空一个容器：罐子空着回来，小瓶变回玻璃，这不是任何「转移
+ * 槽位 N」能表达的。它只指名一个槽位，由接收方菜单重新读取，因此载荷
+ * 不携带物品堆。
  */
 public record EssentiaDepositPayload(int containerId, int where) implements CustomPacketPayload {
 

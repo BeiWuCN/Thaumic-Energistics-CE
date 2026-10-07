@@ -24,11 +24,11 @@ import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The Vis Interface: lets Thaumaturge machines draw vis out of the ME network's aura.
- * It is an {@link IVisRelaySource} for the block the cable is on, and an offer is the smaller
- * of the aspects the reached node may sell and the centivis the energy service can afford. It
- * never asks a vis chain for vis itself - that loop is forbidden - so the vis is made out of
- * AE instead.
+ * Vis 接口：让 Thaumaturge 的机器从 ME 网络的灵气中抽取 vis。
+ * 它是线缆所在方块的 {@link IVisRelaySource}，一次供给取「可达节点可售的要素」
+ * 与「能量服务负担得起的 centivis」中的较小者。它
+ * 从不向 vis 链索要 vis——那个环被禁止——所以 vis 是用
+ * AE 造出来的。
  */
 public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements IVisRelaySource {
 
@@ -36,28 +36,28 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
 
     private static final P2PModels MODELS = new P2PModels(MODEL_VIS_INTERFACE);
 
-    /** AE2's model registry does not discover the status models on its own, and a missing one is a
-     * renderer crash, so every location this part can be drawn with has to be listed. */
+    /** AE2 的模型注册表不会自行发现这些状态模型，缺一个就是
+     * 渲染器崩溃，所以这个部件可能被绘制出的每个位置都必须列出。 */
     public static final List<ResourceLocation> MODEL_LOCATIONS = List.of(
             MODEL_VIS_INTERFACE,
             P2PModels.MODEL_STATUS_OFF,
             P2PModels.MODEL_STATUS_ON,
             P2PModels.MODEL_STATUS_HAS_CHANNEL);
 
-    /** A rate, not a flat fee: a wand recharge and a craft differ. */
+    /** 是一个费率，不是固定费用：法杖充能与一次合成并不相同。 */
     private static final double AE_PER_VIS = 100.0;
 
     private static final int CENTIVIS_PER_VIS = 100;
 
-    /** Above any network's buffer, so a simulated extraction answers with the whole buffer rather
-     * than with the request. Well under {@code Integer.MAX_VALUE} centivis. */
+    /** 高于任何网络的缓冲，这样模拟抽取会回答整个缓冲，而
+     * 不是回答请求量。远低于 {@code Integer.MAX_VALUE} centivis。 */
     private static final double AE_SIMULATE_CEILING = 1.0e9;
 
-    /** Finding either of the two cached lookups scans 17x17x17, so neither runs every tick.
-     * Twenty ticks is one second. */
+    /** 两个带缓存的查找中任一个都要扫描 17x17x17，所以两者都不每 tick 运行。
+     * 二十 tick 是一秒。 */
     private static final int UPSTREAM_POLL_INTERVAL = 20;
 
-    /** Whether to log every vis delivery. Off unless {@code THAUMICENERGISTICS_VIS_TRACE=true}. */
+    /** 是否记录每次 vis 交付。除 {@code THAUMICENERGISTICS_VIS_TRACE=true} 外均关闭。 */
     private static final boolean TRACE = "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_VIS_TRACE"));
 
     private @Nullable PartVisInterface upstreamEnd;
@@ -107,15 +107,15 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         return getBlockEntity().getBlockPos();
     }
 
-    // ----- IVisRelaySource - what Thaumaturge and the Arcane Assembler see -----
+    // ----- IVisRelaySource——Thaumaturge 与奥术组装机所看到的东西 -----
 
     @Override
     public boolean isActive() {
         return getMainNode().isActive();
     }
 
-    /** {@code false} when the reachable chain ends here, so the relay is sent back to the node
-     * beside it: one linked to this source would have no aspect list. */
+    /** 可达链在此终止时为 {@code false}，于是中继会被送回它旁边的
+     * 节点：链到本源的继电器不会有要素列表。 */
     @Override
     public boolean canSupply() {
         return isActive() && permit() != null;
@@ -130,7 +130,7 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         if (node == null || !(visLevel() instanceof ServerLevel server)) {
             return 0;
         }
-        // The node's aspect list, not its store: an emptied node can be asked again.
+        // 问的是节点的要素列表而非它的存量：被抽空的节点还可以再问。
         if (!TcAura.nodeHolds(server, node, primal)) {
             return 0;
         }
@@ -138,14 +138,14 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         if (energy == null) {
             return 0;
         }
-        // One simulated extraction answers "how much can the network pay for", in centivis.
+        // 一次模拟抽取即可回答「网络能负担多少」，单位为 centivis。
         double affordable = energy.extractAEPower(
                 AE_SIMULATE_CEILING, Actionable.SIMULATE, PowerMultiplier.CONFIG);
         return centivisFor(affordable);
     }
 
-    /** The vis is not taken from anywhere: that AE payment is the whole exchange, so a payment that
-     * comes up short hands the price back. */
+    /** vis 不从任何地方取来：那笔 AE 支付就是全部交换，所以付不够的
+     * 那一次会把价钱交还回去。 */
     @Override
     public int drainCentivis(ResourceKey<IAspect> primal, int amount, boolean simulate) {
         if (amount <= 0) {
@@ -165,7 +165,7 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         double cost = aeCost(offered);
         double paid = energy.extractAEPower(cost, Actionable.MODULATE, PowerMultiplier.CONFIG);
         if (paid + 1.0e-6 < cost) {
-            // Part of the price came out before the network ran dry; hand it back.
+            // 代价的一部分在网络耗尽之前已被取出；把它交还回去。
             energy.injectPower(paid, Actionable.MODULATE);
             return 0;
         }
@@ -220,7 +220,7 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
     }
 
     private boolean canReachRelay(ServerLevel server) {
-        // A relay resolving to nothing leads nowhere; this scans the relay block, not the part.
+        // 解析不到任何东西的中继通向虚无；这里扫描的是中继方块，不是部件。
         return TcAura.relayResolves(server, visPos());
     }
 
@@ -259,7 +259,7 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         private final int centivis;
         private final ResourceKey<IAspect> aspect;
 
-        /** True once the vis has actually been handed over, so a second commit cannot charge twice. */
+        /** vis 实际交付之后为 true，这样第二次提交不会重复扣费。 */
         private boolean committed;
 
         private PendingVis(int centivis, ResourceKey<IAspect> aspect) {
@@ -272,7 +272,7 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
             return centivis;
         }
 
-        /** Vis handed over against a payment that then failed would be vis created from nothing. */
+        /** 交付了 vis 而对应的支付随后失败，等于凭空造出 vis。 */
         @Override
         public int commit() {
             if (committed) {
@@ -287,7 +287,7 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
 
         @Override
         public void close() {
-            // Nothing was taken on reserve - see the note on VisReservation.
+            // 没有预先扣下任何东西——见 [VisReservation] 上的说明。
         }
     }
 }

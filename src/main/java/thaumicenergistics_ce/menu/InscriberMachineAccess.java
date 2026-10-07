@@ -7,9 +7,9 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 
 /**
- * The menu's reads of the machine behind it: the level both sides resolve against, the core the slot
- * holds, and whether the block is still there to be used.
- * A client menu has no machine, so each read answers from the menu's own slots instead.
+ * 菜单对其背后机器的读取：两侧共同用于解析的 level、槽位所持有的
+ * 核心，以及方块是否还在原地可供使用。
+ * 客户端菜单没有机器，所以每次读取改为从菜单自己的槽位作答。
  */
 final class InscriberMachineAccess {
 

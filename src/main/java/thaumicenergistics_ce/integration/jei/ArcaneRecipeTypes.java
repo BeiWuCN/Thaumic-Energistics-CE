@@ -16,24 +16,24 @@ import thaumicenergistics_ce.integration.ae2.ClientRegistries;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * How to read a Thaumaturge arcane recipe's grid: the nine cells a transfer would fill, and whether one
- * fits. It names no JEI type, because a dedicated server has no JEI to borrow one from; that is
- * {@code ArcaneJeiRecipeType}'s job.
+ * 如何解读 Thaumaturge 奥术配方的网格：一次转移会填的九个格子，以及它能否放下。
+ * 它不指定任何 JEI 类型，因为专用服务端没有 JEI 可借；那是
+ * [ArcaneJeiRecipeType] 的职责。
  */
 public final class ArcaneRecipeTypes {
 
     private ArcaneRecipeTypes() {}
 
     /**
-     * The nine grid cells a recipe asks for, in reading order, as variant lists; an empty list is an
-     * empty cell. Read from the pattern: it carries one stack per cell, not the full ingredient.
+     * 配方要求的九个网格格子，按阅读顺序，以变体列表给出；空列表即空格子。
+     * 从样板读取：每个格子一个物品堆，而不是完整原料。
      */
     public static @Nullable List<List<ItemStack>> cellsFor(RecipeHolder<?> holder) {
         if (!(holder.value() instanceof IArcaneRecipe arcane)) {
             return null;
         }
         if (arcane instanceof ArcaneShapedCraftingRecipe shaped) {
-            // Pattern's 3x3 layout: reading ingredients directly shifts a two-wide row - 20 of 283.
+            // 样板的 3x3 布局：直接读 ingredients 会让两格宽的行错位——283 个里有 20 个。
             ItemStack output = holder.value().getResultItem(registryAccess());
             if (output.isEmpty()) {
                 return null;
@@ -51,7 +51,7 @@ public final class ArcaneRecipeTypes {
                     cells.add(List.of());
                     continue;
                 }
-                // Every variant of the ingredient in that cell, so the transfer can pick one the player has.
+                // 该格子中原料的每一个变体，好让转移能挑一个玩家拥有的。
                 List<ItemStack> variants = new ArrayList<>();
                 for (Ingredient ingredient : ingredients) {
                     if (ingredient.test(representative)) {
@@ -92,8 +92,8 @@ public final class ArcaneRecipeTypes {
     }
 
     /**
-     * Whether this recipe fits the machine's grid: shaped recipes are padded to their own shape and
-     * always fit a 3x3; a shapeless one needs its ingredients to fit in nine cells.
+     * 这个配方是否放得进机器的网格：有序配方会按自身形状补齐，总能放进 3x3；
+     * 无序配方则需要它的原料放得进九个格子。
      */
     public static boolean fitsGrid(RecipeHolder<?> holder) {
         List<List<ItemStack>> cells = cellsFor(holder);
@@ -110,8 +110,8 @@ public final class ArcaneRecipeTypes {
     }
 
     /**
-     * Registry access for a recipe's result: the server's when there is one, else this side's own through
-     * the client sink. Never Thaumaturge's JEI plugin, which a dedicated server cannot load.
+     * 为配方结果取注册表访问：有服务端就用服务端的，否则通过客户端 sink 用本侧的。
+     * 绝不用 Thaumaturge 的 JEI 插件，专用服务端加载不了它。
      */
     private static HolderLookup.Provider registryAccess() {
         var server = ServerLifecycleHooks.getCurrentServer();

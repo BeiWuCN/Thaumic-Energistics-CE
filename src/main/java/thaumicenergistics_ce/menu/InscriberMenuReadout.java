@@ -6,10 +6,10 @@ import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber
 import thaumicenergistics_ce.init.ModItems;
 
 /**
- * The button's inputs as the menu hands them to the screen: the core slot and the machine's status,
- * mirrored through the data slots, so the client reads what the server last resolved.
- * The status is the machine's own except for a player who may not store the recipe, which only the
- * readings can see, so the menu asks here rather than at the machine.
+ * 菜单交给界面的按钮输入：核心槽位与机器的状态，
+ * 经数据槽位镜像，所以客户端读到的是服务端最后解析出的结果。
+ * 状态取自机器自身，唯一的例外是不被允许存储该配方的玩家，这一点只有
+ * 读数能看到，所以菜单在这里询问而不是去问机器。
  */
 final class InscriberMenuReadout {
 
@@ -32,8 +32,8 @@ final class InscriberMenuReadout {
     }
 
     /**
-     * Whether the menu could encode at all, whatever the recipe. The client reads the synced data slot,
-     * since its own slot copy is not reliably filled.
+     * 无论配方如何，菜单究竟能否编码。客户端读取同步的数据槽位，
+     * 因为它自己的槽位副本并不总是被可靠地填充。
      */
     boolean canEncode() {
         if (menu.inscriber == null) {
@@ -50,8 +50,8 @@ final class InscriberMenuReadout {
     }
 
     /**
-     * True when the button would delete rather than store, not a player-picked mode: a grid resolving to
-     * nothing is Invalid however many patterns the core holds.
+     * 按钮将删除而非存储时返回 true，这不是玩家挑选的模式：解析不出任何东西的
+     * 网格就是 Invalid，无论核心持有多少样板。
      */
     boolean isDelete() {
         return data.get(MenuKnowledgeInscriber.DATA_HAS_CORE) != 0

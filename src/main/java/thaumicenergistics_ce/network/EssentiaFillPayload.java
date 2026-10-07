@@ -10,11 +10,11 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * "Draw this aspect out of the network into my container", sent by the Essentia Terminal's
- * left-click. {@code aspectId} travels as an id because a key the client built wrong would not
- * match server storage, {@code where} names the container slot, and {@code stack} is only a
- * hint on the client side; {@code wholeStack} is the shift-click that fills the held stack
- * rather than one item of it.
+ * 「把这个要素从网络抽进我的容器」，由源质终端的左击发出。
+ * {@code aspectId} 以 id 形式上路，因为客户端构建错误的键无法
+ * 匹配服务端存储，{@code where} 指名容器槽位，而 {@code stack} 只是
+ * 客户端的提示；{@code wholeStack} 是 shift 点击，填满手持物品堆
+ * 而不是它其中的一个物品。
  */
 public record EssentiaFillPayload(
         int containerId, ResourceLocation aspectId, int where, ItemStack stack, boolean wholeStack)
@@ -43,7 +43,7 @@ public record EssentiaFillPayload(
     }
 
     public void handle(Player player) {
-        // The stack field of this record is a client-side hint and is not read here.
+        // 这个 record 的 stack 字段是客户端提示，此处不读取。
         if (player.containerMenu instanceof EssentiaTerminalReceiver receiver
                 && receiver.containerId() == containerId) {
             receiver.fillFromNetwork(player, where, aspectId, wholeStack);

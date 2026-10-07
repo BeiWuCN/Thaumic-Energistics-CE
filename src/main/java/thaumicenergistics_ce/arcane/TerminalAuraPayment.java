@@ -14,10 +14,10 @@ import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.init.ModItems;
 
 /**
- * What one aura payment costs: aura at a place, either bought with AE or taken as aura straight.
- * Shared, so the placed and the wireless terminal cannot drift apart on the exchange rate. The
- * place is what the two differ by: the placed terminal drains the chunk it stands in, the wireless
- * one the chunk the player stands in, since a carried workbench has no block of its own.
+ * 一次灵气支付的花费：某个位置上的灵气，要么用 AE 购买，要么直接取用灵气。
+ * 共用同一份实现，已放置终端与无线终端因此在兑换率上不会走偏。两者的
+ * 差别只在这个位置：已放置终端抽取它所在的区块，无线终端抽取玩家
+ * 所在的区块，因为随身携带的工作台没有自己的方块。
  */
 public final class TerminalAuraPayment {
 
@@ -28,9 +28,9 @@ public final class TerminalAuraPayment {
     private TerminalAuraPayment() {}
 
     /**
-     * Drains aura at {@code where} and pays for it from {@code energy}, simulated then committed;
-     * all or nothing, so a short commit cannot throw out of Thaumaturge's payment handler.
-     * @return the centivis supplied, never more than {@code needCentivis}
+     * 在 {@code where} 抽取灵气并用 {@code energy} 支付，先模拟后提交；
+     * 全有或全无，因此提交额不足也不会从 Thaumaturge 的支付处理器里抛异常。
+     * @return 提供的 centivis，绝不会超过 {@code needCentivis}
      */
     public static int pay(
             Level level, BlockPos where, @Nullable IEnergySource energy, int needCentivis, boolean simulate) {
@@ -65,8 +65,8 @@ public final class TerminalAuraPayment {
     }
 
     /**
-     * Whether the terminal stack carries the vis connection card: only then does a craft take its untyped
-     * vis from the aura. A stack whose upgrades cannot be read answers false and keeps the power path.
+     * 终端物品堆是否装有 vis 连接卡：只有装了，合成才会从灵气中取无属性
+     * vis。升级无法读取的物品堆返回 false，保持用电力支付的路径。
      */
     public static boolean visConnectionInstalled(ItemStack terminal) {
         if (terminal.isEmpty() || !(terminal.getItem() instanceof IUpgradeableItem upgradeable)) {
@@ -77,8 +77,8 @@ public final class TerminalAuraPayment {
     }
 
     /**
-     * Whether the machine the player has open carries the vis connection card; the carried terminal and
-     * the one placed on a cable answer through their own upgrade inventory.
+     * 玩家打开的那台机器是否装有 vis 连接卡；随身终端与插在线缆上的终端
+     * 都通过各自的升级物品栏作答。
      */
     public static boolean visConnectionInstalled(IUpgradeableObject machine) {
         IUpgradeInventory upgrades = machine.getUpgrades();
@@ -86,9 +86,9 @@ public final class TerminalAuraPayment {
     }
 
     /**
-     * Drains aura at {@code where} for a terminal holding the vis connection card. No energy source takes
-     * part, so this craft's untyped vis costs the network nothing.
-     * @return the centivis supplied, never more than {@code needCentivis}
+     * 为装有 vis 连接卡的终端在 {@code where} 抽取灵气。没有任何能量源参与，
+     * 因此这次合成的无属性 vis 不花网络一分钱。
+     * @return 提供的 centivis，绝不会超过 {@code needCentivis}
      */
     public static int payAura(Level level, BlockPos where, int needCentivis, boolean simulate) {
         if (needCentivis <= 0 || level == null || level.isClientSide()) {
@@ -105,8 +105,8 @@ public final class TerminalAuraPayment {
         if (simulate) {
             return offered;
         }
-        // Committed as the amount the pass above saw, not as a fresh reading: Thaumaturge throws when one
-        // craft's two aura passes disagree, so the aura is deliberately only asked once.
+        // 提交的数额就是上一趟读到的值，而不是重新读取：同一场合成的两次灵气查询
+        // 不一致时 Thaumaturge 会抛异常，所以灵气是刻意只问一次的。
         TcAura.drainVis(level, where, (float) offered / CENTIVIS_PER_VIS, false);
         return offered;
     }

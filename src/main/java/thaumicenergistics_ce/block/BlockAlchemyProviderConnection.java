@@ -20,11 +20,11 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
 
 /**
- * The Alchemy Provider Connection: the receiving end of a wireless essentia link. {@code facing}
- * points the plug at the surface it is mounted on, and the blockstate in this mod's assets
- * declares all six directions against it, so both the property and its name are load-bearing.
- * {@code connected} is whether a link exists, and the plug mounts on any surface, up and down
- * included.
+ * 炼金供应器连接件：无线源质链路的接收端。{@code facing} 把插头指向
+ * 它所安装的那个面，本模组资源里的方块状态针对它声明了全部六个
+ * 方向，因此这个属性与它的名字都是关键。
+ * {@code connected} 表示链路是否存在，插头可安装在任意面上，包括朝上
+ * 和朝下。
  */
 public class BlockAlchemyProviderConnection extends ThEBaseEntityBlock {
 
@@ -73,8 +73,8 @@ public class BlockAlchemyProviderConnection extends ThEBaseEntityBlock {
     }
 
     /**
-     * A block ticker carries the essentia: it has no grid node of its own - it is a wire, not a machine - so
-     * it cannot ask AE2 to tick it the way the provider does, and the work is one transfer per half second.
+     * 方块 tick 器负责搬运源质：它没有自己的网格节点——它是导线而不是机器——
+     * 所以无法像供应器那样让 AE2 来 tick 它，工作量是每半秒一次传输。
      */
     @Override
     public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(

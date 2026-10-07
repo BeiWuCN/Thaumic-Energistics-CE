@@ -17,16 +17,16 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 
 /**
- * What the bubble says, as rows of cells: a chip is an aspect drawn from Thaumaturge's own textures, a text
- * cell is a line of the font. The rows are rebuilt only when the monitor's report changes; the measures the
- * renderer lays them out with live here too, so one chip and one line are the same size everywhere.
+ * 气泡显示的内容，以单元格的行表示：芯片是用 Thaumaturge 自身纹理绘制的要素，
+ * 文本单元格是一行字体。只有在监控器的报告变化时才重建各行；渲染器排版所用的量度
+ * 也放在这里，所以一个芯片和一行文本在任何地方都是同样尺寸。
  */
 final class BubbleCells {
 
-    /** Line spacing in text units; eleven is the floor: glyphs plus a drop shadow overlap at ten. */
+    /** 行间距，以文本单位计；11 是下限：字形加上投影在 10 时会重叠。 */
     private static final int LINE_HEIGHT = 11;
 
-    /** The aspect chip, the gap to its badge, and the gap between one chip and the next. */
+    /** 要素芯片、它到自身徽章的间距，以及一个芯片到下一个芯片的间距。 */
     static final int CHIP = 12;
     private static final int CELL_GAP = 5;
 
@@ -79,7 +79,7 @@ final class BubbleCells {
                     .withStyle(ChatFormatting.WHITE))));
         }
 
-        // One aspect per row; a full one turns green.
+        // 每行一个要素；已满的会变绿。
         for (BlockEntityOccultMonitor.EssentiaLine line : essentia) {
             Holder<IAspect> aspect = aspectOf(line.aspect());
             if (aspect == null) {
@@ -105,9 +105,9 @@ final class BubbleCells {
                 ResourceKey.create(IAspect.REGISTRY_KEY, location));
     }
 
-    // --- Layout ---
+    // --- 布局 ---
 
-    /** One cell and the gap that follows it, which is how far the next cell starts to its right. */
+    /** 一个单元格及其后的间距，也就是下一个单元格在其右侧起点的距离。 */
     static float stride(Font font, Cell cell) {
         return cellWidth(font, cell) + CELL_GAP;
     }

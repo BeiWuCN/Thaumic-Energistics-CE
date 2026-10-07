@@ -17,10 +17,10 @@ import thaumicenergistics_ce.network.PartitionWellPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The partition grid the cell workbench shows: what the cell holds and what a client marks in it.
- * A mark reaches the server only as PartitionWellPayload, since a well the client draws is a view
- * of the cell and never a source of writes. Every write goes through the menu's cell, and the
- * block entity is then told the cell changed.
+ * 存储元件工作台显示的分区网格：元件持有什么，以及客户端在其中标记什么。
+ * 标记只以 PartitionWellPayload 的形式到达服务端，因为客户端绘制的凹槽是元件
+ * 的一个视图，永远不是写入的来源。所有写入都经过菜单的元件，随后
+ * 再告知方块实体元件已改变。
  */
 final class CellPartitionEditor {
 
@@ -42,7 +42,7 @@ final class CellPartitionEditor {
         return stack == null ? null : stack.what();
     }
 
-    /** Fills every well from the aspects the cell holds; the client's half is the menu's. */
+    /** 用元件持有的要素填满每一个凹槽；客户端的这一半由菜单负责。 */
     void partitionToContents() {
         if (!menu.hasCell()) {
             ThELog.LOG.warn("[cell-partition] no cell in the workbench, so the wells cannot be filled");
@@ -53,7 +53,7 @@ final class CellPartitionEditor {
         menu.broadcastChanges();
     }
 
-    /** Empties every well; the client's half is the menu's, as in {@link #partitionToContents()}. */
+    /** 清空每一个凹槽；客户端的这一半由菜单负责，与 {@link #partitionToContents()} 相同。 */
     void clearPartition() {
         if (!menu.hasCell()) {
             ThELog.LOG.warn("[cell-partition] no cell in the workbench, so there is no partition to clear");
@@ -65,8 +65,8 @@ final class CellPartitionEditor {
     }
 
     /**
-     * Applies a well edit that arrived from a client, the only route that reaches the server: a
-     * mark, or {@code PartitionWellPayload.CLEAR} to take one out. Refused without a cell.
+     * 应用一个从客户端到达的凹槽编辑，这是唯一到达服务端的路径：一个
+     * 标记，或用 {@code PartitionWellPayload.CLEAR} 取下一个。没有元件时拒绝。
      */
     void setWell(int well, ResourceLocation aspectId, Player player) {
         BlockEntityEssentiaCellWorkbench workbench = menu.workbench;
@@ -82,7 +82,7 @@ final class CellPartitionEditor {
             return;
         }
         if (PartitionWellPayload.CLEAR.equals(aspectId)) {
-            // A mark is taken out by clicking its well, where AE2 would pick the entry back up.
+            // 点击标记所在的凹槽即可取下它，AE2 在这里的做法是把该条目捡回来。
             clearWell(well);
             return;
         }
@@ -93,30 +93,30 @@ final class CellPartitionEditor {
                         ResourceKey.create(
                                 IAspect.REGISTRY_KEY, aspectId));
         if (aspect == null) {
-            // An id the server does not know: dropping it beats a partition entry that can never match.
+            // 服务端不认识的 id：丢弃它总好过留下一个永远无法匹配的分区条目。
             ThELog.LOG.warn("[cell-partition] the server cannot resolve aspect {}", aspectId);
             return;
         }
         AEssentiaKey key = AEssentiaKey.of(aspect);
         if (key == null) {
-            // Not registry-backed: no id, so the entry could never match anything.
+            // 不是注册表支持的：没有 id，所以该条目永远无法匹配任何东西。
             ThELog.LOG.warn("[cell-partition] aspect {} is not a registry entry", aspectId);
             return;
         }
 
-        // One type, one well: a key already marked elsewhere moves here instead of appearing twice.
+        // 一个类型一个凹槽：已在别处标记的 [key] 会移到这里，而不是出现两次。
         for (int other = 0; other < BlockEntityEssentiaCellWorkbench.PARTITION_SLOTS; other++) {
             if (other != well && key.equals(keyInWell(other))) {
                 clearWell(other);
             }
         }
 
-        // One, because a partition entry is a type rather than an amount - how much the cell holds is
-        // decided by its size. Writing here is what fires the block entity's listener, which stores it.
+        // 写 1，因为分区条目是一个类型而不是数量——元件持有多少是由
+        // 它的容量决定的。在这里写入才会触发方块实体的监听器，由它来存储。
         partition.getDelegate().setStack(well, new GenericStack(key, 1));
         workbench.setChanged();
         menu.broadcastChanges();
-        // Read straight back: "wrote" and "now holds" as two separate facts, for the failure being chased.
+        // 立刻回读：把 "wrote" 与 "now holds" 作为两个独立的事实，为的是正在追查的故障。
         ThELog.LOG.info(
                 "[cell-partition] wrote {} to well {}; it now holds {}",
                 key, well, keyInWell(well));

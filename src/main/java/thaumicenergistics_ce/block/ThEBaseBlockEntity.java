@@ -11,8 +11,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Base class for Thaumic Energistics block entities; supplies the {@link MenuProvider} contract
- * so blocks can open a menu without repeating the cast, and centralises the menu title.
+ * Thaumic Energistics 方块实体的基类；提供 {@link MenuProvider} 约定，
+ * 使方块打开菜单时不必重复类型转换，并集中处理菜单标题。
  */
 public abstract class ThEBaseBlockEntity extends BlockEntity implements MenuProvider {
 

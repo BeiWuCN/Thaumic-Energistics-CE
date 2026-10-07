@@ -6,10 +6,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * A well the machine writes into and the player empties: the Distillation Encoder's written
- * pattern. It refuses placement and allows pickup, because only {@code encode()} writes the
- * pattern. It is not a {@code ReadOnlySlot}: a no-op {@code set} swallows the client's
- * {@code AbstractContainerMenu.setItem} write, so the pattern never reaches the screen.
+ * 机器写入、玩家取空的槽位：蒸馏编码器写出的样板。它拒绝放置并允许取走，
+ * 因为只有 {@code encode()} 会写这个样板。它不是 {@code ReadOnlySlot}：空操作的
+ * {@code set} 会吞掉客户端的 {@code AbstractContainerMenu.setItem} 写入，
+ * 于是样板永远到不了屏幕。
  */
 public class MachineOutputSlot extends Slot {
 

@@ -10,9 +10,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The crystal slots, crystal rule and payment registry of Thaumaturge's arcane workbench. All
- * three live in its {@code content} package rather than its {@code api} one, so they move, and
- * this mod's terminal copies the workbench, so it follows those details wherever they go.
+ * Thaumaturge 奥术工作台的水晶槽位、水晶规则和支付注册表。这三者
+ * 都位于其 {@code content} 包而不是 {@code api} 包中，所以会变动，而
+ * 本 mod 的终端复刻了工作台，因此这些细节挪到哪它就跟到哪。
  */
 public final class TcWorkbench {
     private TcWorkbench() {}
@@ -25,7 +25,7 @@ public final class TcWorkbench {
         return SlotCrystalEssentia.isValidCrystal(stack, required);
     }
 
-    /** Registers an aura source the workbench may draw vis from; must run before a workbench opens. */
+    /** 注册工作台可从中抽取 vis 的灵气源；必须在工作台打开之前运行。 */
     public static void registerAuraSources(List<IWorkbenchAuraSource> sources) {
         WorkbenchPayment.registerAuraSources(sources);
     }

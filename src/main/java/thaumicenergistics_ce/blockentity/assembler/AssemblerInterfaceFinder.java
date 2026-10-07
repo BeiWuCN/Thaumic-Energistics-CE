@@ -8,13 +8,13 @@ import net.minecraft.server.level.ServerLevel;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.part.PartVisInterface;
 
-/** Finds the nearest active vis interface and caches it, backing off after fruitless scans. */
+/** 找到最近的活跃 vis 接口并缓存它，扫描无果后逐次退避。 */
 final class AssemblerInterfaceFinder {
 
-    /** How far the machine looks for one of this mod's vis interfaces: the relay's own reach. */
+    /** 机器搜索本 mod 的 vis 接口的距离：中继点自身的覆盖范围。 */
     private static final int INTERFACE_RANGE = 8;
 
-    /** How long a fruitless interface scan waits. The cube is 4,913 block entity lookups. */
+    /** 扫描接口无果后等待多久。该立方体是 4,913 次方块实体查找。 */
     private static final int INTERFACE_MISS_MAX = 200;
 
     private final int pollInterval;

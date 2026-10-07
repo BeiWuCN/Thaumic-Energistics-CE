@@ -27,12 +27,12 @@ import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * Fills the Arcane Crafting Terminal's grid from an arcane workbench recipe. It handles
- * Thaumaturge's own category, so the button appears where players look; slots come from
- * SlotSemantics. No recipe id is passed, as an arcane recipe is not in the vanilla recipe
- * manager. Each cell's template is the variant with stock behind it, not the one the recipe
- * lists first, because the packet resolves a template itself and never learns the ingredient
- * was a tag. One handler serves both terminals: JEI keys by container class and recipe type only.
+ * 用奥术工作台配方填充奥术合成终端的合成网格。它处理 Thaumaturge 自己的分类，
+ * 所以按钮出现在玩家会找的地方；槽位来自 SlotSemantics。不传配方 id，因为奥术配方不在原版
+ * 配方管理器里。每个格子的模板是背后有库存的那个变体，而不是配方首先列出的那个，
+ * 因为数据包自己解析模板，永远不会知道原料原本是个标签。一个处理器服务两个终端：
+ * JEI 只按容器类与配方类型索引。
+ * JEI 只按容器类与配方类型索引。
  */
 public class ArcaneCraftingRecipeTransfer
         implements IRecipeTransferInfo<MenuArcaneCraftingTerminal, RecipeHolder<?>>,
@@ -52,8 +52,8 @@ public class ArcaneCraftingRecipeTransfer
     }
 
     /**
-     * Any menu type of this menu class: the wired and the wireless terminals share it, so naming one menu
-     * type would leave the other without a transfer button.
+     * 这个菜单类的任意菜单类型：有线与无线终端共用它，只写一个菜单类型会让另一个没有转移按钮。
+     * 只写一个菜单类型会让另一个没有转移按钮。
      */
     @Override
     public Optional<MenuType<MenuArcaneCraftingTerminal>> getMenuType() {
@@ -83,7 +83,7 @@ public class ArcaneCraftingRecipeTransfer
 
     // ---- IRecipeTransferHandler ----------------------------------------
 
-    // JEI 19.57 leaves this 6-arg transferRecipe as the interface's only abstract method.
+    // JEI 19.57 只留下这个 6 参数的 [transferRecipe] 作为接口唯一的抽象方法。
     @Override
     @SuppressWarnings("removal")
     public @Nullable IRecipeTransferError transferRecipe(
@@ -101,8 +101,8 @@ public class ArcaneCraftingRecipeTransfer
             return helper.createInternalError();
         }
 
-        // One template per cell, picked as the variant the player or the network can supply: the packet's
-        // template path knows nothing of tags, so a tag's first member may well be the one not in stock.
+        // 每个格子一个模板，选玩家或网络能供得上的那个变体：数据包的模板路径不认识标签，
+        // 所以标签的第一个成员很可能恰好是没有库存的那个。
         IClientRepo repo = menu.getClientRepo();
         NonNullList<ItemStack> templates = NonNullList.withSize(PartArcaneCraftingTerminal.GRID_SIZE, ItemStack.EMPTY);
         boolean missing = false;
@@ -114,8 +114,8 @@ public class ArcaneCraftingRecipeTransfer
             }
         }
 
-        // A recipe that cannot be laid out is refused rather than partly filled: a partly filled grid
-        // reads as "this terminal cannot craft that", not "you are short of it".
+        // 摆不下的配方宁可拒绝也不部分填充：部分填充的网格读起来是“这个终端合成不了那个”，
+        // 而不是“你缺料”。
         if (missing) {
             return helper.createUserErrorWithTooltip(
                     Component.translatable("thaumicenergistics_ce.jei.transfer.missing_ingredients"));
@@ -124,7 +124,7 @@ public class ArcaneCraftingRecipeTransfer
             return null;
         }
 
-        // No recipe id: the recipe is not in the vanilla manager, so the packet's template path is used.
+        // 没有配方 id：该配方不在原版管理器里，所以走数据包的模板路径。
         PacketDistributor.sendToServer(new FillCraftingGridFromRecipePacket(null, templates, false));
         return null;
     }
@@ -132,8 +132,8 @@ public class ArcaneCraftingRecipeTransfer
     // ---- templates -----------------------------------------------------
 
     /**
-     * The template for one cell: the variant with the most supply behind it, so a tag whose first member is
-     * not stocked but whose others are still transfers. Empty when nothing can supply the cell.
+     * 一个格子的模板：背后供给最多的那个变体，这样即使标签的第一个成员没有库存、其余成员有，
+     * 也仍能转移。没有任何东西能供给这个格子时为空。
      */
     private static ItemStack pickSuppliable(List<ItemStack> variants, @Nullable IClientRepo repo, Player player) {
         ItemStack best = ItemStack.EMPTY;
@@ -151,7 +151,7 @@ public class ArcaneCraftingRecipeTransfer
         return best;
     }
 
-    /** What the network reports of this exact item, plus what the player carries. */
+    /** 网络对这一个确切物品报告的数量，加上玩家身上携带的。 */
     private static long supplyOf(ItemStack variant, @Nullable IClientRepo repo, Player player) {
         long supply = 0;
         AEItemKey wanted = AEItemKey.of(variant);
@@ -171,7 +171,7 @@ public class ArcaneCraftingRecipeTransfer
         return supply;
     }
 
-    /** Whether the cell asks for anything at all: an empty cell of the layout must not read as missing. */
+    /** 这个格子是否要求任何东西：布局中的空格子不能被读成缺料。 */
     private static boolean asksForSomething(List<ItemStack> variants) {
         for (ItemStack variant : variants) {
             if (!variant.isEmpty()) {

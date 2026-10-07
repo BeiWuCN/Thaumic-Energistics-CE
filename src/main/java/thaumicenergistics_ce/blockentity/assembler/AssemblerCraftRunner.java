@@ -15,18 +15,18 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Runs the craft the assembler is holding: charging the grid for it, waiting for vis, checking there is
- * room, handing the product over, and giving back what a machine that went away was still holding.
- * Split out of {@link AssemblerCraftJob}, which takes a job and prices it; the node's sleep state lives
- * here too, because waking and sleeping the machine follows whether a craft is running at all.
+ * 运行组装机持有的合成：为它向网格计费、等待 vis、检查是否有空间、
+ * 交付产物，并归还已离开的机器仍持有的物品。从 {@link AssemblerCraftJob} 拆出，
+ * 后者负责接收任务并定价；节点的休眠状态也在这里，
+ * 因为机器的唤醒与休眠取决于是否有合成在运行。
  */
 final class AssemblerCraftRunner {
 
     private static final double ACTIVE_POWER = 1.5;
     private static final int STALLED_CRAFT_REPORT_TICKS = 100;
 
-    /** Ticks of unbroken stalling after which the craft is finished anyway: a minute. AE2 has no
-     * cancellation callback on a provider, and a craft waiting for ever keeps the machine busy. */
+    /** 合成持续停滞多少个 tick 后直接完成：一分钟。AE2 在供应器上没有
+     * 取消回调，而永远等待的合成会一直占用机器。 */
     private static final int STALL_RELEASE_TICKS = 1200;
 
     private final BlockEntityArcaneAssembler owner;
@@ -38,11 +38,11 @@ final class AssemblerCraftRunner {
     }
 
     // ------------------------------------------------------------------
-    // Crafting
+    // 合成
     // ------------------------------------------------------------------
 
     TickRateModulation craftingTick(IGrid grid, int ticksSinceLast) {
-        // No test for a missing pattern: a craft is defined by what it produces and what it owes.
+        // 不检查样板是否缺失：一次合成由它产出什么和欠什么定义。
         if (owner.craft.craftTicks() >= owner.upgrades.ticksPerCraft()) {
             return completeCraft(grid);
         }
@@ -58,13 +58,13 @@ final class AssemblerCraftRunner {
         }
         owner.craft.clearStall();
         owner.craft.addCraftTicks(ticksSinceLast);
-        // URGENT, not SAME: at the idle rate a busy craft runs twenty times too slow.
+        // 用 URGENT 而非 SAME：按空闲速率，忙碌的合成会慢二十倍。
         owner.displaySync.markDisplayForUpdate();
         return TickRateModulation.URGENT;
     }
 
-    /** Reports once that a craft is waiting, then keeps waiting: AE2 already extracted the ingredients.
-     * @return always {@code false}: a craft is never abandoned for waiting */
+    /** 只报告一次合成在等待，然后继续等待：AE2 已经提取了原料。
+     * @return 恒为 {@code false}：合成不会因为等待被放弃 */
     private boolean noteStall(Component reason) {
         owner.craft.noteStall(reason);
         if (owner.craft.stalledTicks() == STALLED_CRAFT_REPORT_TICKS) {
@@ -80,16 +80,16 @@ final class AssemblerCraftRunner {
 
     private TickRateModulation completeCraft(IGrid grid) {
         int price = owner.craft.craftPrice();
-        // Waiting for this price is forever unless a relay or interface reaches vis the aura cannot hold.
+        // 等待这个价格是永久的，除非中继点或接口能引来灵气容量装不下的 vis。
         boolean unpayableForever = price > 0
                 && owner.vis.auraCapacity() > 0
                 && price > owner.vis.auraCapacity()
                 && !owner.vis.relayNetworkInReach()
                 && !owner.vis.interfaceInReach();
-        // A relay that exists but never pays is not a promise either - see STALL_RELEASE_TICKS.
+        // 存在但永不付款的中继点也不是承诺——见 STALL_RELEASE_TICKS。
         boolean stalledOut = !unpayableForever && owner.craft.stalledTicks() >= STALL_RELEASE_TICKS;
         if (owner.vis.bufferedVis() < price && !unpayableForever && !stalledOut) {
-            // Waiting on vis; the tick handler keeps refilling the buffer.
+            // 等待 vis；tick 处理器会不断补满缓冲。
             noteStall(AssemblerStatus.waitReason(
                     AssemblerStatus.WAIT_NO_VIS,
                     "no vis (%s banked of %s needed, target %s)",
@@ -108,7 +108,7 @@ final class AssemblerCraftRunner {
                     price);
         }
         if (owner.vis.bufferedVis() < price) {
-            // Delivered anyway, the lesser evil: AE2 already took the ingredients and waits with no timeout.
+            // 仍然交付，两害相权取其轻：AE2 已经取走原料且等待没有超时。
             ThELog.LOG.info(
                     "[assembler] at {} delivers {} without charging its {} vis: this chunk's aura can never hold"
                             + " more than {}",
@@ -123,7 +123,7 @@ final class AssemblerCraftRunner {
             return TickRateModulation.IDLE;
         }
 
-        // The product comes from the well: the recipe that made it may no longer be readable.
+        // 产物来自产物槽：制作它的配方可能已经无法读取。
         ItemStack output = owner.inventory.getItem(BlockEntityArcaneAssembler.TARGET_SLOT).copy();
         AEItemKey outputKey = AEItemKey.of(output);
         if (outputKey == null) {
@@ -131,7 +131,7 @@ final class AssemblerCraftRunner {
             return TickRateModulation.IDLE;
         }
 
-        // Crystals vis cannot stand in for; checked before the result is inserted, never after.
+        // 晶体无法用 vis 替代；在插入结果之前检查，绝不之后。
         if (!hasCrystals(storage)) {
             noteStall(AssemblerStatus.waitReason(AssemblerStatus.WAIT_NO_CRYSTALS, "no crystals"));
             return TickRateModulation.SAME;
@@ -145,14 +145,14 @@ final class AssemblerCraftRunner {
             return TickRateModulation.SAME;
         }
 
-        // Re-check after the simulate: the extraction below is the point of no return for the crystals.
+        // 模拟之后重新检查：下面的提取对晶体来说是不可回退的一步。
         if (!hasCrystals(storage)) {
             noteStall(AssemblerStatus.waitReason(AssemblerStatus.WAIT_NO_CRYSTALS_RECHECK, "no crystals (recheck)"));
             return TickRateModulation.SAME;
         }
         takeCrystals(storage);
         storage.getInventory().insert(outputKey, output.getCount(), Actionable.MODULATE, owner.actionSource);
-        // What the craft still owed, and no more.
+        // 合成仍然欠的部分，不多取。
         owner.vis.spendVis(price);
         finishCraft();
         return TickRateModulation.URGENT;
@@ -183,7 +183,7 @@ final class AssemblerCraftRunner {
         }
     }
 
-    /** Gives back the inputs a craft already paid for, to the network first and to the ground after. */
+    /** 归还合成已经付过款的投入物，先给网络，再给地面。 */
     void returnHeldInputs() {
         if (owner.craft.heldInputs().isEmpty()) {
             return;
@@ -225,12 +225,12 @@ final class AssemblerCraftRunner {
         owner.displaySync.clearDisplay(false);
         owner.setChanged();
         owner.displaySync.markForUpdate();
-        // Nothing left to run, so the grid may stop ticking this machine.
+        // 已无合成可运行，所以网格可以停止 tick 这台机器。
         updateSleepiness();
     }
 
-    /** Wakes the grid's tick while a craft is held, and lets it sleep when not: a craft restored from a
-     * save never runs otherwise, as AE2 ticks idle devices at the idle rate. */
+    /** 持有合成时唤醒网格的 tick，没有时让它休眠：从存档恢复的合成
+     * 否则永远不会运行，因为 AE2 按空闲速率 tick 空闲设备。 */
     void updateSleepiness() {
         if (owner.getLevel() == null || owner.getLevel().isClientSide() || awakeForCraft == owner.craft.isCrafting()) {
             return;

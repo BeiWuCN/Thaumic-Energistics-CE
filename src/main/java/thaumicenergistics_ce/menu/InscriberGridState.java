@@ -10,10 +10,10 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The menu's 3x3 recipe grid: the write a click makes, the read-back of a stored pattern, and the
- * signature that says whether the grid still resolves the same way.
- * The grid exists on both sides, and a client write is a payload rather than a slot sync - see
- * {@code GhostGridSlot} - so a write here lands on the machine's container or is sent as one.
+ * 菜单的 3x3 配方网格：一次点击所做的写入、已存储样板的回读，以及
+ * 说明网格是否仍以同样方式解析的签名。
+ * 网格在两侧都存在，客户端的写入是载荷而不是槽位同步——见
+ * {@code GhostGridSlot}——所以这里的写入会落到机器的容器上，或作为载荷发送。
  */
 final class InscriberGridState {
 
@@ -30,8 +30,8 @@ final class InscriberGridState {
     }
 
     /**
-     * One cell, from the menu's click routing: the machine's own container on the server, the slot on
-     * the client, whose payload the server turns into the same write on the next tick.
+     * 一个格位，来自菜单的点击路由：在服务端写机器的容器，在客户端写
+     * 槽位，其载荷由服务端在下一个 tick 变成同样的写入。
      */
     void setCell(int cell, ItemStack stack) {
         if (menu.inscriber != null) {
@@ -50,8 +50,8 @@ final class InscriberGridState {
     }
 
     /**
-     * Resampled at most once a tick: the components of nine stacks are too much to hash per frame, so
-     * a frame that did not advance the tick reuses the last answer.
+     * 每个 tick 最多重新采样一次：九个物品堆的组件太多，无法逐帧哈希，所以
+     * 没有推进 tick 的那一帧会复用上一次的答案。
      */
     int signature() {
         long now = menu.playerInventory.player.level().getGameTime();
@@ -67,8 +67,8 @@ final class InscriberGridState {
     }
 
     /**
-     * Fills the grid from a recipe's layout, as a JEI transfer and a pattern click do, in one write: a
-     * payload per cell made the server re-resolve against a grid that was half the old recipe.
+     * 用配方的布局填充网格，JEI 转移与样板点击都是这么做的，且一次写入完成：
+     * 每个格位一个载荷会让服务端针对一个一半还是旧配方的网格反复解析。
      */
     void fillFromRecipe(List<ItemStack> cells) {
         List<ItemStack> full = new ArrayList<>(MenuKnowledgeInscriber.CRAFT_SLOTS);
@@ -77,7 +77,7 @@ final class InscriberGridState {
             full.add(stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1));
         }
 
-        // 1. This side's grid, in one pass. Writing the container sends no payload.
+        // 1. 本侧的网格，一次遍历完成。写入容器不会发送载荷。
         for (int cell = 0; cell < MenuKnowledgeInscriber.CRAFT_SLOTS; cell++) {
             menu.machine.setItem(BlockEntityKnowledgeInscriber.GRID_SLOT_START + cell, full.get(cell));
         }
@@ -90,13 +90,13 @@ final class InscriberGridState {
     }
 
     /**
-     * Reads a stored pattern back onto the grid: the button acts there, so this is also the delete path.
-     * The tail is cleared because a shapeless recipe's stored grid is a compact ingredient list.
+     * 把已存储的样板读回网格：按钮在那里起作用，所以这也是删除路径。
+     * 尾部会被清空，因为无序配方的存储网格是一份紧凑的材料清单。
      */
     void loadPattern(int index) {
         List<ItemStack> cells = storedGrid(index);
         if (cells == null) {
-            // Names the well asked for, so an empty well is distinguishable from the wrong one.
+            // 点名了所请求的凹槽，这样空凹槽就能与找错的凹槽区分开。
             ThELog.LOG.info("[inscriber] pattern well {} holds nothing to load", index);
             return;
         }
@@ -105,13 +105,13 @@ final class InscriberGridState {
                 index,
                 cells.isEmpty() ? "empty grid" : cells.getFirst(),
                 cells.size());
-        // One replacement, so the grid never holds a mixture of the old recipe and the new.
+        // 一次性替换，所以网格绝不会同时持有旧配方与新配方的混合物。
         menu.fillGridFromRecipe(cells);
     }
 
     /**
-     * The grid of the stored pattern in a well, or {@code null} when it is empty. Read from the core by
-     * position: the well's own slots are never filled, so they were stale.
+     * 某个凹槽中已存储样板的网格，为空时为 {@code null}。按位置从核心读取：
+     * 凹槽自身的槽位从未被填充，所以它们是过时的。
      */
     private @Nullable List<ItemStack> storedGrid(int index) {
         if (index < 0) {

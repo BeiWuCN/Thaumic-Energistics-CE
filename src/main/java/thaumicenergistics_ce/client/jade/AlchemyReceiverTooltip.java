@@ -13,10 +13,10 @@ import snownee.jade.api.ui.IElementHelper;
 import thaumicenergistics_ce.integration.jade.AlchemyReceiverProvider;
 
 /**
- * The Alchemy Receiver's Jade tooltip: the provider it is bound to, if any.
- * It is the drawing half of {@link AlchemyReceiverProvider}, paired with it by the shared UID, and
- * it shows no grid state line, because the receiver is never on a cable, so the link is all it can
- * report.
+ * 炼金无线接收器的 Jade tooltip：它绑定到哪个供应器，如果有的话。
+ * 它是 {@link AlchemyReceiverProvider} 的绘制半边，两者靠共用的 UID 配对；
+ * 它不显示网格状态行，因为接收器从不接在线上，所以连接关系就是它能
+ * 报告的全部。
  */
 public final class AlchemyReceiverTooltip implements IBlockComponentProvider {
 
@@ -31,7 +31,7 @@ public final class AlchemyReceiverTooltip implements IBlockComponentProvider {
         IElementHelper helper = IElementHelper.get();
         if (tag.getBoolean(AlchemyReceiverProvider.TAG_BOUND)) {
             BlockPos provider = BlockPos.of(tag.getLong(AlchemyReceiverProvider.TAG_PROVIDER));
-            // Grey: an address to look up, not a reading of this block.
+            // 灰色：这是一个待查的地址，而不是本方块自身的读数。
             tooltip.add(helper.text(Component
                     .translatable("thaumicenergistics_ce.jade.alchemy_receiver.bound",
                             provider.getX(), provider.getY(), provider.getZ())

@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.part.FluxWait;
 import thaumicenergistics_ce.part.PartFluxTransferInterface;
 
-// Goes through AE2's part registry, not Jade's: Jade only knows block entities.
+// 通过 AE2 的部件注册表，而不是 Jade 的：Jade 只认识方块实体。
 public final class FluxTransferStatusProvider
         implements ServerDataProvider<PartFluxTransferInterface> {
 

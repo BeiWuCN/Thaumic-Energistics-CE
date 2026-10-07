@@ -20,11 +20,11 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
- * The Essentia Terminal as a cable part: an AE2 terminal that lists essentia and nothing else.
- * Filtering uses {@link KeyTypeSelection}, AE2's own channel for a terminal's key types, but
- * the parent's selection allows every type while ours replaces it, so the field is read and
- * written by hand. It has to be: the parent's fields are private and its read/write would
- * save the permissive selection instead.
+ * 作为线缆部件的源质终端：一台只列出源质的 AE2 终端。
+ * 过滤使用 {@link KeyTypeSelection}，即 AE2 自己用于终端键类型的通道，但
+ * 父类的选择允许所有类型，而我们的会替换它，所以该字段由手工读写。
+ * 也必须如此：父类的字段是私有的，它的读/写会把那份宽松的选择
+ * 保存下来。
  */
 public class PartEssentiaTerminal extends AbstractTerminalPart {
 

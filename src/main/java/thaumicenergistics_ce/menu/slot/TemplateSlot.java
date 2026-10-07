@@ -6,10 +6,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The Distillation Encoder's source well: a template slot naming the item to distil. The item is
- * never handed over - the job pays it - so placing, taking and reading use one stack. It is a
- * JEI drag safety measure: an ordinary slot would hand a dragged item over for free, duplicating
- * it; unlike a read-only display it still syncs, because {@code set} is untouched.
+ * 蒸馏编码器的源槽位：指名要蒸馏何物的模板槽位。物品从不交付——由任务来支付它——
+ * 所以放置、取走与读取用的是同一个物品堆。这是一项 JEI 拖拽防护措施：普通槽位会
+ * 免费交出被拖入的物品，造成复制；与只读显示不同，
+ * 它仍然同步，因为 {@code set} 未被触碰。
  */
 public class TemplateSlot extends Slot {
 

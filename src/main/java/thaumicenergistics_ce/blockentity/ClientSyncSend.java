@@ -6,8 +6,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-/** The project's one send exit for a block entity update: one packet built once and handed to the players
- * watching this chunk. Whether AE2's own markForClientUpdate would do the same on 1.21 is unverified. */
+/** 本项目对方块实体更新的唯一发送出口：构建一次数据包并交给
+ * 观望这个区块的玩家。AE2 自己的 markForClientUpdate 在 1.21 上是否做同样的事，尚未验证。 */
 public final class ClientSyncSend {
 
     private ClientSyncSend() {}

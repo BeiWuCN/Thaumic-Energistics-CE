@@ -8,9 +8,9 @@ import net.minecraft.world.item.context.UseOnContext;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * The Arcane Crafting Terminal as an item, for placing it on a cable; implements {@link IPartItem}
- * directly rather than extending AE2's {@code PartItem}, which is what AE2 actually checks for and
- * keeps the placement path and the factory in one place.
+ * 作为物品的奥术合成终端，用于把它放到线缆上；直接实现 {@link IPartItem}
+ * 而不是继承 AE2 的 {@code PartItem}，因为前者才是 AE2 真正检查的东西，
+ * 也让放置路径与工厂待在一处。
  */
 public class ItemArcaneCraftingTerminal extends Item implements IPartItem<PartArcaneCraftingTerminal> {
 

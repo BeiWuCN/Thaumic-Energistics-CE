@@ -19,11 +19,11 @@ import thaumicenergistics_ce.network.EssentiaInterfaceMarkPayload;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Lets the player drag an aspect onto the config row of an ME interface that carries our access
- * card. Both host forms share AE2's one interface screen, so one registration serves the block and
- * the part. Without the card there is not one target: a drag shows no drop point, not a swallowing
- * slot, and the screen is taken raw as InterfaceScreen, since JEI pairs a Class with a handler of
- * that same type.
+ * 让玩家把要素拖到带有本访问卡的 ME 接口的配置行上。
+ * 两种宿主形态共用 AE2 的同一个接口界面，所以一次注册同时服务方块与
+ * 线缆部件。没有卡时一个目标都没有：拖拽不会显示落点，而不是显示一个会吞掉
+ * 物品的槽位；界面按原始类型 [InterfaceScreen] 取用，因为 JEI 是把一个 [Class]
+ * 与同类型的处理器配对的。
  */
 public class EssentiaInterfaceGhostIngredientHandler implements IGhostIngredientHandler<InterfaceScreen> {
 
@@ -33,7 +33,7 @@ public class EssentiaInterfaceGhostIngredientHandler implements IGhostIngredient
     public <I> List<Target<I>> getTargetsTyped(
             InterfaceScreen screen, ITypedIngredient<I> ingredient, boolean doStart) {
         List<Target<I>> targets = new ArrayList<>();
-        // Aspects only: this card moves essentia, so a dragged item has nowhere to go.
+        // 只收要素：这张卡搬运的是源质，拖来的物品无处可去。
         if (!(ingredient.getIngredient() instanceof AspectInstance)) {
             return targets;
         }
@@ -47,10 +47,10 @@ public class EssentiaInterfaceGhostIngredientHandler implements IGhostIngredient
 
     @Override
     public void onComplete() {
-        // Nothing to release: an interface slot never took an item from the player.
+        // 没有要释放的东西：接口槽从不接收玩家手上的物品。
     }
 
-    /** Offers every live slot of the config row. */
+    /** 提供配置行的每一个活动槽位。 */
     private static <I> void addRow(List<Target<I>> targets, InterfaceMenu menu, InterfaceScreen screen) {
         for (Slot slot : menu.getSlots(SlotSemantics.CONFIG)) {
             MarkTarget<I> target = MarkTarget.of(menu, screen, slot);
@@ -60,12 +60,12 @@ public class EssentiaInterfaceGhostIngredientHandler implements IGhostIngredient
         }
     }
 
-    /** One drop point, sent to the server: the client never writes the interface's own config row. */
+    /** 一个落点，发给服务端：客户端从不写接口自己的配置行。 */
     private record MarkTarget<I>(int index, int x, int y, int containerId) implements Target<I> {
 
         /**
-         * A target for one config slot, or {@code null}: it must be a live {@link AppEngSlot} over a
-         * {@link ConfigMenuInventory}, since a locked row sits off-panel and the index is not an offset.
+         * 一个配置槽的目标，或 {@code null}：它必须是位于 {@link ConfigMenuInventory} 之上的
+         * 活动 {@link AppEngSlot}，因为被锁定的行位于面板之外，下标也不是偏移量。
          */
         static <I> MarkTarget<I> of(InterfaceMenu menu, InterfaceScreen screen, Slot slot) {
             if (!(slot instanceof AppEngSlot appEngSlot)
@@ -82,8 +82,8 @@ public class EssentiaInterfaceGhostIngredientHandler implements IGhostIngredient
         }
 
         /**
-         * Where JEI draws this target, in screen pixels: a slot's x and y are relative to the GUI
-         * corner, and JEI fills the rectangle with no translation of its own.
+         * JEI 绘制该目标的位置，单位为屏幕像素：槽位的 x 和 y 是相对 GUI 角点的，
+         * 而 JEI 填充这个矩形时自己不做任何平移。
          */
         @Override
         public Rect2i getArea() {
@@ -100,7 +100,7 @@ public class EssentiaInterfaceGhostIngredientHandler implements IGhostIngredient
             }
             ResourceLocation id = aspect.aspect().unwrapKey().map(key -> key.location()).orElse(null);
             if (id == null) {
-                // An aspect with no id is not one the server could look up either.
+                // 没有 id 的要素，服务端同样查不到。
                 ThELog.LOG.warn("[essentia-interface] drag produced an aspect with no registry id");
                 return;
             }

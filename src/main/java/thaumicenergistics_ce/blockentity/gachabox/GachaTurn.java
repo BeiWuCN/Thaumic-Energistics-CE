@@ -3,17 +3,17 @@ package thaumicenergistics_ce.blockentity.gachabox;
 import net.minecraft.nbt.CompoundTag;
 
 /**
- * The turn in flight: how many seconds are left of it, whether it is one of the turns that pays,
- * and the flash that holds its result on the screen before the next one is drawn. The box ticks it
- * one second at a time and decides what the screen shows; this class only keeps the count honest.
+ * 进行中的转动：还剩多少秒、它是否属于给奖的那些转动，以及在下一次转动
+ * 被掷出前把结果按在屏幕上的闪烁。箱子每秒 tick 它一次并决定屏幕显示
+ * 什么；本类只负责让计数保持诚实。
  */
 final class GachaTurn {
 
     private static final String TAG_SECONDS = "TurnSeconds";
     private static final String TAG_PAYS = "TurnPays";
 
-    /** How long a result stays on the screen before the next turn is drawn, in seconds: the box is
-     * ticked once a second, so this counts seconds and not ticks. */
+    /** 结果在下一次转动被掷出前停留在屏幕上多久，以秒计：箱子每秒
+     * 只被 tick 一次，所以这里数的是秒而不是 tick。 */
     private static final int FLASH_SECONDS = 2;
 
     private final BlockEntityGachaBox box;
@@ -34,7 +34,7 @@ final class GachaTurn {
         return flash > 0;
     }
 
-    /** Whether the flash on the screen is a payout or a turn that drew nothing. */
+    /** 屏幕上的闪烁是一次给奖，还是一次什么都没抽到的转动。 */
     boolean earned() {
         return flashPaid;
     }
@@ -43,20 +43,20 @@ final class GachaTurn {
         flash--;
     }
 
-    /** Starts a drawn turn; the caller has already paid for it by the time this is called. */
+    /** 开始一次掷出的转动；调用到这里时调用方已经为它付过账。 */
     void start(GachaOdds.Turn drawn) {
         this.seconds = drawn.seconds();
         this.pays = drawn.pays();
         box.setChanged();
     }
 
-    /** Counts one second off the turn in flight. */
+    /** 从进行中的转动上扣掉一秒。 */
     void advance() {
         seconds--;
         box.setChanged();
     }
 
-    /** Puts the finished turn on the screen for a moment and takes it out of flight. */
+    /** 把结束的转动放到屏幕上停留片刻，并将它移出进行中状态。 */
     void settle() {
         this.flash = FLASH_SECONDS;
         this.flashPaid = this.pays;
@@ -64,7 +64,7 @@ final class GachaTurn {
         box.setChanged();
     }
 
-    /** Nothing in flight and nothing showing: the state a box is in when it has just been filled. */
+    /** 没有进行中的转动，也没有在显示的东西：箱子刚被填装完时所处的状态。 */
     void reset() {
         this.seconds = 0;
         this.pays = false;

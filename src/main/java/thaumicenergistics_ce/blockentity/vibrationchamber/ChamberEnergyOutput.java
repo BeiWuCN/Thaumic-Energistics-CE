@@ -7,15 +7,15 @@ import appeng.api.networking.energy.IAEPowerStorage;
 import appeng.api.networking.energy.IEnergyService;
 
 /**
- * The chamber's energy slot: what the grid takes out of it, and what counts as full. AE2 destroys
- * what the grid refuses, so only what was accepted leaves the slot; {@link #isFull()} is a level
- * read off the room left rather than a latch, so the screen follows the gauge. Whether there is a
- * network at all is asked of what the grid holds, not of how big it is.
+ * 振动室的能量槽：网格从它里面取走什么，以及什么算作满。AE2 会销毁
+ * 网格拒收的部分，所以只有被接受的部分才离开槽位；{@link #isFull()} 是
+ * 由剩余空间读出的水平而非锁存，因此界面随仪表走。是否存在网络要问
+ * 网格持有什么，而不是问它有多大。
  */
 final class ChamberEnergyOutput {
 
-    /** Room the energy slot may keep and still count as full. One tick of the slowest burn is the least a
-     * tick can be worth, so "full" begins where the gauge crosses 15.9 kAE, not at a stuck 15.7 kAE. */
+    /** 能量槽可以保留多少还仍算作满。最慢燃烧的一个 tick 是一个 tick 至少能值的量，
+     * 所以“满”从仪表越过 15.9 kAE 开始，而不是卡在 15.7 kAE。 */
     private static final double FULL_MARGIN = ChamberBurn.BASE_AE_PER_TICK / 2.0;
 
     private final BlockEntityEssentiaVibrationChamber chamber;
@@ -42,7 +42,7 @@ final class ChamberEnergyOutput {
         return room() <= FULL_MARGIN;
     }
 
-    /** Puts burnt power in, never past the slot's size. */
+    /** 把烧出的电力放进去，绝不超出槽位的容量。 */
     void add(double amount) {
         storedEnergy = Math.min(BlockEntityEssentiaVibrationChamber.MAX_ENERGY_STORAGE, storedEnergy + amount);
     }
@@ -52,8 +52,8 @@ final class ChamberEnergyOutput {
     }
 
     /**
-     * Whether this grid can take the power: a node holding it ({@link IAEPowerStorage}) or machines that draw
-     * it. A mere grid is not enough: its 25 AE per node buffer (GridEnergyStorage:83) takes it.
+     * 这个网格能否接收电力：要么有持有电力的节点（{@link IAEPowerStorage}），要么有用电的机器。
+     * 光有网格不算：它每个节点 25 AE 的缓冲区（[GridEnergyStorage:83]）就会把它收下。
      */
     boolean hasNetwork(IGrid grid, IGridNode self) {
         IEnergyService energy = grid.getService(IEnergyService.class);
@@ -71,7 +71,7 @@ final class ChamberEnergyOutput {
         return false;
     }
 
-    /** Hands the grid what it accepts, tick by tick; a refusal leaves the power in the slot. */
+    /** 逐 tick 把网格愿意接受的部分交给它；被拒收时电力留在槽位里。 */
     void output(IGrid grid, int ticksSinceLast) {
         if (storedEnergy <= 0) {
             return;

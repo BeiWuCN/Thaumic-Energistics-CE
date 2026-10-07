@@ -9,8 +9,8 @@ import net.minecraft.server.level.ServerLevel;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Whether to log what the chamber sees of its neighbours, once a second; on with
- * {@code THAUMICENERGISTICS_EVC_TRACE=true}. Tells a pipe not reaching from one out-pulled.
+ * 是否每秒记录一次振动室对邻居的所见；由
+ * {@code THAUMICENERGISTICS_EVC_TRACE=true} 开启。用于区分管道送不到和被抽走两种情况。
  */
 final class ChamberTrace {
 
@@ -31,7 +31,7 @@ final class ChamberTrace {
         this.burn = burn;
     }
 
-    /** One line a second, listing every side that offers a tube or a container and what it answers. */
+    /** 每秒一行，列出每个提供管道或容器的面以及它给出的答复。 */
     void log() {
         if (!TRACE || chamber.getLevel() == null || !(chamber.getLevel() instanceof ServerLevel server)) {
             return;

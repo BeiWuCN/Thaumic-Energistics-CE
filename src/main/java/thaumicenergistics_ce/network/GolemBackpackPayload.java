@@ -7,12 +7,12 @@ import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * What a golem's backpack looks like, told to the players watching it: the backpack lives in the
- * golem's persistent data, which vanilla never syncs, and it is sent on a timer rather than on change.
+ * 傀儡背包长什么样，告知正在看它的玩家：背包存放在傀儡的
+ * 持久数据里，原版从不同步它，而且它是按定时器发送而非随变化发送。
  *
- * @param entityId the golem
- * @param status {@link #STATUS_NO_BACKPACK}, {@link #STATUS_IN_RANGE} or {@link #STATUS_OUT_OF_RANGE}
- * @param skinOrdinal the skin's ordinal in {@code BackpackSkins}
+ * @param entityId 该傀儡
+ * @param status {@link #STATUS_NO_BACKPACK}、{@link #STATUS_IN_RANGE} 或 {@link #STATUS_OUT_OF_RANGE}
+ * @param skinOrdinal 该皮肤在 {@code BackpackSkins} 中的序号
  */
 public record GolemBackpackPayload(int entityId, int status, int skinOrdinal) implements CustomPacketPayload {
 
@@ -36,8 +36,8 @@ public record GolemBackpackPayload(int entityId, int status, int skinOrdinal) im
         return TYPE;
     }
 
-    /** Hands the payload to whatever the client installed as its receiver. The protocol package names no
-     * client class, and the registrar already runs handlers on the main thread - no second enqueue here. */
+    /** 把载荷交给客户端安装的接收者。协议包不指名任何
+     * 客户端类，而且注册器本来就在主线程上运行处理器——这里不再入队第二次。 */
     public void handleOnClient(Player player) {
         ClientSinks.acceptGolemBackpack(this);
     }

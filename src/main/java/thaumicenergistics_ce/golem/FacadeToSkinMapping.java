@@ -12,10 +12,10 @@ import org.jetbrains.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * Which backpack skin a block asks for. Matching is by block id inside Thaumaturge's namespace
- * and by substring on purpose, since a block, a plank, a log and a set of stairs all mean the
- * same material to a player pointing at them. AE2 facades are unwrapped first, and anything not
- * listed returns null, leaving the skin alone.
+ * 某种方块请求的是哪种背包外观。匹配限定在 Thaumaturge 命名空间内、按方块 id 进行，
+ * 并且刻意采用子串匹配：对指着它们看的玩家来说，一个方块、一块木板、一段原木
+ * 和一组楼梯都是同一种材质。AE2 的伪装板会先被拆开，凡是未列入表中的
+ * 一律返回 null，外观保持不变。
  */
 public final class FacadeToSkinMapping {
 

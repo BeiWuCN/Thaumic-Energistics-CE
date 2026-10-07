@@ -28,17 +28,17 @@ import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
- * The Essentia Vibration Chamber burns essentia to generate AE, ticking the three parts beside it.
- * Potentia burns 1.6x duration and power, ignis at the base rate and everything else at half; the
- * buffer is a count rather than an aspect list, so the aspect kept is for display only, and
- * {@link BurnState} is the one answer to the burn. AE2 destroys what the grid refuses.
+ * 源质振动室燃烧源质来产生 AE，并 tick 紧挨着它的三个部件。
+ * [Potentia] 燃烧的持续时间和功率为 1.6 倍，[ignis] 为基础速率，其它一律减半；
+ * 缓冲是一个计数而不是要素列表，所以保留的要素只用于显示，
+ * {@link BurnState} 是对燃烧状态的唯一回答。AE2 会销毁网格拒收的东西。
  */
 public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         implements IGridTickable, IEssentiaStorage, IEssentiaTransport, MenuProvider {
 
     public static final int MAX_ESSENTIA = 64;
 
-    /** Energy slot size in AE; AE2 quotes 16 kAE as 32,000 FE at two FE to the AE. */
+    /** 能量槽的容量，单位 AE；AE2 在 1 AE 兑 2 FE 时把 16 kAE 标为 32,000 FE。 */
     public static final double MAX_ENERGY_STORAGE = 16_000.0;
 
     public static final double MAX_OUTPUT_PER_TICK = 2_000.0;
@@ -48,9 +48,9 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     public enum BurnState {
         BURNING,
-        /** Held back: the energy slot is full to within a tick's worth, so nothing fits. */
+        /** 被按住：能量槽已满到不足一个 tick 的量，什么都装不下。 */
         PAUSED_FULL,
-        /** Nothing but this machine is on its grid: nowhere for the power to go. */
+        /** 它的网格上除了本机器什么都没有：电力无处可去。 */
         NO_NETWORK,
         IDLE;
 
@@ -62,8 +62,8 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         }
     }
 
-    // The fuel, the burn and the power live in ChamberBurn, ChamberEssentiaTank and ChamberEnergyOutput:
-    // this class ticks them and is the face the grid, the pipes and the screen are answered by.
+    // 燃料、燃烧和电力分别住在 [ChamberBurn]、[ChamberEssentiaTank] 和 [ChamberEnergyOutput] 里：
+    // 本类负责 tick 它们，并作为网格、管道和界面所面对的那个门面。
     private final ChamberEssentiaTank tank = new ChamberEssentiaTank(this);
     private final ChamberEnergyOutput energy = new ChamberEnergyOutput(this);
     private final ChamberBurn burn = new ChamberBurn(this, tank, energy);
@@ -78,8 +78,8 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     public BlockEntityEssentiaVibrationChamber(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(), pos, state);
-        // Idle 0.0 and channel-free, as AE2's own generators are (VibrationChamberBlockEntity:57,
-        // ChargerBlockEntity:43): a channel would go dark when a flat network needs it most.
+        // 空闲功耗 0.0 且不占频道，与 AE2 自己的发电机一致（[VibrationChamberBlockEntity:57]、
+        // [ChargerBlockEntity:43]）：在扁平网络最需要频道时，频道反而会熄灭。
         getMainNode().setIdlePowerUsage(0.0).setFlags().addService(IGridTickable.class, this);
     }
 
@@ -113,7 +113,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     @Override
     public boolean canInputFrom(Direction side) { return true; }
 
-    /** True so pipes see a destination, not a dead end, though {@link #takeEssentia} takes nothing. */
+    /** 返回 true，让管道看到一个目的地而不是死路，尽管 {@link #takeEssentia} 什么都不取。 */
     @Override
     public boolean canOutputTo(Direction side) { return true; }
 
@@ -125,8 +125,8 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         return null;
     }
 
-    /** Zero when the buffer or the energy slot is full: pipes steer by this number, and a full machine
-     * advertising suction would draw essentia it cannot burn. */
+    /** 缓冲或能量槽满时返回 0：管道靠这个数字导向，而一台满的机器若宣称
+     * 有吸力，会吸来它烧不掉的源质。 */
     @Override
     public int getSuctionAmount(Direction side) { return tank.suctionAmount(burn.paused()); }
 
@@ -169,8 +169,8 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     public @Nullable Holder<IAspect> currentAspectHolder() { return tank.aspect(); }
 
     /**
-     * The client's copy - state, burn rate and buffered fuel - sent only by {@link #markForClientUpdate()},
-     * never per tick, or the countdown would freeze while watched.
+     * 客户端的副本——状态、燃烧速率和缓冲燃料——只由 {@link #markForClientUpdate()} 发送，
+     * 绝不每 tick 发送，否则被观看时倒计时会冻结。
      */
     @Override
     protected void writeToStream(RegistryFriendlyByteBuf data) {
@@ -180,11 +180,11 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     @Override
     protected boolean readFromStream(RegistryFriendlyByteBuf data) {
-        // Both run: the base says whether it changed, the sync unit puts the stream into the machine.
+        // 两者都执行：基类说明是否有变化，同步单元把字节流写进机器。
         return super.readFromStream(data) | VibrationChamberSync.applyStreamed(this, data);
     }
 
-    /** Package-private for {@link VibrationChamberSync}, which read the stream, and the reload below. */
+    /** 包级私有，供 {@link VibrationChamberSync}（它读取字节流）以及下面的重载使用。 */
     void applyStreamed(BurnState streamedState, double streamedRate, int essentia,
             @Nullable Holder<IAspect> aspect) {
         burn.applyStreamed(streamedState, streamedRate); tank.set(essentia, aspect);

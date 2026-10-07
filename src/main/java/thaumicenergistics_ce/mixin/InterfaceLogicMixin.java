@@ -23,11 +23,11 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceRows;
 
 /**
- * Keeps AE2's own essentia traffic out of an interface that carries the access card: the card
- * moves essentia the other way, so the plan for a marked aspect is dropped and the row refuses
- * aspects. Two more hooks undo the card's work when it is pulled, and save the aspects when one
- * is broken; the rest live behind the card, so an interface without one behaves exactly as
- * AE2 wrote it.
+ * 阻止 AE2 自己的源质流量进入携带访问卡的接口：卡片是往相反方向搬运源质的，
+ * 所以已标记要素的计划会被丢弃，该行也拒绝要素。另有两只钩子在卡片被拔出时撤销它的
+ * 作用，并在某个要素被破坏时保存要素；其余部分都藏在卡片之后，因此没有卡片的接口
+ * 行为与 AE2 写的一模一样。
+ * AE2 写的一模一样。
  */
 @Mixin(InterfaceLogic.class)
 public abstract class InterfaceLogicMixin {
@@ -54,7 +54,7 @@ public abstract class InterfaceLogicMixin {
     @Shadow
     public abstract IGridNode getActionableNode();
 
-    /** Unmarked slots would otherwise swallow any aspect, and a terminal hands out what a row holds. */
+    /** 未标记的槽位否则会吞下任何要素，而终端会分发标记行所持有的东西。 */
     @Inject(
             method = "isAllowedInStorageSlot(ILappeng/api/stacks/AEKey;)Z",
             at = @At("HEAD"),
@@ -65,7 +65,7 @@ public abstract class InterfaceLogicMixin {
         }
     }
 
-    /** A marked aspect would otherwise be pulled out of the grid into the row, and the row's stock out. */
+    /** 已标记的要素否则会被从网格拉进该行，而该行的存货又被拉出去。 */
     @Inject(method = "updatePlan(I)V", at = @At("RETURN"))
     private void tce$dropEssentiaPlan(int slot, CallbackInfo callback) {
         GenericStack planned = plannedWork[slot];
@@ -75,8 +75,8 @@ public abstract class InterfaceLogicMixin {
     }
 
     /**
-     * The card out is its work undone: the marks go with it and the storage row goes back to the grid.
-     * Only an interface that is holding a mark of ours is touched, and marks only go in behind the card.
+     * 卡片拔出即其作用被撤销：标记随之而去，存储行回归网格。
+     * 只触碰正持有我方标记的接口，而标记也只在卡片就位后才会写入。
      */
     @Inject(method = "onUpgradesChanged()V", at = @At("RETURN"))
     private void tce$releaseRowsWithoutCard(CallbackInfo callback) {
@@ -85,7 +85,7 @@ public abstract class InterfaceLogicMixin {
         }
     }
 
-    /** AE2 turns each key of the storage row into a drop, and an aspect has no item to be dropped as. */
+    /** AE2 会把存储行的每个键变成掉落物，而要素没有可掉落成的物品。 */
     @Inject(method = "addDrops(Ljava/util/List;)V", at = @At("HEAD"))
     private void tce$rescueEssentiaFromDrops(List<ItemStack> drops, CallbackInfo callback) {
         EssentiaInterfaceRows.rescueEssentia(storage, networkStorage, tce$source());

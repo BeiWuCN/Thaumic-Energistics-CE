@@ -11,10 +11,10 @@ import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
 import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 
 /**
- * The client half of {@link thaumicenergistics_ce.integration.jei.ThEJeiPlugin}: the ghost
- * ingredient handlers, and the screens they drop into. It is a second plugin, because the
- * registerGuiHandlers registration takes a Screen name itself. JEI reaches it only from its client
- * starter, and its UID stays separate from the transfer half.
+ * {@link thaumicenergistics_ce.integration.jei.ThEJeiPlugin} 的客户端部分：
+ * 幽灵配料处理器及其投放到的屏幕。它是第二个插件，
+ * 因为 registerGuiHandlers 注册本身就需要一个 Screen 名。
+ * JEI 只从它的客户端启动器抵达此处，其 UID 与传输那一半保持分离。
  */
 @JeiPlugin
 public class ThEJeiClientPlugin implements IModPlugin {
@@ -31,16 +31,16 @@ public class ThEJeiClientPlugin implements IModPlugin {
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
         registration.addGhostIngredientHandler(
                 ScreenKnowledgeInscriber.class, new KnowledgeInscriberGhostIngredientHandler());
-        // One handler per concrete screen class: JEI pairs a Class with a handler of that same type, and the
-        // drag target accepts Thaumaturge's aspect ingredient rather than an item.
+        // 每个具体屏幕类各一个处理器：JEI 把一个 [Class] 与同类型的处理器配对，而这个
+        // 拖拽目标接受的是 Thaumaturge 的要素配料，而不是物品。
         registration.addGhostIngredientHandler(
                 ScreenEssentiaCellWorkbench.class, new CellWorkbenchGhostIngredientHandler());
-        // And the Distillation Encoder's source well, so the item to distil can be dragged in rather than
-        // fetched from a terminal by hand.
+        // 还有蒸馏编码器的来源槽位，这样待蒸馏的物品可以直接拖入，
+        // 而不必由玩家手动从终端取出。
         registration.addGhostIngredientHandler(
                 ScreenDistillationEncoder.class, new DistillationEncoderGhostIngredientHandler());
-        // AE2's own ME interface, once our access card is in it: both host forms share this one screen,
-        // so this single line covers the block and the cable part.
+        // AE2 自身的 ME 接口，只要访问卡插在其中：两种宿主形式共用同一个屏幕，
+        // 所以这一行就覆盖了该方块与线缆部件。
         registration.addGhostIngredientHandler(
                 InterfaceScreen.class, new EssentiaInterfaceGhostIngredientHandler());
     }

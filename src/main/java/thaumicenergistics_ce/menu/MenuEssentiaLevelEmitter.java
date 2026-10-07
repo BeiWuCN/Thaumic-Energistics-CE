@@ -12,10 +12,10 @@ import net.minecraft.world.inventory.MenuType;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 
 /**
- * The Essentia Level Emitter's screen: one config slot for the aspect, plus a settable number.
- * The number is a client action rather than a synced field, since what the player types is a
- * command, and the reporting value is sent once when the menu opens so the box shows the real
- * value.
+ * 源质标准发信器的屏幕：一个用于要素的配置槽，外加一个可设定的数字。
+ * 这个数字是客户端动作而非同步字段，因为玩家输入的内容是一条
+ * 指令；上报值在菜单打开时发送一次，使输入框显示真实
+ * 值。
  */
 public class MenuEssentiaLevelEmitter extends UpgradeableMenu<PartEssentiaLevelEmitter> {
 
@@ -37,9 +37,7 @@ public class MenuEssentiaLevelEmitter extends UpgradeableMenu<PartEssentiaLevelE
         return getHost().getCurrentLevel();
     }
 
-    /**
-     * Sets the threshold: the client forwards a client action, the server action applies it.
-     */
+    /** 设置阈值：客户端转发一条客户端动作，由服务端动作应用它。 */
     public void setValue(long value) {
         if (isClientSide()) {
             reportingValue = value;
@@ -50,7 +48,7 @@ public class MenuEssentiaLevelEmitter extends UpgradeableMenu<PartEssentiaLevelE
         }
     }
 
-    /** Called by the server before the menu is sent, so the client's box starts at the real value. */
+    /** 由服务端在菜单发送前调用，使客户端的输入框从真实值开始。 */
     public void setInitialValue(long value) {
         reportingValue = value;
     }

@@ -14,19 +14,19 @@ import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * What the Arcane Crafting Terminal's grid would cost in vis, sent to the screen drawing it: only the
- * server can work it out, and a screen that guessed would show a number the craft then disagrees with.
+ * 奥术合成终端网格要花多少 vis，发给绘制它的屏幕：只有服务端能算出来，
+ * 屏幕若自行猜测，显示的数值会与随后的合成对不上。
  *
- * @param containerId the menu this belongs to; a packet for a closed screen is ignored
- * @param aspects each aspect and its cost in centivis, in the order the recipe listed them
+ * @param containerId 它所属的菜单；发给已关闭屏幕的数据包被忽略
+ * @param aspects 每个要素及其以 centivis 计的开销，按配方列出它们的顺序
  */
 public record ArcaneCraftCostPayload(int containerId, List<AspectCost> aspects)
         implements ClientboundPacket {
 
     /**
-     * One aspect's share of the cost, in centivis - the unit the recipe actually asks for, one vis
-     * being a hundred centivis. Converting to whole vis here would round, so the number on screen and
-     * the number charged could differ by up to a vis.
+     * 单个要素分担的开销，以 centivis 计——这是配方实际索要的单位，1 vis
+     * 等于一百 centivis。在这里换算成整数 vis 会取整，屏幕上的数与被扣的数
+     * 最多可能差整整一个 vis。
      */
     public record AspectCost(ResourceLocation aspect, int centivis) {}
 
@@ -55,23 +55,21 @@ public record ArcaneCraftCostPayload(int containerId, List<AspectCost> aspects)
     }
 
     /**
-     * AE2's other overload, {@code handleOnClient(IPayloadContext)}, enqueues and forwards to this one:
-     * the registrar already runs on the main thread, so this must not enqueue a second time.
+     * AE2 的另一个重载 {@code handleOnClient(IPayloadContext)} 会入队并转发到这一个：
+     * 注册器本来就在主线程上运行，所以这里不得再入队一次。
      */
     @Override
     public void handleOnClient(Player player) {
         ClientSinks.acceptArcaneCraftCost(this);
     }
 
-    /**
-     * Builds a payload from what a craft would charge, dropping aspects that cost nothing.
-     */
+    /** 由一次合成将要收取的费用构建载荷，丢弃开销为零的要素。 */
     public static ArcaneCraftCostPayload of(
             int containerId,
             Map<ResourceKey<IAspect>, Integer> costs) {
         List<AspectCost> list = new ArrayList<>();
-        // The map's keys are {@link ResourceKey}s, because a recipe names aspect keys. Only the location
-        // travels; the client resolves it against its own registries for a name and an icon.
+        // 映射的键是 {@link ResourceKey}，因为配方指名的是要素键。只有位置
+        // 会上路；客户端用它自己的注册表解析出名称与图标。
         costs.forEach((key, centivis) -> {
             if (centivis != null && centivis > 0) {
                 list.add(new AspectCost(key.location(), centivis));

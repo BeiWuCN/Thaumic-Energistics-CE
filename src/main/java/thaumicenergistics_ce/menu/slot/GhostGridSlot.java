@@ -7,10 +7,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * One cell of the Knowledge Inscriber's crafting grid, on the side the player is looking at.
- * It is a ghost slot: it records what to encode without taking the item, since the job pays
- * later, and the item never leaves the player, so the write goes as a payload rather than
- * through slot sync. Picking up is allowed so that a cell can be cleared by clicking it.
+ * 知识铭刻机合成网格的一个单元，位于玩家所看的那一侧。它是幽灵槽位：记录要编码什么
+ * 而不取走物品，因为任务稍后才付费，且物品从不离开玩家，所以这次写入以载荷形式发出
+ * 而不是走槽位同步。
+ * 允许取走，这样点击某个单元即可将其清空。
  */
 public class GhostGridSlot extends Slot {
 
@@ -41,8 +41,8 @@ public class GhostGridSlot extends Slot {
     @Override
     public void onTake(Player player, ItemStack stack) {
         super.onTake(player, stack);
-        // Empty, not the stack that was taken: the machine needs the cell's new contents, and sending the
-        // taken stack would say the cell still holds the recipe the player has just removed.
+        // 发空，而不是被取走的物品堆：机器需要的是该单元的新内容，发送被取走
+        // 的物品堆等于说该单元仍装着玩家刚移走的配方。
         request(ItemStack.EMPTY);
     }
 

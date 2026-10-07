@@ -11,17 +11,17 @@ import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
 /**
- * Lets the player drag an item from JEI straight into the Knowledge Inscriber's grid.
- * The grid is the machine's input, so this is the shortest path to using it. There is nothing in
- * {@link #onComplete()} because the grid is a ghost grid, so JEI hands nothing over: the cells only
- * note what the player has, and the crafting job pays for the real ingredients.
+ * 让玩家把 JEI 里的物品直接拖进知识铭刻机的网格。
+ * 该网格就是机器的输入，所以这是使用它的最短路径。
+ * {@link #onComplete()} 里什么都没有，因为该网格是幽灵网格，JEI 不会交出任何东西：
+ * 格中只记录玩家拥有什么，而合成任务才会付出真实原料。
  */
 public class KnowledgeInscriberGhostIngredientHandler
         implements IGhostIngredientHandler<ScreenKnowledgeInscriber> {
 
     /**
-     * Drop area, in GUI pixels: a well's interior is 16 wide and 15 tall, so a 16-square sits on it -
-     * its last row is wall, not hole.
+     * 放置区域，单位为 GUI 像素：一格的内部宽 16、高 15，所以 16 见方的方块正好
+     * 压在它上面——它的最后一行是壁，不是孔。
      */
     private static final int SLOT_SIZE = 16;
 
@@ -41,15 +41,15 @@ public class KnowledgeInscriberGhostIngredientHandler
 
     @Override
     public void onComplete() {
-        // Nothing to release: a grid cell never took an item.
+        // 没有要释放的东西：网格中的格子从不接收物品。
     }
 
     private record GridTarget<I>(MenuKnowledgeInscriber menu, int cell, int guiLeft, int guiTop)
             implements Target<I> {
 
         /**
-         * Where JEI should draw this target, in screen pixels. Not the slot's x/y: JEI fills the
-         * rectangle with no translation, while slot x/y are relative to the GUI's top-left.
+         * JEI 应当绘制该目标的位置，单位为屏幕像素。不是槽位的 x/y：JEI 填充矩形时
+         * 不做平移，而槽位的 x/y 是相对 GUI 左上角的。
          */
         @Override
         public Rect2i getArea() {
@@ -60,8 +60,8 @@ public class KnowledgeInscriberGhostIngredientHandler
         @Override
         public void accept(I ingredient) {
             if (ingredient instanceof ItemStack stack && !stack.isEmpty()) {
-                // The slot, not the container: the container only reaches the client's scratch copy.
-                // GhostGridSlot.set sends the cell to the server.
+                // 用槽位而不是容器：容器只到得了客户端的暂存副本。
+                // [GhostGridSlot.set] 会把该格发给服务端。
                 menu.slots.get(MenuKnowledgeInscriber.gridSlotIndex(cell))
                         .set(stack.copyWithCount(1));
             }

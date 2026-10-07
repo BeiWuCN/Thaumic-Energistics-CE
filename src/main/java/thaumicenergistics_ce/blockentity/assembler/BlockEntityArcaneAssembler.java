@@ -39,9 +39,9 @@ import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
- * An AE2 crafting machine that runs Thaumaturge arcane recipes on demand, paying in ambient vis: its own
- * {@link ICraftingProvider} and an {@link ICraftingMachine} a provider on the same grid can drive, priced
- * as the workbench is - base vis plus crystal vis, surcharged, less the gear discount.
+ * 一台 AE2 合成机器，按需运行 Thaumaturge 的奥术配方，以环境 vis 付费：它自己是一个
+ * {@link ICraftingProvider}，也是一个 {@link ICraftingMachine}，同网格上的供应器可以驱动它，定价
+ * 与工作台一致——基础 vis 加水晶 vis，再加成，减去装备折扣。
  */
 public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         implements IInWorldGridNodeHost, IActionHost, IGridTickable, ICraftingProvider, ICraftingMachine {
@@ -53,17 +53,17 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     public static final int TARGET_SLOT = PATTERN_SLOT_END + 1;
     public static final int GEAR_SLOT_START = TARGET_SLOT + 1;
     public static final int GEAR_SLOT_COUNT = 4;
-    // Appended after the gear, never inserted: saved slot indices would move old gear into the preview band.
+    // 追加在装备之后，从不插入：已保存的槽位索引会把旧装备挪进预览区。
     public static final int PREVIEW_SLOT_START = GEAR_SLOT_START + GEAR_SLOT_COUNT;
     public static final int PREVIEW_SLOT_COUNT = 9;
-    // Appended after the preview, for the preview's own reason: a saved slot index that moved would read
-    // a card as a preview well, or a well as a card.
+    // 追加在预览之后，理由与预览相同：已保存的槽位索引一旦移动，就会把
+    // 一张卡读成一个预览槽，或把一个槽读成一张卡。
     public static final int UPGRADE_SLOT_START = PREVIEW_SLOT_START + PREVIEW_SLOT_COUNT;
-    /** The acceleration-card slots, one card each: four of them are the machine's whole speed ladder. */
+    /** 加速卡槽位，每张卡一个：四个槽位就是这台机器的整条速度阶梯。 */
     public static final int UPGRADE_SLOT_COUNT = 4;
     public static final int SLOT_COUNT = UPGRADE_SLOT_START + UPGRADE_SLOT_COUNT;
 
-    /** The primal aspects, in the fixed order the six vis columns are drawn in. */
+    /** 元质，按六根 vis 柱绘制所用的固定顺序。 */
     public static final List<ResourceKey<IAspect>> PRIMALS = TCAspects.PRIMALS;
 
     final SimpleContainer inventory = new AssemblerInventoryLayout(this::onInventoryChanged);
@@ -74,8 +74,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     boolean active;
     boolean suppressNotify;
 
-    // Built in the constructor, not here: a helper that reads this machine is built in order, and the
-    // fields below it are the ones it reads.
+    // 在构造器里构建，不在这里：读这台机器的辅助对象要按顺序构建，而它读的
+    // 字段就在它下面。
     final AssemblerCraftState craft;
     final AssemblerDisplaySync displaySync;
     final AssemblerVisSource vis;
@@ -111,12 +111,12 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         AssemblerNodeListener.detach(this);
     }
 
-    /** Drops what the player owns - the core, the gear and the cards - and nothing else: the mirror,
-     * target and preview bands hold copies the machine made, so dropping them hands out unpaid items. */
+    /** 掉落玩家拥有的东西——核心、装备和卡——别的都不掉：镜像、
+     * 目标和预览区放的是机器造出的副本，掉落它们等于白送未付费的物品。 */
     public void dropContents() { AssemblerContents.drop(this); }
 
-    /** Whether a band holds what the player put there. The display bands hold copies the machine
-     * wrote, so this is also the band a pipe may reach. */
+    /** 某个区是否放着玩家自己放进去的东西。展示区放的是机器写入的
+     * 副本，所以这也是管道可以够到的区。 */
     public static boolean isPlayerOwned(int slot) {
         return !AssemblerDisplaySync.isMachineOwned(slot);
     }
@@ -135,7 +135,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     public @Nullable Component waitReason() { return craft.isCrafting() ? craft.lastWait() : null; }
     public @Nullable Component refusalReason() { return craft.lastRefusal(); }
 
-    /** The speed upgrades and the gear discount, read by the menu and the Jade provider. */
+    /** 速度升级与装备折扣，由菜单与 Jade 提供器读取。 */
     public AssemblerUpgrades upgrades() { return upgrades; }
 
     public float getCraftProgress() {
@@ -144,7 +144,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
                 : 0.0F;
     }
 
-    /** The vis a craft of {@code pattern} is charged, after the gear discount. */
+    /** 一次 {@code pattern} 合成所扣的 vis，已扣掉装备折扣。 */
     public int craftCost(ThEArcanePattern pattern) { return craftJob().craftCost(pattern); }
 
     @Override
@@ -158,7 +158,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
     @Override
     public TickingRequest getTickingRequest(IGridNode node) {
-        // Never start asleep: a core can be inserted while idle, and a sleeping node is never woken.
+        // 绝不从睡眠开始：核心可能在空闲时被插入，而睡眠的节点永远不会被唤醒。
         return new TickingRequest(1, 20, false);
     }
 
@@ -223,8 +223,8 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         displaySync.applySyncedState(tag, registries);
     }
 
-    /** Applies an update tag on the client, the route a per-tick update takes. A packet lands here, its
-     * default implementation ending in {@code loadAdditional}, which wiped the craft state. */
+    /** 在客户端应用更新标签，这是每 tick 更新的路径。数据包落在这里，它的
+     * 默认实现以 {@code loadAdditional} 结尾，而那个会把合成状态抹掉。 */
     @Override
     public void onDataPacket(
             Connection net, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider registries) {
@@ -240,6 +240,6 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
     public static void serverTick(
             Level level, BlockPos pos, BlockState state, BlockEntityArcaneAssembler assembler) {
-        // Intentionally empty: the AE2 grid tick is the machine's only clock.
+        // 有意留空：AE2 网格 tick 是这台机器唯一的时钟。
     }
 }

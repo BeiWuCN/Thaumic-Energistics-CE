@@ -9,23 +9,23 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider;
 
 /**
- * The Alchemy Provider's Jade server data: its grid state and the receivers bound to it. AE2
- * draws its own grid-state line from a package an addon cannot hook, so the line is written
- * here. The drawing half is {@code client.jade.AlchemyProviderTooltip}, and both report
- * {@link #UID}.
+ * 炼金供应器的 Jade 服务端数据：它的网格状态以及绑定到它的接收器。AE2
+ * 从附加 mod 无法挂钩的包里绘制自己的网格状态行，所以这一行写在这里。
+ * 绘制的那一半是 {@code client.jade.AlchemyProviderTooltip}，两者都上报
+ * {@link #UID}。
  */
 public class AlchemyProviderProvider implements IServerDataProvider<BlockAccessor> {
 
     public static final AlchemyProviderProvider INSTANCE = new AlchemyProviderProvider();
 
-    /** Shared with {@code client.jade.AlchemyProviderTooltip}: Jade pairs the two halves by UID. */
+    /** 与 {@code client.jade.AlchemyProviderTooltip} 共用：Jade 按 UID 配对这两半。 */
     public static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "alchemy_provider");
 
-    /** The wire format of {@link #appendServerData}. The tooltip half reads it back. */
+    /** {@link #appendServerData} 的传输格式。tooltip 那一半会把它读回。 */
     public static final String TAG_RECEIVERS = "Receivers";
 
-    /** The AE the provider is holding: an unpowered grid leaves the reserve empty, and it is shown. */
+    /** 供应器持有的 AE：未通电的网格会让该储备为空，而这一点也会显示出来。 */
     public static final String TAG_CACHE = "Cache";
 
     @Override

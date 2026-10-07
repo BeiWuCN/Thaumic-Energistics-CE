@@ -10,9 +10,9 @@ import thaumicenergistics_ce.block.BlockGachaBox;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
- * The brain's own slot, the {@code jar} blockstate that mirrors it, and what leaving the slot means.
- * Only a jar brain goes in, and never a stack of them. A hopper or a pipe may fill this slot but
- * never empty it: the brain leaves by the bound player's own hand, and that hand unbinds the box.
+ * 脑自己的槽位、镜像它的 {@code jar} 方块状态，以及离开槽位意味着什么。
+ * 只有缸中之脑可以放入，并且永远不能是一叠。漏斗或管道可以填充这个槽位，
+ * 但永远不能清空它：脑由已绑定玩家亲自动手离开，而那一手会解除箱子的绑定。
  */
 final class GachaBrain {
 
@@ -51,17 +51,17 @@ final class GachaBrain {
         return !container.getItem(0).isEmpty();
     }
 
-    /** Puts one brain in, copied so the stack the player is holding stays their own. */
+    /** 放入一颗脑，复制一份，这样玩家手里拿着的堆仍然是他自己的。 */
     void put(ItemStack held) {
         container.setItem(0, held.copyWithCount(1));
     }
 
-    /** Puts a brain in out of thin air: what a save that kept it in the blockstate alone needs. */
+    /** 凭空放入一颗脑：只把脑留在方块状态里的存档需要这个。 */
     void adopt() {
         container.setItem(0, TcRegistry.jarBrainStack());
     }
 
-    /** Empties the slot and gives back what was in it, or nothing at all. */
+    /** 清空槽位并交回里面原有的东西，或者什么都没有。 */
     ItemStack take() {
         if (!has()) {
             return ItemStack.EMPTY;
@@ -71,8 +71,8 @@ final class GachaBrain {
         return taken;
     }
 
-    /** The blockstate follows the slot, since that is what a client sees and the renderer draws. A
-     * box already removed is skipped: taken apart, it must not write its own block back. */
+    /** 方块状态跟着槽位走，因为那才是客户端看到、渲染器绘制的东西。
+     * 已经被移除的箱子跳过：被拆开之后，它绝不能把自己的方块写回去。 */
     private void settled() {
         if (!has()) {
             box.unbind();

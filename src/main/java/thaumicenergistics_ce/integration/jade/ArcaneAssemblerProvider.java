@@ -16,27 +16,27 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
 /**
- * The Arcane Assembler's Jade server data. Written against Jade's API rather than AE2's, since AE2
- * registers a block entity's grid-state line through the internal
- * {@code appeng.integration.modules.igtooltip} package, which an addon cannot hook - parts are the
- * exception and go through AE2's public {@code PartTooltips}. The drawing half is
- * {@code client.jade.ArcaneAssemblerTooltip}, paired by {@link #UID}.
+ * 奥术组装机的 Jade 服务端数据。针对 Jade 的 API 编写而不是 AE2 的，因为 AE2
+ * 是通过内部的 {@code appeng.integration.modules.igtooltip} 包来注册方块实体的网格状态行的，
+ * 附加 mod 挂钩不到那个包；部件是例外，走 AE2 公开的 [PartTooltips]；另一半绘制是
+ * {@code client.jade.ArcaneAssemblerTooltip}，按 {@link #UID} 配对。
+ * {@code client.jade.ArcaneAssemblerTooltip}，按 {@link #UID} 配对。
  */
 public class ArcaneAssemblerProvider implements IServerDataProvider<BlockAccessor> {
 
     public static final ArcaneAssemblerProvider INSTANCE = new ArcaneAssemblerProvider();
 
-    /** Shared with {@code client.jade.ArcaneAssemblerTooltip}: Jade pairs the two halves by UID. */
+    /** 与 {@code client.jade.ArcaneAssemblerTooltip} 共用：Jade 按 UID 配对这两半。 */
     public static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "arcane_assembler");
 
-    /** Read back by the drawing half, so the wire format below is this class's own public contract.
-     * Three of these names are also spelled by a tag the machine writes for itself
-     * ({@code AssemblerVisPool}, {@code AssemblerDisplaySync}, {@code AssemblerUpgrades}): the values
-     * agree and the documents are separate, so a rename must reach both. */
+    /** 由绘制的那一半读回，因此下面的传输格式是本类自己的公开约定。其中
+     * 三个名字也被机器自己写入的一个标签所拼写（{@code AssemblerVisPool}、
+     * {@code AssemblerDisplaySync}、{@code AssemblerUpgrades}）：两处取值一致，但文档
+     * 各自独立，改名必须同步改到两边。 */
     public static final String TAG_VIS = "BufferedVis";
     public static final String TAG_AURA = "AuraAround";
-    /** Whole-percent vis discount from the installed gear. */
+    /** 所装装备带来的整数百分比 vis 折扣。 */
     public static final String TAG_DISCOUNT = "GearDiscount";
     public static final String TAG_SPEED = "SpeedUpgrades";
     public static final String TAG_PATTERNS = "Patterns";
@@ -46,8 +46,8 @@ public class ArcaneAssemblerProvider implements IServerDataProvider<BlockAccesso
     public static final String TAG_TARGET_STACK = "CraftTargetStack";
     public static final String TAG_INPUTS = "CraftInputs";
     /**
-     * Plain sentences, not translation keys: they carry numbers, and they are deliberately the same
-     * sentences the log gets.
+     * 普通句子，而不是翻译键：它们携带着数字，而且是刻意与日志
+     * 得到的句子保持一致。
      */
     public static final String TAG_WAIT = "WaitReason";
     public static final String TAG_REFUSAL = "RefusalReason";
@@ -58,8 +58,8 @@ public class ArcaneAssemblerProvider implements IServerDataProvider<BlockAccesso
     }
 
     /**
-     * Take the node from {@code getActionableNode}, never {@code getGridNode(null)}: a null side is
-     * exposed on nothing, so the capability lookup answers null however healthy the machine is.
+     * 从 {@code getActionableNode} 取节点，绝不要用 {@code getGridNode(null)}：null 面
+     * 不对任何方向暴露，因此无论机器多正常，能力查询都会答 null。
      */
     @Override
     public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
@@ -71,32 +71,32 @@ public class ArcaneAssemblerProvider implements IServerDataProvider<BlockAccesso
         JadeGridState.of(node).write(tag, node);
 
         tag.putInt(TAG_VIS, assembler.getBufferedVis());
-        // Rounded to whole vis: hundredths are not worth a tooltip line.
+        // 取整到整数 vis：百分位不值得占用一行 tooltip。
         tag.putInt(TAG_AURA, Math.round(assembler.getAuraAround()));
         tag.putInt(TAG_DISCOUNT, assembler.upgrades().getGearDiscount());
         tag.putInt(TAG_SPEED, assembler.upgrades().getSpeedUpgrades());
-        // Available, not stored patterns: the number that answers "why is nothing being crafted for me".
+        // 可用样板而非已存样板：也就是回答 "why is nothing being crafted for me" 的那个数字。
         tag.putInt(TAG_PATTERNS, assembler.getAvailablePatterns().size());
 
         tag.putBoolean(TAG_CRAFTING, assembler.isCrafting());
         if (assembler.isCrafting()) {
             tag.putFloat(TAG_PROGRESS, assembler.getCraftProgress());
-            // The stack's own description id, not "block." + registry id: the wrong prefix drew a raw key.
+            // 用物品堆自己的描述 id，而不是 "block." + 注册表 id：前缀错了会画出原始键名。
             ItemStack targetStack = assembler.getInventory()
                     .getItem(BlockEntityArcaneAssembler.TARGET_SLOT);
             if (!targetStack.isEmpty()) {
                 tag.putString(TAG_TARGET, targetStack.getDescriptionId());
             }
-            // Sent as saved stacks: an id alone cannot be drawn, and deriving the stack on the client
-            // would re-resolve a recipe the server already resolved.
+            // 以已保存的物品堆形式发送：光有 id 画不出来，而在客户端推导物品堆
+            // 会重新解析服务端已经解析过的配方。
             var level = accessor.getLevel();
             if (level != null) {
                 var registries = level.registryAccess();
                 if (!targetStack.isEmpty()) {
                     tag.put(TAG_TARGET_STACK, targetStack.save(registries));
                 }
-                // Grid order, so the icons read left to right the way the recipe does. Only non-empty cells:
-                // nine empty frames would be nine icons of nothing.
+                // 按网格顺序，这样图标像配方一样从左到右阅读。只发送非空单元格：
+                // 九个空框就是九个什么都没有的图标。
                 ListTag inputs = new ListTag();
                 for (int i = 0; i < BlockEntityArcaneAssembler.PREVIEW_SLOT_COUNT; i++) {
                     ItemStack cell = assembler.getInventory()
@@ -108,8 +108,8 @@ public class ArcaneAssemblerProvider implements IServerDataProvider<BlockAccesso
                 tag.put(TAG_INPUTS, inputs);
             }
         }
-        // Sent as components, not as their English text: the server picks the reason but cannot know the
-        // player's language. NbtOps carries the key and its arguments; the client resolves them.
+        // 以组件形式发送，而不是它们的英文文本：服务端挑出原因但无法知道
+        // 玩家的语言。NbtOps 携带键及其参数；由客户端解析它们。
         Component wait = assembler.waitReason();
         if (wait != null) {
             tag.put(TAG_WAIT, encode(wait));

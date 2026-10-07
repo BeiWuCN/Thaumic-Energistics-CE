@@ -3,10 +3,10 @@ package thaumicenergistics_ce.blockentity.vibrationchamber;
 import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber.BurnState;
 
 /**
- * The chamber's burn: what one unit of fuel is worth and how much of it is left. Potentia burns
- * 1.6x duration and power, ignis at the base rate and everything else at half; BurnState is worked
- * out from the room left in the energy slot, never from the state before. {@link #update} tells
- * the client when the state turns, and the caller is told when a unit burns out.
+ * 振动室的燃烧：一份燃料值多少，它还剩下多少。[Potentia] 燃烧的持续时间和
+ * 功率为 1.6 倍，[ignis] 为基础速率，其它一律减半；[BurnState] 由能量槽
+ * 剩余的空间推出，绝不沿用之前的状态。{@link #update} 在状态翻转时通知
+ * 客户端，而调用方会在一份燃料烧尽时被告知。
  */
 final class ChamberBurn {
 
@@ -45,7 +45,7 @@ final class ChamberBurn {
         return state == BurnState.PAUSED_FULL;
     }
 
-    /** Whether the burn may run at all: burning, or idle with fuel waiting. */
+    /** 燃烧是否允许进行：要么正在燃烧，要么空闲但有燃料在等。 */
     boolean mayBurn() {
         return state.mayBurn();
     }
@@ -67,8 +67,8 @@ final class ChamberBurn {
     }
 
     /**
-     * Reads the state off the room left and the burn, and tells the client when it turned. "Full" is a
-     * level, not a latch, so the state, and the line the screen draws from it, follows the gauge.
+     * 根据剩余空间与燃烧读出状态，并在状态翻转时通知客户端。“Full” 是一个
+     * 水平而非锁存，所以状态以及界面据此绘制的线条都随仪表走。
      */
     void update(boolean onNetwork) {
         BurnState next;
@@ -89,17 +89,17 @@ final class ChamberBurn {
         }
     }
 
-    /** One tick of the burn, or of the smallest burn possible; never zero, so room/rate is a tick count. */
+    /** 一次燃烧的 tick 量，或最小可能燃烧量；绝不为 0，因此 剩余空间/速率 就是 tick 数。 */
     double tickPower() {
         return burnTicksRemaining > 0 ? Math.max(aePerTick, 1.0) : BASE_AE_PER_TICK / 2.0;
     }
 
-    /** Only ticks whose power fits are burnt, the rest later: the unit freezes, it does not restart. */
+    /** 只烧掉其功率装得下的那些 tick，剩下的以后再说：这份燃料冻结，而不是重新开始。 */
     int ticksThatFit(int ticksSinceLast) {
         return (int) Math.min(burnTicksRemaining, Math.min(ticksSinceLast, energy.room() / tickPower()));
     }
 
-    /** Takes the burnt ticks off the unit; true once it ran out, which the caller tells the client. */
+    /** 把烧掉的 tick 从这份燃料上扣掉；烧尽时返回 true，由调用方通知客户端。 */
     boolean spend(int burntTicks) {
         burnTicksRemaining -= burntTicks;
         if (burnTicksRemaining > 0) {
@@ -110,7 +110,7 @@ final class ChamberBurn {
         return true;
     }
 
-    /** Lights the unit: one unit of fuel out of the slot, and the aspect's ticks and rate into the burn. */
+    /** 点燃这份燃料：从槽位取出一份燃料，并把该要素的 tick 数和速率写入燃烧。 */
     void start() {
         int burnTicks = burnTicksFor();
         double power = powerFor();
@@ -153,7 +153,7 @@ final class ChamberBurn {
         aePerTick = rate;
     }
 
-    /** The state a reload starts in; the caller works it out from the slot rather than reading it back. */
+    /** 重载后起始的状态；调用方从槽位推出它，而不是把它读回来。 */
     void setState(BurnState restored) {
         state = restored;
     }

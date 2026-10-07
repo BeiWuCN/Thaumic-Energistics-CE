@@ -13,34 +13,34 @@ import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 
 /**
- * The Occult Monitor's Jade server data: whether it can see, and what it sees.
- * The server reads the altar and writes the answers into the data tag; stability is server-side.
- * The drawing half is {@code client.jade.OccultMonitorTooltip}, paired by {@link #UID}; the numbers
- * travel raw so that half can put them in the player's own words.
+ * 神秘监控器的 Jade 服务端数据：它能不能看见，以及看见了什么。
+ * 服务端读取祭坛并把结果写进数据标签；稳定性属于服务端。绘制那一半是
+ * [client.jade.OccultMonitorTooltip]，按 [UID] 配对；数字原样传递，
+ * 好让那一半用玩家自己的话把它说出来。
  */
 public class OccultMonitorProvider implements IServerDataProvider<BlockAccessor> {
 
     public static final OccultMonitorProvider INSTANCE = new OccultMonitorProvider();
 
-    /** Shared with {@code client.jade.OccultMonitorTooltip}: Jade pairs the two halves by UID. */
+    /** 与 [client.jade.OccultMonitorTooltip] 共享：Jade 按 [UID] 配对这两半。 */
     public static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "occult_monitor");
 
-    /** Whether the monitor has its book and an altar - without both it says nothing about risk.
-     * The bubble the machine syncs to its own renderer spells this word too
-     * ({@code OccultMonitorSync.TAG_REPORTING}); the two are separate documents and must stay equal. */
+    /** 监控器是否备有书与祭坛——两者缺一，它便不发表任何风险结论。
+     * 机器同步给自己渲染器的气泡也写出这个词（[OccultMonitorSync.TAG_REPORTING]）；
+     * 两者是各自独立的文档，必须保持一致。 */
     public static final String TAG_REPORTING = "Reporting";
     public static final String TAG_FOUND_ALTAR = "FoundAltar";
-    /** Whether an altar search has run since the monitor's node was last active. "No altar" is a fact
-     * about the room only once the room was searched. */
+    /** 自监控器的节点上次活跃以来是否跑过一次祭坛搜索。“没有祭坛”只有在房间被搜过之后
+     * 才是关于这个房间的事实。 */
     public static final String TAG_SEARCHED = "Searched";
-    /** Whether a thaumonomicon is on the machine. Without it the monitor is blind, not idle. */
+    /** 机器上是否装着一本神秘学书（thaumonomicon）。缺了它，监控器是失明的，而不是空闲的。 */
     public static final String TAG_HAS_BOOK = "HasBook";
     public static final String TAG_CRAFTING = "Crafting";
     public static final String TAG_TIER = "Tier";
     public static final String TAG_BASE = "BaseInstability";
     public static final String TAG_ALTAR = "AltarInstability";
-    /** The altar's live stability, times ten. See {@link #appendServerData}. */
+    /** 祭坛当前的稳定性乘以十。见 [appendServerData]。 */
     public static final String TAG_STABILITY = "Stability";
     public static final String TAG_WANTED = "Wanted";
 
@@ -63,7 +63,7 @@ public class OccultMonitorProvider implements IServerDataProvider<BlockAccessor>
         tag.putInt(TAG_TIER, risk.tier());
         tag.putInt(TAG_BASE, risk.base());
         tag.putInt(TAG_ALTAR, risk.altar());
-        // The altar's own stability, times ten: it is a float and the tag carries ints.
+        // 祭坛自身的稳定性乘以十：它是 float，而这个标签只能装 int。
         tag.putInt(TAG_STABILITY, Math.round(risk.stability() * 10.0F));
 
         ListTag wanted = new ListTag();

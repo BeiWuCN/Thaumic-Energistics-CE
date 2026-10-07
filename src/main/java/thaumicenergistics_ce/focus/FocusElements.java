@@ -7,17 +7,17 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * Thaumaturge's focus element registry, as seen from this mod. {@code FocusElementType} is a
- * NeoForge registry, so register a {@link DeferredRegister} of your own over the same
- * {@code REGISTRY_KEY}, with no addon hook and nothing to mix into. Thaumaturge binds it into
- * {@code FocusEngine} before any addon's constructor runs.
+ * 从本 mod 视角看到的 Thaumaturge 核心元素注册表。{@code FocusElementType} 是一个
+ * NeoForge 注册表，因此自行针对同一个 {@code REGISTRY_KEY} 注册一个 {@link DeferredRegister} 即可，
+ * 既不需要附加 mod 钩子，也没有可混入之处。Thaumaturge 会在任何附加 mod 的构造函数
+ * 运行之前把它绑定进 {@code FocusEngine}。
  */
 public final class FocusElements {
 
     public static final DeferredRegister<FocusElementType> REGISTRY =
             DeferredRegister.create(FocusElementType.REGISTRY_KEY, ThEIds.MODID);
 
-    /** The research page blits {@code icon}, hence the {@code .png}; {@code color} is AE2's wrench tint. */
+    /** 研究页面会直接 blit {@code icon}，所以是 {@code .png}；{@code color} 是 AE2 扳手的染色。 */
     public static final DeferredHolder<FocusElementType, FocusElementType> AEWRENCH = REGISTRY.register(
             FocusEffectAEWrench.KEY.getPath(),
             () -> new FocusElementType(

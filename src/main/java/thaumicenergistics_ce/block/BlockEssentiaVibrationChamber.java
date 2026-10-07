@@ -21,9 +21,9 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
 
 /**
- * The Essentia Vibration Chamber block: horizontal facing only, because its model is not symmetric.
- * Its front carries the animated aspect texture and its top the input, so a vertical facing would
- * swap them. {@code facing} must be the exact property name, or the variants are unreachable.
+ * 振动室方块：只做水平朝向，因为它的模型不对称。
+ * 正面有动态要素贴图、顶部是输入口，因此竖直朝向会把两者
+ * 对调。{@code facing} 必须是准确的属性名，否则这些变体不可达。
  */
 public class BlockEssentiaVibrationChamber extends ThEBaseEntityBlock {
 
@@ -63,8 +63,8 @@ public class BlockEssentiaVibrationChamber extends ThEBaseEntityBlock {
     }
 
     /**
-     * Right-clicking opens the machine's screen: this is a grid machine built on AE2's block entity, not
-     * {@code ThEBaseBlockEntity}, so the base block's menu path does not reach it.
+     * 右键打开机器界面：这是基于 AE2 方块实体而非 {@code ThEBaseBlockEntity} 的
+     * 网格机器，因此基类的菜单路径到不了它。
      */
     @Override
     protected InteractionResult useWithoutItem(

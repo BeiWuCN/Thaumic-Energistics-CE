@@ -9,18 +9,18 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
-/** The numbers the menu shows. Each one is the larger of what the machine holds and what the data slots
- * carry: the block entity is the machine's own state, and a slot that has not caught up can only be
- * behind. The client menu's machine is null, so there its only source is the data slots, reached
- * through the position the open packet carried. */
+/** 菜单显示的数字。每一个都是机器持有的值与数据槽位
+ * 所携带的值中较大的那个：方块实体是机器自身的状态，而尚未跟上的槽位只可能
+ * 落后。客户端菜单的机器为 null，所以在那里唯一的来源是数据槽位，通过
+ * 打开数据包所携带的位置到达。 */
 final class AssemblerMenuReadout {
 
     private final MenuArcaneAssembler menu;
     private final ContainerData data;
 
     /**
-     * Where the machine is, sent in the open packet: the client menu's only handle on it, since its
-     * machine is null, so no position means no craft progress.
+     * 机器所在的位置，由打开数据包发送：这是客户端菜单对它唯一的抓手，因为它的
+     * 机器为 null，所以没有位置就没有合成进度。
      */
     private @Nullable BlockPos clientPos;
 
@@ -31,12 +31,12 @@ final class AssemblerMenuReadout {
         this.data = new ArcaneAssemblerReadings(menu.assembler, this::aspectForSlot);
     }
 
-    /** The table the server fills and the client reads, in the order the {@code DATA_} constants name. */
+    /** 服务端填充、客户端读取的表，顺序按 {@code DATA_} 常量所命名。 */
     ContainerData data() {
         return data;
     }
 
-    /** Takes the position the open packet carried, the client's only way to the machine. */
+    /** 接收打开数据包所携带的位置，这是客户端通向机器的唯一途径。 */
     void setClientPos(BlockPos pos) {
         this.clientPos = pos;
     }
@@ -46,8 +46,8 @@ final class AssemblerMenuReadout {
     }
 
     /**
-     * The six bar columns in the order the art paints them, not in {@code PRIMALS} order - indexing
-     * one by the other paints two columns with the wrong aspect, every bar right in height.
+     * 六个条形列，按素材绘制的顺序排列，而不是按 {@code PRIMALS} 顺序——用其中一个
+     * 去索引另一个，会让两列画上错误的要素，而每根条的高度都对。
      */
     private static final int[] BAR_ASPECTS = {
         primalIndex(TCAspects.AER),
@@ -64,21 +64,21 @@ final class AssemblerMenuReadout {
     }
 
     /**
-     * The vis banked for the bar column whose data slot is {@code index}, in whole vis, read through
-     * {@link #BAR_ASPECTS} rather than by subtracting the slot constants.
+     * 数据槽位为 {@code index} 的那个条形列所蓄积的 vis，以整数 vis 计，通过
+     * {@link #BAR_ASPECTS} 读取，而不是靠减去槽位常量。
      */
     private int aspectForSlot(int index) {
         int column = index - MenuArcaneAssembler.DATA_ASPECT_AIR;
         if (column < 0 || column >= BAR_ASPECTS.length) {
             return 0;
         }
-        // Four-unit steps, as for the pool: this is broadcast every tick.
+        // 以四为单位取整，与 vis 池相同：这个值每个 tick 都会广播。
         return (menu.assembler.getAspectVis(BAR_ASPECTS[column]) / 4) * 4;
     }
 
     /**
-     * How much one bar column holds, in art order: 0 is air, 5 is earth. Whichever channel has more, since
-     * the block entity is the machine's own state and a data slot that has not caught up can only be behind.
+     * 一个条形列持有多少，按素材顺序：0 是风，5 是土。取更大的一方，因为
+     * 方块实体是机器自身的状态，而尚未跟上的数据槽位只可能落后。
      */
     int getBarVis(int column) {
         if (column < 0 || column >= BAR_ASPECTS.length) {
@@ -103,8 +103,8 @@ final class AssemblerMenuReadout {
     }
 
     /**
-     * The machine as this side can see it, or null when there is none. On the client it is looked up from
-     * the position the server sent; an unloaded chunk answers null, which is what the data slots are for.
+     * 这一侧所能看到的机器，没有则为 null。在客户端它由服务端发来的
+     * 位置查找；未加载的区块会返回 null，数据槽位正是为此而设。
      */
     private @Nullable BlockEntityArcaneAssembler machineView() {
         if (menu.assembler != null) {

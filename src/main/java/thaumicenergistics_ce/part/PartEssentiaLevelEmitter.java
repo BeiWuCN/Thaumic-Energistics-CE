@@ -19,11 +19,11 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
- * Essentia level emitter: redstone that follows how much of one aspect the network holds.
- * Redstone, the reporting value, the upgrade slots and lit-state streaming all come from AE2's
- * emitter part. Watching goes through the grid's storage watcher rather than per-tick polling
- * because AE2 already caches the network's contents. The level is the network total, so a jar
- * mounted on a storage bus counts towards it.
+ * 源质标准发信器：跟随网络持有某个要素多少的红石信号。
+ * 红石、上报值、升级槽位与点亮状态的流式同步都来自 AE2 的
+ * 发信器部件。监视经由网格的存储监视器，而不是逐 tick 轮询，
+ * 因为 AE2 已经缓存了网络的内容。该数值是网络总量，所以挂在存储总线上的罐子
+ * 也计入其中。
  */
 public class PartEssentiaLevelEmitter extends AbstractLevelEmitterPart {
 
@@ -107,7 +107,7 @@ public class PartEssentiaLevelEmitter extends AbstractLevelEmitterPart {
                 storageWatcher.add(key);
             }
         }
-        // Ask now rather than wait: an unchanged network would otherwise report nothing until it moved.
+        // 立刻询问而不是等待：否则没变化的网络在变动之前不会上报任何东西。
         getMainNode().ifPresent(this::updateReportingValue);
         updateState();
     }

@@ -13,15 +13,15 @@ import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
- * The box's essentia port, on the face behind the screen. It both asks and is asked: the box pulls
- * from whatever sits against that face, and the suction it reports while a turn is short of
- * cognitio is what sets a tube line moving. A tube only grows an arm toward a neighbour that
- * answers this capability, so the port is also what makes the box visible to a line at all.
+ * 箱子的源质端口，在屏幕背后的那个面上。它既索取也被索取：箱子从贴着那个面
+ * 的东西抽取，而它在一次转动缺少 cognitio 时报告的吸力
+ * 就是让一条管道线动起来的东西。管道只会朝一个能应答这个能力的邻居长出手臂，
+ * 所以端口也是让箱子对一条线可见的东西。
  */
 final class GachaEssentiaPort implements IEssentiaTransport {
 
-    /** The suction the box reports while a turn is short of cognitio: the strength Thaumaturge's own
-     * essentia port asks with, which is enough to out-pull a jar and set a whole line moving. */
+    /** 箱子在一次转动缺少 cognitio 时报告的吸力：Thaumaturge 自己的源质端口
+     * 索取时用的强度，足以压过一个罐并让整条线动起来。 */
     private static final int SUCTION = 128;
 
     private final BlockEntityGachaBox box;
@@ -32,7 +32,7 @@ final class GachaEssentiaPort implements IEssentiaTransport {
         this.neighbours = new CachedEssentiaNeighbours(box);
     }
 
-    /** Banks what the face behind the box is holding out, up to what the next turn still needs. */
+    /** 把箱子背后那个面递出来的东西存入，上限是下一次转动还需要的量。 */
     void sip(ServerLevel server) {
         int need = box.cognitio().room();
         if (need <= 0) {
@@ -57,8 +57,8 @@ final class GachaEssentiaPort implements IEssentiaTransport {
         box.cognitio().add(got);
     }
 
-    /** Takes from a tube a call at a time: a tube carries one point and hands over one per call, so
-     * a tube line fills the reserve over as many seconds as it has points to give. */
+    /** 从管道一次一调用地取：一根管道携带一点、每次调用交出一点，
+     * 所以一条管道线会花掉它有多少点可给就有多少秒来填满储备。 */
     private static int drainTube(IEssentiaTransport tube, Direction face, Holder<IAspect> aspect, int want) {
         Direction into = face.getOpposite();
         if (!tube.canOutputTo(into) || !aspect.equals(tube.getEssentiaType(into))) {
@@ -75,59 +75,59 @@ final class GachaEssentiaPort implements IEssentiaTransport {
         return got;
     }
 
-    /** Whether a point would be welcome right now: the box can turn and is short of a turn's fuel. */
+    /** 现在一点是否会被接受：箱子能转动并且缺一次转动的燃料。 */
     private boolean hungry() {
         return box.cognitio().wants() && box.canTurnNow();
     }
 
-    /** Cognitio as the level hands it out, for the capability answers that arrive without a server. */
+    /** cognitio 按 level 给出的形式，用于那些在没有服务端时到达的能力回答。 */
     private static @Nullable Holder<IAspect> cognitio(@Nullable Level level) {
         return level == null ? null : AEssentiaKeyType.aspectOf(level, TCAspects.COGNITIO.location());
     }
 
-    /** Essentia arrives through the face behind the screen and through no other, which is also where
-     * a tube line has to end for its arm to form at all. */
+    /** 源质只经过屏幕背后的那个面到达，不经任何其他面，那也是一条管道线
+     * 必须结束、它的手臂才能形成的地方。 */
     @Override
     public boolean isConnectable(Direction face) {
         return face == box.backFace();
     }
 
-    /** The back face is an inlet; a tube arm anywhere else is not the box's to take. */
+    /** 背面是入口；其他任何位置的管道手臂都不归箱子取用。 */
     @Override
     public boolean canInputFrom(Direction face) {
         return face == box.backFace();
     }
 
-    /** Nothing is ever drawn back out: the reserve is fuel for a turn, not stock to be shared. */
+    /** 绝不把任何东西再抽出去：储备是一次转动的燃料，不是可供分享的存货。 */
     @Override
     public boolean canOutputTo(Direction face) {
         return false;
     }
 
-    /** The box makes its own suction out of what the turn still needs, so a tube cannot set it. */
+    /** 箱子用这次转动还需要的量自己造出吸力，所以管道设定不了它。 */
     @Override
     public void setSuction(@Nullable Holder<IAspect> aspect, int amount) {}
 
-    /** What the box is asking for: cognitio, and only while it is short of a turn's worth. */
+    /** 箱子在索要什么：cognitio，并且只在它还缺一次转动的量时。 */
     @Override
     public @Nullable Holder<IAspect> getSuctionType(Direction face) {
         return face == box.backFace() && hungry() ? cognitio(box.getLevel()) : null;
     }
 
-    /** The suction that sets a line moving: a tube follows its hungriest neighbour, so a box that
-     * cannot turn asks for nothing rather than emptying a jar it has no use for yet. */
+    /** 让一条线动起来的吸力：管道跟随它最饿的邻居，所以一个转不动的箱子
+     * 什么也不索要，而不是把它还用不上的一个罐抽空。 */
     @Override
     public int getSuctionAmount(Direction face) {
         return face == box.backFace() && hungry() ? SUCTION : 0;
     }
 
-    /** Zero: every point the box holds is already spoken for by the next turn it pays for. */
+    /** 零：箱子持有的每一点都已经被它要支付的下一次转动预定了。 */
     @Override
     public int takeEssentia(Holder<IAspect> aspect, int amount, Direction face) {
         return 0;
     }
 
-    /** Banks a point pushed in through the back face, for a line that hands over what it carries. */
+    /** 把经过背面推入的一点存入，用于一条把它携带的东西交出来的线。 */
     @Override
     public int addEssentia(Holder<IAspect> aspect, int amount, Direction face) {
         int room = spaceFor(aspect, face);
@@ -137,7 +137,7 @@ final class GachaEssentiaPort implements IEssentiaTransport {
         return box.cognitio().add(Math.min(amount, room));
     }
 
-    /** The reserve never holds more than one turn costs, so the room is what is still missing. */
+    /** 储备持有的量从不超一次转动的花费，所以余量就是还缺的那部分。 */
     @Override
     public int spaceFor(Holder<IAspect> aspect, Direction face) {
         if (face != box.backFace() || !hungry() || !aspect.equals(cognitio(box.getLevel()))) {
@@ -146,19 +146,19 @@ final class GachaEssentiaPort implements IEssentiaTransport {
         return box.cognitio().room();
     }
 
-    /** Nothing sits in the box to route: what has been banked is not a container a tube can read. */
+    /** 箱子里没有任何东西可供路由：已经存入的东西不是一个管道能读取的容器。 */
     @Override
     public @Nullable Holder<IAspect> getEssentiaType(Direction face) {
         return null;
     }
 
-    /** Zero for the same reason: a tube reading the box finds nothing it may take away. */
+    /** 同样的原因，为零：管道读箱子时找不到它可以拿走的东西。 */
     @Override
     public int getEssentiaAmount(Direction face) {
         return 0;
     }
 
-    /** No threshold: a line may hand a point over on its own terms rather than match a strength. */
+    /** 没有阈值：一条线可以按自己的条件交过来一点，而不必匹配某个强度。 */
     @Override
     public int getMinimumSuction() {
         return 0;

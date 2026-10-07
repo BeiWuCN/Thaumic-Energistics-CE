@@ -7,17 +7,17 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * One well in the Distillation Encoder's aspect row. Nothing may be placed in it or taken out of
- * it, because a click means "use this one" and so the menu intercepts the click first. The slot
- * index is the aspect's position in the row: slot {@code i} is the i-th aspect the source item
- * offers, and {@code -1} marks the picked-aspect display.
+ * 蒸馏编码器要素行中的一个槽位。不得放入或取出任何东西，因为一次点击意味着
+ * 「用这一个」，所以菜单会先截获这次点击。槽位索引就是该要素在行中的位置：槽位
+ * {@code i} 是源物品提供的第 i 个要素，
+ * {@code -1} 标记已选要素的显示。
  */
 public class AspectSelectSlot extends Slot {
 
     private final int aspectIndex;
 
-    // The row's size and its picked aspect arrive as reads rather than as the menu itself: a slot that
-    // names its menu is one half of the menu <-> slot cycle.
+    // 行的大小与已选要素以读取的形式传入，而不是直接传菜单本身：一个指名自己菜单的槽位
+    // 正是菜单与槽位循环依赖的一半。
     private final IntSupplier aspectCount;
 
     private final IntSupplier selection;

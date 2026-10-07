@@ -7,10 +7,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * The Knowledge Inscriber's button, drawn from the reference build's own two-state sprite.
- * A 32x32 sheet holds two 32x13 frames, idle at v=0 and hovered at v=15, with no disabled frame:
- * the label says what is wrong (No Core, Invalid, Full), so idle is drawn whenever not hovered.
- * The label is centred two pixels down, as the reference does: vanilla centring sits too low.
+ * 知识铭刻机的按钮，绘制自参考构建自己的两态贴图。
+ * 一张 32x32 的图集放两个 32x13 的帧，空闲在 v=0、悬停在 v=15，没有禁用帧：
+ * 标签说明哪里不对（“No Core”、“Invalid”、“Full”），所以只要没悬停就画空闲态。
+ * 标签向下居中两像素，与参考构建的做法一致：原版居中位置太低。
  */
 public class InscriberButton extends Button {
 

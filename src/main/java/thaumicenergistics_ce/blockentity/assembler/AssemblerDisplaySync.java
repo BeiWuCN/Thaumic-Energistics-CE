@@ -9,29 +9,29 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.blockentity.ClientSyncSend;
 import thaumicenergistics_ce.util.ThELog;
 
-/** The assembler's display and its network sync, split out of {@link BlockEntityArcaneAssembler}: what
- * the renderer and the menu draw, how often it goes out, and how an update tag goes out and comes back.
- * Same package, so it reaches the machine's state directly; the four overrides ({@code getUpdateTag},
- * {@code handleUpdateTag}, {@code onDataPacket}) stay on the block entity and delegate here.
+/** 组装机的显示及其网络同步，从 {@link BlockEntityArcaneAssembler} 拆出：
+ * 渲染器和菜单绘制什么、多久发出一次，以及更新标签如何发出与回来。
+ * 同包，所以可直接访问机器状态；四个覆写（{@code getUpdateTag}、
+ * {@code handleUpdateTag}、{@code onDataPacket}）留在方块实体上并委托到这里。
  */
 final class AssemblerDisplaySync {
 
-    /** Throttle on the per-tick display pushes; walking a craft's progress one packet per tick is not
-     * worth it, and the machine still reads as live at this rate. */
+    /** 对每 tick 显示推送的节流；按每 tick 一个数据包推送合成进度不
+     * 值得，而在这一速率下机器看起来仍是实时的。 */
     private static final int UPDATE_INTERVAL = 4;
 
-    /** The wire names. The first is spelled the same way by the Jade payload
-     * ({@code ArcaneAssemblerProvider.TAG_DISCOUNT}); the two are a pair and must stay equal. */
+    /** 线格式名称。第一个与 Jade 载荷（{@code ArcaneAssemblerProvider.TAG_DISCOUNT}）
+     * 拼写相同；两者是一对，必须保持相等。 */
     private static final String TAG_GEAR_DISCOUNT = "GearDiscount";
-    /** The product the renderer previews: sent on a slower clock, so an absent key means "unchanged". */
+    /** 渲染器预览的产物：以更慢的时钟发送，所以缺少该键表示"未改变"。 */
     private static final String TAG_PREVIEW = "Preview";
 
     private final BlockEntityArcaneAssembler owner;
 
     private long lastUpdate;
 
-    /** Renderer-only copy of the running craft's product, written from the update tag: the real one is
-     * in {@link BlockEntityArcaneAssembler#TARGET_SLOT}. */
+    /** 运行中合成产物的仅渲染器副本，从更新标签写入：真实的那份
+     * 在 {@link BlockEntityArcaneAssembler#TARGET_SLOT} 中。 */
     private ItemStack previewStack = ItemStack.EMPTY;
 
     AssemblerDisplaySync(BlockEntityArcaneAssembler owner) {
@@ -43,11 +43,11 @@ final class AssemblerDisplaySync {
     }
 
     // ------------------------------------------------------------------
-    // Write and read
+    // 写入与读取
     // ------------------------------------------------------------------
 
-    /** Adds the synced half of the machine's state to {@code tag}: the craft, the vis pool, the gear
-     * discount and - on a slower clock than the rest - the product the renderer previews. */
+    /** 把机器状态的同步部分加入 {@code tag}：合成、vis 池、装备
+     * 折扣，以及——比其余部分更慢的时钟——渲染器预览的产物。 */
     void writeSync(CompoundTag tag, HolderLookup.Provider registries) {
         owner.craft.writeSync(tag);
         owner.vis.writeNbt(tag);
@@ -57,15 +57,15 @@ final class AssemblerDisplaySync {
         }
     }
 
-    /** Applies an update tag on the client, the route a per-tick update takes. A packet lands here, its
-     * default implementation ending in {@code loadAdditional}, which wiped the craft state. */
+    /** 在客户端应用更新标签，即每 tick 更新走的路径。数据包落在这里，其
+     * 默认实现最终调用 {@code loadAdditional}，会清空合成状态。 */
     void applySyncedState(CompoundTag tag, HolderLookup.Provider registries) {
         owner.suppressNotify = true;
         try {
             owner.craft.readSync(tag);
             owner.vis.readSync(tag);
             owner.upgrades().setGearDiscount(tag.getInt(TAG_GEAR_DISCOUNT));
-            // A display: an absent key means "unchanged", the product going out on a slower clock.
+            // 显示：缺少该键表示"未改变"，产物以更慢的时钟发出。
             if (tag.contains(TAG_PREVIEW)) {
                 previewStack = ItemStack.parseOptional(registries, tag.getCompound(TAG_PREVIEW));
             }
@@ -75,11 +75,11 @@ final class AssemblerDisplaySync {
     }
 
     // ------------------------------------------------------------------
-    // Display
+    // 显示
     // ------------------------------------------------------------------
 
-    /** Empties the target and preview slots - what the renderer and the menu draw - reporting only when
-     * there was something to clear. */
+    /** 清空目标槽位和预览槽位——渲染器和菜单绘制的内容——仅在
+     * 确实有东西可清空时才报告。 */
     void clearDisplay(boolean report) {
         boolean hadAnything =
                 !owner.inventory.getItem(BlockEntityArcaneAssembler.TARGET_SLOT).isEmpty();
@@ -102,11 +102,11 @@ final class AssemblerDisplaySync {
     }
 
     // ------------------------------------------------------------------
-    // Display bands
+    // 显示区段
     // ------------------------------------------------------------------
 
-    /** The bands the machine writes for itself: the pattern mirror, the target well and the preview
-     * grid. None of it was ever a player's item - they hold copies - so none of it is dropped. */
+    /** 机器为自己写入的区段：样板镜像、目标槽和预览
+     * 网格。它们原本都不是玩家的物品——玩家持有的是副本——所以都不掉落。 */
     static boolean isMachineOwned(int slot) {
         return slot >= BlockEntityArcaneAssembler.PATTERN_SLOT_START
                         && slot < BlockEntityArcaneAssembler.GEAR_SLOT_START
@@ -114,18 +114,18 @@ final class AssemblerDisplaySync {
                         && slot < BlockEntityArcaneAssembler.UPGRADE_SLOT_START;
     }
 
-    /** The part of that display a player may never put an item into: the target well and the preview
-     * grid, both of which the machine overwrites from the running craft. */
+    /** 该显示中玩家永远不能放入物品的部分：目标槽和预览
+     * 网格，二者都会被运行中的合成覆盖。 */
     static boolean isDisplaySlot(int slot) {
         return slot == BlockEntityArcaneAssembler.TARGET_SLOT
                 || slot >= BlockEntityArcaneAssembler.PREVIEW_SLOT_START
                         && slot < BlockEntityArcaneAssembler.UPGRADE_SLOT_START;
     }
 
-    /** Writes the running craft's display - the product into the target well, the 3x3 into the preview
-     * grid - behind the notify guard: without it the container's listener takes every write for a
-     * player changing the machine, and rebuilds the pattern list off the core each time. The grid
-     * exists here, on the server, since the running craft does; the client is sent a copy. */
+    /** 写入运行中合成的显示——产物放入目标槽，3x3 放入预览网格——
+     * 位于 notify 守卫之后：没有它，容器的监听器会把每次写入当成玩家
+     * 在改动机器，并每次都从核心重建样板列表。网格在服务端这里存在，因为
+     * 运行中的合成存在；客户端收到的是副本。 */
     void refreshDisplaySlots(ItemStack target, List<ItemStack> grid) {
         owner.suppressNotify = true;
         try {
@@ -141,8 +141,8 @@ final class AssemblerDisplaySync {
         }
     }
 
-    /** Rewrites the pattern slots from the advertised set: the mirror a player reads, not a real
-     * inventory. */
+    /** 从公布的集合重写样板槽位：玩家读到的镜像，不是真实
+     * 物品栏。 */
     void refreshPatternSlots() {
         if (owner.getLevel() == null) {
             return;
@@ -165,7 +165,7 @@ final class AssemblerDisplaySync {
         }
     }
 
-    /** Pushes the display to the watching players, at most every {@link #UPDATE_INTERVAL} ticks. */
+    /** 把显示推送给观看的玩家，最多每 {@link #UPDATE_INTERVAL} tick 一次。 */
     void markDisplayForUpdate() {
         if (owner.getLevel() == null) {
             return;

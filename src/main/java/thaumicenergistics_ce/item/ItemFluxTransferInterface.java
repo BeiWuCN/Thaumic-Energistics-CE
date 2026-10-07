@@ -7,7 +7,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import thaumicenergistics_ce.part.PartFluxTransferInterface;
 
-/** The Flux Transfer Interface as an item, for placing it on a cable. */
+/** 咒波传输接口作为物品的形态，用于把它装到线缆上。 */
 public class ItemFluxTransferInterface extends Item implements IPartItem<PartFluxTransferInterface> {
 
     public ItemFluxTransferInterface(Item.Properties properties) {

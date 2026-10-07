@@ -13,12 +13,12 @@ import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
 /**
- * The backpack: a box with an antenna, and a pearl that says whether the network is there.
- * It is baked from a {@link LayerDefinition}, not a registered model layer. The three boxes are the
- * reference build's own units and rotations, matching the ten skin textures, and lie sideways: the
- * renderer turns the model a quarter turn about Y, and swapping the box dimensions instead would
- * rotate the texture on every face. The pearl is four double-sided faces built by hand, so it can
- * be red as easily as green.
+ * 背包：一个带天线的盒子，以及一颗表示网络是否在线的珍珠。
+ * 它由 {@link LayerDefinition} 烘培而成，不是注册的模型层。三个盒子用的是
+ * 参考构建自身的单位和旋转，与十张皮肤纹理对应，并且是侧躺的：
+ * 渲染器把模型绕 Y 轴转四分之一圈，而改为交换盒子尺寸
+ * 会让每个面上的纹理都转过去。珍珠是手工构建的四个双面面，
+ * 所以它变红和变绿一样容易。
  */
 public final class GolemBackpackModel {
 
@@ -28,14 +28,14 @@ public final class GolemBackpackModel {
     private static final float PEARL_SIZE = 0.125F;
 
     /**
-     * How far above the pack's origin the pearl's underside sits, in the pearl's own units: 2.85 puts it on
-     * the antenna's tip (3.0 in these units) rather than floating above it.
+     * 珍珠底面位于背包原点上方的高度，以珍珠自身的单位计：2.85 让它贴在
+     * 天线尖端（这些单位下为 3.0），而不是悬浮在其上方。
      */
     private static final float PEARL_BOTTOM = 2.85F;
 
     private static final float PEARL_HALF_WIDTH = 0.55F;
 
-    /** The pearl's corner in the skin texture, in sixteenths. */
+    /** 珍珠在皮肤纹理中的一角，以十六分之一为单位。 */
     private static final float PEARL_MIN_U = 8.0F / 16.0F;
     private static final float PEARL_MAX_U = 13.5F / 16.0F;
     private static final float PEARL_MIN_V = 6.0F / 16.0F;
@@ -82,7 +82,7 @@ public final class GolemBackpackModel {
 
         for (int face = 0; face < 4; face++) {
             poseStack.pushPose();
-            // Faces 1 and 3 turn a quarter turn, which puts them on the other two sides of the antenna.
+            // 面 1 和面 3 转四分之一圈，从而落到天线的另外两侧。
             if ((face & 1) == 1) {
                 poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
             }
@@ -116,8 +116,8 @@ public final class GolemBackpackModel {
     }
 
     /**
-     * One corner, transformed and written. The scratch vector is reused rather than allocated: this runs
-     * once per vertex per golem per frame, and a backpack should not be the reason frame time moves.
+     * 一个角点，经变换后写出。临时向量复用而不重新分配：这段代码
+     * 每帧对每个傀儡的每个顶点都跑一次，背包不该成为帧时间变化的理由。
      */
     private static void addVertex(VertexConsumer buffer, Matrix4f matrix, Vector4f scratch, float[] corner,
             float[] uv, int red, int green, int blue, int packedLight, int packedOverlay, float normal) {

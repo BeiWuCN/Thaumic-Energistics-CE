@@ -19,15 +19,15 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * One golem's resolved route into an ME network: a link to an access point, thrown away after
- * use. A backpack holds a {@link GlobalPos} and nothing else, so the block there must be an
- * access point with a grid in range of the golem, resolved per operation so that walking away
- * is noticed at once. Only items move, and a network that cannot pay moves nothing, since
- * AE2's powered helpers decide.
+ * 单个傀儡通往 ME 网络的一条已解析路径：指向某个接入点的链接，用完即弃。
+ * 背包只保存一个 {@link GlobalPos}，别无他物，因此那里的方块必须是一个
+ * 接入点，且其网格在傀儡的可达范围内；每次操作都重新解析，这样一旦走开
+ * 就会立刻被发现。只搬运物品，而付不起能量的网络什么也不搬，
+ * 因为这一步由 AE2 的耗能辅助类判定。
  */
 public final class GolemWirelessLink {
 
-    /** Items per operation, by golem rank. The reference build's own numbers, selected by rank. */
+    /** 每次操作的物品数，按傀儡等级。参照实现自己的一组数值，按等级选取。 */
     private static final int[] ITEM_RATES = {8, 24, 32};
 
     private final MEStorage storage;
@@ -60,8 +60,8 @@ public final class GolemWirelessLink {
             return null;
         }
 
-        // The access point is billed for the transfer, and is an action host, which AE2's security and
-        // channel accounting expect for anything acting on a grid's behalf.
+        // 这次传输记在接入点账上，而它充当动作宿主，AE2 的安全与
+        // 频道统计正是这样要求任何代表网格行事的对象的。
         return new GolemWirelessLink(
                 grid.getStorageService().getInventory(),
                 grid.getEnergyService(),
@@ -69,10 +69,10 @@ public final class GolemWirelessLink {
     }
 
     /**
-     * Puts as much of a stack into the network as it will take, and shrinks the stack by that much. Safe
-     * because {@code getCarrying()} hands out the golem's own live stacks, so the caller is shrunk in place.
+     * 把物品堆里网络愿意收下的那部分放进去，并按该数量缩减这个物品堆。这样做是安全的，
+     * 因为 {@code getCarrying()} 交出的是傀儡自己正在使用的活物品堆，所以调用方会被就地缩减。
      *
-     * @return how many items were accepted, which is zero for a network that is full or out of power.
+     * @return 被接收的物品数量；网络已满或电力耗尽时为 0。
      */
     public long insert(ItemStack stack, int limit) {
         AEItemKey key = AEItemKey.of(stack);
@@ -92,8 +92,8 @@ public final class GolemWirelessLink {
     }
 
     /**
-     * Whether the golem is in range of an active access point on the grid it is linked to. The class
-     * asked for has to be the concrete one - see the note on {@code owner.getClass()}.
+     * 傀儡是否处在其所链接网格上某个活动接入点的范围内。所查询的类
+     * 必须是具体类——见 {@code owner.getClass()} 处的说明。
      */
     private static boolean inRange(ServerLevel level, IGrid grid, EntityThaumaturgeGolem golem) {
         for (WirelessAccessPointBlockEntity accessPoint : grid.getMachines(WirelessAccessPointBlockEntity.class)) {
@@ -114,8 +114,8 @@ public final class GolemWirelessLink {
     }
 
     /**
-     * Why {@link #open} refused this golem, in words, for the trace. A second pass over the same checks
-     * rather than a status carried out of {@code open}: "nothing happened" is not a report.
+     * 以文字说明 {@link #open} 为何拒绝了该傀儡，供追踪使用。再走一遍同样的检查，
+     * 而不是从 {@code open} 带出一个状态：「什么都没发生」不构成一份报告。
      */
     static String refusal(EntityThaumaturgeGolem golem, GlobalPos target) {
         if (!(golem.level() instanceof ServerLevel serverLevel)) {

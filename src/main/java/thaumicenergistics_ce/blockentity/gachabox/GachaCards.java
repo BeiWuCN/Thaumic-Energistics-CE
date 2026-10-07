@@ -10,9 +10,9 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The box's four speed-card slots, in the order the cards went in, so the saved tag stays
- * positional. The array is never handed out: a caller gets a read-only view, or the slots it is
- * emptying. Only the cards live here - the brain on top is a blockstate, not an inventory item.
+ * 箱子的四个速度卡片槽位，按卡片放入的顺序排列，所以保存的 tag 保持
+ * 位置性。数组从不交出去：调用方拿到的是只读视图，或者它正在清空的槽位。
+ * 只有卡片住在这里——上面的脑是方块状态，不是物品栏物品。
  */
 final class GachaCards {
 
@@ -40,12 +40,12 @@ final class GachaCards {
         return count() < slots.length;
     }
 
-    /** The cards as they sit, for the tooltip's icon row: a read-only view, so nothing gets copied. */
+    /** 卡片当前的样子，用于 tooltip 的图标行：只读视图，所以不会复制任何东西。 */
     List<ItemStack> view() {
         return List.of(slots);
     }
 
-    /** Puts one speed card in the first empty slot; false when the box is already full of them. */
+    /** 把一张速度卡片放进第一个空槽位；箱子已经装满卡片时返回 false。 */
     boolean add(ItemStack held) {
         for (int slot = 0; slot < slots.length; slot++) {
             if (slots[slot].isEmpty()) {
@@ -57,7 +57,7 @@ final class GachaCards {
         return false;
     }
 
-    /** Takes the cards back out, for the player who took the brain out of the box. */
+    /** 把卡片取出来，给那个从箱子里取走脑的玩家。 */
     List<ItemStack> take() {
         List<ItemStack> taken = new ArrayList<>(slots.length);
         for (int slot = 0; slot < slots.length; slot++) {
@@ -75,8 +75,8 @@ final class GachaCards {
     void save(CompoundTag tag, HolderLookup.Provider registries) {
         ListTag saved = new ListTag();
         for (ItemStack card : slots) {
-            // An empty slot has to go through the optional form: the plain save refuses to encode it,
-            // and a throw here would cost the whole tag, the buffer and the bound owner with it.
+            // 空槽位必须走可选形式：普通的保存拒绝编码它，
+            // 而这里抛异常会让整个 tag 一起赔进去，连同缓冲和绑定的所有者。
             saved.add(card.saveOptional(registries));
         }
         tag.put(TAG_CARDS, saved);

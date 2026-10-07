@@ -7,10 +7,10 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The receivers one provider serves, and the idle power they cost it. A link is refused with the
- * reason as its message - already linked, too far, or one link too many - and positions are stored
- * immutable, so a receiver that moves is a different receiver. Idle power is the base plus a share
- * per link, set on every change and never saved.
+ * 一个供应器服务的接收端，以及它们给它带来的空闲功耗。链路被拒绝时以原因
+ * 作为消息——已绑定、距离太远，或链路过多——位置以不可变方式存储，
+ * 所以移动过的接收端就是另一个接收端。空闲功耗是基础值加上每条链路的分摊，
+ * 每次变化时设置，从不保存。
  */
 final class ReceiverLinks {
 
@@ -26,7 +26,7 @@ final class ReceiverLinks {
         this.provider = provider;
     }
 
-    /** A refusal, or null when the link was made; the message is what the connector shows. */
+    /** 被拒绝，或链路建立时为 null；消息就是连接端显示的内容。 */
     @Nullable String add(BlockPos receiver) {
         if (linked.contains(receiver)) {
             return null;
@@ -67,7 +67,7 @@ final class ReceiverLinks {
         return List.copyOf(linked);
     }
 
-    /** Drops links whose receiver is gone; true when one went, so the provider can retick at once. */
+    /** 丢弃接收端已消失的链路；有链路被丢弃时为 true，这样供应器可以立即重 tick。 */
     boolean pruneDead() {
         Level level = provider.getLevel();
         if (level == null || linked.isEmpty()) {
@@ -87,7 +87,7 @@ final class ReceiverLinks {
         linked.addAll(positions);
     }
 
-    /** Base idle power plus a share per link: the figure the grid charges this provider. */
+    /** 基础空闲功耗加上每条链路的分摊：网格向此供应器收取的数值。 */
     void updateIdlePower() {
         provider.getMainNode().setIdlePowerUsage(IDLE_POWER + POWER_PER_RECEIVER * linked.size());
     }

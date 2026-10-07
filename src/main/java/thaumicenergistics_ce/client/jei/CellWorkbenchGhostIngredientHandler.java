@@ -16,10 +16,10 @@ import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 import thaumicenergistics_ce.network.PartitionWellPayload;
 
 /**
- * Lets the player drag an aspect from JEI into an Essentia Cell Workbench partition well.
- * Dragging is what a player expects from every other filter grid in AE2, and these wells are the
- * same kind: only aspects are offered a target, because the wells hold keys and an item has nowhere
- * to go. The mark is sent to the server, not written into the slot, in PartitionWellPayload.
+ * 让玩家把 JEI 里的要素拖进源质元件工作台的分区格。
+ * 拖拽是玩家对 AE2 里其他所有过滤网格的预期，而这些格属于同一类：
+ * 只有要素会被提供落点，因为格中存的是 [AEKey]，物品无处可放。标记会发给
+ * 服务端，而不是写进槽位，走的是 [PartitionWellPayload]。
  */
 public class CellWorkbenchGhostIngredientHandler
         implements IGhostIngredientHandler<ScreenEssentiaCellWorkbench> {
@@ -43,15 +43,15 @@ public class CellWorkbenchGhostIngredientHandler
 
     @Override
     public void onComplete() {
-        // Nothing to release: a partition well never took an item from the player.
+        // 没有要释放的东西：分区格从不接收玩家手上的物品。
     }
 
     private record WellTarget<I>(MenuEssentiaCellWorkbench menu, int well, int guiLeft, int guiTop)
             implements Target<I> {
 
         /**
-         * Builds a target for a partition well, or {@code null} for anything else: AE2's config inventory
-         * backs a well, and a cell in the workbench is what makes one writable.
+         * 为一个分区格构建目标，其他情况则返回 {@code null}：格背后是 AE2 的配置物品栏，
+         * 而工作台里装着存储元件才使它可写。
          */
         static <I> WellTarget<I> of(MenuEssentiaCellWorkbench menu, int well, int guiLeft, int guiTop) {
             Slot slot = menu.slots.get(menu.partitionSlotIndex(well));
@@ -64,8 +64,8 @@ public class CellWorkbenchGhostIngredientHandler
         }
 
         /**
-         * Where JEI draws this target, in screen pixels: the GUI's offset is added because JEI fills
-         * this rectangle with no translation of its own, while a slot's x and y are relative to the corner.
+         * JEI 绘制该目标的位置，单位为屏幕像素：要加上 GUI 的偏移，因为 JEI 填充
+         * 这个矩形时自己不做任何平移，而槽位的 x 和 y 是相对 GUI 角点的。
          */
         @Override
         public Rect2i getArea() {
@@ -80,12 +80,12 @@ public class CellWorkbenchGhostIngredientHandler
             }
             ResourceLocation id = aspect.aspect().unwrapKey().map(key -> key.location()).orElse(null);
             if (id == null) {
-                // Not registry-backed: there is no id to send, and the server could not store a mark it
-                // cannot name.
+                // 不由注册表支撑：没有 id 可发，服务端也无法存下它叫不出名字的
+                // 标记。
                 return;
             }
-            // To the server, because this is the only write that leaves this screen: the well itself would
-            // keep the mark until the server answered with its own, empty partition.
+            // 发给服务端，因为这是本界面唯一会外发的一次写入：格自己会一直留着
+            // 这个标记，直到服务端用它自己那个空分区作答。
             PacketDistributor.sendToServer(new PartitionWellPayload(menu.containerId, well, id));
         }
     }

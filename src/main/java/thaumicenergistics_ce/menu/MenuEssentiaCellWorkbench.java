@@ -22,34 +22,34 @@ import thaumicenergistics_ce.item.ItemEssentiaCell;
 import thaumicenergistics_ce.network.PartitionWellReceiver;
 
 /**
- * The Essentia Cell Workbench's menu: the cell, its upgrade slots, and the partition being edited.
- * It is an AE2 menu, so the upgrades panel, the cell slot and the wells come with AE2's own
- * handling. The partition grid is 63 wells and a mark arrives as PartitionWellPayload; what the
- * wells hold belongs to the {@link CellPartitionEditor}, while this menu holds the slots.
+ * 源质存储元件工作台的菜单：存储元件、它的升级槽，以及正在编辑的分区。
+ * 它是一个 AE2 菜单，所以升级面板、元件槽和井都沿用 AE2 自己的
+ * 处理。分区网格是 63 口井，一次标记以 [PartitionWellPayload] 到达；井里
+ * 装什么属于 {@link CellPartitionEditor}，而这个菜单持有槽位。
  */
 public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssentiaCellWorkbench>
         implements PartitionWellReceiver, IPartitionSlotHost {
 
-    /** Client action: fill the wells from what the cell already holds. */
+    /** 客户端动作：用存储元件已有的内容填充这些井。 */
     private static final String ACTION_PARTITION = "partition";
 
-    /** Client action: empty every well. */
+    /** 客户端动作：清空每一口井。 */
     private static final String ACTION_CLEAR = "clear";
 
-    // The cell sits top right, where the art draws it; the wells and the inventory are the style's job.
+    // 存储元件位于右上角，美术图上它就在那里；井和物品栏由样式负责。
     private static final int CELL_X = 152;
     private static final int CELL_Y = 8;
 
-    // Package-private for the partition editor, which writes the cell and tells the host it changed.
+    // 包级可见，供分区编辑器使用：它写入存储元件并通知宿主已变更。
     final BlockEntityEssentiaCellWorkbench workbench;
 
-    // Built by setupConfig, which AE2's base calls while it constructs, so the field cannot be final.
+    // 由 [setupConfig] 构建，AE2 的基类在构造过程中会调用它，所以这个字段不能是 final。
     private CellPartitionEditor partitionEditor;
 
-    // Built in the constructor body: the ranges it measures need the slots AE2 has already filed.
+    // 在构造器体内构建：它测量的区间需要 AE2 已经归档好的槽位。
     private final CellWorkbenchShiftClick shiftClick;
 
-    // The wells ask this menu whether they are enabled, so the slot is kept; setupInventorySlots sets it.
+    // 井会问这个菜单自己是否启用，所以保留该槽位；由 [setupInventorySlots] 设置它。
     private Slot cellSlot;
 
     public MenuEssentiaCellWorkbench(
@@ -59,7 +59,7 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
 
     public MenuEssentiaCellWorkbench(
             int containerId, Inventory playerInventory, @Nullable BlockEntityEssentiaCellWorkbench workbench) {
-        // AE2's base calls the three setup methods from its own constructor, so they read the host.
+        // AE2 的基类在自己的构造器里调用那三个 setup 方法，所以它们读取宿主。
         super(ModMenuTypes.ESSENTIA_CELL_WORKBENCH.get(), containerId, playerInventory, host(workbench));
         this.workbench = getHost();
         this.shiftClick = new CellWorkbenchShiftClick(this);
@@ -77,7 +77,7 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
 
             @Override
             public int getMaxStackSize() {
-                // One cell per slot: a cell carries its contents in its own stack, so a pile would share one.
+                // 每个槽一个存储元件：元件的内容随身在它自己的物品堆里，所以堆叠会共用同一份内容。
                 return 1;
             }
         };
@@ -90,14 +90,14 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         this.partitionEditor =
                 new CellPartitionEditor(this, getHost().getPartition().createMenuWrapper());
         for (int well = 0; well < BlockEntityEssentiaCellWorkbench.PARTITION_SLOTS; well++) {
-            // AE2's own partition slot, so a well with no cell behind it draws itself faint and empty.
+            // AE2 自己的分区槽，所以背后没有元件的井会把自己画得暗淡而空。
             addSlot(new CellPartitionSlot(partitionEditor.partition(), this, well), SlotSemantics.CONFIG);
         }
     }
 
     /**
-     * AE2 shows the upgrade panel - frame, icons and tooltip - only while a card slot reports enabled,
-     * so the cards ride on the cell: same slots AE2 builds, only the enabled check differs.
+     * AE2 只在某个卡槽报告为启用时才显示升级面板 —— 边框、图标和 tooltip ——
+     * 所以这些卡挂在存储元件上：槽位与 AE2 构建的相同，只有启用检查不同。
      */
     @Override
     protected void setupUpgrades() {
@@ -116,21 +116,21 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
     }
 
     /**
-     * Whether a cell sits in the menu's own slot. The wells and the card slots both follow the slot rather
-     * than the block entity: on a client the host may be a stand-in, and only the slot is synced.
+     * 菜单自己的槽里是否放着存储元件。井和卡槽都跟随这个槽，而不是
+     * 方块实体：在客户端上宿主可能是个替身，而只有槽位是同步的。
      */
     boolean hasCellInMenu() {
         return cellSlot != null && cellSlot.getItem().getItem() instanceof ItemEssentiaCell;
     }
 
-    /** The cell's slot, where the one cell goes; the shift-click collaborator names its range. */
+    /** 存储元件的槽，那一个元件就放在这里；shift 点击协作者会指明它的区间。 */
     Slot cellSlot() {
         return getSlots(SlotSemantics.STORAGE_CELL).get(0);
     }
 
     /**
-     * AE2 asks this to draw a well and to let it be clicked: with no cell there is nothing to mark, so the
-     * wells go faint and empty.
+     * AE2 问这个是为了画出一口井并让它可点：没有元件就没有东西可标记，于是这些
+     * 井变得暗淡而空。
      */
     @Override
     public boolean isPartitionSlotEnabled(int well) {
@@ -145,7 +145,7 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         return slots.indexOf(getSlots(SlotSemantics.CONFIG).get(well));
     }
 
-    /** The well a slot is, or {@code -1} when the slot is not one of the partition's. */
+    /** 某个槽是哪口井；若该槽不属于分区的井，则为 {@code -1}。 */
     public int wellOf(Slot slot) {
         return getSlots(SlotSemantics.CONFIG).indexOf(slot);
     }
@@ -159,8 +159,8 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
     }
 
     /**
-     * Fills every well from the aspects the cell already holds. Sent from the client: the block entity,
-     * which owns the cell, does the write on the server.
+     * 用存储元件已有的要素填充每一口井。由客户端发出：持有该元件的
+     * 方块实体在服务端执行写入。
      */
     public void partitionToContents() {
         if (isClientSide()) {
@@ -170,7 +170,7 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         partitionEditor.partitionToContents();
     }
 
-    /** Empties every well. Sent from the client, like {@link #partitionToContents}. */
+    /** 清空每一口井。像 {@link #partitionToContents} 一样由客户端发出。 */
     public void clearPartition() {
         if (isClientSide()) {
             sendClientAction(ACTION_CLEAR);
@@ -180,8 +180,8 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
     }
 
     /**
-     * Applies a well edit that arrived from a client, the only route that reaches the server: a mark, or
-     * {@code PartitionWellPayload.CLEAR} to take one out. Refused without a cell, which holds the partition.
+     * 应用从客户端到达的井编辑，这是通往服务端的唯一路径：一次标记，或用
+     * {@code PartitionWellPayload.CLEAR} 去掉一个。没有元件则拒绝，因为分区由元件持有。
      */
     @Override
     public void setPartitionWell(
@@ -206,7 +206,7 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         ItemStack original = stack.copy();
         CellWorkbenchShiftClick.Move move = shiftClick.moveFor(slot, index, stack);
         if (move == null || !moveItemStackTo(stack, move.from(), move.to(), move.reverse())) {
-            // Nothing to hand the stack to, or the destination refused it: it stays where it is.
+            // 没有东西可以接过这个物品堆，或者目标拒收：它就留在原处。
             return ItemStack.EMPTY;
         }
 
@@ -222,7 +222,7 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
     public boolean stillValid(Player player) {
         var level = workbench.getLevel();
         if (level == null) {
-            // The stand-in that serves a client with no block entity in reach: nothing to validate against.
+            // 服务于够不到方块实体的客户端的替身：没有什么可用来校验。
             return true;
         }
         var pos = workbench.getBlockPos();
@@ -231,8 +231,8 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
     }
 
     /**
-     * The block entity the server opened, or on the client the one the opening packet names; a stand-in
-     * follows when neither is there, because AE2's base reads the host while it builds the slots.
+     * 服务端打开的那个方块实体，客户端上则是打开数据包所指的那个；两者都
+     * 没有时用替身，因为 AE2 的基类在构建槽位时会读宿主。
      */
     private static BlockEntityEssentiaCellWorkbench hostFrom(
             Inventory playerInventory, RegistryFriendlyByteBuf buf) {

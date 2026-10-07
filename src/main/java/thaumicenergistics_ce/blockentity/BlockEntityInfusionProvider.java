@@ -21,10 +21,10 @@ import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 /**
- * The Infusion Provider: lets an Infusion Altar draw essentia straight out of the ME network.
- * Nothing is buffered, because the block is a window onto the network rather than a tank, and
- * {@link #getAspects()} answers empty so no pipe treats it as a container to pump. A take through
- * {@link #takeFromContainer} is all-or-nothing: a partial take is put back and reported as failure.
+ * 注魔供应器：让注魔祭坛直接从 ME 网络抽取源质。
+ * 没有任何缓冲，因为方块是网络的一扇窗而不是一个罐子，并且
+ * {@link #getAspects()} 回答空，这样没有管道会把它当成可抽取的容器。经
+ * {@link #takeFromContainer} 的取出是全有或全无：部分取出会被放回并报为失败。
  */
 public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implements IAspectSource {
 
@@ -80,7 +80,7 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
         }
         long taken = storage.extract(key, amount, Actionable.MODULATE, actionSource);
         if (taken < amount) {
-            // The network changed between the two calls. Put back what did come out, so nothing is lost.
+            // 网络在这两次调用之间变了。把确实取出的部分放回，这样不会有东西丢失。
             if (taken > 0) {
                 storage.insert(key, taken, Actionable.MODULATE, actionSource);
             }
@@ -151,7 +151,7 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
     }
 
     // ------------------------------------------------------------------
-    // Persistence
+    // 持久化
     // ------------------------------------------------------------------
 
     @Override

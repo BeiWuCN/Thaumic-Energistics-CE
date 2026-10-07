@@ -13,15 +13,15 @@ import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Recipe;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 
 /**
- * Finds the altar the monitor watches and reads it: the room's symmetry, the ritual's instability
- * and the catalyst the ritual is about to consume. A found altar is re-checked in place, while a
- * miss backs off, because the cube is 15,625 lookups; and the survey describes the room, not the
- * ritual, so it runs even between rituals.
+ * 找到监控器所监视的祭坛并读取它：房间的对称性、仪式的
+ * 不稳定度，以及仪式即将消耗的触媒。已找到的祭坛在原地复查，而
+ * 未命中则退避，因为这个立方体是 15,625 次查找；并且勘察描述的是
+ * 房间而非仪式，所以仪式之间也会运行。
  */
 final class AltarSurvey {
 
-    /** How far off the altar may stand. {@code OccultMonitorCraftPulse} scans the same cube to find the
-     * machines that answer for it, so the two distances cannot drift apart. */
+    /** 祭坛可以站多远。{@code OccultMonitorCraftPulse} 扫描同一个立方体来找到
+     * 替它作答的机器，所以这两个距离不能漂移开。 */
     static final int ALTAR_SCAN_RANGE = 12;
 
     private static final int ALTAR_MISS_INTERVAL = 100;
@@ -38,11 +38,11 @@ final class AltarSurvey {
     private long nextCubeScan;
     private long nextSurvey;
 
-    /** Wait before the next search; doubles per miss, so a new altar is found within a second. */
+    /** 下次搜索前等待多久；每未命中一次翻倍，所以新祭坛一秒内就会被找到。 */
     private int altarMissBackoff = BlockEntityOccultMonitor.SCAN_INTERVAL;
 
     private List<BlockPos> surveyedProblems = List.of();
-    /** The altar {@link #surveyedProblems} was taken at. */
+    /** {@link #surveyedProblems} 取自的那个祭坛。 */
     private @Nullable BlockPos surveyedAt;
 
     private ItemStack cachedCatalyst = ItemStack.EMPTY;
@@ -51,10 +51,10 @@ final class AltarSurvey {
 
     private Report report = Report.NONE;
 
-    /** Whether the altar has been searched since the node was last active. "No altar" is a fact about the
-     * room only once a search has run; before one - and while the node is offline, when nothing is
-     * searched at all - the machine has not looked, and nothing may claim that it has. Not saved: a
-     * reloaded world starts out not having looked, which is the truth. */
+    /** 自节点上次活跃以来是否搜过祭坛。“没有祭坛”只有在搜索跑过之后
+     * 才是关于房间的事实；在那之前——以及节点离线、完全不做搜索时——
+     * 机器没有搜过，任何东西都不能声称它搜过。不保存：重新加载的世界一开始
+     * 就是没搜过，这是实情。 */
     private boolean altarSearched;
 
     private InfusionRisk risk = InfusionRisk.NONE;
@@ -66,13 +66,13 @@ final class AltarSurvey {
         this.reach = reach;
     }
 
-    /** Finds and reads the altar; a cube scan, since the matrix's offset is arbitrary. */
+    /** 找到并读取祭坛；做立方体扫描，因为矩阵的偏移是任意的。 */
     void scan() {
         Level level = monitor.getLevel();
         if (level == null) {
             return;
         }
-        // A found altar is re-checked directly, not by searching twelve blocks twice a second.
+        // 已找到的祭坛直接复查，不靠每秒两次搜索十二个方块。
         if (matrixPos != null) {
             Altar altar = TcInfusion.altarAt(level, matrixPos);
             if (altar != null) {
@@ -83,7 +83,7 @@ final class AltarSurvey {
         }
         matrixPos = null;
 
-        // A miss backs off: the cube is 15,625 lookups and finding nothing changes nothing.
+        // 未命中就退避：这个立方体是 15,625 次查找，而没找到不会改变任何东西。
         long now = level.getGameTime();
         if (now < nextCubeScan) {
             report = Report.NONE;
@@ -105,19 +105,19 @@ final class AltarSurvey {
         }
         nextCubeScan = now + altarMissBackoff;
         altarMissBackoff = Math.min(ALTAR_MISS_INTERVAL, altarMissBackoff * 2);
-        // The cube was searched and came up empty: that is a real reading, unlike an unsearched machine.
+        // 立方体搜过了并返回空：这是真实的读数，与从未搜索过的机器不同。
         altarSearched = true;
         report = Report.NONE;
     }
 
-    /** Reads one altar. The survey runs even between rituals, since blocks out of place are what a
-     * player fixes first; the instability read is the catalyst's, two blocks below the matrix. */
+    /** 读取一个祭坛。仪式之间也运行勘察，因为方块错位正是
+     * 玩家最先修的；不稳定度读的是触媒的，在矩阵下方两格。 */
     private Report read(Altar altar, BlockPos pos) {
         boolean crafting = altar.crafting();
         float stability = altar.stability();
         AspectList remaining = altar.remaining();
 
-        // The survey describes the room, not the ritual: every two seconds, and at once on a new altar.
+        // 勘察描述的是房间而不是仪式：每两秒一次，遇到新祭坛立刻做。
         Level level = monitor.getLevel();
         if (level != null) {
             long now = level.getGameTime();
@@ -131,7 +131,7 @@ final class AltarSurvey {
             }
         }
         List<BlockPos> problems = surveyedProblems;
-        // A shortage is essentia the altar cannot find, not essentia it has not finished with.
+        // 短缺是祭坛找不到的源质，不是它还没用完的源质。
         boolean shortages = crafting && reach.shortOf(pos, remaining);
         risk = new InfusionRisk(readBaseInstability(pos), problems.size(), shortages, stability);
 
@@ -145,8 +145,8 @@ final class AltarSurvey {
         return new Report(true, crafting, stability, remaining, problems);
     }
 
-    /** Instability of the catalyst's recipe, or zero. Research is ignored on purpose: the player who
-     * has not unlocked the recipe is the one who needs the warning. */
+    /** 触媒配方的不稳定度，没有则为零。有意忽略研究：还没解锁
+     * 该配方的玩家才是需要这条警告的人。 */
     private int readBaseInstability(BlockPos pos) {
         ItemStack catalyst = pedestalItem(pos);
         if (catalyst.isEmpty()) {
@@ -156,13 +156,13 @@ final class AltarSurvey {
         return recipe == null ? 0 : recipe.instability();
     }
 
-    /** The catalyst's recipe, cached: it is asked for twice per scan and walked linearly. */
+    /** 触媒的配方，带缓存：每次扫描要问两次，而且是线性遍历。 */
     private @Nullable Recipe recipeFor(ItemStack catalyst) {
         Level level = monitor.getLevel();
         if (level == null || catalyst.isEmpty()) {
             return null;
         }
-        // Walked linearly and asked twice per scan, so the answer is cached for a couple of seconds.
+        // 线性遍历且每次扫描要问两次，所以答案缓存几秒钟。
         long now = level.getGameTime();
         if (now - cachedRecipeAt <= RECIPE_CACHE_TICKS
                 && ItemStack.isSameItemSameComponents(cachedCatalyst, catalyst)) {
@@ -184,7 +184,7 @@ final class AltarSurvey {
         if (catalyst.isEmpty()) {
             return ItemStack.EMPTY;
         }
-        // Copied per read: the recipe hands out a fresh result stack on every call.
+        // 每次读取都复制：配方在每次调用时都会给出一个新的结果物品堆。
         return recipe == null ? catalyst : recipe.result().copy();
     }
 
@@ -220,8 +220,8 @@ final class AltarSurvey {
         this.matrixPos = matrixPos;
     }
 
-    /** The node went offline: nothing was searched, so the last reading is dropped rather than served as
-     * if it were current. The risk is kept - it is the room's, not the grid's. */
+    /** 节点离线：什么都没搜过，所以丢弃上一次读数，而不是把它当作
+     * 当前读数端出去。风险保留——那是房间的，不是网格的。 */
     void forget() {
         altarSearched = false;
         report = Report.NONE;

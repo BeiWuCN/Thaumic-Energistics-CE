@@ -2,11 +2,11 @@ package thaumicenergistics_ce.blockentity.assembler;
 
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 
-/** The aura around the machine: how much vis it holds, what it can hold, and one drain from it. */
+/** 机器周围的灵气：它持有多少 vis、容量多少，以及一次抽取。 */
 final class AssemblerAura {
 
-    /** Vis reach in chunks, 3x3: one chunk is never enough, Thaumaturge caps an aura's base at 500 vis
-     * while the priciest recipe costs 1728. */
+    /** vis 的搜索范围以区块计，3x3：一个区块永远不够，Thaumaturge 把灵气的
+     * 基础值上限设为 500 vis，而最贵的配方要花 1728。 */
     private static final int VIS_SOURCE_RADIUS = 1;
 
     private AssemblerAura() {

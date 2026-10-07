@@ -10,9 +10,9 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The set of patterns the machine advertises to AE2, read from the knowledge core rather than from the
- * live recipe manager. A core needs registry access, so a read that could not happen yet leaves the set
- * stale and the next ask tries again.
+ * 机器向 AE2 公布的样板集，从知识核心而不是运行中的配方管理器读取。
+ * 核心需要注册表访问，所以一次还无法进行的读取会让集合保持过期，
+ * 下一次请求会重试。
  */
 final class AssemblerPatternCache {
 
@@ -25,7 +25,7 @@ final class AssemblerPatternCache {
         this.machine = machine;
     }
 
-    /** Called when what the set is read from changed, so the set has to be read again. */
+    /** 在读取来源发生变化、必须重新读取集合时调用。 */
     void invalidate() {
         stale = true;
     }
@@ -34,25 +34,25 @@ final class AssemblerPatternCache {
         return stale;
     }
 
-    /** The set as it stands; {@link #refresh()} is what brings it up to date. */
+    /** 集合当前的样子；{@link #refresh()} 负责把它更新到最新。 */
     List<IPatternDetails> patterns() {
         return cached;
     }
 
-    /** Rebuilds the set if it is stale, and only a read that reached the core settles it. */
+    /** 集合过期时重建它，只有真正读到核心的那次读取才结算过期标志。 */
     void refresh() {
         if (stale) {
             stale = !rebuild();
         }
     }
 
-    /** Rebuilds the set from the core, leaving the stale flag alone.
-     * @return {@code true} when the core was readable, so the set is complete */
+    /** 从核心重建集合，不动过期标志。
+     * @return 核心可读、集合因此完整时为 {@code true} */
     boolean rebuild() {
         cached = List.of();
         HandlerKnowledgeCore core = knowledgeCore();
         if (core == null) {
-            // No core, or - the case that matters - no level to read one with; report failure until it is.
+            // 没有核心，或者——更关键的情况——没有可用来读取核心的 level；在可以之前报告失败。
             return machine.getLevel() != null;
         }
         List<IPatternDetails> details = new ArrayList<>();
@@ -71,7 +71,7 @@ final class AssemblerPatternCache {
             }
         }
         if (details.size() < stored.size()) {
-            // Otherwise invisible: the machine just offers fewer recipes than the core holds.
+            // 否则不可见：机器只是提供的配方比核心持有的少。
             ThELog.LOG.warn(
                     "[assembler] at {} offers {} of the {} patterns in its knowledge core",
                     machine.getBlockPos(),
@@ -79,7 +79,7 @@ final class AssemblerPatternCache {
                     stored.size());
         }
         if (core.unreadableCount() > 0) {
-            // Entries this build cannot read: kept in the item, not offered; the core would read as empty.
+            // 本次构建无法读取的条目：留在物品里但不公布；否则核心会被读成空的。
             ThELog.LOG.warn(
                     "[assembler] at {} cannot read {} entr(ies) in its knowledge core; they are kept in the"
                             + " item and {} pattern(s) are offered",

@@ -6,10 +6,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The server's half of the Knowledge Inscriber's crafting grid. It has the same shape as
- * {@link GhostGridSlot} and no payload, because the server already holds the grid the machine
- * reads and both sides must lay out the same slot count. Picking up is refused, since here a
- * click would let a player pull out ingredients they never put in.
+ * 知识铭刻机合成网格的服务端那一半。它与 {@link GhostGridSlot} 形状相同
+ * 且没有载荷，因为服务端已持有机器所读的网格，两侧必须布置相同的槽位数量。
+ * 拒绝取走，因为在这里
+ * 点击会让玩家抽出他们从未放入的材料。
  */
 public class MachineGridSlot extends Slot {
 

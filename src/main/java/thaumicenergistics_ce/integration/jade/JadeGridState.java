@@ -7,11 +7,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 
 /**
- * The four grid-node states AE2 shows, and how our tooltips draw them.
- * The cases, words and colours are AE2's, and its translation keys are reused so every machine
- * shares one. A state is resolved on the server, where the node lives, and sent to the client as an
- * ordinal. The enum is public for the tooltip halves in {@code client.jade}; the write side stays
- * package-private.
+ * AE2 显示的四种网格节点状态，以及我们的 tooltip 如何绘制它们。
+ * 取值、文字与颜色都取自 AE2，并复用它的翻译键，好让每台机器共用同一套。状态在服务端解析，
+ * 因为节点在那边，再以 ordinal 发给客户端。枚举公开是为了 [client.jade] 里的 tooltip 那一半；
+ * 写入侧仍是包级私有。
+ * 所以枚举只需要服务端在这里生成一次。
  */
 public enum JadeGridState {
 
@@ -50,7 +50,7 @@ public enum JadeGridState {
     }
 
     public static JadeGridState read(CompoundTag tag) {
-        // Bounds-checked: an out-of-range ordinal from the other side would crash the client.
+        // 做了边界检查：对面传来越界的 ordinal 会让客户端崩溃。
         JadeGridState[] states = values();
         int ordinal = tag.getByte(TAG);
         return ordinal >= 0 && ordinal < states.length ? states[ordinal] : OFFLINE;

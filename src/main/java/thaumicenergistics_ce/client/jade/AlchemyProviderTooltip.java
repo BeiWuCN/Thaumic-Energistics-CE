@@ -16,10 +16,10 @@ import thaumicenergistics_ce.integration.jade.AlchemyProviderProvider;
 import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
- * The Alchemy Provider's Jade tooltip: whether the grid reaches it and who it hands essentia to.
- * It is the drawing half of {@link AlchemyProviderProvider}, paired with it by the shared UID. It
- * draws three lines: the grid state, the bound receivers, and a bar for the reserve the link
- * spends.
+ * 炼金供应器的 Jade tooltip：网格是否能够到它，以及它把源质交给谁。
+ * 它是 {@link AlchemyProviderProvider} 的绘制半边，两者靠共用的 UID 配对。它画三行：
+ * 网格状态、已绑定的无线接收器，以及连接所花费
+ * 储备的进度条。
  */
 public final class AlchemyProviderTooltip implements IBlockComponentProvider {
 
@@ -47,8 +47,8 @@ public final class AlchemyProviderTooltip implements IBlockComponentProvider {
                     .withStyle(ChatFormatting.WHITE)));
         }
 
-        // A bar rather than a number, in the shape Jade draws for an energy buffer: plain progress()
-        // is its arrow gauge, so the reserve gets a striped bar with the numbers written across it.
+        // 用进度条而不是数字，形状沿用 Jade 给能量缓冲画的那种：普通的 [progress()]
+        // 是它的箭头仪表，所以储备用带条纹的条，数字直接写在上面。
         int cache = tag.getInt(AlchemyProviderProvider.TAG_CACHE);
         ProgressStyle style = helper.progressStyle().color(0xFFAA0000, 0xFF660000);
         tooltip.add(helper.progress(

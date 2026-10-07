@@ -14,19 +14,19 @@ import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor.
 import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Recipe;
 
 /**
- * Whether the room can pay for the ritual: the containers around the altar, and how far each
- * aspect of the job has got. Availability is asked of IAspectSource.containerContains, which
- * counts our provider; and the container list is cached, empty result included, because "nothing
- * in range" is the common case.
+ * 房间能否为仪式付账：祭坛周围的容器，以及任务的每个要素各自
+ * 进展如何。可用量向 [IAspectSource.containerContains] 询问，它会把我们的供应器
+ * 算进去；容器列表带缓存，空结果也缓存，因为“范围内什么都没有”
+ * 是常见情况。
  */
 final class EssentiaReach {
 
-    /** Search radius around an altar: twelve, {@code EssentiaSources}' own container range. */
+    /** 祭坛周围的搜索半径：12，即 {@code EssentiaSources} 自己的容器范围。 */
     private static final int SOURCE_RANGE = 12;
 
     private final BlockEntityOccultMonitor monitor;
 
-    /** Containers found around the altar; also when they were last looked for. See {@link #shortOf}. */
+    /** 在祭坛周围找到的容器；也记录最后一次查找它们的时间。见 {@link #shortOf}。 */
     private final List<BlockPos> sourceCache = new ArrayList<>();
     private long nextSourceScan;
 
@@ -36,14 +36,14 @@ final class EssentiaReach {
         this.monitor = monitor;
     }
 
-    /** Whether the altar cannot reach what the ritual still wants, asked via
-     * {@code IAspectSource.containerContains}; counting {@code getAspects} misses our provider. */
+    /** 祭坛是否够不到仪式仍然需要的东西，通过
+     * {@code IAspectSource.containerContains} 询问；数 {@code getAspects} 会漏掉我们的供应器。 */
     boolean shortOf(BlockPos matrixPos, @Nullable AspectList remaining) {
         Level level = monitor.getLevel();
         if (remaining == null || remaining.isEmpty() || level == null) {
             return false;
         }
-        // Resolved once here, not per (aspect, source): containerContains walks the ME network.
+        // 在这里解析一次，而不是按（要素，来源）逐个解析：[containerContains] 会遍历 ME 网络。
         List<IAspectSource> sources = new ArrayList<>(sourcesAround(matrixPos).size());
         for (BlockPos sourcePos : sourcesAround(matrixPos)) {
             if (level.getCapability(AspectCapabilities.CONTAINER, sourcePos, null)
@@ -60,7 +60,7 @@ final class EssentiaReach {
             for (var source : sources) {
                 reachable += source.containerContains(entry.aspect());
                 if (reachable >= entry.amount()) {
-                    // Enough: the rest would be asked for nothing.
+                    // 足够了：剩下的再问也没有意义。
                     break;
                 }
             }
@@ -71,14 +71,14 @@ final class EssentiaReach {
         return false;
     }
 
-    /** The containers within the altar's own reach, rescanned at most once a second. */
+    /** 祭坛自身触及范围内的容器，最多每秒重新扫描一次。 */
     private List<BlockPos> sourcesAround(BlockPos matrixPos) {
         Level level = monitor.getLevel();
         if (level == null) {
             return List.of();
         }
         long now = level.getGameTime();
-        // The empty result is cached too: "no containers in range" is the common case.
+        // 空结果同样缓存：“范围内没有容器”是常见情况。
         if (now < nextSourceScan) {
             return sourceCache;
         }
@@ -94,8 +94,8 @@ final class EssentiaReach {
         return sourceCache;
     }
 
-    /** How far along each ritual aspect is: both numbers come from the job, never a room scan (which
-     * drains as the ritual runs). An unknown recipe reports 0 / n. */
+    /** 每个仪式要素进展到哪一步：两个数字都来自任务本身，绝不来自房间扫描（扫描
+     * 会随仪式进行而被抽干）。未知配方报告为 0 / n。 */
     void read(AspectList remaining, @Nullable Recipe recipe) {
         essentia.clear();
         AspectList total = recipe == null ? remaining : recipe.aspects();
@@ -110,7 +110,7 @@ final class EssentiaReach {
             int left = remaining == null ? 0 : remaining.amountOf(entry.aspect());
             ResourceLocation id = entry.aspect().unwrapKey().map(key -> key.location()).orElse(null);
             if (id != null) {
-                // Full id, not the path: the client resolves aspects by namespace too.
+                // 用完整 id，不用路径：客户端解析要素时也要看命名空间。
                 essentia.add(new EssentiaLine(id.toString(), Math.max(0, wanted - left), wanted));
             }
         }

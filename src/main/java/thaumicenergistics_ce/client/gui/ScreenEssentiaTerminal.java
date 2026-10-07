@@ -6,10 +6,10 @@ import net.minecraft.world.entity.player.Inventory;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
 
 /**
- * The Essentia Terminal's screen: AE2's terminal wholesale, plus two gestures of its own.
- * Right-click empties a held jar or phial into the network and left-click an entry fills one; with
- * shift the whole held stack is taken, and shift-right-click empties where the container lies.
- * A held container otherwise goes in like any other item, except where a gesture claims the click.
+ * 源质终端的界面：整体沿用 AE2 的终端，另加两个自己的手势。
+ * 右键把手持的罐或药瓶倒空进网络，左键点击条目则把罐或药瓶装满；按住
+ * shift 则取走整叠手持物品，shift 右键则在容器所在处倒空。
+ * 除此之外，手持容器和其他物品一样放入，只有手势认领点击的地方例外。
  */
 public class ScreenEssentiaTerminal extends ScreenEssentiaTerminalBase<MenuEssentiaTerminal> {
 

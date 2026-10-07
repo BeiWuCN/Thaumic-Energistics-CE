@@ -21,11 +21,11 @@ import thaumicenergistics_ce.network.GolemBackpackPayload;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * The Arcane Crafting Terminal's screen.
- * The cost row lives in the style's visCraftCost strip and is the whole vis display: no aura, by
- * choice. The style document is in AE2's namespace, because StyleManager resolves against its own
- * only. The jar and phial gestures come from {@link ScreenEssentiaTerminalBase}, only with the
- * card.
+ * 奥术合成终端的界面。
+ * 费用行位于样式的 [visCraftCost] 条带中，它就是 vis 显示的全部：不带灵气，出于
+ * 刻意取舍。样式文档放在 AE2 的命名空间下，因为 [StyleManager] 只解析自己命名空间内的文档。
+ * 罐与药瓶手势来自 {@link ScreenEssentiaTerminalBase}，仅在装有源质访问卡时
+ * 才提供。
  */
 public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<MenuArcaneCraftingTerminal>
         implements ClientboundReceiver {
@@ -33,8 +33,8 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     private static final int CHIP_UNITS = AspectRendering.GUI_ICON_SIZE;
 
     /**
-     * The style widget naming the wood strip the chips go in. The art says where it is, so a restyled or
-     * rescaled window carries the row with it: {@code widgets.visCraftCost} in the screen's style document.
+     * 样式控件的名字，指向图标所放的木质条带。位置由美术图决定，所以换皮或改尺寸
+     * 的窗口会带着这一行一起走：屏幕样式文档里的 {@code widgets.visCraftCost}。
      */
     private static final String VIS_COST_STRIP = "visCraftCost";
 
@@ -47,11 +47,11 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         super(menu, inventory, title, style);
     }
 
-    /** Without the card the terminal is an ordinary one: every gesture falls through to AE2's own. */
+    /** 没有这张卡时终端就是普通终端：所有手势都落到 AE2 自己的实现上。 */
     @Override
     protected boolean essentiaGesturesAtAll() {
-        // Asked on every click rather than remembered: the menu reads the upgrade slot the player sees, so
-        // a card taken out stops the gestures on the next click and a stale flag could never say otherwise.
+        // 每次点击都重新询问，而不是记住结果：菜单读取的是玩家看到的升级槽，因此
+        // 卡被取出后下一次点击就会停掉手势，缓存的标志永远做不到这一点。
         return menu.hasEssentiaAccessCard();
     }
 
@@ -80,13 +80,13 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     }
 
     /**
-     * The installed sink is this class, so the receiver is the open screen and the id check below still
-     * decides whether the payload is for it.
+     * 安装的接收端就是本类，所以接收者就是打开着的那个界面，下面的 id 校验仍然
+     * 决定这份载荷是不是给它的。
      */
     public static void acceptCost(ArcaneCraftCostPayload payload) {
         ScreenArcaneCraftingTerminal screen = open;
-        // The id check matters: a packet can arrive just after the player closed this screen and opened
-        // another, and applying it then would draw the previous grid's cost on the new one.
+        // id 校验很重要：数据包可能在玩家刚关掉本界面、打开另一个界面之后才到，
+        // 那时套用就会把上一个网格的费用画到新界面上。
         if (screen != null && screen.getMenu().containerId == payload.containerId()) {
             screen.costs = payload.aspects();
         }
@@ -98,25 +98,25 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         if (costs.isEmpty()) {
             return;
         }
-        // The style places the strip, and the point it resolves is window relative already: drawFG runs
-        // inside the panel-offset pose, so adding leftPos again put the row a window right of the art.
+        // 条带由样式定位，它解析出的点本就是窗口相对的：[drawFG] 运行在面板偏移的
+        // 位姿内，再加一次 [leftPos] 会让该行偏出美术图整整一个窗口。
         WidgetStyle strip = getStyle().getWidget(VIS_COST_STRIP);
         if (strip == null) {
             return;
         }
         Point at = strip.resolve(new Rect2i(0, 0, imageWidth, imageHeight));
-        // Chips never outnumber the wells a crystal can sit in, so the strip's width over that count is
-        // the widest one may be: the art's 69 columns over six wells come to 11, and six fill 66 of them.
+        // 图标数量绝不会超过水晶能占的格数，所以条带宽度除以该格数就是一个图标的最大
+        // 边长：美术图 69 列除以六个格得 11，六个图标正好占满其中 66 列。
         int chip = Math.min(strip.getHeight(), strip.getWidth() / PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
         if (chip <= 0) {
             return;
         }
-        // Right to left: the first aspect holds the strip's right end and the rest run back along it,
-        // so a one aspect recipe always lands in the same place instead of drifting with the list length.
+        // 从右向左：第一个要素占住条带的右端，其余要素沿条带往回排，这样单要素配方
+        // 总是落在同一位置，而不会随要素列表长度漂移。
         int y = at.getY() + (strip.getHeight() - chip) / 2;
         int x = at.getX() + strip.getWidth() - chip;
-        // Thaumaturge's renderer draws a chip at CHIP_UNITS square whatever the screen wants, so the pose
-        // shrinks it to the chip size the strip has room for.
+        // Thaumaturge 的渲染器不管界面要多大，都按 [CHIP_UNITS] 见方绘制图标，所以
+        // 这里用位姿把它缩到条带容得下的图标尺寸。
         float shrink = (float) chip / CHIP_UNITS;
         for (ArcaneCraftCostPayload.AspectCost cost : costs) {
             if (x < at.getX()) {
@@ -130,8 +130,8 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
                 graphics.pose().translate(x, y, 0.0F);
                 graphics.pose().scale(shrink, shrink, 1.0F);
                 AspectRendering.renderGui(graphics, font, 0, 0, aspect, 0.0F);
-                // Centivis to whole vis, rounded up: a cost of 1 centivis still needs a vis to pay it, and
-                // showing 0 would say it is free. The number sits in chip units; the pose scales it down.
+                // centivis 折算成整数 vis，向上取整：1 centivis 的费用仍需要一个 vis 来付，
+                // 显示 0 会被读成免费。数字以图标为单位，由位姿缩放下去。
                 String text = String.valueOf((cost.centivis() + 99) / 100);
                 graphics.drawString(
                         font, text, CHIP_UNITS - font.width(text) + 1, CHIP_UNITS - 6, 0xFFFFFF, true);

@@ -10,15 +10,15 @@ import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 
 /**
- * The pattern wells and the craft preview as the menu holds them: the wells are derived from the
- * core slot, and the preview reads the machine's own slots. The wells are re-derived at most once
- * a tick, because the signature walks the whole pattern store.
+ * 菜单所持有的样板凹槽与合成预览：凹槽由核心槽位推导而来，
+ * 预览则读取机器自己的槽位。凹槽每个 tick 最多重新推导
+ * 一次，因为签名要遍历整个样板存储。
  */
 final class AssemblerPreviewMirror {
 
     /**
-     * The pattern wells' container on the client: the client derives them from the core slot, and the
-     * machine's container has no update tag to sync.
+     * 客户端上样板凹槽的容器：客户端从核心槽位推导它们，而
+     * 机器的容器没有可供同步的更新标签。
      */
     private final SimpleContainer display = new SimpleContainer(BlockEntityArcaneAssembler.PATTERN_SLOT_COUNT);
 
@@ -29,8 +29,8 @@ final class AssemblerPreviewMirror {
     private long coreSignatureTick = Long.MIN_VALUE;
 
     /**
-     * The mirrored slot the craft's product is shown in. Held as the slot, not an index, so reordering
-     * slots cannot make it name the wrong one.
+     * 合成产物所显示的那个被镜像的槽位。以槽位对象持有而非索引，这样重排
+     * 槽位不会让它指错对象。
      */
     private @Nullable Slot targetSlot;
 
@@ -40,12 +40,12 @@ final class AssemblerPreviewMirror {
         this.menu = menu;
     }
 
-    /** The container the wells read from while there is no machine behind them. */
+    /** 背后没有机器时凹槽所读取的容器。 */
     SimpleContainer display() {
         return display;
     }
 
-    /** Takes the slots the preview is shown in, once the menu has added them. */
+    /** 接收预览所显示的槽位，在菜单添加完它们之后调用。 */
     void watch(Slot target, Slot[] preview) {
         this.targetSlot = target;
         System.arraycopy(preview, 0, previewSlots, 0, preview.length);
@@ -53,7 +53,7 @@ final class AssemblerPreviewMirror {
 
     void refresh() {
         ItemStack core = coreStack();
-        // Taken at most once a tick: this is a per-frame call and the hash walks the whole pattern store.
+        // 每个 tick 最多取一次：这是每帧都会调用的，而哈希要遍历整个样板存储。
         long now = menu.playerInventory.player.level().getGameTime();
         if (now != coreSignatureTick) {
             coreSignatureTick = now;

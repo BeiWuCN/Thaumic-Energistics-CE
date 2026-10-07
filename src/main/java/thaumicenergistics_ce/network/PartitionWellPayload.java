@@ -9,10 +9,10 @@ import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * "Put this aspect in that partition well", sent by the screen when a player drops one out of JEI.
- * A slot write cannot work: {@code FakeSlot.set} stops at the screen it ran on, and AE2's own
- * {@code InventoryActionPacket} is discarded for any menu that is not an {@code AEBaseMenu}.
- * The aspect travels as an id so the receiver can resolve it and say why a dropped one is dropped.
+ * 「把这个要素放进那个分区槽位」，玩家从 JEI 拖出一个时由屏幕发出。
+ * 槽位写入行不通：{@code FakeSlot.set} 止步于它运行所在的那个屏幕，而 AE2 自己的
+ * {@code InventoryActionPacket} 对任何不是 {@code AEBaseMenu} 的菜单都会被丢弃。
+ * 要素以 id 上路，好让接收者解析它并说明被丢弃的那个为何被丢弃。
  */
 public record PartitionWellPayload(int containerId, int well, ResourceLocation aspectId)
         implements CustomPacketPayload {
@@ -30,7 +30,7 @@ public record PartitionWellPayload(int containerId, int well, ResourceLocation a
                     PartitionWellPayload::aspectId,
                     PartitionWellPayload::new);
 
-    /** The id that means "take the mark out of the well", as on a bus: a key cannot ride the cursor. */
+    /** 表示「把标记从槽位取出」的 id，与总线上一致：键没法搭在光标上。 */
     public static final ResourceLocation CLEAR = ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "clear");
 
     @Override

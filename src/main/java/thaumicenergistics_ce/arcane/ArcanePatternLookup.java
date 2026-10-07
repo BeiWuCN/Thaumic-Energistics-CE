@@ -20,8 +20,8 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Turns live arcane recipes into patterns: by result, by an encoded pattern, or by a hand-filled grid.
- * A pattern holds concrete display stacks, so the recipe behind it is looked up again on every reload.
+ * 把实时奥术配方变成样板：可按产物、按已编码的样板，或按手工填好的网格。
+ * 样板只保存具体的显示物品堆，因此每次重载都会重新查找它背后的配方。
  */
 final class ArcanePatternLookup {
 
@@ -30,8 +30,8 @@ final class ArcanePatternLookup {
     private ArcanePatternLookup() {}
 
     /**
-     * Converts the arcane recipe producing {@code result} into a pattern, or {@code null} when none
-     * produces that exact stack.
+     * 把产出 {@code result} 的奥术配方转换为样板；若没有任何配方产出该
+     * 精确物品堆，则返回 {@code null}。
      */
     static @Nullable ThEArcanePattern fromResult(@Nullable Level level, ItemStack result) {
         if (level == null || result.isEmpty()) {
@@ -54,8 +54,8 @@ final class ArcanePatternLookup {
     }
 
     /**
-     * Validates a player-encoded AE2 pattern against the arcane recipe it claims to encode.
-     * @return the pattern, or {@code null} when no arcane recipe matches
+     * 用玩家编码的 AE2 样板所声称编码的奥术配方来校验该样板。
+     * @return 样板；没有奥术配方匹配时返回 {@code null}
      */
     static @Nullable ThEArcanePattern fromEncoded(
             @Nullable Level level, List<ItemStack> patternInputs, ItemStack output) {
@@ -98,8 +98,8 @@ final class ArcanePatternLookup {
     }
 
     /**
-     * Finds the arcane recipe a hand-filled 3x3 grid stands for.
-     * @return the pattern, or {@code null} when no arcane recipe matches that grid
+     * 找出手工填好的 3x3 网格所代表的奥术配方。
+     * @return 样板；没有奥术配方匹配该网格时返回 {@code null}
      */
     static @Nullable ThEArcanePattern resolveGrid(@Nullable Level level, List<ItemStack> cells) {
         if (level == null || cells.size() != ThEArcanePattern.MAX_GRID) {
@@ -108,8 +108,8 @@ final class ArcanePatternLookup {
         RecipeManager manager = level.getRecipeManager();
         ArcaneRecipeIndex.index(manager);
 
-        // Intersect the per-item sets: only recipes taking every item present survive. An item missing from
-        // the index (built from default stacks) falls back to a full scan, never to a lost recipe.
+        // 对各物品的候选集合取交集：只有接受全部现有物品的配方才留下。某个物品不在
+        // 索引中（索引由默认物品堆构建）时回退到全量扫描，绝不会丢配方。
         Set<ResourceLocation> candidates = null;
         for (ItemStack cell : cells) {
             if (cell.isEmpty()) {
@@ -153,9 +153,9 @@ final class ArcanePatternLookup {
     }
 
     /**
-     * Resolves a pattern handed in from outside - AE2's encoding terminal or a pattern provider: its
-     * entries are concrete stacks, so matching is by membership, not cell by cell.
-     * @return the pattern, or {@code null} when no arcane recipe matches both output and inputs
+     * 解析外部传入的样板——AE2 的编码终端或样板供应器：它的条目是具体物品堆，
+     * 所以按成员关系匹配，而不是逐格匹配。
+     * @return 样板；没有奥术配方同时匹配产物与输入时返回 {@code null}
      */
     static @Nullable ThEArcanePattern resolve(
             @Nullable Level level, List<ItemStack> inputs, ItemStack output) {
@@ -181,8 +181,8 @@ final class ArcanePatternLookup {
     private record Layout(List<ItemStack> cells, List<Ingredient> ingredients, int width, int height) {}
 
     /**
-     * Derives the cell layout of an arcane recipe: shaped keeps its real width and height, shapeless is
-     * laid out in reading order. Keeps the display stacks and the ingredients a grid matches on.
+     * 推导奥术配方的格位布局：有序配方保留真实的宽高，无序配方按
+     * 阅读顺序排布。同时保留显示物品堆和网格匹配所用的材料。
      */
     private static @Nullable Layout layoutOf(IArcaneRecipe recipe) {
         if (recipe instanceof ArcaneShapedCraftingRecipe shaped) {
@@ -196,8 +196,8 @@ final class ArcanePatternLookup {
             if (optional.size() < width * height) {
                 return null;
             }
-            // Ingredients come in the recipe's own rows while the grid is three wide: using the recipe's
-            // stride would put a two-wide recipe's second row in the grid's first.
+            // 材料按配方自身的行来排列，而网格固定三格宽：若沿用配方的步长，
+            // 两格宽配方的第二行会落进网格的第一行。
             List<ItemStack> cells = new ArrayList<>(ThEArcanePattern.MAX_GRID);
             List<Ingredient> ingredients = new ArrayList<>(width * height);
             for (int row = 0; row < ThEArcanePattern.GRID_SIDE; row++) {
@@ -226,8 +226,8 @@ final class ArcanePatternLookup {
     }
 
     /**
-     * A representative stack per ingredient: a pattern carries concrete stacks only, so a multi-item
-     * ingredient takes its first entry, and a tag the display item.
+     * 为每个材料取一个代表性物品堆：样板只保存具体物品堆，因此多物品材料取
+     * 它的第一个条目，标签则取显示物品。
      */
     private static ItemStack representative(Optional<Ingredient> ingredient) {
         if (ingredient.isEmpty() || ingredient.get().isEmpty()) {
@@ -238,15 +238,15 @@ final class ArcanePatternLookup {
     }
 
     /**
-     * The item tag an ingredient stands for, or {@code null} for a plain list of items: the recipe means
-     * "any iron ingot", and writing the first listed member made an assembler refuse another member.
+     * 材料所代表的物品标签；只是普通物品列表时返回 {@code null}：配方表达的是
+     * 「任意铁锭」，而写入列表中第一个成员曾使组装机拒绝另一个成员。
      */
     private static @Nullable TagKey<Item> tagOf(Optional<Ingredient> ingredient) {
         if (ingredient.isEmpty() || ingredient.get().isEmpty()) {
             return null;
         }
-        // Guarded: Ingredient#getValues throws for anything but a plain item list, and the throw escapes
-        // fromRecipe and resolveGrid, reporting "no recipe" for a perfectly laid out grid.
+        // 已加保护：[Ingredient#getValues] 对非普通物品列表会抛异常，该异常会逃出
+        // [fromRecipe] 与 [resolveGrid]，让一个正确摆放的网格被报成「没有配方」。
         try {
             for (Ingredient.Value value : ingredient.get().getValues()) {
                 if (value instanceof Ingredient.TagValue tagValue) {
@@ -260,8 +260,8 @@ final class ArcanePatternLookup {
     }
 
     /**
-     * The layout's ingredient tags on the 3x3 grid: a shaped recipe's list is compacted to its own
-     * {@code width x height}, as {@code layoutOf} does for the display stacks.
+     * 布局在 3x3 网格上的材料标签：有序配方的列表会压缩到它自身的
+     * {@code width x height}，与 {@code layoutOf} 对显示物品堆的处理一致。
      */
     private static List<TagKey<Item>> gridTags(Layout layout) {
         List<TagKey<Item>> byCell = new ArrayList<>(ThEArcanePattern.MAX_GRID);

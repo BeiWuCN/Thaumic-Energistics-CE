@@ -23,10 +23,10 @@ import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 
 /**
- * The Alchemy Provider Connection: the far end of a wireless essentia link to a provider. It
- * carries essentia, never stores it, since arrivals go on to the provider on the next tick; beside
- * a machine that asks, it answers out of the grid as a cabled provider does. It is bound within
- * {@link BlockEntityAlchemyProvider#MAX_LINK_DISTANCE} blocks, and a lost half clears itself.
+ * 炼金供应器连接端：通往供应器的无线源质链路的远端。它只输送源质，
+ * 从不存储，因为送达的源质会在下一个 tick 继续前往供应器；位于请求的机器旁时，
+ * 它像线缆式供应器那样从网格应答。绑定距离不超过
+ * [BlockEntityAlchemyProvider#MAX_LINK_DISTANCE] 格，丢失的一半会自行清理。
  */
 public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity implements IEssentiaStorage {
 
@@ -57,10 +57,10 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
     }
 
     /**
-     * Binds this receiver to a provider, which is asked first because it enforces the limits - how many
-     * receivers it serves, how far away - so a refused link leaves both sides untouched.
+     * 把本接收端绑定到一个供应器，先询问供应器是因为它掌握各种限制——服务多少
+     * 个接收端、距离多远——所以被拒绝的链路不会改动任何一方。
      *
-     * @return the reason the link was refused, or {@code null} on success
+     * @return 链路被拒绝的原因，成功时为 {@code null}
      */
     public @Nullable String link(BlockPos toProvider) {
         if (level == null || level.isClientSide()) {
@@ -98,7 +98,7 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
             return null;
         }
         if (level.getBlockEntity(providerPos) instanceof BlockEntityAlchemyProvider provider) {
-            // Self-healing: put the receiver back if the provider's list lost it, e.g. after an older save.
+            // 自愈：供应器的列表把接收端丢了时把它放回去，例如来自旧存档的存档。
             if (!provider.isLinkedReceiver(worldPosition)) {
                 provider.addLinkedReceiver(worldPosition);
             }
@@ -142,8 +142,8 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
     }
 
     /**
-     * Feeds a machine beside the receiver out of the provider's grid: a suction machine offers no
-     * container face, so the container path leaves it waiting. Fetched first, handed over second.
+     * 从供应器的网格为接收端旁的机器供料：抽吸型机器不提供容器面，
+     * 所以容器路径会一直让它等待。先取出，再交付。
      */
     private void feedSuctionMachines() {
         BlockEntityAlchemyProvider provider = resolveProvider();
@@ -173,7 +173,7 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
             }
             fetched = true;
             int accepted = machine.accept(wanted, taken);
-            // What the machine refused goes on the way in, so an answered request is never thrown away.
+            // 机器拒收的源质留在输入端，所以已应答的请求永远不会被丢弃。
             int left = taken - accepted;
             if (left > 0) {
                 buffer.put(wanted, buffer.getOrDefault(wanted, 0) + left);
@@ -218,8 +218,8 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
     }
 
     /**
-     * Takes essentia from neighbouring containers, only while linked: with no provider there is nowhere
-     * for it to go, and taking it anyway would grow a buffer that can never drain.
+     * 从相邻容器取走源质，仅在已绑定链路时进行：没有供应器就无处可去，
+     * 硬取只会让一个永远排不空的缓冲变大。
      */
     private void drawFromNeighbours() {
         if (level == null) {
@@ -241,8 +241,8 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
                 if (space <= 0) {
                     continue;
                 }
-                // The container reports one contents snapshot, so asking for more than one would overdraw it.
-                // One unit per pull keeps this in step with the provider's own draw.
+                // 容器只返回一次内容快照，所以一次请求多于 1 会透支它。
+                // 每次只取 1 个单位，与供应器自身的取用保持同步。
                 int taken = source.extract(aspect, 1, false);
                 if (taken > 0) {
                     buffer.put(aspect, held + taken);
@@ -251,7 +251,7 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
                 }
             }
         }
-        // Once per visit, not per unit moved: every setChanged() flags the chunk for the next save.
+        // 每次访问一次，而不是每移动一个单位一次：每次 setChanged() 都会把区块标记为待保存。
         if (moved) {
             setChanged();
         }
@@ -278,8 +278,8 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
     }
 
     /**
-     * Serves a neighbouring container out of the provider's network, not the buffer: the buffer holds what
-     * is on its way in, so giving it back out would put the same essentia on both paths.
+     * 从供应器的网络而非缓冲区为相邻容器供料：缓冲区装着正在送入的源质，
+     * 把它再发出去会让同一份源质同时出现在两条路径上。
      */
     @Override
     public int extract(Holder<IAspect> aspect, int amount, boolean simulate) {
@@ -319,7 +319,7 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
         if (providerPos != null) {
             tag.putLong("ProviderPos", providerPos.asLong());
         }
-        // The buffer is deliberately not written: a transfer in progress, not a container to accumulate.
+        // 缓冲区刻意不写入：这是进行中的传输，不是要累积的容器。
     }
 
     @Override

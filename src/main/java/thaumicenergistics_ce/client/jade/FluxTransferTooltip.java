@@ -14,7 +14,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.integration.jade.FluxTransferStatusProvider;
 import thaumicenergistics_ce.part.PartFluxTransferInterface;
 
-// Never touches the part: on the client it is a shell with no grid to ask.
+// 从不接触该部件：在客户端它只是一个壳，没有网格可问。
 public final class FluxTransferTooltip implements BodyProvider<PartFluxTransferInterface> {
 
     public static final FluxTransferTooltip INSTANCE = new FluxTransferTooltip();

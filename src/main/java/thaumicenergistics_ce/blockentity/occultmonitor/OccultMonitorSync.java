@@ -11,14 +11,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import thaumicenergistics_ce.blockentity.ClientSyncSend;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 
-/** The occult monitor's client copy of the bubble, split out of {@link BlockEntityOccultMonitor}:
- * what the bubble renderer draws, what the altar last handed over, and the tag both sides read. The
- * renderer reads a copy, replaced only when a packet goes out, so a render pass never sees half a
- * bubble; the altar's live numbers are compared against the copy to decide on that packet. */
+/** 神秘监控器客户端侧的气泡副本，从 {@link BlockEntityOccultMonitor} 中拆出：
+ * 气泡渲染器绘制的内容、祭坛最后一次交付的内容，以及两端都读取的标签。
+ * 渲染器读的是副本，只在有数据包发出时才替换，所以一次渲染不会看到半个
+ * 气泡；祭坛的实时数字与副本比较，以决定是否发出该数据包。 */
 final class OccultMonitorSync {
 
-    /** The bubble's wire names. The Jade payload spells the first one in its own contract
-     * ({@code OccultMonitorProvider.TAG_REPORTING}); the two are a pair and must stay equal. */
+    /** 气泡的线上名称。Jade 载荷在它自己的契约里写出第一个名字，即
+     * {@code OccultMonitorProvider.TAG_REPORTING}；两者成对，必须保持一致。 */
     static final String TAG_REPORTING = "Reporting";
     static final String TAG_TIER = "BubbleTier";
     static final String TAG_INSTABILITY = "BubbleInstability";
@@ -27,7 +27,7 @@ final class OccultMonitorSync {
     static final String TAG_CRAFT = "BubbleCraft";
     static final String TAG_ESSENTIA = "BubbleEssentia";
 
-    /** The three names inside one line of {@link #TAG_ESSENTIA}. */
+    /** {@link #TAG_ESSENTIA} 一行之内的三个名称。 */
     private static final String TAG_ASPECT = "Aspect";
     private static final String TAG_DRAWN = "Drawn";
     private static final String TAG_TOTAL = "Total";
@@ -45,7 +45,7 @@ final class OccultMonitorSync {
     private int sentInstability = -1;
     private String sentSignature = "";
 
-    /** One reading of the altar, as handed over by the monitor. */
+    /** 一次祭坛读数，由监控器交付。 */
     record Snapshot(
             boolean reporting,
             int tier,
@@ -83,9 +83,9 @@ final class OccultMonitorSync {
         return List.copyOf(essentia);
     }
 
-    /** Takes a reading and sends it when it differs from the last one sent. */
+    /** 接收一次读数，并在它与上次发送的不同时发送它。 */
     void offer(BlockEntity owner, Snapshot reading) {
-        // Stability moves during a craft, so it is part of the signature or the bubble would freeze.
+        // 合成期间稳定性会变化，所以它属于签名的一部分，否则气泡会冻结。
         String signature = reading.crafting() + "|" + reading.craft().getItem() + "|" + reading.lines()
                 + "|" + reading.stabilityTimesTen();
         if (reading.reporting() == sentReporting
@@ -109,7 +109,7 @@ final class OccultMonitorSync {
         ClientSyncSend.sendBlockEntityUpdate(owner);
     }
 
-    /** Writes the bubble half of the update tag. The book is not here - it travels as a blockstate. */
+    /** 写入更新标签中气泡的那一半。书不在这里——它作为方块状态传输。 */
     void write(CompoundTag tag, HolderLookup.Provider registries) {
         tag.putBoolean(TAG_REPORTING, reporting);
         tag.putInt(TAG_TIER, tier);
@@ -128,7 +128,7 @@ final class OccultMonitorSync {
         tag.put(TAG_ESSENTIA, lines);
     }
 
-    /** Reads the bubble half of the update tag back into the copy the renderer draws. */
+    /** 把更新标签中气泡的那一半读回渲染器绘制的副本。 */
     void read(CompoundTag tag, HolderLookup.Provider registries) {
         reporting = tag.getBoolean(TAG_REPORTING);
         tier = Math.max(1, Math.min(InfusionRisk.MAX_TIER, tag.getInt(TAG_TIER)));

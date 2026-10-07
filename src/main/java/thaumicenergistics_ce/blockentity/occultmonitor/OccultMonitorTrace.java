@@ -6,9 +6,9 @@ import thaumicenergistics_ce.infusion.InfusionRisk;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The monitor's one-second trace line: its failure modes - no grid, no power, no book, no altar -
- * all look alike without it. The line is off unless THAUMICENERGISTICS_MONITOR_TRACE=true, so it
- * costs nothing; and the labels name what is printed, not what the field that held it was called.
+ * 监控器每秒一行的追踪：没有它时，它的各种失效模式——无网格、无电力、无书、
+ * 无祭坛——看起来一模一样。除非 [THAUMICENERGISTICS_MONITOR_TRACE=true]，
+ * 否则该行是关闭的，因此不花代价；标签命名的是打印出来的内容，而不是持有它的字段名。
  */
 final class OccultMonitorTrace {
 

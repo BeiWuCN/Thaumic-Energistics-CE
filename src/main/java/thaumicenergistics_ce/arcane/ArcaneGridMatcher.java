@@ -16,8 +16,8 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
- * Whether a 3x3 grid stands for an arcane recipe: shaped recipes are placed and mirrored, shapeless
- * ones are matched as a full assignment. Also checks what a pattern accepts, cell by cell.
+ * 3x3 网格是否代表某个奥术配方：有序配方做放置与镜像匹配，无序配方
+ * 按完整指派匹配。同时逐格检查样板接受哪些物品。
  */
 final class ArcaneGridMatcher {
 
@@ -53,8 +53,8 @@ final class ArcaneGridMatcher {
     }
 
     /**
-     * Whether every non-empty {@code inputs} entry is consumed as a grid cell or a crystal: multiplicity
-     * is not checked, the live recipe is re-matched before the craft.
+     * {@code inputs} 中每个非空条目是否都能作为网格格位或晶体被消耗：不检查
+     * 数量，合成前会用实时配方重新匹配。
      */
     static boolean acceptsInputs(
             List<ItemStack> grid, List<TagKey<Item>> cellTags, AspectList crystals, List<ItemStack> inputs) {
@@ -110,8 +110,8 @@ final class ArcaneGridMatcher {
     }
 
     /**
-     * One placement of a shaped recipe: ingredients are indexed by the recipe's row width, not the
-     * grid's, or a two-wide pattern read three cells at a time compares the wrong columns.
+     * 有序配方的一次放置匹配：材料按配方自身的行宽索引，而不是按网格的
+     * 行宽，否则两格宽的样板按三格读取时会比较到错误的列。
      */
     private static boolean fitsAt(
             List<ItemStack> cells,
@@ -144,8 +144,8 @@ final class ArcaneGridMatcher {
     }
 
     /**
-     * Whether a shapeless recipe's ingredients are present with nothing left over: a full matching, like
-     * the workbench's {@code RecipeMatcher}, not a greedy scan (oak must take the "oak planks" slot).
+     * 无序配方的材料是否刚好用尽、没有剩余：采用完整匹配，与工作台的
+     * {@code RecipeMatcher} 相同，而非贪心扫描（橡木必须占用「橡木木板」槽位）。
      */
     private static boolean fitsShapeless(List<ItemStack> cells, List<Ingredient> ingredients) {
         List<ItemStack> present = new ArrayList<>(cells.size());

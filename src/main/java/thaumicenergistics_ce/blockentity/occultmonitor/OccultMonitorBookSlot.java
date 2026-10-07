@@ -12,9 +12,9 @@ import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
- * The monitor's one slot, the two blockstates that mirror it, and what a right-click does to the
- * tome. Only a thaumonomicon may go in, and only a sneaking player may take it back out; both
- * blockstates are written from here, so the block class stays a set of thin overrides.
+ * 监控器唯一的槽位、镜像它的两个方块状态，以及右键对那本典籍做什么。
+ * 只允许放入魔导手册，且只有潜行中的玩家才能把它取出来；两个方块状态
+ * 都在这里写入，所以方块类保持为一组薄薄的覆写。
  */
 final class OccultMonitorBookSlot {
 
@@ -52,8 +52,8 @@ final class OccultMonitorBookSlot {
         return TcRegistry.isThaumonomicon(book());
     }
 
-    /** Adds the tome, or removes it only when the player sneaks - a plain right-click would disarm
-     * the machine. See {@code BlockOccultMonitor}. */
+    /** 放入典籍，或只在玩家潜行时取出它——普通的右键会让这台机器
+     * 解除武装。见 {@code BlockOccultMonitor}。 */
     @Nullable ItemStack interact(ItemStack held, boolean sneaking) {
         if (has()) {
             if (!sneaking || !held.isEmpty()) {

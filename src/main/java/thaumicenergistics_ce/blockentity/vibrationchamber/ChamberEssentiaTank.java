@@ -13,10 +13,10 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 
 /**
- * The chamber's fuel slot: a count of essentia under the aspect put in last, and the pulling that
- * fills it. The buffer is a count rather than an aspect list, so the aspect kept is for display
- * only; every change lands here, so the revision bumped with it is the one answer a cache needs.
- * What a pipe sees - room, suction, contents - is read off this slot, never off the burn.
+ * 振动室的燃料槽：以最后放入的要素计数的源质量，以及把它填满的抽取。
+ * 缓冲是一个计数而不是要素列表，所以保留的要素只用于显示；每次变化都落在
+ * 这里，因此随之递增的 revision 就是缓存唯一需要的答案。管道所见——空间、
+ * 吸力、内容——都从这个槽位读出，绝不从燃烧读出。
  */
 final class ChamberEssentiaTank {
 
@@ -30,10 +30,10 @@ final class ChamberEssentiaTank {
 
     private @Nullable Holder<IAspect> currentAspect;
 
-    /** Bumped whenever the buffer changes, so a cache of this container's contents notices. */
+    /** 缓冲每次变化都递增，好让本容器内容的缓存察觉。 */
     private long revision;
 
-    /** What the trace has seen arrive since its last line, so a pipe that never reaches can be told apart. */
+    /** 追踪自上一行以来看到到达的量，以便区分根本送不到的管道。 */
     private int tracedEssentia;
 
     ChamberEssentiaTank(BlockEntityEssentiaVibrationChamber chamber) {
@@ -69,13 +69,13 @@ final class ChamberEssentiaTank {
         return Math.max(0, BlockEntityEssentiaVibrationChamber.MAX_ESSENTIA - storedEssentia);
     }
 
-    /** Zero when the buffer or the energy slot is full: pipes steer by this number, and a full machine
-     * advertising suction would draw essentia it cannot burn. */
+    /** 缓冲或能量槽满时返回 0：管道靠这个数字导向，而一台满的机器若宣称
+     * 有吸力，会吸来它烧不掉的源质。 */
     int suctionAmount(boolean paused) {
         return hasRoom() && !paused ? SUCTION : 0;
     }
 
-    /** The whole buffer under the aspect put in last: the buffer is a count, so this answer is lossy. */
+    /** 整个缓冲都记在最后放入的要素名下：缓冲是一个计数，所以这个答案是有损的。 */
     AspectList contents() {
         if (storedEssentia <= 0 || currentAspect == null) {
             return AspectList.EMPTY;
@@ -83,14 +83,14 @@ final class ChamberEssentiaTank {
         return AspectList.EMPTY.add(currentAspect, storedEssentia);
     }
 
-    /** The held aspect's id, or null when nothing is held. */
+    /** 所持要素的 id，没有持有任何东西时为 null。 */
     @Nullable ResourceLocation aspectId() {
         return currentAspect == null
                 ? null
                 : currentAspect.unwrapKey().map(ResourceKey::location).orElse(null);
     }
 
-    /** The held aspect's path, or empty when nothing is held; the burn is priced off this. */
+    /** 所持要素的 path，没有持有任何东西时为空；燃烧的定价取决于它。 */
     String aspectPath() {
         return currentAspect == null
                 ? ""
@@ -98,8 +98,8 @@ final class ChamberEssentiaTank {
     }
 
     /**
-     * Draws one unit from a neighbouring container: there is no "as much as fits" call, and returning an
-     * excess is where essentia gets lost.
+     * 从相邻容器抽取一份：没有“能装多少抽多少”这种调用，而把多余的退回去
+     * 正是源质丢失的地方。
      */
     void pull() {
         if (chamber.getLevel() == null || !hasRoom()) {
@@ -132,8 +132,8 @@ final class ChamberEssentiaTank {
     }
 
     /**
-     * Pulls from a Thaumaturge essentia tube, which does not push into the machines it passes: the
-     * destination is the side that asks, as in Thaumaturge's port. The tests below are that port's.
+     * 从 Thaumaturge 的源质管道抽取，它不会向途经的机器推送：目的地是主动
+     * 询问的那一侧，与 Thaumaturge 的端口一致。下面的判断条件就是那个端口的。
      */
     private boolean pullFromTube(Direction side) {
         Direction facing = side.getOpposite();
@@ -158,7 +158,7 @@ final class ChamberEssentiaTank {
         return false;
     }
 
-    /** Takes what fits under the aspect offered; the aspect put in last is the one the buffer is read as. */
+    /** 按给出的要素取走装得下的量；缓冲按最后放入的要素来读取。 */
     void accept(Holder<IAspect> aspect, int amount) {
         int taken = Math.min(amount, space());
         if (taken <= 0) {
@@ -169,17 +169,17 @@ final class ChamberEssentiaTank {
         currentAspect = aspect;
         revision++;
         chamber.setChanged();
-        // The tooltip reads the buffer client-side; fuel arrives a unit at a time, not per tick.
+        // tooltip 在客户端读取缓冲；燃料是一次一份到达，而不是每 tick 都到。
         chamber.markForClientUpdate();
     }
 
-    /** What a fill takes, capped, and applied only when it is not a simulation. */
+    /** 一次填充会取走多少，已封顶，且仅在非模拟时才真正应用。 */
     int insert(Holder<IAspect> aspect, int amount, boolean simulate, boolean paused) {
-        // Same rule as the pull and the suction: a full slot takes nothing, however it is offered.
+        // 与抽取和吸力同一条规则：满的槽位什么都不收，无论以何种方式提供。
         if (aspect == null || amount <= 0 || paused) {
             return 0;
         }
-        // Floored at 0: a saved count above the cap would go negative, read as "nothing taken".
+        // 下限为 0：保存的计数若超过上限会算出负数，被读成“什么都没取”。
         int accepted = Math.min(amount, space());
         if (accepted > 0 && !simulate) {
             accept(aspect, accepted);
@@ -187,13 +187,13 @@ final class ChamberEssentiaTank {
         return accepted;
     }
 
-    /** Gives up one unit of fuel, counted as a change of contents like any other. */
+    /** 交回一份燃料，与其它任何变化一样计为内容变化。 */
     void revertOne() {
         storedEssentia--;
         revision++;
     }
 
-    /** Puts the count and the aspect in as given, whether they came off the wire or out of a saved tag. */
+    /** 按给定值放入计数和要素，无论它们来自线上还是来自保存的标签。 */
     void set(int essentia, @Nullable Holder<IAspect> aspect) {
         storedEssentia = essentia;
         currentAspect = aspect;

@@ -10,14 +10,14 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
 
 /**
- * Where a shift-clicked stack goes in the cell workbench menu, and the ranges it goes to.
- * The player side is the hotbar and the main inventory together, because AE2 adds the hotbar
- * under its own semantic, which shifts the first main-inventory slot nine slots along. A card
- * only goes in while a cell is there: the cards ride on the cell.
+ * 在存储元件工作台菜单里，被 shift 点击的物品堆去往何处，以及它去往的范围。
+ * 玩家侧是快捷栏与主物品栏合在一起，因为 AE2 按自己的语义添加快捷栏，
+ * 这会把第一个主物品栏槽位向后挪九个槽位。升级卡只有在元件在位时
+ * 才能放入：卡是搭乘在元件上的。
  */
 final class CellWorkbenchShiftClick {
 
-    /** A move for {@code moveItemStackTo}: the range to fill and which end of it to fill first. */
+    /** 给 {@code moveItemStackTo} 的一次移动：要填充的范围，以及先从哪一端填。 */
     record Move(int from, int to, boolean reverse) {}
 
     private final MenuEssentiaCellWorkbench menu;
@@ -43,8 +43,8 @@ final class CellWorkbenchShiftClick {
     }
 
     /**
-     * A group of slots as the one range {@code moveItemStackTo} wants: lowest index and one past the
-     * highest; an empty group becomes an empty range at the end, so a move into it just fails.
+     * 把一组槽位表示成 {@code moveItemStackTo} 所需的单个范围：最小索引与最大索引
+     * 加一；空组会变成末尾的一个空范围，所以移入它只会失败。
      */
     private static int[] slotRange(List<Slot> group, int slotCount) {
         int start = Integer.MAX_VALUE;
@@ -56,7 +56,7 @@ final class CellWorkbenchShiftClick {
         return end == 0 ? new int[] {slotCount, slotCount} : new int[] {start, end};
     }
 
-    /** The move a shift-click on {@code slot} means, or null when the stack stays where it is. */
+    /** 在 {@code slot} 上 shift 点击所表示的移动；物品堆原地不动时为 null。 */
     @Nullable Move moveFor(Slot slot, int index, ItemStack stack) {
         Slot cell = menu.cellSlot();
         if (slot == cell) {
@@ -64,13 +64,13 @@ final class CellWorkbenchShiftClick {
         }
         if (index >= playerStart) {
             if (stack.getItem() instanceof ItemEssentiaCell && !cell.hasItem()) {
-                // The destination is the cell slot, not the clicked one: the clicked slot's own range
-                // merged the stack into itself, so the range names where the stack is going.
+                // 目标范围是元件槽位，而不是被点击的那个：被点击槽位自身的范围
+                // 会把物品堆并进它自己，所以这个范围指的是物品堆要去的地方。
                 return new Move(cell.index, cell.index + 1, false);
             }
             if (menu.hasCellInMenu() && Upgrades.isUpgradeCardItem(stack)) {
-                // A card rides on the cell, so there is nowhere to put one without it. Which cards the cell
-                // takes is the cell's own upgrade inventory's call, asked through the slots' mayPlace.
+                // 升级卡搭乘在元件上，所以没有元件就无处可放。元件接受哪些卡
+                // 由元件自己的升级物品栏决定，通过槽位的 mayPlace 询问。
                 return new Move(cardStart, cardEnd, false);
             }
             return null;
@@ -78,7 +78,7 @@ final class CellWorkbenchShiftClick {
         if (menu.getSlots(SlotSemantics.UPGRADE).contains(slot)) {
             return new Move(playerStart, playerEnd, true);
         }
-        // A well: a mark is a type, not a pile, so there is nothing for shift-click to move.
+        // 凹槽：标记是一个类型而不是一堆数量，所以没有东西可供 shift 点击移动。
         return null;
     }
 }

@@ -21,10 +21,10 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * "Put this aspect in that interface slot", sent when a player drops one out of JEI onto
- * an interface. The slot is always in the config row, the row whose marks the card pulls
- * neighbours in with. An aspect travels as an id, because a slot write goes through
- * {@code AEItemKey}, which drops a key that is not an item.
+ * 「把这个要素放进那个接口槽位」，玩家从 JEI 中拖一个丢到接口上时发出。
+ * 该槽位总在配置行里，也正是卡片靠其标记把邻居拉进来的那一行。
+ * 要素以 id 上路，因为槽位写入要经过
+ * {@code AEItemKey}，而它会丢弃不是物品的键。
  */
 public record EssentiaInterfaceMarkPayload(int containerId, int index, ResourceLocation aspectId)
         implements CustomPacketPayload {
@@ -49,12 +49,12 @@ public record EssentiaInterfaceMarkPayload(int containerId, int index, ResourceL
         return TYPE;
     }
 
-    /** Applies the mark, but only if the interface this menu belongs to has the access card in it. */
+    /** 应用该标记，但仅当这个菜单所属的接口里装有访问卡时。 */
     public void handle(Player player) {
         if (!(player.containerMenu instanceof InterfaceMenu menu) || menu.containerId != containerId) {
             return;
         }
-        // Without the card the row is AE2's own and an essentia key in it would have no meaning.
+        // 没有卡片时这一行属于 AE2 自己，放个源质键进去毫无意义。
         if (!menu.getUpgrades().isInstalled(ModItems.ESSENTIA_ACCESS_CARD.get())) {
             return;
         }
@@ -80,7 +80,7 @@ public record EssentiaInterfaceMarkPayload(int containerId, int index, ResourceL
         }
         AEssentiaKey key = AEssentiaKey.of(aspect);
         if (key == null) {
-            // Not registry-backed: no id, so the mark could never match anything either.
+            // 没有注册表背书：没有 id，该标记也就永远匹配不到任何东西。
             ThELog.LOG.warn("[essentia-interface] aspect {} is not a registry entry", aspectId);
             return;
         }

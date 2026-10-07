@@ -10,11 +10,11 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * The Distillation Encoder's source template, set from the client. It travels although the well is a
- * slot because the item stays in the player's inventory, so vanilla's slot sync has nothing to carry.
+ * 蒸馏编码器的源模板，由客户端设置。它虽然对应一个槽位却仍需上路，
+ * 因为物品留在玩家的物品栏里，原版的槽位同步没有东西可送。
  *
- * @param containerId the menu this applies to, so a packet for a closed screen is ignored
- * @param stack the item to distil, one of it, or empty to clear the well
+ * @param containerId 它作用的菜单，因此发给已关闭屏幕的数据包被忽略
+ * @param stack 要蒸馏的物品，数量为一，空则清空该槽位
  */
 public record EncoderSourcePayload(int containerId, ItemStack stack) implements CustomPacketPayload {
 

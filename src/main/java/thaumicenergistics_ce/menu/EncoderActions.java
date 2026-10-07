@@ -5,9 +5,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-/** The distillation encoder's action bodies, split out of {@link MenuDistillationEncoder} to keep it
- * inside the file's line budget. Every method is a forward target of the host and only ever runs on the
- * host instance it is handed. */
+/** 蒸馏编码器的动作主体，从 {@link MenuDistillationEncoder} 中拆出，以使后者
+ * 保持在文件行数预算之内。每个方法都是宿主的转发目标，且只在传给它的
+ * 宿主实例上运行。 */
 final class EncoderActions {
 
     private EncoderActions() {}
@@ -16,8 +16,8 @@ final class EncoderActions {
         if (index < -1 || index >= host.table.aspectCount()) {
             return;
         }
-        // Refused here and not only in the screen: an action payload arrives through this path too, and a
-        // hand-assembled click must not select an undiscovered aspect.
+        // 在这里拒绝，而不只是在界面里：动作载荷也会经由这条路径到达，而且
+        // 手工构造的点击不得选中未发现的要素。
         if (index >= 0 && !host.table.isRevealed(index)) {
             return;
         }

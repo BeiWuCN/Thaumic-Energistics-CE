@@ -6,10 +6,10 @@ import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.api.networking.ticking.TickRateModulation;
 
 /**
- * The machine's only clock: one pass of the AE2 grid tick. A stale pattern set is rebuilt, the vis buffer
- * is topped up to what the held craft asks for, and a running craft is handed to
- * {@link AssemblerCraftRunner}. Split out of {@link BlockEntityArcaneAssembler}, which keeps the
- * interface method AE2 calls and nothing else of the tick.
+ * 机器的唯一时钟：AE2 网格 tick 的一遍。过期的样板集会被重建，vis 缓冲
+ * 被补足到持有的合成所要求的量，运行中的合成交给
+ * {@link AssemblerCraftRunner}。从 {@link BlockEntityArcaneAssembler} 拆出，后者
+ * 只保留 AE2 调用的接口方法，不再保留 tick 的任何部分。
  */
 final class AssemblerGridTick {
 
@@ -21,7 +21,7 @@ final class AssemblerGridTick {
             return TickRateModulation.SLEEP;
         }
         if (machine.patternCache.isStale()) {
-            // Settled only on a successful read, so a rebuild with no level yet retries. See refresh().
+            // 仅在成功读取时结算，所以还没有 level 的重建会重试。见 refresh()。
             machine.patternCache.refresh();
             ICraftingProvider.requestUpdate(machine.mainNode);
         }

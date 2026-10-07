@@ -17,8 +17,8 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Which arcane recipes accept which item, so a hand-filled grid narrows its candidates before matching.
- * Rebuilt whenever the recipe manager changes, because a reload hands out a new one.
+ * 记录哪些奥术配方接受哪些物品，使手工填好的网格在匹配前先缩小候选范围。
+ * 配方管理器一旦变化就重建，因为每次重载都会给出一个新的管理器。
  */
 final class ArcaneRecipeIndex {
 
@@ -29,8 +29,8 @@ final class ArcaneRecipeIndex {
     private ArcaneRecipeIndex() {}
 
     /**
-     * Indexes an item under any accepting ingredient: over-indexing costs a test, under-indexing loses
-     * a recipe silently.
+     * 把物品登记到所有接受它的材料下：多登记只多一次检测，少登记则会
+     * 悄无声息地丢掉配方。
      */
     static void index(RecipeManager manager) {
         if (manager == indexedManager) {

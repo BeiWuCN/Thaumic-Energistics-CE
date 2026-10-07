@@ -9,16 +9,16 @@ import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 /**
- * The menu host behind the Wireless Essentia Terminal.
- * All the terminal behaviour is AE2's {@link WirelessTerminalMenuHost}, and the one override is the
- * keys. They are read through the part-based {@code PartEssentiaTerminal}, which makes the same
- * restriction the same way: two terminals that both say "essentia only" should say it through the
- * same mechanism.
+ * 无线源质终端背后的菜单宿主。
+ * 全部终端行为都来自 AE2 的 {@link WirelessTerminalMenuHost}，唯一的覆写是
+ * 按键。它们通过基于部件的 {@code PartEssentiaTerminal} 读取，后者以同样的
+ * 方式施加同样的限制：两个都宣称 "essentia only" 的终端应当通过同一个
+ * 机制来宣称。
  */
 public class WirelessEssentiaTerminalMenuHost extends WirelessTerminalMenuHost<ItemWirelessEssentiaTerminal> {
 
-    /** Essentia only. The listener is empty because there is nothing to save: the host answers the same
-     * thing every time, so a "the player changed the selection" callback has nothing to record. */
+    /** 仅源质。监听器为空是因为没有任何东西需要保存：宿主每次都回答同样的
+     * 内容，所以 "the player changed the selection" 回调没有任何可记录的东西。 */
     private final KeyTypeSelection essentiaOnly =
             new KeyTypeSelection(() -> {}, keyType -> keyType == AEssentiaKeyType.INSTANCE);
 

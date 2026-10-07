@@ -8,9 +8,9 @@ import net.minecraft.world.item.context.UseOnContext;
 import thaumicenergistics_ce.part.PartEssentiaTerminal;
 
 /**
- * The Essentia Terminal as an item, for placing it on a cable.
- * Implementing {@link IPartItem} is what makes AE2 treat this as a part: placing, wrenching,
- * the cable's click handling and the model are all driven through it.
+ * 源质终端作为物品的形态，用于把它装到线缆上。
+ * 实现 {@link IPartItem} 才使 AE2 把它当作部件对待：放置、扳手拆卸、
+ * 线缆的点击处理与模型都由它驱动。
  */
 public class ItemEssentiaTerminal extends Item implements IPartItem<PartEssentiaTerminal> {
 

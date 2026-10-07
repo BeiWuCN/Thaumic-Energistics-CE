@@ -28,16 +28,16 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
 
 /**
- * Where a storage cell is told which aspects it may hold. The partition lives on the cell item, as
- * AE2's own cells do, so it survives a drive or a chest; the block holds the cell plus a working
- * copy, because a write-back rebuilds a data component. The syncing flag guards load and
- * write-back, since a write changes components that a naive reload misreads.
+ * 存储元件被告知可以存放哪些要素的地方。分区存在元件物品上，与
+ * AE2 自己的元件一样，所以它能挺过一次驱动器或一个箱子；方块持有元件外加一份工作
+ * 副本，因为回写会重建数据组件。同步标志守着加载与回写，
+ * 因为一次写入会改动组件，而天真的重新加载会读错。
  */
 public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity implements IUpgradeableObject {
 
     public static final int CELL_SLOT = 0;
 
-    /** Partition entries, matching AE2's own cell workbench and the 7x9 grid in the screen's art. */
+    /** 分区条目，与 AE2 自己的元件工作台以及屏幕上 7x9 的网格一致。 */
     public static final int PARTITION_SLOTS = 63;
 
     private final SimpleContainer inventory = new SimpleContainer(1) {
@@ -62,12 +62,12 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
             .changeListener(this::storePartitionInCell)
             .build();
 
-    /** The cell's own upgrade slots, re-read per call so a cell swapped inside a menu cannot go stale. */
+    /** 元件自带的升级槽，每次调用重新读取，这样在菜单里换过的元件不会读到过期状态。 */
     private final IUpgradeInventory upgrades = new IUpgradeInventory() {
 
         @Override
         public int size() {
-            // Three even with no cell, because the client builds its own slots from this number.
+            // 即使没有元件也是三，因为客户端按这个数字构建自己的槽位。
             return ItemEssentiaCell.UPGRADE_SLOTS;
         }
 
@@ -79,8 +79,8 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
 
         @Override
         public int getSlotLimit(int slot) {
-            // A card slot takes its stack size from the inventory, and the interface's own default is 99,
-            // so without this one slot swallows a whole stack of cards. One card per slot, as AE2's own.
+            // 卡槽的物品堆上限取自物品栏，而接口自带的默认值是 99，
+            // 所以没有这一条，一个槽位就会吞下整整一叠卡。一槽一卡，与 AE2 自己的相同。
             IUpgradeInventory cell = upgradesOfCell();
             return slot < cell.size() ? cell.getSlotLimit(slot) : 1;
         }
@@ -91,7 +91,7 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
             if (slot >= cell.size()) {
                 return;
             }
-            // Onto the cell item the block holds, which is then saved with it.
+            // 写到方块持有的元件物品上，随后与方块一起保存。
             cell.setItemDirect(slot, stack);
             BlockEntityEssentiaCellWorkbench.this.setChanged();
         }
@@ -118,12 +118,12 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
 
         @Override
         public void readFromNBT(CompoundTag tag, String key, HolderLookup.Provider registries) {
-            // Nothing to read: the cards sit in the cell item's own components, saved along with it.
+            // 没什么可读：卡就在元件物品自己的组件里，随它一起保存。
         }
 
         @Override
         public void writeToNBT(CompoundTag tag, String key, HolderLookup.Provider registries) {
-            // Nothing to write, for the same reason.
+            // 没什么可写，理由相同。
         }
     };
 
@@ -220,7 +220,7 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        // ContainerHelper, not createTag: createTag writes no index, so any gap shifts every item.
+        // 用 ContainerHelper，不用 createTag：createTag 不写索引，任何空隙都会让后面每个物品前移。
         ContainerHelper.saveAllItems(tag, inventory.getItems(), registries);
     }
 
@@ -230,13 +230,13 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
         if (tag.contains(ContainerHelper.TAG_ITEMS, Tag.TAG_LIST)) {
             ContainerHelper.loadAllItems(tag, inventory.getItems(), registries);
         } else {
-            // Old worlds kept a bare list under "Inventory"; one slot means position 0 or nothing.
+            // 旧世界在 "Inventory" 下存的是裸列表；只有一个槽意味着位置 0 或什么都没有。
             var list = tag.getList("Inventory", CompoundTag.TAG_COMPOUND);
             if (!list.isEmpty()) {
                 inventory.setItem(CELL_SLOT, ItemStack.parseOptional(registries, list.getCompound(0)));
             }
         }
-        // After the inventory, so a saved cell comes back with its partition on screen.
+        // 放在物品栏之后，这样存档里的元件回来时屏幕上就带着它的分区。
         loadPartitionFromCell();
     }
 

@@ -18,32 +18,32 @@ import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.network.KnowledgeInscriberReceiver;
 
 /**
- * The Knowledge Inscriber's menu: the core slot, the 7x3 read-only grid of patterns, the player's
- * 3x3 ghost grid and the result well.
- * There is no output slot, because the core is the pattern store; see
- * {@code BlockEntityKnowledgeInscriber}.
+ * 知识铭刻机的菜单：核心槽、7x3 的只读样板网格、玩家的
+ * 3x3 幽灵网格以及结果井。
+ * 没有输出槽，因为核心就是样板存储；见
+ * {@code BlockEntityKnowledgeInscriber}。
  */
 public class MenuKnowledgeInscriber extends AbstractContainerMenu implements KnowledgeInscriberReceiver {
 
-    /** Package-private for the layout, which turns a well index into a column and a row. */
+    /** 包级可见，供布局使用：它把井索引转成列与行。 */
     static final int PATTERN_COLS = 7;
     private static final int PATTERN_ROWS = 3;
     private static final int PATTERN_COUNT = PATTERN_COLS * PATTERN_ROWS;
     private static final int CRAFT_SIZE = 9;
 
-    /** Package-private for the layout, whose player band is the first of the menu's slots. */
+    /** 包级可见，供布局使用：其玩家带是菜单槽位中的第一段。 */
     static final int PLAYER_SLOTS = 36;
 
-    /** Package-private for the readout and the preview, which both ask what the core slot holds. */
+    /** 包级可见，供读数与预览使用：二者都会问核心槽里放着什么。 */
     static final int IDX_CORE = PLAYER_SLOTS;
 
-    /** Package-private for the click routing, which reads a well's index off the slot id. */
+    /** 包级可见，供点击路由使用：它从槽 id 读出井的索引。 */
     static final int IDX_PATTERN_START = IDX_CORE + 1;
 
-    /** Package-private for the grid state, whose window into the slots is the 3x3 recipe grid. */
+    /** 包级可见，供网格状态使用：它观察槽位的窗口就是 3x3 配方网格。 */
     static final int IDX_CRAFT_START = IDX_PATTERN_START + PATTERN_COUNT;
 
-    /** The menu-button packet carries only an id, so the delete flag rides in it. */
+    /** 菜单按钮数据包只带一个 id，所以删除标志搭在它上面。 */
     @Override
     public boolean clickMenuButton(Player player, int id) {
         runButton(player, id == 1);
@@ -53,15 +53,15 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
     public static final int PATTERN_SLOTS = PATTERN_COUNT;
     public static final int CRAFT_SLOTS = CRAFT_SIZE;
 
-    /** Menu index of one cell of the player grid; public because JEI names these slots too. */
+    /** 玩家网格中某一格的菜单索引；设为 public 是因为 JEI 也会指名这些槽位。 */
     public static int gridSlotIndex(int cell) {
         return IDX_CRAFT_START + cell;
     }
 
-    /** Package-private for the readout, whose core check runs on the side the machine is present. */
+    /** 包级可见，供读数使用：其核心检查在机器存在的那一侧运行。 */
     final @Nullable BlockEntityKnowledgeInscriber inscriber;
 
-    /** Package-private for the grid state, which writes a whole recipe into it in one pass. */
+    /** 包级可见，供网格状态使用：它会一次性把整个配方写入其中。 */
     final Container machine;
 
     final Inventory playerInventory;
@@ -92,15 +92,15 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
 
         InscriberSlotLayout.addSlots(this, playerInventory, preview, machine, inscriber, this::addSlot);
 
-        // 6. The button's inputs, reported to the client through the menu's data slots. Resolving a
-        // recipe scans every recipe in the manager, so this is throttled to one recompute per tick.
+        // 6. 按钮的输入，通过菜单的数据槽上报给客户端。解析一个
+        // 配方要扫描管理器中的每一个配方，所以这里限流为每 tick 重算一次。
         this.readout = new InscriberMenuReadout(this, playerInventory);
         addDataSlots(readout.data());
     }
 
     /**
-     * Vanilla reads what is in the clicked slot, which lost a placed recipe on the second
-     * click; here the carried stack instructs and the slot is only the target.
+     * 原版读取被点击槽位里的东西，这会在第二次点击时丢掉第一次
+     * 放入的配方；这里由携带的物品堆下指令，而槽位只是目标。
      */
     @Override
     public void clicked(int slotId, int dragType, ClickType clickType, Player player) {
@@ -135,14 +135,14 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
         return containerId;
     }
 
-    /** Whether the player carries a stack that matches: JEI places what the player actually has. */
+    /** 玩家是否携带了匹配的物品堆：JEI 放的是玩家实际拥有的东西。 */
     public boolean playerHas(ItemStack wanted) {
         return InscriberSlotLayout.playerHas(this, wanted);
     }
 
     /**
-     * Fills the grid from a recipe's layout, as a JEI transfer and a pattern click do, in one write: a
-     * payload per cell made the server re-resolve against a grid that was half the old recipe.
+     * 按配方布局填充网格，就像 JEI 转移和点击样板那样，一次写入完成：
+     * 每格一个载荷会让服务端对着一个还留着一半旧配方的网格重新解析。
      */
     public void fillGridFromRecipe(List<ItemStack> cells) {
         grid.fillFromRecipe(cells);
@@ -158,14 +158,14 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
     }
 
     /**
-     * Fills the 7x3 wells from the core, each frame but only on a change: they are read-only slots, so
-     * only the side drawing them can write what they show.
+     * 从核心填充 7x3 的井，每帧检查但只在变化时写：它们是只读槽位，
+     * 所以只有绘制它们的那一侧才能写入它们显示的内容。
      */
     public void refreshMirrors() {
         preview.refreshMirrors();
     }
 
-    /** Package-private for the grid state and the preview, whose reads all start at the core item. */
+    /** 包级可见，供网格状态与预览使用：它们的读取都从核心物品开始。 */
     @Nullable HandlerKnowledgeCore handler() {
         return InscriberMachineAccess.handler(this);
     }
@@ -175,8 +175,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
     }
 
     /**
-     * Whether the menu could encode at all, whatever the recipe. The client reads the synced data slot,
-     * since its own slot copy is not reliably filled.
+     * 不管配方是什么，这个菜单究竟能否编码。客户端读取的是同步的数据槽，
+     * 因为它自己的槽位副本并不可靠地被填充。
      */
     public boolean canEncode() {
         return readout.canEncode();
@@ -187,8 +187,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
     }
 
     /**
-     * True when the button would delete rather than store, not a player-picked mode: a grid resolving to
-     * nothing is Invalid however many patterns the core holds.
+     * 当按钮会执行删除而非存储时为 true，这不是玩家选定的模式：解析不出
+     * 任何东西的网格就是 [Invalid]，无论核心存有多少样板。
      */
     public boolean isDelete() {
         return readout.isDelete();
@@ -198,19 +198,19 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
         return readout.isActionable();
     }
 
-    /** Package-private for the grid state and the preview, which resolve against the same level. */
+    /** 包级可见，供网格状态与预览使用：它们针对同一个 level 解析。 */
     @Nullable Level level() {
         return InscriberMachineAccess.level(this);
     }
 
-    /** Package-private for the three collaborators, whose reads are all slot reads. */
+    /** 包级可见，供三个协作者使用：它们的读取全都是槽位读取。 */
     ItemStack slotStack(int index) {
         return InscriberMachineAccess.slotStack(this, index);
     }
 
     /**
-     * Runs the button on the server, from the menu-button packet, so the research check and the item
-     * write happen where they can be trusted.
+     * 在服务端运行该按钮，由菜单按钮数据包触发，使研究检查与物品
+     * 写入发生在可信的地方。
      */
     public void runButton(Player player, boolean delete) {
         InscriberButtonAction.run(this, player, delete);

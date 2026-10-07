@@ -20,10 +20,10 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * How AE2 draws an essentia key.
- * Registration is mandatory, because AE2 throws when drawing a key whose type has no handler. The
- * icon comes from Thaumaturge's {@link AspectRendering}, which knows the aspect textures and the
- * player's discovery state; a hand-rolled blit loses the masking.
+ * AE2 如何绘制源质 key。
+ * 注册是必须的，因为绘制没有处理器的 key 类型时 AE2 会抛异常。图标来自
+ * Thaumaturge 的 {@link AspectRendering}，它知道要素纹理和玩家的发现状态；自己手写的
+ * blit 会丢掉遮罩。
  */
 public class EssentiaKeyRenderHandler implements AEKeyRenderHandler<AEssentiaKey> {
 
@@ -33,8 +33,8 @@ public class EssentiaKeyRenderHandler implements AEKeyRenderHandler<AEssentiaKey
     public void drawInGui(Minecraft minecraft, GuiGraphics graphics, int x, int y, AEssentiaKey key) {
         Holder<IAspect> aspect = key.resolveAspect();
         if (aspect == null) {
-            // AE2 swallows anything a render handler throws, so an unresolved key vanishes silently:
-            // this warning is the only evidence the path ran.
+            // AE2 会吞掉渲染处理器抛出的一切，所以未解析的 key 会无声消失：
+            // 这条警告是该路径运行过的唯一证据。
             if (REPORTED.add(key.getId())) {
                 ThELog.LOG.warn(
                         "[essentia-icon] {} has no aspect ({}); drawing the missing chip",
@@ -44,8 +44,8 @@ public class EssentiaKeyRenderHandler implements AEKeyRenderHandler<AEssentiaKey
             AspectRendering.renderMissingGui(graphics, x, y);
             return;
         }
-        // The amount is zero because AE2 draws the count itself, right after this and on top. Asking for
-        // the chip's own label as well would print the number twice.
+        // 数量为 0，因为紧接着在其之上 AE2 会自己绘制数量。
+        // 再要求芯片自身的标签就会把数字打印两遍。
         AspectRendering.renderGui(graphics, minecraft.font, x, y, aspect, 0.0F);
     }
 

@@ -27,16 +27,16 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 
 /**
- * The Occult Monitor block: three states, none decorative, and one pulse that is not a state.
- * {@code facing} turns the frame, {@code book} is the thaumonomicon as a real state, and
- * {@code network} is the ME connection; the models come from those three names. The pulse is asked
- * of the machine by the block, and a scheduled tick takes it down again.
+ * 神秘监控器方块：三个状态都不可或缺，外加一个不是状态的脉冲。
+ * {@code facing} 转动外框，{@code book} 是作为真实状态的魔导手册，
+ * {@code network} 是 ME 连接；模型就来自这三个名字。脉冲由方块向
+ * 机器询问，再由一个计划 tick 把它降下来。
  */
 public class BlockOccultMonitor extends ThEBaseEntityBlock {
 
     public static final MapCodec<BlockOccultMonitor> CODEC = simpleCodec(BlockOccultMonitor::new);
 
-    /** The strength of the finished-craft pulse, which is a redstone signal and not an analogue read. */
+    /** 合成完成脉冲的强度，它是红石信号而不是模拟量读数。 */
     private static final int SIGNAL_STRENGTH = 15;
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -93,8 +93,8 @@ public class BlockOccultMonitor extends ThEBaseEntityBlock {
             Player player,
             InteractionHand hand,
             BlockHitResult hit) {
-        // ItemInteractionResult rather than InteractionResult: the type this hook returns in 1.21.
-        // The constant is spelled out because 1.21 renamed it away from a bare PASS.
+        // 返回 [ItemInteractionResult] 而不是 [InteractionResult]：1.21 里这个钩子的返回类型。
+        // 常量写全，因为 1.21 把它从裸的 [PASS] 改了名。
         InteractionResult result = interact(level, pos, player, stack, player.isShiftKeyDown());
         return result == InteractionResult.SUCCESS
                 ? ItemInteractionResult.SUCCESS
@@ -104,8 +104,8 @@ public class BlockOccultMonitor extends ThEBaseEntityBlock {
     private static InteractionResult interact(
             Level level, BlockPos pos, Player player, ItemStack held, boolean sneaking) {
         if (level.isClientSide()) {
-            // Answer optimistically; the server decides. Both reach the same answer, because
-            // the condition is one both sides know: what is in hand, and whether sneaking.
+            // 乐观作答，最终由服务端决定。两端会得到相同答案，因为
+            // 判断条件是双方都知道的：手上拿的是什么，以及是否潜行。
             return InteractionResult.SUCCESS;
         }
         if (!(level.getBlockEntity(pos) instanceof BlockEntityOccultMonitor monitor)) {
@@ -113,7 +113,7 @@ public class BlockOccultMonitor extends ThEBaseEntityBlock {
         }
         var takenBack = monitor.interact(held, sneaking);
         if (takenBack != null) {
-            // The tome came off; hand it to the player, or drop it if there is no room.
+            // 魔导手册被取下；把它交给玩家，没有空间时则丢到地上。
             if (!player.getInventory().add(takenBack)) {
                 player.drop(takenBack, false);
             }
@@ -131,7 +131,7 @@ public class BlockOccultMonitor extends ThEBaseEntityBlock {
         return true;
     }
 
-    /** The finished-craft pulse: strength 15 while the machine holds it, nothing otherwise. */
+    /** 合成完成脉冲：机器保持脉冲期间强度为 15，其余时候没有信号。 */
     @Override
     protected int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction side) {
         return level.getBlockEntity(pos) instanceof BlockEntityOccultMonitor monitor && monitor.pulsing()
@@ -139,7 +139,7 @@ public class BlockOccultMonitor extends ThEBaseEntityBlock {
                 : 0;
     }
 
-    /** Takes the pulse down: the machine scheduled this tick when the ritual finished. */
+    /** 把脉冲降下来：仪式完成时机器计划了这个 tick。 */
     @Override
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (level.getBlockEntity(pos) instanceof BlockEntityOccultMonitor monitor) {

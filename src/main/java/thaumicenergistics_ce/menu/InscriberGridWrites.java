@@ -6,17 +6,17 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * What a click or a payload writes into the 3x3 grid: a cell takes the carried stack, a well loads the
- * pattern it holds, and the two payloads carry one cell or a whole grid over.
- * The payload half runs server only, since a client write lands in a container the server never sees.
+ * 一次点击或一个载荷写入 3x3 网格的内容：格位接收手持的物品堆，凹槽加载它
+ * 持有的样板，两个载荷分别传送一个格位或整个网格。
+ * 载荷那一半只在服务端运行，因为客户端的写入落在服务端永远看不到的容器里。
  */
 final class InscriberGridWrites {
 
     private InscriberGridWrites() {}
 
     /**
-     * Routes a click that landed on the recipe grid or a pattern well. True when it was handled, so the
-     * caller must not hand it on to the vanilla slot logic.
+     * 路由一次落在配方网格或样板凹槽上的点击。已处理时返回 true，所以
+     * 调用方不得再把它交给原版的槽位逻辑。
      */
     static boolean route(
             MenuKnowledgeInscriber menu, InscriberGridState grid, int slotId, ClickType clickType) {
@@ -37,7 +37,7 @@ final class InscriberGridWrites {
         return false;
     }
 
-    /** Applies one cell from {@code InscriberGridPayload}: the write lands on the machine's container. */
+    /** 应用来自 {@code InscriberGridPayload} 的一个格位：写入落在机器的容器上。 */
     static void setCell(MenuKnowledgeInscriber menu, int cell, ItemStack stack) {
         if (menu.inscriber == null) {
             return;
@@ -47,8 +47,8 @@ final class InscriberGridWrites {
     }
 
     /**
-     * Applies a whole grid from {@code InscriberGridFillPayload}, in one write and one resolution, so
-     * the two sides change together rather than a cell at a time; missing entries are treated as empty.
+     * 应用来自 {@code InscriberGridFillPayload} 的整个网格，一次写入、一次解析，
+     * 使两侧一起变化而不是一次一个格位；缺失的条目按空处理。
      */
     static void fill(MenuKnowledgeInscriber menu, List<ItemStack> cells, int count) {
         if (menu.inscriber == null) {
@@ -59,7 +59,7 @@ final class InscriberGridWrites {
             full.add(i < cells.size() ? cells.get(i) : ItemStack.EMPTY);
         }
         menu.inscriber.setGrid(full);
-        // The client's own copy was already written; the data slots have to catch up this tick.
+        // 客户端自己的副本已经写入；数据槽位必须在这个 tick 内跟上。
         menu.broadcastChanges();
     }
 }

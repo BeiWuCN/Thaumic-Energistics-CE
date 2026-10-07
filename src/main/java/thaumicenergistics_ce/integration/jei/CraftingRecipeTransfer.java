@@ -25,11 +25,11 @@ import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * Lets JEI fill the Arcane Crafting Terminal's grid from an ordinary crafting recipe.
- * A second handler beside the arcane one, without which a missing JEI button reads as broken.
- * Unlike the arcane handler it passes the recipe id, which AE2 resolves in the vanilla recipe
- * manager. The transfer is written out rather than left to JEI, which only knows the player's
- * inventory and not the network.
+ * 让 JEI 用普通合成配方填充奥术合成终端的网格。
+ * 与奥术处理器并列的第二个处理器，没有它，缺少的 JEI 按钮就会被当成故障。
+ * 与奥术处理器不同，它传配方 id，由 AE2 在原版配方管理器里解析。
+ * 转移是显式写出的，而不是交给 JEI，因为 JEI 只认识玩家的物品栏，不认识网络。
+ * 网络里的库存只有 AE2 自己看得见。
  */
 public class CraftingRecipeTransfer
         implements IRecipeTransferInfo<MenuArcaneCraftingTerminal, RecipeHolder<CraftingRecipe>>,
@@ -52,8 +52,8 @@ public class CraftingRecipeTransfer
     }
 
     /**
-     * Any menu type of this menu class: the wired and the wireless terminals share it, so naming one menu
-     * type would leave the other without a transfer button.
+     * 这个菜单类的任意菜单类型：有线与无线终端共用它，只写一个菜单类型会让另一个没有转移按钮。
+     * 只写一个菜单类型会让另一个没有转移按钮。
      */
     @Override
     public Optional<MenuType<MenuArcaneCraftingTerminal>> getMenuType() {
@@ -66,8 +66,8 @@ public class CraftingRecipeTransfer
     }
 
     /**
-     * Whether this recipe can be laid out in the grid. Asked of the recipe, not of the flat ingredient
-     * list: a 3x3 check on the list would accept a recipe that is 4 wide.
+     * 这个配方能否摆进网格。问的是配方本身，而不是扁平原料列表：对列表做 3x3 检查
+     * 会接受一个 4 格宽的配方。
      */
     @Override
     public boolean canHandle(MenuArcaneCraftingTerminal menu, RecipeHolder<CraftingRecipe> recipe) {
@@ -87,7 +87,7 @@ public class CraftingRecipeTransfer
 
     // ---- IRecipeTransferHandler ----------------------------------------
 
-    // old 6-arg transferRecipe is the interface's only abstract method in JEI 19.57
+    // JEI 19.57 里旧的 6 参数 [transferRecipe] 是接口唯一的抽象方法
     @Override
     @SuppressWarnings("removal")
     public @Nullable IRecipeTransferError transferRecipe(
@@ -108,8 +108,8 @@ public class CraftingRecipeTransfer
             return null;
         }
 
-        // The templates travel empty: the packet resolves the recipe by id and reads its own ingredients,
-        // and a non-resolving recipe was refused above. A second copy would answer a question never asked.
+        // 模板以空列表发出：数据包按 id 解析配方并读取自己的原料，无法解析的配方已在上面被拒。
+        // 再带一份副本等于回答一个没人问过的问题。
         NonNullList<ItemStack> templates =
                 NonNullList.withSize(PartArcaneCraftingTerminal.GRID_SIZE, ItemStack.EMPTY);
         PacketDistributor.sendToServer(

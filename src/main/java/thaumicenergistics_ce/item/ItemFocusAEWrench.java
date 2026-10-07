@@ -18,20 +18,20 @@ import thaumicenergistics_ce.compat.thaumaturge.TcWand;
 import thaumicenergistics_ce.focus.FocusEffectAEWrench;
 
 /**
- * The AE2 wrench as a wand focus; the item half, {@link FocusEffectAEWrench} is what it does.
- * This half is written onto the stack rather than built at a manipulator, because {@link #assemble}
- * installs it on every tick. It is not installed from {@code getDefaultInstance}, which returns
- * {@code new ItemStack(this)}: that constructor copies the stack's components, so a component set
- * on it never reaches the caller.
+ * AE2 扳手作为法杖核心；这是物品那一半，{@link FocusEffectAEWrench} 才是它的行为。
+ * 这一半是写到物品堆上的，而不是在操纵器处构建，因为 {@link #assemble}
+ * 每个 tick 都会把它装上。它不是从 {@code getDefaultInstance} 装上的，后者返回
+ * {@code new ItemStack(this)}：该构造器会复制物品堆的组件，所以在它上面设置的组件
+ * 永远到不了调用方。
  */
 public class ItemFocusAEWrench extends ItemFocus {
 
-    /** The root medium every wand cast starts from; without it {@code CastExecutor} has no targets, so the
-     * cast silently does nothing and still costs vis. */
+    /** 每次法杖施法都从根介质开始；没有它 {@code CastExecutor} 就没有目标，于是
+     * 施法静默地什么都不做，却仍然消耗 vis。 */
     private static final ResourceLocation ROOT = ResourceLocation.fromNamespaceAndPath("thaumaturge", "root");
 
-    /** The assembled package: root medium, then the wrench effect; built fresh each call, as it is an
-     * immutable record, and {@code complexity} must be set because the builder defaults it to 0. */
+    /** 组装好的包：先是根介质，然后是扳手效果；每次调用都新建，因为它是
+     * 不可变 record，而且必须设置 {@code complexity}，因为构建器把它默认为 0。 */
     public static FocusPackage wrenchPackage() {
         int complexity = rootComplexity() + new FocusEffectAEWrench().complexity(FocusSettings.empty());
         return FocusPackage.builder()
@@ -41,23 +41,23 @@ public class ItemFocusAEWrench extends ItemFocus {
                 .build();
     }
 
-    /** The root medium's own complexity, read from the registry so it cannot drift from the real element. */
+    /** 根介质自身的复杂度，从注册表读取，因此不会与真实要素发生偏移。 */
     private static int rootComplexity() {
         var element = FocusEngine.element(ROOT);
         return element == null ? 0 : element.complexity(FocusSettings.defaults(element));
     }
 
-    /** What one wrench use costs - the package's complexity over five, Thaumaturge's rule for a focus
-     * ({@code ItemFocus.getVisCost}) - derived from the package so the price cannot drift from the cast.
-     * {@link FocusEffectAEWrench} charges it after a wrench has acted; see {@link #getVisCost} for why
-     * the wand's own charge is zero. */
+    /** 一次扳手使用的代价——包的复杂度除以五，这是 Thaumaturge 对核心的规则（
+     * {@code ItemFocus.getVisCost}）——由包推导，价格不会与施法脱节。
+     * {@link FocusEffectAEWrench} 在扳手动作之后收取它；{@link #getVisCost} 还说明为何
+     * 法杖自身的收费为零。 */
     public static float visCost() {
         return wrenchPackage().complexity() / 5.0F;
     }
 
-    /** Writes the package onto a stack that has none; the only place a package is set. Idempotent, so callers
-     * need not know whether a stack has been through here.
-     * @return true if it wrote one now, false if the stack already had one or is empty
+    /** 把包写入一个还没有包的物品堆；这是唯一设置包的地方。它是幂等的，所以调用方
+     * 无需知道物品堆是否已经过这里。
+     * @return 如果这次写入了则返回 true，如果物品堆已有包或为空则返回 false
      */
     public static boolean assemble(ItemStack stack) {
         if (stack.isEmpty() || ItemFocus.getPackage(stack) != null) {
@@ -67,8 +67,8 @@ public class ItemFocusAEWrench extends ItemFocus {
         return true;
     }
 
-    /** A stack with the package already written, for callers with no tick to hang assembly off (the
-     * creative tab). */
+    /** 一个已经写好包的物品堆，供没有 tick 可挂载组装逻辑的调用方使用（
+     * 创造模式标签页）。 */
     public static ItemStack assembledStack() {
         ItemStack stack = new ItemStack(thaumicenergistics_ce.init.ModItems.FOCUS_AEWRENCH.get());
         assemble(stack);
@@ -102,12 +102,12 @@ public class ItemFocusAEWrench extends ItemFocus {
             return InteractionResultHolder.pass(stack);
         }
         if (!TcWand.focus(otherStack).isEmpty()) {
-            // Pass rather than succeed: succeeding would swallow the click without installing anything.
+            // 返回 pass 而不是 success：返回 success 会吞掉这次点击，却什么都没装上。
             return InteractionResultHolder.pass(stack);
         }
 
         if (!level.isClientSide()) {
-            // Also here, not only on the tick: a stack straight from a recipe result has never been ticked.
+            // 这里也要做，不只是靠 tick：直接来自配方结果的物品堆从未被 tick 过。
             assemble(stack);
             TcWand.setFocus(otherStack, stack.copyWithCount(1));
             level.playSound(null, player.blockPosition(), SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.PLAYERS,

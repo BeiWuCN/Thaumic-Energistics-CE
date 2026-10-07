@@ -23,19 +23,19 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * One aspect as an ME network sees it: immutable, interned by registry id. Identity by id makes
- * a key off the network equal one read back from a cell, without which there would be two of
- * everything. Only the id is held, since name, colour and discovery state resolve on demand,
- * and keys are built where there is no level (NBT, packet, crafting planner).
+ * ME 网络眼中的一种要素：不可变，按注册表 id 做驻留。以 id 为身份，使得
+ * 网络之外的一个键与从存储元件读回的键相等，否则一切都会有
+ * 两份。只保存 id，因为名称、颜色和发现状态都按需解析，
+ * 而且键会在没有 level 的地方构建（NBT、数据包、合成规划器）。
  */
 public final class AEssentiaKey extends AEKey {
 
-    /** One key per aspect id, so identity and reference equality agree. */
+    /** 每个要素 id 一个键，使身份相等与引用相等保持一致。 */
     private static final Map<ResourceLocation, AEssentiaKey> CACHE = new ConcurrentHashMap<>();
 
     /**
-     * Decoding goes through {@link #of}, never the constructor: AE2 maps keys on {@link #getPrimaryKey()}
-     * by reference, so a fresh instance answers zero and only shows after a restart from NBT.
+     * 解码一律走 {@link #of}，绝不用构造函数：AE2 是按引用在 {@link #getPrimaryKey()} 上映射键的，
+     * 因此新造的实例会答 0，只有在从 NBT 重启之后才显现。
      */
     public static final MapCodec<AEssentiaKey> MAP_CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
             ResourceLocation.CODEC.fieldOf("id").forGetter(AEssentiaKey::getId)
@@ -76,8 +76,8 @@ public final class AEssentiaKey extends AEKey {
     }
 
     /**
-     * The object AE2 groups keys by: the id itself. Its maps key on it by reference, so two keys for one
-     * aspect must be one object.
+     * AE2 用来对键分组的对象：id 本身。它的各个映射以它为键并按引用比较，所以同一要素的
+     * 两个键必须是同一个对象。
      */
     @Override
     public Object getPrimaryKey() {
@@ -95,8 +95,8 @@ public final class AEssentiaKey extends AEKey {
     }
 
     /**
-     * The key as a standalone tag. Written through {@link AEKey#CODEC}: this class's own map codec omits
-     * the {@code #t} type field, which AE2's reader resolves to missing content.
+     * 该键作为独立标签的形式。通过 {@link AEKey#CODEC} 写出：本类自己的映射编解码器会省略
+     * {@code #t} 类型字段，而 AE2 的读取器会把它解析为内容缺失。
      */
     @Override
     public CompoundTag toTag(HolderLookup.Provider registries) {
@@ -110,8 +110,8 @@ public final class AEssentiaKey extends AEKey {
     }
 
     /**
-     * The true name, not {@code AspectComponents.name}, which says "Unknown" if undiscovered. AE2 caches
-     * it on the shared key, so an "Unknown" cached first would stick.
+     * 真正的名称，而不是 {@code AspectComponents.name}——后者在尚未发现时会给出 "Unknown"。AE2 会把它
+     * 缓存在共享键上，所以先缓存进去的 "Unknown" 会一直留着。
      */
     @Override
     protected Component computeDisplayName() {
@@ -128,7 +128,7 @@ public final class AEssentiaKey extends AEKey {
 
     @Override
     public void addDrops(long amount, List<ItemStack> drops, Level level, BlockPos pos) {
-        // Intentionally nothing.
+        // 有意什么都不做。
     }
 
     @Override

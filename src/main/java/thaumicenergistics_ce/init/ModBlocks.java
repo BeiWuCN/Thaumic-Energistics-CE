@@ -21,15 +21,15 @@ import thaumicenergistics_ce.block.BlockGachaBoxAggregator;
 import thaumicenergistics_ce.block.BlockKnowledgeInscriber;
 
 /**
- * Block registration. The Arcane Assembler is an AE2 crafting machine that performs
- * Thaumaturge arcane recipes on demand.
+ * 方块注册。奥术组装机是一台 AE2 合成机器，按需执行
+ * Thaumaturge 的奥术配方。
  */
 public final class ModBlocks {
     public static final DeferredRegister.Blocks REGISTRY = DeferredRegister.createBlocks(ThEIds.MODID);
 
     /**
-     * Properties for the Arcane Assembler. {@code noOcclusion()} is load-bearing, not cosmetic: an open
-     * frame with gaps over the default full-cube occlusion shape would have its contact face culled.
+     * 奥术组装机的属性。{@code noOcclusion()} 是功能所需而非外观修饰：带缝隙的开放式
+     * 框架若沿用默认的整方块遮挡形状，其接触面会被剔除。
      */
     private static final BlockBehaviour.Properties ASSEMBLER_PROPERTIES = BlockBehaviour.Properties.of()
             .mapColor(MapColor.METAL)
@@ -105,8 +105,8 @@ public final class ModBlocks {
                     .noOcclusion()));
 
     /**
-     * The far end of a wireless essentia link. {@code noOcclusion()} as on the Arcane Assembler: the plug
-     * model has gaps, so the touching face of the block behind it would be culled.
+     * 无线源质链路另一端。与奥术组装机一样使用 {@code noOcclusion()}：插头
+     * 模型带有缝隙，否则其后方方块与之接触的面会被剔除。
      */
     public static final DeferredBlock<BlockAlchemyProviderConnection> ALCHEMY_PROVIDER_CONNECTION =
             REGISTRY.register(
@@ -127,8 +127,8 @@ public final class ModBlocks {
                     .noOcclusion()));
 
     /**
-     * The two blocks of the Gacha Box: the body, which carries the jar as a blockstate, and the upper
-     * half. {@code noOcclusion()} as on the Arcane Assembler, because neither is a full cube.
+     * Gacha Box 的两个方块：主体，以方块状态携带罐子，以及上半部分。
+     * 与奥术组装机一样使用 {@code noOcclusion()}，因为两者都不是完整的立方体。
      */
     private static final BlockBehaviour.Properties GACHA_BOX_PROPERTIES = BlockBehaviour.Properties.of()
             .mapColor(MapColor.METAL)

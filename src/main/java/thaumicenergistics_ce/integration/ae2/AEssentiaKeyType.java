@@ -18,15 +18,15 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 /**
- * The AE2 key type for Thaumaturge essentia. Registering this makes essentia first-class, so
- * cells, buses, terminals and the planner all dispatch. {@code AMOUNT_PER_BYTE = 8} matches
- * Thaumaturge, where a jar holds 250 and a phial 10 (see {@code TcRegistry}); it was measured
- * in this build rather than taken from the reference's 64, and a 1k component is 1024 bytes,
- * 8192 essentia.
+ * Thaumaturge 源质对应的 AE2 键类型。注册它之后源质成为一等公民，
+ * 存储元件、总线、终端和规划器都能正确分派。{@code AMOUNT_PER_BYTE = 8} 与 Thaumaturge
+ * 一致：那里一个罐子装 250，一个小瓶装 10（见 {@code TcRegistry}）；这个值是在
+ * 本构建中实测得到的，而不是取自参照实现的 64；一个 1k 组件是 1024 字节，
+ * 即 8192 源质。
  */
 public final class AEssentiaKeyType extends AEKeyType {
 
-    /** Essentia held per byte of a storage component. */
+    /** 存储组件每字节可容纳的源质。 */
     public static final int AMOUNT_PER_BYTE = 8;
 
     public static final ResourceLocation ID = ThEIds.id("essentia");
@@ -53,8 +53,8 @@ public final class AEssentiaKeyType extends AEKeyType {
     }
 
     /**
-     * How much is moved per operation: one, the base class default. AE2 sizes what a bus moves from
-     * this, and a bigger number would let one bus empty a jar instantly.
+     * 每次操作搬运多少：为 1，即基类的默认值。AE2 据此决定总线一次搬运的量，
+     * 数值更大就会让一条总线瞬间抽空一个罐子。
      */
     @Override
     public int getAmountPerOperation() {
@@ -66,17 +66,17 @@ public final class AEssentiaKeyType extends AEKeyType {
         return 1;
     }
 
-    /** No fuzzy search: fuzzy matching needs damage or durability, and an aspect has neither. */
+    /** 不做模糊搜索：模糊匹配需要损伤值或耐久度，而要素两者都没有。 */
     @Override
     public boolean supportsFuzzyRangeSearch() {
         return false;
     }
 
     /**
-     * Resolves the aspect a key names against whichever registry access is at hand: registries, not a
-     * level, because the aspect registry is synchronised and the client has it before any level exists.
+     * 用手边拿得到的注册表访问来解析键所指的要素：用注册表而不是
+     * level，因为要素注册表是同步的，客户端在任何 level 存在之前就拥有它。
      *
-     * @return the aspect, or {@code null} when those registries have no such entry
+     * @return 该要素；这些注册表里没有对应条目时为 {@code null}
      */
     public static @Nullable Holder<IAspect> aspectOf(HolderLookup.Provider registries, ResourceLocation id) {
         var lookup = registries.lookup(IAspect.REGISTRY_KEY).orElse(null);
@@ -91,9 +91,9 @@ public final class AEssentiaKeyType extends AEKeyType {
         return aspectOf(level.registryAccess(), id);
     }
 
-    /** The registries an aspect can be resolved against, asked of whichever side is running: the client
-     * installs its own through {@link ClientRegistries}, a dedicated server is asked for the server's.
-     * @return the registries, or {@code null} before either side has any
+    /** 可以用于解析要素的注册表，向当前运行的那一侧索取：客户端
+     * 通过 {@link ClientRegistries} 装入自己的；专用服务器则索取服务端的。
+     * @return 这些注册表；在任一侧拥有它之前为 {@code null}
      */
     static @Nullable RegistryAccess clientOrServerRegistries() {
         RegistryAccess client = ClientRegistries.get();
@@ -105,8 +105,8 @@ public final class AEssentiaKeyType extends AEKeyType {
     }
 
     /**
-     * Why an aspect could not be resolved, in a few words. "No registries yet" and "not in them"
-     * look alike from outside - nothing is drawn - but mean opposite things.
+     * 用几个字说明某个要素为何解析不出来。"No registries yet" 与 "not in them"
+     * 从外面看是一样的——都没画出来——但含义正好相反。
      */
     public static String whyNoAspect(ResourceLocation id) {
         RegistryAccess registries = clientOrServerRegistries();

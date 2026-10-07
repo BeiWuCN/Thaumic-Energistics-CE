@@ -13,17 +13,17 @@ import net.minecraft.world.level.Level;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.gachabox.BlockEntityGachaBox;
 
-/** Draws the brain in the jar: the model's Y runs downwards, so the chain stands it up. */
+/** 绘制缸中之脑：模型的 Y 轴朝下，所以靠姿态链把它立起来。 */
 public final class GachaBoxRenderer implements BlockEntityRenderer<BlockEntityGachaBox> {
 
-    // Own layer definition, registered by this mod rather than by Thaumaturge.
+    // 自有的层定义，由本 mod 注册而不是由 Thaumaturge 注册。
     public static final ModelLayerLocation BRAIN_LAYER =
             new ModelLayerLocation(ThEIds.id("gacha_box_brain"), "main");
 
     private static final ResourceLocation BRAIN_TEXTURE =
             ResourceLocation.fromNamespaceAndPath("thaumaturge", "textures/entity/brain2.png");
 
-    // Lift and scale solved to fill the jar's cavity.
+    // 抬升量与缩放经过求解，以填满罐子的空腔。
     private static final float BRAIN_SCALE = 0.5F;
 
     private static final float BRAIN_LIFT = -0.8125F;

@@ -12,9 +12,9 @@ import net.minecraft.resources.ResourceLocation;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 /**
- * The provider seen as an ME inventory: what the grid hands over, for the world to take away. The
- * buffer holds the essentia, so everything asked here is asked of it, and extraction is refused
- * because essentia in the buffer is on its way out and never comes back in.
+ * 把供应器当作 ME 物品栏来看：网格交付的东西，供外界取走。
+ * 源质存放在缓冲里，所以这里的一切询问都转问缓冲，且拒绝抽取，
+ * 因为缓冲中的源质正在往外走，绝不会再回到里面。
  */
 final class AlchemyProviderStorage implements MEStorage {
 
@@ -66,7 +66,7 @@ final class AlchemyProviderStorage implements MEStorage {
                 "block.thaumicenergistics_ce.alchemy_provider");
     }
 
-    /** The buffer holds ints; a single AE insert cannot exceed what one aspect slot allows anyway. */
+    /** 缓冲以 int 计量；单次 AE 插入本来也不会超过一个要素槽位所允许的量。 */
     private static int clamp(long amount) {
         return (int) Math.min(amount, Integer.MAX_VALUE);
     }

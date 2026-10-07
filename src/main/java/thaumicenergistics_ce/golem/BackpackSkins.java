@@ -4,10 +4,10 @@ import net.minecraft.resources.ResourceLocation;
 import thaumicenergistics_ce.ThEIds;
 
 /**
- * The skins a golem's wireless backpack can wear: the reference build's ten, by material. Each
- * is a texture at {@code textures/model/golembackpack/<id>.png}, looked up by the id rather
- * than by the enum's name so the files and the constants can be read against each other, and
- * the set is built lazily because an enum constant is constructed before the mod's id settles.
+ * 傀儡的无线背包可以穿的外观：参照实现中的十种，按材质划分。每一种
+ * 都是 {@code textures/model/golembackpack/<id>.png} 处的一张纹理，按 id 而不是
+ * 按枚举名查询，这样文件和常量可以互相对照着读；该集合延迟构建，因为枚举常量
+ * 的构造早于本 mod 的 id 确定。
  */
 public enum BackpackSkins {
 

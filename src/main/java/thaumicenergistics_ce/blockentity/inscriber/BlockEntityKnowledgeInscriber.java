@@ -18,10 +18,10 @@ import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
 /**
- * The Knowledge Inscriber: the slots the player fills and the two answers read off them - what the
- * grid resolves to, and what the button would do with that recipe. The slots live in
- * {@link InscriberInventory} and the resolution in {@link InscriberResolution}, so what is left
- * here is the face other packages call: the slots, the codes and the menu.
+ * 知识铭刻机：玩家填的槽位，以及从这些槽位读出的两个答案——网格
+ * 解析成什么，以及按钮会用那份配方做什么。槽位在
+ * {@link InscriberInventory} 里，解析在 {@link InscriberResolution} 里，所以留在这里
+ * 的是其它包调用的门面：槽位、状态码和菜单。
  */
 public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
 
@@ -47,14 +47,14 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         super(ModBlockEntities.KNOWLEDGE_INSCRIBER.get(), pos, state);
     }
 
-    /** Called from the inventory on every change that is not part of a held-back grid write. */
+    /** 由物品栏在每次改动时调用，但不包括被压住的网格写入。 */
     void contentsChanged() {
         resolution.markDirty();
         resolution.refresh();
     }
 
     // ------------------------------------------------------------------
-    // Slots
+    // 槽位
     // ------------------------------------------------------------------
 
     public SimpleContainer getInventory() {
@@ -73,7 +73,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         inventory.setCell(cell, stack);
     }
 
-    /** One change, not nine: the grid goes in with the notifications held back. */
+    /** 一次改动，不是九次：写入网格时把通知压住。 */
     public void setGrid(List<ItemStack> cells) {
         inventory.setAll(cells);
     }
@@ -83,7 +83,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
     }
 
     // ------------------------------------------------------------------
-    // Status
+    // 状态
     // ------------------------------------------------------------------
 
     public int status() {
@@ -103,7 +103,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
     }
 
     // ------------------------------------------------------------------
-    // Actions
+    // 操作
     // ------------------------------------------------------------------
 
     public int save(@Nullable Player player) {
@@ -123,7 +123,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
     }
 
     // ------------------------------------------------------------------
-    // Stored patterns
+    // 已存储的样板
     // ------------------------------------------------------------------
 
     public List<ItemStack> storedOutputs() {
@@ -135,7 +135,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
     }
 
     // ------------------------------------------------------------------
-    // Menu, persistence, sync
+    // 菜单、持久化、同步
     // ------------------------------------------------------------------
 
     @Override
@@ -157,8 +157,8 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         resolution.readFrom(tag);
     }
 
-    // No custom update tag: the core is kept in step by the menu's own slot sync, and pushing a container
-    // through a block update only gave the client a second, stale copy.
+    // 没有自定义更新标签：核心由菜单自己的槽位同步保持同步，而把容器
+    // 通过方块更新推过去只会让客户端多一份过期的副本。
 
     @Override
     public Component getDisplayName() {

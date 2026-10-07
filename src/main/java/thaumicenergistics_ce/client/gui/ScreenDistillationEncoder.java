@@ -17,9 +17,9 @@ import thaumicenergistics_ce.menu.slot.AspectSelectSlot;
 import thaumicenergistics_ce.network.EncoderActionPayload;
 
 /**
- * The Distillation Encoder's screen: this mod's own art blitted whole, with the slots placed by the menu at
- * the coordinates the art draws them. Drawn directly rather than through AE2's screen-style system, which
- * resolves a style document inside AE2's namespace only, so an addon's texture cannot be named by one.
+ * 蒸馏编码台的界面：整体 blit 本 mod 自己的美术图，槽位由菜单放在美术图所画的坐标上。
+ * 之所以直接绘制而不用 AE2 的界面样式系统，是因为它只在 AE2 的命名空间内解析样式
+ * 文档，附加模组的贴图没法被它引用。
  */
 public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDistillationEncoder> {
 
@@ -28,7 +28,7 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
 
     private static final int WIDTH = 176;
 
-    /** 234 rows, not 229: the art's opaque pixels run y=0..233, the last five being the bottom bevel. */
+    /** 234 行而不是 229：美术图的不透明像素占 y=0..233，最后五行是底部斜面。 */
     private static final int HEIGHT = 234;
 
     private static final int TITLE_X = 8;
@@ -36,10 +36,10 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
     private static final int INVENTORY_LABEL_X = 8;
     private static final int INVENTORY_LABEL_Y = HEIGHT - 94;
 
-    /** How large an aspect is drawn in a well. Matches Thaumaturge's own GUI aspect size. */
+    /** 要素在格中绘制的大小。与 Thaumaturge 自己的 GUI 要素尺寸一致。 */
     private static final int ASPECT_SIZE = 16;
 
-    /** The Encode button's top-left, in panel pixels: the 34x14 band of bare panel between the wells. */
+    /** Encode 按钮的左上角，单位为面板像素：格与格之间那条 34x14 的裸面板。 */
     private static final int BUTTON_X = 140;
     private static final int BUTTON_Y = 94;
 
@@ -76,7 +76,7 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // The row comes from the source item, and a client menu is never told when it arrives.
+        // 这一行来自源物品，而客户端菜单永远不会被告知它何时到达。
         menu.ensureAspects();
         renderBackground(graphics, mouseX, mouseY, partialTick);
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -88,8 +88,8 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         graphics.blit(TEXTURE, leftPos, topPos, 0, 0, WIDTH, HEIGHT);
 
-        // An item whose aspects are all undiscovered has an empty row and nothing explains it, so the screen
-        // looks broken. The row is emptied rather than drawn faintly, so nothing covers this notice.
+        // 要素全未发现的物品，行是空的，也没有任何东西解释，界面看起来就像坏了。
+        // 这里把该行清空而不是画淡，这样就没有东西盖住这条提示。
         if (menu.sourceRevealsNothing()) {
             graphics.drawCenteredString(
                     font,
@@ -107,30 +107,30 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
         List<Holder<IAspect>> aspects = menu.aspects();
         for (Slot slot : menu.slots) {
             if (slot instanceof AspectSelectSlot aspectSlot && aspectSlot.aspectIndex() < 0) {
-                // The picked well: its slot holds nothing, because what goes here is a choice, not a stack.
+                // 选中的格：它的槽位什么都不放，因为这里放的是选择，不是物品堆。
                 Holder<IAspect> picked = menu.pickedAspect();
                 if (picked != null) {
-                    // No amount on purpose: this well is the choice itself, the source well shows the number.
+                    // 故意不写数量：这一格本身就是选择，数量由源格显示。
                     AspectRendering.renderGui(graphics, font, slot.x, slot.y, picked, 0.0F);
                 }
                 continue;
             }
             if (slot instanceof AspectSelectSlot aspectSlot && aspectSlot.isFilled()) {
                 int index = aspectSlot.aspectIndex();
-                // Undiscovered aspects keep their place in the row but are not drawn - an icon would claim
-                // knowledge the player does not have.
+                // 未发现的要素在行里保留位置，但不绘制——画出图标就等于宣称玩家拥有
+                // 其并不具备的知识。
                 if (index < 0 || index >= aspects.size() || !menu.isAspectRevealed(index)) {
                     continue;
                 }
-                // Slot coordinates, not screen: renderLabels already runs inside the panel-offset pose,
-                // and adding leftPos again put every icon at twice its distance.
+                // 用槽位坐标而不是屏幕坐标：[renderLabels] 已经在面板偏移的位姿内运行，
+                // 再加一次 [leftPos] 会让每个图标的距离翻倍。
                 int x = slot.x;
                 int y = slot.y;
-                // The amount goes to the renderer, which draws it in the well's corner: the pattern's output.
+                // 数量交给渲染器，由它画在格的角上：即样板的产出数量。
                 AspectRendering.renderGui(graphics, font, x, y, aspects.get(index), menu.aspectAmountFor(index));
 
                 if (aspectSlot.isSelected()) {
-                    // A frame around the picked well, inset by one to sit on the border; drawn, so no art.
+                    // 选中的格四周加一圈边框，向内缩一格压在边界上；这是绘制出来的，不用美术图。
                     graphics.renderOutline(x - 1, y - 1, ASPECT_SIZE + 2, ASPECT_SIZE + 2, 0xFFFFD700);
                 }
             }
@@ -147,7 +147,7 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
             }
             return;
         }
-        // The two pattern slots are ordinary item slots and get their tooltips from vanilla.
+        // 两个样板槽是普通物品槽，tooltip 由原版提供。
     }
 
 }

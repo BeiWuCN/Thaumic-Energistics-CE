@@ -13,20 +13,20 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * The Arcane Crafting Terminal's grid, presented to Thaumaturge as a workbench's input. The grid
- * stays nine cells, empty ones included, because vanilla's {@code CraftingInput.of} shrinks to the
- * non-empty rectangle and that throws out of Thaumaturge's menu constructor. It also adds what a
- * plain grid lacks: the crafting player, and the wand and crystals a machine supplies.
+ * 奥术合成终端的网格，以工作台输入的形式交给 Thaumaturge。网格
+ * 保持九个格位、包含空格位，因为原版的 {@code CraftingInput.of} 会收缩成
+ * 非空矩形，而那会让 Thaumaturge 的菜单构造函数抛异常。它还补上了
+ * 普通网格缺少的东西：合成的玩家，以及机器提供的法杖与晶体。
  */
 public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
 
     private static final int GRID_WIDTH = 3;
     private static final int GRID_HEIGHT = 3;
 
-    /** The nine cells in slot order, empties included - see the class note. */
+    /** 按槽位顺序的九个格位，包含空格位——见类注释。 */
     private final List<ItemStack> grid;
 
-    /** Built here rather than read out of a {@code CraftingInput}, which would have shrunk the grid. */
+    /** 在此处构建，而不是从 {@code CraftingInput} 读出，后者会把网格收缩掉。 */
     private final StackedContents stackedContents = new StackedContents();
 
     private final int ingredientCount;
@@ -37,14 +37,14 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
     private final @Nullable IEnergySource payer;
 
     /**
-     * Frozen here because Thaumaturge asks an aura source twice per craft and both passes must agree;
-     * reading the card again inside the supply call could answer differently halfway through a craft.
+     * 在这里冻结，因为 Thaumaturge 每次合成会两次询问灵气源，两次必须一致；
+     * 若在供给调用里再读一次卡片，就可能在一次合成的中途给出不同的答案。
      */
     private final boolean visConnection;
 
     /**
-     * Collects the crystal payment from the terminal's own crystal slots, never from the grid: a crystal
-     * in the grid also counts towards {@code ingredientCount}, which makes such recipes unmatchable.
+     * 只从终端自己的晶体槽收集晶体支付，绝不从网格取：网格里的晶体
+     * 也会计入 {@code ingredientCount}，从而使这类配方无法匹配。
      */
     private static AspectList crystalsIn(List<ItemStack> slots) {
         AspectList found = AspectList.EMPTY;
@@ -70,8 +70,8 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
     }
 
     /**
-     * A payer means a wireless terminal's craft: the vis then comes from the aura around that player
-     * rather than around a cable. See {@link #payer()}.
+     * 有支付者意味着这是无线终端的合成：此时 vis 来自该玩家周围的灵气，
+     * 而不是线缆周围的灵气。见 {@link #payer()}。
      */
     public TerminalArcaneCraftingInput(
             List<ItemStack> grid,
@@ -84,8 +84,8 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
     }
 
     /**
-     * The full form: {@code visConnection} is whether the terminal carried the vis connection card when
-     * this input was built, so both of one craft's aura passes answer with the same number.
+     * 完整形式：{@code visConnection} 表示构建此输入时终端是否装有 vis 连接卡，
+     * 这样同一场合成的两次灵气询问会给出相同的数值。
      */
     public TerminalArcaneCraftingInput(
             List<ItemStack> grid,
@@ -103,8 +103,8 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
         this.payer = payer;
         this.visConnection = visConnection;
 
-        // All nine cells, not just the occupied ones: the count is what a recipe's ingredient list is
-        // compared against, and the contents are what its ingredient matching reads.
+        // 全部九个格位，而不只是被占用的那些：数量是配方材料列表的比较对象，
+        // 内容则是材料匹配所读取的对象。
         int count = 0;
         for (ItemStack stack : this.grid) {
             if (!stack.isEmpty()) {
@@ -116,24 +116,24 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
     }
 
     /**
-     * The part this input came from, or {@code null} when built for something else. The vis source needs
-     * it: Thaumaturge hands it this input alone, and a virtual workbench has no position to look up.
+     * 该输入来源的部件；若是为其它对象构建则返回 {@code null}。vis 源需要它：
+     * Thaumaturge 只把这个输入交给它，而虚拟工作台没有位置可供查找。
      */
     public @Nullable PartArcaneCraftingTerminal part() {
         return part;
     }
 
     /**
-     * Who pays for the vis when the craft comes from a handheld item: its own battery, and the aura is
-     * then the one around the player. {@code null} for a placed part, which pays from its network.
+     * 合成来自手持物品时由谁支付 vis：它自身的电池，此时灵气取
+     * 玩家周围的那一份。已放置的部件为 {@code null}，它由其网络支付。
      */
     public @Nullable IEnergySource payer() {
         return payer;
     }
 
     /**
-     * Whether the terminal this craft came from carried the vis connection card: {@code true} moves the
-     * untyped vis onto the aura around the player, {@code false} keeps buying it with network power.
+     * 该合成所用终端是否装有 vis 连接卡：{@code true} 把无属性 vis 转到
+     * 玩家周围的灵气上，{@code false} 则继续用网络电力购买它。
      */
     public boolean visConnection() {
         return visConnection;

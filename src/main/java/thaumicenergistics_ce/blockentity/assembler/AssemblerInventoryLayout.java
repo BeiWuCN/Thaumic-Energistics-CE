@@ -7,8 +7,8 @@ import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.inventory.GearSlots;
 
 /**
- * The machine's inventory: what each band of slots accepts, and the owner's callback when one changes.
- * The slot numbers themselves stay on {@link BlockEntityArcaneAssembler}, where callers read them.
+ * 机器的物品栏：每个槽段接受什么，以及所有者在一格变化时的回调。
+ * 槽位号本身留在 {@link BlockEntityArcaneAssembler} 上，调用方在那里读取。
  */
 final class AssemblerInventoryLayout extends SimpleContainer {
 
@@ -22,11 +22,11 @@ final class AssemblerInventoryLayout extends SimpleContainer {
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
         if (slot >= BlockEntityArcaneAssembler.UPGRADE_SLOT_START) {
-            // The card band: the slots the menu's four card wells point at.
+            // 卡槽段：菜单四个卡槽指向的槽位。
             return AEItems.SPEED_CARD.is(stack);
         }
         if (AssemblerDisplaySync.isDisplaySlot(slot)) {
-            // The machine's own display: it takes nothing from a player.
+            // 机器自己的显示：不从玩家那里接收任何物品。
             return false;
         }
         return switch (slot) {

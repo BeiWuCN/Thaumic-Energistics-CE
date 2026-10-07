@@ -22,9 +22,9 @@ import net.minecraft.world.item.component.CustomData;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Reads and writes a pattern as a tag, and wraps one into the item AE2's CPU saves and decodes.
- * The same {@link #save}/{@link #load} contract serves the knowledge core and a task list, so a
- * pattern cannot differ between the two.
+ * 把样板按标签读写，并将其包装成 AE2 的合成 CPU 保存与解码所用的物品。
+ * 知识核心与任务列表共用同一套 {@link #save}/{@link #load} 约定，因此
+ * 样板在两者之间不会出现差异。
  */
 final class ArcanePatternTags {
 
@@ -38,7 +38,7 @@ final class ArcanePatternTags {
         return stack;
     }
 
-    /** Reads a pattern back out of the item {@link #toItem} produced, or {@code null} if unreadable. */
+    /** 从 {@link #toItem} 产出的物品中读回样板，无法读取时返回 {@code null}。 */
     static @Nullable ThEArcanePattern ofItem(ItemStack stack, HolderLookup.Provider registries) {
         if (stack == null || stack.isEmpty()) {
             return null;
@@ -146,16 +146,16 @@ final class ArcanePatternTags {
         return new ThEArcanePattern(
                 output,
                 grid,
-                // Only the display stacks: the ingredients belong to the recipe, looked up from the manager.
+                // 只保存显示物品堆：材料属于配方，由配方管理器查找。
                 List.of(),
-                // Clamped: the width and height come from a saved pattern, and a million-cell grid is a hang.
+                // 已做钳制：宽高来自保存的样板，百万格位的网格会直接把游戏卡死。
                 Math.clamp(width, 1, ThEArcanePattern.MAX_GRID),
                 Math.clamp(height, 1, ThEArcanePattern.MAX_GRID),
                 crystals,
                 tag.getInt("BaseVis"),
                 research,
                 stage,
-                // The tags do survive, the exception above: a tag is not recoverable from the recipe.
+                // 标签会被保留下来，正是上面那个例外：标签无法从配方反推得到。
                 cellTags);
     }
 }

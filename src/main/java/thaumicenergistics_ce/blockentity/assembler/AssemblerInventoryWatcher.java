@@ -3,9 +3,9 @@ package thaumicenergistics_ce.blockentity.assembler;
 import appeng.api.networking.crafting.ICraftingProvider;
 
 /**
- * What the machine does when a slot changes: the pattern set is dropped, the card count and the gear
- * discount are re-read from the inventory, and the grid is asked to come back. Split out of
- * {@link BlockEntityArcaneAssembler} so the one reaction to a container edit is readable in one place.
+ * 槽位变化时机器做什么：样板集被丢弃，卡数和装备折扣从物品栏重新读取，
+ * 并请求网格回来。从 {@link BlockEntityArcaneAssembler} 拆出，
+ * 使对容器编辑的唯一反应能在一处读完。
  */
 final class AssemblerInventoryWatcher {
 
@@ -16,7 +16,7 @@ final class AssemblerInventoryWatcher {
             return;
         }
         machine.patternCache.invalidate();
-        // The cards sit in the machine's own slots now, so their count is read off the inventory.
+        // 卡现在位于机器自己的槽位中，所以其数量从物品栏读取。
         machine.upgrades.refreshSpeedUpgrades();
         machine.upgrades.recalculateGearDiscount();
         machine.setChanged();

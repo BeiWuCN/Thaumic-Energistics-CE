@@ -16,13 +16,13 @@ import net.minecraft.server.level.ServerLevel;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 
-/** Thaumaturge has no "may flux land here" question, so the landing is picked down a chain. */
+/** Thaumaturge 没有「咒波能否落在这里」这一问，所以落点沿一条链逐级挑选。 */
 final class FluxCondensation {
 
-    // The design said 35%; the author took a tenth of it.
+    // 设计写的是 35%；作者取了它的十分之一。
     private static final double CONDENSE_CHANCE = 0.10;
 
-    // The design split this by drive, 5% and 40%; the author set a single 1.5%.
+    // 设计按驱动器区分，分别为 5% 与 40%；作者设成了单一的 1.5%。
     private static final double SPILL_CHANCE = 0.015;
 
     static final int BURST = 16;
@@ -53,13 +53,13 @@ final class FluxCondensation {
                 return;
             }
             long condensed = storage.insert(vitium, drawn, Actionable.MODULATE, source);
-            // What the network will not take falls back to flux rather than vanishing.
+            // 网络不肯收下的部分回退成咒波，而不是就此消失。
             if (condensed < drawn) {
                 TcAura.addFlux(server, landing, drawn - condensed);
             }
             return;
         }
-        // The vent window sits above the condense window, so both paths vent the same 1.5%.
+        // 排空窗口位于凝结窗口之上，所以两条路径排空的都是同样的 1.5%。
         double spillCeiling = condensing ? CONDENSE_CHANCE + SPILL_CHANCE : SPILL_CHANCE;
         if (roll < spillCeiling) {
             spill(server, landing, budget, take);
@@ -89,7 +89,7 @@ final class FluxCondensation {
                     return controller.getBlockPos();
                 }
             }
-            // Unloaded controllers give no landing: no fallback, and no chunk is force-loaded.
+            // 未加载的控制器给不出落点：不采用回退，也不强制加载任何区块。
             return null;
         }
         for (StorageBusPart bus : grid.getMachines(StorageBusPart.class)) {

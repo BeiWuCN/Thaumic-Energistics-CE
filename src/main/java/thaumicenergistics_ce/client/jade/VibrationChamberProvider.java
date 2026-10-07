@@ -13,11 +13,11 @@ import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVib
 import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
- * The Essentia Vibration Chamber's Jade tooltip: whether there is a network to burn for, and what
- * it does. Its lines are drawn from the client's copy, not from server data, because Jade collects
- * that data once and the lines would then freeze; the burn's countdown and slot energy are
- * deliberately left out, as both move every tick. Client-only: only Jade's registerClient
- * registers it, which a dedicated server skips.
+ * 源质振动室的 Jade tooltip：有没有可供燃烧的网络，以及它在做什么。
+ * 它的各行取自客户端的副本，而不是服务端数据，因为 Jade 只采集一次
+ * 数据、之后这些行就会冻住；燃烧倒计时和槽内能量被刻意省略，
+ * 因为两者每 tick 都在变。仅客户端：只有 Jade 的 [registerClient] 会注册它，
+ * 专用服务端会跳过。
  */
 public class VibrationChamberProvider implements IBlockComponentProvider {
 
@@ -32,8 +32,8 @@ public class VibrationChamberProvider implements IBlockComponentProvider {
             return;
         }
         IElementHelper helper = IElementHelper.get();
-        // AE2's own word for the node, from the machine's state: channel-free, so of AE2's four words
-        // only these two can happen, and neither is a snapshot.
+        // 用 AE2 自己对节点的说法，取自机器状态：不占频道，所以 AE2 的四个说法
+        // 里只会出现这两个，且都不是快照。
         JadeGridState word = chamber.getBurnState() == BurnState.NO_NETWORK
                 ? JadeGridState.OFFLINE
                 : JadeGridState.ONLINE;
@@ -53,14 +53,14 @@ public class VibrationChamberProvider implements IBlockComponentProvider {
                 "thaumicenergistics_ce.jade.energy_output",
                 String.format("%.0f", chamber.getMaxOutputPerTick())));
 
-        // The state, last: what the machine is doing, or why it is not burning.
+        // 状态放在最后：机器在做什么，或者为什么没在燃烧。
         switch (chamber.getBurnState()) {
             case BURNING -> tooltip.add(Component.translatable(
                     "thaumicenergistics_ce.jade.burning", String.format("%.1f", chamber.getAePerTick())));
             case NO_NETWORK -> tooltip.add(Component.translatable("thaumicenergistics_ce.jade.no_network"));
             case PAUSED_FULL -> tooltip.add(Component.translatable("thaumicenergistics_ce.jade.tank_full"));
             case IDLE -> {
-                // Nothing to say: there is room in the slot and nothing loaded to burn.
+                // 没什么可说：槽里还有空位，也没装任何可烧的东西。
             }
         }
     }

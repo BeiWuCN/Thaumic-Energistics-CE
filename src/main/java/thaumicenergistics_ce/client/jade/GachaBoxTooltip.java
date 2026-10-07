@@ -20,7 +20,7 @@ import snownee.jade.api.ui.IElement;
 import snownee.jade.api.ui.IElementHelper;
 import thaumicenergistics_ce.integration.jade.GachaBoxProvider;
 
-/** The gacha box's drawing half: what it is bound to, and why it is standing still. */
+/** 概率之箱的绘制半边：它绑定到了什么，以及它为什么停着不动。 */
 public final class GachaBoxTooltip implements IBlockComponentProvider {
 
     public static final GachaBoxTooltip INSTANCE = new GachaBoxTooltip();
@@ -28,8 +28,8 @@ public final class GachaBoxTooltip implements IBlockComponentProvider {
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
         CompoundTag tag = accessor.getServerData();
-        // The node's state leads: whether the box is on the network is the first thing worth knowing,
-        // and it is worded the way AE2 words it for its own devices.
+        // 节点状态打头：箱子是否在网络上是第一件值得知道的事，
+        // 而且措辞沿用 AE2 描述自家设备的说法。
         if (tag.contains(GachaBoxProvider.TAG_ONLINE)) {
             boolean online = tag.getBoolean(GachaBoxProvider.TAG_ONLINE);
             tooltip.add(IElementHelper.get()
@@ -49,15 +49,15 @@ public final class GachaBoxTooltip implements IBlockComponentProvider {
             tooltip.add(IElementHelper.get().text(wait.copy().withStyle(ChatFormatting.RED)));
         }
         if (tag.contains(GachaBoxProvider.TAG_OWNER)) {
-            // The name is the part worth reading at a glance, so it is the part that gets a colour.
+            // 名字是值得一眼读到的部分，所以上色的正是它。
             Component name = Component.literal(tag.getString(GachaBoxProvider.TAG_OWNER))
                     .withStyle(ChatFormatting.GOLD);
             tooltip.add(IElementHelper.get().text(Component
                     .translatable("jade.thaumicenergistics_ce.gacha_box.bound", name)
                     .withStyle(ChatFormatting.GRAY)));
         }
-        // The cards draw themselves: an icon says "which card, how many" at a glance, where the count
-        // sentence had to be read. No label, because the icons are the label.
+        // 卡牌自行绘制：一个图标一眼就能说明“哪张卡、几张”，而计数那句话
+        // 还得读一遍。没有标签，因为图标就是标签。
         ListTag cards = tag.getList(GachaBoxProvider.TAG_CARDS, Tag.TAG_COMPOUND);
         var level = accessor.getLevel();
         if (level != null) {

@@ -5,7 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 
-/** The release volume is the interface's own rule: Thaumaturge has no "may flux go here" query. */
+/** 释放体积是接口自己的规则：Thaumaturge 没有「咒波能否去这里」这一查询。 */
 final class FluxVolume {
 
     private static final int DEPTH = 3;
@@ -25,7 +25,7 @@ final class FluxVolume {
                 Math.max(near.getY(), far.getY()) + across(face.getStepY()),
                 Math.max(near.getZ(), far.getZ()) + across(face.getStepZ()));
         for (BlockPos pos : BlockPos.betweenClosed(from, to)) {
-            // An unloaded position counts as occupied: asking for its state would pull the chunk in.
+            // 未加载的位置算作被占用：询问它的状态会把区块拉进来。
             if (!server.isLoaded(pos)) {
                 return false;
             }

@@ -15,21 +15,21 @@ import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 /**
- * The Infusion Provider's Jade server data: what the altar beside it can actually draw.
- * {@code getAspects} is empty on purpose, because the block is a window rather than a
- * container and pipes skip it. The drawing half is {@code client.jade.InfusionProviderTooltip},
- * which cannot live here since resolving an aspect id needs the client's level; both report
- * {@link #UID}, which is how Jade pairs the two.
+ * 注魔供应器的 Jade 服务端数据：它旁边的注魔祭坛实际能抽取什么。
+ * [getAspects] 刻意为空，因为这个方块是一扇窗口而不是容器，管道会跳过它。绘制那一半是
+ * [client.jade.InfusionProviderTooltip]，它不能放在这里，因为解析要素 id 需要客户端的 level；
+ * 两边都上报 [UID]，Jade 就是靠它把两者配对的。
+ * 没有这一对，tooltip 就挂不到方块上。
  */
 public class InfusionProviderProvider implements IServerDataProvider<BlockAccessor> {
 
     public static final InfusionProviderProvider INSTANCE = new InfusionProviderProvider();
 
-    /** Shared with {@code client.jade.InfusionProviderTooltip}: Jade pairs the two halves by UID. */
+    /** 与 [client.jade.InfusionProviderTooltip] 共享：Jade 按 [UID] 配对这两半。 */
     public static final ResourceLocation UID =
             ResourceLocation.fromNamespaceAndPath(ThEIds.MODID, "infusion_provider");
 
-    /** The wire format of {@link #appendServerData}. The tooltip half reads it back. */
+    /** [appendServerData] 的线上格式。tooltip 那一半把它读回来。 */
     public static final String TAG_ASPECT = "Aspect";
     public static final String TAG_AMOUNT = "Amount";
     public static final String TAG_KINDS = "Kinds";

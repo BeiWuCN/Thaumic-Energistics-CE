@@ -13,15 +13,15 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The two config rows of an interface that carries our access card, read and written as wholes: the
- * config row says which aspects may come in, the storage row is what the grid takes back when the card
- * comes out. Apart from the round, so a row can be reasoned about without a host in hand.
+ * 带我们访问卡的接口的两个配置行，整体读写：配置行说明哪些要素可以进来，存储行是
+ * 卡取出时网格收回的东西。
+ * 放在轮次之外，这样不用手里有宿主就能推敲一行。
  */
 public final class EssentiaInterfaceRows {
 
     private EssentiaInterfaceRows() {}
 
-    /** The config row reduced to its essentia keys; an empty answer stands for "no filter at all". */
+    /** 把配置行归约为它的源质键；空结果代表“完全没有过滤”。 */
     static List<AEKey> whitelist(ConfigInventory row) {
         List<AEKey> listed = new ArrayList<>();
         for (int slot = 0; slot < row.size(); slot++) {
@@ -34,8 +34,8 @@ public final class EssentiaInterfaceRows {
     }
 
     /**
-     * Whether the config row lets a key in. An empty row is no filter at all: entries that are not
-     * essentia never count, so a row holding only items or fluids behaves like an empty one.
+     * 配置行是否放某个键进来。空行就是完全没有过滤：不是源质的条目从不算数，
+     * 所以只放物品或流体的行表现得和空行一样。
      */
     public static boolean mayEnter(List<AEKey> allowed, AEKey key) {
         boolean filtered = false;
@@ -51,7 +51,7 @@ public final class EssentiaInterfaceRows {
         return !filtered;
     }
 
-    /** Drops aspects an earlier build of this card let JEI write into the storage row. */
+    /** 丢弃早先版本这张卡让 JEI 写进存储行的要素。 */
     static void dropStaleAspects(ConfigInventory storage) {
         for (int slot = 0; slot < storage.size(); slot++) {
             if (storage.getKey(slot) instanceof AEssentiaKey) {
@@ -62,8 +62,8 @@ public final class EssentiaInterfaceRows {
     }
 
     /**
-     * Empties both rows of an interface whose card has just come out: the marks go, and the storage row
-     * is handed back to the grid. An aspect the grid refuses is dropped; a key of another type stays.
+     * 清空一个刚刚取出卡的接口的两行：标记消失，存储行交还给网格。
+     * 网格拒收的要素被丢弃；其它类型的键保留。
      */
     public static void releaseRows(
             ConfigInventory config,
@@ -90,8 +90,8 @@ public final class EssentiaInterfaceRows {
     }
 
     /**
-     * Clears the aspects out of a storage row that is about to be dropped, so that breaking an interface
-     * never puts one on the ground. An aspect has no item to be dropped as; the rest goes to the grid.
+     * 把即将被丢弃的存储行里的要素清出来，这样破坏一个接口绝不会把要素掉在地上。
+     * 要素没有可掉落的物品；其余的交由网格处理。
      */
     public static void rescueEssentia(
             ConfigInventory storage,
@@ -111,7 +111,7 @@ public final class EssentiaInterfaceRows {
         }
     }
 
-    /** Whether a row holds an aspect, which is how an interface of ours is told from a plain one. */
+    /** 某一行是否持有要素，这是区分我们的接口与普通接口的依据。 */
     public static boolean holdsEssentia(ConfigInventory row) {
         for (int slot = 0; slot < row.size(); slot++) {
             if (row.getKey(slot) instanceof AEssentiaKey) {
@@ -121,7 +121,7 @@ public final class EssentiaInterfaceRows {
         return false;
     }
 
-    /** What the grid takes of a held stack; a grid that is gone or full takes nothing. */
+    /** 网格会收下手中物品堆的多少；网格已消失或已满则什么都不收。 */
     private static long returnToNetwork(
             GenericStack held,
             @Nullable MEStorage network,

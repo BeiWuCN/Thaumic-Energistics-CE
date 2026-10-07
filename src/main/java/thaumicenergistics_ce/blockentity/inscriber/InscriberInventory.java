@@ -15,9 +15,9 @@ import net.minecraft.world.level.Level;
 import thaumicenergistics_ce.init.ModItems;
 
 /**
- * The inscriber's slots: the core, the mirrors, and the grid the player assembles in the menu. A
- * grid write is one change, not nine, because the cells go in with the notifications held back;
- * saving keeps slot indices, so a grid with gaps comes back with its gaps.
+ * 铭刻机的槽位：核心、镜像，以及玩家在菜单里拼出的网格。一次
+ * 网格写入是一次改动而不是九次，因为写入元件时把通知压住；
+ * 保存会保留槽位索引，所以带空隙的网格回来时仍带空隙。
  */
 final class InscriberInventory {
 
@@ -37,15 +37,15 @@ final class InscriberInventory {
 
                 @Override
                 public boolean canPlaceItem(int slot, ItemStack stack) {
-                    // The core is the only slot that holds an item; the wells beside it only mirror what
-                    // the core already stores, so nothing may be put there at all.
+                    // 核心是唯一持有物品的槽位；它旁边的那些槽只镜像
+                    // 核心已经存着的东西，所以完全不许往那里放东西。
                     return slot == BlockEntityKnowledgeInscriber.CORE_SLOT
                             && stack.is(ModItems.KNOWLEDGE_CORE.get());
                 }
             };
 
-    /** True while the grid is written cell by cell: a notification per cell would resolve a half-replaced
-     * grid, and the player would watch the old recipe's items being shoved out one at a time. */
+    /** 在网格被逐格写入期间为 true：逐格通知会解析出一个换了一半的
+     * 网格，玩家会看着旧配方的物品被一件件挤出去。 */
     private boolean absorbing;
 
     InscriberInventory(BlockEntityKnowledgeInscriber inscriber) {
@@ -122,8 +122,8 @@ final class InscriberInventory {
     }
 
     void saveItems(CompoundTag tag, HolderLookup.Provider registries) {
-        // Not SimpleContainer.createTag: that writes only non-empty slots and records no index, so a grid
-        // came back with its gaps gone and every item shifted forwards.
+        // 不用 SimpleContainer.createTag：它只写非空槽位且不记录索引，于是网格
+        // 回来时空隙没了，每个物品都往前挪了。
         ContainerHelper.saveAllItems(tag, inventory.getItems(), registries);
     }
 
@@ -131,14 +131,14 @@ final class InscriberInventory {
         if (tag.contains(ContainerHelper.TAG_ITEMS, Tag.TAG_LIST)) {
             ContainerHelper.loadAllItems(tag, inventory.getItems(), registries);
         } else {
-            // A world saved before this change kept a bare list under "Inventory", already gap-less: read it
-            // positionally and the next save writes the new form.
+            // 在本次改动之前保存的世界在 "Inventory" 下存的是裸列表，本来就没有空隙：按
+            // 位置读取，下一次保存就会写出新形式。
             loadLegacy(tag.getList("Inventory", Tag.TAG_COMPOUND), registries);
         }
     }
 
-    /** Reads the old bare-list form by position; that form lost which slots its entries came from, and the
-     * list may name more slots than this build has. */
+    /** 按位置读取旧的裸列表形式；那种形式丢掉了条目原本来自哪些槽位，而且
+     * 列表指明的槽位可能多于本版本拥有的槽位。 */
     private void loadLegacy(ListTag list, HolderLookup.Provider registries) {
         int kept = Math.min(list.size(), BlockEntityKnowledgeInscriber.SLOT_COUNT);
         for (int i = 0; i < kept; i++) {
@@ -146,7 +146,7 @@ final class InscriberInventory {
         }
     }
 
-    /** Drops the core and the mirrors when the block is broken. The grid is a scratch pad, not storage. */
+    /** 方块被破坏时掉落核心与镜像。网格是草稿纸，不是存储。 */
     void dropItems() {
         Level level = inscriber.getLevel();
         if (level == null) {
@@ -154,7 +154,7 @@ final class InscriberInventory {
         }
         BlockPos pos = inscriber.getBlockPos();
         for (int i = 0; i < BlockEntityKnowledgeInscriber.SLOT_COUNT; i++) {
-            // The grid holds items the player still has; dropping them would duplicate what JEI dragged in.
+            // 网格里放的是玩家仍然持有的物品；掉落它们会把 JEI 拖进来的东西复制一份。
             if (i >= BlockEntityKnowledgeInscriber.GRID_SLOT_START) {
                 continue;
             }

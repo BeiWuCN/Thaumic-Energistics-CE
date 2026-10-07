@@ -7,10 +7,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * The Distillation Encoder's Encode button, from the reference build's own two-state sprite.
- * Disabled is veiled, as the sheet has no disabled frame and "Encode" says nothing on its own; it
- * is drawn 34x14, not the native 32x13, because the reference stretches it to the panel band. The
- * label is centred 3 pixels from the top, as the inscriber's label is.
+ * 蒸馏编码器的 Encode 按钮，来自参考构建自己的两态贴图。
+ * 禁用态覆了一层纱，因为图集里没有禁用帧，而“Encode”本身说明不了什么；它
+ * 绘制为 34x14，而不是原生的 32x13，因为参考构建把它拉伸到面板条带。标签
+ * 距顶部 3 像素居中，与铭刻机的标签一致。
  */
 public class EncodeButton extends Button {
 

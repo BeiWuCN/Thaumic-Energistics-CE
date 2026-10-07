@@ -21,14 +21,14 @@ import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 
-/** Menu type registration. */
+/** 菜单类型注册。 */
 public final class ModMenuTypes {
     public static final DeferredRegister<MenuType<?>> REGISTRY =
             DeferredRegister.create(Registries.MENU, ThEIds.MODID);
 
     /**
-     * AE2's name for a terminal, "终端". The header names only the storage half; which crafting half hangs off
-     * it is the section title the style draws above the grid.
+     * AE2 给终端起的名字，"终端"。标题只指明存储那一半；挂在它上面的是哪一半合成，
+     * 由样式在网格上方绘制的分区标题决定。
      */
     private static final String TERMINAL_TITLE = "gui.ae2.Terminal";
 
@@ -57,8 +57,8 @@ public final class ModMenuTypes {
                     () -> IMenuTypeExtension.create(MenuDistillationEncoder::new));
 
     /**
-     * The Arcane Crafting Terminal's screen. Built through AE2's {@link MenuTypeBuilder}: it puts the host
-     * into the open packet, without which the menu has no network behind it.
+     * 奥术合成终端的界面。通过 AE2 的 {@link MenuTypeBuilder} 构建：它会把宿主
+     * 放进打开界面的数据包里，没有它菜单背后就没有网络。
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneCraftingTerminal>>
             ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
@@ -71,8 +71,8 @@ public final class ModMenuTypes {
                             .buildUnregistered(ThEIds.id("arcane_crafting_terminal")));
 
     /**
-     * The Essentia Terminal. The builder puts the host - the cable part, or the wireless item in hand - into
-     * the open packet. The title is named because AE2's terminal style carries {@code gui.ae2.Terminal}.
+     * 源质终端。构建器会把宿主——线缆部件，或手中的无线物品——放进
+     * 打开界面的数据包。标题被显式指定，因为 AE2 的终端样式自带 {@code gui.ae2.Terminal}。
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaTerminal>> ESSENTIA_TERMINAL =
             REGISTRY.register(
@@ -82,8 +82,8 @@ public final class ModMenuTypes {
                             .buildUnregistered(ThEIds.id("essentia_terminal")));
 
     /**
-     * The Wireless Essentia Terminal's screen. A second menu type rather than a reuse of the wired one: the
-     * builder encodes the host class into the open packet, and the host differs.
+     * 无线源质终端的界面。它另设一个菜单类型，而不是复用有线那个：
+     * 构建器会把宿主类编码进打开界面的数据包，而两者的宿主不同。
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaTerminal>> WIRELESS_ESSENTIA_TERMINAL =
             REGISTRY.register(
@@ -94,8 +94,8 @@ public final class ModMenuTypes {
                             .buildUnregistered(ThEIds.id("wireless_essentia_terminal")));
 
     /**
-     * The Wireless Arcane Crafting Terminal's screen: the same menu as the wired terminal, opened from a
-     * handheld item, which is why the host class - not a second menu class - is what differs.
+     * 无线奥术合成终端的界面：与有线终端是同一个菜单，只是从手持物品打开，
+     * 所以不同之处在于宿主类，而不在于另设一个菜单类。
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneCraftingTerminal>>
             WIRELESS_ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
@@ -105,8 +105,8 @@ public final class ModMenuTypes {
                             .buildUnregistered(ThEIds.id("wireless_arcane_crafting_terminal")));
 
     /**
-     * The Essentia Level Emitter's screen. The reporting value rides along as initial data - a setting, not
-     * something the server keeps pushing - so the threshold box opens on what the emitter is set to.
+     * 源质标准发信器的界面。上报值作为初始数据一并带过去——它是一项设置，而不是
+     * 服务端不断推送的东西——因此阈值框打开时显示的就是发信器当前的设定值。
      */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaLevelEmitter>> ESSENTIA_LEVEL_EMITTER =
             REGISTRY.register(

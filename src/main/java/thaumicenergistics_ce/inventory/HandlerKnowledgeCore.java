@@ -21,15 +21,15 @@ import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * The arcane patterns stored inside one knowledge core: a value object over the core's item stack.
- * It reads and writes the stack's own {@link CustomData}, so a core stays one portable item with
- * no side inventory, and the data stays out of the item's component registry.
+ * 存在一个知识核心里的奥术样板：核心物品堆之上的值对象。
+ * 它读写物品堆自己的 {@link CustomData}，所以核心始终是一件可携带的物品，没有外挂物品栏，
+ * 数据也不会进入物品的组件注册表。
  */
 public final class HandlerKnowledgeCore {
 
     private static final String NBT_PATTERNS = "Patterns";
 
-    /** Patterns one core holds. Matches the assembler GUI's 7x3 read-only grid. */
+    /** 一个核心存多少样板。与组装机 GUI 的 7x3 只读网格一致。 */
     public static final int MAXIMUM_STORED_PATTERNS = 21;
 
     private final ItemStack core;
@@ -37,8 +37,8 @@ public final class HandlerKnowledgeCore {
     private final List<ThEArcanePattern> patterns = new ArrayList<>(MAXIMUM_STORED_PATTERNS);
 
     /**
-     * Entries this build could not read, kept exactly as found and written back verbatim.
-     * {@link #save} rewrites the whole list, so dropping one here deletes it on the next store.
+     * 本版本读不了的条目，按原样保留并原样写回。
+     * [save] 会重写整个列表，所以在这里丢掉一个条目，下一次存储时它就没了。
      */
     private final List<CompoundTag> unreadable = new ArrayList<>();
 
@@ -81,8 +81,8 @@ public final class HandlerKnowledgeCore {
     }
 
     /**
-     * Stores a pattern, replacing any existing entry for the same result.
-     * @return {@code false} when the core is full and holds no entry for that result
+     * 存储一个样板，替换同一结果的已有条目。
+     * @return 核心已满且没有该结果的条目时为 {@code false}
      */
     public boolean store(ThEArcanePattern pattern) {
         boolean replacing = patternFor(pattern.result()) != null;
@@ -128,7 +128,7 @@ public final class HandlerKnowledgeCore {
     }
 
     // ------------------------------------------------------------------
-    // Persistence, inside the stack's custom data
+    // 持久化，存放在物品堆的自定义数据里
     // ------------------------------------------------------------------
 
     private void load() {
@@ -137,14 +137,14 @@ public final class HandlerKnowledgeCore {
         CompoundTag tag = core.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         ListTag list = tag.getList(NBT_PATTERNS, Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
-            // Copied, not referenced: save may write this entry back, and the tag belongs to the stack.
+            // 取副本而不是引用：save 可能会写回这个条目，而标签属于物品堆。
             CompoundTag entry = list.getCompound(i).copy();
             ThEArcanePattern pattern =
                     patterns.size() < MAXIMUM_STORED_PATTERNS ? ThEArcanePattern.load(registries, entry) : null;
             if (pattern != null) {
                 patterns.add(pattern);
             } else {
-                // Past the cap as well as unreadable: the entry is the player's, not ours to drop.
+                // 既超出上限又读不了：这个条目是玩家的，不该由我们丢弃。
                 unreadable.add(entry);
             }
         }
@@ -156,8 +156,8 @@ public final class HandlerKnowledgeCore {
         for (ThEArcanePattern pattern : patterns) {
             list.add(pattern.save(registries));
         }
-        // Put back unchanged whatever this build could not read: this write replaces the whole list,
-        // so leaving them out deletes them.
+        // 把本版本读不了的内容原样放回：这次写入替换整个列表，
+        // 漏掉它们就等于删掉它们。
         for (CompoundTag entry : unreadable) {
             list.add(entry.copy());
         }
@@ -186,8 +186,8 @@ public final class HandlerKnowledgeCore {
     }
 
     /**
-     * A warning naming the entries this build cannot read, or nothing when it can read them all.
-     * Shown because the entries stay in the core, so without it the player's list just looks shorter.
+     * 一条警告，列出本版本读不了的条目；全部可读时什么都不显示。
+     * 之所以显示，是因为这些条目仍留在核心里，没有它，玩家的列表只是看起来短了。
      */
     public List<Component> describeUnreadable() {
         if (unreadable.isEmpty()) {
@@ -230,8 +230,8 @@ public final class HandlerKnowledgeCore {
     }
 
     /**
-     * Applies one text colour. Wrapped rather than calling {@code withStyle} inline: that method is
-     * varargs, and overload resolution against {@code ChatFormatting} does not settle on this toolchain.
+     * 应用一种文字颜色。包一层而不是就地调用 [withStyle]：那个方法是
+     * 可变参数的，在这套工具链上针对 {@code ChatFormatting} 的重载解析定不下来。
      */
     private static MutableComponent styled(Component text, ChatFormatting colour) {
         MutableComponent mutable = text.copy();

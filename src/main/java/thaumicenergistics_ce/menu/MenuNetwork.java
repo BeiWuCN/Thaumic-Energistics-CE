@@ -9,40 +9,40 @@ import thaumicenergistics_ce.network.InscriberGridFillPayload;
 import thaumicenergistics_ce.network.InscriberGridPayload;
 
 /**
- * The four requests a menu sends to the server, built in one place.
- * A menu is the container's client half, so it asks, and this is the only place a menu names a
- * payload. The requests are built here and not in {@code net}, which is what the two sides agree
- * on and so must not know what a menu decided.
+ * 菜单发给服务端的四个请求，集中在一处构建。
+ * 菜单是容器的客户端半边，所以由它来问，而这里是菜单唯一指名载荷的地方。
+ * 请求在此构建而不在 {@code net} 里，
+ * 后者只是两侧约定之物，不得知道某个菜单决定了什么。
  */
 public final class MenuNetwork {
 
     private MenuNetwork() {}
 
-    /** Picks the aspect at the sent value, or clears the pick when it is negative. */
+    /** 选中传入值处的要素，值为负时清除选择。 */
     public static final int ACTION_SELECT = EncoderActionPayload.ACTION_SELECT;
 
-    /** Writes one pattern from the current source item, aspect and blank. */
+    /** 用当前的源物品、要素与空白样板写入一个样板。 */
     public static final int ACTION_ENCODE = EncoderActionPayload.ACTION_ENCODE;
 
-    /** Moves one blank into the blank well for a drag, which must not conjure one: the encode spends it. */
+    /** 为拖拽把一个空白样板移入空白槽位，不得凭空变出一个：编码会消耗它。 */
     public static final int ACTION_INSERT_BLANK = EncoderActionPayload.ACTION_INSERT_BLANK;
 
-    /** One cell of the Inscriber's ghost grid; the stack arrives already trimmed to one item. */
+    /** 铭刻机幽灵网格的一个单元；物品堆送达时已裁剪为一个物品。 */
     public static void sendInscriberGrid(int containerId, int cell, ItemStack stack) {
         PacketDistributor.sendToServer(new InscriberGridPayload(containerId, cell, stack));
     }
 
-    /** The whole Inscriber grid in one write: a payload per cell would re-resolve against a half grid. */
+    /** 一次写入整个铭刻机网格：每单元一个载荷会对着半边网格重复求解。 */
     public static void sendInscriberGridFill(int containerId, List<ItemStack> cells) {
         PacketDistributor.sendToServer(new InscriberGridFillPayload(containerId, List.copyOf(cells)));
     }
 
-    /** Which aspect the Distillation Encoder should be working from. */
+    /** 蒸馏编码器应以哪个要素为工作依据。 */
     public static void sendEncoderSource(int containerId, ItemStack stack) {
         PacketDistributor.sendToServer(new EncoderSourcePayload(containerId, stack.copy()));
     }
 
-    /** An Encoder button: select / encode / insert, encoded as one int plus its value. */
+    /** 编码器按钮：select / encode / insert，编码为一个 int 加其值。 */
     public static void sendEncoderAction(int containerId, int action, int value) {
         PacketDistributor.sendToServer(new EncoderActionPayload(containerId, action, value));
     }

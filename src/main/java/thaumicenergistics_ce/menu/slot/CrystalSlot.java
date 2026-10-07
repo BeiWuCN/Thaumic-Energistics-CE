@@ -8,10 +8,10 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 
 /**
- * One of the Arcane Crafting Terminal's six crystal slots, pinned to a single primal aspect.
- * Refusal delegates to {@code TcWorkbench.isValidCrystal}, the workbench's own rule
- * ({@code MenuArcaneWorkbench.addSlots}), so the terminal accepts what the workbench accepts.
- * {@code mayPlace} is the whole gate: every route into the slot goes through it.
+ * 奥术合成终端六个水晶槽位之一，固定对应一个元初要素。拒绝与否委托给
+ * {@code TcWorkbench.isValidCrystal}，即工作台自己的规则（{@code MenuArcaneWorkbench.addSlots}），
+ * 所以终端接受工作台所接受的东西。{@code mayPlace} 就是全部闸门：进入该槽位的每条路径
+ * 都要经过它。
  */
 public class CrystalSlot extends AppEngSlot {
     private final ResourceKey<IAspect> required;

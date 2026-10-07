@@ -3,9 +3,9 @@ package thaumicenergistics_ce.menu;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * The menu button's server action: hand the grid to the machine to store, or ask it to delete what the
- * grid already stored, then let the client side catch up.
- * The status is pushed after the machine has re-resolved, since a store clears the grid.
+ * 菜单按钮的服务端动作：把网格交给机器存储，或让它删除网格
+ * 已经存储的内容，然后让客户端一侧跟上。
+ * 状态在机器重新解析之后推送，因为一次存储会清空网格。
  */
 final class InscriberButtonAction {
 
@@ -20,7 +20,7 @@ final class InscriberButtonAction {
         } else {
             menu.inscriber.save(player);
         }
-        // A save clears the grid, so the cached resolution must catch up before the status is pushed.
+        // 保存会清空网格，所以在推送状态之前，缓存的解析结果必须先跟上。
         menu.inscriber.refreshResolution();
         menu.broadcastChanges();
         menu.updatePreview();

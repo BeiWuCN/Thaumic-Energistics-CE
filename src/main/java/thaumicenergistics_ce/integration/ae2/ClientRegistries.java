@@ -4,11 +4,11 @@ import net.minecraft.core.RegistryAccess;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Where the client installs the way to reach its registries, so common code can ask for them
- * without naming a client class - the shape {@code net.ClientSinks} uses, for the same reason.
- * It is installed from {@code ClientSetup} before anything draws a key, while a dedicated
- * server installs nothing. The field itself is common: both sides load this class, only one of
- * them sets its value.
+ * 客户端在这里装入通往自身注册表的方式，好让通用代码能够索取它们
+ * 而不必指名客户端类——{@code net.ClientSinks} 用的就是这个形式，理由相同。
+ * 它在任何东西绘制键之前由 {@code ClientSetup} 装入，而专用
+ * 服务器什么都不装。这个字段本身是通用的：两侧都会加载这个类，只有一侧
+ * 会给它赋值。
  */
 public final class ClientRegistries {
 
@@ -20,7 +20,7 @@ public final class ClientRegistries {
         ClientRegistries.source = source;
     }
 
-    /** This side's registries, or null when it has none to offer - a dedicated server installs nothing. */
+    /** 本侧的注册表；本侧无可提供时为 null——专用服务器什么都不装。 */
     public static @Nullable RegistryAccess get() {
         ClientRegistrySource source = ClientRegistries.source;
         return source == null ? null : source.registries();

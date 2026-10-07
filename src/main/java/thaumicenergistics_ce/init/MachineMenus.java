@@ -14,10 +14,10 @@ import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
 /**
- * The machine menus, built from the machine that opens them. A machine that named its own menu
- * class put {@code blockentity} and {@code menu} in a mutual pair of packages, whereas the
- * wiring package already knows both sides. Registration stays in {@link ModMenuTypes}, since
- * these build a menu rather than define one.
+ * 机器菜单，由打开它们的机器构建。若让机器自己指名菜单类，就会让 {@code blockentity} 与
+ * {@code menu} 两个包互相引用，而接线包本来两边都认识。注册仍然留在
+ * {@link ModMenuTypes}，因为这些只是构建菜单，
+ * 而不是定义菜单。
  */
 public final class MachineMenus {
 

@@ -19,17 +19,17 @@ import thaumicenergistics_ce.menu.slot.PreviewSlot;
 import thaumicenergistics_ce.menu.slot.ReadOnlySlot;
 
 /**
- * The Arcane Assembler's menu: pattern mirror, knowledge core, acceleration cards, craft preview
- * and the gear slots whose vis discount applies here. Coordinates come from a {@link GuiLayout}
- * generated from the same constants as the background texture, so this class holds no client-only
- * resource access and no geometry of its own.
+ * 奥术组装机的菜单：样板镜像、知识核心、加速卡、合成预览，
+ * 以及 vis 减免在此生效的装备槽。坐标来自 {@link GuiLayout}，
+ * 它由与背景纹理相同的常量生成，因此本类不含仅客户端的
+ * 资源访问，也没有自己的几何。
  */
 public class MenuArcaneAssembler extends AbstractContainerMenu {
 
     private static final int PLAYER_SLOTS = 36;
 
-    // Slot indices in registration order: player, core, patterns, upgrades, gear.
-    // No index for the result well: it is in the panel art, and a Slot would always highlight.
+    // 槽位索引按注册顺序：玩家、核心、样板、升级、装备。
+    // 结果井没有索引：它画在面板图里，而 [Slot] 会始终高亮。
     static final int IDX_CORE = PLAYER_SLOTS;
     private static final int IDX_PATTERN_START = IDX_CORE + 1;
     private static final int IDX_PATTERN_END = IDX_PATTERN_START + BlockEntityArcaneAssembler.PATTERN_SLOT_COUNT;
@@ -39,9 +39,9 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
     private static final int IDX_GEAR_START = IDX_UPGRADE_END;
     private static final int IDX_GEAR_END = IDX_GEAR_START + BlockEntityArcaneAssembler.GEAR_SLOT_COUNT;
 
-    /** The vis pool as one number: the total the six per-aspect slots below break down. */
+    /** 把 vis 池当作一个数字：下面六个按要素划分的槽位所细分的总量。 */
     public static final int DATA_BUFFERED_VIS = 0;
-    /** The six primals, one slot each, in {@code BAR_ASPECTS} order; a shared pool drew all bars equal. */
+    /** 六个元要素各占一个槽，按 {@code BAR_ASPECTS} 顺序；共用池会让所有条画得一样长。 */
     public static final int DATA_ASPECT_AIR = 1;
     public static final int DATA_ASPECT_WATER = 2;
     public static final int DATA_ASPECT_FIRE = 3;
@@ -54,7 +54,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
     public static final int DATA_GEAR_DISCOUNT = 10;
     public static final int DATA_SIZE = 11;
 
-    // Package-private for the two collaborators: they read the machine and the inventory directly.
+    // 包级可见，供两个协作者使用：它们直接读机器和物品栏。
     final @Nullable BlockEntityArcaneAssembler assembler;
 
     final Inventory playerInventory;
@@ -64,22 +64,20 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
     private final AssemblerMenuReadout readout;
 
     public MenuArcaneAssembler(int containerId, Inventory playerInventory, BlockEntityArcaneAssembler assembler) {
-        // Both sides read the layout from the mod's resources, so their slot positions cannot drift apart.
+        // 两侧都从 mod 的资源里读布局，所以它们的槽位坐标不会彼此漂移。
         this(containerId, playerInventory, assembler, assembler.getInventory());
         mirror.refresh();
     }
 
     public MenuArcaneAssembler(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
         this(containerId, playerInventory, null, new SimpleContainer(BlockEntityArcaneAssembler.SLOT_COUNT));
-        // The open packet's only reader: the menu type hands the buffer to this constructor.
+        // 打开数据包的唯一读取者：菜单类型把缓冲区交给这个构造器。
         if (buf.readableBytes() >= Long.BYTES) {
             readout.setClientPos(buf.readBlockPos());
         }
     }
 
-    /**
-     * The geometry both sides place their slots from, from the file the art generator writes.
-     */
+    /** 两侧据此摆放槽位的几何，来自美术生成器写出的文件。 */
     private static GuiLayout layout() {
         return GuiLayout.load();
     }
@@ -104,7 +102,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         GuiLayout.Grid preview = layout.previewGrid();
         GuiLayout.Anchor result = layout.previewResult();
 
-        // 1. Player inventory, three rows then the hotbar.
+        // 1. 玩家物品栏，先三行，再快捷栏。
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 addSlot(new Slot(playerInventory, col + row * 9 + 9,
@@ -116,7 +114,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
                     layout.hotbar().y()));
         }
 
-        // 2. Knowledge core.
+        // 2. 知识核心。
         addSlot(new Slot(machine, BlockEntityArcaneAssembler.CORE_SLOT, core.x(), core.y()) {
             @Override
             public boolean mayPlace(ItemStack stack) {
@@ -130,7 +128,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
             }
         });
 
-        // 3. Pattern mirror, display only, derived from the core - see AssemblerPreviewMirror.refresh.
+        // 3. 样板镜像，仅显示，从核心推导而来 —— 见 [AssemblerPreviewMirror.refresh]。
         for (int i = 0; i < BlockEntityArcaneAssembler.PATTERN_SLOT_COUNT; i++) {
             addSlot(new ReadOnlySlot(
                     assembler == null ? mirror.display() : machine,
@@ -139,8 +137,8 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
                     patterns.slotY(i)));
         }
 
-        // 4. Acceleration cards, in the machine's own slots. A menu-local container held them once, and
-        // closing the menu took them with it; these are saved with the machine, so they come back.
+        // 4. 加速卡，放在机器自身的槽位里。以前由一个菜单本地容器持有，
+        // 关掉菜单就把卡一起带走了；这些随机器保存，所以会回来。
         for (int i = 0; i < BlockEntityArcaneAssembler.UPGRADE_SLOT_COUNT; i++) {
             addSlot(new Slot(machine, BlockEntityArcaneAssembler.UPGRADE_SLOT_START + i, upgrades.x(),
                     upgrades.columnY(i)) {
@@ -151,14 +149,14 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
 
                 @Override
                 public int getMaxStackSize() {
-                    // One card per slot: four slots, four cards, four steps of speed.
+                    // 每个槽一张卡：四个槽、四张卡、四档速度。
                     return 1;
                 }
             });
         }
 
-        // 5. Gear slots whose vis discount applies to this assembler.
-        // mayPlace is what a player click goes through; the block's container only sees automation.
+        // 5. vis 减免对本组装机生效的装备槽。
+        // 玩家点击走的是 [mayPlace]；方块的容器只能看到自动化。
         for (int i = 0; i < BlockEntityArcaneAssembler.GEAR_SLOT_COUNT; i++) {
             int gearIndex = i;
             addSlot(new Slot(machine, BlockEntityArcaneAssembler.GEAR_SLOT_START + i, gear.x(),
@@ -170,19 +168,19 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
             });
         }
 
-        // 6. The craft preview's product, while a craft is running. Added last, as quickMoveStack routes by
-        // IDX_GEAR_START. A slot, as the block sends no update tag; +1, so the well does not highlight.
+        // 6. 合成进行中时，合成预览的产物。最后添加，因为 [quickMoveStack] 按
+        // [IDX_GEAR_START] 路由。用普通槽，因为方块不发更新标签；偏移 +1，使该井不高亮。
         Slot target = addSlot(new PreviewSlot(
                 machine,
                 BlockEntityArcaneAssembler.TARGET_SLOT,
                 result.x() + 1,
                 result.y() + 1));
 
-        // 7. The running craft's 3x3, shown in the preview wells.
-        // Added last like the result well; PreviewSlot, so the wells do not highlight under the cursor.
+        // 7. 正在进行的合成的 3x3，显示在预览井中。
+        // 像结果井一样最后添加；用 [PreviewSlot]，使这些井在光标下不高亮。
         Slot[] wells = new Slot[BlockEntityArcaneAssembler.PREVIEW_SLOT_COUNT];
         for (int i = 0; i < wells.length; i++) {
-            // No +1 offset here, unlike the result well: the wells sit exactly on the grid cells.
+            // 这里不像结果井那样偏移 +1：这些井正好落在网格单元上。
             wells[i] = addSlot(new PreviewSlot(
                     machine,
                     BlockEntityArcaneAssembler.PREVIEW_SLOT_START + i,
@@ -191,7 +189,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         }
         mirror.watch(target, wells);
 
-        // The numbers the menu shows live in AssemblerMenuReadout, which owns the table they travel in.
+        // 菜单显示的数字存放在 [AssemblerMenuReadout] 里，它持有这些数字传输所用的表。
         addDataSlots(readout.data());
     }
 
@@ -254,7 +252,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
                 merged = moveItemStackTo(stack, IDX_UPGRADE_START, IDX_UPGRADE_END, false);
             }
             if (!merged && !GearSlots.isGear(stack)) {
-                // Fall through to the normal inventory shuffle.
+                // 落到常规的物品栏搬移。
             }
             if (!merged) {
                 merged = moveItemStackTo(stack, IDX_GEAR_START, IDX_GEAR_END, false);
@@ -270,7 +268,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
                 return ItemStack.EMPTY;
             }
         } else {
-            // Machine slots back into the player inventory; the read-only ones refuse this already.
+            // 机器槽位搬回玩家物品栏；只读槽位本身已经拒绝这样做。
             if (!moveItemStackTo(stack, 0, PLAYER_SLOTS, true)) {
                 return ItemStack.EMPTY;
             }

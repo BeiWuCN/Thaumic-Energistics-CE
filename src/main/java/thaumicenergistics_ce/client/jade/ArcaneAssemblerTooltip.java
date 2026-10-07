@@ -23,10 +23,10 @@ import thaumicenergistics_ce.integration.jade.ArcaneAssemblerProvider;
 import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
- * The Arcane Assembler's Jade tooltip: the drawing half of {@link ArcaneAssemblerProvider}.
- * Everything it needs is in the data tag the server wrote, and the registry lookups are the
- * client's own, which is why this half lives in the client tree. Both halves report
- * {@link ArcaneAssemblerProvider#UID}, which is how Jade pairs them.
+ * 奥术组装机的 Jade tooltip：{@link ArcaneAssemblerProvider} 的绘制半边。
+ * 它需要的一切都在服务端写好的数据标签里，而注册表查询用的是客户端
+ * 自己的，这就是这一半位于客户端代码树的原因。两半都报告
+ * {@link ArcaneAssemblerProvider#UID}，Jade 借此把它们配对。
  */
 public final class ArcaneAssemblerTooltip implements IBlockComponentProvider {
 
@@ -36,7 +36,7 @@ public final class ArcaneAssemblerTooltip implements IBlockComponentProvider {
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
         CompoundTag tag = accessor.getServerData();
         if (!tag.contains(JadeGridState.TAG)) {
-            // Only reachable if the block entity was not the assembler. Better nothing than a wrong line.
+            // 只有方块实体并非组装机时才可能走到这里。宁可什么都不显示，也不显示错行。
             return;
         }
         var helper = IElementHelper.get();
@@ -48,8 +48,8 @@ public final class ArcaneAssemblerTooltip implements IBlockComponentProvider {
             tooltip.add(helper.text(
                     Component.translatable("jade.thaumicenergistics_ce.arcane_assembler.crafting")
                             .withStyle(ChatFormatting.WHITE)));
-            // The arrow row: what goes in on the left and what comes out on the right, so "what is it
-            // making" and "out of what" need no sentence; full-size icons because Jade's sprite is 22x16.
+            // 箭头那一行：左边是投入什么，右边是产出什么，于是“在做什么”和“用什么
+            // 做”都不需要文字；图标用全尺寸，因为 Jade 的 sprite 是 22x16。
             ListTag inputs = tag.getList(ArcaneAssemblerProvider.TAG_INPUTS, Tag.TAG_COMPOUND);
             List<IElement> row = new ArrayList<>();
             var level = accessor.getLevel();
@@ -80,8 +80,8 @@ public final class ArcaneAssemblerTooltip implements IBlockComponentProvider {
             }
         }
 
-        // One line, not two: banked and drawable answer the same question, and split they read as two
-        // facts to compare. The first number is a cache, not plain vis.
+        // 合并成一行而不是两行：存款与可抽取回答的是同一个问题，拆开就会被读成
+        // 两个可以比较的事实。第一个数字是缓存，不是单纯的 vis。
         tooltip.add(helper.text(Component.translatable(
                         "jade.thaumicenergistics_ce.arcane_assembler.vis",
                         tag.getInt(ArcaneAssemblerProvider.TAG_VIS),
@@ -108,8 +108,8 @@ public final class ArcaneAssemblerTooltip implements IBlockComponentProvider {
                         tag.getInt(ArcaneAssemblerProvider.TAG_PATTERNS))
                 .withStyle(ChatFormatting.GRAY)));
 
-        // A waiting machine and an idle one look identical from outside; the CPU waiting on it shows
-        // only a stopped timer.
+        // 等待中的机器和空闲的机器从外面看一模一样；等着它的合成 CPU 只显示一个
+        // 停住的计时器。
         Component wait = decode(tag, ArcaneAssemblerProvider.TAG_WAIT);
         if (wait != null) {
             tooltip.add(helper.text(Component.translatable(
@@ -125,8 +125,8 @@ public final class ArcaneAssemblerTooltip implements IBlockComponentProvider {
     }
 
     /**
-     * The component back, or {@code null} when the tag is absent or unreadable: an empty line under
-     * "waiting" claims the machine waits for nothing.
+     * 返回该组件，标签缺失或无法读取时为 {@code null}：在“等待”下面留一行空的，
+     * 等于宣称这台机器什么都没等。
      */
     private static @Nullable Component decode(CompoundTag tag, String key) {
         Tag encoded = tag.get(key);

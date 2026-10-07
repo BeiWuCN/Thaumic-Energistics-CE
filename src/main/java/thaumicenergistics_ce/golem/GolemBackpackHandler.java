@@ -24,24 +24,24 @@ import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Putting the wireless backpack on a golem, taking it off again, and repainting it: equip with
- * a linked backpack, remove with a sneaking golem bell, repaint with a mapped block. It is not
- * an accessory, since those use a fixed five-id atlas and a {@code final} item with no AE2
- * link. The link lives in the golem's persistent data, unsynced, and
- * {@link GolemBackpackTickHandler} pushes it.
+ * 给傀儡装上无线背包、再取下、以及重新上色：用已链接的背包装备，用潜行状态下的
+ * 傀儡铃取下，用映射到的方块重新上色。它不是饰品——饰品使用固定的五 id 图集
+ * 和一个没有 AE2 链接的 {@code final} 物品。链接存放在傀儡的持久化数据里，
+ * 不参与同步，由
+ * {@link GolemBackpackTickHandler} 推送。
  */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class GolemBackpackHandler {
 
-    /** Where the linked network lives. The same shape AE2 stores on the item. */
+    /** 已链接的网络存放在哪里。与 AE2 存储在物品上的结构相同。 */
     static final String KEY_LINK = "ThEWifiBackpackLink";
     static final String KEY_SKIN = "ThEBackpackSkin";
     static final String KEY_FACADE = "ThEBackpackFacade";
 
-    /** Golem UUID to decoded link: the tick handler must not re-parse the same NBT twenty times a second. */
+    /** 傀儡 UUID 到已解码链接的映射：tick 处理器不能每秒把同一份 NBT 解析二十次。 */
     private static final Map<UUID, GlobalPos> LINK_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
 
-    /** Set {@code THAUMICENERGISTICS_BACKPACK_TRACE} to log each equip, removal, repaint and transfer. */
+    /** 设置 {@code THAUMICENERGISTICS_BACKPACK_TRACE} 可记录每次装备、取下、重新上色与传输。 */
     static final boolean TRACE = System.getenv("THAUMICENERGISTICS_BACKPACK_TRACE") != null;
 
     private GolemBackpackHandler() {}
@@ -65,8 +65,8 @@ public final class GolemBackpackHandler {
         }
 
         if (held.getItem() instanceof ItemGolemWirelessBackpack backpack) {
-            // Client only to swing: the server is where anything happens, and vanilla sends the interaction
-            // packet before this event either way, so cancelling locally does not hide the click from it.
+            // 客户端这边只负责挥手：所有实际动作都在服务端，而且无论怎样原版都会先发交互
+            // 数据包再触发本事件，因此本地取消并不会让服务端看不到这次点击。
             if (event.getLevel().isClientSide()) {
                 event.setCancellationResult(InteractionResult.SUCCESS);
                 event.setCanceled(true);
@@ -80,8 +80,8 @@ public final class GolemBackpackHandler {
         }
 
         if (held.getItem() instanceof ItemGolemBell) {
-            // Sneak, because the bell alone is Thaumaturge's follow toggle; cancelling is what stops the
-            // golem being pocketed along with its backpack.
+            // 需要潜行，因为单用铃是 Thaumaturge 的跟随开关；取消才是阻止
+            // 傀儡连同背包一起被收走的原因。
             if (!player.isShiftKeyDown()) {
                 return;
             }
@@ -122,7 +122,7 @@ public final class GolemBackpackHandler {
         }
         GlobalPos link = backpack.getLinkedPosition(held);
         if (link == null) {
-            // Refused: a backpack with no network is a decoration, and the golem would never reach anything.
+            // 予以拒绝：没有网络的背包只是装饰，傀儡永远够不到任何东西。
             return false;
         }
 
@@ -149,7 +149,7 @@ public final class GolemBackpackHandler {
         backpack.set(AEComponents.WIRELESS_LINK_TARGET, link);
         golem.spawnAtLocation(backpack);
 
-        // The block goes back too: it was a real item the player spent, and repainting must not consume it.
+        // 方块也会退还：它是玩家实实在在花掉的物品，重新上色不得把它消耗掉。
         ItemStack facade = getFacade(golem);
         if (!facade.isEmpty() && !player.isCreative()) {
             golem.spawnAtLocation(facade);
@@ -189,8 +189,8 @@ public final class GolemBackpackHandler {
     }
 
     /**
-     * The reference build's sound, the one a player already associates with putting something on a golem.
-     * Thaumaturge has its own clack for accessories; this is a backpack, not one.
+     * 参照实现所用的音效，玩家已经把它与「给傀儡装上东西」联系在一起。
+     * Thaumaturge 为饰品配了自己的咔嗒声；这是背包，不属于饰品。
      */
     private static void playEquipSound(EntityThaumaturgeGolem golem) {
         golem.level().playSound(null, golem.getX(), golem.getY(), golem.getZ(),

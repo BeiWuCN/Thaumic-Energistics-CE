@@ -27,27 +27,27 @@ import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
- * Every ME interface that carries our access card, plus the rounds that drive them. A chunk load and a
- * menu opening each admit a host; a sweep then revisits the loaded chunks, one per tick.
- * Nothing here is ever saved, since the catalog is rebuilt from what is in the world, and an entry
- * whose host is gone is dropped on the first round that notices it.
+ * 每一个带我们访问卡的 ME 接口，以及驱动它们的轮次。
+ * 区块加载和菜单打开各自接纳一个宿主；然后一次扫描会重访已加载的区块，每 tick 一个。
+ * 这里的东西从不存档，因为目录是由世界里的实际内容重建的；
+ * 宿主已消失的条目会在第一个注意到它的轮次里被丢弃。
  */
 public final class EssentiaInterfaceRegistry {
 
     private static final List<Entry> ENTRIES = new ArrayList<>();
 
     /**
-     * The loaded chunks, per dimension, as told to us by the load and unload events. A level cannot be
-     * asked for its chunks, so the sweep walks this instead.
+     * 已加载的区块，按维度分组，由加载与卸载事件告知。无法向 level 索取它的区块列表，
+     * 所以扫描改为遍历这里。
      */
     private static final Map<ResourceKey<Level>, Set<ChunkPos>> LOADED = new HashMap<>();
 
-    /** One chunk per tick, so the sweep cannot become the tick budget of a large world. */
+    /** 每 tick 一个区块，这样扫描不会变成大世界的 tick 预算。 */
     private static int cursor;
 
     private EssentiaInterfaceRegistry() {}
 
-    /** Hooks every discovery path to the game bus. Called once, from the mod's own construction. */
+    /** 把每条发现路径都挂到游戏总线上。只调用一次，在 mod 自身构造时。 */
     public static void register() {
         NeoForge.EVENT_BUS.addListener(EssentiaInterfaceRegistry::onChunkLoad);
         NeoForge.EVENT_BUS.addListener(EssentiaInterfaceRegistry::onChunkUnload);
@@ -57,8 +57,8 @@ public final class EssentiaInterfaceRegistry {
     }
 
     /**
-     * A chunk that arrives: it joins the sweep, and an interface already inside it is admitted now.
-     * This is what restores the catalog after a save is loaded.
+     * 一个区块到来：它加入扫描，其中已有的接口立即被接纳。
+     * 这就是存档加载后恢复目录的机制。
      */
     public static void onChunkLoad(ChunkEvent.Load event) {
         if (!(event.getLevel() instanceof ServerLevel level)) {
@@ -72,7 +72,7 @@ public final class EssentiaInterfaceRegistry {
         }
     }
 
-    /** A chunk that goes away leaves the sweep: nothing that is unloaded is worth a visit. */
+    /** 区块离开就退出扫描：卸载了的东西不值得再访问。 */
     public static void onChunkUnload(ChunkEvent.Unload event) {
         if (event.getLevel() instanceof ServerLevel level) {
             forget(level, event.getChunk().getPos());
@@ -80,8 +80,8 @@ public final class EssentiaInterfaceRegistry {
     }
 
     /**
-     * A player opening an interface's menu: the case the chunk sweep misses, since the interface may have
-     * been in a loaded chunk all along and only just received the card.
+     * 玩家打开了某个接口的菜单：这是区块扫描漏掉的情况，因为接口可能一直在已加载的区块里，
+     * 只是刚刚才拿到卡。
      */
     public static void onContainerOpen(PlayerContainerEvent.Open event) {
         if (event.getContainer() instanceof InterfaceMenu menu
@@ -90,15 +90,15 @@ public final class EssentiaInterfaceRegistry {
         }
     }
 
-    /** Steps the slow sweep, then runs the rounds, which are staggered so that no two share a tick. */
+    /** 推进一步缓慢扫描，然后运行轮次；轮次是错开的，所以任意两个不会共用同一个 tick。 */
     public static void onServerTick(ServerTickEvent.Post event) {
         sweep(event.getServer().getAllLevels());
         dispatchRounds(event.getServer().getTickCount());
     }
 
     /**
-     * A stopped server takes the catalog with it: the entries name block entities of a world that is gone,
-     * and the chunk list is keyed by dimension, so the next world would inherit the previous one's.
+     * 服务端停止会把目录一起带走：条目指向的方块实体属于一个已经不存在的世界，
+     * 而区块列表按维度作键，下一个世界会继承上一个世界的。
      */
     public static void onServerStopped(ServerStoppedEvent event) {
         ENTRIES.clear();
@@ -107,8 +107,8 @@ public final class EssentiaInterfaceRegistry {
     }
 
     /**
-     * Adds a host that is not known yet. A host has no identity beyond the object itself, so the same
-     * interface seen twice - by a chunk load and then by a menu - must still end up as one entry.
+     * 加入一个尚不知晓的宿主。宿主除了对象本身没有身份，所以同一个接口被看到两次——
+     * 一次来自区块加载，一次来自菜单——也必须最终只算一个条目。
      */
     private static void admit(InterfaceLogicHost host) {
         if (host.getBlockEntity() == null || host.getInterfaceLogic() == null) {
@@ -126,8 +126,8 @@ public final class EssentiaInterfaceRegistry {
     }
 
     /**
-     * Runs one round for every entry whose card is still installed, dropping those whose host is gone. The
-     * phase is the entry's place in the catalog, so a round finds each interface five ticks on.
+     * 为每个卡仍安装着的条目跑一轮，并丢弃宿主已消失的那些。相位是条目在目录中的位置，
+     * 所以一轮每五个 tick 找到每个接口一次。
      */
     private static void dispatchRounds(long tick) {
         int now = Math.floorMod(tick, EssentiaInterfaceAccess.ROUND_TICKS);
@@ -142,12 +142,12 @@ public final class EssentiaInterfaceRegistry {
         }
     }
 
-    /** Adds a position to the sweep of its dimension. */
+    /** 把一个位置加入它所在维度的扫描。 */
     private static void remember(ServerLevel level, ChunkPos pos) {
         LOADED.computeIfAbsent(level.dimension(), key -> new HashSet<>()).add(pos);
     }
 
-    /** Drops a position from the sweep of its dimension. */
+    /** 把一个位置从它所在维度的扫描中移除。 */
     private static void forget(ServerLevel level, ChunkPos pos) {
         Set<ChunkPos> positions = LOADED.get(level.dimension());
         if (positions != null) {
@@ -155,7 +155,7 @@ public final class EssentiaInterfaceRegistry {
         }
     }
 
-    /** The hosts a chunk contributes, taken as a copy: a live block entity list mutates under the walk. */
+    /** 一个区块贡献的宿主，取的是副本：活着的方块实体列表会在遍历中被改动。 */
     private static List<InterfaceLogicHost> hostsIn(LevelChunk chunk) {
         List<InterfaceLogicHost> hosts = new ArrayList<>();
         if (chunk == null) {
@@ -176,7 +176,7 @@ public final class EssentiaInterfaceRegistry {
         return hosts;
     }
 
-    /** Advances the sweep by one chunk of every dimension in turn, dropping chunks that are gone. */
+    /** 轮流把每个维度的扫描推进一步，并丢弃已消失的区块。 */
     private static void sweep(Iterable<ServerLevel> levels) {
         for (ServerLevel level : levels) {
             Set<ChunkPos> positions = LOADED.get(level.dimension());
@@ -192,7 +192,7 @@ public final class EssentiaInterfaceRegistry {
             ServerChunkCache source = level.getChunkSource();
             LevelChunk chunk = source.getChunkNow(pos.x, pos.z);
             if (chunk == null) {
-                // Absent at every status: the position cannot come back, so the sweep forgets it.
+                // 所有状态下都不存在：这个位置不可能回来了，所以扫描忘掉它。
                 if (!source.hasChunk(pos.x, pos.z)) {
                     walk.remove();
                 }
@@ -214,6 +214,6 @@ public final class EssentiaInterfaceRegistry {
         return null;
     }
 
-    /** One interface and the round driver bound to it. */
+    /** 一个接口以及绑定到它的轮次驱动器。 */
     private record Entry(InterfaceLogicHost host, EssentiaInterfaceAccess access) {}
 }

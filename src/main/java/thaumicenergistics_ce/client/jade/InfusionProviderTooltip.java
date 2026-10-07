@@ -29,10 +29,10 @@ import thaumicenergistics_ce.integration.jade.InfusionProviderProvider;
 import thaumicenergistics_ce.integration.jade.JadeGridState;
 
 /**
- * The Infusion Provider's Jade tooltip: what the altar beside it can actually draw.
- * It is the drawing half of {@link InfusionProviderProvider}, and both report the same
- * {@link #getUid() UID}, which is how Jade pairs the server data with this. Entries come one aspect
- * at a time: a chip with the amount in the corner, in {@link AmountFormat#SLOT} figures.
+ * 注魔供应器的 Jade tooltip：旁边的祭坛实际能抽取到什么。
+ * 它是 {@link InfusionProviderProvider} 的绘制半边，两者报告同一个
+ * {@link #getUid() UID}，Jade 借此把服务端数据与它配对。条目一次一个
+ * 要素：一个图标，数量标在角上，采用 {@link AmountFormat#SLOT} 的数字格式。
  */
 public final class InfusionProviderTooltip implements IBlockComponentProvider {
 
@@ -62,11 +62,11 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
                 }
                 AEssentiaKey key = AEssentiaKey.of(aspect);
                 if (key == null) {
-                    // Not registry-backed: leave the entry out rather than badge it as something else.
+                    // 不由注册表支撑：宁可不列出该条目，也不要把它标成别的东西。
                     continue;
                 }
                 long amount = entry.getLong(InfusionProviderProvider.TAG_AMOUNT);
-                // AE2's own abbreviation - "16K", "28M" - so a figure under an icon reads as in a terminal.
+                // 用 AE2 自己的缩写——“16K”、“28M”——好让图标下面的数字读起来像在终端里。
                 String badge = key.formatAmount(amount, AmountFormat.SLOT);
                 row.add(new AspectIcon(aspect, badge));
                 if (row.size() >= InfusionProviderProvider.PER_ROW) {
@@ -85,7 +85,7 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
             }
         }
 
-        // Last, because the machine holds nothing itself: the line a player needs right after placing one.
+        // 放在最后，因为这台机器本身不存东西：玩家刚放下它之后最需要看到的就是这行。
         tooltip.add(helper.text(Component.translatable("thaumicenergistics_ce.jade.infusion_provider.window")
                 .withStyle(ChatFormatting.DARK_GRAY)));
     }
@@ -109,7 +109,7 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
 
         private static final int CHIP = 16;
         private static final int GAP = 1;
-        /** Smaller than the chip, so a row of figures sits under its icons rather than beside them. */
+        /** 比图标小，所以一行数字位于图标下方而不是旁边。 */
         private static final float BADGE_SCALE = 0.75F;
 
         private final Holder<IAspect> aspect;
@@ -120,8 +120,8 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
             Font font = Minecraft.getInstance().font;
             this.aspect = aspect;
             this.badge = badge;
-            // The badge is part of the width: Jade lays a row out by the sizes elements report, and the
-            // first version reported only the chip's 16 pixels, so numbers printed on top of the next chip.
+            // 角标算在宽度里：Jade 按各元素上报的尺寸排一行，而第一版只上报了图标的
+            // 16 像素，于是数字压到了下一个图标上。
             this.size = new Vec2(CHIP + GAP + Math.round(font.width(badge) * BADGE_SCALE), CHIP);
         }
 
@@ -129,8 +129,8 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
         public void render(GuiGraphics graphics, float x, float y, float delta, float alpha) {
             Font font = Minecraft.getInstance().font;
             AspectRendering.renderGui(graphics, font, (int) x, (int) y, aspect, 0.0F);
-            // The chip's bottom line, so a row reads as one band of numbers. The amount above is zero
-            // because this badge is the number, not the chip's own label.
+            // 图标的最下一行，这样一行读起来就是一整条数字。上面的数量为 0，
+            // 因为这个角标才是那个数字，而不是图标自己的标签。
             graphics.pose().pushPose();
             graphics.pose().translate(x + CHIP + GAP, y + 9, 0.0F);
             graphics.pose().scale(BADGE_SCALE, BADGE_SCALE, 1.0F);
@@ -158,7 +158,7 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
             return this;
         }
 
-        /** Left, so a short last row lines up under the first. */
+        /** 左对齐，让短的最后一行与第一行对齐。 */
         @Override
         public IElement.Align getAlignment() {
             return IElement.Align.LEFT;

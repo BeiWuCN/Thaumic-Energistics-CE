@@ -7,9 +7,9 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 
 /**
- * The knowledge inscriber's two readings, as the menu hands them to the screen: on the server they
- * come off the machine and its core slot, on the client they are what the server last sent, and
- * {@code set} keeps what it is given because a slot sync calls it on the client.
+ * 知识铭刻机的两项读数，由菜单交给屏幕：服务端上它们来自
+ * 机器及其核心槽，客户端上则是服务端最后一次发来的值，且
+ * {@code set} 会保留收到的值，因为客户端上槽位同步会调用它。
  */
 final class KnowledgeInscriberReadings implements ContainerData {
 
@@ -17,10 +17,10 @@ final class KnowledgeInscriberReadings implements ContainerData {
 
     private final @Nullable BlockEntityKnowledgeInscriber inscriber;
 
-    /** Who the status is read for: whether the recipe may be stored is checked against this player. */
+    /** 状态为谁而读：配方能否被存储要对照这名玩家检查。 */
     private final Player player;
 
-    /** Whether the core slot holds a core. Only the menu can see its own slots. */
+    /** 核心槽里是否有核心。只有菜单能看到自己的槽位。 */
     private final IntSupplier coreInSlot;
 
     private final int[] mirrored = new int[COUNT];
@@ -45,8 +45,8 @@ final class KnowledgeInscriberReadings implements ContainerData {
     }
 
     /**
-     * The machine's status, except that ACTIONABLE becomes RESEARCH_LOCKED for a player who may not
-     * store the recipe: the button's tooltip reads this, and ACTIONABLE means storable, not permitted.
+     * 机器的状态，只是对不能存储该配方的玩家，[ACTIONABLE] 会变成
+     * [RESEARCH_LOCKED]：按钮的 tooltip 读的是它，而 [ACTIONABLE] 意为可存储，而非被允许。
      */
     private int status() {
         int status = inscriber.status();

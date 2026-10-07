@@ -11,11 +11,11 @@ import thaumicenergistics_ce.block.BlockGachaBox;
 import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.block.BlockInfusionProvider;
 /**
- * The client half of {@link thaumicenergistics_ce.integration.jade.ThEJadePlugin}: its four
- * components. It is a second plugin rather than a method on the first, because
- * IWailaClientRegistration carries Screen; each component reports the same UID as its server data
- * half in integration.jade. Jade asks every @WailaPlugin on both sides, but a client only for the
- * client half.
+ * 客户端半边，对应 {@link thaumicenergistics_ce.integration.jade.ThEJadePlugin}：它的四个
+ * 组件。它做成第二个插件而不是第一个上的一个方法，因为
+ * [IWailaClientRegistration] 携带的是 [Screen]；每个组件报告与其服务端数据半边
+ * 相同的 UID，那个半边在 [integration.jade] 里。Jade 会在两侧询问每个 [@WailaPlugin]，
+ * 但客户端只问客户端半边。
  */
 @WailaPlugin
 public class ThEJadeClientPlugin implements IWailaPlugin {

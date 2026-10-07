@@ -4,8 +4,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * The partition-well half of the wire contract shared by the cell workbench menus: an aspect is set by id,
- * because a key written into a fake slot would stop at the screen it was written on.
+ * 存储元件工作台各菜单共用的线上约定中分区槽位那一半：要素按 id 设置，
+ * 因为写进 fake 槽位的键会止步于它被写入的那个屏幕。
  */
 public interface PartitionWellReceiver extends ThEMenuReceiver {
 

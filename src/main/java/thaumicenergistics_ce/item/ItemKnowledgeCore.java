@@ -11,9 +11,9 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 
 /**
- * A knowledge core: the portable list of arcane recipes an Arcane Assembler can perform; the item
- * is a plain {@link Item} whose contents live in custom data written by
- * {@link HandlerKnowledgeCore}, and this class only reports them in the tooltip.
+ * 知识核心：奥术组装机能执行的奥术配方的可携带清单；这件物品
+ * 就是一个普通的 {@link Item}，其内容存放在由
+ * {@link HandlerKnowledgeCore} 写入的自定义数据里，而这个类只在 tooltip 中报告它们。
  */
 public class ItemKnowledgeCore extends Item {
 

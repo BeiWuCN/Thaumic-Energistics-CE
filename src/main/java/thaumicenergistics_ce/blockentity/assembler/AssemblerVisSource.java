@@ -11,14 +11,14 @@ import thaumicenergistics_ce.part.PartVisInterface;
 import thaumicenergistics_ce.part.VisReservation;
 
 /**
- * Where the assembler's vis comes from: the surrounding aura, Thaumaturge's relay chain, and this
- * mod's vis interfaces - plus the pool that banks what they give.
- * Same package, so it reaches the machine's state directly instead of through accessors; the
- * machine keeps its public getters and forwards them here.
+ * 组装机的 vis 从哪里来：周围的灵气、Thaumaturge 的中继链，以及本 mod 的
+ * vis 接口——再加上把它们给的东西存起来的池子。
+ * 同包内，所以它直接够到机器的状态而不走访问器；机器保留自己的
+ * 公开 getter 并把它们转发到这里。
  */
 final class AssemblerVisSource {
 
-    /** Centivis in one vis: the relay network answers in hundredths of a vis, the aura in whole vis. */
+    /** 一 vis 中的 centivis：中继网络按百分之一 vis 回答，灵气按整数 vis 回答。 */
     private static final int CENTIVIS_PER_VIS = 100;
 
     static final int RELAY_POLL_INTERVAL = 20;
@@ -30,12 +30,12 @@ final class AssemblerVisSource {
 
     private long nextRelayPoll;
 
-    /** Centivis below a whole vis, per aspect: a whole vis goes to the aspect that supplied it. */
+    /** 不足一 vis 的 centivis，按要素分：整数 vis 归提供它的那个要素。 */
     private final int[] aspectCentivis = new int[BlockEntityArcaneAssembler.PRIMALS.size()];
 
     private long nextInterfacePoll;
 
-    /** Aura vis taken but not yet a whole vis: the aura is a float, the pool is whole vis. */
+    /** 已取的灵气 vis 中不足一 vis 的部分：灵气是 float，池子是整数 vis。 */
     private float auraRemainder;
 
     AssemblerVisSource(BlockEntityArcaneAssembler owner) {
@@ -43,7 +43,7 @@ final class AssemblerVisSource {
     }
 
     // ------------------------------------------------------------------
-    // The pool, forwarded
+    // 池子，转发
     // ------------------------------------------------------------------
 
     int bufferedVis() {
@@ -79,7 +79,7 @@ final class AssemblerVisSource {
     }
 
     // ------------------------------------------------------------------
-    // Where vis comes from
+    // vis 从哪来
     // ------------------------------------------------------------------
 
     float auraAround() {
@@ -90,8 +90,8 @@ final class AssemblerVisSource {
         return AssemblerAura.capacity(owner);
     }
 
-    /** Whether a relay chain that can answer is in reach. Asked only when deciding whether a craft is
-     * payable: a relay resolving to nothing would accept the job and starve. */
+    /** 能作答的中继链是否在范围内。只在判断一次合成是否
+     * 付得起时询问：解析不到任何东西的中继会接下任务然后断供。 */
     boolean relayNetworkInReach() {
         return relay.networkInReach(owner);
     }
@@ -104,28 +104,28 @@ final class AssemblerVisSource {
         return total;
     }
 
-    /** Tops the vis buffer up from the surrounding aura, from the grid tick rather than the craft loop:
-     * aura access is server-thread only. */
+    /** 用周围的灵气补满 vis 缓冲，从网格 tick 而非合成循环里做：
+     * 灵气访问仅限服务端线程。 */
     void replenishVis() {
         int target = pool.visTarget(owner.craft.isCrafting(), owner.craft.craftPrice());
         if (owner.getLevel() == null || owner.getLevel().isClientSide() || pool.bufferedVis() >= target) {
             return;
         }
-        // Relays first, then the aura: a node's vis lives in the node, so the aura alone reads as starved.
+        // 先问中继，再问灵气：节点的 vis 存在节点里，只看灵气会显得断供。
         int before = pool.bufferedVis();
         drainVisFromRelays(target - pool.bufferedVis());
         if (pool.bufferedVis() < target) {
-            // Asked directly: a relay picks its own parent, preferring a node over an addon source (relink).
+            // 直接询问：中继自己挑父级，优先节点而不是附属来源（relink）。
             drainVisFromInterfaces(target - pool.bufferedVis());
         }
         if (pool.bufferedVis() < target) {
-            // Aura vis has no aspect, so it lands evenly (bankVisEvenly); a drain returns a float.
+            // 灵气 vis 没有要素，所以平均入账（bankVisEvenly）；drain 返回 float。
             int remaining = target - pool.bufferedVis();
             float thisCall = drainVisAround(remaining);
             float drained = thisCall + auraRemainder;
             int whole = Math.min((int) Math.floor(drained), remaining);
             auraRemainder = drained - whole;
-            // The whole vis of this drain: the fraction it could not bank is carried above.
+            // 本次抽取的整数 vis：它存不进去的零头在上面结转。
             pool.bankVisEvenly(whole);
         }
         if (pool.bufferedVis() > before) {
@@ -133,14 +133,14 @@ final class AssemblerVisSource {
         }
     }
 
-    /** Tops the buffer up from Thaumaturge's relay network, as its workbench does: {@code drainCentivis}
-     * finds a linked relay and walks its chain; every primal is asked an equal share.
-     * @return whole vis obtained; a short answer means "ask the aura as well" */
+    /** 从 Thaumaturge 的中继网络补满缓冲，与它的工作台一样：{@code drainCentivis}
+     * 找到已链接的中继并沿链行走；每个元质被索取相等的份额。
+     * @return 取得的整数 vis；回答偏少意味着“也要去问灵气” */
     private int drainVisFromRelays(int wantVis) {
         if (wantVis <= 0 || !(owner.getLevel() instanceof ServerLevel server)) {
             return 0;
         }
-        // Ask the cheap cached question first: each drainCentivis scans for a relay.
+        // 先问那个便宜的缓存问题：每次 drainCentivis 都要扫一遍中继。
         if (!relayNetworkInReach()) {
             return 0;
         }
@@ -164,7 +164,7 @@ final class AssemblerVisSource {
             int got = TcAura.drainCentivis(
                     server, owner.getBlockPos(), BlockEntityArcaneAssembler.PRIMALS.get(i), ask, false);
             taken += got;
-            // Banked per aspect, whole vis only; the remainder stays with the aspect that earned it.
+            // 按要素入账，只记整数 vis；零头留在挣得它的那个要素名下。
             int carried = aspectCentivis[i] + got;
             pool.bankVis(carried / CENTIVIS_PER_VIS, i);
             aspectCentivis[i] = carried % CENTIVIS_PER_VIS;
@@ -211,13 +211,13 @@ final class AssemblerVisSource {
         try {
             return reservation.commit();
         } finally {
-            // Closing is bookkeeping only: nothing moves on reserve.
+            // 关闭只是账目处理：预留上没有任何东西移动。
             reservation.close();
         }
     }
 
-    /** Whether a vis interface beside the machine can sell it anything: presence is not enough, so a
-     * one-centivis reservation asks. Cached like {@link #relayNetworkInReach}. */
+    /** 机器旁边的 vis 接口是否能卖给它任何东西：光有存在不够，所以要
+     * 用一次一 centivis 的预留去问。缓存方式与 {@link #relayNetworkInReach} 相同。 */
     boolean interfaceInReach() {
         if (!(owner.getLevel() instanceof ServerLevel server)) {
             return false;
@@ -226,7 +226,7 @@ final class AssemblerVisSource {
         if (source == null) {
             return false;
         }
-        // Any primal will do: an interface sells what its node holds, and a node holds one list, not six.
+        // 任何元质都行：接口卖的是它节点持有的东西，而节点持有一份列表，不是六份。
         int primals = BlockEntityArcaneAssembler.PRIMALS.size();
         for (int i = 0; i < primals; i++) {
             VisReservation probe = source.reserve(BlockEntityArcaneAssembler.PRIMALS.get(i), 1);

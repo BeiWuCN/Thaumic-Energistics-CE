@@ -13,10 +13,10 @@ import thaumicenergistics_ce.item.ItemWirelessArcaneCraftingTerminal;
 import thaumicenergistics_ce.network.ArcaneUnbindPayload;
 
 /**
- * Sneak and left-click with the wireless arcane terminal: ask the server to forget the paired
- * terminal. The client owns this click and only the client, since the server sees an arm swing at
- * most, which is why the gesture becomes a packet here instead of being watched for there. It is
- * sent only for a sneak with the terminal in hand, so an ordinary left-click costs nothing.
+ * 潜行并左键点击无线奥术终端：请求服务端遗忘已配对的终端。
+ * 这个点击只有客户端拥有，因为服务端最多只看到一次手臂挥动，
+ * 所以该手势在这里变成数据包，而不是在那边等它出现。它只在潜行
+ * 且手持终端时发送，因此普通左键点击不产生任何开销。
  */
 @EventBusSubscriber(modid = ThEIds.MODID, value = Dist.CLIENT)
 public final class WirelessArcaneUnbindClick {

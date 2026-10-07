@@ -1,9 +1,9 @@
 package thaumicenergistics_ce.blockentity.assembler;
 
 /**
- * The two halves a craft is split across, each built when it is first asked for: the job that takes and
- * prices one, and the runner that sees it through. Split out of {@link BlockEntityArcaneAssembler}, which
- * keeps one accessor for each so the rest of the package reaches them exactly as before.
+ * 一次合成被拆成的两半，各自在首次被请求时构建：接收并定价的任务对象，
+ * 以及把它执行到底的运行器。从 {@link BlockEntityArcaneAssembler} 拆出，后者为
+ * 二者各留一个访问器，使包内其余部分拿到的接口与之前完全一致。
  */
 final class AssemblerCraftParts {
 

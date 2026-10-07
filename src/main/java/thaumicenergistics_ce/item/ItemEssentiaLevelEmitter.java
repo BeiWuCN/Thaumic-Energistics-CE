@@ -7,7 +7,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 
-/** The Essentia Level Emitter as an item, for placing it on a cable. */
+/** 作为物品的源质标准发信器，用于把它放到线缆上。 */
 public class ItemEssentiaLevelEmitter extends Item implements IPartItem<PartEssentiaLevelEmitter> {
 
     public ItemEssentiaLevelEmitter(Item.Properties properties) {

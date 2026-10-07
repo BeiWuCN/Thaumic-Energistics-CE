@@ -52,10 +52,10 @@ import thaumicenergistics_ce.part.PartVisInterface;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * Thaumic Energistics - bridges Thaumaturge essentia with Applied Energistics 2 ME networks.
- * Target: Minecraft 1.21.1, NeoForge 21.1.250, Thaumaturge, AE2 19.2.x. For arcane autocrafting
- * the Knowledge Inscriber stores an ingredient grid as an AE2 pattern in a knowledge core; that
- * machine advertises those recipes and runs them for ambient vis.
+ * Thaumic Energistics——把 [Thaumaturge] 的源质与 [Applied Energistics 2] 的 [ME 网络] 对接起来。
+ * 目标：Minecraft 1.21.1、NeoForge 21.1.250、Thaumaturge、AE2 19.2.x。对于奥术自动合成，
+ * [Knowledge Inscriber] 把一份原料网格作为 [AE2] [样板] 存进知识核心；那台
+ * 机器公布这些配方，并以环境 vis 为代价运行它们。
  */
 @Mod(ThEIds.MODID)
 public final class ThaumicEnergistics {
@@ -77,16 +77,16 @@ public final class ThaumicEnergistics {
         modBus.addListener(this::commonSetup);
 
         registerPartModels();
-        // The tooltip's server half goes through AE2's part registry; Jade only sees block entities.
+        // [tooltip] 的服务端那一半走 [AE2] 的部件注册表；[Jade] 只能看到方块实体。
         FluxTransferStatusProvider.register();
-        // The ME interface's access card works on the game bus rather than a grid tickable, since AE2
-        // reports nothing when a card goes in or out - see EssentiaInterfaceRegistry.
+        // [ME 接口] 的访问卡走游戏总线而不是网格的可 tick 对象，因为 [AE2]
+        // 在卡片进出时不报告任何东西——见 [EssentiaInterfaceRegistry]。
         EssentiaInterfaceRegistry.register();
     }
 
     /**
-     * Registers every part model: in AE2 19 {@code @PartModels} is only a marker, and a location the
-     * renderer cannot find is a crash the moment the part is placed.
+     * 注册每一个部件模型：在 [AE2] 19 中 {@code @PartModels} 只是个标记，而一个
+     * 渲染器找不到的位置，就是部件被放置那一刻的崩溃。
      */
     private static void registerPartModels() {
         List<ResourceLocation> models = new ArrayList<>();
@@ -94,17 +94,17 @@ public final class ThaumicEnergistics {
         models.addAll(PartFluxTransferInterface.MODEL_LOCATIONS);
         models.addAll(PartEssentiaLevelEmitter.MODEL_LOCATIONS);
         models.addAll(PartArcaneCraftingTerminal.MODEL_LOCATIONS);
-        // The P2P part draws itself with AE2's own P2P set, status models included.
+        // [P2P] 部件用 [AE2] 自己的 [P2P] 模型集绘制自身，含状态模型。
         models.addAll(PartVisInterface.MODEL_LOCATIONS);
         PartModels.registerModels(models);
     }
 
     /**
-     * Exposes the mod's grid machines to AE2's network; without {@code IN_WORLD_GRID_NODE_HOST} a
-     * machine forms its own isolated grid and the ME terminal never learns about it.
+     * 把 mod 的网格机器暴露给 [AE2] 的网络；没有 {@code IN_WORLD_GRID_NODE_HOST} 时，
+     * 机器会形成自己的孤立网格，[ME 终端] 永远不会知道它存在。
      */
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        // Implementing the interface is not enough; an unregistered capability stays inert.
+        // 只实现接口是不够的；未注册的 [能力] 始终不起作用。
         for (BlockEntityType<?> type : List.of(
                 ModBlockEntities.ARCANE_ASSEMBLER.get(),
                 ModBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(),
@@ -118,28 +118,28 @@ public final class ThaumicEnergistics {
                     (blockEntity, context) -> (IInWorldGridNodeHost) blockEntity);
         }
 
-        // AE2 bridges only its own block entities to FE, and Jade draws its energy bar off whatever
-        // this capability hands out, so the box's reserve is invisible to both until it is listed.
+        // [AE2] 只把自己拥有的方块实体桥接到 FE，而 [Jade] 画的能量条取自
+        // 这个 [能力] 给出的值，因此在被列出之前，箱子的储备对这两者都不可见。
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK,
                 ModBlockEntities.GACHA_BOX.get(),
                 (blockEntity, context) -> blockEntity.getEnergyStorage(context));
 
-        // Same STORAGE capability Thaumaturge's jars expose; pipes and neighbours treat it as one.
+        // 与 [Thaumaturge] 的罐子暴露的 STORAGE [能力] 相同；管道与相邻方块都把它当作同一个。
         event.registerBlockEntity(
                 EssentiaCapabilities.STORAGE,
                 ModBlockEntities.ALCHEMY_PROVIDER.get(),
                 (blockEntity, context) -> (IEssentiaStorage)
                         blockEntity);
 
-        // A container to its neighbours: a jar beside it fills, an alembic beside it empties.
+        // 对相邻方块它是个容器：旁边的罐子会被填满，旁边的蒸馏器会被抽空。
         event.registerBlockEntity(
                 EssentiaCapabilities.STORAGE,
                 ModBlockEntities.ALCHEMY_PROVIDER_CONNECTION.get(),
                 (blockEntity, context) -> (IEssentiaStorage)
                         blockEntity);
 
-        // STORAGE + TRANSPORT so essentia can be pushed in; wildcard suction - see the class note.
+        // STORAGE + TRANSPORT，这样源质才能被压入；通配吸取——见类注释。
         event.registerBlockEntity(
                 EssentiaCapabilities.STORAGE,
                 ModBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(),
@@ -151,14 +151,14 @@ public final class ThaumicEnergistics {
                 (blockEntity, context) -> (IEssentiaTransport)
                         blockEntity);
 
-        // The box is a consumer: a tube behind the screen grows an arm toward it and follows the
-        // suction the box reports, which is what drags a jar's cognitio down the line and into it.
+        // 箱子是个消费者：屏幕后面的管道会朝它伸出一条臂并跟随
+        // 箱子报告的吸取，正是这个把罐子里的 cognitio 顺着管道拖进去。
         event.registerBlockEntity(
                 EssentiaCapabilities.TRANSPORT,
                 ModBlockEntities.GACHA_BOX.get(),
                 (blockEntity, context) -> blockEntity.essentiaTransport(context));
 
-        // Aspect CONTAINER is the capability an Infusion Altar scans for to draw essentia.
+        // Aspect CONTAINER 是注魔祭坛为抽取源质而扫描的那个 [能力]。
         event.registerBlockEntity(
                 AspectCapabilities.CONTAINER,
                 ModBlockEntities.INFUSION_PROVIDER.get(),
@@ -167,8 +167,8 @@ public final class ThaumicEnergistics {
     }
 
     /**
-     * Exposes TECE's own parts through AE2's own event, since parts are not block entities and the
-     * lookup goes through the cable bus. Static because it is handed to the bus as a listener.
+     * 用 [AE2] 自己的事件暴露 TECE 自己的部件，因为部件不是方块实体，
+     * 查找要经过线缆总线。写成静态是因为它作为监听器交给了总线。
      */
     public static void registerPartCapabilities(RegisterPartCapabilitiesEvent event) {
         TcAura.registerVisSource(event, PartVisInterface.class);
@@ -176,31 +176,31 @@ public final class ThaumicEnergistics {
 
     private void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
-            // Skipping this silently breaks memory card binding; must run after item registration.
+            // 跳过这一步会静默地破坏内存卡绑定；必须在物品注册之后运行。
             GridLinkables.register(
                     ModItems.GOLEM_WIFI_BACKPACK.get(), ItemGolemWirelessBackpack.LINKABLE_HANDLER);
             GridLinkables.register(
                     ModItems.WIRELESS_ESSENTIA_TERMINAL.get(),
                     WirelessTerminalItem.LINKABLE_HANDLER);
-            // The access point's link slot asks this registry by item, so an unregistered terminal is
-            // refused before the player can drop it in - the same silent break as the line above.
+            // 访问点的链接槽按物品查询这个注册表，所以未注册的终端会在
+            // 玩家放进去之前就被拒绝——与上一行同样的静默破坏。
             GridLinkables.register(
                     ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                     WirelessTerminalItem.LINKABLE_HANDLER);
             registerUpgrades();
             ThELog.LOG.info("ThaumicEnergistics common setup complete");
-            // Else every terminal craft fails with PAYMENT_UNAVAILABLE - see TerminalWorkbenchVis.
+            // 否则每次终端合成都会以 PAYMENT_UNAVAILABLE 失败——见 [TerminalWorkbenchVis]。
             thaumicenergistics_ce.arcane.TerminalWorkbenchVis.register();
         });
     }
 
     /**
-     * Tells AE2 which upgrade cards this mod's machines and cells take; without it their slots show AE2's
-     * "available upgrades" header with nothing under it, since that list comes from AE2's own registry.
+     * 告诉 [AE2] 这个 mod 的机器与存储元件接受哪些升级卡；没有它，它们的槽位会显示 [AE2] 的
+     * "available upgrades" 表头而下面空无一物，因为那张列表来自 [AE2] 自己的注册表。
      */
     private static void registerUpgrades() {
-        // AE2's BasicCellInventory reads all three cards; an essentia aspect carries no NBT, so no fuzzy one.
-        // The name key is AE2's own fourth argument and collapses the five tiers into one tooltip line.
+        // [AE2] 的 [BasicCellInventory] 会读取全部三种卡；源质要素不携带 NBT，所以没有模糊卡。
+        // 名称键是 [AE2] 自己的第四个参数，它把五个等级收拢成一行 [tooltip]。
         for (var cell : List.of(
                 ModItems.ESSENTIA_CELL_1K.get(),
                 ModItems.ESSENTIA_CELL_4K.get(),
@@ -211,31 +211,31 @@ public final class ThaumicEnergistics {
             Upgrades.add(AEItems.EQUAL_DISTRIBUTION_CARD, cell, 1, CELL_UPGRADE_NAME);
             Upgrades.add(AEItems.VOID_CARD, cell, 1, CELL_UPGRADE_NAME);
         }
-        // One card per slot: the number is the machine's own slot count, so the two cannot disagree.
+        // 每个槽位一张卡：这个数字就是机器自身的槽位数量，因此两者不可能不一致。
         Upgrades.add(
                 AEItems.SPEED_CARD,
                 ModItems.ARCANE_ASSEMBLER.get(),
                 BlockEntityArcaneAssembler.UPGRADE_SLOT_COUNT);
-        // One access card per ME interface, block form and cable part alike: without these two AE2's
-        // upgrade slot refuses our card. One name key keeps the block and the part to a single line.
+        // 每个 [ME 接口] 一张访问卡，方块形态与线缆部件都一样：没有这两条，[AE2] 的
+        // 升级槽会拒绝我们的卡。同一个名称键让方块与部件共用一行。
         Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEBlocks.INTERFACE, 1, INTERFACE_UPGRADE_NAME);
         Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEParts.INTERFACE, 1, INTERFACE_UPGRADE_NAME);
-        // The same card in the wireless arcane terminal's own two slots; without this line AE2's slot
-        // filter refuses it, since an unregistered pair reports room for none.
+        // 同一张卡放进无线奥术终端自己的两个槽位；没有这一行，[AE2] 的槽位
+        // 过滤器会拒绝它，因为未注册的组合报告说一个都放不下。
         Upgrades.add(
                 ModItems.ESSENTIA_ACCESS_CARD.get(),
                 ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                 1,
                 ARCANE_TERMINAL_UPGRADE_NAME);
-        // The vis connection card in the same two slots: without its own line AE2's slot filter refuses
-        // it, and with it the craft takes its untyped vis from the aura instead of the network's power.
+        // vis 连接卡放进同样这两个槽位：没有它自己的一行，[AE2] 的槽位过滤器会
+        // 拒绝它；有了它，合成改为从灵气取用无类型 vis，而不是用网络的能量。
         Upgrades.add(
                 ModItems.VIS_CONNECTION_CARD.get(),
                 ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                 1,
                 ARCANE_TERMINAL_UPGRADE_NAME);
-        // The same card on the terminal placed on a cable: it has one upgrade slot too, and with the card
-        // in it the craft takes its vis from the aura around the cable instead of the network's power.
+        // 同一张卡用在装在电缆上的终端：它也有一个升级槽，卡放进去之后
+        // 合成改为从电缆周围的灵气取 vis，而不是用网络的能量。
         Upgrades.add(
                 ModItems.VIS_CONNECTION_CARD.get(),
                 ModItems.ARCANE_CRAFTING_TERMINAL.get(),
@@ -243,23 +243,23 @@ public final class ThaumicEnergistics {
                 ARCANE_TERMINAL_PART_UPGRADE_NAME);
     }
 
-    /** What a card's tooltip calls the whole essentia cell family, at every size. */
+    /** 卡片 [tooltip] 对整本源质存储元件家族的称呼，适用于所有尺寸。 */
     private static final String CELL_UPGRADE_NAME = "item.thaumicenergistics_ce.essentia_cell";
 
-    /** What the access card's tooltip calls the interface: one name for the block and the part both. */
+    /** 访问卡 [tooltip] 对接口的称呼：方块与部件共用同一个名称。 */
     private static final String INTERFACE_UPGRADE_NAME = "block.ae2.interface";
 
-    /** What the access card's tooltip calls the wireless arcane terminal: the item's own name key. */
+    /** 访问卡 [tooltip] 对无线奥术终端的称呼：物品自己的名称键。 */
     private static final String ARCANE_TERMINAL_UPGRADE_NAME =
             "item.thaumicenergistics_ce.wireless_arcane_crafting_terminal";
 
-    /** The same terminal on a cable is a separate item, so its tooltip line needs its own name key. */
+    /** 装在电缆上的同一终端是另一个物品，所以它的 [tooltip] 行需要自己的名称键。 */
     private static final String ARCANE_TERMINAL_PART_UPGRADE_NAME =
             "item.thaumicenergistics_ce.arcane_crafting_terminal";
 
     /**
-     * Adds the essentia key type to AE2's registry. Not from the mod constructor: an {@code AEKeyType}
-     * is a registry object, so registering before AE2 builds its registry throws.
+     * 把源质键类型加到 [AE2] 的注册表。不能在 mod 构造函数里做：{@code AEKeyType}
+     * 是注册表对象，在 [AE2] 建好自己的注册表之前注册会抛异常。
      */
     private void registerKeyTypes(RegisterEvent event) {
         if (event.getRegistryKey() != AEKeyType.REGISTRY_KEY) {

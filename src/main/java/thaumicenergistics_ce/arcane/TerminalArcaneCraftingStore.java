@@ -11,12 +11,12 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * The terminal's own three containers, presented to Thaumaturge as the store an arcane craft
- * works on. The grid is the payment, as on Thaumaturge's workbench: a recipe only matches when
- * the grid already holds its ingredients, so charging the network for them too would ask for a
- * second copy of what the player placed. {@link #consume} runs twice, once simulated and once
- * for real, and only the second takes anything, which is what makes a refused craft cost nothing.
- * The grid is the terminal's, not the network's, and holds what the player is arranging right now.
+ * 终端自己的三个容器，以奥术合成所用存储的形式交给 Thaumaturge。
+ * 与 Thaumaturge 的工作台一样，网格本身就是支付：只有网格中已经放有
+ * 材料时配方才匹配，所以再向网络收一份就等于索要玩家已放置物品的
+ * 第二份副本。{@link #consume} 会运行两次，一次模拟一次真实，
+ * 只有第二次才真正取走物品，这正是被拒绝的合成不付出任何代价的原因。
+ * 网格属于终端而不属于网络，保存的是玩家此刻正在摆放的内容。
  */
 public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
 
@@ -34,10 +34,10 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
     }
 
     /**
-     * Checks the grid still holds what the craft matched and the crystals cover it, then charges both.
-     * @param consumption what one craft uses up
-     * @param simulate    true to only check
-     * @return whether the containers still matched, and whether the change was applied when not simulating
+     * 检查网格是否仍保有合成所匹配的内容、晶体是否够付，然后对两者一并扣费。
+     * @param consumption 一次合成消耗掉的内容
+     * @param simulate    为 true 时只做检查
+     * @return 容器是否仍然匹配，以及在非模拟时改动是否已应用
      */
     @Override
     public boolean consume(Consumption consumption, boolean simulate) {
@@ -62,8 +62,8 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
         return true;
     }
 
-    /** Cell for cell: the consumption's grid is the nine cells flattened {@code x + y * 3}, the order the
-     * slots are read in. A count change is a mismatch too, so a grid taken from under the craft refuses. */
+    /** 逐格比较：消耗对象的网格是把九个格位按 {@code x + y * 3} 展平，即
+     * 槽位的读取顺序。数量变化同样算不匹配，因此合成过程中被抽走的网格会被拒绝。 */
     private boolean matches(List<ItemStack> expected) {
         if (expected.size() != PartArcaneCraftingTerminal.GRID_SIZE) {
             return false;
@@ -92,8 +92,8 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
         return true;
     }
 
-    /** Aspects outer: one aspect can sit in several slots, and a slot pass would take the full
-     * requirement from each. */
+    /** 要素作外层循环：同一种要素可能分布在多个槽位里，若按槽位循环，
+     * 每个槽位都会被取走整份需求。 */
     private void consumeCrystals(AspectList needed) {
         for (Holder<IAspect> aspect : needed.aspects()) {
             int outstanding = needed.amountOf(aspect);
@@ -104,15 +104,15 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
                     continue;
                 }
                 int take = Math.min(outstanding, crystal.getCount());
-                // Shrunk in place: the inventory hands out the stack it holds, as on Thaumaturge's bench.
+                // 就地收缩：物品栏交出的就是它持有的那个物品堆，与 Thaumaturge 的工作台一致。
                 crystal.shrink(take);
                 outstanding -= take;
             }
         }
     }
 
-    /** The remainder belongs to the cell it came out of: into an emptied cell, on top of the same item
-     * when the cell still holds some, and to the player only when neither is possible. */
+    /** 剩余物归还给它原本所在的格位：空出来的格位直接放入；格位仍有同类物品时
+     * 叠加上去；只有两者都不可行时才交给玩家。 */
     private void placeRemainder(int slot, ItemStack remainder) {
         if (remainder.isEmpty()) {
             return;
