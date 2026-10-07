@@ -1,13 +1,13 @@
 package thaumicenergistics_ce.menu;
 
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.aspect.TCAspects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
+import thaumicenergistics_ce.compat.thaumaturge.TcAspects;
 
 /** 菜单显示的数字。每一个都是机器持有的值与数据槽位
  * 所携带的值中较大的那个：方块实体是机器自身的状态，而尚未跟上的槽位只可能
@@ -50,12 +50,12 @@ final class AssemblerMenuReadout {
      * 去索引另一个，会让两列画上错误的要素，而每根条的高度都对。
      */
     private static final int[] BAR_ASPECTS = {
-        primalIndex(TCAspects.AER),
-        primalIndex(TCAspects.AQUA),
-        primalIndex(TCAspects.IGNIS),
-        primalIndex(TCAspects.ORDO),
-        primalIndex(TCAspects.PERDITIO),
-        primalIndex(TCAspects.TERRA)
+        primalIndex(TcAspects.AER),
+        primalIndex(TcAspects.AQUA),
+        primalIndex(TcAspects.IGNIS),
+        primalIndex(TcAspects.ORDO),
+        primalIndex(TcAspects.PERDITIO),
+        primalIndex(TcAspects.TERRA)
     };
 
     private static int primalIndex(ResourceKey<IAspect> aspect) {

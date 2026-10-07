@@ -16,7 +16,6 @@ import appeng.items.parts.PartModels;
 import appeng.parts.PartModel;
 import appeng.parts.p2p.P2PTunnelPart;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.aspect.TCAspects;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -28,6 +27,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
+import thaumicenergistics_ce.compat.thaumaturge.TcAspects;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
@@ -157,8 +157,8 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         }
         MEStorage storage = storage();
         IEnergyService energy = energy();
-        AEKey auram = aspectKey(server, TCAspects.AURAM);
-        AEKey ordo = aspectKey(server, TCAspects.ORDO);
+        AEKey auram = aspectKey(server, TcAspects.AURAM);
+        AEKey ordo = aspectKey(server, TcAspects.ORDO);
         if (storage == null || energy == null || auram == null || ordo == null) {
             return;
         }
@@ -189,7 +189,7 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
                 banked,
                 grid(),
                 storage(),
-                aspectKey(server, TCAspects.VITIUM),
+                aspectKey(server, TcAspects.VITIUM),
                 actionSource(),
                 payer::takeFlux);
     }
@@ -197,8 +197,8 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
     private @Nullable FluxWait fuelShort(ServerLevel server) {
         IEnergyService energy = energy();
         MEStorage storage = storage();
-        AEKey auram = aspectKey(server, TCAspects.AURAM);
-        AEKey ordo = aspectKey(server, TCAspects.ORDO);
+        AEKey auram = aspectKey(server, TcAspects.AURAM);
+        AEKey ordo = aspectKey(server, TcAspects.ORDO);
         if (energy == null || storage == null || auram == null || ordo == null) {
             return FluxWait.NO_NETWORK;
         }

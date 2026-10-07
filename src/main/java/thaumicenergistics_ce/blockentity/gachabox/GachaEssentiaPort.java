@@ -1,7 +1,6 @@
 package thaumicenergistics_ce.blockentity.gachabox;
 
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.aspect.TCAspects;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
 import net.minecraft.core.Direction;
@@ -9,6 +8,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
+import thaumicenergistics_ce.compat.thaumaturge.TcAspects;
 import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
@@ -82,7 +82,7 @@ final class GachaEssentiaPort implements IEssentiaTransport {
 
     /** cognitio 按 level 给出的形式，用于那些在没有服务端时到达的能力回答。 */
     private static @Nullable Holder<IAspect> cognitio(@Nullable Level level) {
-        return level == null ? null : AEssentiaKeyType.aspectOf(level, TCAspects.COGNITIO.location());
+        return level == null ? null : AEssentiaKeyType.aspectOf(level, TcAspects.COGNITIO.location());
     }
 
     /** 源质只经过屏幕背后的那个面到达，不经任何其他面，那也是一条管道线

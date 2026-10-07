@@ -1,7 +1,6 @@
 package thaumicenergistics_ce.focus;
 
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.aspect.TCAspects;
 import com.leclowndu93150.thaumaturge.api.casters.CastContext;
 import com.leclowndu93150.thaumaturge.api.casters.FocusEffect;
 import com.leclowndu93150.thaumaturge.api.casters.FocusElement;
@@ -27,6 +26,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.compat.thaumaturge.TcActionBar;
+import thaumicenergistics_ce.compat.thaumaturge.TcAspects;
 import thaumicenergistics_ce.compat.thaumaturge.TcWand;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.item.ItemFocusAEWrench;
@@ -53,7 +53,7 @@ public final class FocusEffectAEWrench implements FocusEffect {
     @Override
     public ResourceKey<IAspect> aspect() {
         // [potentia] 是 Thaumcraft 的 [Energy] 要素在现代名称下的写法，原本的核心就是按它着色的。
-        return TCAspects.POTENTIA;
+        return TcAspects.POTENTIA;
     }
 
     @Override

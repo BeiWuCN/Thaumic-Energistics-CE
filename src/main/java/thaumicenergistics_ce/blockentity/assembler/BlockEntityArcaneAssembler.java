@@ -15,7 +15,6 @@ import appeng.api.networking.ticking.TickingRequest;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.util.AECableType;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.aspect.TCAspects;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -35,6 +34,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
+import thaumicenergistics_ce.compat.thaumaturge.TcAspects;
 import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
@@ -64,7 +64,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     public static final int SLOT_COUNT = UPGRADE_SLOT_START + UPGRADE_SLOT_COUNT;
 
     /** 元质，按六根 vis 柱绘制所用的固定顺序。 */
-    public static final List<ResourceKey<IAspect>> PRIMALS = TCAspects.PRIMALS;
+    public static final List<ResourceKey<IAspect>> PRIMALS = TcAspects.PRIMALS;
 
     final SimpleContainer inventory = new AssemblerInventoryLayout(this::onInventoryChanged);
     private final AssemblerCraftParts craftParts = new AssemblerCraftParts(this);
