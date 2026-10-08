@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import thaumicenergistics_ce.integration.ae2.PatternProviderUpgrades;
 
 /**
  * 给样板供应器界面挂上升级面板。AE2 把这个面板做在 {@code UpgradeableScreen} 里，而供应器界面不是它，

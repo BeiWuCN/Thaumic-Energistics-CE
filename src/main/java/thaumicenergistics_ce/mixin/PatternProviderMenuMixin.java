@@ -12,10 +12,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import thaumicenergistics_ce.integration.ae2.PatternProviderUpgrades;
 
 /**
  * 把升级槽加进样板供应器的菜单，槽位类型与语义都交给 {@link AEBaseMenuAccessor} 转发的 AE2 那一步。
- * {@code logic} 是它本类自己声明的字段，{@code @Shadow} 拿得到；基类的成员不能这样拿，所以走访问器。
+ * {@code logic} 是它本类自己声明的字段，{@code @Shadow} 拿得到；基类的成员不能这样取，所以走访问器。
  */
 @Mixin(PatternProviderMenu.class)
 public abstract class PatternProviderMenuMixin implements PatternProviderUpgrades {
