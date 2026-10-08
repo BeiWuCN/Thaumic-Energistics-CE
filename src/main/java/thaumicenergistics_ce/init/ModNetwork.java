@@ -7,7 +7,6 @@ import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
 import thaumicenergistics_ce.network.ArcaneUnbindPayload;
 import thaumicenergistics_ce.network.EncoderActionPayload;
 import thaumicenergistics_ce.network.EncoderSourcePayload;
-import thaumicenergistics_ce.network.EssentiaBusConfigPayload;
 import thaumicenergistics_ce.network.EssentiaDepositPayload;
 import thaumicenergistics_ce.network.EssentiaFillPayload;
 import thaumicenergistics_ce.network.EssentiaInterfaceMarkPayload;
@@ -51,12 +50,6 @@ public final class ModNetwork {
         registrar.playToServer(
                 EssentiaFillPayload.TYPE,
                 EssentiaFillPayload.CODEC,
-                (payload, context) -> payload.handle(context.player()));
-        // 整格一次发；写九次会让机器去解析八个既不是配方、也画不出来的网格。
-        // 见 [InscriberGridFillPayload]。
-        registrar.playToServer(
-                EssentiaBusConfigPayload.TYPE,
-                EssentiaBusConfigPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
         // 整格一次发；写九次会让机器去解析八个既不是配方、也画不出来的网格。
         // 见 [InscriberGridFillPayload]。
