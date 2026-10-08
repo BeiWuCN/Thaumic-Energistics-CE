@@ -280,6 +280,7 @@
   "thaumicenergistics_ce.jei.transfer.ctrl_click": "按住Ctrl合成缺失物品",
   "thaumicenergistics_ce.jei.transfer.missing": "缺少: %d",
   "thaumicenergistics_ce.jei.transfer.missing_ingredients": "你身上缺少这个配方所需的材料",
+  "thaumicenergistics_ce.jei.transfer.pattern_too_large": "这条配方需要的输入比样板编码终端的格子多",
   "tooltip.thaumicenergistics_ce.wireless_arcane_crafting_terminal.paired": "已绑定到坐标(%s, %s, %s)的奥术合成终端",
   "item.thaumicenergistics_ce.wireless_arcane_crafting_terminal.paired": "已绑定到坐标(%s, %s, %s)的奥术合成终端",
   "item.thaumicenergistics_ce.wireless_arcane_crafting_terminal.cleared": "已清空绑定的奥术合成终端",
