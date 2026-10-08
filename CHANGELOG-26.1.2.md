@@ -126,6 +126,17 @@ src\main\java\thaumicenergistics_ce\compat\thaumaturge\TcArcanePayment.java
 - 手册「源质访问卡」第 2 阶段的正文（键 `tc.research_text.ESSENTIAACCESSCARD.stage.2`，`assets\thaumicenergistics_ce\lang\zh_cn.json:253` / `en_us.json:253`）在第一个句号前补上结论句：中文「…在配置行上标出想要的要素，**它就会允许这类要素进入ME网络**。」，英文「…mark the aspects you want on its config row, **and it lets those aspects into the ME network**.」
 - 1.21.1 成熟线**没有**这个键（那边的研究文案结构不同），所以无需同步。
 
+### A13. 奥术合成终端手册第 2 页重写
+
+- 键 `tc.research_text.ARCANECRAFTINGTERMINAL.stage.2`（26.1.2 在 `assets\thaumicenergistics_ce\lang\zh_cn.json:130` / `en_us.json:130`，1.21.1 在 `:149`）原来是「…也能做：法杖放进…，材料从…取，缺的…」这样的冒号罗列句，与同页邻居（无线奥术合成终端）的整句叙述风格不一致。
+- 重写为整句：中文「把法杖放进终端的法杖槽，九宫格里的材料便由网络供给，缺的那点灵气也由网络补上。这次合成要付多少灵气、要不要动用水晶，终端会在你动手前先算给你看。」，英文同义。两条线已同步（26.1.2 `a341208`、1.21.1 `90bba9a`）。
+
+### A14. 模型补齐 `particle` 槽（消掉日志里的 Missing texture references）
+
+- 26.x 的模型系统要求每个自带 `elements` 的模型自己解析出 `particle` 槽，1.21.1 时代没这要求，照抄过来的 12 个模型因此各报一条 `Missing texture references in model …: particle`（`block/distillation_encoder` 另有 `#all` 未解析）。
+- 改法：11 个部件/物品模型显式补 `"particle"`（值就是各自已有的那张贴图变量，源质等级发射器与通量传输接口用 `#indicator` / `#front` / `#emitter`；终端类用 `#lightsMedium`），`models/block/distillation_encoder.json` 补 `"all"`（该模型自带六面 elements，`all` 不参与绘制，只为消 resolver 告警，同 `infusion_provider.json` 的做法）。
+- 两条线已同步（26.1.2、1.21.1 `0f02ffa`）；日志里剩的那条 `minecraft:block/block: particle` 来自 Thaumaturge 自己的 46 个模型，与本模组无关。
+
 ---
 
 ## B. 移植补齐（1.21.1 本来就对）
