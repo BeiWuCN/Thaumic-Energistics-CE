@@ -3,10 +3,13 @@
 	"package": "thaumicenergistics_ce.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"InterfaceLogicMixin"
+		"InterfaceLogicMixin",
+		"PatternProviderLogicMixin",
+		"PatternProviderMenuMixin"
 	],
 	"client": [
-		"PageLineStyleMixin"
+		"PageLineStyleMixin",
+		"PatternProviderScreenMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
