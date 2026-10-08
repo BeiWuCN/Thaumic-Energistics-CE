@@ -1,7 +1,7 @@
 {
   "background": "thaumicenergistics_ce:textures/research/research_background.png",
   "overlay_background": "thaumaturge:textures/gui/gui_research_back_over.png",
-  "icon": "thaumicenergistics_ce:textures/research/tab_icon.png",
+  "icon": "thaumicenergistics_ce:textures/item/knowledge_core.png",
   "index": 7,
   "required_research": "thaumaturge:unlock_infusion",
   "formula": [
