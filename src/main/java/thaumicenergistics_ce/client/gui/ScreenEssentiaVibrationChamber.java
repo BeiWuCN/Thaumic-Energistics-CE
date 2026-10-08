@@ -7,45 +7,57 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import org.jspecify.annotations.Nullable;
+import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 
 /**
- * 源质振动室的界面：燃料缓冲、能量槽和燃烧进度。
- * 机器的贴图是正面 60x100 的控件，不是窗口，本界面拿游戏容器的颜色自己填一个窗口。
- * 储罐按所属要素着色，能量槽用 AE2 的红色，燃烧条用自己的颜色。
+ * 源质振动室的界面：源质缓冲、能量槽和燃烧进度，版面照 {@code textures/gui/essentia_vibration_chamber.png}。
+ * 窗口占贴图 (0,0)-(175,167)，贴图右侧 176 起另画着三条同尺寸的满格精灵，本身不属于窗口。
+ * 窗口里那条高条是源质槽、那条条纹条是能量槽、那三簇火苗是燃烧条，三条都按比例把精灵的一段贴进来。
+ * 读数不进图标区，只在三条仪表的悬浮提示里给；窗口顶部那行机器名由原版容器自己画。
  */
 public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<MenuEssentiaVibrationChamber> {
 
+    private static final ResourceLocation TEXTURE = ThEIds.id("textures/gui/essentia_vibration_chamber.png");
+
     private static final int WIDTH = 176;
-    private static final int HEIGHT = 166;
+    private static final int HEIGHT = 168;
 
-    /** 窗口自身的颜色，游戏里每个容器画窗口都用它。 */
-    private static final int PANEL = 0xFFC6C6C6;
-    private static final int PANEL_LIGHT = 0xFFFFFFFF;
-    private static final int PANEL_DARK = 0xFF555555;
-    private static final int SLOT = 0xFF8B8B8B;
-    private static final int SLOT_DARK = 0xFF373737;
+    // 三条仪表：窗口里画的是空槽，贴图右侧 176 起画的是同尺寸的满格精灵。
+    // 每条的 [X,Y,W,H] 是空槽（也是悬浮提示的命中框），[U,V,SH] 是从精灵底部往上数的那一段。
+    /**
+     * 源质：窗口里那条高条，精灵是右侧最下面那条淡色竖条。
+     * 空槽从 y11 起算，把槽自己那个深色封顶也圈进来：满格时整条精灵（含它自己的封顶）正好盖住空槽，不会两个顶叠着。
+     */
+    private static final int TANK_X = 64;
+    private static final int TANK_Y = 11;
+    private static final int TANK_W = 12;
+    private static final int TANK_H = 58;
+    private static final int TANK_U = 177;
+    private static final int TANK_V = 33;
+    private static final int TANK_SH = 58;
 
-    /** 能量槽的颜色取自 AE2，燃烧条同色。 */
-    private static final int ENERGY = 0xFFAA0000;
-    private static final int BURN = 0xFFFFAA00;
-    private static final int TANK_EMPTY = 0xFF4B4B4B;
+    /** 能量：窗口里那条条纹条，精灵是右侧火苗下面那列紫条。两边内部都是 4x16。 */
+    private static final int ENERGY_X = 100;
+    private static final int ENERGY_Y = 37;
+    private static final int ENERGY_W = 4;
+    private static final int ENERGY_H = 16;
+    private static final int ENERGY_U = 177;
+    private static final int ENERGY_V = 15;
+    private static final int ENERGY_SH = 16;
 
-    private static final int GAUGE_Y = 20;
-    private static final int GAUGE_H = 46;
-    private static final int GAUGE_W = 14;
-    private static final int TANK_X = 22;
-    private static final int ENERGY_X = 44;
-    private static final int BURN_X = 70;
-    private static final int BURN_Y = 46;
-    private static final int BURN_W = 84;
-    private static final int BURN_H = 6;
-
-    private static final int TEXT_X = 70;
-    private static final int TEXT_Y = 20;
+    /** 燃烧：窗口里那三簇火苗，精灵是右侧最顶上那三簇。 */
+    private static final int BURN_X = 81;
+    private static final int BURN_Y = 39;
+    private static final int BURN_W = 13;
+    private static final int BURN_H = 13;
+    private static final int BURN_U = 177;
+    private static final int BURN_V = 0;
+    private static final int BURN_SH = 14;
 
     private static final int TITLE_X = 8;
     private static final int TITLE_Y = 6;
@@ -85,84 +97,39 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
         int x = leftPos;
         int y = topPos;
 
-        // 窗口，带游戏里每个容器都有的两像素边框。
-        graphics.fill(x, y, x + WIDTH, y + HEIGHT, PANEL);
-        graphics.fill(x, y, x + WIDTH, y + 1, PANEL_LIGHT);
-        graphics.fill(x, y, x + 1, y + HEIGHT, PANEL_LIGHT);
-        graphics.fill(x + WIDTH - 1, y, x + WIDTH, y + HEIGHT, PANEL_DARK);
-        graphics.fill(x, y + HEIGHT - 1, x + WIDTH, y + HEIGHT, PANEL_DARK);
+        graphics.blit(TEXTURE, x, y, 0, 0, WIDTH, HEIGHT);
 
-        // 凹格画在各槽位左上偏一像素，和游戏自身的画法一致；
-        // 按槽位自身坐标画，物品会偏到中心右下各一像素。
-        for (int row = 0; row < 3; row++) {
-            for (int column = 0; column < 9; column++) {
-                slot(graphics, x + 8 + column * 18 - 1, y + 84 + row * 18 - 1);
-            }
-        }
-        for (int column = 0; column < 9; column++) {
-            slot(graphics, x + 8 + column * 18 - 1, y + 142 - 1);
-        }
-
-        // 每条进度条都带边框，空着也还是一条条；
-        // 只画一个凹槽再往上涂填充，空机器的三条会变成黑块。
-        int aspectColour = menu.reading(MenuEssentiaVibrationChamber.DATA_ASPECT_COLOUR);
-        bar(graphics, x + TANK_X, y + GAUGE_Y, GAUGE_W, GAUGE_H, menu.essentiaFill(),
-                aspectColour == 0 ? TANK_EMPTY : aspectColour, true);
-        bar(graphics, x + ENERGY_X, y + GAUGE_Y, GAUGE_W, GAUGE_H, menu.energyFill(), ENERGY, true);
-        bar(graphics, x + BURN_X, y + BURN_Y, BURN_W, BURN_H, menu.burnProgress(), BURN, false);
-
-        // 数字排在仪表旁边一列，不排在下面：下面那行是窗口自带的「Inventory」标签，
-        // 读数打在那里会压穿它。
-        Component essentia = Component.translatable(
-                "thaumicenergistics_ce.gui.vibration_chamber.essentia",
-                menu.reading(MenuEssentiaVibrationChamber.DATA_ESSENTIA),
-                menu.reading(MenuEssentiaVibrationChamber.DATA_ESSENTIA_MAX));
-        Component energy = Component.translatable(
-                "thaumicenergistics_ce.gui.vibration_chamber.energy",
-                formatEnergy(menu.reading(MenuEssentiaVibrationChamber.DATA_ENERGY)),
-                formatEnergy(menu.reading(MenuEssentiaVibrationChamber.DATA_ENERGY_MAX)));
-        graphics.drawString(font, essentia, x + TEXT_X, y + TEXT_Y, 0x404040, false);
-        graphics.drawString(font, energy, x + TEXT_X, y + TEXT_Y + 12, 0x404040, false);
-
-        // 先给原因：槽满只是暂停燃烧，没接线的机器也不算空闲；
-        // 不说清是哪一种，这行会被读成燃料耗尽。
-        Component state = heldBackLine();
-        if (state == null) {
-            state = menu.isBurning()
-                    ? Component.translatable(
-                            "thaumicenergistics_ce.gui.vibration_chamber.rate",
-                            String.format(
-                                    "%.1f",
-                                    menu.reading(MenuEssentiaVibrationChamber.DATA_AE_PER_TICK) / 10.0))
-                    : Component.translatable("thaumicenergistics_ce.gui.vibration_chamber.idle");
-        }
-        graphics.drawString(font, state, x + TEXT_X, y + TEXT_Y + 34, 0x404040, false);
+        reveal(graphics, x + TANK_X, y + TANK_Y, TANK_W, TANK_H,
+                TANK_U, TANK_V, TANK_SH, menu.essentiaFill());
+        reveal(graphics, x + ENERGY_X, y + ENERGY_Y, ENERGY_W, ENERGY_H,
+                ENERGY_U, ENERGY_V, ENERGY_SH, menu.energyFill());
+        reveal(graphics, x + BURN_X, y + BURN_Y, BURN_W, BURN_H,
+                BURN_U, BURN_V, BURN_SH, menu.burnProgress());
     }
 
-    private static void bar(
-            GuiGraphics graphics, int x, int y, int width, int height, float fill, int colour, boolean vertical) {
-        graphics.fill(x, y, x + width, y + height, SLOT_DARK);
-        graphics.fill(x + 1, y + 1, x + width - 1, y + height - 1, TANK_EMPTY);
-        int inner = (vertical ? height : width) - 2;
-        int length = Math.round(inner * Math.max(0.0F, Math.min(1.0F, fill)));
+    /**
+     * 按比例从下往上把满格精灵的一段贴进空槽。贴图里的精灵本身就是这些仪表的花纹，用纯色填会把它盖掉。
+     * 取的是精灵底部那 [length] 行：空槽多高决定显示多长，精灵自己的高度决定从那一段的哪一行开始取。
+     */
+    private static void reveal(
+            GuiGraphics graphics,
+            int x,
+            int y,
+            int width,
+            int height,
+            int u,
+            int v,
+            int sourceHeight,
+            float amount) {
+        int length = Math.round(height * Math.max(0.0F, Math.min(1.0F, amount)));
         if (length <= 0) {
             return;
         }
-        if (vertical) {
-            graphics.fill(x + 1, y + height - 1 - length, x + width - 1, y + height - 1, colour);
-        } else {
-            graphics.fill(x + 1, y + 1, x + 1 + length, y + height - 1, colour);
-        }
-    }
-
-    private static void slot(GuiGraphics graphics, int x, int y) {
-        graphics.fill(x, y, x + 18, y + 18, SLOT_DARK);
-        graphics.fill(x + 1, y + 1, x + 18, y + 18, PANEL_LIGHT);
-        graphics.fill(x + 1, y + 1, x + 17, y + 17, SLOT);
+        graphics.blit(TEXTURE, x, y + height - length, u, v + sourceHeight - length, width, length);
     }
 
     private void barTooltips(GuiGraphics graphics, int mouseX, int mouseY) {
-        if (inside(mouseX, mouseY, TANK_X, GAUGE_Y, GAUGE_W, GAUGE_H)) {
+        if (inside(mouseX, mouseY, TANK_X, TANK_Y, TANK_W, TANK_H)) {
             graphics.renderTooltip(
                     font,
                     Component.translatable(
@@ -171,7 +138,7 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
                             menu.reading(MenuEssentiaVibrationChamber.DATA_ESSENTIA_MAX)),
                     mouseX,
                     mouseY);
-        } else if (inside(mouseX, mouseY, ENERGY_X, GAUGE_Y, GAUGE_W, GAUGE_H)) {
+        } else if (inside(mouseX, mouseY, ENERGY_X, ENERGY_Y, ENERGY_W, ENERGY_H)) {
             List<Component> lines = new ArrayList<>();
             lines.add(Component.translatable(
                     "thaumicenergistics_ce.gui.vibration_chamber.energy.tip",
