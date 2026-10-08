@@ -2,11 +2,13 @@ package thaumicenergistics_ce.menu;
 
 import appeng.core.definitions.AEItems;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
@@ -78,6 +80,16 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
     /** 两侧摆槽位用的几何，出自美术生成器写的那个文件。 */
     private static GuiLayout layout() {
         return GuiLayout.load();
+    }
+
+    /** 空装备槽画原版物品栏那四个图标，顺序同 [GearSlots.equipmentSlot]：头、胸、腿、脚。 */
+    private static Identifier emptyGearIcon(int index) {
+        return switch (index) {
+            case 0 -> InventoryMenu.EMPTY_ARMOR_SLOT_HELMET;
+            case 1 -> InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE;
+            case 2 -> InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS;
+            default -> InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS;
+        };
     }
 
     private MenuArcaneAssembler(
@@ -155,11 +167,18 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         // 5. vis 减免对本组装机生效的装备槽。玩家点击走 [mayPlace]，方块容器只看得到自动化。
         for (int i = 0; i < BlockEntityArcaneAssembler.GEAR_SLOT_COUNT; i++) {
             int gearIndex = i;
+            Identifier emptyIcon = emptyGearIcon(i);
             addSlot(new Slot(machine, BlockEntityArcaneAssembler.GEAR_SLOT_START + i, gear.x(),
                     gear.columnY(i)) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return GearSlots.accepts(gearIndex, stack);
+                }
+
+                // 空槽借原版那套图标，玩家一眼看出这格要头还是脚。放了东西原版就不画。
+                @Override
+                public Identifier getNoItemIcon() {
+                    return emptyIcon;
                 }
             });
         }

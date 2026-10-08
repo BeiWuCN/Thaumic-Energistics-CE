@@ -46,16 +46,25 @@ final class InscriberPreview {
         return mirrors;
     }
 
-    /** 网格当前状态的结果，在本侧解析，凹槽画的就是它。 */
+    /**
+     * 网格当前状态的结果。解析<b>只在服务端</b>做：26.1.2 把配方访问收成
+     * {@code Level.recipeAccess()}（只剩属性集与切石机），完整配方表只有服务端有，
+     * 客户端取 [Level#getServer] 是 null，硬解析就是崩溃。
+     * 结果凹槽是菜单槽位，服务端写进去的东西由原版同步过来，
+     * 客户端画的就是同步到的这一份，所以这一侧直接空转。
+     */
     void update() {
+        Level level = menu.level();
+        if (level == null || level.isClientSide()) {
+            return;
+        }
         int signature = grid.signature();
         if (signature == previewedSignature) {
             return;
         }
         previewedSignature = signature;
-        Level level = menu.level();
         List<ItemStack> cells = grid.cells();
-        if (level == null || ThEArcanePattern.isGridEmpty(cells)) {
+        if (ThEArcanePattern.isGridEmpty(cells)) {
             result.setItem(0, ItemStack.EMPTY);
             return;
         }

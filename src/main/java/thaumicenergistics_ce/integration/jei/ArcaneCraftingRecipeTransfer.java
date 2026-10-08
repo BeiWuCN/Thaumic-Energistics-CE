@@ -1,7 +1,10 @@
 package thaumicenergistics_ce.integration.jei;
 
+import appeng.api.stacks.AEItemKey;
 import appeng.core.network.serverbound.FillCraftingGridFromRecipePacket;
 import appeng.menu.SlotSemantics;
+import appeng.menu.me.common.GridInventoryEntry;
+import appeng.menu.me.common.IClientRepo;
 import java.util.List;
 import java.util.Optional;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -16,6 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
@@ -106,19 +110,15 @@ public class ArcaneCraftingRecipeTransfer
             return helper.createInternalError();
         }
 
-        // 每格一个模板，外加玩家供不上的那些。数据包处理缺失的那些；
-        // 这里只报告，好让按钮说出原因而不是毫无反应。
+        // 每格一个模板，选玩家或网络供得上的变体：
+        // 数据包的模板路径不认识标签，标签的第一个成员常常正是没库存的那个。
+        IClientRepo repo = menu.getClientRepo();
         NonNullList<ItemStack> templates = NonNullList.withSize(PartArcaneCraftingTerminal.GRID_SIZE, ItemStack.EMPTY);
         boolean missing = false;
         for (int cell = 0; cell < PartArcaneCraftingTerminal.GRID_SIZE; cell++) {
             List<ItemStack> variants = cell < cells.size() ? cells.get(cell) : List.of();
-            for (ItemStack variant : variants) {
-                if (!variant.isEmpty()) {
-                    templates.set(cell, variant.copyWithCount(1));
-                    break;
-                }
-            }
-            if (templates.get(cell).isEmpty() && !variants.isEmpty()) {
+            templates.set(cell, pickSuppliable(variants, repo, player));
+            if (templates.get(cell).isEmpty() && asksForSomething(variants)) {
                 missing = true;
             }
         }
@@ -136,5 +136,60 @@ public class ArcaneCraftingRecipeTransfer
         // 不带配方 id：奥术配方不在原版管理器里，所以走数据包的模板那条路。
         ClientPacketDistributor.sendToServer(new FillCraftingGridFromRecipePacket(null, templates, false));
         return null;
+    }
+
+    // ---- 模板 -----------------------------------------------------------
+
+    /**
+     * 一个格子的模板：背后供给最多的变体，标签第一个成员没库存也能转移。
+     * 没东西能供给这个格子时为空。
+     */
+    private static ItemStack pickSuppliable(
+            List<ItemStack> variants, @Nullable IClientRepo repo, Player player) {
+        ItemStack best = ItemStack.EMPTY;
+        long bestSupply = 0;
+        for (ItemStack variant : variants) {
+            if (variant.isEmpty()) {
+                continue;
+            }
+            long supply = supplyOf(variant, repo, player);
+            if (supply > bestSupply) {
+                best = variant.copyWithCount(1);
+                bestSupply = supply;
+            }
+        }
+        return best;
+    }
+
+    /** 网络对这个确切物品报的数量，加玩家身上带的。 */
+    private static long supplyOf(ItemStack variant, @Nullable IClientRepo repo, Player player) {
+        long supply = 0;
+        AEItemKey wanted = AEItemKey.of(variant);
+        if (repo != null && wanted != null) {
+            // 26.1.2 的 Ingredient 没有按物品堆建的那几个工厂，只有 ItemLike；
+            // 精确到组件的那一层由下面的 key 相等判断负责，这里只要捞到同物品的条目。
+            for (GridInventoryEntry entry : repo.getByIngredient(Ingredient.of(variant.getItem()))) {
+                if (wanted.equals(entry.getWhat())) {
+                    supply += entry.getStoredAmount();
+                }
+            }
+        }
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            ItemStack carried = player.getInventory().getItem(slot);
+            if (ItemStack.isSameItemSameComponents(carried, variant)) {
+                supply += carried.getCount();
+            }
+        }
+        return supply;
+    }
+
+    /** 这个格子要不要东西：布局里的空格子不能读成缺料。 */
+    private static boolean asksForSomething(List<ItemStack> variants) {
+        for (ItemStack variant : variants) {
+            if (!variant.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

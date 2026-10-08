@@ -90,6 +90,24 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
     }
 
     /**
+     * 悬停框画成 AE2 的样子：一像素浅青细框加半透明蓝底。
+     * 26.1.2 的原版高亮是私有的白方块 sprite，覆写不了也拦不住，
+     * 只能在它之后照 AE2 的画法再补一遍，见 {@link Ae2SlotHighlight}。
+     */
+    @Override
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractContents(graphics, mouseX, mouseY, partialTick);
+        Slot hovered = this.hoveredSlot;
+        if (hovered == null) {
+            return;
+        }
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(leftPos, topPos);
+        Ae2SlotHighlight.render(graphics, hovered);
+        graphics.pose().popMatrix();
+    }
+
+    /**
      * 面板、升级图标和 vis 柱归 [extractBackground]，不归 [extractContents]：这一版把一帧拆成两半，
      * 槽里的物品、悬停的那个槽位和 tooltip 都在 [extractContents] 里，占住它又不调 super，
      * 物品和 tooltip 就一起没了。画进背景也就画在物品下面，正是这几样要的层。

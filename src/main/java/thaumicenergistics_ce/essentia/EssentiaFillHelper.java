@@ -1,6 +1,7 @@
 package thaumicenergistics_ce.essentia;
 
 import appeng.api.config.Actionable;
+import appeng.api.config.PowerMultiplier;
 import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.storage.MEStorage;
@@ -171,10 +172,12 @@ public final class EssentiaFillHelper {
             IActionSource source,
             ItemStack stack) {
         if (!isSupportedContainer(stack)) {
+            log("deposit refused: {} is not a jar or a phial", stack.getItem());
             return null;
         }
         IItemEssentia container = stack.getCapability(EssentiaCapabilities.CONTAINER);
         if (container == null) {
+            log("deposit refused: {} carries no essentia container capability", stack.getItem());
             return null;
         }
         int count = stack.getCount();
@@ -183,8 +186,11 @@ public final class EssentiaFillHelper {
         }
         AspectList aspects = container.getAspects();
         if (aspects == null || aspects.isEmpty()) {
+            // 这一步静默返回是「倒源质毫无反应」的头号嫌疑，先把它喊出来。
+            log("deposit refused: {} x{} reports no aspects at all ({})", stack.getItem(), count, aspects);
             return stack;
         }
+        log("deposit asked: {} x{} holds {}", stack.getItem(), count, aspects);
 
         List<AEssentiaKey> keys = new ArrayList<>(aspects.size());
         List<Long> totals = new ArrayList<>(aspects.size());
@@ -197,11 +203,15 @@ public final class EssentiaFillHelper {
             if (id == null) {
                 // 不由注册表支撑：没有 id 可以存，整个容器就原样留下；
                 // 跳过这一条照样倒空，等于把它丢掉。
+                log("deposit refused: {} is not backed by the registry, so it has no id to store",
+                        entry.aspect());
                 return stack;
             }
             long total = (long) perItem * count;
-            if (storage.insert(AEssentiaKey.of(id), total, Actionable.SIMULATE, source) < total) {
+            long accepted = storage.insert(AEssentiaKey.of(id), total, Actionable.SIMULATE, source);
+            if (accepted < total) {
                 // 没地方全放下：容器原样留下，不做半倒空。
+                log("deposit refused: the network takes {} of the {} it was asked for {}", accepted, total, id);
                 return stack;
             }
             keys.add(AEssentiaKey.of(id));
@@ -211,9 +221,15 @@ public final class EssentiaFillHelper {
             return stack;
         }
 
+        // AE2 的 poweredInsert 拿不到电就一点都不搬，而这条路上以前一声不响：
+        // 先把可用电力探出来，替玩家把「凭什么没反应」这个问题答了。
+        double power = energy.extractAEPower(1000, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+        log("deposit: {} AE available, moving {} key(s)", power, keys.size());
+
         for (int i = 0; i < keys.size(); i++) {
             long moved = StorageHelper.poweredInsert(energy, storage, keys.get(i), totals.get(i), source);
             if (moved < totals.get(i)) {
+                log("deposit stopped: only {} of {} {} made it in", moved, totals.get(i), keys.get(i));
                 // 电力中途耗尽：这一条连同它之前的全部放回去。
                 if (moved > 0) {
                     storage.insert(keys.get(i), moved, Actionable.MODULATE, source);
@@ -227,6 +243,7 @@ public final class EssentiaFillHelper {
 
         // 倒空了。罐子留成空罐，瓶子被消耗，两者物品 id 都和输入相同
         // （见类注释），所以空的输入副本就是它的全部。
+        log("deposit ok: {} key(s) of {} x{} moved into the network", keys.size(), stack.getItem(), count);
         if (TcRegistry.isPhial(stack)) {
             return TcRegistry.emptyPhials(count);
         }

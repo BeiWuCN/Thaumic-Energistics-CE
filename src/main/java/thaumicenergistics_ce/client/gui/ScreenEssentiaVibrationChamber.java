@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 
@@ -46,6 +47,12 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
     private static final int TEXT_X = 70;
     private static final int TEXT_Y = 20;
 
+    /**
+     * 读数的字色。这一版的 {@code text} 收的是 ARGB，{@code ARGB.alpha(color) == 0} 就直接丢掉不画；
+     * 写成 {@code 0x404040} 是把高位当成了透明度，字会整行消失（按钮文字同为这个坑）。
+     */
+    private static final int TEXT_COLOUR = 0xFF404040;
+
     private static final int TITLE_X = 8;
     private static final int TITLE_Y = 6;
     private static final int INVENTORY_LABEL_X = 8;
@@ -64,6 +71,24 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         barTooltips(graphics, mouseX, mouseY);
+    }
+
+    /**
+     * 悬停框画成 AE2 的样子：一像素浅青细框加半透明蓝底。
+     * 26.1.2 的原版高亮是私有的白方块 sprite，覆写不了也拦不住，
+     * 只能在它之后照 AE2 的画法再补一遍，见 {@link Ae2SlotHighlight}。
+     */
+    @Override
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractContents(graphics, mouseX, mouseY, partialTick);
+        Slot hovered = this.hoveredSlot;
+        if (hovered == null) {
+            return;
+        }
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(leftPos, topPos);
+        Ae2SlotHighlight.render(graphics, hovered);
+        graphics.pose().popMatrix();
     }
 
     /**
@@ -113,8 +138,8 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
                 "thaumicenergistics_ce.gui.vibration_chamber.energy",
                 formatEnergy(menu.reading(MenuEssentiaVibrationChamber.DATA_ENERGY)),
                 formatEnergy(menu.reading(MenuEssentiaVibrationChamber.DATA_ENERGY_MAX)));
-        graphics.text(font, essentia, x + TEXT_X, y + TEXT_Y, 0x404040, false);
-        graphics.text(font, energy, x + TEXT_X, y + TEXT_Y + 12, 0x404040, false);
+        graphics.text(font, essentia, x + TEXT_X, y + TEXT_Y, TEXT_COLOUR, false);
+        graphics.text(font, energy, x + TEXT_X, y + TEXT_Y + 12, TEXT_COLOUR, false);
 
         // 先给原因：槽满只是暂停燃烧，没接线的机器也不算空闲；
         // 不说清是哪一种，这行会被读成燃料耗尽。
@@ -128,7 +153,7 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
                                     menu.reading(MenuEssentiaVibrationChamber.DATA_AE_PER_TICK) / 10.0))
                     : Component.translatable("thaumicenergistics_ce.gui.vibration_chamber.idle");
         }
-        graphics.text(font, state, x + TEXT_X, y + TEXT_Y + 34, 0x404040, false);
+        graphics.text(font, state, x + TEXT_X, y + TEXT_Y + 34, TEXT_COLOUR, false);
     }
 
     private static void bar(

@@ -16,12 +16,10 @@ import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 import thaumicenergistics_ce.menu.MenuEssentiaLevelEmitter;
-import thaumicenergistics_ce.menu.MenuEssentiaStorageBus;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
 import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
-import thaumicenergistics_ce.part.PartEssentiaStorageBus;
 
 /** 菜单类型注册。 */
 public final class ModMenuTypes {
@@ -101,15 +99,6 @@ public final class ModMenuTypes {
                             .withMenuTitle(host -> Component.translatable(
                                     "gui.thaumicenergistics_ce.wireless_arcane_crafting_terminal"))
                             .buildUnregistered(ThEIds.id("wireless_arcane_crafting_terminal")));
-
-    public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaStorageBus>> ESSENTIA_STORAGE_BUS =
-            REGISTRY.register(
-                    "essentia_storage_bus",
-                    () -> MenuTypeBuilder.create(
-                                    MenuEssentiaStorageBus::new, PartEssentiaStorageBus.class)
-                            .withMenuTitle(host -> Component.translatable(
-                                    "gui.thaumicenergistics_ce.essentia_storage_bus"))
-                            .buildUnregistered(ThEIds.id("essentia_storage_bus")));
 
     /**
      * 源质标准发信器的界面。上报值随初始数据带过去，它是设置，服务端不会一直推：

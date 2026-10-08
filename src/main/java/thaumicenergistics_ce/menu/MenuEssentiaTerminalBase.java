@@ -13,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.essentia.EssentiaFillHelper;
 import thaumicenergistics_ce.menu.slot.ContainerSlot;
 import thaumicenergistics_ce.network.EssentiaTerminalReceiver;
+import thaumicenergistics_ce.util.ThELog;
 
 /**
  * 任何搬运手持罐或瓶内容物而非物品的终端中，属于源质的那一半。
@@ -48,7 +49,11 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
 
     @Override
     public boolean fillFromNetwork(Player player, int where, Identifier aspectId, boolean wholeStack) {
-        if (isClientSide() || !essentiaAccessGranted()) {
+        if (isClientSide()) {
+            return false;
+        }
+        if (!essentiaAccessGranted()) {
+            ThELog.LOG.info("[源质手势] 从网络装填被拒：这个终端里没插源质访问卡");
             return false;
         }
         ItemStack container = containerAt(player, where);
@@ -78,9 +83,14 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
 
     @Override
     public void deposit(Player player, int where) {
-        if (isClientSide() || !essentiaAccessGranted()) {
+        if (isClientSide()) {
             return;
         }
+        if (!essentiaAccessGranted()) {
+            ThELog.LOG.info("[源质手势] 倒回网络被拒：这个终端里没插源质访问卡");
+            return;
+        }
+        ThELog.LOG.info("[源质手势] 收到倒回请求 where={}", where);
 
         // 按菜单槽位：对玩家槽位 shift 右键，会清空放在里面的容器。
         if (where >= 0) {
@@ -94,9 +104,11 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
             }
             ItemStack inSlot = target.getItem();
             if (!EssentiaFillHelper.isSupportedContainer(inSlot)) {
+                ThELog.LOG.info("[源质手势] 倒回被拒：槽位 {} 里不是源质容器（{}）", where, inSlot);
                 return;
             }
             ItemStack left = emptyIntoNetwork(inSlot);
+            ThELog.LOG.info("[源质手势] 槽位 {} 倒回结果：{} -> {}", where, inSlot, left);
             if (left != null) {
                 target.set(left);
             // 已填充容器会被另一个物品堆替换，客户端对这两处的副本都过时了。
@@ -107,9 +119,12 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
 
         ItemStack container = containerAt(player, where);
         if (container == null || !EssentiaFillHelper.isSupportedContainer(container)) {
+            ThELog.LOG.info("[源质手势] 倒回被拒：{} 那一侧不是源质容器（{}）",
+                    where == ContainerSlot.CURSOR ? "光标" : "主手", container);
             return;
         }
         ItemStack left = emptyIntoNetwork(container);
+        ThELog.LOG.info("[源质手势] 倒回结果：{} -> {}", container, left);
         if (left == null) {
             return;
         }

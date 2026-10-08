@@ -30,7 +30,7 @@ public final class GachaBoxBreakGuard {
                 && box.hasJar()
                 && !box.mayTakeBrain(player)) {
             event.setCanceled(true);
-            player.sendSystemMessage(
+            player.sendOverlayMessage(
                     Component.translatable(
                             "block.thaumicenergistics_ce.gacha_box.bound_to_other",
                             box.ownerName() == null ? "" : box.ownerName()));

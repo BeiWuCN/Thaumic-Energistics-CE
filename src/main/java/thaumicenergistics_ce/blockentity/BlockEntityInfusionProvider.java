@@ -24,7 +24,9 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 /**
  * 注魔供应器：让注魔祭坛直接从 ME 网络抽源质。
  * 没有缓冲：方块是网络的一扇窗，不是罐子；{@link #getAspects()} 答空，管道就不会把它当容器抽。
- * 经 {@link #takeFromContainer} 的取出是全有或全无：部分取出放回去并报失败。
+ * 经 {@link #drain} 的取出是全有或全无：部分取出放回去并报失败。
+ * （1.21.1 那代这套接口叫 addToContainer/takeFromContainer/containerContains，
+ * Thaumaturge 1.0.2 换成 accepts/fill/drain/amountOf，逐个对应。）
  */
 public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implements IAspectSource {
 

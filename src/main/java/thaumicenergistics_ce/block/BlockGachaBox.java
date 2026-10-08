@@ -116,7 +116,7 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
                 return InteractionResult.SUCCESS;
             }
             unbound.bind(player);
-            player.sendSystemMessage(
+            player.sendOverlayMessage(
                     Component.translatable("block.thaumicenergistics_ce.gacha_box.rebound"));
             return InteractionResult.SUCCESS;
         }
@@ -161,7 +161,7 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
             return;
         }
         if (!box.mayTakeBrain(player)) {
-            player.sendSystemMessage(
+            player.sendOverlayMessage(
                     Component.translatable(
                             "block.thaumicenergistics_ce.gacha_box.bound_to_other",
                             box.ownerName() == null ? "" : box.ownerName()));
@@ -175,7 +175,7 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
         }
         give(player, brain.isEmpty() ? TcRegistry.jarBrainStack() : brain);
         level.setBlockAndUpdate(pos, state.setValue(JAR, false));
-        player.sendSystemMessage(
+        player.sendOverlayMessage(
                 Component.translatable("block.thaumicenergistics_ce.gacha_box.lost_target"));
     }
 

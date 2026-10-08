@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Inventory;
 import org.jspecify.annotations.Nullable;
+import thaumicenergistics_ce.arcane.EssentiaCrystals;
 import thaumicenergistics_ce.client.GolemBackpackClientData;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
@@ -22,7 +23,8 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
  * 奥术合成终端的界面。
- * 费用行在样式的 [visCraftCost] 条带里，vis 显示只有这一处，不带灵气是刻意的。
+ * 费用行在样式的 [visCraftCost] 条带里：右端是法杖出的 vis，左端接着要扣的晶体。
+ * vis 显示只有这一处，不带灵气是刻意的。
  * 样式文档放在 AE2 命名空间下：[StyleManager] 只解析自己命名空间里的文档。
  * 罐和药瓶手势来自 {@link ScreenEssentiaTerminalBase}，只在装了源质访问卡时提供。
  */
@@ -40,6 +42,9 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     private static @Nullable ScreenArcaneCraftingTerminal open;
 
     private List<ArcaneCraftCostPayload.AspectCost> costs = List.of();
+
+    /** 同一次合成要从六个晶体槽里扣掉的晶体，画在要素左边。 */
+    private List<ArcaneCraftCostPayload.CrystalCost> crystals = List.of();
 
     public ScreenArcaneCraftingTerminal(
             MenuArcaneCraftingTerminal menu, Inventory inventory, Component title, ScreenStyle style) {
@@ -87,13 +92,14 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         // 套用就会把上一个网格的费用画到新界面上。
         if (screen != null && screen.getMenu().containerId == payload.containerId()) {
             screen.costs = payload.aspects();
+            screen.crystals = payload.crystals();
         }
     }
 
     @Override
     public void drawFG(GuiGraphicsExtractor graphics, int offsetX, int offsetY, int mouseX, int mouseY) {
         super.drawFG(graphics, offsetX, offsetY, mouseX, mouseY);
-        if (costs.isEmpty()) {
+        if (costs.isEmpty() && crystals.isEmpty()) {
             return;
         }
         // 条带由样式定位，解析出的点本就是窗口相对的：
@@ -103,9 +109,12 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
             return;
         }
         Point at = strip.resolve(new Rect2i(0, 0, imageWidth, imageHeight));
-        // 图标数不超过水晶能占的格数，条带宽度除以格数就是一个图标的最大边长：
-        // 美术图 69 列除以六个格得 11，六个图标占满这 66 列。
-        int chip = Math.min(strip.getHeight(), strip.getWidth() / PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
+        // 基数仍是「水晶能占的格数」：美术图 69 列除以六个格得 11，六个图标占满这 66 列。
+        // 要画的东西超过六件（六颗晶体加一个要素这种常见配方就是七件）时按件数等比缩小，
+        // 缩小有下限，到下限还排不下的才会像以前那样丢掉尾巴。
+        int wanted = Math.max(PartArcaneCraftingTerminal.CRYSTAL_SLOTS, costs.size() + crystals.size());
+        int chip = Math.min(strip.getHeight(), strip.getWidth() / wanted);
+        chip = Math.max(chip, Math.min(6, strip.getHeight()));
         if (chip <= 0) {
             return;
         }
@@ -131,6 +140,28 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
                 // centivis 折算成整数 vis 并向上取整：1 centivis 也要一个 vis 才付得起，
                 // 显示 0 会被读成免费。数字以图标为单位，靠位姿缩放。
                 String text = String.valueOf((cost.centivis() + 99) / 100);
+                graphics.text(
+                        font, text, CHIP_UNITS - font.width(text) + 1, CHIP_UNITS - 6, 0xFFFFFF, true);
+                graphics.pose().popMatrix();
+            }
+            x -= chip;
+        }
+        // 晶体接着要素往左排：单要素配方仍占住条带右端，不因为多了晶体而挪位。
+        // 晶体是物品，画的就是那一颗本身，同样是十六见方，跟着同一个位姿缩到条带容得下。
+        for (ArcaneCraftCostPayload.CrystalCost cost : crystals) {
+            if (x < at.getX()) {
+                break;
+            }
+            var aspect = Aspects.resolve(
+                    menu.getPlayer().level(), ResourceKey.create(
+                            IAspect.REGISTRY_KEY, cost.aspect()));
+            if (aspect != null) {
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(x, y);
+                graphics.pose().scale(shrink, shrink);
+                graphics.item(EssentiaCrystals.create(aspect, 1), 0, 0);
+                // 颗数：晶体本身就是整颗的，这里不用像 centivis 那样向上折算。
+                String text = String.valueOf(cost.count());
                 graphics.text(
                         font, text, CHIP_UNITS - font.width(text) + 1, CHIP_UNITS - 6, 0xFFFFFF, true);
                 graphics.pose().popMatrix();

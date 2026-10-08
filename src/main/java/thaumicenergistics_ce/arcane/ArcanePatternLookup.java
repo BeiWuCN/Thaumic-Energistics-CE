@@ -1,5 +1,6 @@
 package thaumicenergistics_ce.arcane;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
@@ -38,8 +39,12 @@ final class ArcanePatternLookup {
         if (level == null || result.isEmpty()) {
             return null;
         }
+        RecipeManager manager = recipes(level);
+        if (manager == null) {
+            return null;
+        }
         ContextMap context = SlotDisplayContext.fromLevel(level);
-        for (RecipeHolder<?> holder : level.getServer().getRecipeManager().getRecipes()) {
+        for (RecipeHolder<?> holder : manager.getRecipes()) {
             if (!(holder.value() instanceof IArcaneRecipe arcane)) {
                 continue;
             }
@@ -64,8 +69,12 @@ final class ArcanePatternLookup {
         if (level == null || output.isEmpty()) {
             return null;
         }
+        RecipeManager manager = recipes(level);
+        if (manager == null) {
+            return null;
+        }
         ContextMap context = SlotDisplayContext.fromLevel(level);
-        for (RecipeHolder<?> holder : level.getServer().getRecipeManager().getRecipes()) {
+        for (RecipeHolder<?> holder : manager.getRecipes()) {
             if (!(holder.value() instanceof IArcaneRecipe arcane)) {
                 continue;
             }
@@ -79,6 +88,21 @@ final class ArcanePatternLookup {
             }
         }
         return null;
+    }
+
+    /**
+     * 这一侧的完整配方表；拿不到时为 {@code null}。
+     * 26.1.2 把配方访问收成 {@code Level.recipeAccess()}，它只剩属性集与切石机配方，
+     * 完整配方表只有服务端持有：客户端 [Level#getServer] 是 null，
+     * 客户端 [ClientLevel#recipeAccess] 也只是连接上同步来的那一小份。
+     * 所以下方的解析在客户端一律不成立，调用方要先看这一侧是不是服务端。
+     */
+    private static @Nullable RecipeManager recipes(@Nullable Level level) {
+        if (level == null || level.isClientSide()) {
+            return null;
+        }
+        MinecraftServer server = level.getServer();
+        return server == null ? null : server.getRecipeManager();
     }
 
     static @Nullable ThEArcanePattern fromRecipe(IArcaneRecipe recipe, ItemStack output) {
@@ -108,7 +132,10 @@ final class ArcanePatternLookup {
         if (level == null || cells.size() != ThEArcanePattern.MAX_GRID) {
             return null;
         }
-        RecipeManager manager = level.getServer().getRecipeManager();
+        RecipeManager manager = recipes(level);
+        if (manager == null) {
+            return null;
+        }
         ArcaneRecipeIndex.index(manager);
         ContextMap context = SlotDisplayContext.fromLevel(level);
 
@@ -165,8 +192,12 @@ final class ArcanePatternLookup {
         if (level == null || output.isEmpty() || inputs.isEmpty()) {
             return null;
         }
+        RecipeManager manager = recipes(level);
+        if (manager == null) {
+            return null;
+        }
         ContextMap context = SlotDisplayContext.fromLevel(level);
-        for (RecipeHolder<?> holder : level.getServer().getRecipeManager().getRecipes()) {
+        for (RecipeHolder<?> holder : manager.getRecipes()) {
             if (!(holder.value() instanceof IArcaneRecipe arcane)) {
                 continue;
             }

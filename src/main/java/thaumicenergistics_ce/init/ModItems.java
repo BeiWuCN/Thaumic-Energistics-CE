@@ -12,7 +12,6 @@ import thaumicenergistics_ce.item.ItemArcaneCraftingTerminal;
 import thaumicenergistics_ce.item.ItemArcanePattern;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
 import thaumicenergistics_ce.item.ItemEssentiaLevelEmitter;
-import thaumicenergistics_ce.item.ItemEssentiaStorageBus;
 import thaumicenergistics_ce.item.ItemEssentiaTerminal;
 import thaumicenergistics_ce.item.ItemFluxTransferInterface;
 import thaumicenergistics_ce.item.ItemFocusAEWrench;
@@ -41,32 +40,48 @@ public final class ModItems {
     public static final DeferredItem<Item> ARCANE_PATTERN =
             REGISTRY.registerItem("arcane_pattern", ItemArcanePattern::build, () -> new Item.Properties());
 
-    public static final DeferredItem<BlockItem> ARCANE_ASSEMBLER =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.ARCANE_ASSEMBLER);
+    public static final DeferredItem<BlockItem> ARCANE_ASSEMBLER = REGISTRY.registerItem(
+            "arcane_assembler",
+            p -> new BlockItem(ModBlocks.ARCANE_ASSEMBLER.get(), p),
+            () -> new Item.Properties().useBlockDescriptionPrefix());
 
-    public static final DeferredItem<BlockItem> KNOWLEDGE_INSCRIBER =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.KNOWLEDGE_INSCRIBER);
+    public static final DeferredItem<BlockItem> KNOWLEDGE_INSCRIBER = REGISTRY.registerItem(
+            "knowledge_inscriber",
+            p -> new BlockItem(ModBlocks.KNOWLEDGE_INSCRIBER.get(), p),
+            () -> new Item.Properties().useBlockDescriptionPrefix());
 
     public static final DeferredItem<BlockItem> ESSENTIA_CELL_WORKBENCH =
             REGISTRY.registerSimpleBlockItem(ModBlocks.ESSENTIA_CELL_WORKBENCH);
 
-    public static final DeferredItem<BlockItem> ESSENTIA_VIBRATION_CHAMBER =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.ESSENTIA_VIBRATION_CHAMBER);
+    public static final DeferredItem<BlockItem> ESSENTIA_VIBRATION_CHAMBER = REGISTRY.registerItem(
+            "essentia_vibration_chamber",
+            p -> new BlockItem(ModBlocks.ESSENTIA_VIBRATION_CHAMBER.get(), p),
+            () -> new Item.Properties().useBlockDescriptionPrefix());
 
-    public static final DeferredItem<BlockItem> ALCHEMY_PROVIDER =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.ALCHEMY_PROVIDER);
+    public static final DeferredItem<BlockItem> ALCHEMY_PROVIDER = REGISTRY.registerItem(
+            "alchemy_provider",
+            p -> new BlockItem(ModBlocks.ALCHEMY_PROVIDER.get(), p),
+            () -> new Item.Properties().useBlockDescriptionPrefix());
 
-    public static final DeferredItem<BlockItem> INFUSION_PROVIDER =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.INFUSION_PROVIDER);
+    public static final DeferredItem<BlockItem> INFUSION_PROVIDER = REGISTRY.registerItem(
+            "infusion_provider",
+            p -> new BlockItem(ModBlocks.INFUSION_PROVIDER.get(), p),
+            () -> new Item.Properties().useBlockDescriptionPrefix());
 
-    public static final DeferredItem<BlockItem> DISTILLATION_ENCODER =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.DISTILLATION_ENCODER);
+    public static final DeferredItem<BlockItem> DISTILLATION_ENCODER = REGISTRY.registerItem(
+            "distillation_encoder",
+            p -> new BlockItem(ModBlocks.DISTILLATION_ENCODER.get(), p),
+            () -> new Item.Properties().useBlockDescriptionPrefix());
 
-    public static final DeferredItem<BlockItem> OCCULT_MONITOR =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.OCCULT_MONITOR);
+    public static final DeferredItem<BlockItem> OCCULT_MONITOR = REGISTRY.registerItem(
+            "occult_monitor",
+            p -> new BlockItem(ModBlocks.OCCULT_MONITOR.get(), p),
+            () -> new Item.Properties().useBlockDescriptionPrefix());
 
-    public static final DeferredItem<BlockItem> ALCHEMY_PROVIDER_CONNECTION =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.ALCHEMY_PROVIDER_CONNECTION);
+    public static final DeferredItem<BlockItem> ALCHEMY_PROVIDER_CONNECTION = REGISTRY.registerItem(
+            "alchemy_provider_connection",
+            p -> new BlockItem(ModBlocks.ALCHEMY_PROVIDER_CONNECTION.get(), p),
+            () -> new Item.Properties().useBlockDescriptionPrefix());
 
     public static final DeferredItem<BlockItem> GACHA_BOX = REGISTRY.registerSimpleBlockItem(ModBlocks.GACHA_BOX);
 
@@ -143,10 +158,6 @@ public final class ModItems {
 
     public static final DeferredItem<Item> COALESCENCE_CORE = REGISTRY.registerItem(
             "coalescence_core", Item::new, () -> new Item.Properties().stacksTo(64));
-
-    public static final DeferredItem<ItemEssentiaStorageBus> ESSENTIA_STORAGE_BUS = REGISTRY.registerItem(
-            "essentia_storage_bus",
-            ItemEssentiaStorageBus::new, () -> new Item.Properties().stacksTo(64).rarity(Rarity.RARE));
 
     public static final DeferredItem<ItemFluxTransferInterface> FLUX_TRANSFER_INTERFACE =
             REGISTRY.registerItem(

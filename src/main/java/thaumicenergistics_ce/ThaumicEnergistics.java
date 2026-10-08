@@ -43,7 +43,6 @@ import thaumicenergistics_ce.init.capability.ThEItemCapabilities;
 import thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceRegistry;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
-import thaumicenergistics_ce.part.PartEssentiaStorageBus;
 import thaumicenergistics_ce.part.PartEssentiaTerminal;
 import thaumicenergistics_ce.part.PartVisInterface;
 import thaumicenergistics_ce.util.ThELog;
@@ -174,10 +173,6 @@ public final class ThaumicEnergistics {
      */
     public static void registerPartCapabilities(RegisterPartCapabilitiesEvent event) {
         TcAura.registerVisSource(event, PartVisInterface.class);
-        // 管道只向邻居要传输能力，不注册这个，源质存储总线看得见管道，管道却看不见它。
-        // 端口就是总线朝着的那一面，所以每次查询重建，而不是长期持有。
-        event.register(EssentiaCapabilities.TRANSPORT, (part, context) -> part.transportView(),
-                PartEssentiaStorageBus.class);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

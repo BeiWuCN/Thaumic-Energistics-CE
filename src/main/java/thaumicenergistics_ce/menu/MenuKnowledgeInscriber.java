@@ -150,6 +150,18 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
         preview.update();
     }
 
+    /**
+     * 服务端每 tick 把预览重算一次，客户端只读同步过去的槽位。
+     * 26.1.2 起客户端没有配方表，预览不能再像以前那样「两边各算一遍」；
+     * 原版客户端也会调这个方法，[InscriberPreview#update] 在那一侧是空转。
+     * 放在 {@code super} 之前，这一 tick 的改动才赶得上同一次槽位同步。
+     */
+    @Override
+    public void broadcastChanges() {
+        updatePreview();
+        super.broadcastChanges();
+    }
+
     public boolean hasCore() {
         return readout.hasCore();
     }

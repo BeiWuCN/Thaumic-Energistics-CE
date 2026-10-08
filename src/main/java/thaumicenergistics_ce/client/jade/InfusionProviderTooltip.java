@@ -108,6 +108,13 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
      * <ul>
      *   <li>Jade 26.1.8 把 {@code IElement} 接口换成了 {@code Element} 类，它的契约是两个方法：
      *       报一段朗读文本，以及在交给你的位置上提取渲染状态。尺寸现在是一个字段，不再是一打重写。
+     *   <li><b>坐标要用自己的 {@code getX()}/{@code getY()}，不能用传进来的那两个 int。</b>
+     *       {@code BoxElementImpl.extractRenderState} 遍历子元素时，给每个子元素传的是同一个
+     *       {@code Vector2i}，也就是整个提示框的原点；真正的位置是布局在排完行之后用
+     *       {@code setX}/{@code setY} 写进元素自己的。Jade 自带的元素（{@code ItemStackElement}、
+     *       {@code ProgressElement}、{@code TextElementImpl}、{@code SpriteElement}）一律只用自身坐标。
+     *       1.21.1 那一版用的是老接口 {@code IElement.render(graphics, x, y, delta, alpha)}，
+     *       那里的 x/y 恰好就是元素自己的位置，照抄过来就会把整排图标叠画在提示框左上角。
      *   <li>角标算进宽度：Jade 按各元素上报的宽度排一行，
      *       最早的版本只报了图标的 16 像素，数字就压到下一个图标上。
      *   <li>左对齐，短的最后一行和第一行对齐。
@@ -132,10 +139,13 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
         @Override
         public void extractRenderState(GuiGraphicsExtractor graphics, int x, int y, float partialTick) {
             Font font = Minecraft.getInstance().font;
-            AspectRendering.renderGui(graphics, font, x, y, aspect, 0.0F);
+            // 传进来的 x/y 是提示框原点，不是这个图标的位置；布局把自己的坐标写进了这两个字段。
+            int left = getX();
+            int top = getY();
+            AspectRendering.renderGui(graphics, font, left, top, aspect, 0.0F);
             // 图标最下一行，一行读起来就是一整条数字。上面的数量写 0，
             // 因为这个角标才是那个数字，不是图标自己的标签。
-            graphics.text(font, badge, x + CHIP + GAP, y + 9, 0xFFFFFFFF, true);
+            graphics.text(font, badge, left + CHIP + GAP, top + 9, 0xFFFFFFFF, true);
         }
 
         @Override

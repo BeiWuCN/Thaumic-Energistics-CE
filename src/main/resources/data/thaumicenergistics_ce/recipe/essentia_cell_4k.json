@@ -1,10 +1,17 @@
 {
-  "type": "minecraft:crafting_shapeless",
+  "type": "minecraft:crafting_shaped",
   "category": "misc",
-  "_note": "The reference build's essentia_cell_4k: a storage casing and a 4k component, shapeless.",
-  "ingredients": [
-    "thaumicenergistics_ce:storage_casing",
-    "thaumicenergistics_ce:storage_component_4k"
+  "_note": "The 1.12.2 build's essentia_cell_4k, shape and materials both: quartz glass in the top corners, a redstone frame, the 4k component in the middle and an iron base. The 1.12.2 build took plain quartz glass and the ingotIron ore dictionary; this build takes its own glass tag (AE2 quartz glass or Thaumaturge warded glass) and a plain iron ingot, which is how the sibling storage_casing is written.",
+  "key": {
+    "a": "#thaumicenergistics_ce:essentia_cell_glass",
+    "b": "minecraft:redstone",
+    "c": "thaumicenergistics_ce:storage_component_4k",
+    "d": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "aba",
+    "bcb",
+    "ddd"
   ],
   "result": {
     "id": "thaumicenergistics_ce:essentia_cell_4k",

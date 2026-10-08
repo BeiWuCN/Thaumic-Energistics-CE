@@ -21,7 +21,6 @@ import thaumicenergistics_ce.client.gui.ScreenArcaneAssembler;
 import thaumicenergistics_ce.client.gui.ScreenArcaneCraftingTerminal;
 import thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
-import thaumicenergistics_ce.client.gui.ScreenEssentiaStorageBus;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaTerminal;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaVibrationChamber;
 import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
@@ -38,7 +37,6 @@ import thaumicenergistics_ce.integration.ae2.ClientRegistrySource;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 import thaumicenergistics_ce.menu.MenuEssentiaLevelEmitter;
-import thaumicenergistics_ce.menu.MenuEssentiaStorageBus;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
 import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
 import thaumicenergistics_ce.network.ClientSinks;
@@ -181,11 +179,6 @@ public final class ClientSetup {
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/arcane_crafting_terminal.json")));
-        event.register(
-                ModMenuTypes.ESSENTIA_STORAGE_BUS.get(),
-                (MenuEssentiaStorageBus menu, Inventory inventory, Component title) ->
-                        new ScreenEssentiaStorageBus(
-                                menu, inventory, title, StyleManager.loadStyleDoc("/screens/storage_bus.json")));
         event.register(
                 ModMenuTypes.ESSENTIA_LEVEL_EMITTER.get(),
                 (MenuEssentiaLevelEmitter menu, Inventory inventory, Component title) ->

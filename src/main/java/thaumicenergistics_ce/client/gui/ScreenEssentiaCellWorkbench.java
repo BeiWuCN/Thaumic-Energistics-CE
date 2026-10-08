@@ -34,6 +34,24 @@ public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaC
     }
 
     /**
+     * 悬停框照 AE2 的画法补一遍，见 {@link Ae2SlotHighlight}：AE2 自己的高亮钩子在这一代
+     * 没接上，不补的话井和升级槽悬停时是原版白块。禁用的井不走这里——它们不是 active 槽位，
+     * 原版压根不会把指针放上去，那几口的框由 [extractRenderState] 代画。
+     */
+    @Override
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractContents(graphics, mouseX, mouseY, partialTick);
+        Slot hovered = this.hoveredSlot;
+        if (hovered == null) {
+            return;
+        }
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(leftPos, topPos);
+        Ae2SlotHighlight.render(graphics, hovered);
+        graphics.pose().popMatrix();
+    }
+
+    /**
      * AE2 把禁用的井画成五分之一不透明度、还不给图标，本界面自己的美术图会把它吞掉：
      * 同一套槽位美术调成灰色，井看着还是井，又说明放不进标记。
      */

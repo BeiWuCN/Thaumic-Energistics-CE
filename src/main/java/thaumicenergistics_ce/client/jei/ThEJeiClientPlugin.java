@@ -8,7 +8,6 @@ import net.minecraft.resources.Identifier;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
-import thaumicenergistics_ce.client.gui.ScreenEssentiaStorageBus;
 import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 
 /**
@@ -31,11 +30,6 @@ public class ThEJeiClientPlugin implements IModPlugin {
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
         registration.addGhostIngredientHandler(
                 ScreenKnowledgeInscriber.class, new KnowledgeInscriberGhostIngredientHandler());
-        // 每个具体屏幕类一个处理器：JEI 把一个 [Class] 和同类型的处理器配对，
-        // 而这个拖拽目标收的是 Thaumaturge 的要素配料，不是物品。
-        registration.addGhostIngredientHandler(
-                ScreenEssentiaStorageBus.class,
-                new EssentiaBusGhostIngredientHandler<ScreenEssentiaStorageBus>());
         // 每个具体屏幕类一个处理器：JEI 把一个 [Class] 和同类型的处理器配对，
         // 而这个拖拽目标收的是 Thaumaturge 的要素配料，不是物品。
         registration.addGhostIngredientHandler(
