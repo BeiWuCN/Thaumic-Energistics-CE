@@ -75,6 +75,15 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
         renderTooltip(graphics, mouseX, mouseY);
     }
 
+    /**
+     * 悬停框换成 AE2 的配色，见 {@link Ae2SlotHighlight}。
+     * 不调 super：基类那版先贴一层半透明白方块，框底会发白。
+     */
+    @Override
+    protected void renderSlotHighlight(GuiGraphics graphics, Slot slot, int mouseX, int mouseY, float partialTick) {
+        Ae2SlotHighlight.render(graphics, slot);
+    }
+
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         if (layout == null) {

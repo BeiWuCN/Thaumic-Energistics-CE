@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 
@@ -68,6 +69,15 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
         super.render(graphics, mouseX, mouseY, partialTick);
         barTooltips(graphics, mouseX, mouseY);
         renderTooltip(graphics, mouseX, mouseY);
+    }
+
+    /**
+     * 悬停框换成 AE2 的配色，见 {@link Ae2SlotHighlight}。
+     * 不调 super：基类那版先贴一层半透明白方块，框底会发白。
+     */
+    @Override
+    protected void renderSlotHighlight(GuiGraphics graphics, Slot slot, int mouseX, int mouseY, float partialTick) {
+        Ae2SlotHighlight.render(graphics, slot);
     }
 
     @Override

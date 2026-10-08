@@ -20,6 +20,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.jetbrains.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
+import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.util.ThELog;
 
@@ -60,6 +61,11 @@ public final class GolemBackpackHandler {
         Player player = event.getEntity();
         ItemStack held = player.getItemInHand(event.getHand());
         if (held.isEmpty()) {
+            // 空手潜行右键就是 Thaumaturge 的「收起傀儡」：它把属性与经验写进一颗物品再把傀儡 discard。
+            // 背包链接存在傀儡的持久化数据里，不跟着走，所以趁傀儡还在先摘下来还给玩家。
+            if (player.isShiftKeyDown() && !event.getLevel().isClientSide()) {
+                salvage(golem);
+            }
             return;
         }
 
@@ -144,20 +150,41 @@ public final class GolemBackpackHandler {
             return false;
         }
 
-        ItemStack backpack = new ItemStack(thaumicenergistics_ce.init.ModItems.GOLEM_WIFI_BACKPACK.get());
+        releasePack(golem, link, !player.isCreative());
+        trace("removed the backpack from golem " + golem.getId() + ", link " + link + " returned");
+        playEquipSound(golem);
+        return true;
+    }
+
+    /**
+     * 收起傀儡（空手潜行右键）前把背包摘下来。Thaumaturge 的 {@code pickUpGolem} 只把属性与经验写进
+     * 那颗「傀儡」物品，傀儡的持久化数据不跟着走，背包与链接会一起没 —— 这里不拦那次收，只先还东西。
+     */
+    private static void salvage(EntityThaumaturgeGolem golem) {
+        GlobalPos link = getLink(golem);
+        if (link == null) {
+            return;
+        }
+
+        releasePack(golem, link, true);
+        trace("took the backpack off golem " + golem.getId() + " before it was pocketed, link " + link);
+        playEquipSound(golem);
+    }
+
+    /**
+     * 把背包与方块摘下来落在傀儡脚下。方块是玩家花掉的物品，只有主动取下时才看创造模式。
+     */
+    private static void releasePack(EntityThaumaturgeGolem golem, GlobalPos link, boolean returnFacade) {
+        ItemStack backpack = new ItemStack(ModItems.GOLEM_WIFI_BACKPACK.get());
         backpack.set(AEComponents.WIRELESS_LINK_TARGET, link);
         golem.spawnAtLocation(backpack);
 
-        // 方块也退还：那是玩家花掉的物品，重新上色不该消耗它。
         ItemStack facade = getFacade(golem);
-        if (!facade.isEmpty() && !player.isCreative()) {
+        if (returnFacade && !facade.isEmpty()) {
             golem.spawnAtLocation(facade);
         }
 
         clear(golem);
-        trace("removed the backpack from golem " + golem.getId() + ", link " + link + " returned");
-        playEquipSound(golem);
-        return true;
     }
 
     private static boolean repaint(EntityThaumaturgeGolem golem, Player player, ItemStack held,

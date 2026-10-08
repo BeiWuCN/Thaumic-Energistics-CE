@@ -11,15 +11,20 @@ import appeng.menu.SlotSemantics;
 import appeng.menu.slot.AppEngSlot;
 import appeng.util.inv.AppEngInternalInventory;
 import appeng.util.inv.InternalInventoryHost;
+import appeng.util.inv.filter.IAEItemFilter;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftCost;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ArcaneTerminalHost;
 import thaumicenergistics_ce.arcane.TerminalAuraPayment;
@@ -27,6 +32,7 @@ import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.menu.slot.ArcaneCraftingResultSlot;
 import thaumicenergistics_ce.menu.slot.CrystalSlot;
+import thaumicenergistics_ce.menu.slot.WandSlot;
 import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
@@ -64,8 +70,8 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     private final @Nullable PartArcaneCraftingTerminal part;
 
     /**
-     * 终端还没解析出来时的替身容器。
-     * 槽位要始终存在，否则看不到所绑区块的客户端会建出和服务端不一样的菜单。
+     * 终端还没解析出来时的替身容器：只管占住槽位，槽位数量两侧不一致菜单就会错位。
+     * 它不承担存储：收下的东西没有任何存档接着，关掉菜单就没了；见构造函数里的过滤器。
      */
     private final AppEngInternalInventory gridFallback = new AppEngInternalInventory(this, GRID_SIZE);
 
@@ -90,6 +96,9 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
     private int craftInputSignature = -1;
 
+    /** 上次说「替身槽位不收东西」的时刻。初值 -100 让第一次点击就能出声，之后两秒一次。 */
+    private int lastPlaceholderRefusal = -100;
+
     public MenuArcaneCraftingTerminal(
             MenuType<?> menuType, int id, Inventory playerInventory, ITerminalHost host) {
         super(menuType, id, playerInventory, host, false);
@@ -98,6 +107,20 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         this.craftingGrid = part == null ? gridFallback : part.craftingGrid();
         this.wandInventory = part == null ? wandFallback : part.wandInventory();
         this.crystals = part == null ? crystalFallback : part.crystalInventory();
+
+        // 替身容器一概拒收：这一侧既写不进存档，也合不了成（part == null 时结果槽直接返回），
+        // 收下等于吃掉。玩家点击走 [AppEngSlot#mayPlace] 到这里，与部件容器的过滤器同一条门。
+        Player menuOwner = playerInventory.player;
+        IAEItemFilter placeholdersTakeNothing = new IAEItemFilter() {
+            @Override
+            public boolean allowInsert(InternalInventory inventory, int slot, ItemStack stack) {
+                refusePlaceholderInsert(menuOwner);
+                return false;
+            }
+        };
+        gridFallback.setFilter(placeholdersTakeNothing);
+        crystalFallback.setFilter(placeholdersTakeNothing);
+        wandFallback.setFilter(placeholdersTakeNothing);
 
         // 1. 工作台合成单元。
         for (int i = 0; i < GRID_SIZE; i++) {
@@ -110,8 +133,9 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         }
 
         // 2. 法杖槽，[STORAGE] 类型；AE2 对工具没有语义，这个槽只管摆放和 shift 点击。
+        //    只收法杖，规则与容器上的过滤器一致：见 [WandSlot]。
         Slot wandSlot = addSlot(
-                new AppEngSlot(wandInventory, PartArcaneCraftingTerminal.WAND_SLOT),
+                new WandSlot(wandInventory, PartArcaneCraftingTerminal.WAND_SLOT),
                 SlotSemantics.STORAGE);
         wandSlot.x = WAND_X;
         wandSlot.y = WAND_Y;
@@ -229,7 +253,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         }
         sendPacketToClient(cost == null
                 ? ArcaneCraftCostPayload.none(containerId)
-                : ArcaneCraftCostPayload.of(containerId, cost.wandCentivis()));
+                : ArcaneCraftCostPayload.of(containerId, cost.wandCentivis(), cost.crystalsNeeded()));
     }
 
 
@@ -249,6 +273,19 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
      * 答话的是宿主自己的槽位，包里第二张终端顶不了。 */
     public boolean hasVisConnectionCard() {
         return TerminalAuraPayment.visConnectionInstalled(getHost());
+    }
+
+    /**
+     * 替身槽位拒收时说一句为什么：光不放行，玩家只会觉得界面卡住了。
+     * 只在服务端出声，两秒一次。
+     */
+    private void refusePlaceholderInsert(Player player) {
+        if (!(player instanceof ServerPlayer server) || server.tickCount - lastPlaceholderRefusal < 40) {
+            return;
+        }
+        lastPlaceholderRefusal = server.tickCount;
+        server.displayClientMessage(
+                Component.translatable("gui.thaumicenergistics_ce.arcane_terminal.not_linked"), true);
     }
 
     /** 不写存档：结果由网格推导，存下来的会活得比网格久。 */

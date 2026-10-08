@@ -35,3 +35,6 @@ docs/
 # read from the repository, and it lives on disk only.
 MOD-DESCRIPTION.md
 MOD-DESCRIPTION.en.md
+
+# Scratch space for javap dumps and other throwaway evidence gathered while reading a dependency.
+_scratch/

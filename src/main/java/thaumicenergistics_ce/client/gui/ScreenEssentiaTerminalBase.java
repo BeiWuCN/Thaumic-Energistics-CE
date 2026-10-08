@@ -55,15 +55,25 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
 
     @Override
     protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type) {
-        if (essentiaGesturesAtAll() && slot instanceof RepoSlot repoSlot && cursorIsContainer()) {
-            var entry = repoSlot.getEntry();
-            if (entry != null && entry.getWhat() instanceof AEssentiaKey) {
-                // 光标上是我们的容器时就到这里：手势是唯一入口，AE2 自己的槽位点击不跑。
-                // 静默处理，光标每过一格就触发一次。
-                return;
-            }
+        if (essentiaGesturesAtAll() && slot instanceof RepoSlot && cursorIsContainer()
+                && type != ClickType.QUICK_MOVE) {
+            // shift 左键（QUICK_MOVE）不经过光标，放行才能照常把网络里的东西搬进背包。
+            // 非源质行也得挡：漏给 AE2 的空容器会被它当普通物品存进网络。
+            return;
         }
         super.slotClicked(slot, slotId, mouseButton, type);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (essentiaGesturesAtAll() && cursorIsContainer()) {
+            // 空格子没有条目，滚轮落上去时 AE2 的 ROLL_DOWN / ROLL_UP 分支
+            // 会把手持的容器当普通物品存进网络。只挡空格子：有条目的格子照旧一次取一个。
+            if (hoveredSlot instanceof RepoSlot repoSlot && repoSlot.getEntry() == null) {
+                return true;
+            }
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     private boolean handleRightClick() {
