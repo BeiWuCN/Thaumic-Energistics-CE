@@ -121,6 +121,11 @@ src\main\java\thaumicenergistics_ce\compat\thaumaturge\TcArcanePayment.java
 - 同步 1.21.1：目录名同为 `data\thaumicenergistics_ce\loot_table\blocks\`（1.21 起数据包目录改单数），12 个 JSON 可原样复制；那边的方块 id 与本侧一致。
 - 校验：`mc_gradle build` 绿；产物 jar 里 12 条 `data/thaumicenergistics_ce/loot_table/blocks/*.json` 已在位，全部 JSON 通过解析。
 
+### A12. 源质访问卡手册文案补一句
+
+- 手册「源质访问卡」第 2 阶段的正文（键 `tc.research_text.ESSENTIAACCESSCARD.stage.2`，`assets\thaumicenergistics_ce\lang\zh_cn.json:253` / `en_us.json:253`）在第一个句号前补上结论句：中文「…在配置行上标出想要的要素，**它就会允许这类要素进入ME网络**。」，英文「…mark the aspects you want on its config row, **and it lets those aspects into the ME network**.」
+- 1.21.1 成熟线**没有**这个键（那边的研究文案结构不同），所以无需同步。
+
 ---
 
 ## B. 移植补齐（1.21.1 本来就对）
