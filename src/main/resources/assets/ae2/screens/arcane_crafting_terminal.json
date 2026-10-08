@@ -35,9 +35,18 @@
     }
   },
   "text": {
+    "dialog_title": {
+      "text": {
+        "translate": "gui.ae2.Terminal"
+      },
+      "position": {
+        "left": 8,
+        "top": 6
+      }
+    },
     "crafting_grid_title": {
       "text": {
-        "translate": "gui.thaumicenergistics_ce.ArcaneCraftingTerminal"
+        "translate": "item.thaumicenergistics_ce.arcane_crafting_terminal"
       },
       "position": {
         "left": 8,
