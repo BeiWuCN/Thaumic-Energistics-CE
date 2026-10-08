@@ -15,7 +15,6 @@ import thaumicenergistics_ce.menu.MenuEssentiaTerminalBase;
 import thaumicenergistics_ce.menu.slot.ContainerSlot;
 import thaumicenergistics_ce.network.EssentiaDepositPayload;
 import thaumicenergistics_ce.network.EssentiaFillPayload;
-import thaumicenergistics_ce.util.ThELog;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
@@ -28,9 +27,6 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
  */
 public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalBase>
         extends MEStorageScreen<M> {
-
-    /** 两个界面共用这个日志标签，手势代码只有一份。 */
-    protected static final String TAG = "[essentia-terminal] ";
 
     protected ScreenEssentiaTerminalBase(
             M menu, Inventory playerInventory, Component title, ScreenStyle style) {
@@ -86,21 +82,26 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
         if (container == null) {
             return false;
         }
-        boolean overEssentia = false;
+        AEssentiaKey overKey = null;
         if (hoveredSlot instanceof RepoSlot repoSlot) {
             var entry = repoSlot.getEntry();
-            overEssentia = entry != null && entry.getWhat() instanceof AEssentiaKey;
+            if (entry != null && entry.getWhat() instanceof AEssentiaKey key) {
+                overKey = key;
+            }
         }
-        if (!overEssentia) {
+        if (overKey != null && EssentiaFillHelper.isContainerEmpty(container)) {
+            // 行上有东西可给时，空容器就是装入，左右键都算：
+            // 方向由容器决定，按键只在单个物品和整叠之间选。
+            ClientPacketDistributor.sendToServer(new EssentiaFillPayload(
+                    menu.containerId, overKey.getId(), whereHeld(), container, shift));
+            return true;
+        }
+        if (!(hoveredSlot instanceof RepoSlot)) {
             // 根本不是网格里的格子：手上拿什么都一样，这次点击归 AE2。
             return false;
         }
-        if (EssentiaFillHelper.isContainerEmpty(container)) {
-            // 我们的容器且是空的：AE2 的右键会把这个容器插进去，而空容器是给左键用的工具，
-            // 所以这次点击到此为止。
-            return true;
-        }
-        // 我们的容器且是满的：内容进网络，从光标上的或主手上的都行。
+        // 满容器从一行倒空进网络，跟从空存储元件上倒空一样：
+        // 从哪取由该行决定，往哪走由容器决定。
         ClientPacketDistributor.sendToServer(new EssentiaDepositPayload(
                 menu.containerId, whereHeld()));
         return true;
@@ -112,29 +113,23 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
             return false;
         }
         var entry = repoSlot.getEntry();
-        if (entry == null) {
-            return false;
-        }
-        if (entry.getWhat() instanceof AEssentiaKey key && EssentiaFillHelper.isContainerEmpty(container)) {
+        boolean overEssentia = entry != null && entry.getWhat() instanceof AEssentiaKey;
+        if (EssentiaFillHelper.isContainerEmpty(container)) {
+            if (!overEssentia) {
+                // 空容器又没东西可取：别的类型的条目按普通物品点击处理，空存储元件也没得取。
+                return false;
+            }
+            AEssentiaKey key = (AEssentiaKey) entry.getWhat();
             // 按住 shift 就把这次点击变成「整叠手持物品」：装满网络付得起的量，
             // 付不起的留在原处。
             ClientPacketDistributor.sendToServer(new EssentiaFillPayload(
                     menu.containerId, key.getId(), whereHeld(), container, shift));
             return true;
         }
-        if (!(entry.getWhat() instanceof AEssentiaKey)) {
-            // 根本不是网格里的格子：手上拿什么都一样，这次点击归 AE2。
-            return false;
-        }
-        if (cursorIsContainer()) {
-            // 我们的容器，光标上是罐或药瓶：AE2 会把还装着源质的容器插进去，
-            // 而那种操作对应的手势是 shift 右键，所以这次点击到此为止。
-            ThELog.LOG.info(TAG + "entry click refused: the cursor holds a container,"
-                    + " which is never inserted into the network");
-            return true;
-        }
-            // 根本不是网格里的格子：手上拿什么都一样，这次点击归 AE2。
-        return false;
+        // 满容器从一行倒空进网络，跟从空存储元件上倒空一样：
+        // 方向由容器决定，不看光标下的那一行。
+        ClientPacketDistributor.sendToServer(new EssentiaDepositPayload(menu.containerId, whereHeld()));
+        return true;
     }
 
     private boolean cursorIsContainer() {
