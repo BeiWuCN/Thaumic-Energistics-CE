@@ -1,3 +1,73 @@
+# TECE 2.7.3.65
+
+## 新增
+
+- 机器槽位的悬停框改成 AE2 风格：青色描边加半透明填充，不再用原版的白色方块
+- 奥术合成终端改为先扣六槽里的魔力水晶、不够才掏法杖，此前是法杖优先
+- 奥术合成终端的费用条带会画出这次要动用的水晶，颗数与要素并排显示
+- 水晶槽改为按住 Shift 才说明这一格收哪种水晶，提示不再常驻挡住旁边的格子
+- 奥术装配室的四个装备槽补上空图标
+- 十二台机器补上战利品表：用镐子直接挖会掉回机器本体，此前挖掉什么都不剩
+
+## 修复
+
+- 收起傀儡（空手潜行右键）时先把背包、无线链接与贴皮摘下来还给玩家，此前会被一起吞掉
+- 终端未绑定时点替身槽改为明确拒收并提示，此前会静默收下，等于把物品吃掉
+- 源质手势的两处遗漏：shift 左键取整排被拦下、shift 滚轮没有挡
+- 法杖槽此前不检查放进去的是不是法杖
+- 概率之箱的给奖提示原本写的是 Thaumaturge 的知识类型名（观测／理论），看不出实际给了什么，改为「原始／复合」
+- 终端未绑定的提示此前没有文案，玩家看到的是键名本身
+
+## 改动
+
+- 跟进 Thaumaturge 上游 1.21.1 分线的新版本：法杖焦点整体换到上游新的法术 API，源质容器改用物品能力视图，若干部件的成员随之易名
+- 奥术合成终端第二页与源质访问卡第二页的研究文本改写
+- 对 Thaumaturge 的依赖下限明确为 1.0.0。更旧的版本没有这批类名，装上去会在类加载时崩，而不是在加载时被拦下
+
+## 其他（内部重构、构建、文档）
+
+- 自建 Thaumaturge 补丁重新推导到新上游。保留索引构建移出服务端线程、索引载荷只编码一次、客户端跳过内容相同的索引三项；放弃分配无关指纹那一项 —— 上游自己重写了指纹并改成分节比对，动它的风险是缓存该失效时不失效，那是拿陈旧索引换一点速度
+- 焦点现在是数据包驱动的法术行为，随代码补上法术部件与焦点数据映射两份文件，缺了它们焦点不生效
+- 焦点不再自己收费。法杖路径已按法术复杂度统一扣费，再收一次就是双扣
+- JEI 钉回 Thaumaturge 编译所用的 19.36。JEI 后来给 `ListElementInfo.createFromElement` 加了一个参数，Thaumaturge 的搜索索引仍按旧的三参签名调用，用更新的 JEI 一打开 JEI 搜索框就 `NoSuchMethodError`
+
+---
+
+# TECE 2.7.3.65
+
+## Additions
+
+- Machine slot highlights now use AE2's style: a cyan outline over a translucent fill instead of the vanilla white block
+- Arcane crafting terminals spend the six crystal slots before the wand, where they used to prefer the wand
+- The arcane terminal's cost strip draws the crystals a craft will use, next to the aspect icons
+- The crystal slots explain which crystal they take only while shift is held, instead of covering the neighbouring slots
+- The arcane assembler's four gear slots show their empty icons
+- Twelve machines gained loot tables: a pickaxe returns the machine itself, where it used to drop nothing
+
+## Fixes
+
+- Collapsing a golem with an empty hand now hands its backpack, wireless link and skin back first; they used to disappear with it
+- Clicking a placeholder slot on a terminal that is not bound now refuses the item and says so, instead of silently swallowing it
+- Two gaps in the essentia gestures: shift left-click took the whole row and was blocked, and shift scrolling was not blocked at all
+- The wand slot did not check that what went into it was a wand
+- The gacha payout line named Thaumaturge's knowledge types (observation and theory), which does not say what was actually granted, so it now says primal and compound
+- The unbound terminal warning had no text, so players saw the key itself
+
+## Changes
+
+- Followed the new head of Thaumaturge's 1.21.1 branch: the wand focus moved onto upstream's new spell API, essentia containers are read through an item capability view, and several parts renamed their members
+- Rewrote the arcane crafting terminal's and the essentia access card's second research pages
+- The dependency floor on Thaumaturge is now 1.0.0. Older builds have none of these class names and would die at class load rather than being refused at startup
+
+## Other (internal refactors, build, documentation)
+
+- Re-derived the vendored Thaumaturge patch onto the new upstream. The build moving off the server thread, encoding the index once, and the client skipping an unchanged index are kept; the allocation-free fingerprint is dropped, because upstream rewrote the fingerprint as a sectioned comparison and touching it risks a cache that does not invalidate, which trades a stale index for a little speed
+- The focus is a datapack-driven spell behaviour now, so the spell part and the focus data map come with it; without them the focus does nothing
+- The focus no longer charges vis itself. The wand path charges once by spell complexity, so charging again would take it twice
+- JEI is pinned back to the 19.36 that Thaumaturge compiles against. JEI later added a parameter to `ListElementInfo.createFromElement` and Thaumaturge's search index still calls the older three-argument form, so a newer JEI throws `NoSuchMethodError` the moment JEI's search box is opened
+
+---
+
 # TECE 2.7.3.64
 
 ## 其他（内部重构、构建、文档）
