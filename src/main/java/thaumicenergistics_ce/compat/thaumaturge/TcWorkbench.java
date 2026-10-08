@@ -4,7 +4,7 @@ import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.recipe.IWorkbenchAuraSource;
 import com.leclowndu93150.thaumaturge.content.workbench.MenuArcaneWorkbench;
 import com.leclowndu93150.thaumaturge.content.workbench.SlotCrystalEssentia;
-import com.leclowndu93150.thaumaturge.content.workbench.WorkbenchPayment;
+import com.leclowndu93150.thaumaturge.registry.TTWorkbenchSources;
 import java.util.List;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
@@ -27,6 +27,6 @@ public final class TcWorkbench {
 
     /** 注册工作台可从中抽取 vis 的灵气源；要在工作台打开之前运行。 */
     public static void registerAuraSources(List<IWorkbenchAuraSource> sources) {
-        WorkbenchPayment.registerAuraSources(sources);
+        TTWorkbenchSources.registerAuraSources(sources);
     }
 }

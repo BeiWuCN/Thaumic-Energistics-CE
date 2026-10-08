@@ -43,6 +43,8 @@
   "item.thaumicenergistics_ce.essentia_terminal": "源质终端",
   "item.thaumicenergistics_ce.flux_transfer_interface": "咒波传输接口",
   "item.thaumicenergistics_ce.focus_aewrench": "AE扳手核心",
+  "spell.thaumaturge.aewrench.name": "扳手",
+  "spell.thaumaturge.aewrench.desc": "可拆下AE2机器与线缆部件。",
   "item.thaumicenergistics_ce.golem_wifi_backpack": "傀儡无线背包",
   "item.thaumicenergistics_ce.knowledge_core": "知识核心",
   "item.thaumicenergistics_ce.knowledge_core.cost": "消耗 %svis（%s）",

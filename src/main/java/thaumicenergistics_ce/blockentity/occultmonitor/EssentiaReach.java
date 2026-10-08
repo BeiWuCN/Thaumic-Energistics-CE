@@ -15,7 +15,7 @@ import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Recipe;
 
 /**
  * 房间能不能为仪式付账：祭坛周围的容器，以及每个仪式要素的进展。
- * 可用量问 [IAspectSource.containerContains]，它会把我们的供应器算进去。
+ * 可用量问 [IAspectSource.amountOf]，它会把我们的供应器算进去。
  * 容器列表带缓存，空结果也缓存：「范围内什么都没有」是常见情况。
  */
 final class EssentiaReach {
@@ -35,14 +35,14 @@ final class EssentiaReach {
         this.monitor = monitor;
     }
 
-    /** 祭坛是否够不到仪式仍然需要的要素，问 {@code IAspectSource.containerContains}；
+    /** 祭坛是否够不到仪式仍然需要的要素，问 {@code IAspectSource.amountOf}；
      * 数 {@code getAspects} 会漏掉我们的供应器。 */
     boolean shortOf(BlockPos matrixPos, @Nullable AspectList remaining) {
         Level level = monitor.getLevel();
         if (remaining == null || remaining.isEmpty() || level == null) {
             return false;
         }
-        // 在这里解析一次，不按（要素，来源）逐个解析：[containerContains] 会遍历 ME 网络。
+        // 在这里解析一次，不按（要素，来源）逐个解析：[amountOf] 会遍历 ME 网络。
         List<IAspectSource> sources = new ArrayList<>(sourcesAround(matrixPos).size());
         for (BlockPos sourcePos : sourcesAround(matrixPos)) {
             if (level.getCapability(AspectCapabilities.CONTAINER, sourcePos, null)
@@ -57,7 +57,7 @@ final class EssentiaReach {
             }
             int reachable = 0;
             for (var source : sources) {
-                reachable += source.containerContains(entry.aspect());
+                reachable += source.amountOf(entry.aspect());
                 if (reachable >= entry.amount()) {
                     // 够了：剩下的再问也没意义。
                     break;

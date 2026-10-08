@@ -43,6 +43,8 @@
   "item.thaumicenergistics_ce.essentia_terminal": "Essentia Terminal",
   "item.thaumicenergistics_ce.flux_transfer_interface": "Flux Transfer Interface",
   "item.thaumicenergistics_ce.focus_aewrench": "Focus of the AE Wrench",
+  "spell.thaumaturge.aewrench.name": "Wrench",
+  "spell.thaumaturge.aewrench.desc": "Takes AE2 machines and cable parts apart.",
   "item.thaumicenergistics_ce.golem_wifi_backpack": "Golem Wireless Backpack",
   "item.thaumicenergistics_ce.knowledge_core": "Knowledge Core",
   "item.thaumicenergistics_ce.knowledge_core.cost": "Costs %s vis (%s)",

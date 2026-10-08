@@ -23,7 +23,7 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 /**
  * 注魔供应器：让注魔祭坛直接从 ME 网络抽源质。
  * 没有缓冲：方块是网络的一扇窗，不是罐子；{@link #getAspects()} 答空，管道就不会把它当容器抽。
- * 经 {@link #takeFromContainer} 的取出是全有或全无：部分取出放回去并报失败。
+ * 经 {@link #drain} 的取出是全有或全无：部分取出放回去并报失败。
  */
 public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implements IAspectSource {
 
@@ -50,17 +50,17 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
     }
 
     @Override
-    public boolean doesContainerAccept(Holder<IAspect> aspect) {
+    public boolean accepts(Holder<IAspect> aspect) {
         return false;
     }
 
     @Override
-    public int addToContainer(Holder<IAspect> aspect, int amount) {
+    public int fill(Holder<IAspect> aspect, int amount) {
         return amount;
     }
 
     @Override
-    public boolean takeFromContainer(Holder<IAspect> aspect, int amount) {
+    public boolean drain(Holder<IAspect> aspect, int amount) {
         if (aspect == null || amount <= 0 || !getMainNode().isActive()) {
             return false;
         }
@@ -89,16 +89,12 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
         return true;
     }
 
+    /**
+     * 覆写而不是吃默认实现，默认实现读 {@link #getAspects()}：那个方法故意答空，
+     * 好让管道不把这个方块当罐子抽；默认实现读它就会向祭坛自己的搜索报零。
+     */
     @Override
-    public boolean doesContainerContainAmount(Holder<IAspect> aspect, int amount) {
-        if (aspect == null || amount <= 0 || !getMainNode().isActive()) {
-            return false;
-        }
-        return containerContains(aspect) >= amount;
-    }
-
-    @Override
-    public int containerContains(Holder<IAspect> aspect) {
+    public int amountOf(Holder<IAspect> aspect) {
         if (aspect == null || !getMainNode().isActive()) {
             return 0;
         }

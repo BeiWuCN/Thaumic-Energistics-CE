@@ -68,7 +68,7 @@ public final class GolemWirelessLink {
 
     /**
      * 把物品堆里网络愿收的那部分放进去，并按该数量缩减这个堆。安全，
-     * 因 {@code getCarrying()} 交出的是傀儡正在用的活物品堆，调用方会被就地缩减。
+     * 因 {@code hands().contents()} 交出的是傀儡正在用的活物品堆，调用方会被就地缩减。
      * @return 被收下的物品数；网络满或没电为 0。
      */
     public long insert(ItemStack stack, int limit) {
@@ -84,7 +84,7 @@ public final class GolemWirelessLink {
     }
 
     public static int itemRate(EntityThaumaturgeGolem golem) {
-        int rank = Math.max(0, Math.min(ITEM_RATES.length - 1, golem.getProperties().getRank()));
+        int rank = Math.max(0, Math.min(ITEM_RATES.length - 1, golem.properties().rank()));
         return ITEM_RATES[rank];
     }
 

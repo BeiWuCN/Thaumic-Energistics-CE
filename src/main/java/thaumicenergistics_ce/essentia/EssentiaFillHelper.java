@@ -8,7 +8,8 @@ import appeng.api.storage.StorageHelper;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaContainerItem;
+import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
+import com.leclowndu93150.thaumaturge.api.essentia.IItemEssentia;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.Holder;
@@ -27,7 +28,7 @@ import thaumicenergistics_ce.util.ThELog;
  * 在容器物品与 ME 网络之间搬源质，移植自参考构建的 {@code EssentiaFillHelper}。
  * 先模拟后执行，部分拒绝就回滚，缩小前先复制：防复制也防丢失。
  * 瓶子整瓶填（{@code TcRegistry.phialCapacity()}）或完全不填；罐子按网络允许的量填，不被消耗。
- * 标签、水晶、魔力豆也是 {@code IEssentiaContainerItem}，{@link #isSupportedContainer} 是唯一的闸门。
+ * 标签、水晶、魔力豆也报源质容器能力，{@link #isSupportedContainer} 是唯一的闸门。
  */
 public final class EssentiaFillHelper {
 
@@ -38,7 +39,7 @@ public final class EssentiaFillHelper {
 
     public static final int PHIAL_CAPACITY = TcRegistry.phialCapacity();
 
-    /** 不走 {@code instanceof IEssentiaContainerItem}：标签、水晶、魔力豆填不了。 */
+    /** 不走源质容器能力：标签、水晶、魔力豆填不了。 */
     public static boolean isSupportedContainer(ItemStack stack) {
         return TcRegistry.isEssentiaContainer(stack);
     }
@@ -113,7 +114,8 @@ public final class EssentiaFillHelper {
             return true;
         }
 
-        if (!(carried.getItem() instanceof IEssentiaContainerItem container)) {
+        IItemEssentia container = carried.getCapability(EssentiaCapabilities.CONTAINER);
+        if (container == null) {
             return false;
         }
         long wanted = Math.min(available, JAR_CAPACITY);
@@ -133,8 +135,15 @@ public final class EssentiaFillHelper {
         // 手牌堆缩小之前先复制。数量为 1 时 [shrink] 留下空堆单例，
         // [copy()] 会把 [EMPTY] 本身交回来，毁掉这个共享常量。
         ItemStack filled = carried.copyWithCount(1);
+        // 能力是一份绑定到「被问的那个堆」的视图，副本得有自己的；
+        // 而且要在手牌堆缩小之前取到：取不到时源质还能退回网络，之后就只能白丢。
+        IItemEssentia filledView = filled.getCapability(EssentiaCapabilities.CONTAINER);
+        if (filledView == null) {
+            storage.insert(key, taken, Actionable.MODULATE, source);
+            return false;
+        }
         carried.shrink(1);
-        container.setAspects(filled, AspectList.of(new AspectInstance(aspect, (int) taken)));
+        filledView.setAspects(AspectList.of(new AspectInstance(aspect, (int) taken)));
         give(player, filled);
         log("fill {} ok: {} of {} into a jar", aspectId, taken, available);
         return true;
@@ -185,14 +194,15 @@ public final class EssentiaFillHelper {
         if (!isSupportedContainer(stack)) {
             return null;
         }
-        if (!(stack.getItem() instanceof IEssentiaContainerItem container)) {
+        IItemEssentia container = stack.getCapability(EssentiaCapabilities.CONTAINER);
+        if (container == null) {
             return null;
         }
         int count = stack.getCount();
         if (count <= 0) {
             return stack;
         }
-        AspectList aspects = container.getAspects(stack);
+        AspectList aspects = container.getAspects();
         if (aspects == null || aspects.isEmpty()) {
             return stack;
         }
@@ -256,8 +266,9 @@ public final class EssentiaFillHelper {
     }
 
     private static @Nullable AspectList contents(ItemStack stack) {
-        if (stack.getItem() instanceof IEssentiaContainerItem container) {
-            AspectList aspects = container.getAspects(stack);
+        IItemEssentia container = stack.getCapability(EssentiaCapabilities.CONTAINER);
+        if (container != null) {
+            AspectList aspects = container.getAspects();
             if (aspects != null && !aspects.isEmpty()) {
                 return aspects;
             }

@@ -24,11 +24,11 @@ public final class TcArcanePayment {
      * [TerminalCrystalPayment] 原样用规划器给的灵气价，套上它同一场合成会凭空贵四分之一。
      */
     public static int auraVisForCrystals(IArcaneRecipe recipe, Player player) {
-        if (recipe.getBaseVis() <= 0) {
+        if (recipe.visCost() <= 0) {
             return 0;
         }
         float modifier = WandEconomy.CRAFT_AURA_SURCHARGE * gearModifier(player);
-        return Math.max(1, Mth.ceil(recipe.getBaseVis() * modifier));
+        return Math.max(1, Mth.ceil(recipe.visCost() * modifier));
     }
 
     private static float gearModifier(Player player) {

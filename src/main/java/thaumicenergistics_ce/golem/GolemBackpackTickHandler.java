@@ -87,7 +87,7 @@ public final class GolemBackpackTickHandler {
             return;
         }
         int rate = GolemWirelessLink.itemRate(golem);
-        for (ItemStack carried : golem.getCarrying()) {
+        for (ItemStack carried : golem.hands().contents()) {
             if (carried.isEmpty()) {
                 continue;
             }
@@ -111,7 +111,7 @@ public final class GolemBackpackTickHandler {
     }
 
     private static void traceErrand(EntityThaumaturgeGolem golem) {
-        if (!GolemBackpackHandler.TRACE || golem.getCarrying().isEmpty()) {
+        if (!GolemBackpackHandler.TRACE || golem.hands().contents().isEmpty()) {
             return;
         }
         long now = golem.level().getGameTime();

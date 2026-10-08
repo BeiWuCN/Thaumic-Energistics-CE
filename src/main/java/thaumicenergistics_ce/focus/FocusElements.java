@@ -1,33 +1,35 @@
 package thaumicenergistics_ce.focus;
 
-import com.leclowndu93150.thaumaturge.api.casters.FocusElementType;
+import com.leclowndu93150.thaumaturge.TTIds;
+import com.leclowndu93150.thaumaturge.api.spell.behavior.SpellBehaviorType;
+import com.leclowndu93150.thaumaturge.api.spell.part.SpellPart;
+import com.leclowndu93150.thaumaturge.api.spell.part.SpellPartKind;
+import com.leclowndu93150.thaumaturge.registry.TTSpellBehaviors;
+import net.minecraft.resources.ResourceKey;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import thaumicenergistics_ce.ThEIds;
 
 /**
- * 从本 mod 视角看到的 Thaumaturge 核心元素注册表。
- * {@code FocusElementType} 是 NeoForge 注册表，自行针对同一个 {@code REGISTRY_KEY}
- * 注册 {@link DeferredRegister} 就行，没有附加 mod 钩子，也没有可混入之处。
- * Thaumaturge 会在任何附加 mod 的构造函数运行之前把它绑定进 {@code FocusEngine}。
+ * 从本 mod 视角看到的 Thaumaturge 法术注册表。
+ * 行为类型直接注册进 Thaumaturge 自己的 {@code TTSpellBehaviors.BEHAVIORS}，
+ * 没有附加 mod 钩子，也没有可混入之处。
+ * 法术部件是 JSON 描述的，见 {@code thaumaturge/spell_part/aewrench.json}。
  */
 public final class FocusElements {
 
-    public static final DeferredRegister<FocusElementType> REGISTRY =
-            DeferredRegister.create(FocusElementType.REGISTRY_KEY, ThEIds.MODID);
+    /** 扳手行为，路径与法术部件相同，免得两者走岔。 */
+    public static final DeferredHolder<SpellBehaviorType<?>, SpellBehaviorType<FocusEffectAEWrench>>
+            AEWRENCH_BEHAVIOR = TTSpellBehaviors.BEHAVIORS.register(
+                    FocusEffectAEWrench.KEY.getPath(),
+                    () -> new SpellBehaviorType<>(SpellPartKind.EFFECT, FocusEffectAEWrench.CODEC));
 
-    /** 研究页面会直接 blit {@code icon}，文件得是 {@code .png}； */
-    public static final DeferredHolder<FocusElementType, FocusElementType> AEWRENCH = REGISTRY.register(
-            FocusEffectAEWrench.KEY.getPath(),
-            () -> new FocusElementType(
-                    new FocusEffectAEWrench(),
-                    ThEIds.id("textures/foci/aewrench.png"),
-                    0x4FC3F7));
+    /** 与行为配对的法术部件，由 {@code thaumaturge/spell_part/aewrench.json} 提供。 */
+    public static final ResourceKey<SpellPart> AEWRENCH =
+            ResourceKey.create(SpellPart.REGISTRY_KEY, TTIds.rl(FocusEffectAEWrench.KEY.getPath()));
 
     private FocusElements() {}
 
-    public static void register(IEventBus modBus) {
-        REGISTRY.register(modBus);
-    }
+    /** 上面几项进的是 Thaumaturge 自己的注册表，这个总线没东西可交。
+     * 留着它是因为要调用它才会跑本类的静态初始化，而那必须早于数据包解析 spell_part。 */
+    public static void register(IEventBus modBus) {}
 }

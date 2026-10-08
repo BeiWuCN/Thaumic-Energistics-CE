@@ -89,8 +89,8 @@ final class ArcanePatternLookup {
                 layout.ingredients(),
                 layout.width(),
                 layout.height(),
-                recipe.getCrystals(),
-                recipe.getBaseVis(),
+                recipe.crystalCost(),
+                recipe.visCost(),
                 gate == null ? null : gate.entry(),
                 gate == null ? null : gate.stage().orElse(null),
                 gridTags(layout));

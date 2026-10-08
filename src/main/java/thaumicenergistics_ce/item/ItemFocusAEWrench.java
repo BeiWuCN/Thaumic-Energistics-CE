@@ -1,10 +1,10 @@
 package thaumicenergistics_ce.item;
 
-import com.leclowndu93150.thaumaturge.api.casters.FocusEngine;
-import com.leclowndu93150.thaumaturge.api.casters.FocusPackage;
-import com.leclowndu93150.thaumaturge.api.casters.FocusSettings;
-import com.leclowndu93150.thaumaturge.content.casters.ItemFocus;
-import net.minecraft.resources.ResourceLocation;
+import com.leclowndu93150.thaumaturge.api.spell.CastStyle;
+import com.leclowndu93150.thaumaturge.api.spell.Spell;
+import com.leclowndu93150.thaumaturge.api.spell.SpellNode;
+import com.leclowndu93150.thaumaturge.api.spell.Spells;
+import com.leclowndu93150.thaumaturge.content.spell.item.FocusItem;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -16,55 +16,48 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import thaumicenergistics_ce.compat.thaumaturge.TcWand;
 import thaumicenergistics_ce.focus.FocusEffectAEWrench;
+import thaumicenergistics_ce.focus.FocusElements;
 
 /**
  * AE2 扳手当法杖核心用；这是物品那一半，{@link FocusEffectAEWrench} 是行为那一半。
- * 包写在物品堆上，不在操纵器处构建：{@link #assemble} 每个 tick 都会装一次。
+ * 法术写在物品堆的数据组件上，不在操纵器处构建：{@link #assemble} 每个 tick 都会装一次。
  * 不能从 {@code getDefaultInstance} 装：它返回 {@code new ItemStack(this)}，
  * 该构造器复制物品堆的组件，写在它上面的组件永远到不了调用方。
  */
-public class ItemFocusAEWrench extends ItemFocus {
+public class ItemFocusAEWrench extends FocusItem {
 
-    /** 每次法杖施法都从根介质开始：没有它 {@code CastExecutor} 没有目标，
-     * 施法什么都不做，却照样扣 vis。 */
-    private static final ResourceLocation ROOT = ResourceLocation.fromNamespaceAndPath("thaumaturge", "root");
+    /** 部件的复杂度，写在 {@code spell_part/aewrench.json} 里；两处必须同步。 */
+    private static final int COMPLEXITY = 10;
 
-    /** 组装好的包：先根介质，再扳手效果。每次调用都新建，它是不变 record；
-     * {@code complexity} 要显式设，构建器默认给 0。 */
-    public static FocusPackage wrenchPackage() {
-        int complexity = rootComplexity() + new FocusEffectAEWrench().complexity(FocusSettings.empty());
-        return FocusPackage.builder()
-                .add(ROOT)
-                .add(FocusEffectAEWrench.KEY)
-                .complexity(complexity)
-                .build();
+    /** Thaumaturge 每点复杂度的 vis 价，也就是旧的「复杂度除以五」那条规则。 */
+    private static final float VIS_PER_COMPLEXITY = 0.2F;
+
+    /** 写进去的法术：每次施法都从原点起，接着是扳手效果。它是不可变记录，每次调用现建。 */
+    public static Spell wrenchSpell() {
+        return new Spell(CastStyle.INSTANT,
+                SpellNode.of(Spell.ORIGIN).then(SpellNode.of(FocusElements.AEWRENCH)));
     }
 
-    /** 根介质自己的复杂度，从注册表读，跟真实要素不会脱节。 */
-    private static int rootComplexity() {
-        var element = FocusEngine.element(ROOT);
-        return element == null ? 0 : element.complexity(FocusSettings.defaults(element));
-    }
-
-    /** 一次扳手使用的代价：包复杂度除以五，即 Thaumaturge 对核心的规则（{@code ItemFocus.getVisCost}）。
-     * {@link FocusEffectAEWrench} 在扳手动作之后收它；{@link #getVisCost} 说明法杖自身的收费为零。 */
+    /** 一次扳手使用的代价，按部件复杂度算：10 乘以 0.2 得 2.0。
+     * 这是给潜行左键那次“转方块”看的价，右键施法的收费由法术本身走法杖的正常路径扣，
+     * 与这里无关；法杖自身的收费为零，不再单独扣一次。 */
     public static float visCost() {
-        return wrenchPackage().complexity() / 5.0F;
+        return COMPLEXITY * VIS_PER_COMPLEXITY;
     }
 
-    /** 把包写进还没有包的物品堆，这是唯一设置包的位置。
+    /** 把法术写进还没有法术的物品堆，这是唯一设置法术的位置。
      * 幂等，调用方不用管物品堆有没有过这里。
-     * @return 这次写入了就是 true；已有包或为空是 false
+     * @return 这次写入了就是 true；已有法术或为空是 false
      */
     public static boolean assemble(ItemStack stack) {
-        if (stack.isEmpty() || ItemFocus.getPackage(stack) != null) {
+        if (stack.isEmpty() || Spells.spellOf(stack) != null) {
             return false;
         }
-        ItemFocus.setPackage(stack, wrenchPackage());
+        Spells.setSpell(stack, wrenchSpell());
         return true;
     }
 
-    /** 一个写好包的物品堆，给挂不上 tick 组装的调用方（创造模式标签页）。 */
+    /** 一个已写好法术的物品堆，给挂不上 tick 组装的调用方（创造模式标签页）。 */
     public static ItemStack assembledStack() {
         ItemStack stack = new ItemStack(thaumicenergistics_ce.init.ModItems.FOCUS_AEWRENCH.get());
         assemble(stack);
@@ -72,16 +65,12 @@ public class ItemFocusAEWrench extends ItemFocus {
     }
 
     public ItemFocusAEWrench(Item.Properties properties) {
-        super(properties, 0);
-    }
-
-    @Override
-    public float getVisCost(ItemStack focusStack) {
-        return 0.0F;
+        super(properties);
     }
 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
+        // 这里也要做，不能只靠 tick：直接来自配方结果的物品堆从没被 tick 过。
         if (!level.isClientSide()) {
             assemble(stack);
         }
