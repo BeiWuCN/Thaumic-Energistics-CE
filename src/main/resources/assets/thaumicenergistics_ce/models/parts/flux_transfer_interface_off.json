@@ -2,7 +2,8 @@
 	"format_version": "1.21.6",
 	"credit": "Made with _leng",
 	"textures": {
-		"indicator": "ae2:part/monitor_sides_status_off"
+		"indicator": "ae2:part/monitor_sides_status_off",
+		"particle": "#indicator"
 	},
 	"elements": [
 		{
