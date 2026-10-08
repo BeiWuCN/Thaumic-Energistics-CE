@@ -3,11 +3,13 @@
 	"package": "thaumicenergistics_ce.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"AEBaseMenuAccessor",
 		"InterfaceLogicMixin",
 		"PatternProviderLogicMixin",
 		"PatternProviderMenuMixin"
 	],
 	"client": [
+		"AEBaseScreenAccessor",
 		"PageLineStyleMixin",
 		"PatternProviderScreenMixin"
 	],
