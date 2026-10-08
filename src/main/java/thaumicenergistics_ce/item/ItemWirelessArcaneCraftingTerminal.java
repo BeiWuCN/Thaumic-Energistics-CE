@@ -1,5 +1,6 @@
 package thaumicenergistics_ce.item;
 
+import appeng.api.ids.AEComponents;
 import appeng.api.parts.IPart;
 import appeng.api.parts.IPartHost;
 import appeng.api.parts.PartHelper;
@@ -30,8 +31,9 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * 无线奥术合成终端：一个能带走的奥术工作台，显示它所绑定的已放置终端的网格。
- * 在终端上潜行就绑定，潜行左键解除：一个状态，两个位置。
+ * 无线奥术合成终端：一个能带走的奥术工作台。工作台来自配对的已放置终端，
+ * ME 网络来自 AE2 的无线访问点链接，两件事互不干涉。
+ * 在已放置的终端上潜行就配对，潜行左键把配对和链接一起下掉。
  * vis 从玩家周围的灵气取，可携带的工作台没有方块可抽。
  */
 public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem implements ArcaneTerminalLink {
@@ -133,10 +135,21 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     /**
-     * 忘掉已配对的终端。真有一个可忘的才返回 true，
-     * 第二次清除才不会当成做了事通告给玩家。
+     * 忘掉已配对的终端，顺带把 AE2 的链接也下了：潜行左键清到底，不会留下上一个网络。
+     * 真清掉了东西才返回 true，第二次清除才不会当成做了事通告给玩家。
      */
     public static boolean unbind(ItemStack terminal) {
+        boolean cleared = clearPairing(terminal);
+        if (isLinked(terminal)) {
+            // 走 AE2 自己的解除，和访问点链接槽用的是同一段代码。
+            WirelessTerminalItem.LINKABLE_HANDLER.unlink(terminal);
+            cleared = true;
+        }
+        return cleared;
+    }
+
+    /** 只清配对那三个键，物品上别的自定义数据不碰。 */
+    private static boolean clearPairing(ItemStack terminal) {
         CompoundTag tag = bindingTag(terminal);
         if (tag == null || !tag.contains(NBT_POS)) {
             return false;
@@ -150,6 +163,11 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
             terminal.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
         }
         return true;
+    }
+
+    /** 有没有 AE2 的访问点链接，也就是终端看不看得到一张网络。 */
+    private static boolean isLinked(ItemStack terminal) {
+        return terminal.get(AEComponents.WIRELESS_LINK_TARGET) != null;
     }
 
     private static @Nullable CompoundTag bindingTag(ItemStack terminal) {

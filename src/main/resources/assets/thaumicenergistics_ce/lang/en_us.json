@@ -283,6 +283,6 @@
   "thaumicenergistics_ce.jei.transfer.pattern_too_large": "This recipe needs more input slots than the pattern encoding terminal has",
   "tooltip.thaumicenergistics_ce.wireless_arcane_crafting_terminal.paired": "Bound to the Arcane Crafting Terminal at %s, %s, %s",
   "item.thaumicenergistics_ce.wireless_arcane_crafting_terminal.paired": "Bound to the Arcane Crafting Terminal at %s, %s, %s",
-  "item.thaumicenergistics_ce.wireless_arcane_crafting_terminal.cleared": "Unbound from the Arcane Crafting Terminal",
+  "item.thaumicenergistics_ce.wireless_arcane_crafting_terminal.cleared": "Cleared the Arcane Crafting Terminal binding and the ME link",
   "gui.thaumicenergistics_ce.wireless_arcane_crafting_terminal.not_bound": "Not bound to an Arcane Crafting Terminal"
 }
