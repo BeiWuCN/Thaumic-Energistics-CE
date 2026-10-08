@@ -23,6 +23,7 @@
   "focus.thaumicenergistics_ce.aewrench.text": "Takes AE2 machines and cable parts apart.",
   "gui.thaumicenergistics_ce.ArcaneCraftingTerminal": "Arcane Crafting Terminal",
   "gui.thaumicenergistics_ce.arcane_terminal.crystal_required": "This slot only takes the %s crystal shard",
+  "gui.thaumicenergistics_ce.arcane_terminal.not_linked": "Not linked to the bound Arcane Crafting Terminal, so the wand and crystal slots stay closed",
   "gui.thaumicenergistics_ce.essentia_level_emitter": "Essentia Level Emitter",
   "gui.thaumicenergistics_ce.essentia_storage": "Essentia Container",
   "gui.thaumicenergistics_ce.essentia_terminal": "Essentia Terminal",

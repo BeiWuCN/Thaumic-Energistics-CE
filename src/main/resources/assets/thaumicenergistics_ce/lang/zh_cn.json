@@ -23,6 +23,7 @@
   "focus.thaumicenergistics_ce.aewrench.text": "可拆下AE2机器与线缆部件。",
   "gui.thaumicenergistics_ce.ArcaneCraftingTerminal": "奥术合成终端",
   "gui.thaumicenergistics_ce.arcane_terminal.crystal_required": "这个槽只收「%s」的魔力水晶碎片",
+  "gui.thaumicenergistics_ce.arcane_terminal.not_linked": "没连上已绑定的奥术合成终端，法杖和水晶暂时放不进去",
   "gui.thaumicenergistics_ce.essentia_level_emitter": "源质发信器",
   "gui.thaumicenergistics_ce.essentia_storage": "源质容器",
   "gui.thaumicenergistics_ce.essentia_terminal": "源质终端",
