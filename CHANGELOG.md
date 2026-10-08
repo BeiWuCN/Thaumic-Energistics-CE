@@ -1,3 +1,51 @@
+# TECE 2.7.3.66
+
+## 新增
+
+- 坩埚配方可以在样板编码终端里按 JEI 转移直接写成处理样板：催化剂物品占第一个输入格，配方的每个要素各占一格源质，产物是输出。要素写进样板是刻意的 —— 不告诉网络坩埚要哪几种要素，它就没东西可备
+- 样板供应器多了一个升级槽，装得下源质访问卡。AE2 只给 ME 接口配了升级 inventory，方块与线缆部件两种形态的供应器此前都没地方插卡
+- 第二个装饰娃娃：BeiWu_CN 头像
+- 研究页签的图标改为知识核心的晶体，取单帧放大到 32×32，不再是叠在一起的四帧动画
+
+## 修复
+
+- 用镐子挖机器此前什么都不掉：十三个方块里有十一个要求正确工具，而 `Tool.isCorrectForDrops` 依据的 `minecraft:mineable/pickaxe` 标签这一线从来没提供，于是任何工具都判为不正确，已经写好的战利品表形同虚设。现在挖掉会掉回机器本体
+- 振动室界面改为按贴图绘制：面板、槽位凹槽与三条仪表（燃烧火焰、能量紫条、源质浅条）都进贴图。三条读数行删掉 —— 贴图左侧只剩 61 像素、右侧 68，最长一行要约 100，数字改在仪表 tooltip 里给
+- 奥术合成终端顶行显示的原本是终端自己的名字，而网格上方的标签有线与无线都写着同一句，两个终端分不出来。顶行现在读「终端」，网格标签写各自的形态名
+- 页签图标的第一版直接指向知识核心的 16×64 动画表，画出来是四帧叠在一起；该路径没有帧处理，改为只取第一帧放大到 32×32
+
+## 其他（内部重构、构建、文档）
+
+- 坩埚那条走三个新类：配方读取不点任何 JEI 类型（专用服务端也要跑这条路），配方类型借用 Thaumaturge 的坩埚分类、与奥术工作台同一套借法（镜像会另开一页，和玩家实际看到的那一页对不上），搬运交给 AE2 自己的 `EncodingHelper`
+- 样板供应器升级槽的两处启动崩溃：`@Invoker` 只在本 mixin 的目标类里找成员，把 `setupUpgrades` 挂到 `PatternProviderMenu` 上会 `InvalidAccessorException`，访问器必须落在声明它的 `AEBaseMenu`；另外 mixin 配置声明的包里不能放可以被外部引用的普通类，否则 `IllegalClassLoadError`，混合进去的接口已移到 `integration.ae2`
+- 样板供应器的注入描述符检查器扩到 12 条并加了两条规则（访问器必须声明在同一目标类、mixin 包内不得留可被引用的普通类）；`runData` 现在作为启动自检跑一遍完整的 mixin 加载，上面两次崩溃它都能提前抓到
+
+---
+
+# TECE 2.7.3.66
+
+## Additions
+
+- Crucible recipes can be written into a processing pattern straight from JEI in the pattern encoding terminal: the catalyst takes the first input slot, each of the recipe's aspects takes one essentia slot, and the result is the single output. The aspects go in on purpose - a network that is not told which aspects the crucible wants has nothing to stock
+- The pattern provider gained a slot for the essentia access card. AE2 gives the ME Interface an upgrade inventory and left the pattern provider with none, so neither the block nor the cable part had anywhere to put the card
+- A second decorative doll: the BeiWu_CN figure
+- The research tab icon is now the knowledge core's crystal, one frame doubled to 32x32 rather than four animation frames drawn on top of each other
+
+## Fixes
+
+- Breaking a machine with a pickaxe dropped nothing. Eleven of the thirteen blocks require the correct tool, and `Tool.isCorrectForDrops` reads `minecraft:mineable/pickaxe`, which this line never shipped, so no tool counted as correct and every loot table was dead weight. The machines drop themselves now
+- The vibration chamber screen is drawn from its texture now: the panel, the slot wells and all three gauges (flames for burn, a purple bar for energy, a pale bar for essentia). The three readout lines are gone - the art leaves 61 pixels on the left and 68 on the right while the longest line needs about 100 - so the numbers live in the gauge tooltips
+- The arcane terminal's top line showed the terminal's own name while the label above the crafting grid said the same thing on both the wired and the wireless terminal, which made the two indistinguishable. The top line reads "Terminal" now and the grid label carries the terminal's own name
+- The first version of the tab icon pointed at the whole 16x64 knowledge core sheet, so its four animation frames stacked; that path has no frame handling, so the icon takes the first frame only
+
+## Other (internal refactors, build, documentation)
+
+- The crucible feature is three new classes: reading the recipe names no JEI type (the dedicated server runs that path too), the recipe type is borrowed from Thaumaturge's crucible category the way the workbench's is (a mirror would open a second page that does not match the one the player sees), and the transfer is handed to AE2's own `EncodingHelper`
+- Two startup crashes inside the pattern provider's upgrade slot: `@Invoker` only looks in the mixin's own target class, so putting `setupUpgrades` on `PatternProviderMenu` throws `InvalidAccessorException` and the accessor has to sit on `AEBaseMenu`, which declares it; and a plain class cannot live in a package the mixin config declares, or it fails with `IllegalClassLoadError`, so the mixed-in interface moved to `integration.ae2`
+- The pattern provider's injection descriptor checker covers 12 descriptors and grew two rules (every accessor must be declared in the same target class; no referencable plain class may be left inside the mixin package). `runData` now loads the whole mod's mixins as a startup self-check - it would have caught both crashes before anyone launched a client
+
+---
+
 # TECE 2.7.3.65
 
 ## 新增
