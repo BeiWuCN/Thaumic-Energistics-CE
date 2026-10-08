@@ -1,0 +1,21 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "_note": "The Infusion Provider. One step above the Alchemy Provider - a coalescence core instead of a diffusion core, since its whole job is to present the network to an Infusion Altar as something the altar can draw from, and a salis mundus binding the two halves. 50 vis: the 1.12.2 tree puts it behind the buses and the altar itself.",
+  "crystals": [],
+  "key": {
+    "S": "thaumaturge:salis_mundus",
+    "T": "thaumaturge:ingot_thaumium",
+    "C": "thaumicenergistics_ce:coalescence_core",
+    "P": "thaumicenergistics_ce:alchemy_provider"
+  },
+  "pattern": [
+    "TST",
+    "SCS",
+    "TPT"
+  ],
+  "vis": 50,
+  "result": {
+    "id": "thaumicenergistics_ce:infusion_provider",
+    "count": 1
+  }
+}

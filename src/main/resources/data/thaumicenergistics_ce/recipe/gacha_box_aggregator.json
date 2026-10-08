@@ -1,0 +1,50 @@
+{
+    "type":  "thaumaturge:infusion",
+    "catalyst":  "thaumaturge:stone_arcane_brick",
+    "components":  [
+                       {
+                           "neoforge:ingredient_type":  "neoforge:components",
+                           "items":  "thaumaturge:essentia_crystal",
+                           "components":  {
+                                              "thaumaturge:crystal_aspect":  {
+                                                                                 "aspect":  "thaumaturge:ordo"
+                                                                             }
+                                          }
+                       },
+                       "thaumaturge:ingot_thaumium",
+                       "thaumaturge:ingot_thaumium",
+                       "thaumaturge:nugget_quicksilver",
+                       "thaumaturge:nugget_quicksilver",
+                       "thaumaturge:salis_mundus"
+                   ],
+    "aspects":  [
+                    {
+                        "aspect":  "thaumaturge:ordo",
+                        "amount":  16
+                    },
+                    {
+                        "aspect":  "thaumaturge:machina",
+                        "amount":  8
+                    },
+                    {
+                        "aspect":  "thaumaturge:metallum",
+                        "amount":  8
+                    },
+                    {
+                        "aspect":  "thaumaturge:fabrico",
+                        "amount":  8
+                    },
+                    {
+                        "aspect":  "thaumaturge:praecantatio",
+                        "amount":  8
+                    }
+                ],
+    "instability":  6,
+    "research":  {
+                     "entry":  "thaumicenergistics_ce:gacha_box"
+                 },
+    "result":  {
+                   "id":  "thaumicenergistics_ce:gacha_box_aggregator",
+                   "count":  1
+               }
+}

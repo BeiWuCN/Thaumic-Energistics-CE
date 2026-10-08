@@ -1,0 +1,49 @@
+{
+  "$schema": "../schema.json",
+  "includes": ["common/common.json"],
+  "background": {
+    "texture": "thaumicenergistics_ce:textures/gui/essentia_cell_workbench.png",
+    "srcRect": [0, 0, 176, 253]
+  },
+  "slots": {
+    "STORAGE_CELL": {
+      "left": 152,
+      "top": 8
+    },
+    "CONFIG": {
+      "left": 8,
+      "top": 29,
+      "grid": "BREAK_AFTER_9COLS"
+    },
+    "PLAYER_INVENTORY": {
+      "left": 8,
+      "top": 167,
+      "grid": "BREAK_AFTER_9COLS"
+    },
+    "PLAYER_HOTBAR": {
+      "left": 8,
+      "top": 225,
+      "grid": "HORIZONTAL"
+    }
+  },
+  "text": {
+    "dialog_title": {
+      "text": {
+        "translate": "block.thaumicenergistics_ce.essentia_cell_workbench"
+      },
+      "position": {
+        "left": 8,
+        "top": 6
+      }
+    },
+    "player_inventory_title": {
+      "text": {
+        "translate": "container.inventory"
+      },
+      "position": {
+        "left": 8,
+        "top": 157
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "type": "thaumaturge:arcane_workbench_shapeless",
+  "_note": "The Wireless Binding Tool. One salis mundus to hold a coordinate, one essentia crystal to resonate with a receiver, thaumium for the handle. Cheap and shapeless, because it is a tool rather than a machine - a player needs one, not a stack - and 20 vis, so experimenting with links is not expensive.",
+  "crystals": [],
+  "ingredients": [
+    "thaumaturge:salis_mundus",
+    {
+      "neoforge:ingredient_type": "neoforge:components",
+      "items": "thaumaturge:essentia_crystal",
+      "components": {
+        "thaumaturge:crystal_aspect": {
+          "aspect": "thaumaturge:auram"
+        }
+      }
+    },
+    "thaumaturge:ingot_thaumium"
+  ],
+  "vis": 20,
+  "result": {
+    "id": "thaumicenergistics_ce:wireless_connector",
+    "count": 1
+  }
+}

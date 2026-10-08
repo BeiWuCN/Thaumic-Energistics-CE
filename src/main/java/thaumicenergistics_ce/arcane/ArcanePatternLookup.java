@@ -1,0 +1,322 @@
+package thaumicenergistics_ce.arcane;
+
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.util.context.ContextMap;
+import com.leclowndu93150.thaumaturge.api.recipe.IArcaneRecipe;
+import com.leclowndu93150.thaumaturge.api.recipe.ResearchGate;
+import com.leclowndu93150.thaumaturge.content.recipe.workbench.ArcaneShapedCraftingRecipe;
+import com.leclowndu93150.thaumaturge.content.recipe.workbench.ArcaneShapelessCraftingRecipe;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * 把实时奥术配方变成样板：按产物、按已编码的样板、或按手工填好的网格。
+ * 样板只存具体的显示物品堆，背后的配方每次重载都要重查。
+ */
+final class ArcanePatternLookup {
+
+    private ArcanePatternLookup() {}
+
+    /**
+     * 把产出 {@code result} 的奥术配方转成样板；没有配方产出这个精确物品堆时返回 {@code null}。
+     */
+    static @Nullable ThEArcanePattern fromResult(@Nullable Level level, ItemStack result) {
+        if (level == null || result.isEmpty()) {
+            return null;
+        }
+        ContextMap context = SlotDisplayContext.fromLevel(level);
+        for (RecipeHolder<?> holder : level.getServer().getRecipeManager().getRecipes()) {
+            if (!(holder.value() instanceof IArcaneRecipe arcane)) {
+                continue;
+            }
+            ItemStack output = outputOf(arcane, context);
+            if (output.isEmpty() || !ItemStack.isSameItemSameComponents(output, result)) {
+                continue;
+            }
+            ThEArcanePattern pattern = fromRecipe(arcane, output);
+            if (pattern != null) {
+                return pattern;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 拿样板声称编码的奥术配方校验玩家编码的 [AE2] 样板。
+     * @return 样板；没有奥术配方匹配时为 {@code null}
+     */
+    static @Nullable ThEArcanePattern fromEncoded(
+            @Nullable Level level, List<ItemStack> patternInputs, ItemStack output) {
+        if (level == null || output.isEmpty()) {
+            return null;
+        }
+        ContextMap context = SlotDisplayContext.fromLevel(level);
+        for (RecipeHolder<?> holder : level.getServer().getRecipeManager().getRecipes()) {
+            if (!(holder.value() instanceof IArcaneRecipe arcane)) {
+                continue;
+            }
+            ItemStack recipeOutput = outputOf(arcane, context);
+            if (recipeOutput.isEmpty() || !ItemStack.isSameItemSameComponents(recipeOutput, output)) {
+                continue;
+            }
+            ThEArcanePattern pattern = fromRecipe(arcane, recipeOutput);
+            if (pattern != null && pattern.acceptsInputs(patternInputs)) {
+                return pattern;
+            }
+        }
+        return null;
+    }
+
+    static @Nullable ThEArcanePattern fromRecipe(IArcaneRecipe recipe, ItemStack output) {
+        Layout layout = layoutOf(recipe);
+        if (layout == null || layout.cells().isEmpty()) {
+            return null;
+        }
+        ResearchGate gate = recipe.researchGate().orElse(null);
+        return new ThEArcanePattern(
+                output,
+                layout.cells(),
+                layout.ingredients(),
+                layout.width(),
+                layout.height(),
+                recipe.crystalCost(),
+                recipe.visCost(),
+                gate == null ? null : gate.entry(),
+                gate == null ? null : gate.stage().orElse(null),
+                gridTags(layout));
+    }
+
+    /**
+     * 查明手工填好的 3x3 网格代表哪个奥术配方。
+     * @return 样板；没有配方对上这个网格时为 {@code null}
+     */
+    static @Nullable ThEArcanePattern resolveGrid(@Nullable Level level, List<ItemStack> cells) {
+        if (level == null || cells.size() != ThEArcanePattern.MAX_GRID) {
+            return null;
+        }
+        RecipeManager manager = level.getServer().getRecipeManager();
+        ArcaneRecipeIndex.index(manager);
+        ContextMap context = SlotDisplayContext.fromLevel(level);
+
+        // 按物品取交集，只有收得下全部现有物品的配方留下。索引里
+        // 查不到的物品（索引由默认物品堆建）走全量扫描，不丢配方。
+        Set<ResourceKey<Recipe<?>>> candidates = null;
+        for (ItemStack cell : cells) {
+            if (cell.isEmpty()) {
+                continue;
+            }
+            Set<ResourceKey<Recipe<?>>> accepting = ArcaneRecipeIndex.accepting(cell.getItem());
+            if (accepting == null) {
+                candidates = null;
+                break;
+            }
+            if (candidates == null) {
+                candidates = new HashSet<>(accepting);
+            } else {
+                candidates.retainAll(accepting);
+            }
+            if (candidates.isEmpty()) {
+                return null;
+            }
+        }
+
+        for (RecipeHolder<?> holder : manager.getRecipes()) {
+            if (!(holder.value() instanceof IArcaneRecipe arcane)) {
+                continue;
+            }
+            if (candidates != null && !candidates.contains(holder.id())) {
+                continue;
+            }
+            if (!ArcaneGridMatcher.satisfiesGrid(arcane, cells, level)) {
+                continue;
+            }
+            ItemStack output = outputOf(arcane, context);
+            if (output.isEmpty()) {
+                continue;
+            }
+            ThEArcanePattern pattern = fromRecipe(arcane, output);
+            if (pattern != null) {
+                return pattern;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 解析外部传进来的样板（[AE2] 编码终端或样板供应器）：它的条目是具体物品堆，按成员关系匹配，不逐格比。
+     * @return 样板；没有配方同时对上产物与输入时为 {@code null}
+     */
+    static @Nullable ThEArcanePattern resolve(
+            @Nullable Level level, List<ItemStack> inputs, ItemStack output) {
+        if (level == null || output.isEmpty() || inputs.isEmpty()) {
+            return null;
+        }
+        ContextMap context = SlotDisplayContext.fromLevel(level);
+        for (RecipeHolder<?> holder : level.getServer().getRecipeManager().getRecipes()) {
+            if (!(holder.value() instanceof IArcaneRecipe arcane)) {
+                continue;
+            }
+            ItemStack recipeOutput = outputOf(arcane, context);
+            if (recipeOutput.isEmpty() || !ItemStack.isSameItemSameComponents(recipeOutput, output)) {
+                continue;
+            }
+            ThEArcanePattern pattern = fromRecipe(arcane, recipeOutput);
+            if (pattern != null && pattern.acceptsInputs(inputs)) {
+                return pattern;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 配方产出的物品堆：{@code Recipe} 已经没有取产物的方法了，产物由
+     * {@link RecipeDisplay} 携带，必须用上下文解析；而只有用注册表
+     * 解析出来的显示，才能把标签产物变成物品堆。
+     */
+    private static ItemStack outputOf(IArcaneRecipe recipe, ContextMap context) {
+        for (RecipeDisplay display : recipe.display()) {
+            ItemStack stack = display.result().resolveForFirstStack(context);
+            if (!stack.isEmpty()) {
+                return stack;
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private record Layout(List<ItemStack> cells, List<Optional<Ingredient>> ingredients, int width, int height) {}
+
+    /**
+     * 把配方的材料在 3x3 网格上一格一格摆开，所以索引 N 就是网格第 N 格。有序
+     * 配方按自己的行存材料：两格宽配方的第二行落在索引 2，不是
+     * 网格的索引 3，因此拿网格格位直接对原料索引的读法会差
+     * 配方一个步长；Thaumaturge 自己的 16 个旗帜配方就是这么读坏的。
+     * 配方没盖到的格子，和留作空隙的格子，都返回空。
+     */
+    public static List<Optional<Ingredient>> gridAlignedIngredients(IArcaneRecipe recipe) {
+        if (recipe instanceof ArcaneShapedCraftingRecipe shaped) {
+            List<Optional<Ingredient>> optional = shaped.getIngredients();
+            int width = shaped.getWidth();
+            int height = shaped.getHeight();
+            if (width < 1 || height < 1 || width > ThEArcanePattern.GRID_SIDE
+                    || height > ThEArcanePattern.GRID_SIDE || optional.size() < width * height) {
+                return List.of();
+            }
+            List<Optional<Ingredient>> ingredients = new ArrayList<>(ThEArcanePattern.MAX_GRID);
+            for (int row = 0; row < ThEArcanePattern.GRID_SIDE; row++) {
+                for (int column = 0; column < ThEArcanePattern.GRID_SIDE; column++) {
+                    boolean inside = row < height && column < width;
+                    ingredients.add(inside ? optional.get(row * width + column) : Optional.empty());
+                }
+            }
+            return ingredients;
+        }
+        if (recipe instanceof ArcaneShapelessCraftingRecipe shapeless) {
+            List<Optional<Ingredient>> ingredients =
+                    shapeless.ingredients().stream().map(Optional::of).toList();
+            if (ingredients.size() > ThEArcanePattern.MAX_GRID) {
+                return List.of();
+            }
+            List<Optional<Ingredient>> padded = new ArrayList<>(ingredients);
+            while (padded.size() < ThEArcanePattern.MAX_GRID) {
+                padded.add(Optional.empty());
+            }
+            return padded;
+        }
+        return List.of();
+    }
+
+    /**
+     * 推出奥术配方的格位布局：有序配方保留真实宽高，无序配方按阅读顺序排。
+     * 显示物品堆和网格匹配用的材料一起留下。
+     */
+    private static @Nullable Layout layoutOf(IArcaneRecipe recipe) {
+        List<Optional<Ingredient>> aligned = gridAlignedIngredients(recipe);
+        if (aligned.isEmpty()) {
+            return null;
+        }
+            // 材料按配方自己的行排，网格固定三格宽：沿用配方的步长，两格宽配方的第二行会落进网格第一行。
+        List<ItemStack> cells = new ArrayList<>(ThEArcanePattern.MAX_GRID);
+        for (Optional<Ingredient> entry : aligned) {
+            cells.add(representative(entry));
+        }
+        if (recipe instanceof ArcaneShapedCraftingRecipe shaped) {
+            return new Layout(cells, aligned, shaped.getWidth(), shaped.getHeight());
+        }
+        int width = Math.min(ThEArcanePattern.MAX_GRID, Math.max(1, aligned.size()));
+        return new Layout(cells, aligned, width, 1);
+    }
+
+    /**
+     * 每个材料取一个代表物品堆：样板只存具体物品堆，多物品材料取第一项，标签取显示物品。
+     */
+    private static ItemStack representative(Optional<Ingredient> ingredient) {
+        if (ingredient.isEmpty() || ingredient.get().isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        try {
+            ItemStack shown = ingredient.get()
+                    .display()
+                    .resolveForFirstStack(new ContextMap.Builder().create(SlotDisplayContext.CONTEXT));
+            if (!shown.isEmpty()) {
+                return shown;
+            }
+        } catch (RuntimeException e) {
+            // 需要超出物品堆才能解析的显示（标签要读注册表）落到下面
+            // 那个普通物品列表，也就是本方法原先读的东西。
+        }
+        return ingredient.get().items().findFirst()
+                .map(holder -> new ItemStack(holder.value()))
+                .orElse(ItemStack.EMPTY);
+    }
+
+    /**
+     * 材料代表的物品标签，普通物品列表返回 {@code null}：配方说的是「任意铁锭」，
+     * 写死列表第一个成员会让组装机拒收别的成员。
+     */
+    private static @Nullable TagKey<Item> tagOf(Optional<Ingredient> ingredient) {
+        if (ingredient.isEmpty() || ingredient.get().isEmpty()) {
+            return null;
+        }
+        // [Ingredient#getValues] 对非普通物品列表会抛异常，异常逃得出 [fromRecipe] 和 [resolveGrid]，
+        // 摆得正确的网格会被报成「没有配方」。
+        try {
+            return ingredient.get().getValues().unwrapKey().orElse(null);
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    /**
+     * 布局放在 3x3 网格上的材料标签：有序配方的列表压到它自己的 {@code width x height}，
+     * 跟 {@code layoutOf} 处理显示物品堆一样。
+     */
+    private static List<TagKey<Item>> gridTags(Layout layout) {
+        List<TagKey<Item>> byCell = new ArrayList<>(ThEArcanePattern.MAX_GRID);
+        for (int row = 0; row < ThEArcanePattern.GRID_SIDE; row++) {
+            for (int column = 0; column < ThEArcanePattern.GRID_SIDE; column++) {
+                int index = row * layout.width() + column;
+                boolean inside = row < layout.height() && column < layout.width();
+                if (!inside || index < 0 || index >= layout.ingredients().size()) {
+                    byCell.add(null);
+                    continue;
+                }
+                byCell.add(tagOf(layout.ingredients().get(index)));
+            }
+        }
+        return byCell;
+    }
+}

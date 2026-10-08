@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "_note": "AE2's own advanced card silhouette (data/ae2/recipe/materials/advancedcard.json) with thaumium where its gem goes and a diffusion core where its processor does: this card is the essentia half of that same upgrade, and thaumium is the machine frame this mod already builds in.",
+  "key": {
+    "a": "thaumaturge:ingot_thaumium",
+    "b": "minecraft:iron_ingot",
+    "c": "thaumicenergistics_ce:diffusion_core",
+    "d": "ae2:calculation_processor"
+  },
+  "pattern": [
+    "ab ",
+    "cdb",
+    "ab "
+  ],
+  "result": {
+    "id": "thaumicenergistics_ce:essentia_access_card",
+    "count": 1
+  }
+}

@@ -1,0 +1,87 @@
+{
+    "category":  "thaumicenergistics_ce:thaumicenergistics_ce",
+    "name":  "tc.research_name.ESSENTIASTORAGE4k",
+    "parents":  [
+                    "thaumicenergistics_ce:essentia_storage_1k"
+                ],
+    "column":  -4,
+    "row":  0,
+    "meta":  [
+                 "round"
+             ],
+    "icons":  [
+                  "thaumicenergistics_ce:storage_component_4k",
+                  "thaumicenergistics_ce:essentia_cell_4k"
+              ],
+    "stages":  [
+                   {
+                       "text":  "tc.research_text.ESSENTIASTORAGE4k.stage.1",
+                       "required_knowledge":  [
+                                                  {
+                                                      "type":  "theory",
+                                                      "category":  "thaumicenergistics_ce:thaumicenergistics_ce",
+                                                      "amount":  1
+                                                  },
+                                                  {
+                                                      "type":  "observation",
+                                                      "category":  "thaumicenergistics_ce:thaumicenergistics_ce",
+                                                      "amount":  1
+                                                  }
+                                              ],
+                       "obtain":  [
+                                      {
+                                          "items":  [
+                                                        "thaumaturge:salis_mundus"
+                                                    ],
+                                          "amount":  4
+                                      },
+                                      {
+                                          "items":  [
+                                                        "thaumicenergistics_ce:storage_component_1k"
+                                                    ],
+                                          "amount":  3
+                                      },
+                                      {
+                                          "items":  [
+                                                        "ae2:quartz_vibrant_glass"
+                                                    ],
+                                          "amount":  1
+                                      },
+                                      {
+                                          "items":  [
+                                                        "ae2:logic_processor"
+                                                    ],
+                                          "amount":  1
+                                      }
+                                  ]
+                   },
+                   {
+                       "text":  "tc.research_text.ESSENTIASTORAGE4k.stage.2",
+                       "recipes":  [
+                                       "thaumicenergistics_ce:storage_component_4k",
+                                       "thaumicenergistics_ce:essentia_cell_4k"
+                                   ],
+                       "knowledge":  [
+                                         {
+                                             "type":  "observation",
+                                             "category":  "thaumicenergistics_ce:thaumicenergistics_ce",
+                                             "amount":  1
+                                         }
+                                     ]
+                   }
+               ],
+    "note_aspects":  [
+                         {
+                             "aspect":  "thaumaturge:vacuos",
+                             "amount":  2
+                         },
+                         {
+                             "aspect":  "thaumaturge:potentia",
+                             "amount":  1
+                         },
+                         {
+                             "aspect":  "thaumaturge:vitreus",
+                             "amount":  1
+                         }
+                     ]
+}

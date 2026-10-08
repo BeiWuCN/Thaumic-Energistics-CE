@@ -1,0 +1,42 @@
+{
+    "type":  "thaumaturge:infusion",
+    "aspects":  [
+                    {
+                        "aspect":  "thaumaturge:auram",
+                        "amount":  16
+                    },
+                    {
+                        "aspect":  "thaumaturge:praecantatio",
+                        "amount":  16
+                    },
+                    {
+                        "aspect":  "thaumaturge:potentia",
+                        "amount":  8
+                    },
+                    {
+                        "aspect":  "thaumaturge:permutatio",
+                        "amount":  8
+                    }
+                ],
+    "catalyst":  "ae2:basic_card",
+    "components":  [
+                       {
+                           "neoforge:ingredient_type":  "neoforge:components",
+                           "items":  "thaumaturge:essentia_crystal",
+                           "components":  {
+                                              "thaumaturge:crystal_aspect":  {
+                                                                                 "aspect":  "thaumaturge:auram"
+                                                                             }
+                                          }
+                       },
+                       "thaumicenergistics_ce:diffusion_core",
+                       "thaumaturge:ingot_thaumium",
+                       "thaumaturge:ingot_thaumium",
+                       "thaumaturge:salis_mundus"
+                   ],
+    "instability":  3,
+    "result":  {
+                   "id":  "thaumicenergistics_ce:vis_connection_card",
+                   "count":  1
+               }
+}

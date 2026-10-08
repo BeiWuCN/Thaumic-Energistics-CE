@@ -1,0 +1,15 @@
+{
+  "type": "thaumaturge:arcane_workbench_shapeless",
+  "_note": "The wireless terminal is the placed one plus a receiver: the same workbench, reachable from the hand.",
+  "crystals": [],
+  "ingredients": [
+    "thaumicenergistics_ce:arcane_crafting_terminal",
+    "ae2:wireless_receiver",
+    "thaumaturge:salis_mundus"
+  ],
+  "vis": 50,
+  "result": {
+    "id": "thaumicenergistics_ce:wireless_arcane_crafting_terminal",
+    "count": 1
+  }
+}

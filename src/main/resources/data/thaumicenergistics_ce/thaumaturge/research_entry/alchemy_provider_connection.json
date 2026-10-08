@@ -1,0 +1,49 @@
+{
+    "category":  "thaumicenergistics_ce:thaumicenergistics_ce",
+    "name":  "tc.research_name.ALCHEMYPROVIDER.connection",
+    "parents":  [
+                    "thaumicenergistics_ce:alchemy_provider"
+                ],
+    "column":  -6,
+    "row":  -4,
+    "meta":  [
+                 "round"
+             ],
+    "icons":  [
+                  "thaumicenergistics_ce:alchemy_provider_connection"
+              ],
+    "stages":  [
+                   {
+                       "text":  "tc.research_text.ALCHEMYPROVIDER.connection.stage.1",
+                       "required_knowledge":  [
+                                                  {
+                                                      "type":  "observation",
+                                                      "category":  "thaumicenergistics_ce:thaumicenergistics_ce",
+                                                      "amount":  1
+                                                  }
+                                              ]
+                   },
+                   {
+                       "text":  "tc.research_text.ALCHEMYPROVIDER.tool.stage.1",
+                       "recipes":  [
+                                       "thaumicenergistics_ce:alchemy_provider_connection",
+                                       "thaumicenergistics_ce:wireless_connector"
+                                   ]
+                   }
+               ],
+    "note_aspects":  [
+                         {
+                             "aspect":  "thaumaturge:motus",
+                             "amount":  1
+                         },
+                         {
+                             "aspect":  "thaumaturge:permutatio",
+                             "amount":  1
+                         },
+                         {
+                             "aspect":  "thaumaturge:vitreus",
+                             "amount":  1
+                         }
+                     ],
+    "complexity":  2
+}

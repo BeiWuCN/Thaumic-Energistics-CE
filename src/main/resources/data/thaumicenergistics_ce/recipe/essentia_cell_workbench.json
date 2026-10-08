@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "_note": "The reference build's essentia_cell_workbench: AE2's own cell workbench and a 1k storage component, shapeless - any arrangement of the two. It was written as a shaped recipe with the pattern \"CW\" (which demands the component to the left of the workbench) while this note already said shapeless.",
+  "ingredients": [
+    "ae2:cell_workbench",
+    "thaumicenergistics_ce:storage_component_1k"
+  ],
+  "result": {
+    "id": "thaumicenergistics_ce:essentia_cell_workbench",
+    "count": 1
+  }
+}

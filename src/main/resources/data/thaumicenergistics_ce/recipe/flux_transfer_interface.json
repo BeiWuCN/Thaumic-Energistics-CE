@@ -1,0 +1,48 @@
+{
+    "type":  "thaumaturge:infusion",
+    "catalyst":  "ae2:interface",
+    "components":  [
+                       "thaumaturge:vis_relay",
+                       "thaumaturge:salis_mundus",
+                       "thaumaturge:salis_mundus",
+                       "thaumaturge:crystal_ordo",
+                       "thaumaturge:crystal_vitium",
+                       "ae2:annihilation_core",
+                       "minecraft:piston",
+                       "minecraft:sticky_piston"
+                   ],
+    "aspects":  [
+                    {
+                        "aspect":  "thaumaturge:aer",
+                        "amount":  24
+                    },
+                    {
+                        "aspect":  "thaumaturge:ordo",
+                        "amount":  24
+                    },
+                    {
+                        "aspect":  "thaumaturge:praecantatio",
+                        "amount":  12
+                    },
+                    {
+                        "aspect":  "thaumaturge:vacuos",
+                        "amount":  12
+                    },
+                    {
+                        "aspect":  "thaumaturge:vitium",
+                        "amount":  8
+                    },
+                    {
+                        "aspect":  "thaumaturge:machina",
+                        "amount":  8
+                    }
+                ],
+    "instability":  7,
+    "result":  {
+                   "id":  "thaumicenergistics_ce:flux_transfer_interface",
+                   "count":  1
+               },
+    "research":  {
+                     "entry":  "thaumicenergistics_ce:flux_transfer_interface"
+                 }
+}

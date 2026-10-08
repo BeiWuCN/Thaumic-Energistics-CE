@@ -1,0 +1,88 @@
+package thaumicenergistics_ce.interfaceaccess;
+
+import appeng.helpers.InterfaceLogicHost;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
+import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
+import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
+import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
+import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import org.jspecify.annotations.Nullable;
+import thaumicenergistics_ce.essentia.ThEImmediateStorage;
+
+/**
+ * 接口的某一面作为源质存储给出什么：原本的容器，或包装后能对上的管道。
+ * 从不索取物品，这就是一轮里邻居侧的全部。
+ */
+final class EssentiaNeighbour {
+
+    private EssentiaNeighbour() {}
+
+    /**
+     * 某一面给出的源质存储，没有则为 {@code null}。从不索取物品：
+     * 玩家的规则是这张卡搬运源质，不是箱子会收什么。
+     */
+    static @Nullable IEssentiaStorage at(InterfaceLogicHost host, Direction face) {
+        BlockEntity be = host.getBlockEntity();
+        if (be == null || !(be.getLevel() instanceof ServerLevel level)) {
+            return null;
+        }
+        BlockPos neighbour = be.getBlockPos().relative(face);
+        Direction from = face.getOpposite();
+        if (!level.isLoaded(neighbour)) {
+            return null;
+        }
+        // 管道回应的是 TRANSPORT 不是 STORAGE，先问它，再包装到能对上。
+        IEssentiaTransport tube = level.getCapability(EssentiaCapabilities.TRANSPORT, neighbour, from);
+        if (tube != null && tube.isConnectable(from)) {
+            return new TubeStorage(tube, from);
+        }
+        return level.getCapability(EssentiaCapabilities.STORAGE, neighbour, from);
+    }
+
+    /**
+     * 把管道读成容器。管道上的源质按面存在，没有单一仓库，一个适配器服务一个面；
+     * 对每轮都读一遍的调用方来说，它的 revision 没有用。
+     */
+    private record TubeStorage(IEssentiaTransport transport, Direction face)
+            implements IEssentiaStorage, ThEImmediateStorage {
+
+        @Override
+        public AspectList contents() {
+            Holder<IAspect> held = transport.getEssentiaType(face);
+            int amount = transport.getEssentiaAmount(face);
+            return held == null || amount <= 0 ? AspectList.EMPTY : AspectList.EMPTY.add(held, amount);
+        }
+
+        /** 立即应用：Thaumaturge 的管道 API 没有事务可以把这次变更交出去。 */
+        @Override
+        public int insert(Holder<IAspect> aspect, int amount, TransactionContext transaction) {
+            return transport.addEssentia(aspect, amount, face);
+        }
+
+        @Override
+        public int extract(Holder<IAspect> aspect, int amount, TransactionContext transaction) {
+            return transport.takeEssentia(aspect, amount, face);
+        }
+
+        @Override
+        public int previewInsert(Holder<IAspect> aspect, int amount) {
+            return transport.addEssentia(aspect, amount, face, true);
+        }
+
+        @Override
+        public int previewExtract(Holder<IAspect> aspect, int amount) {
+            return transport.takeEssentia(aspect, amount, face, true);
+        }
+
+        @Override
+        public long contentRevision() {
+            return 0;
+        }
+    }
+}

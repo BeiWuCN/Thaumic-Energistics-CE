@@ -1,0 +1,21 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "category": "misc",
+  "vis": 50,
+  "crystals": [],
+  "pattern": [
+    "QlQ",
+    "lCl",
+    "QPQ"
+  ],
+  "key": {
+    "Q": "ae2:quartz_glass",
+    "l": "minecraft:gold_ingot",
+    "C": "thaumaturge:brain",
+    "P": "ae2:calculation_processor"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:knowledge_inscriber",
+    "count": 1
+  }
+}

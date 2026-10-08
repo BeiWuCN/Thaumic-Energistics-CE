@@ -1,0 +1,53 @@
+modLoader = "javafml"
+loaderVersion = "${loader_version_range}"
+license = "${mod_license}"
+issueTrackerURL = "https://github.com/BeiWuCN/ThaumicEnergistics/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+authors = "${mod_authors}"
+description = '''${mod_description}'''
+logoFile = "icon.png"
+
+[[mixins]]
+config = "thaumicenergistics_ce.mixins.json"
+
+[[dependencies."${mod_id}"]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neo_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "thaumaturge"
+type = "required"
+# 0.2.1, not 0.4.0. Upstream's 26.1.2 line is mod_version 0.2.1, and that is the source tree this port
+# was compiled against; there is no 0.4.0 on this line to require. The old range was carried over
+# from the 1.21.1 manifest, where it matched a different Thaumaturge version numbering.
+versionRange = "[0.2.1,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "ae2"
+type = "required"
+versionRange = "[19.2.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "jade"
+type = "optional"
+versionRange = "[15.0.0,)"
+ordering = "AFTER"
+side = "BOTH"

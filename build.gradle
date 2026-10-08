@@ -1,0 +1,369 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'idea'
+    id 'net.neoforged.moddev' version '2.0.144'
+}
+
+version = mod_version
+group = mod_group_id
+base {
+    archivesName = "${mod_id}-${minecraft_version}-neoforge"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+    withSourcesJar()
+}
+
+repositories {
+    // The mod dependencies are ordinary maven coordinates, pinned to exact versions in
+    // gradle.properties. Scoped by group so this repository can never answer for anything else.
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
+    // NeoForge itself arrives through the moddev plugin, which adds maven.neoforged.net over in
+    // settings.gradle. These two cover the build plugins and the optional local mirror.
+    mavenLocal()
+    mavenCentral()
+    // JEI's NeoForge artifact lives here, not on Modrinth's maven repository - see the JEI note in
+    // gradle.properties. Named, because Gradle caches a resolved module against the repository that
+    // answered for it: an unnamed repository re-resolves from the network even when the artifact is
+    // already in the cache, which fails the moment the VPN is down.
+    maven {
+        name = 'BlameJared'
+        url = 'https://maven.blamejared.com'
+    }
+    // maven { url = '../local-maven' }
+}
+
+// ---- Self-tests: a diagnostic that must not ship --------------------------
+// They have a source set of their own, and src/main says nothing about them at all: no interface to
+// implement, no hook to call, no ServiceLoader file. The self-tests wire themselves onto the mod bus
+// with @EventBusSubscriber from inside this source set, so the jar - which packages main's output
+// alone - carries none of it and a release has nothing left to notice.
+//
+// Declared before neoForge because the mod entry below names it. A dev run reaches it through that
+// entry and not through a dependency: ModDevGradle hands a run its mods as MOD_CLASSES folders.
+//
+// The source set is declared only when the directory is there, because it is deliberately not in
+// the repository: a clone checks out the mod and nothing else, and a build that insisted on a
+// source set no clone carries would fail at configuration time. This is the switch that keeps that
+// from mattering. A working copy may keep them in either place - src/selftest, or out of the way in
+// _scratch/selftest, which is where they were moved to when they left the tracked tree.
+//
+// The two directories are named explicitly rather than left at their defaults. Pointing Java and
+// resources at src/selftest itself lists each one twice: javac tolerates that, the resource copy
+// does not - it fails the run with "Entry META-INF/services/... is a duplicate but no duplicate
+// handling strategy has been set".
+def selftestDir = ['src/selftest', '_scratch/selftest'].collect { file(it) }.find { it.isDirectory() }
+if (selftestDir != null) {
+    sourceSets {
+        selftest {
+            java.srcDirs = [new File(selftestDir, 'java')]
+            resources.srcDirs = [new File(selftestDir, 'resources')]
+        }
+    }
+    sourceSets.selftest.compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+}
+
+neoForge {
+    version = project.neo_version
+
+    // Makes Slot's position fields writable, so a screen of ours can place an AE2 fake slot - which has
+    // no coordinate parameter of its own. See src/main/resources/META-INF/accesstransformer.cfg.
+    accessTransformers.from 'src/main/resources/META-INF/accesstransformer.cfg'
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    // Declare OUR source set and nothing else. Thaumaturge needs no entry here: it reaches the run
+    // as an ordinary dependency, and ModDevGradle derives the run config from the jar it finds.
+    //
+    // This block used to also map "thaumaturge" onto sourceSets.main, which is wrong: a mod entry
+    // contributes its source set's class folders to the run, so that entry handed the loader this
+    // project's own output under Thaumaturge's name - the mod was reported loaded twice, once as
+    // ours and once as Thaumaturge's.
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+            // The self-tests are a second folder of the SAME mod, which is what puts them in a dev run:
+            // ModDevGradle hands a run its mods as MOD_CLASSES folders, not as a Java classpath, so a
+            // runtimeOnly dependency would never be seen by the loader. They wire themselves up from
+            // inside that folder - src/main names none of them. The jar packages main's output alone,
+            // so neither folder of this entry reaches a release.
+            //
+            // Only when the folder is on disk: see that source set's own note above, or this entry
+            // would name a source set that a fresh clone does not have.
+            if (selftestDir != null) {
+                sourceSet(sourceSets.selftest)
+            }
+        }
+    }
+
+    runs {
+        client {
+            client()
+            // There is no switch to run without this mod, and there cannot be one here. Both the
+            // environment variable (MOD_CLASSES) and RunModel.loadedMods were tried: the first leaves
+            // the mod's class output on the run classpath, where its neoforge.mods.toml is discovered
+            // regardless of the coordinates; the second does remove the mod, but then its datapack
+            // still loads through the pack finder while none of its items, blocks or aspect keys are
+            // ever registered. Every research entry naming one of them then fails to resolve:
+            //
+            //     Failed to parse .../research_entry/arcane_assembler.json from pack mod/thaumicenergistics
+            //     Caused by: Failed to get element thaumicenergistics_ce:essentia_terminal
+            //
+            // and the world refuses to load. A run that produces a broken world is worse than no switch.
+            // To see the mod absent, build a jar and drop it into a separate profile with no
+            // Thaumaturge - but note that Thaumaturge is a hard dependency, so the loader refuses
+            // before any of this is even reached.
+            //
+            // Quick-play into the existing dev world when asked. `MenuSelfTest` needs a player to exist -
+            // every menu takes an Inventory, and an Inventory needs one - so it skips on a dedicated server
+            // nobody has joined, which is the only way it can otherwise be run here. With this it runs on
+            // world load:
+            //
+            //     ./gradlew runClient -PquickPlay="New World"
+            //
+            // Left out by default so the plain run still stops at the title screen.
+            if (project.hasProperty('quickPlay')) {
+                programArguments.addAll '--quickPlaySingleplayer', project.property('quickPlay')
+            }
+        }
+        server {
+            server()
+            programArgument '--nogui'
+
+            // A client and a dedicated server cannot share a directory. Both used to work in `run/`,
+            // so whichever one started second died on the world lock:
+            //
+            //     java.io.IOException: another process has locked a portion of the file
+            //     [net.minecraft.server.Main/FATAL]: Failed to start the minecraft server
+            //
+            // which is indistinguishable from a real crash and wasted two runs on 2026-10-04. The
+            // server also recycles latest.log on every start, so a client run in between destroys the
+            // previous server's evidence - the Done line a gate reads to call the run a pass.
+            // Separating the two costs one line and removes the whole failure mode.
+            //
+            // The client stays in `run/`, where its world and logs already are. A gate that looks for
+            // server output now reads run/server/logs/latest.log.
+            gameDirectory.set(layout.projectDirectory.dir('run/server'))
+        }
+        // There is no `data` run here, and declaring one is what broke the IDE import. ModDevGradle 2.x
+        // registers data generation as the two platform runs `clientData` and `serverData`, both of
+        // which exist in this project already (`./gradlew runServerData`, `runClientData`). A run named
+        // `data` looks harmless - until it is declared, the IDE's project resolver runs the plugin's
+        // `prepareDataRun` for it, and that task fails the whole sync:
+        //
+        //     Execution failed for task ':prepareDataRun'.
+        //     Trying to prepare unknown run: data. Available run types: [client, clientData, serverData, gameTestServer, server, junit]
+        //
+        // The sync then aborts before a single module is written, which is what "cannot import the
+        // project" looks like from IDE-side. The block that used to sit here also passed the
+        // `--output src/generated/resources/` arguments; the plugin's own data runs already write
+        // there (`sourceSets.main.resources { srcDir 'src/generated/resources' }` below), so dropping
+        // it loses nothing but the broken run.
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+
+            // The self-tests and the trace switches are turned on by environment variables, and a forked
+            // run does not inherit the shell's. Passing them through is what makes the documented
+            //
+            //     THAUMICENERGISTICS_INSCRIBER_SELFTEST=true ./gradlew runClient -PquickPlay="New World"
+            //
+            // actually run anything: without this the variable is set in the shell, silently dropped by
+            // the fork, and every test reports nothing at all - which looks exactly like a pass.
+            //
+            // By prefix, not by a list. The list this replaces had to be extended for every new switch,
+            // and did not always get extended: the encoder self-test and the whole vis-relay switch were
+            // in the code and absent from it, so both reported nothing and that read as a pass.
+            System.getenv().each { name, value ->
+                if (name.startsWith('THAUMICENERGISTICS_')) {
+                    environment name, value
+                }
+            }
+
+            // The block above reads whatever launched Gradle. A verification run is launched by a
+            // harness that cannot set the Gradle process's environment at all, so the same switches
+            // can be named from the build instead:
+            //
+            //     ./gradlew runServer -Pselftests=all
+            //
+            // Names are the switch with its THAUMICENERGISTICS_ prefix and _SELFTEST suffix dropped,
+            // except the two the sources spell differently (VIS_RELAY_TEST, ARCANE_ESSENTIA_SELFTEST).
+            // `all` is the list below - every switch the sources read. A switch that exists in the
+            // code and is missing from this list still reports nothing, which is why it is one list
+            // and not a default: the failure mode this whole mechanism exists to remove is a run that
+            // looks green because a test never started.
+            def requested = (findProperty('selftests') ?: '').toString().trim()
+            if (!requested.isEmpty()) {
+                def everySwitch = [
+                        'INTERFACE_SELFTEST', 'MENU_SELFTEST', 'ENCODER_SELFTEST', 'INSCRIBER_SELFTEST',
+                        'GEAR_SELFTEST', 'CELLPARTITION_SELFTEST', 'ARCANE_ESSENTIA_SELFTEST',
+                        'ESSENTIA_SELFTEST', 'VIS_RELAY_TEST', 'ASSEMBLER_SELFTEST',
+                        'VIS_CONNECTION_SELFTEST', 'SYNC_SELFTEST', 'RESEARCH_SELFTEST',
+                        'RECIPE_SELFTEST', 'NETWORK_SELFTEST'
+                ]
+                def wanted = requested.equalsIgnoreCase('all')
+                        ? everySwitch
+                        : requested.split(',').collect { it.trim() }
+                wanted.each { name ->
+                    def full = name.toUpperCase().startsWith('THAUMICENERGISTICS_')
+                            ? name.toUpperCase()
+                            : 'THAUMICENERGISTICS_' + name.toUpperCase()
+                    environment full, 'true'
+                }
+            }
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+
+// ---- Thaumaturge: built by the builder, never shipped ---------------------
+// It is All Rights Reserved. Its LICENSE forbids publishing the mod or any binary built from it and
+// names "GitHub Releases on a fork" as forbidden, so this repository cannot carry the jar, and it
+// publishes no maven artifact either, so it cannot be resolved. Section 2.4 does allow building it
+// for your own use, which is what tools/fetch-thaumaturge.* does: once, from the canonical
+// repository, at the commit pinned in gradle.properties. See libs/README.md.
+def thaumaturgeJars = fileTree(dir: 'libs', include: ['thaumaturge-*.jar'])
+if (thaumaturgeJars.isEmpty()) {
+    throw new GradleException("""
+        No Thaumaturge jar in libs/.
+
+        Thaumaturge is All Rights Reserved and publishes no maven artifact, so it cannot be
+        downloaded for you - every builder compiles it from the canonical repository themselves.
+        Run one of these once and it will be there:
+
+            tools/fetch-thaumaturge.sh                      (Linux, macOS, CI)
+            powershell -File tools/fetch-thaumaturge.ps1    (Windows PowerShell)
+
+        It clones github.com/Leclowndu93150/Thaumaturge at ${thaumaturge_commit} and leaves the
+        built jar in libs/. Do not commit it or pass it on; the licence forbids both.
+    """.stripIndent())
+}
+
+dependencies {
+    compileOnly "org.jspecify:jspecify:1.0.0"
+
+    // ---- Mod dependencies -------------------------------------------------
+    // Pinned in gradle.properties, resolved from the Modrinth maven repository. `implementation`
+    // rather than a split of compile and runtime on purpose: Thaumaturge's and AE2's public
+    // signatures name GuideME, Curios and Jade types, so every one of these has to be on the compile
+    // classpath for this mod to compile at all, and on the runtime classpath for the dev run.
+    implementation "maven.modrinth:ae2:${ae2_version}"
+    implementation "maven.modrinth:guideme:${guideme_version}"
+    // JEI is the one dependency here that does NOT come from the Modrinth maven repository: its
+    // Modrinth version numbers carry no loader suffix, so the bare number resolves to the Fabric
+    // artifact, which NeoForge silently declines to load. The NeoForge artifact under mezz.jei is the
+    // one that carries META-INF/neoforge.mods.toml; see the note in gradle.properties.
+    implementation "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    implementation "maven.modrinth:jade:${jade_version}"
+    implementation "maven.modrinth:curios:${curios_version}"
+    implementation "maven.modrinth:lithostitched:${lithostitched_version}"
+    implementation "maven.modrinth:apollib:${apollib_version}"
+
+    // Thaumaturge, from the local build the guard above insists on.
+    implementation thaumaturgeJars
+}
+
+// ---- Porting aid: full javac diagnostics on disk --------------------------
+// The console copy of a 917-error wall is truncated, and half an error list is worse than none: what
+// matters is the clustering, and that needs every line. This javac has no option that redirects its own
+// diagnostics (-Xstdout is not recognised), so the task's logging listeners are tapped instead and the
+// stream is appended to a file. Appending rather than collecting keeps the file on a failed compile,
+// which is the only case that matters here.
+def javacFull = layout.buildDirectory.file('javac-full.txt').get().asFile
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-Xmaxerrs' << '2000'
+    // One file per compile task: the selftest source set is a second compile and would otherwise be
+    // wiped by whichever task's doFirst ran last. Every listener is global, so a later task's output
+    // also lands in an earlier task's file; that is noise, not loss. main keeps its old file name.
+    def javacLog = name == 'compileJava' ? javacFull : layout.buildDirectory.file("javac-${name}.txt").get().asFile
+    doFirst { javacLog.text = '' }
+    def javacSink = { CharSequence s -> javacLog.append(s.toString()) } as org.gradle.api.logging.StandardOutputListener
+    logging.addStandardOutputListener(javacSink)
+    logging.addStandardErrorListener(javacSink)
+}
+
+// ---- Source encoding ------------------------------------------------------
+// Every text file in this tree is UTF-8 (no BOM, LF). Without this javac falls back to the platform
+// default charset, which is GBK on a Chinese Windows box: any non-ASCII comment or string literal
+// then either trips "unmappable character" or is silently written into the class file as mojibake.
+// Every source file happens to be pure ASCII today, so nothing is broken yet - this is here so that
+// the first non-ASCII comment someone writes does not become a build failure.
+//
+// `withType` rather than `named('compileJava')` on purpose: the IDE sync and any future source set
+// add their own JavaCompile tasks, and one of them left without the flag is exactly the failure this
+// prevents. Javadoc reads the same files and gets the same flag.
+//
+// This file itself stays pure ASCII on purpose: Gradle reads build scripts with the platform charset,
+// not necessarily UTF-8, so a non-ASCII comment here can turn into mojibake for the next reader.
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [minecraft_version      : minecraft_version,
+                             minecraft_version_range: minecraft_version_range,
+                             neo_version            : neo_version,
+                             neo_version_range      : neo_version_range,
+                             loader_version_range   : loader_version_range,
+                             mod_id                 : mod_id,
+                             mod_name               : mod_name,
+                             mod_license            : mod_license,
+                             mod_version            : mod_version,
+                             mod_authors            : mod_authors,
+                             mod_description        : mod_description]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+// The default test task is off: the checks that matter here need a running game, and are a diagnostic
+// inside the mod rather than a unit test - see ThaumicEnergistics.recipeSelfTest.
+tasks.named('test') {
+    enabled = false
+}
+
+jar {
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_name,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : mod_name,
+                'Implementation-Version'  : mod_version,
+                'Implementation-Vendor'   : mod_authors
+        ])
+    }
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifactId = mod_id
+            from components.java
+        }
+    }
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}

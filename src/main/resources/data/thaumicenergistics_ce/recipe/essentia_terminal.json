@@ -1,0 +1,17 @@
+{
+  "type": "thaumaturge:arcane_workbench_shapeless",
+  "_note": "The reference build's ESSENTIA_TERMINAL: an AE2 illuminated panel, both cores, a logic processor and a vis filter. The panel is a tag because the reference's own is one - it accepts any of AE2's three.",
+  "crystals": [],
+  "ingredients": [
+    "#thaumicenergistics_ce:illuminated_panel",
+    "thaumicenergistics_ce:diffusion_core",
+    "thaumicenergistics_ce:coalescence_core",
+    "ae2:logic_processor",
+    "thaumaturge:filter"
+  ],
+  "vis": 50,
+  "result": {
+    "id": "thaumicenergistics_ce:essentia_terminal",
+    "count": 1
+  }
+}

@@ -1,0 +1,53 @@
+{
+    "category":  "thaumicenergistics_ce:thaumicenergistics_ce",
+    "name":  "tc.research_name.ESSENTIALEVELEMITTER",
+    "parents":  [
+                    "thaumicenergistics_ce:digisentia"
+                ],
+    "column":  -8,
+    "row":  -2,
+    "meta":  [
+                 "round"
+             ],
+    "icons":  [
+                  "thaumicenergistics_ce:essentia_level_emitter"
+              ],
+    "stages":  [
+                   {
+                       "text":  "tc.research_text.ESSENTIALEVELEMITTER",
+                       "required_knowledge":  [
+                                                  {
+                                                      "type":  "theory",
+                                                      "category":  "thaumicenergistics_ce:thaumicenergistics_ce",
+                                                      "amount":  1
+                                                  },
+                                                  {
+                                                      "type":  "observation",
+                                                      "category":  "thaumicenergistics_ce:thaumicenergistics_ce",
+                                                      "amount":  1
+                                                  }
+                                              ]
+                   },
+                   {
+                       "text":  "tc.research_text.ESSENTIALEVELEMITTER",
+                       "recipes":  [
+                                       "thaumicenergistics_ce:essentia_level_emitter"
+                                   ]
+                   }
+               ],
+    "note_aspects":  [
+                         {
+                             "aspect":  "thaumaturge:ignis",
+                             "amount":  2
+                         },
+                         {
+                             "aspect":  "thaumaturge:potentia",
+                             "amount":  1
+                         },
+                         {
+                             "aspect":  "thaumaturge:machina",
+                             "amount":  1
+                         }
+                     ],
+    "complexity":  2
+}

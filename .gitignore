@@ -1,0 +1,37 @@
+# Gradle / build output
+build/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Dev run directory (worlds, logs, configs)
+run/
+logs/
+
+# IDE
+.idea/
+*.iml
+
+# The one dependency that cannot come from maven (see libs/README.md for why, and for how to build
+# it). Its jar is All Rights Reserved and must never be committed. The glob is doubled up so it also
+# covers libs/backup/, where an older build is kept to roll back to: a single-star pattern only
+# matches the directory's own children, so a jar one level down would have slipped into the commit.
+libs/**/*.jar
+
+# Where tools/fetch-thaumaturge.* checks Thaumaturge out. CI points it at the workspace root so the
+# path is stable for the run; it is deliberately not cached (see .github/workflows/build.yml, which
+# explains why a Thaumaturge checkout must not end up in this repository's Actions cache). Not a
+# dot-directory: Gradle refuses to configure a project whose directory name begins with a dot.
+thaumaturge-src/
+
+# JVM crash logs
+hs_err_pid*.log
+replay_pid*.log
+*.log
+
+# Working notes stay out of the repository and live on disk only - the same rule the 2.0-Renewed
+# branch's .gitignore states for docs/. _scratch holds what a working copy accumulates and a clone
+# has no use for: the plan documents, the 2.0-Renewed archive, the diagnostic source set, and the
+# one-off scripts that have already done their job. Nothing in the build reads any of it.
+_scratch/
+PLAN*.md
+Thaumic-Energistics-CE-2.0-Renewed.zip

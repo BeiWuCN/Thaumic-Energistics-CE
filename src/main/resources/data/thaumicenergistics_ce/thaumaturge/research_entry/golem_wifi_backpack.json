@@ -1,0 +1,58 @@
+{
+    "category":  "thaumicenergistics_ce:thaumicenergistics_ce",
+    "name":  "tc.research_name.GOLEMWIFI",
+    "parents":  [
+                    "thaumicenergistics_ce:essentia_terminal",
+                    "thaumicenergistics_ce:alchemy_provider"
+                ],
+    "column":  2,
+    "row":  0,
+    "meta":  [
+                 "round"
+             ],
+    "icons":  [
+                  "thaumicenergistics_ce:golem_wifi_backpack"
+              ],
+    "stages":  [
+                   {
+                       "text":  "tc.research_text.GOLEMWIFI",
+                       "required_knowledge":  [
+                                                  {
+                                                      "type":  "theory",
+                                                      "category":  "thaumicenergistics_ce:thaumicenergistics_ce",
+                                                      "amount":  1
+                                                  },
+                                                  {
+                                                      "type":  "observation",
+                                                      "category":  "thaumicenergistics_ce:thaumicenergistics_ce",
+                                                      "amount":  1
+                                                  }
+                                              ]
+                   },
+                   {
+                       "text":  "tc.research_text.GOLEMWIFI",
+                       "recipes":  [
+                                       "thaumicenergistics_ce:golem_wifi_backpack"
+                                   ]
+                   }
+               ],
+    "note_aspects":  [
+                         {
+                             "aspect":  "thaumaturge:potentia",
+                             "amount":  2
+                         },
+                         {
+                             "aspect":  "thaumaturge:auram",
+                             "amount":  1
+                         },
+                         {
+                             "aspect":  "thaumaturge:humanus",
+                             "amount":  1
+                         },
+                         {
+                             "aspect":  "thaumaturge:motus",
+                             "amount":  1
+                         }
+                     ],
+    "complexity":  3
+}

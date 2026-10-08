@@ -1,0 +1,81 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "_note": "The reference build's ESSENTIASTORAGE 1k recipe, pattern and materials: EQ / QPQ / QE. Q is certus quartz crystal and P a logic processor, both AE2 ids that exist in 19.2.17. The reference's six wisp-essence cells become four vis crystals - see the note above on why four.",
+  "_vis": "Chosen against Thaumaturge's own arcane workbench recipes rather than copied: their vis costs cluster at 10, 25, 50, 100 and 200. The reference took an aspect list and derived its own cost internally, so there is no figure to copy.",
+  "crystals": [],
+  "key": {
+    "E": {
+      "neoforge:ingredient_type": "neoforge:compound",
+      "children": [
+  
+        {
+          "neoforge:ingredient_type": "neoforge:components",
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:aer"
+            }
+          }
+        },
+        {
+          "neoforge:ingredient_type": "neoforge:components",
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:ignis"
+            }
+          }
+        },
+        {
+          "neoforge:ingredient_type": "neoforge:components",
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:aqua"
+            }
+          }
+        },
+        {
+          "neoforge:ingredient_type": "neoforge:components",
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:terra"
+            }
+          }
+        },
+        {
+          "neoforge:ingredient_type": "neoforge:components",
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:ordo"
+            }
+          }
+        },
+        {
+          "neoforge:ingredient_type": "neoforge:components",
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:perditio"
+            }
+          }
+        }
+      ]
+    },
+    "Q": "ae2:certus_quartz_crystal",
+    "P": "ae2:logic_processor"
+  },
+  "pattern": [
+    "E Q",
+    "QPQ",
+    "Q E"
+  ],
+  "vis": 30,
+  "result": {
+    "id": "thaumicenergistics_ce:storage_component_1k",
+    "count": 1
+  },
+  "_essence": "E is any primal vis crystal, written inline as six component filters; see the header of the generator that produced this file (tools/build_essentia_recipes.js) for why it stands in for the reference's wisp essences and why it is not a tag."
+}

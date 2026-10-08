@@ -1,0 +1,1 @@
+{"model":{"type":"ae2:composite","models":[{"type":"ae2:model","model":"thaumicenergistics_ce:parts/essentia_storage_bus_base"},{"type":"ae2:status_indicator","active":"thaumicenergistics_ce:parts/essentia_storage_bus_has_channel","powered":"thaumicenergistics_ce:parts/essentia_storage_bus_on","unpowered":"thaumicenergistics_ce:parts/essentia_storage_bus_off"}]}}
