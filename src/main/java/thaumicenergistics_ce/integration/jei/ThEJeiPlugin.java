@@ -13,7 +13,7 @@ import thaumicenergistics_ce.util.ThELog;
  * Thaumic Energistics 的 JEI 插件，配方转移那一半，两侧 JEI 都会向它索取。
  * 这里不写任何界面类，专用服务端也要跑它。
  * 幽灵原料处理器在另一个插件 [client.jei.ThEJeiClientPlugin] 里，有自己的 UID。
- * 两个插件都用 Thaumaturge 的奥术配方分类，铭刻机编码的内容与合成一致。
+ * 两个插件都用 Thaumaturge 的配方分类，铭刻机编码的内容与合成一致。
  */
 @JeiPlugin
 public class ThEJeiPlugin implements IModPlugin {
@@ -53,6 +53,10 @@ public class ThEJeiPlugin implements IModPlugin {
                 new CraftingRecipeTransfer(
                         registration.getTransferHelper(), ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get()),
                 RecipeTypes.CRAFTING);
+        // 坩埚配方进的是处理样板，格数与合成网格对不上，不能交给上面的基础处理器。
+        registration.addRecipeTransferHandler(
+                new CruciblePatternTransfer(registration.getTransferHelper()),
+                CrucibleJeiRecipeType.crucible());
         // 用自带配方类型的处理器，别只给 [IRecipeTransferInfo]。
         // info 会被 JEI 的 [BasicRecipeTransferHandler] 包起来：它假定槽位一一对应，12 对 9 时就拒绝。
         registration.addRecipeTransferHandler(

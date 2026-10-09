@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "thaumicenergistics_ce:arcane_assembler",
+    "thaumicenergistics_ce:knowledge_inscriber",
+    "thaumicenergistics_ce:essentia_cell_workbench",
+    "thaumicenergistics_ce:essentia_vibration_chamber",
+    "thaumicenergistics_ce:alchemy_provider",
+    "thaumicenergistics_ce:alchemy_provider_connection",
+    "thaumicenergistics_ce:infusion_provider",
+    "thaumicenergistics_ce:distillation_encoder",
+    "thaumicenergistics_ce:occult_monitor",
+    "thaumicenergistics_ce:gacha_box",
+    "thaumicenergistics_ce:gacha_box_aggregator"
+  ]
+}

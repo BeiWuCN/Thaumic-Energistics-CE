@@ -1,0 +1,27 @@
+{
+  "_note": "This file lives in the thaumaturge namespace on purpose: NeoForge derives a data map type's id from the folder namespace plus the file name, so a copy under data/thaumicenergistics_ce/ would be rejected as a non-existent type 'thaumicenergistics_ce:base_aspects'. Several packs may provide this path; the loader stacks and merges them, and Thaumaturge's own copy sets no replace flag, so this entry adds to it. The ME controller is unscannable without it: Thaumaturge derives item aspects from crafting recipes, but the controller's three inputs (smooth sky stone, fluix crystal, engineering processor) are all made outside a crafting grid, so nothing derives and the index holds no entry for it.",
+  "values": {
+    "ae2:controller": [
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 15
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:metallum",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:permutatio",
+        "amount": 8
+      }
+    ]
+  }
+}
