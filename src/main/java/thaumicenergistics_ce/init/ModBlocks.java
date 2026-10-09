@@ -8,6 +8,7 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.block.BlockArcaneAssembler;
+import thaumicenergistics_ce.block.BlockBeiWuCnFumo;
 import thaumicenergistics_ce.block.BlockDecorativeFigure;
 import thaumicenergistics_ce.block.BlockDistillationEncoder;
 import thaumicenergistics_ce.block.BlockEssentiaCellWorkbench;
@@ -129,6 +130,16 @@ public final class ModBlocks {
     public static final DeferredBlock<BlockDecorativeFigure> ALKUSURE86_FUMO = REGISTRY.registerBlock(
             "alkusure86fumo",
             BlockDecorativeFigure::new,
+            properties -> properties
+                    .mapColor(MapColor.WOOL)
+                    .strength(0.5F)
+                    .sound(SoundType.WOOL)
+                    .noOcclusion());
+
+    /** 第二个玩偶，模型只有坐姿。属性与上一个一致，各自一个 lambda：注册会把 id 盖到属性对象上。 */
+    public static final DeferredBlock<BlockBeiWuCnFumo> BEIWU_CN_FUMO = REGISTRY.registerBlock(
+            "beiwu_cn_fumo",
+            BlockBeiWuCnFumo::new,
             properties -> properties
                     .mapColor(MapColor.WOOL)
                     .strength(0.5F)

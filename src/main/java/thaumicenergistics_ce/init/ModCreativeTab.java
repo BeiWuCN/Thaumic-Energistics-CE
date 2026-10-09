@@ -32,6 +32,7 @@ public final class ModCreativeTab {
                         output.accept(ModItems.ALCHEMY_PROVIDER_CONNECTION.get());
                         output.accept(ModItems.WIRELESS_CONNECTOR.get());
                         output.accept(ModItems.ALKUSURE86_FUMO.get());
+                        output.accept(ModItems.BEIWU_CN_FUMO.get());
                         output.accept(ModItems.STORAGE_CASING.get());
                         output.accept(ModItems.STORAGE_COMPONENT_1K.get());
                         output.accept(ModItems.STORAGE_COMPONENT_4K.get());

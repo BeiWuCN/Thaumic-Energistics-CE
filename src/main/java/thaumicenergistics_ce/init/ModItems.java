@@ -94,6 +94,9 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> ALKUSURE86_FUMO =
             REGISTRY.registerSimpleBlockItem(ModBlocks.ALKUSURE86_FUMO);
 
+    public static final DeferredItem<BlockItem> BEIWU_CN_FUMO =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.BEIWU_CN_FUMO);
+
     public static final DeferredItem<ItemVisInterface> VIS_INTERFACE =
             REGISTRY.registerItem("vis_interface", ItemVisInterface::new, () -> new Item.Properties());
 

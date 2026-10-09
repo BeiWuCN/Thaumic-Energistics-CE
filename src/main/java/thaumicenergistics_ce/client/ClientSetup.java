@@ -22,7 +22,7 @@ import thaumicenergistics_ce.client.gui.ScreenArcaneCraftingTerminal;
 import thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
 import thaumicenergistics_ce.client.gui.ScreenEssentiaTerminal;
-import thaumicenergistics_ce.client.gui.ScreenEssentiaVibrationChamber;
+import thaumicenergistics_ce.client.gui.ScreenEssentiaResonanceChamber;
 import thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 import thaumicenergistics_ce.client.render.ArcaneAssemblerRenderer;
 import thaumicenergistics_ce.client.render.EssentiaKeyRenderHandler;
@@ -143,7 +143,7 @@ public final class ClientSetup {
                                 title,
                                 StyleManager.loadStyleDoc("/screens/essentia_cell_workbench.json")));
         event.register(ModMenuTypes.DISTILLATION_ENCODER.get(), ScreenDistillationEncoder::new);
-        event.register(ModMenuTypes.ESSENTIA_VIBRATION_CHAMBER.get(), ScreenEssentiaVibrationChamber::new);
+        event.register(ModMenuTypes.ESSENTIA_VIBRATION_CHAMBER.get(), ScreenEssentiaResonanceChamber::new);
         // 存储元件工作台是 AE2 可升级界面，美术和槽位都来自一个 style。
         event.register(
                 ModMenuTypes.ESSENTIA_TERMINAL.get(),
@@ -171,6 +171,8 @@ public final class ClientSetup {
                                 title,
                                 StyleManager.loadStyleDoc("/screens/terminals/wireless_terminal.json")));
         // 存储元件工作台是 AE2 可升级界面，美术和槽位都来自一个 style。
+        // 无线终端画的是同一个工作台，只在自己的 style 文档里多叠一个标题：
+        // 有线那份的 [crafting_grid_title] 写的是方块物品名，手持终端要写自己的名字。
         event.register(
                 ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                 (MenuArcaneCraftingTerminal menu, Inventory inventory, Component title) ->
@@ -178,7 +180,7 @@ public final class ClientSetup {
                                 menu,
                                 inventory,
                                 title,
-                                StyleManager.loadStyleDoc("/screens/arcane_crafting_terminal.json")));
+                                StyleManager.loadStyleDoc("/screens/wireless_arcane_crafting_terminal.json")));
         event.register(
                 ModMenuTypes.ESSENTIA_LEVEL_EMITTER.get(),
                 (MenuEssentiaLevelEmitter menu, Inventory inventory, Component title) ->

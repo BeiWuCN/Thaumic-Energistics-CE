@@ -1,0 +1,28 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "_note": "The BeiWu_CN figure, the second decorative doll. Same shape as the first one but priced lower: no hat, so no dyed cloth for it. Vis is the only cost that matters here.",
+  "crystals": [],
+  "key": {
+    "W": "minecraft:white_wool",
+    "C": {
+      "neoforge:ingredient_type": "neoforge:components",
+      "items": "thaumaturge:essentia_crystal",
+      "components": {
+        "thaumaturge:crystal_aspect": {
+          "aspect": "thaumaturge:fabrico"
+        }
+      }
+    },
+    "T": "thaumaturge:ingot_thaumium"
+  },
+  "pattern": [
+    " C ",
+    "WCW",
+    " T "
+  ],
+  "vis": 8,
+  "result": {
+    "id": "thaumicenergistics_ce:beiwu_cn_fumo",
+    "count": 1
+  }
+}
