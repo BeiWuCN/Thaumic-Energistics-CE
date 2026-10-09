@@ -237,18 +237,6 @@ public final class ThaumicEnergistics {
                 ModItems.ARCANE_CRAFTING_TERMINAL.get(),
                 1,
                 ARCANE_TERMINAL_PART_UPGRADE_NAME);
-        // 样板供应器本来一个升级槽都没有，槽是 mixin 补的；注册这两条才让那个槽收下我们的卡，
-        // 也让卡片的 [tooltip] 认得出这台机器。方块形态和线缆部件都要。
-        Upgrades.add(
-                ModItems.ESSENTIA_ACCESS_CARD.get(),
-                AEBlocks.PATTERN_PROVIDER,
-                1,
-                PATTERN_PROVIDER_UPGRADE_NAME);
-        Upgrades.add(
-                ModItems.ESSENTIA_ACCESS_CARD.get(),
-                AEParts.PATTERN_PROVIDER,
-                1,
-                PATTERN_PROVIDER_UPGRADE_NAME);
     }
 
     /** 卡片 [tooltip] 对整本源质存储元件家族的称呼，所有尺寸共用。 */
@@ -264,9 +252,6 @@ public final class ThaumicEnergistics {
     /** 装在电缆上的终端是另一个物品，[tooltip] 行要自己的名称键。 */
     private static final String ARCANE_TERMINAL_PART_UPGRADE_NAME =
             "item.thaumicenergistics_ce.arcane_crafting_terminal";
-
-    /** 访问卡 [tooltip] 对样板供应器的称呼，方块和部件共用一个名字。 */
-    private static final String PATTERN_PROVIDER_UPGRADE_NAME = "block.ae2.pattern_provider";
 
     /**
      * 把源质键类型加进 [AE2] 注册表。不能放在 mod 构造函数里：{@code AEKeyType} 是注册表对象，
