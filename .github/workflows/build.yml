@@ -58,15 +58,7 @@ jobs:
           CI: true
 
       - name: Build
-        run: |
-          # The settings plugin below is only on the plugin portal, and this line's cache is the one
-          # thing that differs from the 1.21.1 line's builds, which resolve their plugins from a warm
-          # cache. Print the portal's answer so a resolution failure here is readable, then force
-          # Gradle to re-check what it has cached rather than trust a recorded miss.
-          echo -n 'plugins.gradle.org foojay marker: '
-          curl -s -o /dev/null -w '%{http_code}\n' \
-            https://plugins.gradle.org/m2/org/gradle/toolchains/foojay-resolver-convention/org.gradle.toolchains.foojay-resolver-convention.gradle.plugin/0.8.0/org.gradle.toolchains.foojay-resolver-convention.gradle.plugin-0.8.0.pom || true
-          ./gradlew build --stacktrace --refresh-dependencies --info
+        run: ./gradlew build --stacktrace
 
       # The upload step below hands out build/libs/*.jar. Keep it that way: libs/ holds a build of
       # Thaumaturge, and publishing that would breach its licence.
