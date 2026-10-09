@@ -9,7 +9,6 @@ import thaumicenergistics_ce.network.EncoderActionPayload;
 import thaumicenergistics_ce.network.EncoderSourcePayload;
 import thaumicenergistics_ce.network.EssentiaDepositPayload;
 import thaumicenergistics_ce.network.EssentiaFillPayload;
-import thaumicenergistics_ce.network.EssentiaInterfaceMarkPayload;
 import thaumicenergistics_ce.network.GolemBackpackPayload;
 import thaumicenergistics_ce.network.InscriberGridFillPayload;
 import thaumicenergistics_ce.network.InscriberGridPayload;
@@ -49,12 +48,6 @@ public final class ModNetwork {
         registrar.playToServer(
                 EssentiaFillPayload.TYPE,
                 EssentiaFillPayload.CODEC,
-                (payload, context) -> payload.handle(context.player()));
-        // 落在 ME 接口自身配置行或存储行上的标记。
-        // 走服务端方向：源质键不是物品，AE2 的幽灵槽位通道只收物品。
-        registrar.playToServer(
-                EssentiaInterfaceMarkPayload.TYPE,
-                EssentiaInterfaceMarkPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
         // 从 JEI 设置存储元件工作台的分区井，走服务端方向。
         // AE2 的网格数据包只有经 [AEBaseMenu] 才能到达伪槽位，见 [PartitionWellPayload]。
