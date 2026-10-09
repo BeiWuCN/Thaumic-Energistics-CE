@@ -1,6 +1,7 @@
 package thaumicenergistics_ce.client.gui;
 
 import appeng.client.Point;
+import appeng.client.gui.AEBaseScreen;
 import appeng.client.gui.style.ScreenStyle;
 import appeng.client.gui.style.WidgetStyle;
 import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
@@ -39,6 +40,12 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
      */
     private static final String VIS_COST_STRIP = "visCraftCost";
 
+    /**
+     * 样式控件名，指向格子上方那行文字：屏幕样式文档里的 {@code text.crafting_grid_title}。
+     * 键写死在文档里，值由 {@link #init} 换成终端自己的名字。
+     */
+    private static final String CRAFTING_GRID_TITLE = "crafting_grid_title";
+
     private static @Nullable ScreenArcaneCraftingTerminal open;
 
     private List<ArcaneCraftCostPayload.AspectCost> costs = List.of();
@@ -46,9 +53,13 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     /** 同一次合成要从六个晶体槽里扣掉的晶体，画在要素左边。 */
     private List<ArcaneCraftCostPayload.CrystalCost> crystals = List.of();
 
+    /** 终端自己的名字。原先是顶行，现在下移到格子上方那行。 */
+    private final Component terminalName;
+
     public ScreenArcaneCraftingTerminal(
             MenuArcaneCraftingTerminal menu, Inventory inventory, Component title, ScreenStyle style) {
         super(menu, inventory, title, style);
+        terminalName = title;
     }
 
     /** 没有这张卡时终端就是普通终端，手势全落到 AE2 自己的实现上。 */
@@ -62,6 +73,10 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     @Override
     public void init() {
         super.init();
+        // AE2 的 [getGuiDisplayName] 只要 title 非空就用 title 顶掉样式文档里的值，改文档换不掉顶行，
+        // 只能走 [setTextContent] 覆写：顶行给通用「终端」，终端自己的名字下移到格子上方。
+        setTextContent(AEBaseScreen.TEXT_ID_DIALOG_TITLE, Component.translatable("gui.ae2.Terminal"));
+        setTextContent(CRAFTING_GRID_TITLE, terminalName);
         open = this;
     }
 

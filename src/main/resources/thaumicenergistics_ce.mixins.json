@@ -3,7 +3,7 @@
 	"package": "thaumicenergistics_ce.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"InterfaceLogicMixin"
+		"InterfaceLogicDropMixin"
 	],
 	"client": [
 		"PageLineStyleMixin"

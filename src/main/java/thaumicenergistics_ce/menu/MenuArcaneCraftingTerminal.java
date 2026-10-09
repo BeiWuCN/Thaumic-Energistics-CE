@@ -4,6 +4,7 @@ import appeng.api.implementations.menuobjects.IPortableTerminal;
 import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.energy.IEnergySource;
+import appeng.api.networking.security.IActionHost;
 import appeng.api.storage.ITerminalHost;
 import appeng.helpers.ICraftingGridMenu;
 import appeng.menu.SlotSemantic;
@@ -42,6 +43,10 @@ import thaumicenergistics_ce.util.ThELog;
  * 九个合成单元、一个结果槽、六个侧面槽（水晶按两份计）、一个法杖槽。
  * 结构照抄 AE2 的 {@code CraftingTermMenu}：[CraftingRecipe] 匹配不上奥术配方。
  * 源质手势来自 {@link MenuEssentiaTerminalBase}，要访问卡。
+ * 网络只认宿主：放置式是部件所在的那张网格，配对式是无线访问点链接的那张网格，
+ * 配对只提供工作台状态，不换网络。{@link ICraftingGridMenu#getGridNode} 只认宿主那颗节点：
+ * AE2 的 {@code MEStorageMenu#broadcastChanges} 同时发 storage 的清单和 getGridNode 那张网格的
+ * 可合成集合，返回配对部件的节点就会把另一个网络的条目混进同一个终端里。
  */
 public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         implements ICraftingGridMenu, InternalInventoryHost {
@@ -180,9 +185,14 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     }
 
 
+    /**
+     * 与 AE2 自己的 {@code WirelessCraftingTermMenu} 同构：节点就是宿主的那颗 ——
+     * 无线终端是访问点所在的网格，放置式是部件自己的网格。
+     * 配对部件的节点接在这里会把另一个网络的可合成集合混进终端条目，见类注释。
+     */
     @Override
     public IGridNode getGridNode() {
-        return part == null ? null : part.getMainNode().getNode();
+        return getHost() instanceof IActionHost actionHost ? actionHost.getActionableNode() : null;
     }
 
     @Override

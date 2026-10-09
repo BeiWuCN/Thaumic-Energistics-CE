@@ -14,7 +14,7 @@ import thaumicenergistics_ce.util.ThELog;
 
 /**
  * 带本访问卡的接口的两个配置行，整体读写：配置行说哪些要素能进来，
- * 存储行是取卡时网格收回的东西。不绑轮次，手里没有宿主也能推敲一行。
+ * 存储行里的要素在接口被拆除时交还网格。不绑轮次，手里没有宿主也能推敲一行。
  */
 public final class EssentiaInterfaceRows {
 
@@ -50,44 +50,6 @@ public final class EssentiaInterfaceRows {
         return !filtered;
     }
 
-    /** 丢掉早先版本的这张卡让 JEI 写进存储行的要素。 */
-    static void dropStaleAspects(ConfigInventory storage) {
-        for (int slot = 0; slot < storage.size(); slot++) {
-            if (storage.getKey(slot) instanceof AEssentiaKey) {
-                ThELog.LOG.info("[essentia-interface] clearing a stale aspect in storage slot {}", slot);
-                storage.setStack(slot, null);
-            }
-        }
-    }
-
-    /**
-     * 清空刚取出卡的接口的两行：标记消失，存储行交还网格。
-     * 网格拒收的要素丢掉；别的类型的键留下。
-     */
-    public static void releaseRows(
-            ConfigInventory config,
-            ConfigInventory storage,
-            @Nullable MEStorage network,
-            IActionSource source) {
-        config.clear();
-        for (int slot = 0; slot < storage.size(); slot++) {
-            GenericStack held = storage.getStack(slot);
-            if (held == null) {
-                continue;
-            }
-            long rest = held.amount() - returnToNetwork(held, network, source);
-            if (rest <= 0) {
-                storage.setStack(slot, null);
-            } else if (held.what() instanceof AEssentiaKey) {
-                ThELog.LOG.info(
-                        "[essentia-interface] discarding {} of {} as the card comes out", rest, held.what());
-                storage.setStack(slot, null);
-            } else {
-                storage.setStack(slot, new GenericStack(held.what(), rest));
-            }
-        }
-    }
-
     /**
      * 把即将丢掉的存储行里的要素清出来，砸接口绝不会把要素掉在地上。
      * 要素没有可掉落的物品形态；其余的交给网格。
@@ -108,16 +70,6 @@ public final class EssentiaInterfaceRows {
             }
             storage.setStack(slot, null);
         }
-    }
-
-    /** 某一行有没有要素，这是分辨我们的接口与普通接口的依据。 */
-    public static boolean holdsEssentia(ConfigInventory row) {
-        for (int slot = 0; slot < row.size(); slot++) {
-            if (row.getKey(slot) instanceof AEssentiaKey) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /** 网格会收下手头物品堆的多少；网格没了或满了就一点不收。 */
