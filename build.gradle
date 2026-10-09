@@ -207,7 +207,7 @@ neoForge {
                         'GEAR_SELFTEST', 'CELLPARTITION_SELFTEST', 'ARCANE_ESSENTIA_SELFTEST',
                         'ESSENTIA_SELFTEST', 'VIS_RELAY_TEST', 'ASSEMBLER_SELFTEST',
                         'VIS_CONNECTION_SELFTEST', 'SYNC_SELFTEST', 'RESEARCH_SELFTEST',
-                        'RECIPE_SELFTEST', 'NETWORK_SELFTEST'
+                        'RECIPE_SELFTEST', 'NETWORK_SELFTEST', 'GUI_SELFTEST'
                 ]
                 def wanted = requested.equalsIgnoreCase('all')
                         ? everySwitch
