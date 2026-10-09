@@ -66,7 +66,7 @@ jobs:
           echo -n 'plugins.gradle.org foojay marker: '
           curl -s -o /dev/null -w '%{http_code}\n' \
             https://plugins.gradle.org/m2/org/gradle/toolchains/foojay-resolver-convention/org.gradle.toolchains.foojay-resolver-convention.gradle.plugin/0.8.0/org.gradle.toolchains.foojay-resolver-convention.gradle.plugin-0.8.0.pom || true
-          ./gradlew build --stacktrace --refresh-dependencies
+          ./gradlew build --stacktrace --refresh-dependencies --info
 
       # The upload step below hands out build/libs/*.jar. Keep it that way: libs/ holds a build of
       # Thaumaturge, and publishing that would breach its licence.
