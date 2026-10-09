@@ -26,7 +26,8 @@
 #
 # Environment:
 #     THAUMATURGE_SRC   where the checkout lives (default <root>/build/thaumaturge-src)
-#     JAVA_HOME         must point at a JDK 21
+#     JAVA_HOME         must point at a JDK 25: the toolchain this line builds with, and the one the
+#                       pinned Thaumaturge's own plugins refuse to configure without
 #     CI                if set, Gradle runs without a daemon
 
 set -eu
@@ -100,8 +101,12 @@ if [ -n "${CI:-}" ]; then
     gradle_args="$gradle_args --no-daemon"
 fi
 
+# Thaumaturge 1.0.2 split datagen into the two moddev runs the platform provides: there is no plain
+# runData any more, and the -PdatagenPass switch the old invocation passed is gone from upstream.
+# Both halves run, because the jar carries whatever they write.
 echo "fetch-thaumaturge: generating Thaumaturge's data (this is what makes the jar usable)"
-( cd "$src" && ./gradlew $gradle_args runData -PdatagenPass=true )
+( cd "$src" && ./gradlew $gradle_args runServerData )
+( cd "$src" && ./gradlew $gradle_args runClientData )
 
 echo "fetch-thaumaturge: building Thaumaturge (several minutes the first time)"
 if [ -x "$src/gradlew" ]; then
