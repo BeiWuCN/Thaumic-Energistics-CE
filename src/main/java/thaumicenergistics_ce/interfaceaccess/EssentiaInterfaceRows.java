@@ -50,16 +50,6 @@ public final class EssentiaInterfaceRows {
         return !filtered;
     }
 
-    /** 丢掉早先版本的这张卡让 JEI 写进存储行的要素。 */
-    static void dropStaleAspects(ConfigInventory storage) {
-        for (int slot = 0; slot < storage.size(); slot++) {
-            if (storage.getKey(slot) instanceof AEssentiaKey) {
-                ThELog.LOG.info("[essentia-interface] clearing a stale aspect in storage slot {}", slot);
-                storage.setStack(slot, null);
-            }
-        }
-    }
-
     /**
      * 清空刚取出卡的接口的两行：标记消失，存储行交还网格。
      * 网格拒收的要素丢掉；别的类型的键留下。

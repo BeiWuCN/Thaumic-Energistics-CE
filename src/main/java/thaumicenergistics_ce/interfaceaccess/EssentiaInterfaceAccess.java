@@ -25,8 +25,9 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.util.ThELog;
 
 /**
- * 带访问卡的 ME 接口：把碰到的容器里的源质拉进网络；取出卡时清空两行。
- * 标记留在配置行里，不清除。流向只有一个方向，源质终端本来就会从网络取源质。
+ * 带访问卡的 ME 接口：把碰到的容器里的源质拉进网络。
+ * 标记留在配置行里，不清除；存储行按标记缓存源质是 AE2 自己的事。
+ * 流向只有一个方向，源质终端本来就会从网络取源质。
  * 访问由注册表轮次驱动，不走 AE2 的 tickable 服务，拔出卡立刻停。
  */
 public final class EssentiaInterfaceAccess {
@@ -42,9 +43,6 @@ public final class EssentiaInterfaceAccess {
 
     private final InterfaceLogicHost host;
     private final IManagedGridNode node;
-
-    /** 第一轮设上；只有那一轮清理旧版本留下的标记。 */
-    private boolean storageRowCleared;
 
     /**
      * 持有宿主，不再去查找，一轮不会追两个 tick 之间被拆掉的接口。
@@ -83,7 +81,6 @@ public final class EssentiaInterfaceAccess {
         if (network == null || energy == null) {
             return;
         }
-        cleanStorageRow(logic.getStorage());
         absorb(faces(), logic.getConfig(), network, energy);
     }
 
@@ -96,18 +93,6 @@ public final class EssentiaInterfaceAccess {
             return side == null ? new Direction[0] : new Direction[] {side};
         }
         return Direction.values();
-    }
-
-    /**
-     * 扔掉旧版本这张卡让 JEI 写进存储行的要素。只做一次：后面各轮不再碰这一行，
-     * 那时里面的要素可能就是 AE2 自己存的货。
-     */
-    private void cleanStorageRow(ConfigInventory storage) {
-        if (storageRowCleared) {
-            return;
-        }
-        storageRowCleared = true;
-        EssentiaInterfaceRows.dropStaleAspects(storage);
     }
 
     /**
