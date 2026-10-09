@@ -1,3 +1,12 @@
+# TECE 2.7.4.2-hotfix1
+
+## 修复
+
+- 修好 26.1.2 环境下启动即崩的那次事故：给谐振仓界面改过类名之后，自测里的引用没跟着改，模组一加载就抛 `NoClassDefFoundError`。两处引用都改到了新类名
+- 补上繁体中文（台湾用语）的翻译
+
+---
+
 # TECE 2.7.4.2
 
 ## 修复
@@ -19,6 +28,15 @@
 - 把访问卡的研究文本改成描述它在 ME 接口上的实际行为（从网络向外输出源质），并写明它也能装进无线奥术合成终端
 - 在文案里把无线奥术合成终端写全名
 - 把 README 与 README.en.md 里的图标地址从旧分支名改到 `1.21.1`
+
+---
+
+# TECE 2.7.4.2-hotfix1
+
+## Fixes
+
+- Fix the crash on 26.1.2, where the mod failed to load with a `NoClassDefFoundError` because the GUI self-test still referenced the resonance chamber screen's old class name after the screen was renamed. Both references point at the new name now
+- Add a Traditional Chinese translation for players in Taiwan
 
 ---
 
