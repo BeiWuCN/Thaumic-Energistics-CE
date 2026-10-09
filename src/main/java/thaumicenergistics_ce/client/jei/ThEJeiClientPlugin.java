@@ -1,5 +1,6 @@
 package thaumicenergistics_ce.client.jei;
 
+import appeng.client.gui.implementations.InterfaceScreen;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
@@ -36,5 +37,9 @@ public class ThEJeiClientPlugin implements IModPlugin {
         // 还有蒸馏编码器的来源槽位，待蒸馏的物品可以直接拖进去，玩家不用手动从终端拿。
         registration.addGhostIngredientHandler(
                 ScreenDistillationEncoder.class, new DistillationEncoderGhostIngredientHandler());
+        // AE2 自己的 ME 接口，前提是访问卡插在里面：两种宿主形式共用一个屏幕，
+        // 这一行就覆盖了方块和线缆部件。
+        registration.addGhostIngredientHandler(
+                InterfaceScreen.class, new EssentiaInterfaceGhostIngredientHandler());
     }
 }

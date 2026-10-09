@@ -43,6 +43,7 @@ import thaumicenergistics_ce.integration.jade.FluxTransferStatusProvider;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import thaumicenergistics_ce.init.ModNetwork;
 import thaumicenergistics_ce.init.capability.ThEItemCapabilities;
+import thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceRegistry;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 import thaumicenergistics_ce.part.PartEssentiaTerminal;
@@ -78,6 +79,9 @@ public final class ThaumicEnergistics {
         registerPartModels();
         // [tooltip] 的服务端那一半走 [AE2] 部件注册表，[Jade] 只看得到方块实体。
         FluxTransferStatusProvider.register();
+        // [ME 接口] 的访问卡挂游戏总线，不挂网格的可 tick 对象：[AE2] 在卡片进出时不发通知。
+        // 见 [EssentiaInterfaceRegistry]。
+        EssentiaInterfaceRegistry.register();
     }
 
     /**
@@ -209,6 +213,10 @@ public final class ThaumicEnergistics {
                 AEItems.SPEED_CARD,
                 ModItems.ARCANE_ASSEMBLER.get(),
                 BlockEntityArcaneAssembler.UPGRADE_SLOT_COUNT);
+        // 每个 [ME 接口] 一张访问卡，方块形态和线缆部件都要。少了这两条，
+        // [AE2] 的升级槽拒收我们的卡。同一个名称键让方块和部件共用一行。
+        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEBlocks.INTERFACE, 1, INTERFACE_UPGRADE_NAME);
+        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEParts.INTERFACE, 1, INTERFACE_UPGRADE_NAME);
         // 同一张卡也进无线奥术终端自己的两个槽。少了这一行，[AE2] 槽位过滤器拒收，未注册的组合报告说放不下。
         Upgrades.add(
                 ModItems.ESSENTIA_ACCESS_CARD.get(),
@@ -233,6 +241,9 @@ public final class ThaumicEnergistics {
 
     /** 卡片 [tooltip] 对整本源质存储元件家族的称呼，所有尺寸共用。 */
     private static final String CELL_UPGRADE_NAME = "item.thaumicenergistics_ce.essentia_cell";
+
+    /** 访问卡 [tooltip] 对接口的称呼，方块和部件共用一个名字。 */
+    private static final String INTERFACE_UPGRADE_NAME = "block.ae2.interface";
 
     /** 访问卡 [tooltip] 对无线奥术终端的称呼，用物品自己的名称键。 */
     private static final String ARCANE_TERMINAL_UPGRADE_NAME =
