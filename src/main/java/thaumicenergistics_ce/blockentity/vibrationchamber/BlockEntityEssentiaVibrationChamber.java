@@ -44,7 +44,12 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     /** 能量槽容量，单位 AE；1 AE 兑 2 FE，AE2 把 16 kAE 报成 32,000 FE。 */
     public static final double MAX_ENERGY_STORAGE = 16_000.0;
 
-    public static final double MAX_OUTPUT_PER_TICK = 2_000.0;
+    /**
+     * 能量槽每秒最多往外放多少 AE，也就是一次燃烧发得多快。
+     * 高于 [ChamberBurn.PEAK_AE_PER_TICK] 的上限没有东西去碰：燃烧会按剩余空间
+     * 分配 tick，放得再宽松也只会收到燃料自己发的那些。
+     */
+    public static final double MAX_OUTPUT_PER_TICK = ChamberBurn.PEAK_AE_PER_TICK;
 
     private static final int TICK_RATE_BURNING = 10;
     private static final int TICK_RATE_IDLE = 40;

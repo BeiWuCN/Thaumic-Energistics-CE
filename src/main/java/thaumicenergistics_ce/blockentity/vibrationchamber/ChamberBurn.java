@@ -14,6 +14,13 @@ final class ChamberBurn {
 
     static final double BASE_AE_PER_TICK = 200.0;
 
+    /**
+     * 点燃后每 tick 发多少 AE 的天花板：[Potentia] 的 {@link #BASE_AE_PER_TICK} 乘 1.6。
+     * 能量槽往外放的上限就取这个数：再高的上限没有任何东西去碰，
+     * 剩下的只是 Jade 与界面把一个大数字当「输出上限」报给玩家看。
+     */
+    static final double PEAK_AE_PER_TICK = BASE_AE_PER_TICK * 1.6;
+
     static final String ASPECT_POTENTIA = "potentia";
     static final String ASPECT_IGNIS = "ignis";
 
@@ -134,7 +141,7 @@ final class ChamberBurn {
     private double powerFor() {
         String path = tank.aspectPath();
         if (ASPECT_POTENTIA.equals(path)) {
-            return BASE_AE_PER_TICK * 1.6;
+            return PEAK_AE_PER_TICK;
         }
         if (ASPECT_IGNIS.equals(path)) {
             return BASE_AE_PER_TICK;
