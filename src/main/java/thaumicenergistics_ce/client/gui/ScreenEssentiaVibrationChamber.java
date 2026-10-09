@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
+import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
 import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 
 /**
@@ -144,7 +145,9 @@ public class ScreenEssentiaVibrationChamber extends AbstractContainerScreen<Menu
                     "thaumicenergistics_ce.gui.vibration_chamber.energy.tip",
                     formatEnergy(menu.reading(MenuEssentiaVibrationChamber.DATA_ENERGY)),
                     formatEnergy(menu.reading(MenuEssentiaVibrationChamber.DATA_ENERGY_MAX))));
-            lines.add(Component.translatable("thaumicenergistics_ce.gui.vibration_chamber.energy.limit")
+            lines.add(Component.translatable(
+                            "thaumicenergistics_ce.gui.vibration_chamber.energy.limit",
+                            String.format("%.0f", BlockEntityEssentiaVibrationChamber.MAX_OUTPUT_PER_TICK))
                     .withStyle(ChatFormatting.GRAY));
             graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
         } else if (inside(mouseX, mouseY, BURN_X, BURN_Y, BURN_W, BURN_H)) {

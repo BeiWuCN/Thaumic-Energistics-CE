@@ -221,7 +221,7 @@
   "thaumicenergistics_ce.monitor.bubble.risk": "注魔风险: %s",
   "thaumicenergistics_ce.gui.vibration_chamber.burn.tip": "燃料燃烧进度 %s%%",
   "thaumicenergistics_ce.gui.vibration_chamber.energy": "能量 %s/%s",
-  "thaumicenergistics_ce.gui.vibration_chamber.energy.limit": "输出上限 2000 AE/tick",
+  "thaumicenergistics_ce.gui.vibration_chamber.energy.limit": "输出上限 %s AE/tick",
   "thaumicenergistics_ce.gui.vibration_chamber.energy.tip": "能量槽 %s / %s",
   "thaumicenergistics_ce.gui.vibration_chamber.essentia": "源质 %s/%s",
   "thaumicenergistics_ce.gui.vibration_chamber.essentia.tip": "缓冲源质 %s / %s",

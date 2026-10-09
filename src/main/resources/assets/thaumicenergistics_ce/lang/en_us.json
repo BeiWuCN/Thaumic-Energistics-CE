@@ -221,7 +221,7 @@
   "thaumicenergistics_ce.monitor.bubble.risk": "Infusion risk: %s",
   "thaumicenergistics_ce.gui.vibration_chamber.burn.tip": "Fuel burn progress %s%%",
   "thaumicenergistics_ce.gui.vibration_chamber.energy": "Energy %s/%s",
-  "thaumicenergistics_ce.gui.vibration_chamber.energy.limit": "Output limit 2000 AE/tick",
+  "thaumicenergistics_ce.gui.vibration_chamber.energy.limit": "Output limit %s AE/tick",
   "thaumicenergistics_ce.gui.vibration_chamber.energy.tip": "Energy slot %s / %s",
   "thaumicenergistics_ce.gui.vibration_chamber.essentia": "Essentia %s/%s",
   "thaumicenergistics_ce.gui.vibration_chamber.essentia.tip": "Buffered essentia %s / %s",

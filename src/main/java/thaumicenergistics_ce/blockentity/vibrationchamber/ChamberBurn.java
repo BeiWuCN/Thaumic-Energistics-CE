@@ -12,7 +12,11 @@ final class ChamberBurn {
 
     static final int BASE_BURN_TICKS = 800;
 
-    static final double BASE_AE_PER_TICK = 200.0;
+    /** 基础输出：potentia 乘 1.6、ignis 原样、其余减半。 */
+    static final double BASE_AE_PER_TICK = 20.0;
+
+    /** 单 tick 的产出天花板：[potentia] 的 1.6 倍，推给网格的上限就取在它上面。 */
+    static final double PEAK_AE_PER_TICK = BASE_AE_PER_TICK * 1.6;
 
     static final String ASPECT_POTENTIA = "potentia";
     static final String ASPECT_IGNIS = "ignis";
@@ -134,7 +138,7 @@ final class ChamberBurn {
     private double powerFor() {
         String path = tank.aspectPath();
         if (ASPECT_POTENTIA.equals(path)) {
-            return BASE_AE_PER_TICK * 1.6;
+            return PEAK_AE_PER_TICK;
         }
         if (ASPECT_IGNIS.equals(path)) {
             return BASE_AE_PER_TICK;
