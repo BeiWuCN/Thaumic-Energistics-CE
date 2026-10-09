@@ -190,7 +190,7 @@
   "tc.research_text.WIRELESSESSENTIATERMINAL.stage.1": "为了看罐子而抱着终端跑来跑去，实在浪费脚力。ME网络给无线终端用的那套无线接收器，用来传送源质应当同样可行。",
   "tc.research_text.WIRELESSESSENTIATERMINAL.stage.2": "无线源质终端通过无线访问点接入网络，在信号范围内随时随地查看网络中的源质。像ME无线终端一样使用它即可完成绑定。",
   "tc.research_text.ESSENTIAACCESSCARD.stage.1": "ME接口只处理物品与流体。把一张§l基础卡§r与扩散核心一同注魔，得到的卡片可以让接口处理源质：在接口的配置行上标记要素后，它会把这些要素从旁边的机器中抽进网络。",
-  "tc.research_text.ESSENTIAACCESSCARD.stage.2": "把这张卡装进ME接口，方块形态和线缆部件各需要一张，然后在配置行上标出想要的要素，它就会允许这类要素进入ME网络。同样的卡也可以装进奥术合成终端的升级槽，在那里它提供终端上的源质操作。",
+  "tc.research_text.ESSENTIAACCESSCARD.stage.2": "把这张卡装进ME接口，它就会允许其具备操纵源质的能力，如果在配置行上标记了想要的源质，它就会从ME网络输出对应的源质到外界。同样的卡也可以装进无线奥术终端的升级槽，在那里它提供终端上的源质操作。",
   "tc.research_text.VISCONNECTIONCARD.stage.1": "AE2的升级卡大多是一张§l基础卡§r加上某种部件。把基础卡与一枚能共鸣灵气的结晶一同注魔，得到的卡片让机器不再向网络购买灵气，而是直接取用周围的灵气。",
   "tc.research_text.VISCONNECTIONCARD.stage.2": "用一枚§l灵气魔力水晶碎片§r注魔基础卡，再把它装进奥术合成终端的升级槽。合成所需的未定型灵气直接取自终端周围的灵气；随身终端则取自玩家周围的灵气，网络不承担这部分开销。",
   "tc.research_text.WIRELESSARCANECRAFTINGTERMINAL.stage.1": "奥术合成终端绑定在它合成时所在的那张工作台上，只能在附近使用。既然无线接收器能把网络送到源质终端前，也应该能把这张工作台送到玩家手上。",
