@@ -1,4 +1,4 @@
-![Thaumic Energistics: CE](https://cdn.jsdelivr.net/gh/BeiWuCN/Thaumic-Energistics-CE@2.0-Renewed/logo.png)
+![Thaumic Energistics: CE](https://cdn.jsdelivr.net/gh/BeiWuCN/Thaumic-Energistics-CE@1.21.1/logo.png)
 
 [English](README.en.md) · [仓库](https://github.com/beiwucn/Thaumic-Energistics-CE) · [问题反馈](https://github.com/beiwucn/Thaumic-Energistics-CE/issues)
 

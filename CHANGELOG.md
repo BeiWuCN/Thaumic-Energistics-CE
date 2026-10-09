@@ -1,3 +1,51 @@
+# TECE 2.7.4.2
+
+## 修复
+
+- 把拆掉 ME 接口时被一起清掉的源质留给掉落物，此前接口一破，里面存着的源质就没了
+- 清掉无线奥术合成终端的绑定时一并断开 ME 链接，此前终端解除绑定后仍挂在网络上
+- 让无线奥术合成终端只认它绑定的那一个网络，此前它会同时接上两个
+- 把接口的源质行交回给 AE2 自己补货，这一线的补货逻辑与 AE2 的库存管理是重复的
+- 把振动室的基础输出降到十分之一：200 → 20 AE/t，potentia 峰值 320 → 32、ignis 20、其余要素 10，一份源质从 4 万～16 万 AE 降到 4 千～1.6 万 AE
+- 让振动室的输出上限跟着常量走，不再把 2000 AE/t 写死在界面文案里：界面与 Jade 现在显示 32
+- 删掉研究页里那句没有依据的「约 350%」，不再承诺具体倍数
+
+## 移除
+
+- 删掉样板供应器的升级槽，以及随行的两个访问器和两个 mixin。AE2 的样板供应器没有升级 inventory，2.7.3.66 给它加的那个槽插进去的访问卡没有归宿
+
+## 其他（内部重构、构建、文档）
+
+- 把访问卡的研究文本改成描述它在 ME 接口上的实际行为（从网络向外输出源质），并写明它也能装进无线奥术合成终端
+- 在文案里把无线奥术合成终端写全名
+- 把 README 与 README.en.md 里的图标地址从旧分支名改到 `1.21.1`
+
+---
+
+# TECE 2.7.4.2
+
+## Fixes
+
+- Keep the essentia an interface is broken with: it stays with the dropped item, where before breaking the interface destroyed whatever it held
+- Unlink the ME network when the terminal's binding is cleared, where before an unbound terminal stayed on the network
+- Keep the wireless arcane crafting terminal on the single network it is bound to, where before it joined two at once
+- Hand the interface's essentia rows back to AE2 to stock: this line's own stocking logic duplicated AE2's inventory management
+- Cut the essentia vibration chamber's output to a tenth: 200 -> 20 AE/t, which puts potentia's peak at 32, ignis at 20 and every other aspect at 10, and takes one piece of essentia from 40k-160k AE down to 4k-16k AE
+- Read the chamber's output limit from the constant instead of hardcoding 2000 AE/t in the GUI text: the screen and Jade show 32 now
+- Drop the unsupported 350% claim from the chamber's research page rather than promise a figure
+
+## Removals
+
+- Drop the pattern provider's upgrade slot along with the two accessors and two mixins that came with it. AE2's pattern provider has no upgrade inventory, so the card 2.7.3.66 made room for had nowhere to live
+
+## Other (internal refactors, build, documentation)
+
+- Describe what the access card actually does at the interface - it outputs aspects from the network to the outside - and say it also fits a wireless arcane crafting terminal
+- Name the wireless arcane crafting terminal in full in its text
+- Point the README and README.en.md icon at the new branch name, `1.21.1`
+
+---
+
 # TECE 2.7.3.66
 
 ## 新增
