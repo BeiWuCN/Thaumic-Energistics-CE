@@ -1,48 +1,69 @@
-![Thaumic Energistics: CE](https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/26.1.2/src/main/resources/icon.png)
-
-[中文](README.md) · [Repository](https://github.com/beiwucn/Thaumic-Energistics-CE) · [Issues](https://github.com/beiwucn/Thaumic-Energistics-CE/issues)
-
 # Thaumic Energistics: CE
 
-## About
+Thaumic Energistics: CE connects Thaumaturge's essentia and Vis to Applied Energistics 2's ME network. Store aspects in one place, find and withdraw them through terminals, and let the network supply materials for alchemy, infusion and arcane crafting.
 
-A Minecraft mod about essentia and networks. It connects Thaumaturge's essentia to AE2's ME network: aspects are stored on the network, moved by it, and crafted by it.
+The project continues the original Thaumic Energistics gameplay using Thaumaturge on newer Minecraft versions. This branch targets **Minecraft 26.1.2 / NeoForge**. For Minecraft 1.21.1, see the [1.21.1 branch](https://github.com/BeiWuCN/Thaumic-Energistics-CE/tree/1.21.1).
 
-This mod is the original Thaumic Energistics (stopped at 1.12.2) redone on 1.21.1, written against Thaumaturge's API.
+[中文](README.md) · [Downloads](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) · [Changelog](CHANGELOG-2.7.4.4.md) · [Issues](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues)
 
-Requirements: Minecraft 1.21.1, NeoForge 21.1.250 or newer, Applied Energistics 2 19.2.x, Thaumaturge 0.4.4 or newer.
+<img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/26.1.2/src/main/resources/icon.png" alt="Thaumic Energistics: CE" width="420">
 
-It contains essentia storage components, the essentia terminal, several essentia machines, wireless links and arcane crafting, plus a complete Thaumaturge research tree.
+## Features
 
-## Building
+- **Essentia storage and transfer:** store aspects in ME Essentia Cells and fit Essentia Access Cards to ME Import, Export and Storage Buses to connect external essentia containers.
+- **Essentia terminals:** browse network aspects, search names in your language, and deposit or withdraw essentia using containers. The wireless terminal provides remote access.
+- **Arcane crafting:** wired and wireless arcane terminals provide wand and crystal slots with crafting cost displays. The Arcane Assembler handles automated crafting.
+- **Vis relay connections:** bind a Vis Connection Card to a Vis Relay Interface output to cover a terminal's local chunk VIS shortage. The output must be loaded and online.
+- **Alchemy and infusion supply:** use the Alchemy Provider, Infusion Provider and related devices to supply Thaumaturge crafting from the ME network.
+- **Golem wireless backpacks:** let golems exchange items with the network and choose backpack appearances using supported materials.
+- **Research and configuration:** unlock content through the Thaumonomicon and adjust machine values and feature switches on the server.
 
-Building uses JDK 21 and `gradlew build`.
+## Installation
 
-The dependencies come from the Modrinth maven repository with their versions pinned in `gradle.properties`: Applied Energistics 2, JEI, Jade, Thaumaturge.
+Download the mod JAR containing `26.1.2-neoforge` in its name from [Releases](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) and place it in your instance's `mods` folder. The `-sources.jar` contains source code and is not an installation file.
 
-Thaumaturge itself has to be built locally once. It ships as All Rights Reserved, publishes no maven artifact, and its licence forbids distributing it or any binary built from it, so this repository does not carry it. Section 2.4 of that licence permits building it for your own use:
+The current release was built and tested with:
 
-```sh
-tools/fetch-thaumaturge.sh                      # Linux, macOS, CI
-powershell -File tools/fetch-thaumaturge.ps1    # Windows
+| Component | Version |
+| --- | --- |
+| Minecraft | 26.1.2 |
+| NeoForge | 26.1.2.112 |
+| Java | 25 |
+| Applied Energistics 2 | 26.1.13-beta |
+| Thaumaturge | 1.0.3, source revision `80903dd9` |
+
+AE2 and Thaumaturge are required. JEI provides recipe viewing and transfer, Jade provides machine tooltips, and Curios adds accessory slots for wireless terminals. Configure the wireless terminal shortcuts in AE2's controls category; both are unbound by default.
+
+Server settings are stored in `config/thaumicenergistics_ce-server.toml`. By default, ordinary ME terminals hide essentia, and arcane terminals require an Essentia Access Card to display it. Spending AE to draw environmental VIS without a Vis Connection Card is disabled by default. The two cards serve different purposes.
+
+## Building from source
+
+Use JDK 25. Build the pinned Thaumaturge dependency first, then build this mod.
+
+Windows:
+
+```powershell
+powershell -File tools/fetch-thaumaturge.ps1
+.\gradlew.bat build
 ```
 
-The script clones <https://github.com/Leclowndu93150/Thaumaturge/> at the commit named by `thaumaturge_commit` in `gradle.properties` and puts the jar it builds into `libs/`. With that jar present the commands are not needed; without it `gradlew build` stops during configuration and prints them. The jar is never committed and never passed on.
+Linux / macOS:
 
-## License
+```sh
+./tools/fetch-thaumaturge.sh
+./gradlew build
+```
 
-MIT, see `LICENSE`.
+Dependency versions and the Thaumaturge revision are pinned in `gradle.properties`. The script fetches Thaumaturge's source, applies the project patches, generates its data and places the dependency JAR in `libs`. This mod's artifacts are written to `build/libs` and do not bundle Thaumaturge binaries.
 
-The code derives from Thaumic Energistics by Nividica, which is MIT as well. That part remains the original authors' copyright, so the upstream notice (Chris and BrockWS) is carried in `LICENSE` too; keep it there when redistributing. Thaumaturge is Leclowndu93150's project. High-version textures are drawn by @麦淇淋.
+## Reporting issues
 
-## Issues
+Report bugs or suggestions through [Issues](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues). Include your Minecraft, NeoForge, TECE, AE2 and Thaumaturge versions, reproduction steps, and logs or a crash report. Screenshots help with interface problems.
 
-Crashes, suggestions and bugs all go to the [issues page](https://github.com/beiwucn/Thaumic-Energistics-CE/issues).
+This repository handles the CE versions. Report issues with the original Thaumic Energistics to its own project.
 
-Before submitting, make sure you are using the latest version, that the issue has not already been answered or fixed, and that it is a valid issue. Anything vanilla Minecraft, AE2 or Thaumaturge can already do is considered an invalid suggestion; asking for a smaller, more compact or more efficient version of something is considered invalid as well.
+## License and credits
 
-Click New Issue to start. Where the repository provides a template, fill that in: the template lists the information to add. Then click Submit New Issue and wait for feedback.
+This project is licensed under [MIT](LICENSE). Parts of the code derive from Nividica's [Thaumic Energistics](https://github.com/Nividica/ThaumicEnergistics); the original copyright notices for Chris and BrockWS are preserved in the license file.
 
-The more complete the information, the faster the issue is located and the faster a fixed version arrives. Issues that do not match these requirements may be closed.
-
-This tracker covers the CE version on 1.21.1 / 26.1.2 only. The original Thaumic Energistics, which stopped at 1.12.2, is a different project.
+Thaumaturge is developed by Leclowndu93150. Textures for the newer versions are drawn by @麦淇淋. Thaumaturge has its own license; follow the upstream terms. This repository does not distribute its binaries.

@@ -1,48 +1,69 @@
-![Thaumic Energistics: CE](https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/26.1.2/src/main/resources/icon.png)
-
-[English](README.en.md) · [仓库](https://github.com/beiwucn/Thaumic-Energistics-CE) · [问题反馈](https://github.com/beiwucn/Thaumic-Energistics-CE/issues)
-
 # Thaumic Energistics: CE
 
-## 简介
+Thaumic Energistics: CE（神秘能源 CE）将 Thaumaturge 的源质与魔力接入 Applied Energistics 2 的 ME 网络。你可以集中存储源质，通过终端查找和取用要素，让网络为炼金、注魔与奥术合成提供材料。
 
-一个关于源质与网络的 Minecraft 模组。它把 Thaumaturge 的源质接进 AE2 的 ME 网络：要素存在网络上、在网络上搬运、由网络自动合成。
+项目延续原版 Thaumic Energistics 的玩法，并基于 Thaumaturge 适配新的 Minecraft 版本。当前分支面向 **Minecraft 26.1.2 / NeoForge**；1.21.1 版本请查看 [1.21.1 分支](https://github.com/BeiWuCN/Thaumic-Energistics-CE/tree/1.21.1)。
 
-本模组是原版 Thaumic Energistics（止于 1.12.2）在 1.21.1 上的重做，基于 Thaumaturge 的 API 编写。
+[English](README.en.md) · [下载](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) · [更新记录](CHANGELOG-2.7.4.4.md) · [问题反馈](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues)
 
-运行环境：Minecraft 1.21.1、NeoForge 21.1.250 或更高、Applied Energistics 2 19.2.x、Thaumaturge 0.4.4 或更高
+<img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/26.1.2/src/main/resources/icon.png" alt="Thaumic Energistics: CE" width="420">
 
-内容包含源质存储元件、源质终端、若干源质机器、无线连接与奥术合成，以及一套完整的 Thaumaturge 研究树。
+## 主要功能
 
-## 编译
+- **源质存储与传输**：使用 ME 源质存储单元保存要素，给 ME 输入、输出和存储总线装上源质访问卡，即可与外部源质容器交互。
+- **源质终端**：查看网络中的源质，按当前语言搜索名称，并通过容器存取源质。无线源质终端可以远程访问网络。
+- **奥术合成**：有线和无线奥术合成终端提供法杖、水晶槽与合成费用提示，奥术装配室用于自动合成。
+- **魔力中继**：魔力访问卡可以绑定魔力中继接口的输出端，在终端所在区块 VIS 不足时补足合成所需魔力。绑定端必须处于加载且在线的状态。
+- **炼金与注魔供给**：通过炼金供应器、注魔供应器等设备，让 ME 网络参与 Thaumaturge 的制作流程。
+- **傀儡无线背包**：让傀儡与 ME 网络交换物品，并使用支持的材料选择背包外观。
+- **研究与配置**：通过魔导手册研究解锁内容；服务端可以调整机器数值和功能开关。
 
-编译使用 JDK 21 与 `gradlew build`。
+## 安装与运行
 
-依赖由 Modrinth 的 maven 仓库提供，版本固定在 `gradle.properties`：Applied Energistics 2、JEI、Jade、Thaumaturge。
+从 [Releases](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) 下载名称包含 `26.1.2-neoforge` 的模组 JAR，放入实例的 `mods` 文件夹。`-sources.jar` 是源码包，不用于安装。
 
-Thaumaturge 需要本地构建一次。它以 All Rights Reserved 发布，没有 maven 制品，其许可也禁止分发它以及由它构建的任何二进制，所以本仓库不包含它。许可 §2.4 允许自行构建并使用：
+当前版本的构建与测试环境：
 
-```sh
-tools/fetch-thaumaturge.sh                      # Linux / macOS / CI
-powershell -File tools/fetch-thaumaturge.ps1    # Windows
+| 项目 | 版本 |
+| --- | --- |
+| Minecraft | 26.1.2 |
+| NeoForge | 26.1.2.112 |
+| Java | 25 |
+| Applied Energistics 2 | 26.1.13-beta |
+| Thaumaturge | 1.0.3，源码提交 `80903dd9` |
+
+AE2 和 Thaumaturge 为必需依赖。JEI 提供配方查看与转移，Jade 提供设备提示，Curios 提供无线终端的饰品栏支持。无线终端的打开按键可在 AE2 按键分类中设置，默认未绑定。
+
+服务端配置位于 `config/thaumicenergistics_ce-server.toml`。默认情况下，普通 ME 终端不显示源质，奥术终端需装源质访问卡才能显示源质；未装魔力访问卡时耗电取用环境 VIS 的功能默认关闭。两种访问卡的用途不同。
+
+## 从源码构建
+
+需要 JDK 25。先按项目固定的版本构建 Thaumaturge，再构建本模组。
+
+Windows：
+
+```powershell
+powershell -File tools/fetch-thaumaturge.ps1
+.\gradlew.bat build
 ```
 
-脚本按 `gradle.properties` 中 `thaumaturge_commit` 指定的 commit 克隆 <https://github.com/Leclowndu93150/Thaumaturge/>，并把构建出的 jar 放进 `libs/`。该 jar 存在时不需要上述命令；缺少它时 `gradlew build` 在配置阶段停止并给出这两条命令。这个 jar 不提交、不转发。
+Linux / macOS：
 
-## 许可
+```sh
+./tools/fetch-thaumaturge.sh
+./gradlew build
+```
 
-MIT，见 `LICENSE`。
-
-代码源自 Nividica 的 Thaumic Energistics，后者同样以 MIT 发布。那部分版权仍属原作者，`LICENSE` 中已一并保留上游的版权声明（Chris 与 BrockWS），再分发时请保留该声明。Thaumaturge 是 Leclowndu93150 的项目。高版本材质由 @麦淇淋 绘制。
+依赖版本与 Thaumaturge 提交固定在 `gradle.properties`。脚本会获取 Thaumaturge 源码、应用项目补丁、生成数据，并将构建出的依赖 JAR 放入 `libs`。本模组的产物位于 `build/libs`，不包含 Thaumaturge 的二进制。
 
 ## 问题反馈
 
-崩溃、建议与 bug 都在 [issues 页](https://github.com/beiwucn/Thaumic-Energistics-CE/issues) 提交。
+请在 [Issues](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues) 提交问题或建议。报告问题时请附上 Minecraft、NeoForge、TECE、AE2 和 Thaumaturge 的版本，以及复现步骤、日志或崩溃报告。涉及界面问题时可以附上截图。
 
-提交前确认使用最新版本，确认该问题尚未被回答或修复，并确认它是一个有效的问题。原版 Minecraft、AE2 或 Thaumaturge 本身可以实现的功能，这类建议视为无效；要求更小、更紧凑或更高效的版本，同样视为无效。
+此仓库处理 CE 版本的问题；原版 Thaumic Energistics 的问题请反馈给对应项目。
 
-点击 New Issue 开始。仓库提供模板时按模板填写，模板中列有需要补充的信息。填写完成后点击 Submit New Issue，然后等待回复。
+## 许可与致谢
 
-信息越完整，问题定位越快，修复版本到手越早。不符合上述要求的 issue 可能被直接关闭。
+本项目使用 [MIT 许可](LICENSE)。部分代码源自 Nividica 的 [Thaumic Energistics](https://github.com/Nividica/ThaumicEnergistics)，原作者 Chris、BrockWS 的版权声明保留在许可文件中。
 
-本仓库只处理 1.21.1 / 26.1.2 上的 CE 版本。止于 1.12.2 的原版 Thaumic Energistics 是另一个项目。
+Thaumaturge 由 Leclowndu93150 开发，高版本材质由 @麦淇淋 绘制。Thaumaturge 使用独立许可，请遵守其上游许可；本仓库不分发其二进制。
