@@ -1,0 +1,103 @@
+name: Publish Release to CurseForge
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing GitHub Release tag
+        required: true
+        type: string
+      dry_run:
+        description: Validate assets without uploading to CurseForge
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: curseforge-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.release.outputs.matrix }}
+      tag: ${{ steps.release.outputs.tag }}
+      changelog: ${{ steps.release.outputs.changelog }}
+      version_type: ${{ steps.release.outputs.version_type }}
+    steps:
+      - name: Read release and select mod artifacts
+        id: release
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        with:
+          script: |
+            const tag = process.env.RELEASE_TAG;
+            const { data: release } = await github.rest.repos.getReleaseByTag({
+              ...context.repo, tag
+            });
+            if (release.draft) throw new Error('Draft releases cannot be published.');
+            const artifacts = release.assets.filter(asset =>
+              /^thaumicenergistics_ce-(1\.21\.1|26\.1\.2)-neoforge-.+\.jar$/.test(asset.name)
+              && !/-(sources|javadoc|dev)\.jar$/.test(asset.name)
+            ).map(asset => ({
+              filename: asset.name,
+              minecraft: asset.name.match(/^thaumicenergistics_ce-(1\.21\.1|26\.1\.2)-/)[1],
+              digest: asset.digest || '',
+              display_name: `${release.name || tag} / ${asset.name.includes('-26.1.2-') ? '26.1.2' : '1.21.1'} / NeoForge`
+            }));
+            if (!artifacts.length) throw new Error('No supported TECE mod JAR found in the release.');
+            core.setOutput('matrix', JSON.stringify({ include: artifacts }));
+            core.setOutput('tag', tag);
+            core.setOutput('changelog', release.body || '');
+            core.setOutput('version_type', release.prerelease ? 'beta' : 'release');
+
+  publish:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - name: Download published mod JAR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+          ASSET_NAME: ${{ matrix.filename }}
+          EXPECTED_DIGEST: ${{ matrix.digest }}
+        run: |
+          mkdir -p dist
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern "$ASSET_NAME" --dir dist
+          if [[ "$EXPECTED_DIGEST" == sha256:* ]]; then
+            printf '%s  %s\n' "${EXPECTED_DIGEST#sha256:}" "dist/$ASSET_NAME" | sha256sum --check
+          fi
+          unzip -t "dist/$ASSET_NAME"
+      - name: Validate configuration
+        env:
+          PROJECT_ID: ${{ vars.CURSEFORGE_PROJECT_ID }}
+        run: |
+          [[ "$PROJECT_ID" =~ ^[0-9]+$ ]] || { echo 'CURSEFORGE_PROJECT_ID must be configured.'; exit 1; }
+      - name: Publish to CurseForge
+        if: ${{ github.event_name == 'release' || !inputs.dry_run }}
+        uses: Kira-NT/mc-publish@52307b03863581dec6b652b83e597aec02ebb075
+        with:
+          curseforge-id: ${{ vars.CURSEFORGE_PROJECT_ID }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          files: dist/${{ matrix.filename }}
+          name: ${{ matrix.display_name }}
+          version: ${{ needs.prepare.outputs.tag }}
+          version-type: ${{ needs.prepare.outputs.version_type }}
+          changelog: ${{ needs.prepare.outputs.changelog }}
+          loaders: neoforge
+          game-versions: ${{ matrix.minecraft }}
+          game-version-filter: all
+          dependencies: |
+            applied-energistics-2(required)
+            thaumaturge(required)
+          retry-attempts: 2
