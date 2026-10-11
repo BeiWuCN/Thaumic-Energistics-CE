@@ -9,12 +9,6 @@ import net.minecraft.world.level.storage.ValueOutput;
 import thaumicenergistics_ce.block.BlockGachaBox;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
-/**
- * 脑自己的槽位、镜像它的 {@code jar} 方块状态，以及离开槽位意味着什么。
- * 只有缸中之脑能放入，且永远不能是一叠。
- * 漏斗或管道能填这个槽位，永远不能清空它：脑由已绑定玩家亲自动手离开，
- * 那一手会解除箱子的绑定。
- */
 final class GachaBrain {
 
     private static final String TAG_BRAIN = "Brain";
@@ -52,17 +46,14 @@ final class GachaBrain {
         return !container.getItem(0).isEmpty();
     }
 
-    /** 放入一颗脑，复制一份，玩家手里拿的堆仍是他自己的。 */
     void put(ItemStack held) {
         container.setItem(0, held.copyWithCount(1));
     }
 
-    /** 凭空放入一颗脑：脑只存在方块状态里的存档需要这个。 */
     void adopt() {
         container.setItem(0, TcRegistry.jarBrainStack());
     }
 
-    /** 清空槽位，交回里面原有的东西，没有就交回空。 */
     ItemStack take() {
         if (!has()) {
             return ItemStack.EMPTY;
@@ -72,8 +63,6 @@ final class GachaBrain {
         return taken;
     }
 
-    /** 方块状态跟着槽位走，客户端看到、渲染器画的就是它。
-     * 已经移除的箱子跳过：被拆开之后它绝不能把自己的方块写回去。 */
     private void settled() {
         if (!has()) {
             box.unbind();
@@ -90,7 +79,6 @@ final class GachaBrain {
     }
 
     void save(ValueOutput output) {
-        // 槽位可能是空的，而普通物品编解码器不接受数量为零。
         output.store(TAG_BRAIN, ItemStack.OPTIONAL_CODEC, container.getItem(0));
     }
 

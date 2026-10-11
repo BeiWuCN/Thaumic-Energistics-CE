@@ -7,11 +7,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.item.ItemStack;
 
-/**
- * 奥术组装机四个装备槽能放什么。机器容器和菜单槽共用这条规则：
- * 两份规则正是菜单什么都收而容器拒绝的成因，只有 [mayPlace] 看得见点击。
- * 顺序对应槽 0..3，头、胸、腿、脚。
- */
 public final class GearSlots {
 
     public static final int COUNT = 4;
@@ -39,7 +34,6 @@ public final class GearSlots {
         if (!(stack.getItem() instanceof IVisDiscountGear) && !(stack.getItem() instanceof IWarpingGear)) {
             return false;
         }
-        // 26.1.2 删掉了 Equippable 接口：槽位现在放在 EQUIPPABLE 数据组件上。
         Equippable equipable = stack.get(DataComponents.EQUIPPABLE);
         if (equipable == null) {
             return false;

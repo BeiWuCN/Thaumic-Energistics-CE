@@ -16,12 +16,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProvider;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
 
-/**
- * 无线绑定工具：建起和断开炼金供应器用的链接。
- * 链接是两端式的，得有个东西把一端的身份带到另一端：这个工具装一个坐标，
- * 即已选中但还没绑定的接收端，第二次点击完成配对。
- * 潜行把读取和写入分开；没有它，走过一座祭坛就会重新绑定。
- */
 public class ItemWirelessConnector extends Item {
 
     private static final String NBT_SELECTED = "SelectedReceiver";
@@ -72,10 +66,6 @@ public class ItemWirelessConnector extends Item {
                         receiver.getX(), receiver.getY(), receiver.getZ()));
     }
 
-    /**
-     * 这个工具当前持有的接收端，或 {@code null}。经自定义数据组件读取：
-     * 1.21 从 {@link ItemStack} 上移除了直接的 tag 访问器，真正传输的也是组件。
-     */
     private static @Nullable CompoundTag selection(ItemStack tool) {
         CustomData data = tool.get(DataComponents.CUSTOM_DATA);
         return data == null ? null : data.copyTag();

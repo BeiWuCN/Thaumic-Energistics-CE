@@ -6,10 +6,6 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 
-/**
- * 菜单对它背后机器的读取：两侧共同给解析的 level、槽位持有的核心、方块还在不在。
- * 客户端菜单没有机器，每次读取改为从菜单自己的槽位作答。
- */
 final class InscriberMachineAccess {
 
     private InscriberMachineAccess() {}

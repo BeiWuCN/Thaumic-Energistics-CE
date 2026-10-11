@@ -19,11 +19,6 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.alchemyprovider.BlockEntityAlchemyProviderConnection;
 
-/**
- * 炼金供应器连接件：无线源质链路的接收端。{@code facing} 把插头指向它装的那个面，
- * 本 mod 资源里的方块状态针对它声明了全部六个方向，属性和它的名字都是关键。
- * {@code connected} 是链路在不在；插头能装在任意面，向上向下都行。
- */
 public class BlockAlchemyProviderConnection extends ThEBaseEntityBlock {
 
     public static final MapCodec<BlockAlchemyProviderConnection> CODEC =
@@ -70,10 +65,6 @@ public class BlockAlchemyProviderConnection extends ThEBaseEntityBlock {
         return new BlockEntityAlchemyProviderConnection(pos, state);
     }
 
-    /**
-     * 方块 tick 器搬源质：它没有自己的网格节点，它是线不是机器，故没法像供应器那样让 AE2 来 tick 它；
-     * 工作量是每半秒一次传输。
-     */
     @Override
     public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(
             Level level, BlockState state, BlockEntityType<T> type) {

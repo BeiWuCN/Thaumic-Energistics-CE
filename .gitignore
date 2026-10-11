@@ -33,5 +33,6 @@ replay_pid*.log
 # has no use for: the plan documents, the 2.0-Renewed archive, the diagnostic source set, and the
 # one-off scripts that have already done their job. Nothing in the build reads any of it.
 _scratch/
+src/generated/resources/.cache/
 PLAN*.md
 Thaumic-Energistics-CE-2.0-Renewed.zip

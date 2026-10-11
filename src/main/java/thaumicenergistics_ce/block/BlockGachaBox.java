@@ -28,7 +28,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.gachabox.BlockEntityGachaBox;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
-/** 方块状态带 {@code facing} 和 {@code screen}；{@code jar} 镜像槽里的大脑。 */
 public class BlockGachaBox extends ThEBaseEntityBlock {
 
     public static final MapCodec<BlockGachaBox> CODEC = simpleCodec(BlockGachaBox::new);
@@ -73,10 +72,6 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
-    /**
-     * 箱子的整个表面：潜行取回大脑，点击认领残留的无主大脑，
-     * 其余情况就是给它喂大脑或加速卡。
-     */
     @Override
     protected InteractionResult useItemOn(
             ItemStack stack,
@@ -90,7 +85,6 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
         return result == InteractionResult.SUCCESS ? InteractionResult.SUCCESS : InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
-    /** 潜行操作空手也算，而空手走的是这里，不是上面那个方法。 */
     @Override
     protected InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
@@ -109,8 +103,6 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
             takeBack(level, pos, player, state);
             return InteractionResult.SUCCESS;
         }
-        // 盒里残留的无主大脑（来自中途失败的存档）由点击的玩家认领：
-        // 一样都不丢，一次点击就修好了。
         if (level.getBlockEntity(pos) instanceof BlockEntityGachaBox unbound && unbound.hasUnboundBrain()) {
             if (level.isClientSide()) {
                 return InteractionResult.SUCCESS;
@@ -120,15 +112,12 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
                     Component.translatable("block.thaumicenergistics_ce.gacha_box.rebound"));
             return InteractionResult.SUCCESS;
         }
-        // 已装大脑的盒子只收被给的那种大脑，别的放不进去。
         if (!state.getValue(JAR)
                 && TcRegistry.isJarBrain(stack)
                 && level.getBlockEntity(pos) instanceof BlockEntityGachaBox box) {
             if (level.isClientSide()) {
                 return InteractionResult.SUCCESS;
             }
-            // 状态变化由槽位触发，不由方块触发：
-            // 实体保留自己的数据，绑定到放入大脑的玩家。
             box.addBrain(stack);
             box.bind(player);
             level.playSound(null, pos, TcRegistry.jarBrainPlaceSound(), SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -137,8 +126,6 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
             }
             return InteractionResult.SUCCESS;
         }
-        // 四个槽位只收加速卡，只有它缩短一轮的时间。
-        // 别的升级，容量卡或红石卡，一律拒收不存。
         if (AEItems.SPEED_CARD.is(stack)
                 && level.getBlockEntity(pos) instanceof BlockEntityGachaBox box
                 && box.hasRoomForCard()) {
@@ -155,7 +142,6 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
         return InteractionResult.PASS;
     }
 
-    /** 往装好大脑的箱子上潜行：先解绑，之后取出来的东西归新主人。 */
     private static void takeBack(Level level, BlockPos pos, Player player, BlockState state) {
         if (!(level.getBlockEntity(pos) instanceof BlockEntityGachaBox box)) {
             return;
@@ -169,7 +155,6 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
         }
         box.unbind();
         ItemStack brain = box.takeBrain();
-                // 卡片跟着大脑一起取出：空盒子没有可加速的对象。
         for (ItemStack card : box.takeCards()) {
             give(player, card);
         }
@@ -179,7 +164,6 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
                 Component.translatable("block.thaumicenergistics_ce.gacha_box.lost_target"));
     }
 
-    /** 把物品给玩家，实在放不下才丢到地上。 */
     private static void give(Player player, ItemStack stack) {
         if (!player.getInventory().add(stack)) {
             player.drop(stack, false);
@@ -191,7 +175,6 @@ public class BlockGachaBox extends ThEBaseEntityBlock {
         return new BlockEntityGachaBox(pos, state);
     }
 
-    /** 屏幕能显示的五种状态；名字既是模型后缀也是状态值。 */
     public enum Screen implements StringRepresentable {
         OFF("off"),
         ON("on"),

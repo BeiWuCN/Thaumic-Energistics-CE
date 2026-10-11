@@ -25,16 +25,9 @@ import thaumicenergistics_ce.client.GolemBackpackClientData;
 import thaumicenergistics_ce.golem.BackpackSkins;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 
-/**
- * 每帧从世界渲染阶段画出所有可见背包。
- * Thaumaturge 的傀儡渲染器不是 NeoForge 能加层的 living 类型，没有钩子可挂。
- * {@link #PACK_HEIGHT} 和 {@link #PACK_DEPTH} 是目测定的。
- * 绘制在 AFTER_ENTITIES 阶段，批次在这里收尾。
- */
 @EventBusSubscriber(modid = ThEIds.MODID, value = Dist.CLIENT)
 public final class GolemBackpackRenderer {
 
-    /** 背包在傀儡身体上的高度，以脚上方多少方块计。 */
     private static final float PACK_HEIGHT = 0.42F;
 
     private static final float PACK_DEPTH = 0.16F;
@@ -45,10 +38,6 @@ public final class GolemBackpackRenderer {
 
     private static final GolemBackpackModel MODEL = GolemBackpackModel.create();
 
-    /**
-     * 按皮肤区分的渲染类型，每种只建一次。
-     * {@code RenderType.entityCutoutNoCull(texture)} 每次调用都分配新对象，批次中途切换类型会刷新待处理批次。
-     */
     private static final Map<BackpackSkins, RenderType> PACK_TYPES = new EnumMap<>(BackpackSkins.class);
     private static final Map<BackpackSkins, RenderType> PEARL_TYPES = new EnumMap<>(BackpackSkins.class);
 
@@ -65,7 +54,6 @@ public final class GolemBackpackRenderer {
 
         PoseStack poseStack = event.getPoseStack();
         Vec3 camera = event.getLevelRenderState().cameraRenderState.pos;
-        // 这一帧在一个 tick 里占的比例：傀儡位置插值落在 tick 之间就靠它。
         float partialTick = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
         BufferSource buffers = minecraft.renderBuffers().bufferSource();
         boolean drewAny = false;
@@ -88,11 +76,8 @@ public final class GolemBackpackRenderer {
 
             poseStack.pushPose();
             poseStack.translate(x, y, z);
-            // 傀儡渲染器自身的主体旋转；模型空间 +Z 是傀儡背面，取 +depth。
             poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - bodyRotation));
             poseStack.translate(0.0F, PACK_HEIGHT, PACK_DEPTH);
-            // 四分之一圈：模型盒子按沿 X 轴两像素厚制作。
-            // 放在这里而不写进模型，皮肤纹理才能继续对上它们原本绘制的面。
             poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
             poseStack.scale(PACK_SCALE, PACK_SCALE, PACK_SCALE);
 

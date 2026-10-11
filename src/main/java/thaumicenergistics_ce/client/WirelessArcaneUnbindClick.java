@@ -12,11 +12,6 @@ import thaumicenergistics_ce.item.ItemWirelessArcaneCraftingTerminal;
 import thaumicenergistics_ce.network.ArcaneUnbindPayload;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
-/**
- * 潜行左键点击无线奥术终端：请求服务端遗忘已配对的终端和它的 AE2 链接。
- * 服务端最多只看到一次手臂挥动，手势在这里变成数据包。
- * 只在潜行且手持终端时发送，普通左键点击没有开销。
- */
 @EventBusSubscriber(modid = ThEIds.MODID, value = Dist.CLIENT)
 public final class WirelessArcaneUnbindClick {
 

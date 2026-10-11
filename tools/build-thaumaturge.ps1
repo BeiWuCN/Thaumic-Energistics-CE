@@ -19,7 +19,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$Commit = 'de63133232483fce39a8e9fc1499f8f4e7e82379',
+    [string]$Commit = '80903dd9724ba20811b6ef3bc056a18082613ad6',
     [switch]$SkipClone,
     # A 1.0.x jar is wanted even when a patch has been overtaken by upstream. The skip is loud and
     # per-patch: a silently unpatched jar and a patched one look identical from the outside, which

@@ -3,10 +3,6 @@ package thaumicenergistics_ce.arcane;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 
-/**
- * 奥术样板的 vis 价格：法杖基础消耗加上它所替代的元质晶体。
- * 复合晶体按它的元质算，Thaumaturge 不替代复合晶体。
- */
 final class ArcaneVisCost {
 
     private ArcaneVisCost() {}

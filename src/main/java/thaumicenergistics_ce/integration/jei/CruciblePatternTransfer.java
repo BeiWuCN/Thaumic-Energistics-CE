@@ -19,14 +19,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jspecify.annotations.Nullable;
 
-/**
- * 把坩埚配方写进样板编码终端的处理样板：催化剂进第一格，一个要素一格源质。
- * 用 Thaumaturge 自己的坩埚分类，玩家才会在惯常位置找到转移按钮。
- * 写成处理样板，合成样板的九宫格摆不下坩埚要的要素。
- * 搬运交给 [EncodingHelper]：它把模式切到处理样板，再逐格发数据包；
- * 幽灵槽里的「物品」只是 [GenericStack] 的包装，玩家自己一格一格摆走的也是这条路。
- * 九个格装不下就整次拒绝，不部分填充：半填的样板看着像是「这条配方就是这样」。
- */
 public class CruciblePatternTransfer
         implements IRecipeTransferInfo<PatternEncodingTermMenu, RecipeHolder<?>>,
                 IRecipeTransferHandler<PatternEncodingTermMenu, RecipeHolder<?>> {
@@ -39,17 +31,12 @@ public class CruciblePatternTransfer
         this.helper = helper;
     }
 
-    // ---- IRecipeTransferInfo -------------------------------------------
 
     @Override
     public Class<? extends PatternEncodingTermMenu> getContainerClass() {
         return PatternEncodingTermMenu.class;
     }
 
-    /**
-     * 这个菜单类的任意菜单类型：样板编码终端有方块、线缆部件与无线三种形态，
-     * 只写一个菜单类型会让另外两个没转移按钮。
-     */
     @Override
     public Optional<MenuType<PatternEncodingTermMenu>> getMenuType() {
         return Optional.empty();
@@ -65,7 +52,6 @@ public class CruciblePatternTransfer
         return CrucibleRecipeTypes.isCrucible(recipe);
     }
 
-    /** 处理输入是幽灵槽：JEI 拿它们判断玩家是否备齐原料，转移不往里放真物品。 */
     @Override
     public List<Slot> getRecipeSlots(PatternEncodingTermMenu menu, RecipeHolder<?> recipe) {
         return List.<Slot>of(menu.getProcessingInputSlots());
@@ -76,9 +62,7 @@ public class CruciblePatternTransfer
         return menu.getSlots(SlotSemantics.PLAYER_INVENTORY);
     }
 
-    // ---- IRecipeTransferHandler ----------------------------------------
 
-    // JEI 里这个 6 参数的 [transferRecipe] 是接口唯一的抽象方法。
     @Override
     @SuppressWarnings("removal")
     public @Nullable IRecipeTransferError transferRecipe(
@@ -88,12 +72,11 @@ public class CruciblePatternTransfer
             Player player,
             boolean maxTransfer,
             boolean doTransfer) {
-        List<List<GenericStack>> inputs = CrucibleRecipeTypes.inputsFor(holder);
+        List<List<GenericStack>> inputs = CrucibleRecipeTypes.inputsFor(holder, player.level().registryAccess());
         List<GenericStack> outputs = CrucibleRecipeTypes.outputsFor(holder);
         if (inputs == null || outputs == null) {
             return helper.createInternalError();
         }
-        // 坩埚的要素数量没有上限，样板的输入格有：装不下就明说。
         if (inputs.size() > menu.getProcessingInputSlots().length
                 || outputs.size() > menu.getProcessingOutputSlots().length) {
             return helper.createUserErrorWithTooltip(Component.translatable(TOO_LARGE));

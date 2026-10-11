@@ -37,13 +37,8 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.util.ThELog;
 import thaumicenergistics_ce.util.ThEItemTags;
 
-/**
- * 把「物品蒸馏成源质」写成 ME 处理样板，蒸馏样板不在 Thaumaturge 的配方表里。
- * 只列源物品真正持有的要素；样板带上所属研究，终端据此拒掉没学蒸馏的玩家。
- */
 public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
 
-    /** 源物品所在的幽灵槽；槽里只是模板，不消耗。 */
     public static final int SLOT_SOURCE = 0;
 
     public static final int SLOT_BLANK = 1;
@@ -54,7 +49,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
 
     public static final int MAX_ASPECTS = 6;
 
-    /** 样板要求的研究；键名与 1.12.2 版一致。 */
     public static final String REQUIRED_RESEARCH = "DISTILESSENTIA";
 
     private static final String NBT_RESEARCH = "research";
@@ -78,12 +72,10 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
         }
     };
 
-    // 源物品持有的要素，按 availableAspects 给出的顺序；物品变化时刷新。
     private List<Holder<IAspect>> aspects = List.of();
 
     private ItemStack cachedSource = ItemStack.EMPTY;
 
-    /** 玩家选中的要素，作为 {@link #aspects} 的索引；-1 表示未选。 */
     private int selectedAspect = -1;
 
     public BlockEntityDistillationEncoder(BlockPos pos, BlockState state) {
@@ -94,8 +86,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
         return inventory;
     }
 
-    // ------------------------------------------------------------------
-    // ------------------------------------------------------------------
 
     public List<Holder<IAspect>> availableAspects() {
         ItemStack source = inventory.getItem(SLOT_SOURCE);
@@ -120,12 +110,10 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
                 found.add(entry.aspect());
             }
         }
-        // 按 id 排序；菜单对副本用同样排序，选中项是位置索引，两边顺序不一致就选错。
         found.sort(Comparator.comparing(BlockEntityDistillationEncoder::aspectId));
         return List.copyOf(found);
     }
 
-    /** 要素 id 字符串；排序用它，不依赖遍历顺序。 */
     private static String aspectId(Holder<IAspect> aspect) {
         return aspect.unwrapKey().map(k -> k.identifier().toString()).orElse("");
     }
@@ -149,7 +137,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
         }
     }
 
-    /** 源物品带多少该要素；样板按这个数输出。 */
     public long yieldFor(Holder<IAspect> aspect) {
         ItemStack source = inventory.getItem(SLOT_SOURCE);
         if (source.isEmpty() || aspect == null) {
@@ -162,13 +149,7 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
         return Math.max(1, composition.amountOf(aspect));
     }
 
-    // ------------------------------------------------------------------
-    // ------------------------------------------------------------------
 
-    /**
-     * 写出样板。前置条件全部先检查，失败不消耗空白样板。
-     * @return 是否写入了样板
-     */
     public boolean encode() {
         ItemStack blank = inventory.getItem(SLOT_BLANK);
         if (blank.isEmpty() || !AEItems.BLANK_PATTERN.is(blank)) {
@@ -194,7 +175,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
                 List.of(new GenericStack(AEItemKey.of(source), 1)),
                 List.of(new GenericStack(AEssentiaKey.of(aspectId), yieldFor(aspect))));
 
-        // 给样板打上研究标签；样板本身不带这类信息。
         CompoundTag research = new CompoundTag();
         research.putString(NBT_RESEARCH, REQUIRED_RESEARCH);
         pattern.set(DataComponents.CUSTOM_DATA, CustomData.of(research));
@@ -205,7 +185,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
         return true;
     }
 
-    /** 样板带着的研究；不是本 mod 的样板返回 {@code null}。 */
     public static @Nullable String researchOf(ItemStack pattern) {
         CustomData data = pattern.get(DataComponents.CUSTOM_DATA);
         if (data == null) {
@@ -215,14 +194,11 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
         return tag.contains(NBT_RESEARCH) ? tag.getStringOr(NBT_RESEARCH, "") : null;
     }
 
-    // ------------------------------------------------------------------
-    // ------------------------------------------------------------------
 
     public ItemStack sourceTemplate() {
         return inventory.getItem(SLOT_SOURCE);
     }
 
-    /** 设置幽灵模板；不消耗玩家物品。 */
     public void setSourceTemplate(ItemStack stack) {
         inventory.setItem(SLOT_SOURCE, stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1));
         selectedAspect = -1;
@@ -236,13 +212,10 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
         return MachineMenus.distillationEncoder(containerId, playerInventory, this);
     }
 
-    // ------------------------------------------------------------------
-    // ------------------------------------------------------------------
 
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        // 用 ContainerHelper 存盘，它记槽位号；裸列表会把空隙丢掉。
         ContainerHelper.saveAllItems(output, inventory.getItems());
         output.putInt("SelectedAspect", selectedAspect);
     }
@@ -251,20 +224,14 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         if (input.childrenList(ContainerHelper.TAG_ITEMS).isPresent()) {
-            // 每个条目带着自己的槽位号，空槽读回来还是空。
             ContainerHelper.loadAllItems(input, inventory.getItems());
         } else {
-            // 旧存档的键：那时只存裸列表，见 loadLegacyInventory。
             loadLegacyInventory(input.read("Inventory", ItemStack.OPTIONAL_CODEC.listOf()).orElse(List.of()));
         }
         selectedAspect = input.getIntOr("SelectedAspect", 0);
     }
 
-    /**
-     * 读旧格式：紧凑的非空物品堆列表，不记槽位号。模板本身就是样板，这类世界加载后会多出一份样板。
-     */
     private void loadLegacyInventory(List<ItemStack> list) {
-        // 条目数不超过槽位数，末尾总留有空槽。
         int kept = Math.min(list.size(), SLOT_COUNT);
         List<Integer> placed = new ArrayList<>(kept);
         for (int entry = 0; entry < kept; entry++) {
@@ -274,7 +241,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
             }
             int slot = legacySlotFor(stack);
             if (slot < 0) {
-                // 按上面的规模走不到这里；只记日志，不覆盖别的条目。
                 ThELog.LOG.error(
                         "[encoder] at {} cannot place {} from a pre-fix tag: every well is taken",
                         worldPosition, stack);
@@ -290,9 +256,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
         }
     }
 
-    /**
-     * 旧格式的条目该进哪个槽：先找同类空槽，没有就取离源物品槽最远的空槽。
-     */
     private int legacySlotFor(ItemStack stack) {
         int preferred = preferredWellFor(stack);
         if (inventory.getItem(preferred).isEmpty()) {
@@ -306,7 +269,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
         return -1;
     }
 
-    /** 物品按类别落槽；两种样板之外的都归源物品槽。 */
     private static int preferredWellFor(ItemStack stack) {
         if (AEItems.BLANK_PATTERN.is(stack)) {
             return SLOT_BLANK;
@@ -322,8 +284,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
             return;
         }
         for (int slot = 0; slot < SLOT_COUNT; slot++) {
-            // 源物品槽里只是一个名字，JEI 写这个名字时不取走东西，掉落它等于凭空造一份。
-            // 合成格同理，也不进掉落表。
             if (slot == SLOT_SOURCE) {
                 continue;
             }

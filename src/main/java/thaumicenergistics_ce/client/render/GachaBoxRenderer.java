@@ -17,7 +17,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.gachabox.BlockEntityGachaBox;
 
-/** 绘制缸中之脑：模型的 Y 轴朝下，靠姿态链把它立起来。 */
 public class GachaBoxRenderer implements BlockEntityRenderer<BlockEntityGachaBox, GachaBoxRenderState> {
 
     public static final ModelLayerLocation BRAIN_LAYER =
@@ -26,14 +25,12 @@ public class GachaBoxRenderer implements BlockEntityRenderer<BlockEntityGachaBox
     private static final Identifier BRAIN_TEXTURE =
             Identifier.fromNamespaceAndPath("thaumaturge", "textures/entity/brain2.png");
 
-    /** 抬升与缩放是解出来的，为的是正好填满罐子的空腔。 */
     private static final float BRAIN_SCALE = 0.5F;
 
     private static final float BRAIN_LIFT = -0.8125F;
 
     private static final float BRAIN_DEGREES_PER_TICK = 0.25F;
 
-    /** 转满一圈要这么多 tick；角度会回绕，所以旋转永不累积。 */
     private static final float BRAIN_TURN_TICKS = 1440.0F;
 
     private final BrainModel brain;
@@ -71,9 +68,7 @@ public class GachaBoxRenderer implements BlockEntityRenderer<BlockEntityGachaBox
             return;
         }
         poseStack.pushPose();
-        // 移到方块中心，比罐底高一丝。
         poseStack.translate(0.5F, 0.01F, 0.5F);
-        // 模型是倒着做的；这一步把它正过来。
         poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
         poseStack.pushPose();
         poseStack.translate(0.0F, BRAIN_LIFT, 0.0F);

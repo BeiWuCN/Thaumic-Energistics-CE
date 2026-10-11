@@ -13,12 +13,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import thaumicenergistics_ce.init.ModItems;
 
-/**
- * 机器如何向 AE2 展现自己：访问它所用的托管节点，
- * 以及它在网格合成机器列表中的条目。
- * 两者都在这里构建，节点的形状（频道、暴露面、空闲耗电）在一处读取，
- * 不写在机器构造函数里。
- */
 final class AssemblerGridNode {
 
     private AssemblerGridNode() {}

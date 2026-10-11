@@ -21,16 +21,9 @@ import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.block.BlockInfusionProvider;
 import thaumicenergistics_ce.block.BlockKnowledgeInscriber;
 
-/**
- * 奥术组装机是一台 AE2 合成机器，按需执行 Thaumaturge 的奥术配方。
- */
 public final class ModBlocks {
     public static final DeferredRegister.Blocks REGISTRY = DeferredRegister.createBlocks(ThEIds.MODID);
 
-    /**
-     * {@code noOcclusion()} 是功能所需，不是外观修饰。
-     * 带缝隙的开放式框架沿用默认的整方块遮挡形状，接触面会被剔除。
-     */
     private static final BlockBehaviour.Properties ASSEMBLER_PROPERTIES = BlockBehaviour.Properties.of()
             .mapColor(MapColor.METAL)
             .strength(3.5F, 8.0F)
@@ -112,10 +105,6 @@ public final class ModBlocks {
                     .requiresCorrectToolForDrops()
                     .noOcclusion());
 
-    /**
-     * 无线源质链路的另一端。与奥术组装机一样用 {@code noOcclusion()}。
-     * 插头模型有缝隙，用默认遮挡形状会让它后方接触的面被剔除。
-     */
     public static final DeferredBlock<BlockAlchemyProviderConnection> ALCHEMY_PROVIDER_CONNECTION =
             REGISTRY.registerBlock(
                     "alchemy_provider_connection",
@@ -136,7 +125,6 @@ public final class ModBlocks {
                     .sound(SoundType.WOOL)
                     .noOcclusion());
 
-    /** 第二个玩偶，模型只有坐姿。属性与上一个一致，各自一个 lambda：注册会把 id 盖到属性对象上。 */
     public static final DeferredBlock<BlockBeiWuCnFumo> BEIWU_CN_FUMO = REGISTRY.registerBlock(
             "beiwu_cn_fumo",
             BlockBeiWuCnFumo::new,
@@ -146,8 +134,6 @@ public final class ModBlocks {
                     .sound(SoundType.WOOL)
                     .noOcclusion());
 
-    /** {@code noOcclusion()} 让罐子和连接件透过盒子自己的形状看得见。
-     * 单独一个 lambda，不共用实例：注册会把 id 盖到属性对象上。 */
     public static final DeferredBlock<BlockGachaBox> GACHA_BOX = REGISTRY.registerBlock(
             "gacha_box",
             BlockGachaBox::new,
@@ -158,7 +144,6 @@ public final class ModBlocks {
                     .requiresCorrectToolForDrops()
                     .noOcclusion());
 
-    /** 按连接件定价，不算机器：这里没有任何东西会 tick。 */
     public static final DeferredBlock<BlockGachaBoxAggregator> GACHA_BOX_AGGREGATOR = REGISTRY.registerBlock(
             "gacha_box_aggregator",
             BlockGachaBoxAggregator::new,

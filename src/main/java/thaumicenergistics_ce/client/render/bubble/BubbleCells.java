@@ -16,17 +16,10 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 
-/**
- * 气泡显示的内容，以单元格的行表示：芯片是用 Thaumaturge 自身纹理绘制的要素，
- * 文本单元格是一行字体。只有监控器的报告变化时才重建各行；
- * 渲染器排版用的量度也放在这里，芯片和一行文本在任何地方尺寸都一样。
- */
 final class BubbleCells {
 
-    /** 行间距，单位文本单位；11 是下限：字形加投影在 10 时会重叠。 */
     private static final int LINE_HEIGHT = 11;
 
-    /** 要素芯片的尺寸、到徽章的间距、芯片之间的间距。 */
     static final int CHIP = 12;
     private static final int CELL_GAP = 5;
 
@@ -79,7 +72,6 @@ final class BubbleCells {
                     .withStyle(ChatFormatting.WHITE))));
         }
 
-        // 每行一个要素；已满的那行变绿。
         for (BlockEntityOccultMonitor.EssentiaLine line : essentia) {
             Holder<IAspect> aspect = aspectOf(line.aspect());
             if (aspect == null) {
@@ -105,9 +97,7 @@ final class BubbleCells {
                 ResourceKey.create(IAspect.REGISTRY_KEY, location));
     }
 
-    // --- 布局 ---
 
-    /** 一个单元格到下一个单元格起点的距离，含间距。 */
     static float stride(Font font, Cell cell) {
         return cellWidth(font, cell) + CELL_GAP;
     }

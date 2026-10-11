@@ -21,7 +21,6 @@ import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 
-/** 菜单类型注册。 */
 public final class ModMenuTypes {
     public static final DeferredRegister<MenuType<?>> REGISTRY =
             DeferredRegister.create(Registries.MENU, ThEIds.MODID);
@@ -50,10 +49,6 @@ public final class ModMenuTypes {
                     "distillation_encoder",
                     () -> IMenuTypeExtension.create(MenuDistillationEncoder::new));
 
-    /**
-     * 奥术合成终端的界面。用 AE2 的 {@link MenuTypeBuilder} 构建：
-     * 它把宿主放进打开界面的数据包，没有它菜单背后就没有网络。
-     */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneCraftingTerminal>>
             ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
                     "arcane_crafting_terminal",
@@ -65,10 +60,6 @@ public final class ModMenuTypes {
                                     "gui.thaumicenergistics_ce.ArcaneCraftingTerminal"))
                             .buildUnregistered(ThEIds.id("arcane_crafting_terminal")));
 
-    /**
-     * 源质终端。构建器把宿主（线缆部件或手中的无线物品）放进打开界面的数据包。
-     * 标题显式指定，AE2 的终端样式自带 {@code gui.ae2.Terminal}。
-     */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaTerminal>> ESSENTIA_TERMINAL =
             REGISTRY.register(
                     "essentia_terminal",
@@ -76,10 +67,6 @@ public final class ModMenuTypes {
                             .withMenuTitle(host -> Component.translatable("gui.thaumicenergistics_ce.essentia_terminal"))
                             .buildUnregistered(ThEIds.id("essentia_terminal")));
 
-    /**
-     * 无线源质终端的界面。另设一个菜单类型，不复用有线那个：
-     * 构建器把宿主类编进打开界面的数据包，两者宿主不同。
-     */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaTerminal>> WIRELESS_ESSENTIA_TERMINAL =
             REGISTRY.register(
                     "wireless_essentia_terminal",
@@ -88,10 +75,6 @@ public final class ModMenuTypes {
                                     Component.translatable("gui.thaumicenergistics_ce.wireless_essentia_terminal"))
                             .buildUnregistered(ThEIds.id("wireless_essentia_terminal")));
 
-    /**
-     * 无线奥术合成终端的界面：与有线终端同一个菜单，只是从手持物品打开，
-     * 差别在宿主类，不在另设菜单类。
-     */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneCraftingTerminal>>
             WIRELESS_ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
                     "wireless_arcane_crafting_terminal",
@@ -100,10 +83,6 @@ public final class ModMenuTypes {
                                     "gui.thaumicenergistics_ce.wireless_arcane_crafting_terminal"))
                             .buildUnregistered(ThEIds.id("wireless_arcane_crafting_terminal")));
 
-    /**
-     * 源质标准发信器的界面。上报值随初始数据带过去，它是设置，服务端不会一直推：
-     * 阈值框打开时显示的就是发信器当前的设定值。
-     */
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaLevelEmitter>> ESSENTIA_LEVEL_EMITTER =
             REGISTRY.register(
                     "essentia_level_emitter",

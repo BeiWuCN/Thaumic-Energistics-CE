@@ -16,6 +16,9 @@ java {
     withSourcesJar()
 }
 
+sourceSets.test.compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+sourceSets.test.runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+
 repositories {
     // The mod dependencies are ordinary maven coordinates, pinned to exact versions in
     // gradle.properties. Scoped by group so this repository can never answer for anything else.
@@ -90,6 +93,8 @@ neoForge {
     mods {
         "${mod_id}" {
             sourceSet(sourceSets.main)
+            // 注册表集成检查只参与开发运行，不打入发布 JAR。
+            sourceSet(sourceSets.test)
             // The self-tests are a second folder of the SAME mod, which is what puts them in a dev run:
             // ModDevGradle hands a run its mods as MOD_CLASSES folders, not as a Java classpath, so a
             // runtimeOnly dependency would never be seen by the loader. They wire themselves up from
@@ -105,6 +110,13 @@ neoForge {
     }
 
     runs {
+        clientData {
+            type = 'clientData'
+            programArguments.addAll '--mod', mod_id, '--all',
+                    '--output', file('src/generated/resources').absolutePath,
+                    '--existing', file('src/main/resources').absolutePath
+            gameDirectory.set(layout.projectDirectory.dir('run/datagen'))
+        }
         client {
             client()
             // There is no switch to run without this mod, and there cannot be one here. Both the
@@ -136,6 +148,9 @@ neoForge {
         }
         server {
             server()
+            if (findProperty('upgradeVerification') != null) {
+                environment 'THAUMICENERGISTICS_UPGRADE_VERIFICATION', 'true'
+            }
             programArgument '--nogui'
 
             // A client and a dedicated server cannot share a directory. Both used to work in `run/`,
@@ -151,22 +166,10 @@ neoForge {
             //
             // The client stays in `run/`, where its world and logs already are. A gate that looks for
             // server output now reads run/server/logs/latest.log.
-            gameDirectory.set(layout.projectDirectory.dir('run/server'))
+            gameDirectory.set(layout.projectDirectory.dir(
+                    findProperty('upgradeVerification') != null ? 'run/upgrade-verification' : 'run/server'))
         }
-        // There is no `data` run here, and declaring one is what broke the IDE import. ModDevGradle 2.x
-        // registers data generation as the two platform runs `clientData` and `serverData`, both of
-        // which exist in this project already (`./gradlew runServerData`, `runClientData`). A run named
-        // `data` looks harmless - until it is declared, the IDE's project resolver runs the plugin's
-        // `prepareDataRun` for it, and that task fails the whole sync:
-        //
-        //     Execution failed for task ':prepareDataRun'.
-        //     Trying to prepare unknown run: data. Available run types: [client, clientData, serverData, gameTestServer, server, junit]
-        //
-        // The sync then aborts before a single module is written, which is what "cannot import the
-        // project" looks like from IDE-side. The block that used to sit here also passed the
-        // `--output src/generated/resources/` arguments; the plugin's own data runs already write
-        // there (`sourceSets.main.resources { srcDir 'src/generated/resources' }` below), so dropping
-        // it loses nothing but the broken run.
+        // ModDevGradle uses clientData for GatherDataEvent.Client.
         configureEach {
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             logLevel = org.slf4j.event.Level.DEBUG
@@ -337,6 +340,151 @@ neoForge.ideSyncTask generateModMetadata
 // inside the mod rather than a unit test - see ThaumicEnergistics.recipeSelfTest.
 tasks.named('test') {
     enabled = false
+}
+
+// ---- Thaumaturge isolation gate -------------------------------------------
+// compat/thaumaturge is the one package allowed to name Thaumaturge's own classes: a rename or a
+// signature change is fixed there and nowhere else - see that package's package-info.java. Half of
+// its job is structural and cannot be widened, because the types that appear in this mod's own
+// signatures and the interfaces it implements stay unwrapped. This gate watches the other half,
+// the one that can drift.
+//
+// The rule: outside the layer, no file calls a member of, or constructs, a class from
+// com.leclowndu93150.thaumaturge.content. api classes are exempt the moment they are imported -
+// api is Thaumaturge's stable surface, content is where members move, and every break upstream's
+// 2026-10 refactor caused came out of content. Extending or implementing a content class stays
+// legal, because an interface cannot be named without naming it.
+//
+// This reads text, it does not compile: it sees Class.member and new Class(, and does not follow
+// variables, so a member call reached through an instance escapes it. It is exact about what it
+// does see, which is the shape of usage that has actually broken this mod.
+
+// Blanks comments and string/char literals while preserving the line count, so a class name in
+// prose or in a message is not read as a call.
+def blankJavaTrivia = { String s ->
+    char slash = (char) 47, star = (char) 42, nl = (char) 10
+    char dq = (char) 34, sq = (char) 39, bs = (char) 92
+    def out = new StringBuilder(s.length())
+    int i = 0
+    int n = s.length()
+    while (i < n) {
+        char c = s.charAt(i)
+        if (c == slash && i + 1 < n && s.charAt(i + 1) == slash) {
+            while (i < n && s.charAt(i) != nl) { i++ }
+        } else if (c == slash && i + 1 < n && s.charAt(i + 1) == star) {
+            i += 2
+            while (i + 1 < n && !(s.charAt(i) == star && s.charAt(i + 1) == slash)) {
+                if (s.charAt(i) == nl) { out.append(nl) }
+                i++
+            }
+            i = Math.min(n, i + 2)
+        } else if (c == dq || c == sq) {
+            char quote = c
+            i++
+            while (i < n && s.charAt(i) != quote) {
+                if (s.charAt(i) == bs) {
+                    i++
+                } else if (s.charAt(i) == nl) {
+                    out.append(nl)
+                }
+                i++
+            }
+            i++
+            out.append((char) 32)
+        } else {
+            out.append(c)
+            i++
+        }
+    }
+    return out.toString()
+}
+
+def lineNumberOf = { String text, int offset ->
+    int line = 1
+    int stop = Math.min(offset, text.length())
+    for (int i = 0; i < stop; i++) {
+        if (text.charAt(i) == (char) 10) { line++ }
+    }
+    return line
+}
+
+var thaumaturgeIsolation = tasks.register('thaumaturgeIsolation') {
+    group = 'verification'
+    description = 'Rejects calls into upstream content classes from outside compat/thaumaturge.'
+    def srcRoot = file('src/main/java')
+    def layerPath = new File(srcRoot, 'thaumicenergistics_ce/compat/thaumaturge').absolutePath + File.separator
+    // The self-test source set compiles in a dev run like anything else, so it answers to the same
+    // rule. It is absent from a clone; an empty tree simply yields nothing to scan.
+    def roots = [srcRoot]
+    if (selftestDir != null) {
+        roots << new File(selftestDir, 'java')
+    }
+    inputs.files(roots.collect { fileTree(it) { include '**/*.java' } })
+    doLast {
+        def findings = []
+        def sources = []
+        roots.each { r -> sources.addAll(fileTree(r) { include '**/*.java' }.files) }
+        sources.sort { it.path }.each { f ->
+            if (f.absolutePath.startsWith(layerPath)) { return }
+            def names = [] as Set
+            def direct = []
+            def body = new StringBuilder()
+            f.getText('UTF-8').split('\n', -1).each { line ->
+                def t = line.trim()
+                if (t.startsWith('import') && t.contains('thaumaturge.content.')) {
+                    if (t.startsWith('import static') || t.endsWith('.*;')) {
+                        direct << t
+                    } else {
+                        def tail = t.substring(t.indexOf('thaumaturge.content.') + 'thaumaturge.content.'.length())
+                        names << tail.substring(tail.lastIndexOf('.') + 1).replace(';', '').trim()
+                    }
+                    body.append('\n')
+                } else {
+                    body.append(line).append('\n')
+                }
+            }
+            def text = blankJavaTrivia(body.toString())
+            direct.each { findings << [file: f, line: 0, name: it, kind: 'names a content member directly:'] }
+            names.each { nm ->
+                def quoted = java.util.regex.Pattern.quote(nm)
+                [[java.util.regex.Pattern.compile('(?<![A-Za-z0-9_$.])' + quoted + '\\s*\\.\\s*[A-Za-z_$]'), 'calls a member of'],
+                 [java.util.regex.Pattern.compile('(?<![A-Za-z0-9_$.])new\\s+' + quoted + '\\s*\\('), 'constructs']].each { pair ->
+                    def m = pair[0].matcher(text)
+                    while (m.find()) {
+                        findings << [file: f, line: lineNumberOf(text, m.start()), name: nm, kind: pair[1]]
+                    }
+                }
+            }
+        }
+        if (!findings.isEmpty()) {
+            def report = findings.collect { x ->
+                def where = x.file.absolutePath.substring(project.projectDir.absolutePath.length() + 1)
+                if (x.line > 0) {
+                    return "  ${where}:${x.line}  ${x.kind} ${x.name}"
+                }
+                return "  ${where}  ${x.kind} ${x.name}"
+            }
+            throw new GradleException("${findings.size()} call(s) into com.leclowndu93150.thaumaturge.content " +
+                    "from outside compat/thaumaturge. Move them behind a Tc* facade in that package.\n" +
+                    report.join('\n'))
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn thaumaturgeIsolation
+    dependsOn 'researchFormattingCheck'
+}
+
+tasks.register('researchFormattingCheck', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.output + sourceSets.main.compileClasspath
+    mainClass = 'thaumicenergistics_ce.recipe.ResearchFormattingChecks'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+
+tasks.withType(Jar).configureEach {
+    exclude('doc/**')
 }
 
 jar {

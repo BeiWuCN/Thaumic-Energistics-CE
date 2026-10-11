@@ -15,12 +15,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 import thaumicenergistics_ce.util.ThETransaction;
 
-/**
- * 振动室的燃料槽：以最后放入的要素计数的源质量，以及把它填满的抽取。
- * 缓冲是个计数，不是要素列表，留住要素只为显示；每次变化都落在这里，
- * 跟着递增的 revision 就是缓存唯一的依据。
- * 管道看到的空间、吸力、内容都从这个槽位读出，不从燃烧读。
- */
 final class ChamberEssentiaTank {
 
     private static final int SUCTION = 128;
@@ -33,16 +27,10 @@ final class ChamberEssentiaTank {
 
     private @Nullable Holder<IAspect> currentAspect;
 
-    /** 缓冲每次变化都加一，容器内容的缓存靠它察觉。 */
     private long revision;
 
-    /** 记下自上次记录以来到达的量，好区分根本送不到的管道。 */
     private int tracedEssentia;
 
-    /**
-     * 为填满它的那次事务保住燃料槽位。计数、显示要素和 revision
-     * 就是这个槽位的全部，所以四样都在同一份快照里。
-     */
     private final SnapshotJournal<TankSnapshot> journal = new SnapshotJournal<>() {
         @Override
         protected TankSnapshot createSnapshot() {
@@ -97,13 +85,10 @@ final class ChamberEssentiaTank {
         return Math.max(0, BlockEntityEssentiaVibrationChamber.MAX_ESSENTIA - storedEssentia);
     }
 
-    /** 缓冲或能量槽满就返回 0：管道按这个数字导向，
-     * 满的机器若还宣称有吸力，会吸来它烧不掉的源质。 */
     int suctionAmount(boolean paused) {
         return hasRoom() && !paused ? SUCTION : 0;
     }
 
-    /** 整个缓冲都记在最后放入的要素名下：缓冲是个计数，这个答案是有损的。 */
     AspectList contents() {
         if (storedEssentia <= 0 || currentAspect == null) {
             return AspectList.EMPTY;
@@ -111,24 +96,18 @@ final class ChamberEssentiaTank {
         return AspectList.EMPTY.add(currentAspect, storedEssentia);
     }
 
-    /** 持有的要素 id，空的时候为 null。 */
     @Nullable Identifier aspectId() {
         return currentAspect == null
                 ? null
                 : currentAspect.unwrapKey().map(ResourceKey::identifier).orElse(null);
     }
 
-    /** 持有的要素 path，空的时候是空串；燃烧的定价看它。 */
     String aspectPath() {
         return currentAspect == null
                 ? ""
                 : currentAspect.unwrapKey().map(key -> key.identifier().getPath()).orElse("");
     }
 
-    /**
-     * 从相邻容器抽一份：没有「能装多少抽多少」的调用，
-     * 多抽的部分退回去就会丢源质。
-     */
     void pull() {
         if (chamber.getLevel() == null || !hasRoom()) {
             return;
@@ -159,10 +138,6 @@ final class ChamberEssentiaTank {
         return false;
     }
 
-    /**
-     * 从 Thaumaturge 的源质管道抽，它不向途经的机器推送：
-     * 目的地是主动询问的那一侧，和 Thaumaturge 的端口一致，下面的判断就是那个端口的。
-     */
     private boolean pullFromTube(Direction side) {
         Direction facing = side.getOpposite();
         IEssentiaTransport tube = neighbours.transport(side);
@@ -186,7 +161,6 @@ final class ChamberEssentiaTank {
         return false;
     }
 
-    /** 按给定要素取走装得下的量；缓冲仍按最后放入的要素读。 */
     void accept(Holder<IAspect> aspect, int amount) {
         int taken = Math.min(amount, space());
         if (taken <= 0) {
@@ -197,20 +171,13 @@ final class ChamberEssentiaTank {
         currentAspect = aspect;
         revision++;
         chamber.setChanged();
-        // tooltip 在客户端读缓冲；燃料一份一份到，不每 tick 都有。
         chamber.markForClientUpdate();
     }
 
-    /**
-     * 一次填充能取走多少，已封顶，在给定事务内落账：中止会把计数、
-     * 留作显示的要素和 revision 放回原处。
-     */
     int insert(Holder<IAspect> aspect, int amount, TransactionContext transaction, boolean paused) {
-        // 和抽取、吸力同一条规则：满槽什么都不收，不管从哪条路径来。
         if (aspect == null || amount <= 0 || paused) {
             return 0;
         }
-        // 下限取 0：保存的计数超过上限会算出负数，被读成「什么都没取」。
         int accepted = Math.min(amount, space());
         if (accepted <= 0) {
             return 0;
@@ -220,13 +187,11 @@ final class ChamberEssentiaTank {
         return accepted;
     }
 
-    /** 退回一份燃料，跟别的内容变化一样算变化。 */
     void revertOne() {
         storedEssentia--;
         revision++;
     }
 
-    /** 按给定值写入计数和要素，不管来自网络还是保存的标签。 */
     void set(int essentia, @Nullable Holder<IAspect> aspect) {
         storedEssentia = essentia;
         currentAspect = aspect;

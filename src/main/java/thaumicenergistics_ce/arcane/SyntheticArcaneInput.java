@@ -12,11 +12,6 @@ import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
-/**
- * 给机器用、也给脱离工作台校验配方的最小 {@link IArcaneCraftingInput}。
- * 槽序同 {@code InventoryArcaneWorkbench}：先九格网格，再六格晶体，最后法杖槽。
- * 这里永远为空，机器用 vis 付账，不用法杖。
- */
 public final class SyntheticArcaneInput implements IArcaneCraftingInput {
     public static final int GRID_SLOTS = 9;
     public static final int CRYSTAL_SLOTS = 6;
@@ -54,10 +49,6 @@ public final class SyntheticArcaneInput implements IArcaneCraftingInput {
         return new SyntheticArcaneInput(width, height, padded);
     }
 
-    /**
-     * 由样板的网格加要在晶体槽里露出的晶体堆构建输入。
-     * @param crystals 最多六个物品堆，多的条目忽略
-     */
     public static SyntheticArcaneInput of(ThEArcanePattern pattern, List<ItemStack> crystals) {
         List<ItemStack> items = new ArrayList<>(SIZE);
         for (int i = 0; i < GRID_SLOTS; i++) {

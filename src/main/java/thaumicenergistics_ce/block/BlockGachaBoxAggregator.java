@@ -11,7 +11,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.redstone.Orientation;
 import org.jspecify.annotations.Nullable;
 
-/** 上半部分：模型对称，没有朝向；状态只表示它是不是立在底座上。 */
 public class BlockGachaBoxAggregator extends Block {
 
     public static final MapCodec<BlockGachaBoxAggregator> CODEC =
@@ -40,7 +39,6 @@ public class BlockGachaBoxAggregator extends Block {
                 .setValue(STACKED, isOnBody(context.getLevel(), context.getClickedPos()));
     }
 
-    /** 底座能在已立着的上半部分下面放置或被拆掉：状态跟着它变。 */
     @Override
     protected void neighborChanged(
             BlockState state,

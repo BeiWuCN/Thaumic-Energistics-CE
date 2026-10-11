@@ -11,11 +11,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 
-/**
- * 某种方块请求的是哪种背包外观。匹配限于 Thaumaturge 命名空间，按方块 id 走。
- * 匹配刻意用子串：方块、木板、原木、楼梯在玩家眼里是同一种材质。
- * AE2 的伪装板会先被拆开；未列入表的一律返回 null，外观不变。
- */
 public final class FacadeToSkinMapping {
 
     private FacadeToSkinMapping() {}

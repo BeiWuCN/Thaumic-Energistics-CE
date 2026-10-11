@@ -1,5 +1,7 @@
 package thaumicenergistics_ce.blockentity.gachabox;
 
+import thaumicenergistics_ce.config.ThEConfig;
+
 import appeng.api.config.AccessRestriction;
 import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.GridFlags;
@@ -27,11 +29,8 @@ import thaumicenergistics_ce.block.BlockGachaBoxAggregator;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
-/** 箱子本体。网格节点、每秒一次的 tick、开转前的检查、存档都在这儿；脑、卡片、
- * cognitio、转动过程、源质端口、绑定玩家、从网格取的电各自分出去当小类。 */
 public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implements IGridTickable {
 
-    /** 20 tick 即一秒。转动按秒走，每秒醒一次画动画，不必每 tick 唤醒箱子。 */
     private static final int TICKS_PER_SECOND = 20;
 
     private final GachaBrain brain = new GachaBrain(this);
@@ -45,15 +44,11 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
     public BlockEntityGachaBox(BlockPos pos, BlockState state) {
         super(ModBlockEntities.GACHA_BOX.get(), pos, state);
         setInternalMaxPower(GachaPower.ENERGY_CAPACITY);
-        // 缓冲区靠箱子自己索取（[GachaPower.chargeFromGrid]）填充；公开存储是 WRITE，
-        // 发电机的盈余能落进来，箱子只当索取者。
         setInternalPublicPowerStorage(true);
         setInternalPowerFlow(AccessRestriction.WRITE);
-        // 要一个频道：没频道就不通电，箱子整个不动。
         getMainNode().addService(IGridTickable.class, this).setFlags(GridFlags.REQUIRE_CHANNEL);
     }
 
-    /** AE2 的物品栏留空。脑有独立槽位、卡片走手工填充，这里再暴露一次就是重复。 */
     @Override
     public InternalInventory getInternalInventory() {
         return InternalInventory.empty();
@@ -64,7 +59,6 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
                 && getBlockState().getValue(BlockGachaBox.JAR);
     }
 
-    /** 上半部分坐在箱子上才算完整；缺了它机器不转。 */
     public boolean structureComplete() {
         return level != null && level.getBlockState(getBlockPos().above()).getBlock() instanceof BlockGachaBoxAggregator;
     }
@@ -77,7 +71,6 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         return cards.hasRoom();
     }
 
-    /** 卡片当前的样子，给 tooltip 的图标行用。只读，不复制。 */
     public List<ItemStack> cards() {
         return cards.view();
     }
@@ -90,17 +83,14 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         return cards.take();
     }
 
-    /** 脑槽位，漏斗和管道靠它放进或取出一颗脑。 */
     public SimpleContainer brainSlot() {
         return brain.container();
     }
 
-    /** 放进一颗脑，调用方已确认是缸中之脑。 */
     public void addBrain(ItemStack held) {
         brain.put(held);
     }
 
-    /** 取出脑会解除箱子绑定；槽里没脑时返回空。 */
     public ItemStack takeBrain() {
         return brain.take();
     }
@@ -115,15 +105,16 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         if (!(level instanceof ServerLevel server)) {
             return TickRateModulation.IDLE;
         }
-        // AE2 机器自己抽电，只等着被充电的箱子永远是零，得自己索取。
+        if (!ThEConfig.GACHA_ENABLED.get()) {
+            showScreen(BlockGachaBox.Screen.OFF);
+            return TickRateModulation.SAME;
+        }
         if (getMainNode().isActive()) {
             power.chargeFromGrid();
         }
-        // 能转动就补满储备，进行中的转动和闪现也算在内。
         if (setupReason(server) == null) {
             port.sip(server);
         }
-        // 结果停留片刻，不然下一次转动会盖掉玩家还没看到的闪光。
         if (turn.flashing()) {
             turn.tickFlash();
             showScreen(turn.earned() ? BlockGachaBox.Screen.SUCCESS : BlockGachaBox.Screen.FAILED);
@@ -131,7 +122,6 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         }
         GachaWait wait = waitReason(server);
         if (wait != null) {
-            // 所有者回来时接着转，不重启。
             showScreen(wait.blankScreen() ? BlockGachaBox.Screen.OFF : BlockGachaBox.Screen.ON);
             return TickRateModulation.SAME;
         }
@@ -147,13 +137,11 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         return TickRateModulation.SAME;
     }
 
-    /** 第一个挡路的条件，按玩家会修的先后排；null 表示可以转。 */
     public @Nullable GachaWait waitReason(ServerLevel server) {
         GachaWait setup = setupReason(server);
         if (setup != null) {
             return setup;
         }
-        // 进行中的转动已经付过费，这里只查下一次的燃料。
         if (turn.running()) {
             return null;
         }
@@ -166,49 +154,44 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         return null;
     }
 
-    /** 箱子自己缺什么，缺一项就没东西可转。 */
     @Nullable GachaWait setupReason(ServerLevel server) {
+        if (!ThEConfig.GACHA_ENABLED.get()) {
+            return GachaWait.DISABLED;
+        }
         if (!structureComplete()) {
             return GachaWait.NO_STRUCTURE;
         }
         if (!hasJar()) {
             return GachaWait.NO_BRAIN;
         }
-        // 脑还在原地没人认领，点一下箱子就能认领。
         if (!owner.isBound()) {
             return GachaWait.UNBOUND_BRAIN;
         }
         if (!getMainNode().isActive()) {
             return GachaWait.NO_CHANNEL;
         }
-        // 所有者不在线，箱子就等着，不把产出存起来。
         if (owner.player(server) == null) {
             return GachaWait.OWNER_OFFLINE;
         }
         return null;
     }
 
-    /** 现在能不能真转一次；源质端口按这个状态算吸力。 */
     boolean canTurnNow() {
         return level instanceof ServerLevel server && setupReason(server) == null;
     }
 
-    /** 已存入的 cognitio；端口读它判断一点会不会被接受。 */
     GachaCognitio cognitio() {
         return cognitio;
     }
 
-    /** 源质能力只在背面给出，别的面都不回答。 */
     public @Nullable IEssentiaTransport essentiaTransport(@Nullable Direction face) {
         return face == null || port.isConnectable(face) ? port : null;
     }
 
-    /** 屏幕朝放置箱子的玩家，背面就是源质端口。 */
     Direction backFace() {
         return getBlockState().getValue(BlockGachaBox.FACING).getOpposite();
     }
 
-    /** 一次抽取同时定下时长和概率，付过费才开转。 */
     private void beginTurn(ServerLevel server) {
         GachaOdds.Turn drawn = GachaOdds.roll(server.getRandom(), cardCount());
         if (!payForTurn()) {
@@ -217,18 +200,16 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         turn.start(drawn);
     }
 
-    /** 扣两点 cognitio 加这次转动的电力；付不出就不开转。 */
     private boolean payForTurn() {
         if (!cognitio.ready() || !power.canPay()) {
             return false;
         }
-        if (!power.spend(GachaOdds.AE_PER_TURN)) {
+        if (!power.spend(ThEConfig.GACHA_POWER.get())) {
             return false;
         }
         return cognitio.spend();
     }
 
-    /** 把抽到的东西发出去，结果在屏幕上停片刻。 */
     private void finishTurn(ServerLevel server) {
         turn.settle();
         if (!turn.earned()) {
@@ -240,7 +221,6 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         GachaPayout.grant(player);
     }
 
-    /** 屏幕是方块状态，方块自己落盘并发给客户端。 */
     private void showScreen(BlockGachaBox.Screen screen) {
         BlockState state = getBlockState();
         if (state.getValue(BlockGachaBox.SCREEN) != screen) {
@@ -248,13 +228,11 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         }
     }
 
-    /** 绑定到放入脑的玩家，作废上一个所有者留下的转动。 */
     public void bind(Player player) {
         owner.bind(player);
         turn.reset();
     }
 
-    /** 解绑会把转动丢掉，不存起来；空箱子不工作。 */
     public void unbind() {
         owner.unbind();
         turn.reset();
@@ -264,24 +242,14 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         return owner.name();
     }
 
-    /** 脑在箱子里，不属于任何人：存档中断留下的。 */
     public boolean hasUnboundBrain() {
         return hasJar() && !owner.isBound();
     }
 
-    /** 能不能取回脑：绑定者本人；箱子持未认领的脑时谁都可以。 */
     public boolean mayTakeBrain(Player player) {
         return owner.mayTakeBrain(player);
     }
 
-    /**
-     * 箱子被拆掉时把它装着的东西交出来。26.1.2 的掉落由方块实体处理，
-     * 不是方块：等方块自己的移除钩子跑到时，
-     * 这个实体早已被移出区块，问不出答案了。
-     *
-     * @param holdsBrain 被替换掉的那个方块状态的 {@code jar} 值，
-     *                   因为实体可能已经带着新值了
-     */
     @Override
     public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         super.preRemoveSideEffects(pos, state);
@@ -294,7 +262,6 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         }
         ItemStack held = takeBrain();
         if (held.isEmpty() && holdsBrain) {
-            // 旧存档把脑只留在方块状态里，这里补一颗。
             held = TcRegistry.jarBrainStack();
         }
         spill(held);
@@ -328,7 +295,6 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
     @Override
     public void loadTag(ValueInput input) {
         super.loadTag(input);
-        // 状态要在槽位之前读，加载会清空槽位；老存档的脑转回物品，不丢。
         boolean stateHeldBrain = getBlockState().getValue(BlockGachaBox.JAR);
         brain.load(input);
         if (stateHeldBrain && !brain.has()) {

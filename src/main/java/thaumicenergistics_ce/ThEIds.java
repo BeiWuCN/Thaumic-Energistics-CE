@@ -2,10 +2,6 @@ package thaumicenergistics_ce;
 
 import net.minecraft.resources.Identifier;
 
-/**
- * Thaumic Energistics 的中心标识符。MODID 与上游 Thaumic Energistics 保持一致，
- * 复用的纹理、模型、方块状态与语言键都能照原样解析。
- */
 public final class ThEIds {
     public static final String MODID = "thaumicenergistics_ce";
 

@@ -1,5 +1,7 @@
 package thaumicenergistics_ce.arcane;
 
+import thaumicenergistics_ce.config.ThEConfig;
+
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
 import appeng.api.networking.energy.IEnergySource;
@@ -14,12 +16,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.init.ModItems;
 
-/**
- * 一次灵气支付的花费：某个位置的灵气，要么用 AE 买，要么直接取灵气。
- * 已放置终端和无线终端共用这份实现，兑换率不会走偏。
- * 两者只差位置：已放置终端抽自己所在的区块，无线终端抽玩家所在的区块，
- * 随身携带的工作台没有自己的方块。
- */
 public final class TerminalAuraPayment {
 
     public static final double AE_PER_VIS = 1_000.0;
@@ -28,20 +24,13 @@ public final class TerminalAuraPayment {
 
     private TerminalAuraPayment() {}
 
-    /**
-     * 在 {@code where} 抽灵气，用 {@code energy} 付账，全有或全无，
-     * 提交额不足也不会让 Thaumaturge 的支付处理器抛异常。灵气加入交给它的事务；
-     * 网络的电力在每份日志之外花掉，所以中止的合成照样为它
-     * 已经拿到的那份付账。给一个开着的事务而不提交，就是预演一次支付。
-     * @return 提供的 centivis，绝不超过 {@code needCentivis}
-     */
     public static int pay(
             Level level,
             BlockPos where,
             @Nullable IEnergySource energy,
             int needCentivis,
             TransactionContext transaction) {
-        if (needCentivis <= 0 || energy == null) {
+        if (!ThEConfig.ALLOW_AE_FOR_AURA_VIS.get() || needCentivis <= 0 || energy == null) {
             return 0;
         }
         float wanted = (float) needCentivis / CENTIVIS_PER_VIS;
@@ -50,15 +39,16 @@ public final class TerminalAuraPayment {
             return 0;
         }
         int offered = Math.min(needCentivis, Math.round(available * CENTIVIS_PER_VIS));
-        double cost = AE_PER_VIS * offered / CENTIVIS_PER_VIS;
+        double aePerVis = ThEConfig.AE_PER_VIS.get();
+        double cost = aePerVis * offered / CENTIVIS_PER_VIS;
 
         double payable = energy.extractAEPower(cost, Actionable.SIMULATE, PowerMultiplier.CONFIG);
         if (payable < cost) {
-            offered = (int) Math.floor(payable / AE_PER_VIS * CENTIVIS_PER_VIS);
+            offered = (int) Math.floor(payable / aePerVis * CENTIVIS_PER_VIS);
             if (offered <= 0) {
                 return 0;
             }
-            cost = AE_PER_VIS * offered / CENTIVIS_PER_VIS;
+            cost = aePerVis * offered / CENTIVIS_PER_VIS;
         }
         if (energy.extractAEPower(cost, Actionable.SIMULATE, PowerMultiplier.CONFIG) < cost) {
             return 0;
@@ -68,10 +58,44 @@ public final class TerminalAuraPayment {
         return offered;
     }
 
-    /**
-     * 终端物品堆是否装了 vis 连接卡：只有装了，合成才从灵气取无属性 vis。
-     * 升级读不出来的物品堆返回 false，仍走电力支付。
-     */
+    public static ItemStack visCard(IUpgradeableObject machine) {
+        var upgrades = machine.getUpgrades();
+        if (upgrades != null) {
+            for (int i = 0; i < upgrades.size(); i++) {
+                var card = upgrades.getStackInSlot(i);
+                if (card.is(ModItems.VIS_CONNECTION_CARD.get())) {
+                    return card;
+                }
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+
+    public static int payBoundAura(Level level, BlockPos where, ItemStack card,
+            int need, TransactionContext transaction) {
+        int supplied = payAura(level, where, need, transaction);
+        if (supplied >= need || !(level instanceof net.minecraft.server.level.ServerLevel server)) {
+            return supplied;
+        }
+        var relay = thaumicenergistics_ce.item.ItemVisConnectionCard.resolve(server, card);
+        if (relay == null) {
+            return supplied;
+        }
+        return supplied + payRelay(relay, need - supplied, transaction);
+    }
+
+    public static int payRelay(com.leclowndu93150.thaumaturge.api.aura.IVisRelaySource relay,
+            int need, TransactionContext transaction) {
+        int supplied = 0;
+        for (var primal : thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler.PRIMALS) {
+            if (supplied >= need) {
+                break;
+            }
+            supplied += relay.drainCentivis(primal, need - supplied, transaction);
+        }
+        return supplied;
+    }
+
     public static boolean visConnectionInstalled(ItemStack terminal) {
         if (terminal.isEmpty() || !(terminal.getItem() instanceof IUpgradeableItem upgradeable)) {
             return false;
@@ -80,21 +104,11 @@ public final class TerminalAuraPayment {
         return upgrades != null && upgrades.isInstalled(ModItems.VIS_CONNECTION_CARD.get());
     }
 
-    /**
-     * 玩家打开的那台机器是否装了 vis 连接卡；
-     * 随身终端和插在线缆上的终端各由自己的升级物品栏作答。
-     */
     public static boolean visConnectionInstalled(IUpgradeableObject machine) {
         IUpgradeInventory upgrades = machine.getUpgrades();
         return upgrades != null && upgrades.isInstalled(ModItems.VIS_CONNECTION_CARD.get());
     }
 
-    /**
-     * 为装了 vis 连接卡的终端在 {@code where} 抽灵气。没有能量源参与，
-     * 这次合成的无属性 vis 不花网络一分钱。给一个开着的事务而不
-     * 提交，就是预演一次支付。
-     * @return 提供的 centivis，绝不超过 {@code needCentivis}
-     */
     public static int payAura(Level level, BlockPos where, int needCentivis, TransactionContext transaction) {
         if (needCentivis <= 0 || level == null || level.isClientSide()) {
             return 0;
@@ -107,8 +121,6 @@ public final class TerminalAuraPayment {
         if (offered <= 0) {
             return 0;
         }
-        // 提交的数额用上一趟读到的值，不重读，并加入调用方的事务，
-        // 中止时灵气会放回去。
         TcAura.drainVis(level, where, (float) offered / CENTIVIS_PER_VIS, transaction);
         return offered;
     }

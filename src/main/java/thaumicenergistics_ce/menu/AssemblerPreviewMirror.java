@@ -9,15 +9,8 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 
-/**
- * 菜单手里的样板井与合成预览：井从核心槽推导，预览读机器自己的槽。
- * 井每 tick 最多重推一次，签名的遍历要扫整个样板存储。
- */
 final class AssemblerPreviewMirror {
 
-    /**
-     * 客户端上样板井的容器：客户端从核心槽推导它们，机器的容器没有更新标签可同步。
-     */
     private final SimpleContainer display = new SimpleContainer(BlockEntityArcaneAssembler.PATTERN_SLOT_COUNT);
 
     private final MenuArcaneAssembler menu;
@@ -26,9 +19,6 @@ final class AssemblerPreviewMirror {
     private int sampledCore = -1;
     private long coreSignatureTick = Long.MIN_VALUE;
 
-    /**
-     * 合成产物显示的那个镜像槽。拿槽对象不是索引，重排槽位也不会指错。
-     */
     private @Nullable Slot targetSlot;
 
     private final Slot[] previewSlots = new Slot[BlockEntityArcaneAssembler.PREVIEW_SLOT_COUNT];
@@ -37,12 +27,10 @@ final class AssemblerPreviewMirror {
         this.menu = menu;
     }
 
-    /** 背后没有机器时井所读的容器。 */
     SimpleContainer display() {
         return display;
     }
 
-    /** 收下预览显示的槽位，在菜单把它们加完之后调。 */
     void watch(Slot target, Slot[] preview) {
         this.targetSlot = target;
         System.arraycopy(preview, 0, previewSlots, 0, preview.length);
@@ -50,7 +38,6 @@ final class AssemblerPreviewMirror {
 
     void refresh() {
         ItemStack core = coreStack();
-        // 每 tick 最多取一次：这是每帧调用，哈希要扫整个样板存储。
         long now = menu.playerInventory.player.level().getGameTime();
         if (now != coreSignatureTick) {
             coreSignatureTick = now;

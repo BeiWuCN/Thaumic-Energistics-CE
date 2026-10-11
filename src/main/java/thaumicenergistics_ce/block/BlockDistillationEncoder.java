@@ -16,10 +16,6 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 
-/**
- * 蒸馏编码器方块。做水平朝向：美术有正面，四个水平变体要 {@code facing}，
- * 缺了会渲染成缺失贴图的立方体。
- */
 public class BlockDistillationEncoder extends ThEBaseEntityBlock {
 
     public static final MapCodec<BlockDistillationEncoder> CODEC = simpleCodec(BlockDistillationEncoder::new);

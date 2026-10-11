@@ -5,7 +5,6 @@ import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
@@ -18,11 +17,6 @@ import thaumicenergistics_ce.infusion.InfusionRisk;
 import thaumicenergistics_ce.integration.jade.OccultMonitorProvider;
 import thaumicenergistics_ce.integration.jade.JadeGridState;
 
-/**
- * 神秘监控器的 Jade tooltip：{@link OccultMonitorProvider} 的绘制半边。
- * 数字来自服务端，文字在这里拼，跟随玩家语言。
- * 风险拆成“4（基础 1 + 祭坛 3）”，玩家才知道该修哪一半。
- */
 public final class OccultMonitorTooltip implements IBlockComponentProvider {
 
     public static final OccultMonitorTooltip INSTANCE = new OccultMonitorTooltip();
@@ -33,11 +27,9 @@ public final class OccultMonitorTooltip implements IBlockComponentProvider {
         if (!tag.contains(JadeGridState.TAG)) {
             return;
         }
-                JadeGridState state = JadeGridState.read(tag);
+        JadeGridState state = JadeGridState.read(tag);
         tooltip.add(JadeUI.text(state.label().copy().withStyle(state.colour())));
 
-        // 状态行背后有两种故障：缺书是机器自身的毛病，玩家能修。
-        // “没有祭坛”是对房间的判断，只有搜索才能下。
         if (!tag.getBooleanOr(OccultMonitorProvider.TAG_HAS_BOOK, false)) {
             tooltip.add(JadeUI.text(Component.translatable("thaumicenergistics_ce.jade.monitor.no_book")
                     .withStyle(ChatFormatting.GOLD)));
@@ -57,22 +49,22 @@ public final class OccultMonitorTooltip implements IBlockComponentProvider {
                         Component.translatable("thaumicenergistics_ce.jade.monitor.risk." + tier),
                         tier)
                 .withStyle(colourOf(tier))));
-        // 先显示实时稳定性，那个数字才在变，仪式背后的两个排在后面。
-        // 负值不是错误：祭坛把值夹在 -100 到 25 之间，低于零就吐出去。
         float stability = tag.getIntOr(OccultMonitorProvider.TAG_STABILITY, 0) / 10.0F;
         tooltip.add(JadeUI.text(Component.translatable(
                 "thaumicenergistics_ce.jade.monitor.stability",
                 String.format("%.1f", stability),
                 Component.translatable("gui.thaumaturge.infusion.stability." + tierKeyOf(stability)))));
-        tooltip.add(JadeUI.text(Component.translatable(
+        if (accessor.getPlayer().isShiftKeyDown()) {
+            tooltip.add(JadeUI.text(Component.translatable(
                         "thaumicenergistics_ce.jade.monitor.instability",
                         tag.getIntOr(OccultMonitorProvider.TAG_BASE, 0)
                                 + tag.getIntOr(OccultMonitorProvider.TAG_ALTAR, 0),
                         tag.getIntOr(OccultMonitorProvider.TAG_BASE, 0),
                         tag.getIntOr(OccultMonitorProvider.TAG_ALTAR, 0))
-                .withStyle(ChatFormatting.GRAY)));
-        tooltip.add(JadeUI.text(Component.translatable("thaumicenergistics_ce.jade.monitor.tier." + tier)
-                .withStyle(ChatFormatting.GRAY)));
+                    .withStyle(ChatFormatting.GRAY)));
+            tooltip.add(JadeUI.text(Component.translatable("thaumicenergistics_ce.jade.monitor.tier." + tier)
+                    .withStyle(ChatFormatting.GRAY)));
+        }
 
         if (tag.getBooleanOr(OccultMonitorProvider.TAG_CRAFTING, false)) {
             tooltip.add(JadeUI.text(
@@ -80,7 +72,6 @@ public final class OccultMonitorTooltip implements IBlockComponentProvider {
                             .withStyle(ChatFormatting.WHITE)));
         }
 
-        // 在客户端构建，名称用玩家的语言，不用服务端的。
         ListTag wanted = tag.getListOrEmpty(OccultMonitorProvider.TAG_WANTED);
         if (!wanted.isEmpty()) {
             List<Component> names = new ArrayList<>();
@@ -90,14 +81,12 @@ public final class OccultMonitorTooltip implements IBlockComponentProvider {
             tooltip.add(JadeUI.text(Component.translatable(
                             "thaumicenergistics_ce.jade.monitor.shortages", join(names))
                     .withStyle(ChatFormatting.YELLOW)));
-        } else {
+        } else if (tag.getBooleanOr(OccultMonitorProvider.TAG_CRAFTING, false)) {
             tooltip.add(JadeUI.text(Component.translatable("thaumicenergistics_ce.jade.monitor.essence_ok")
                     .withStyle(ChatFormatting.GREEN)));
         }
     }
 
-    /** Thaumaturge 自己给稳定度的档位说法，抄它的阈值和翻译键，护目镜与监控器才对得上。
-     * 阈值出自 {@code BlockEntityInfusionMatrix.stabilityTierKey}。 */
     private static String tierKeyOf(float stability) {
         if (stability > 12.5F) {
             return "very_stable";

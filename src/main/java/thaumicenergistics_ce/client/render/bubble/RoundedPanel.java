@@ -6,37 +6,22 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import org.joml.Matrix4f;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 
-/**
- * 气泡绘制用的全部颜色，以及用到两种颜色的框：带 1 像素渐变边框的
- * 填充圆角矩形，与 Jade 画 tooltip 的方式相同。
- * 边框和填充放在不同深度，共面的四边形会争同一深度并闪烁。
- */
 final class RoundedPanel {
 
     private static final int PANEL_FILL = 0xF0100010;
     private static final int BORDER_TOP = 0x505000FF;
     private static final int BORDER_BOTTOM = 0x5028007F;
-    /** 圆角半径 2 面板单位，与 Jade 的框一致；10 看起来圆得过分。 */
     private static final float CORNER_RADIUS = 2.0F;
 
-    /** 边框和填充放在不同深度：共面的四边形会争同一深度并闪烁。 */
     private static final float BORDER_Z = -0.08F;
     private static final float FILL_Z = -0.06F;
 
     private RoundedPanel() {}
 
-    /**
-     * 把方框排进队列。{@code debugQuads} 只收位置和颜色，而面板能给的也就这些。
-     * <p>
-     * 是提交而不是直接画：方块实体渲染器不再持有缓冲源，所以几何按构建时的姿态
-     * 排队，帧收集器稍后发出。
-     */
     static void submit(
             SubmitNodeCollector collector, PoseStack pose, float left, float top, float right, float bottom) {
         collector.submitCustomGeometry(pose, RenderTypes.debugQuads(), (entry, quads) -> {
             Matrix4f matrix = entry.pose();
-            // 边框是整个形状走渐变，填充是同样形状内缩一像素，所以半径也小一。
-            // 深度分开：同一平面上的精灵会争同一深度并闪烁。
             roundedFill(
                     quads, matrix, left, top, right, bottom, CORNER_RADIUS, BORDER_TOP, BORDER_BOTTOM, BORDER_Z);
             roundedFill(
@@ -147,7 +132,6 @@ final class RoundedPanel {
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
-    /** 风险等级的颜色，从安静祭坛的绿色到撑不过去时的红色。 */
     static int colourOf(int tier) {
         return switch (tier) {
             case 1 -> 0xFF55FF55;

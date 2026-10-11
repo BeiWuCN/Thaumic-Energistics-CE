@@ -13,8 +13,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.integration.jade.FluxTransferStatusProvider;
 import thaumicenergistics_ce.part.PartFluxTransferInterface;
 
-/** 通量接口的悬浮提示，绘制那一半。它绝不碰部件：
- * 客户端上那只是个空壳，没有网格可问。 */
 public final class FluxTransferTooltip implements BodyProvider<PartFluxTransferInterface> {
 
     public static final FluxTransferTooltip INSTANCE = new FluxTransferTooltip();

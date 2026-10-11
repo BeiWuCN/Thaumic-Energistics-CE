@@ -19,12 +19,6 @@ import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
-/**
- * 知识铭刻机：玩家填的槽位，以及从槽位读出的两个答案：
- * 网格解析成什么，按钮拿那份配方做什么。
- * 槽位在 {@link InscriberInventory}，解析在 {@link InscriberResolution}；
- * 留在这里的是别的包调用的门面：槽位、状态码和菜单。
- */
 public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
 
     public static final int CORE_SLOT = 0;
@@ -49,15 +43,11 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         super(ModBlockEntities.KNOWLEDGE_INSCRIBER.get(), pos, state);
     }
 
-    /** 物品栏每次改动都调它，被压住的网格写入不调。 */
     void contentsChanged() {
         resolution.markDirty();
         resolution.refresh();
     }
 
-    // ------------------------------------------------------------------
-    // 槽位
-    // ------------------------------------------------------------------
 
     public SimpleContainer getInventory() {
         return inventory.inventory();
@@ -75,7 +65,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         inventory.setCell(cell, stack);
     }
 
-    /** 一次改动，不是九次：写网格期间压住通知。 */
     public void setGrid(List<ItemStack> cells) {
         inventory.setAll(cells);
     }
@@ -84,9 +73,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         inventory.clear();
     }
 
-    // ------------------------------------------------------------------
-    // 状态
-    // ------------------------------------------------------------------
 
     public int status() {
         return resolution.status();
@@ -104,9 +90,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         return resolution.pattern();
     }
 
-    // ------------------------------------------------------------------
-    // 操作
-    // ------------------------------------------------------------------
 
     public int save(@Nullable Player player) {
         return resolution.save(player);
@@ -124,9 +107,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         return resolution.canStore(player);
     }
 
-    // ------------------------------------------------------------------
-    // 已存储的样板
-    // ------------------------------------------------------------------
 
     public List<ItemStack> storedOutputs() {
         return resolution.storedOutputs();
@@ -136,9 +116,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         inventory.dropItems();
     }
 
-    // ------------------------------------------------------------------
-    // 菜单、持久化、同步
-    // ------------------------------------------------------------------
 
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
@@ -159,9 +136,6 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
         resolution.readFrom(input);
     }
 
-    // ------------------------------------------------------------------
-    // 菜单、持久化、同步
-    // ------------------------------------------------------------------
 
     @Override
     public Component getDisplayName() {

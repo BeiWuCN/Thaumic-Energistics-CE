@@ -15,12 +15,6 @@ import thaumicenergistics_ce.menu.slot.ContainerSlot;
 import thaumicenergistics_ce.network.EssentiaTerminalReceiver;
 import thaumicenergistics_ce.util.ThELog;
 
-/**
- * 任何搬运手持罐或瓶内容物而非物品的终端中，属于源质的那一半。
- * 源质终端和无线奥术合成终端都要它；子类继承而非复制，
- * 该手势需要这个菜单的携带堆、槽位与玩家判定。
- * 每次动作都查询它，从不缓存，卡片一离开槽位就把这些手势一起带走。
- */
 public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements EssentiaTerminalReceiver {
 
     public MenuEssentiaTerminalBase(
@@ -42,7 +36,6 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
         return this.containerId;
     }
 
-    /** 由子类终端覆写：只有它的访问卡在槽里时才提供这些手势。 */
     protected boolean essentiaAccessGranted() {
         return true;
     }
@@ -60,8 +53,6 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
         if (container == null || !EssentiaFillHelper.isSupportedContainer(container)) {
             return false;
         }
-        // 一轮消耗手持堆里的一个物品，交回一个已填充的；
-        // 整堆点击就是重复这一轮：第一次被拒时停下，也在堆的最后一个物品处停下。
         int turns = wholeStack ? container.getCount() : 1;
         boolean moved = false;
         for (int turn = 0; turn < turns; turn++) {
@@ -75,7 +66,6 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
             moved = true;
         }
         if (moved) {
-            // 已填充容器会被另一个物品堆替换，客户端对这两处的副本都过时了。
             broadcastChanges();
         }
         return moved;
@@ -92,13 +82,11 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
         }
         ThELog.LOG.info("[源质手势] 收到倒回请求 where={}", where);
 
-        // 按菜单槽位：对玩家槽位 shift 右键，会清空放在里面的容器。
         if (where >= 0) {
             if (where >= slots.size()) {
                 return;
             }
             Slot target = slots.get(where);
-            // 只限玩家自己的槽位，AE2 拥有的槽位无法从这里清空。
             if (!isPlayerSideSlot(target)) {
                 return;
             }
@@ -107,11 +95,11 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
                 ThELog.LOG.info("[源质手势] 倒回被拒：槽位 {} 里不是源质容器（{}）", where, inSlot);
                 return;
             }
-            ItemStack left = emptyIntoNetwork(inSlot);
+            EssentiaFillHelper.DepositResult left = emptyIntoNetwork(inSlot);
             ThELog.LOG.info("[源质手势] 槽位 {} 倒回结果：{} -> {}", where, inSlot, left);
             if (left != null) {
-                target.set(left);
-            // 已填充容器会被另一个物品堆替换，客户端对这两处的副本都过时了。
+                target.set(left.remaining());
+                giveOverflow(player, left);
                 broadcastChanges();
             }
             return;
@@ -123,24 +111,33 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
                     where == ContainerSlot.CURSOR ? "光标" : "主手", container);
             return;
         }
-        ItemStack left = emptyIntoNetwork(container);
+        EssentiaFillHelper.DepositResult left = emptyIntoNetwork(container);
         ThELog.LOG.info("[源质手势] 倒回结果：{} -> {}", container, left);
         if (left == null) {
             return;
         }
         if (where == ContainerSlot.CURSOR) {
-            setCarried(left);
+            setCarried(left.remaining());
         } else {
-            player.setItemInHand(InteractionHand.MAIN_HAND, left);
+            player.setItemInHand(InteractionHand.MAIN_HAND, left.remaining());
         }
+        giveOverflow(player, left);
         broadcastChanges();
     }
 
-    public ItemStack emptyIntoNetwork(ItemStack stack) {
+    public EssentiaFillHelper.DepositResult emptyIntoNetwork(ItemStack stack) {
         if (isClientSide()) {
             return null;
         }
         return EssentiaFillHelper.emptyIntoNetwork(storage, energySource, getActionSource(), stack);
+    }
+
+    private static void giveOverflow(Player player, EssentiaFillHelper.DepositResult result) {
+        for (ItemStack stack : result.overflow()) {
+            if (!player.getInventory().add(stack)) {
+                player.drop(stack, false);
+            }
+        }
     }
 
     private @Nullable ItemStack containerAt(Player player, int where) {

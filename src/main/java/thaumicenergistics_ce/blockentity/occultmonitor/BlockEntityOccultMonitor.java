@@ -26,51 +26,36 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.infusion.InfusionRisk;
 import thaumicenergistics_ce.init.ModBlockEntities;
 
-/**
- * 神秘监控器：看一座注魔祭坛，报告仪式会对房间做什么。
- * 书槽里没有魔导手册时 {@link #canReport()} 为 false；[InfusionStabilitySurvey] 指出破坏对称性的方块。
- */
 public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements IGridTickable {
 
     public static final int BOOK_SLOT = 0;
 
     private static final double IDLE_POWER = 64.0;
 
-    /** 合成完成脉冲时长；10 tick 正好半秒，闪一下干净利落。 */
     static final int PULSE_TICKS = 10;
 
-    /** 脉冲粒子数；撒在机器上方，看得见信号从哪来。 */
     private static final int PULSE_PARTICLES = 8;
 
-    /** 房间扫描间隔 10 tick；祭坛勘察未命中后从这个值退避。 */
     static final int SCAN_INTERVAL = 10;
 
-    // 那本书的槽位；两个方块状态镜像它。
 
     private final OccultMonitorBookSlot bookSlot = new OccultMonitorBookSlot(this);
 
-    // 读取房间分两件事：找祭坛，查什么能为仪式付账。
 
     private final EssentiaReach reach = new EssentiaReach(this);
 
     private final AltarSurvey survey = new AltarSurvey(this, reach);
 
-    /** {@code THAUMICENERGISTICS_MONITOR_TRACE=true} 时每秒写一行日志。 */
     private final OccultMonitorTrace trace = new OccultMonitorTrace(this, survey);
 
-    // 气泡在客户端绘制，数字走更新标签传过去。
 
     private final OccultMonitorReadings readings = new OccultMonitorReadings(this, survey, reach);
 
-    // 完成仪式留下的红石脉冲；由预定的方块 tick 撤销。
 
-    /** 脉冲结束时的游戏时间，无脉冲为 0。
-     * 刻意不存档：跨过一次重载的信号会谎报早就结束的仪式。 */
     private long pulseUntil;
 
     public BlockEntityOccultMonitor(BlockPos pos, BlockState state) {
         super(ModBlockEntities.OCCULT_MONITOR.get(), pos, state);
-        // 要 [REQUIRE_CHANNEL]，监控器才会出现在频道读数里。
         getMainNode()
                 .setIdlePowerUsage(IDLE_POWER)
                 .addService(IGridTickable.class, this)
@@ -89,8 +74,6 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
         return bookSlot.has();
     }
 
-    /** 放入那本书；只有玩家潜行时才取出——普通右键会把机器解除武装。
-     * 见 {@code BlockOccultMonitor}。 */
     public @Nullable ItemStack interact(ItemStack held, boolean sneaking) {
         return bookSlot.interact(held, sneaking);
     }
@@ -110,8 +93,6 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
             return TickRateModulation.IDLE;
         }
         updateNetworkState();
-        // 离线时跳过工作，仍继续 tick（SAME）以察觉网格恢复。
-        // 这次没搜过，上一次祭坛读数要丢弃，别当最新数据报出去。
         if (!getMainNode().isActive()) {
             survey.forget();
             readings.sync(canReport(), survey.risk());
@@ -156,7 +137,6 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
         return readings.essentia();
     }
 
-    /** 气泡的客户端同步载荷；书走方块状态，不在这里。 */
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, registries);
@@ -170,8 +150,6 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
         applyBubbleState(input);
     }
 
-    /** 实时更新从这里进来；{@code handleUpdateTag} 是区块加载那条路。两者都落到这里，
-     * 不落到 {@code loadTag}，那里会加载容器。 */
     @Override
     public void onDataPacket(Connection net, ValueInput input) {
         super.onDataPacket(net, input);
@@ -193,28 +171,22 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
         return survey.report();
     }
 
-    /** 自节点上次活跃以来是否搜过祭坛。Jade 仅在它为 true 时说 “no altar”。 */
     public boolean hasSearchedAltar() {
         return survey.searched();
     }
 
     public boolean canReport() {
-        // 断网后留在屏幕上的气泡会报过期读数。
         return hasBook() && survey.report().foundAltar() && getMainNode().isActive();
     }
 
-    /** 脉冲是否开着；方块把它的值当红石信号上报。 */
     public boolean pulsing() {
         return pulseUntil != 0L && level != null && level.getGameTime() < pulseUntil;
     }
 
-    /** 本机是否观察这个 {@code matrix}，即它响应谁的合成完成。 */
     boolean watches(BlockPos matrix) {
         return matrix.equals(survey.matrixPos());
     }
 
-    /** 开启完成仪式的脉冲，并通知周围红石。
-     * 由 {@code OccultMonitorCraftPulse} 调用，不是 public；方块的预定 tick 结束它。 */
     void startPulse() {
         if (!(level instanceof ServerLevel server)) {
             return;
@@ -223,7 +195,6 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
         BlockState state = getBlockState();
         server.scheduleTick(worldPosition, state.getBlock(), PULSE_TICKS);
         server.updateNeighborsAt(worldPosition, state.getBlock());
-        // 方块上方撒几点粒子，让脉冲看得见从哪来，而不只是感觉得到。
         server.sendParticles(
                 DustParticleOptions.REDSTONE,
                 worldPosition.getX() + 0.5,
@@ -236,7 +207,6 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
                 0.0);
     }
 
-    /** 结束脉冲；脉冲还在时第二次仪式完成会重排 tick。 */
     public void endPulse() {
         if (pulseUntil == 0L || level == null) {
             return;

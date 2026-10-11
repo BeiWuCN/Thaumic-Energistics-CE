@@ -21,13 +21,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
-/**
- * 注魔供应器：让注魔祭坛直接从 ME 网络抽源质。
- * 没有缓冲：方块是网络的一扇窗，不是罐子；{@link #getAspects()} 答空，管道就不会把它当容器抽。
- * 经 {@link #drain} 的取出是全有或全无：部分取出放回去并报失败。
- * （1.21.1 那代这套接口叫 addToContainer/takeFromContainer/containerContains，
- * Thaumaturge 1.0.2 换成 accepts/fill/drain/amountOf，逐个对应。）
- */
 public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implements IAspectSource {
 
     private static final double IDLE_POWER = 5.0;
@@ -39,9 +32,6 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
         getMainNode().setIdlePowerUsage(IDLE_POWER);
     }
 
-    // ------------------------------------------------------------------
-    // 持久化
-    // ------------------------------------------------------------------
 
     @Override
     public AspectList getAspects() {
@@ -82,7 +72,6 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
         }
         long taken = storage.extract(key, amount, Actionable.MODULATE, actionSource);
         if (taken < amount) {
-            // 两次调用之间网络变了：把真取出的那部分放回去，不会有东西丢。
             if (taken > 0) {
                 storage.insert(key, taken, Actionable.MODULATE, actionSource);
             }
@@ -92,11 +81,6 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
         return true;
     }
 
-    /**
-     * 覆写而不是留给默认实现，默认实现会读 {@link #getAspects()}：那个方法故意答空，
-     * 好让管道不把这个方块当罐子抽；默认实现读它会向祭坛自己的搜索报零，
-     * 供应器就永远够不到。
-     */
     @Override
     public int amountOf(Holder<IAspect> aspect) {
         if (aspect == null || !getMainNode().isActive()) {
@@ -149,9 +133,6 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
         return counter;
     }
 
-    // ------------------------------------------------------------------
-    // 持久化
-    // ------------------------------------------------------------------
 
     @Override
     public void saveAdditional(ValueOutput output) {

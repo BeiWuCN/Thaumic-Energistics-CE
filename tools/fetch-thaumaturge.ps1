@@ -106,7 +106,9 @@ if ($env:CI) { $gradleArgs += '--no-daemon' }
 Push-Location $src
 try {
     Write-Host "fetch-thaumaturge: generating Thaumaturge's data (this is what makes the jar usable)"
-    & $wrapper @gradleArgs runData -PdatagenPass=true
+    & $wrapper @gradleArgs runServerData
+    if ($LASTEXITCODE -ne 0) { throw "Thaumaturge server datagen failed ($LASTEXITCODE)" }
+    & $wrapper @gradleArgs runClientData
     if ($LASTEXITCODE -ne 0) { throw "fetch-thaumaturge: Thaumaturge datagen failed ($LASTEXITCODE)" }
 
     Write-Host 'fetch-thaumaturge: building Thaumaturge (several minutes the first time)'

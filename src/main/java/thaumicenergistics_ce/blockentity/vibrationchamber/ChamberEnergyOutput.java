@@ -6,16 +6,8 @@ import appeng.api.networking.IGridNode;
 import appeng.api.networking.energy.IAEPowerStorage;
 import appeng.api.networking.energy.IEnergyService;
 
-/**
- * 振动室的能量槽：网格从它里面取走什么，以及什么算满。
- * AE2 会销毁网格拒收的部分，只有被接受的部分才离开槽位。
- * {@link #isFull()} 由剩余空间读出，是水平不是锁存，界面随仪表走。
- * 有没有网络要问网格持有什么，不问它有多大。
- */
 final class ChamberEnergyOutput {
 
-    /** 能量槽能留多少还算满：最慢燃烧的一个 tick 是一个 tick 最少值多少，
-     * 「满」从仪表越过 15.9 kAE 开始，不卡在 15.7 kAE。 */
     private static final double FULL_MARGIN = ChamberBurn.BASE_AE_PER_TICK / 2.0;
 
     private final BlockEntityEssentiaVibrationChamber chamber;
@@ -42,7 +34,6 @@ final class ChamberEnergyOutput {
         return room() <= FULL_MARGIN;
     }
 
-    /** 把烧出的电力放进去，绝不超过槽位容量。 */
     void add(double amount) {
         storedEnergy = Math.min(BlockEntityEssentiaVibrationChamber.MAX_ENERGY_STORAGE, storedEnergy + amount);
     }
@@ -51,10 +42,6 @@ final class ChamberEnergyOutput {
         storedEnergy = energy;
     }
 
-    /**
-     * 网格能否接收电力：有持有电力的节点（{@link IAEPowerStorage}），或有用电的机器。
-     * 光有网格不算：它每个节点 25 AE 的缓冲区（[GridEnergyStorage:83]）就会收下。
-     */
     boolean hasNetwork(IGrid grid, IGridNode self) {
         IEnergyService energy = grid.getService(IEnergyService.class);
         if (energy == null) {
@@ -71,7 +58,6 @@ final class ChamberEnergyOutput {
         return false;
     }
 
-    /** 逐 tick 把网格愿意接受的部分交给它；被拒收时电力留在槽位里。 */
     void output(IGrid grid, int ticksSinceLast) {
         if (storedEnergy <= 0) {
             return;

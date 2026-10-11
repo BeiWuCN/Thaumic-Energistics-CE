@@ -6,10 +6,6 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.inventory.GearSlots;
 
-/**
- * 机器的物品栏：每个槽段接受什么，以及一格变化时给所有者的回调。
- * 槽位号留在 {@link BlockEntityArcaneAssembler} 上，调用方从那里读。
- */
 final class AssemblerInventoryLayout extends SimpleContainer {
 
     private final Runnable onChanged;
@@ -22,11 +18,9 @@ final class AssemblerInventoryLayout extends SimpleContainer {
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
         if (slot >= BlockEntityArcaneAssembler.UPGRADE_SLOT_START) {
-            // 卡槽段：菜单四个卡槽指向的槽位。
             return AEItems.SPEED_CARD.is(stack);
         }
         if (AssemblerDisplaySync.isDisplaySlot(slot)) {
-            // 机器自己的显示；不收玩家放进来的物品。
             return false;
         }
         return switch (slot) {

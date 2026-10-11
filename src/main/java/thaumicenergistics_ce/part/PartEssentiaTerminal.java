@@ -18,11 +18,6 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
-/**
- * 作为线缆部件的源质终端：一台只列源质的 AE2 终端。
- * 过滤用 {@link KeyTypeSelection}，即 AE2 自己给终端键类型的通道；父类的选择允许所有类型，
- * 我们这份替换它，字段就由手工读写。父类的字段是私有的，它的读/写会把宽松选择存下来。
- */
 public class PartEssentiaTerminal extends AbstractTerminalPart {
 
     public static final Identifier MODEL_BASE = ThEIds.id("parts/essentia_terminal_base");

@@ -28,12 +28,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
-/**
- * 源质的存储组件：字节记账、分区、升级、NBT 和 tooltip 仍旧由 AE2 负责。
- * AE2 按本物品上报的键类型和字节预算建自己的 {@code BasicCellInventory}。
- * 容量沿用 AE2 的 1k/4k/16k/64k，每字节八个源质，即 8192/32768/131072/524288；
- * 每类型八个字节、63 种类型的上限，同样是 AE2 自己的规模数字。
- */
 public class ItemEssentiaCell extends Item implements IBasicCellItem {
 
     public static final int UPGRADE_SLOTS = 3;
@@ -69,9 +63,6 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
         return new ItemEssentiaCell(properties, "64k", 64, 2.0);
     }
 
-    /**
-     * 创造模式组件：无上限，不是无限：{@code BasicCellInventory} 用 long 运算，字节数字是 int。
-     */
     public static ItemEssentiaCell createCreative(Item.Properties properties) {
         return new ItemEssentiaCell(properties, "creative", Integer.MAX_VALUE / 1024, 0.0);
     }
@@ -80,10 +71,6 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
         return tier;
     }
 
-    /**
-     * 不是源质的一律拒收。驱动器里的元件、接口填充的元件都走同一条路径，
-     * 这个拒收是所有路径唯一必经之处。
-     */
 
     @Override
     public AEKeyType getKeyType() {
@@ -115,10 +102,6 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
         return true;
     }
 
-    /**
-     * 不是源质的一律拒收。驱动器里的元件、接口填充的元件都走同一条路径，
-     * 这个拒收是所有路径唯一必经之处。
-     */
     @Override
     public boolean isBlackListed(ItemStack cellItem, AEKey requestedAddition) {
         return !(requestedAddition instanceof AEssentiaKey);

@@ -8,10 +8,6 @@ import net.minecraft.world.entity.Entity;
 import thaumicenergistics_ce.golem.BackpackSkins;
 import thaumicenergistics_ce.network.GolemBackpackPayload;
 
-/**
- * 客户端持有的副本：哪些傀儡背着背包，长什么样。以实体为弱键，
- * 傀儡离开世界就带走它的条目；未知傀儡读作「没有背包」，渲染器从第一帧就安全。
- */
 public final class GolemBackpackClientData {
 
     private static final Map<EntityThaumaturgeGolem, Integer> STATUS = new WeakHashMap<>();

@@ -22,11 +22,6 @@ import net.minecraft.world.item.component.CustomData;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.util.ThEItemTags;
 
-/**
- * 把样板按标签读写，并包装成 AE2 合成 CPU 保存与解码所用的物品。
- * 知识核心和任务列表共用同一套 {@link #save}/{@link #load} 约定，
- * 样板在两者之间不会出现差异。
- */
 final class ArcanePatternTags {
 
     private ArcanePatternTags() {}
@@ -39,7 +34,6 @@ final class ArcanePatternTags {
         return stack;
     }
 
-    /** 从 {@link #toItem} 产出的物品里读回样板，读不出来时返回 {@code null}。 */
     static @Nullable ThEArcanePattern ofItem(ItemStack stack, HolderLookup.Provider registries) {
         if (stack == null || stack.isEmpty()) {
             return null;
@@ -147,16 +141,13 @@ final class ArcanePatternTags {
         return new ThEArcanePattern(
                 output,
                 grid,
-                // 只保存显示物品堆：材料属于配方，由配方管理器查找。
                 List.of(),
-                // 已做钳制：宽高来自保存的样板，百万格位的网格会直接把游戏卡死。
                 Math.clamp(width, 1, ThEArcanePattern.MAX_GRID),
                 Math.clamp(height, 1, ThEArcanePattern.MAX_GRID),
                 crystals,
                 tag.getIntOr("BaseVis", 0),
                 research,
                 stage,
-                // 标签会保留下来，正是上面那个例外：标签无法从配方反推得到。
                 cellTags);
     }
 }

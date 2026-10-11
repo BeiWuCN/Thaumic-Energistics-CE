@@ -16,10 +16,6 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
-/**
- * 3x3 网格是否代表某个奥术配方：有序配方做放置与镜像匹配，无序配方按完整指派匹配。
- * 同时逐格检查样板接受哪些物品。
- */
 final class ArcaneGridMatcher {
 
     private ArcaneGridMatcher() {}
@@ -53,10 +49,6 @@ final class ArcaneGridMatcher {
         return false;
     }
 
-    /**
-     * {@code inputs} 中每个非空条目是否都能作为网格格位或晶体被消耗。
-     * 不检查数量，合成前会用实时配方重新匹配。
-     */
     static boolean acceptsInputs(
             List<ItemStack> grid, List<TagKey<Item>> cellTags, AspectList crystals, List<ItemStack> inputs) {
         int matched = 0;
@@ -110,10 +102,6 @@ final class ArcaneGridMatcher {
         return cellTags.get(cell);
     }
 
-    /**
-     * 有序配方的一次放置匹配：材料按配方自身的行宽索引，不按网格的行宽，
-     * 否则两格宽的样板一次读三格，比的是错的列。
-     */
     private static boolean fitsAt(
             List<ItemStack> cells,
             List<Optional<Ingredient>> ingredients,
@@ -136,7 +124,6 @@ final class ArcaneGridMatcher {
                 }
                 int column = mirrored ? width - localX - 1 : localX;
                 Optional<Ingredient> ingredient = ingredients.get(localY * width + column);
-                // 被覆盖的格位没有材料条目就必须为空——那是样板自己的空隙标记。
                 if (!Ingredient.testOptionalIngredient(ingredient, cell)) {
                     return false;
                 }
@@ -145,10 +132,6 @@ final class ArcaneGridMatcher {
         return true;
     }
 
-    /**
-     * 无序配方的材料是否刚好用尽、没有剩余：走完整匹配，与工作台的 {@code RecipeMatcher} 相同，不是贪心扫描。
-     * 橡木要占用「橡木木板」槽位。
-     */
     private static boolean fitsShapeless(List<ItemStack> cells, List<Ingredient> ingredients) {
         List<ItemStack> present = new ArrayList<>(cells.size());
         for (ItemStack cell : cells) {

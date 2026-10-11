@@ -2,7 +2,6 @@ package thaumicenergistics_ce.part;
 
 import net.minecraft.network.chat.Component;
 
-/** 展示给玩家的原因：tick 做出的每次拒绝各有一条，看到「idle」就只可能是成功了。 */
 public enum FluxWait {
     NO_FLUX("no_flux", "Not enough flux in this chunk to draw"),
     NO_SPACE("no_room", "Not enough clear space in front of the interface"),
@@ -27,7 +26,6 @@ public enum FluxWait {
         this.english = english;
     }
 
-    /** 原因由服务端挑选；只有客户端知道玩家的语言。 */
     public Component label() {
         return Component.translatableWithFallback(PREFIX + reason, english);
     }

@@ -28,12 +28,6 @@ import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 import thaumicenergistics_ce.util.ThETransaction;
 
-/**
- * 炼金供应器连接端：通往供应器的无线源质链路的远端。
- * 它只过路不存储，送达的源质会在下一个 tick 继续前往供应器；
- * 贴在请求的机器旁时，它像线缆式供应器那样从网格应答。
- * 绑定距离不超过 [BlockEntityAlchemyProvider#MAX_LINK_DISTANCE] 格；链路丢了一半会自行清理。
- */
 public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
         implements IEssentiaStorage, ThEImmediateStorage {
 
@@ -49,10 +43,6 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
 
     private long revision;
 
-    /**
-     * 为改动缓冲区的那个事务保存缓冲区。这块方块带的东西就是缓冲区，
-     * 复制它等于一份完整快照。
-     */
     private final SnapshotJournal<LinkSnapshot> journal = new SnapshotJournal<>() {
         @Override
         protected LinkSnapshot createSnapshot() {
@@ -90,10 +80,6 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
         return resolveProvider() != null;
     }
 
-    /**
-     * 把本接收端绑到供应器上；限制（连多少个、多远）在供应器那边，先问它，被拒时不改动任何一方。
-     * @return 链路被拒绝的原因，成功时为 {@code null}
-     */
     public @Nullable String link(BlockPos toProvider) {
         if (level == null || level.isClientSide()) {
             return null;
@@ -130,7 +116,6 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
             return null;
         }
         if (level.getBlockEntity(providerPos) instanceof BlockEntityAlchemyProvider provider) {
-            // 自愈：供应器的列表丢了本接收端就补回去（旧存档如此）。
             if (!provider.isLinkedReceiver(worldPosition)) {
                 provider.addLinkedReceiver(worldPosition);
             }
@@ -173,10 +158,6 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
         }
     }
 
-    /**
-     * 从供应器的网格给接收端旁的机器供料。
-     * 抽吸型机器没有容器面，容器路径会让它一直等；先取出再交付。
-     */
     private void feedSuctionMachines() {
         BlockEntityAlchemyProvider provider = resolveProvider();
         if (provider == null) {
@@ -205,7 +186,6 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
             }
             fetched = true;
             int accepted = machine.accept(wanted, taken);
-            // 机器拒收的源质留在输入端，已应答的请求就不会被丢弃。
             int left = taken - accepted;
             if (left > 0) {
                 buffer.put(wanted, buffer.getOrDefault(wanted, 0) + left);
@@ -249,10 +229,6 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
         }
     }
 
-    /**
-     * 从相邻容器取走源质，只在链路已绑定时做。
-     * 没有供应器就无处可去，硬取只会把缓冲撑大。
-     */
     private void drawFromNeighbours() {
         if (level == null) {
             return;
@@ -273,8 +249,6 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
                 if (space <= 0) {
                     continue;
                 }
-                // 容器只报一份内容快照，一次要多于一个就会超支。
-                // 每次抽一个单位，跟供应器自己的抽取步调一致。
                 int taken = ThETransaction.apply(transaction -> source.extract(aspect, 1, transaction));
                 if (taken > 0) {
                     buffer.put(aspect, held + taken);
@@ -283,14 +257,12 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
                 }
             }
         }
-        // 每次访问标一次待保存；每个单位标一次会让区块反复进保存队列。
         if (moved) {
             setChanged();
         }
     }
 
 
-    /** 收下装得下的部分，并记日志，事务中止时把数量放回去。 */
     @Override
     public int insert(Holder<IAspect> aspect, int amount, TransactionContext transaction) {
         int accepted = previewInsert(aspect, amount);
@@ -312,10 +284,6 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
         return space <= 0 ? 0 : Math.min(amount, space);
     }
 
-    /**
-     * 从供应器的网格而不是缓冲区供应相邻容器：缓冲区装的是正在 <em>进来</em> 的东西，
-     * 再把它送出去会让同一份源质同时占两条路。
-     */
     @Override
     public int extract(Holder<IAspect> aspect, int amount, TransactionContext transaction) {
         if (aspect == null || amount <= 0) {
@@ -328,10 +296,6 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
         return provider.takeForLink(aspect, Math.min(amount, TRANSFER_LIMIT), transaction);
     }
 
-    /**
-     * 直接问供应器，绝不走事务：网格的电力花在所有日志之外，
-     * 绕远路的预演照样要为它搬的东西付账。
-     */
     @Override
     public int previewExtract(Holder<IAspect> aspect, int amount) {
         if (aspect == null || amount <= 0) {
@@ -369,7 +333,6 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
         if (providerPos != null) {
             output.putLong("ProviderPos", providerPos.asLong());
         }
-        // 缓冲区不写入：它只装进行中的传输，不累积。
     }
 
     @Override

@@ -14,13 +14,8 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.util.ThEItemTags;
 
-/**
- * 组装机正在运行的合成：产出什么、还欠什么，以及为何在等待。
- * 从 {@link BlockEntityArcaneAssembler} 拆出，状态与其存档格式放在一起。
- */
 final class AssemblerCraftState {
 
-    /** 运行中的合成仍欠的 vis 和晶体；存下来，重载后还能完成。 */
     private static final String TAG_CRAFT_PRICE = "CraftPrice";
     private static final String TAG_CRAFT_CRYSTALS = "CraftCrystals";
 
@@ -29,14 +24,10 @@ final class AssemblerCraftState {
 
     private @Nullable ThEArcanePattern currentPattern;
 
-    /** 运行中的合成同意支付的 vis，存下来不推导。
-     * 核心可在合成中途被移除，合成 CPU 会永远等一个已经推出去的任务。 */
     private int craftPrice;
 
     private List<ItemStack> craftCrystals = List.of();
 
-    /** AE2 为被推送的合成提取的原料，只为永不完成时归还而留着。
-     * 本机器用 vis 和晶体制作产物。 */
     private final List<ItemStack> heldInputs = new ArrayList<>();
 
     private int stalledTicks;
@@ -149,7 +140,6 @@ final class AssemblerCraftState {
     void writeNbt(ValueOutput output) {
         output.putBoolean("Crafting", crafting);
         output.putInt("CraftTicks", craftTicks);
-        // 和合成一起存下来，重载后完成它只要这个标签和井。
         output.putInt(TAG_CRAFT_PRICE, craftPrice);
         output.store(TAG_CRAFT_CRYSTALS, ItemStack.CODEC.listOf(), craftCrystals);
     }

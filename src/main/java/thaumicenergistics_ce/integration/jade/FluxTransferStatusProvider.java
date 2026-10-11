@@ -10,11 +10,6 @@ import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.part.FluxWait;
 import thaumicenergistics_ce.part.PartFluxTransferInterface;
 
-/**
- * 咒波接口的 tooltip 服务端半边。它走 AE2 自己的部件注册表，不走 Jade 的，
- * 因为 Jade 只认识方块实体；与本类配对的是
- * {@code client.jade.FluxTransferTooltip}，注册这两个的是 {@link FluxTransferTooltipProvider}。
- */
 public final class FluxTransferStatusProvider
         implements ServerDataProvider<PartFluxTransferInterface> {
 

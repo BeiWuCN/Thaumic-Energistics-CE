@@ -14,12 +14,6 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 
-/**
- * 知识铭刻机方块：把 AE2 样板转成它所编码的奥术配方，写进知识核心，
- * 随后由奥术组装机读取。
- * {@code FACING} 纯属外观，没有分面行为，但模型亮的那一面是正面，
- * 方块状态按这个属性旋转模型。
- */
 public class BlockKnowledgeInscriber extends ThEBaseEntityBlock {
     public static final MapCodec<BlockKnowledgeInscriber> CODEC = simpleCodec(BlockKnowledgeInscriber::new);
     public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;

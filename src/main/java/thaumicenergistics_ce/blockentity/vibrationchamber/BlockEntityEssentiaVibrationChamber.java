@@ -31,24 +31,13 @@ import thaumicenergistics_ce.init.MachineMenus;
 import thaumicenergistics_ce.init.ModBlockEntities;
 import thaumicenergistics_ce.util.ThETransaction;
 
-/**
- * 源质振动室烧源质发 AE，并 tick 紧挨着它的三个部件。[Potentia] 的时长和功率为 1.6 倍，
- * [ignis] 按基础速率，它它减半；缓冲是计数不是要素列表，留下的要素只给显示，
- * {@link BurnState} 是燃烧的唯一答案。网格拒收的 AE 由 AE2 销毁。
- */
 public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         implements IGridTickable, IEssentiaStorage, IEssentiaTransport, MenuProvider {
 
     public static final int MAX_ESSENTIA = 64;
 
-    /** 能量槽容量，单位 AE；1 AE 兑 2 FE，AE2 把 16 kAE 报成 32,000 FE。 */
     public static final double MAX_ENERGY_STORAGE = 16_000.0;
 
-    /**
-     * 能量槽每秒最多往外放多少 AE，也就是一次燃烧发得多快。
-     * 高于 [ChamberBurn.PEAK_AE_PER_TICK] 的上限没有东西去碰：燃烧会按剩余空间
-     * 分配 tick，放得再宽松也只会收到燃料自己发的那些。
-     */
     public static final double MAX_OUTPUT_PER_TICK = ChamberBurn.PEAK_AE_PER_TICK;
 
     private static final int TICK_RATE_BURNING = 10;
@@ -56,9 +45,7 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     public enum BurnState {
         BURNING,
-        /** 退回：能量槽满到一个 tick 的量以内，什么都放不下。 */
         PAUSED_FULL,
-        /** 网格上只有这台机器：电力无处可去。 */
         NO_NETWORK,
         IDLE;
 
@@ -70,8 +57,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         }
     }
 
-    // 燃料、燃烧和电力分别在 [ChamberBurn]、[ChamberEssentiaTank]、[ChamberEnergyOutput]：
-    // 本类 tick 它们，并对网格、管道和界面当门面。
     private final ChamberEssentiaTank tank = new ChamberEssentiaTank(this);
     private final ChamberEnergyOutput energy = new ChamberEnergyOutput(this);
     private final ChamberBurn burn = new ChamberBurn(this, tank, energy);
@@ -86,8 +71,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     public BlockEntityEssentiaVibrationChamber(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(), pos, state);
-        // 空闲 0.0 且不占频道，跟 AE2 自己的发电机一致（[VibrationChamberBlockEntity:57]、
-        // [ChargerBlockEntity:43]）：扁平网络最缺频道时，带频道的机器会灭。
         getMainNode().setIdlePowerUsage(0.0).setFlags().addService(IGridTickable.class, this);
     }
 
@@ -109,7 +92,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         return tank.insert(aspect, amount, transaction, burn.paused());
     }
 
-    /** 什么都不取出来：振动室烧掉给它的东西。 */
     @Override
     public int extract(Holder<IAspect> aspect, int amount, TransactionContext transaction) { return 0; }
 
@@ -122,7 +104,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     @Override
     public boolean canInputFrom(Direction side) { return true; }
 
-    /** 返回 true，让管道看到目的地不是死路，尽管 {@link #takeEssentia} 什么都不取。 */
     @Override
     public boolean canOutputTo(Direction side) { return true; }
 
@@ -134,7 +115,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
         return null;
     }
 
-    /** 缓冲或能量槽满时返回 0：管道照这个数导向，满的机器再报吸力会吸来烧不掉的源质。 */
     @Override
     public int getSuctionAmount(Direction side) { return tank.suctionAmount(burn.paused()); }
 
@@ -176,10 +156,6 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     public @Nullable Identifier getCurrentAspect() { return tank.aspectId(); }
     public @Nullable Holder<IAspect> currentAspectHolder() { return tank.aspect(); }
 
-    /**
-     * 客户端的副本：状态、燃烧速率、缓冲燃料。只由 {@link #markForClientUpdate()} 发出，
-     * 不每 tick 发，否则被盯着看时倒计时会冻住。
-     */
     @Override
     protected void writeToStream(RegistryFriendlyByteBuf data) {
         super.writeToStream(data);
@@ -188,11 +164,9 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
 
     @Override
     protected boolean readFromStream(RegistryFriendlyByteBuf data) {
-        // 两者都会跑：基类回答有没有变化，同步单元把字节流写进机器。
         return super.readFromStream(data) | VibrationChamberSync.applyStreamed(this, data);
     }
 
-    /** 包级可见，给读字节流的 {@link VibrationChamberSync} 和下面的重载用。 */
     void applyStreamed(BurnState streamedState, double streamedRate, int essentia,
             @Nullable Holder<IAspect> aspect) {
         burn.applyStreamed(streamedState, streamedRate); tank.set(essentia, aspect);

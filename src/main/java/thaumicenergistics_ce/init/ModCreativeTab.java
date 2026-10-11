@@ -9,7 +9,6 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import thaumicenergistics_ce.ThEIds;
 
-/** 本 mod 的创造标签页。 */
 public final class ModCreativeTab {
     public static final DeferredRegister<CreativeModeTab> REGISTRY =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, ThEIds.MODID);
@@ -54,8 +53,6 @@ public final class ModCreativeTab {
                         output.accept(ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get());
                         output.accept(ModItems.ESSENTIA_ACCESS_CARD.get());
                         output.accept(ModItems.VIS_CONNECTION_CARD.get());
-                        // 与物品用的是同一个调用，标签页里的物品堆不会是第二个未组装的副本：
-                        // 标签页里的物品堆从不 tick，也不经过配方，没有别的机会把它修正过来。
                         output.accept(thaumicenergistics_ce.item.ItemFocusAEWrench.assembledStack());
                         output.accept(ModItems.GOLEM_WIFI_BACKPACK.get());
                         output.accept(ModItems.GACHA_BOX.get());

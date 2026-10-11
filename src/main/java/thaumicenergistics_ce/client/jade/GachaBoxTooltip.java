@@ -21,7 +21,6 @@ import snownee.jade.api.ui.JadeUI;
 import thaumicenergistics_ce.integration.jade.GachaBoxProvider;
 import thaumicenergistics_ce.util.ThEItemTags;
 
-/** 概率之箱的绘制半边：箱子绑定到了什么，以及为什么停着不动。 */
 public final class GachaBoxTooltip implements IBlockComponentProvider {
 
     public static final GachaBoxTooltip INSTANCE = new GachaBoxTooltip();
@@ -29,8 +28,6 @@ public final class GachaBoxTooltip implements IBlockComponentProvider {
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
         CompoundTag tag = accessor.getServerData();
-        // 节点状态打头：箱子在不在网络上是第一件值得知道的事，
-        // 措辞沿用 AE2 描述自家设备的说法。
         if (tag.contains(GachaBoxProvider.TAG_ONLINE)) {
             boolean online = tag.getBooleanOr(GachaBoxProvider.TAG_ONLINE, false);
             tooltip.add(JadeUI.text(Component
@@ -49,15 +46,12 @@ public final class GachaBoxTooltip implements IBlockComponentProvider {
             tooltip.add(JadeUI.text(wait.copy().withStyle(ChatFormatting.RED)));
         }
         if (tag.contains(GachaBoxProvider.TAG_OWNER)) {
-            // 名字是值得一眼读到的部分，上色的就是名字。
             Component name = Component.literal(tag.getStringOr(GachaBoxProvider.TAG_OWNER, ""))
                     .withStyle(ChatFormatting.GOLD);
             tooltip.add(JadeUI.text(Component
                     .translatable("jade.thaumicenergistics_ce.gacha_box.bound", name)
                     .withStyle(ChatFormatting.GRAY)));
         }
-        // 卡牌自己画：一个图标一眼说明「哪张卡、几张」，计数那句话还得读一遍。
-        // 没有标签，图标就是标签。
         ListTag cards = tag.getListOrEmpty(GachaBoxProvider.TAG_CARDS);
         var level = accessor.getLevel();
         if (level != null) {

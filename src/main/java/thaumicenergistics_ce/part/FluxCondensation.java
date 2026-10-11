@@ -16,7 +16,6 @@ import net.minecraft.server.level.ServerLevel;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 
-/** Thaumaturge 不提供「咒波能不能落在这里」这一问，落点沿一条链逐级挑。 */
 final class FluxCondensation {
 
     private static final double CONDENSE_CHANCE = 0.10;
@@ -51,13 +50,11 @@ final class FluxCondensation {
                 return;
             }
             long condensed = storage.insert(vitium, drawn, Actionable.MODULATE, source);
-            // 网络不肯收下的部分回退成咒波，不会就此消失。
             if (condensed < drawn) {
                 TcAura.addFlux(server, landing, drawn - condensed);
             }
             return;
         }
-        // 排空窗口在凝结窗口之上，两条路径排空的都是同样的 1.5%。
         double spillCeiling = condensing ? CONDENSE_CHANCE + SPILL_CHANCE : SPILL_CHANCE;
         if (roll < spillCeiling) {
             spill(server, landing, budget, take);
@@ -76,10 +73,6 @@ final class FluxCondensation {
         }
     }
 
-    /**
-     * 释放出去的咒波落在哪：优先已加载的控制器，然后是存储总线，再是接口，
-     * 网格里一个都没有时就落在接口自己身上。
-     */
     static @Nullable BlockPos landing(ServerLevel server, @Nullable IGrid grid, BlockPos self) {
         if (grid == null) {
             return null;
@@ -91,7 +84,6 @@ final class FluxCondensation {
                     return controller.getBlockPos();
                 }
             }
-            // 未加载的控制器给不出落点：不采用回退，也不强制加载任何区块。
             return null;
         }
         for (StorageBusPart bus : grid.getMachines(StorageBusPart.class)) {

@@ -17,11 +17,6 @@ import net.minecraft.world.level.Level;
 import thaumicenergistics_ce.init.ModItems;
 import thaumicenergistics_ce.util.ThEItemTags;
 
-/**
- * 铭刻机的槽位：核心、镜像、玩家在菜单里拼出的网格。
- * 网格一次写完算一次改动；写元件期间通知被压住，否则会解析出半旧的网格。
- * 保存保留槽位索引，带空隙的网格回来时仍带空隙。
- */
 final class InscriberInventory {
 
     private final BlockEntityKnowledgeInscriber inscriber;
@@ -40,15 +35,11 @@ final class InscriberInventory {
 
                 @Override
                 public boolean canPlaceItem(int slot, ItemStack stack) {
-                    // 只有核心槽真正持有物品，旁边的槽只镜像核心已经存着的东西。
-                    // 那些镜像槽不许写入。
                     return slot == BlockEntityKnowledgeInscriber.CORE_SLOT
                             && stack.is(ModItems.KNOWLEDGE_CORE.get());
                 }
             };
 
-    /** 网格正在被逐格写入期间为 true。
-     * 逐格通知会解析出一个换了一半的网格，玩家会看着旧配方的物品一件件被挤出去。 */
     private boolean absorbing;
 
     InscriberInventory(BlockEntityKnowledgeInscriber inscriber) {
@@ -125,8 +116,6 @@ final class InscriberInventory {
     }
 
     void saveItems(ValueOutput output) {
-        // 不用 SimpleContainer.createTag：它只写非空槽位、不记索引，于是网格回来时
-        // 空隙全没了，每件物品都往前挪。
         ContainerHelper.saveAllItems(output, inventory.getItems());
     }
 
@@ -134,14 +123,10 @@ final class InscriberInventory {
         if (input.childrenList(ContainerHelper.TAG_ITEMS).isPresent()) {
             ContainerHelper.loadAllItems(input, inventory.getItems());
         } else {
-            // 这次改动之前的旧世界在 "Inventory" 下留的是裸列表，本来就没有空隙：
-            // 按位置读它，下一次保存就会写成新形式。
             loadLegacy(input.read("Inventory", ItemStack.OPTIONAL_CODEC.listOf()).orElse(List.of()));
         }
     }
 
-    /** 按位置读旧的裸列表形式；那种形式丢了条目原本属于哪个槽位，
-     * 列表点名的槽位也可能比这个构建多。 */
     private void loadLegacy(List<ItemStack> list) {
         int kept = Math.min(list.size(), BlockEntityKnowledgeInscriber.SLOT_COUNT);
         for (int i = 0; i < kept; i++) {
@@ -149,7 +134,6 @@ final class InscriberInventory {
         }
     }
 
-    /** 方块被破坏时掉落核心与镜像；网格是草稿纸，不掉。 */
     void dropItems() {
         Level level = inscriber.getLevel();
         if (level == null) {
@@ -157,7 +141,6 @@ final class InscriberInventory {
         }
         BlockPos pos = inscriber.getBlockPos();
         for (int i = 0; i < BlockEntityKnowledgeInscriber.SLOT_COUNT; i++) {
-            // 网格里是玩家本来就有的物品，掉落等于把 JEI 拖进来的东西复制一份。
             if (i >= BlockEntityKnowledgeInscriber.GRID_SLOT_START) {
                 continue;
             }

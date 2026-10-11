@@ -1,0 +1,63 @@
+[terminals]
+	#允许未装魔力访问卡的终端消耗 AE 取用环境 VIS；环境 VIS 不足时仍不能合成。
+	allowAeForAuraVis = false
+	#仅源质终端和装有源质访问卡的奥术终端显示源质。包含无线终端。
+	restrictEssentiaVisibility = true
+	#Shift 点击时优先把法杖和水晶放入奥术终端的专用槽位。
+	quickInsertWandAndCrystals = true
+	#终端支付未定型灵气时，每点 Vis 消耗的 AE。灵气连接卡仍直接取用环境灵气。
+	# Default: 1000.0
+	# Range: 0.01 ~ 1000000.0
+	aePerVis = 1000.0
+
+[golemBackpack]
+	#允许傀儡无线背包向网络传输物品。关闭后仍可装备和取下。
+	transferEnabled = true
+	#背包两次传输之间的间隔，单位 tick，20 tick 为一秒。
+	# Default: 20
+	# Range: 1 ~ 12000
+	transferIntervalTicks = 20
+
+[arcaneAssembler]
+	#允许奥术装配室执行合成。关闭时保留已有任务，重新开启后继续。
+	enabled = true
+	#无加速卡时的合成时长，单位 tick。每张加速卡减少4 tick，最低4 tick。
+	# Default: 20
+	# Range: 4 ~ 12000
+	craftTicks = 20
+	#合成进行时每 tick 的 AE 消耗。
+	# Default: 1.5
+	# Range: 0.0 ~ 1000000.0
+	aePerTick = 1.5
+
+[essentiaVibrationChamber]
+	#允许源质谐振仓吸入和燃烧源质。关闭时保留燃料进度和储存的能量。
+	enabled = true
+	#燃烧时长计算的基础 tick 数。能量要素除以1.6，其余除以2；仅对新点燃的燃料生效。
+	# Default: 800
+	# Range: 2 ~ 120000
+	baseBurnTicks = 800
+
+[gachaBox]
+	#允许概率之箱运行。关闭时暂停已有轮次，不删除缸中之脑。
+	enabled = true
+	#每轮开始时消耗的 AE，不影响已开始的轮次。
+	# Default: 500.0
+	# Range: 0.0 ~ 1000000.0
+	aePerTurn = 500.0
+	#30秒轮次的获奖概率，0到1。
+	# Default: 0.75
+	# Range: 0.0 ~ 1.0
+	chanceAt30Seconds = 0.75
+	#180秒轮次的获奖概率，0到1，其余时长线性插值。
+	# Default: 0.45
+	# Range: 0.0 ~ 1.0
+	chanceAt180Seconds = 0.45
+
+[buses]
+	#允许装有源质访问卡的 ME 输入、输出和存储总线访问源质。
+	essentiaAccessEnabled = true
+	#输入和输出总线每传输一点源质消耗的 AE。存储总线沿用 AE2 的存储访问耗电。
+	# Default: 10.0
+	# Range: 0.0 ~ 1000000.0
+	aePerEssentia = 10.0

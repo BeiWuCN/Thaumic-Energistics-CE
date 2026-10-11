@@ -10,10 +10,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
-/**
- * Thaumic Energistics 方块实体的基类。
- * 提供 {@link MenuProvider} 约定，方块打开菜单时不用重复类型转换，菜单标题也在这里处理。
- */
 public abstract class ThEBaseBlockEntity extends BlockEntity implements MenuProvider {
 
     protected ThEBaseBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {

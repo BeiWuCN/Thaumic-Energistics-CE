@@ -15,15 +15,12 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
 import thaumicenergistics_ce.util.ThELog;
 
-/** 编码器的要素行：源物品提供什么、各有多少、哪些凹槽可见、选中了哪个。
- * 两侧都从同步的物品推导，不会不一致。 */
 final class EncoderAspectTable {
 
     private final MenuDistillationEncoder menu;
 
     private final @Nullable BlockEntityDistillationEncoder encoder;
 
-    /** 由 {@link #refresh} 写入的视图，玩家写不到它。 */
     private final SimpleContainer aspectDisplay;
 
     private final SimpleContainer selectedDisplay;
@@ -59,8 +56,6 @@ final class EncoderAspectTable {
         this.selectedDisplay = selectedDisplay;
     }
 
-    /** 源物品变化时刷新这一行。
-     * 客户端菜单收不到通知（{@link MenuDistillationEncoder#broadcastChanges}），界面绘制前自己调它。 */
     void ensure() {
         if (!ItemStack.matches(menu.slots.get(MenuDistillationEncoder.MENU_SOURCE).getItem(), lastSourceItem)) {
             refresh();
@@ -93,7 +88,6 @@ final class EncoderAspectTable {
 
         aspectAmounts = List.copyOf(foundAmounts);
 
-        // 每个凹槽一个标志。两个判断都要：物品已扫描、要素已发现；Thaumaturge 把元初要素都算已知。
         ItemStack source = menu.slots.get(MenuDistillationEncoder.MENU_SOURCE).getItem();
         lastSourceItem = source.copy();
         boolean itemScanned = sourceIsScanned(source);
@@ -109,13 +103,11 @@ final class EncoderAspectTable {
         this.revealedWells = revealedWells;
         this.revealedTotal = revealedTotal;
 
-        // 凹槽刻意留空，界面自己画图标、数量和选中框；放物品堆会多渲染一个物品。
         for (int i = 0; i < MenuDistillationEncoder.ASPECT_SLOTS; i++) {
             aspectDisplay.setItem(i, ItemStack.EMPTY);
         }
 
         tracePick();
-        // 选中的凹槽也清空，由界面像别的凹槽一样画出来。
         selectedDisplay.setItem(0, ItemStack.EMPTY);
     }
 
@@ -124,7 +116,6 @@ final class EncoderAspectTable {
                 && KnowledgeAccess.of(menu.owner).isResearchKnown(ScanKeys.item(source.getItem()));
     }
 
-    /** 开关打开时每次源物品变化记一次揭示判断；『要素不显示』有三种相似成因。 */
     private void traceSource(ItemStack source, boolean itemScanned, int revealedTotal) {
         if (!TRACE || (ItemStack.matches(source, tracedSource) && revealedTotal == tracedRevealed)) {
             return;
@@ -139,7 +130,6 @@ final class EncoderAspectTable {
                 revealedTotal);
     }
 
-    /** 记录选中变更与拒绝原因；两种情况凹槽都不画东西。 */
     private void tracePick() {
         int raw = pickedIndexRaw();
         if (!TRACE || raw == tracedPick) {
@@ -160,7 +150,6 @@ final class EncoderAspectTable {
                 encoder != null ? "server" : "client");
     }
 
-    /** 源槽有东西却提供不了任何要素时为 true；已扫描的物品一律 false。 */
     boolean revealsNothing() {
         return !menu.slots.get(MenuDistillationEncoder.MENU_SOURCE).getItem().isEmpty() && revealedTotal == 0;
     }
@@ -169,7 +158,6 @@ final class EncoderAspectTable {
         return index >= 0 && index < aspectAmounts.size() ? aspectAmounts.get(index) : 0;
     }
 
-    /** 玩家是否已发现该要素；没发现的凹槽画空，点击也拒绝。 */
     boolean isRevealed(int index) {
         return index >= 0 && index < revealedWells.length && revealedWells[index];
     }
@@ -178,8 +166,6 @@ final class EncoderAspectTable {
         return revealedTotal;
     }
 
-    /** 被选中的要素；槽位里没有东西，只能从这里读。
-     * 没选中或选中项不可见时为 null。 */
     @Nullable Holder<IAspect> pickedAspect() {
         int picked = pickedIndex();
         return picked >= 0 ? aspects.get(picked) : null;
@@ -189,8 +175,6 @@ final class EncoderAspectTable {
         return amountFor(pickedIndex());
     }
 
-    /** 选中的要素索引，没有为 {@code -1}。
-     * 每次现算不缓存；选中项会在服务端没有消息的情况下变。 */
     int pickedIndex() {
         int picked = pickedIndexRaw();
         return picked >= 0 && picked < aspects.size() && isRevealed(picked) ? picked : -1;
@@ -216,8 +200,6 @@ final class EncoderAspectTable {
         return aspects.size();
     }
 
-    /** 一次遍历同时得出要素与数量，数量写进 {@code amountsOut}。
-     * 界面开着时它每 tick 都跑。 */
     private static List<Holder<IAspect>> deriveAspects(ItemStack source, List<Integer> amountsOut) {
         if (source.isEmpty()) {
             return List.of();
@@ -235,8 +217,6 @@ final class EncoderAspectTable {
             }
         }
 
-        // 两侧给要素编号的顺序要一致，选中项按索引传输。
-        // 排索引、不排要素，数量才跟得住自己的要素。
         List<Integer> order = new ArrayList<>(found.size());
         for (int i = 0; i < found.size(); i++) {
             order.add(i);

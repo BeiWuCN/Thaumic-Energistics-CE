@@ -14,10 +14,6 @@ import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.util.ThEItemTags;
 
-/**
- * 监控器唯一的槽、镜像它的两个方块状态，以及右键对典籍做什么。只放得进魔导手册，
- * 只有潜行的玩家能把它取出来；两个方块状态都在这里写，方块类因此只剩一层薄覆写。
- */
 final class OccultMonitorBookSlot {
 
     private final BlockEntityOccultMonitor monitor;
@@ -52,7 +48,6 @@ final class OccultMonitorBookSlot {
         return TcRegistry.isThaumonomicon(book());
     }
 
-    /** 放入典籍，只在玩家潜行时取出。普通右键会把机器解除武装。见 {@code BlockOccultMonitor}。 */
     @Nullable ItemStack interact(ItemStack held, boolean sneaking) {
         if (has()) {
             if (!sneaking || !held.isEmpty()) {
@@ -102,8 +97,6 @@ final class OccultMonitorBookSlot {
     }
 
     void save(ValueOutput output) {
-        // 空槽也必须写这个字段：ItemStack.CODEC 拒收数量为零的物品堆，会让整次存档失败，
-        // 而 OPTIONAL_CODEC 写出的空 compound 正好是 load() 读得回的那个。
         output.store("Book", ItemStack.OPTIONAL_CODEC, container.getItem(BlockEntityOccultMonitor.BOOK_SLOT));
     }
 
@@ -117,11 +110,10 @@ final class OccultMonitorBookSlot {
         if (level == null) {
             return;
         }
-        ItemStack book = container.getItem(BlockEntityOccultMonitor.BOOK_SLOT);
+        ItemStack book = container.removeItemNoUpdate(BlockEntityOccultMonitor.BOOK_SLOT);
         if (!book.isEmpty()) {
             Containers.dropItemStack(level, monitor.getBlockPos().getX() + 0.5,
                     monitor.getBlockPos().getY() + 0.5, monitor.getBlockPos().getZ() + 0.5, book);
-            container.setItem(BlockEntityOccultMonitor.BOOK_SLOT, ItemStack.EMPTY);
         }
     }
 }

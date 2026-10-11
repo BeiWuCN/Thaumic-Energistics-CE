@@ -8,10 +8,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import thaumicenergistics_ce.util.ThELog;
 
-/**
- * 是否每秒记录一次振动室对邻居的所见，由
- * {@code THAUMICENERGISTICS_EVC_TRACE=true} 开启。区分管道送不到和被抽走两种情况。
- */
 final class ChamberTrace {
 
     private static final boolean TRACE = "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_EVC_TRACE"));
@@ -31,7 +27,6 @@ final class ChamberTrace {
         this.burn = burn;
     }
 
-    /** 每秒一行，列出每个给出管道或容器的面，以及对面给出的答复。 */
     void log() {
         if (!TRACE || chamber.getLevel() == null || !(chamber.getLevel() instanceof ServerLevel server)) {
             return;

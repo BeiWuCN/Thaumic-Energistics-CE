@@ -20,19 +20,9 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 
-/**
- * 在奥术组装机里画正在进行的合成的产物，做法和分子组装机一样。
- * 物品堆取自方块实体的 update 标签，机器的真实产物仍留在服务端。
- * 最后一件产物在合成结束后留 {@link #LINGER_TICKS}，不看合成进度：
- * 进度每合成一次就重置，会让物品跳。
- */
 public class ArcaneAssemblerRenderer
         implements BlockEntityRenderer<BlockEntityArcaneAssembler, ArcaneAssemblerRenderState> {
 
-    /**
-     * 物品下移到方块中心以下的距离：物品模型从自身底端往上画，
-     * 方块模型以原点为中心，两者数值不一样。
-     */
     private static final float ITEM_DROP = 0.3F;
     private static final float BLOCK_DROP = 0.2F;
 
@@ -41,9 +31,6 @@ public class ArcaneAssemblerRenderer
     private static final float BOB_HEIGHT = 0.03F;
     private static final float BOB_PERIOD = 25.0F;
 
-    /**
-     * 最后一件产物在合成结束后悬留的 tick 数：两秒，够跨过合成 CPU 推下一次合成的那几个 tick。
-     */
     private static final float LINGER_TICKS = 40.0F;
 
     private static final class LastDraw {
@@ -99,8 +86,6 @@ public class ArcaneAssemblerRenderer
             return;
         }
         state.drop = shown.getItem() instanceof BlockItem ? BLOCK_DROP : ITEM_DROP;
-        // 每次 extract 都新建渲染状态：上一个属于模型上次被解析的那一帧，
-        // 复用会在产物换掉后留下一个过时的模型。
         ItemStackRenderState item = new ItemStackRenderState();
         this.itemModelResolver.updateForTopItem(
                 item, shown, ItemDisplayContext.GROUND, assembler.getLevel(), null, 0);

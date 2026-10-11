@@ -3,7 +3,6 @@ package thaumicenergistics_ce.blockentity.assembler;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 
-/** 归还损坏机器的内容物：玩家拥有的物品，加上合成已经付过款的投入物。 */
 final class AssemblerContents {
 
     private AssemblerContents() {}
@@ -12,7 +11,6 @@ final class AssemblerContents {
         if (machine.getLevel() == null || machine.getLevel().isClientSide()) {
             return;
         }
-        // 在方块消失前，把网络已经付过款的原料还回去。
         machine.craftRunner().returnHeldInputs();
         machine.suppressNotify = true;
         try {

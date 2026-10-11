@@ -14,21 +14,13 @@ import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.BlockEntityInfusionProvider;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
-/**
- * 注魔供应器的 Jade 服务端数据：它旁边的注魔祭坛实际能抽什么。
- * [getAspects] 刻意为空：方块是窗口不是容器，管道会跳过它。绘制那一半是
- * [client.jade.InfusionProviderTooltip]，不能放这里：解析要素 id 要客户端的 level；
- * 两边都上报 [UID]，Jade 靠它把两者配对。没有这一对，tooltip 挂不到方块上。
- */
 public class InfusionProviderProvider implements IServerDataProvider<BlockAccessor> {
 
     public static final InfusionProviderProvider INSTANCE = new InfusionProviderProvider();
 
-    /** 与 [client.jade.InfusionProviderTooltip] 共享：Jade 按 [UID] 配对这两半。 */
     public static final Identifier UID =
             Identifier.fromNamespaceAndPath(ThEIds.MODID, "infusion_provider");
 
-    /** [appendServerData] 的线上格式。tooltip 那一半把它读回来。 */
     public static final String TAG_ASPECT = "Aspect";
     public static final String TAG_AMOUNT = "Amount";
     public static final String TAG_KINDS = "Kinds";

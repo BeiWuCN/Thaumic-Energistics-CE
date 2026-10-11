@@ -23,11 +23,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-/**
- * 装饰人偶方块：一个毛绒模型，不是机器。
- * {@code variant} 要保留：方块状态声明了四种朝向乘二，缺 variant 的不可达，会渲染成缺贴图的立方体。
- * 右键让它转向操作它的玩家。
- */
 public class BlockDecorativeFigure extends HorizontalDirectionalBlock {
 
     public static final MapCodec<BlockDecorativeFigure> CODEC = simpleCodec(BlockDecorativeFigure::new);
@@ -79,7 +74,6 @@ public class BlockDecorativeFigure extends HorizontalDirectionalBlock {
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (player.isShiftKeyDown()) {
             if (!level.isClientSide()) {
-                // 按物品取走，不破坏（破坏会播破坏音效）：这只是搬动摆件。
                 if (!player.getAbilities().instabuild) {
                     Block.popResource(level, pos, new ItemStack(asItem()));
                 }

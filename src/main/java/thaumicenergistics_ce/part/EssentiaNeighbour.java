@@ -14,26 +14,17 @@ import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.essentia.ThEImmediateStorage;
 
-/**
- * 找到总线所面对方块上的源质容器，并问对问题。
- * <ul>
- * <li>{@code isConnectable} 收的是容器自己的面：位于北侧的总线落在它的 SOUTH 面。
- * <li>面不对就沉默：罐子只在 {@code UP} 应答 true，别的面什么都插不进去。
- * <li>顺序：总线那一面上的 transport，然后任一被接受的面上的 storage，最后把 transport 当 storage。
- * </ul>
- */
-final class EssentiaNeighbour {
+public final class EssentiaNeighbour {
 
     private static final Direction[] FACES = Direction.values();
 
     private EssentiaNeighbour() {}
 
-    /**
-     * 有意不缓存，是本 mod 邻居查找里唯一这么做的一个：目标不是调用方自己的方块，
-     * 部件的宿主也从不说邻居被重新打包过。直接问更省。
-     */
-    static @Nullable IEssentiaStorage find(Level level, BlockPos target, Direction from) {
+    public static @Nullable IEssentiaStorage find(Level level, BlockPos target, Direction from) {
         if (!(level instanceof ServerLevel server)) {
+            return null;
+        }
+        if (!server.isLoaded(target)) {
             return null;
         }
 
@@ -58,7 +49,6 @@ final class EssentiaNeighbour {
         return new Adapter(transport, from);
     }
 
-    /** 按面不可免：管道的内容按面不同，一个适配器只服务一个面。 */
     private record Adapter(IEssentiaTransport transport, Direction face)
             implements IEssentiaStorage, ThEImmediateStorage {
 
@@ -77,7 +67,6 @@ final class EssentiaNeighbour {
             return held != null && held.equals(aspect) ? transport.getEssentiaAmount(face) : 0;
         }
 
-        /** 立即生效：Thaumaturge 的管道 API 没有事务可以托管这次改动。 */
         @Override
         public int insert(Holder<IAspect> aspect, int amount, TransactionContext transaction) {
             return transport.addEssentia(aspect, amount, face);

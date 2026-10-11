@@ -15,12 +15,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
 import thaumicenergistics_ce.util.ThETransaction;
 
-/**
- * 供应器的缓冲：源质送往外界途中的暂存，一次一个 tick。
- * 它只是中转点，不保存东西，重载后从空开始。
- * 没接东西的供应器拒绝一切；机器的抽吸量从网格取。
- * 每次改动递增 revision，容器的缓存只需要这个数。
- */
 final class AlchemyProviderBuffer {
 
     private final BlockEntityAlchemyProvider provider;
@@ -31,10 +25,6 @@ final class AlchemyProviderBuffer {
 
     private long revision;
 
-    /**
-     * 托管改了缓冲的那个事务。这家存储的全部内容就是这一个映射，
-     * 复制它就等于一份完整快照。
-     */
     private final SnapshotJournal<BufferSnapshot> journal = new SnapshotJournal<>() {
         @Override
         protected BufferSnapshot createSnapshot() {
@@ -79,7 +69,6 @@ final class AlchemyProviderBuffer {
         buffer.clear();
     }
 
-    /** 收下装得下的部分，并记入日志，中止的事务好把数量放回去。 */
     int insert(Holder<IAspect> aspect, int amount, TransactionContext transaction) {
         int accepted = previewInsert(aspect, amount);
         if (accepted <= 0) {
@@ -91,7 +80,6 @@ final class AlchemyProviderBuffer {
         return accepted;
     }
 
-    /** 收下 {@code amount} 会收走多少，问它什么都不改。 */
     int previewInsert(Holder<IAspect> aspect, int amount) {
         if (aspect == null || amount <= 0 || !hasAnyTarget()) {
             return 0;
@@ -113,7 +101,6 @@ final class AlchemyProviderBuffer {
         return AspectList.ofEntries(entries);
     }
 
-    /** 任一邻接方收源质时为 true；否则插入无处可去。 */
     boolean hasAnyTarget() {
         for (Direction side : Direction.values()) {
             if (neighbours.storage(side) != null || SuctionTarget.on(neighbours, side) != null) {
@@ -123,7 +110,6 @@ final class AlchemyProviderBuffer {
         return false;
     }
 
-    /** 有活干时为 true：有源质等着送出，或有机器在索要。 */
     boolean hasWork() {
         if (!buffer.isEmpty()) {
             return true;
@@ -137,7 +123,6 @@ final class AlchemyProviderBuffer {
         return false;
     }
 
-    /** 该方向上值得投喂的机器；可插入的容器占着那块位置时为空。 */
     private @Nullable SuctionTarget machine(Direction side) {
         if (neighbours.storage(side) != null) {
             return null;
@@ -145,7 +130,6 @@ final class AlchemyProviderBuffer {
         return SuctionTarget.on(neighbours, side);
     }
 
-    /** 把缓冲挨个交给各方向的邻接方，返回是否有东西移动。 */
     boolean push() {
         if (provider.getLevel() == null) {
             return false;
@@ -183,7 +167,6 @@ final class AlchemyProviderBuffer {
         return movedAnything;
     }
 
-    /** 容器只接受一次插入；抽吸机器改成直接交付同样的量。 */
     private int hand(Direction side, Holder<IAspect> aspect, int amount) {
         IEssentiaStorage target = neighbours.storage(side);
         if (target != null) {
@@ -193,10 +176,6 @@ final class AlchemyProviderBuffer {
         return machine == null ? 0 : machine.accept(aspect, amount);
     }
 
-    /**
-     * 取抽吸机器要的量：来源是网格，缓冲只是中转点。
-     * 旁边没有容器的机器否则会一直等一个永远不来的插入。
-     */
     private boolean topUpFromNetwork() {
         boolean fetched = false;
         for (Direction side : Direction.values()) {
@@ -208,8 +187,6 @@ final class AlchemyProviderBuffer {
             if (wanted == null || buffer.getOrDefault(wanted, 0) > 0) {
                 continue;
             }
-            // 网格花在一切日志之外，所以取货和改缓冲共用一个事务：
-            // 退不回来的事只做一次，缓冲照样正经地加入它。
             int taken = ThETransaction.apply(transaction -> {
                 int got = provider.takeForLink(wanted, BlockEntityAlchemyProvider.BUFFER_PER_ASPECT, transaction);
                 if (got > 0) {

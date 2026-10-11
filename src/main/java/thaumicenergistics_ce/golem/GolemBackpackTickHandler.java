@@ -1,5 +1,7 @@
 package thaumicenergistics_ce.golem;
 
+import thaumicenergistics_ce.config.ThEConfig;
+
 import com.leclowndu93150.thaumaturge.content.golem.EntityThaumaturgeGolem;
 import java.util.Collections;
 import java.util.Map;
@@ -16,26 +18,17 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import thaumicenergistics_ce.ThEIds;
+import thaumicenergistics_ce.compat.thaumaturge.TcGolem;
 import thaumicenergistics_ce.network.GolemBackpackPayload;
 import thaumicenergistics_ce.util.ThELog;
 
-/**
- * 傀儡拿背包做什么：倒进 ME 网络，能碰到时告知附近的客户端。
- * 门槛是「有差事」：Thaumaturge 的傀儡没有核心，核心检查变成 {@code getTask()}；
- * 少了它，背包会把所有用傀儡的印记都抢走。
- * 客户端看不到链接（数据未同步），观察者按自己的间隔收到外观。
- */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class GolemBackpackTickHandler {
 
-    private static final int NETWORK_COOLDOWN = 20;
-
     private static final int SYNC_INTERVAL = 100;
 
-    /** 每个傀儡上次发出的状态和外观，心跳只在变化时出声。 */
     private static final Map<UUID, int[]> LAST_SENT = Collections.synchronizedMap(new WeakHashMap<>());
 
-    /** 每个傀儡上次发出的状态和外观，心跳只在变化时出声。 */
     private static final Map<UUID, int[]> COOLDOWNS = Collections.synchronizedMap(new WeakHashMap<>());
 
     private static final long ERRAND_TRACE_INTERVAL = 200L;
@@ -44,6 +37,16 @@ public final class GolemBackpackTickHandler {
             Collections.synchronizedMap(new WeakHashMap<>());
 
     private GolemBackpackTickHandler() {}
+
+    public static void clearBackpackState(EntityThaumaturgeGolem golem) {
+        LAST_SENT.remove(golem.getUUID());
+        COOLDOWNS.remove(golem.getUUID());
+        LAST_ERRAND_TRACE.remove(golem.getUUID());
+        if (!golem.level().isClientSide()) {
+            PacketDistributor.sendToPlayersTrackingEntity(golem,
+                    new GolemBackpackPayload(golem.getId(), GolemBackpackPayload.STATUS_NO_BACKPACK, 0));
+        }
+    }
 
     @SubscribeEvent
     public static void onEntityTick(EntityTickEvent.Post event) {
@@ -63,7 +66,11 @@ public final class GolemBackpackTickHandler {
 
         syncStatus(golem, link);
 
-        if (cooling(golem, 0, NETWORK_COOLDOWN)) {
+        if (!ThEConfig.GOLEM_TRANSFER.get()) {
+            return;
+        }
+
+        if (cooling(golem, 0, ThEConfig.GOLEM_COOLDOWN.get())) {
             return;
         }
         GolemWirelessLink connection = GolemWirelessLink.open(golem, link);
@@ -77,12 +84,8 @@ public final class GolemBackpackTickHandler {
         deposit(golem, connection);
     }
 
-    /**
-     * 把傀儡拿的东西搬进网络，一次一个物品堆：速度由冷却决定。
-     * 一次搬两个会让搬运傀儡的速度翻倍，速率表也就随附加 mod 变。
-     */
     private static void deposit(EntityThaumaturgeGolem golem, GolemWirelessLink connection) {
-        if (golem.getTask() != null) {
+        if (TcGolem.hasActiveJob(golem)) {
             traceErrand(golem);
             return;
         }
@@ -91,7 +94,6 @@ public final class GolemBackpackTickHandler {
             if (carried.isEmpty()) {
                 continue;
             }
-            // 先取名字再插入：插入之后物品堆被清空，名字会变成 "minecraft:air"。
             String name = GolemBackpackHandler.TRACE ? itemName(carried) : null;
             long inserted = connection.insert(carried, rate);
             if (inserted > 0L) {
@@ -99,7 +101,6 @@ public final class GolemBackpackTickHandler {
                     ThELog.LOG.info("[pack] golem " + golem.getId() + " put " + inserted + "x "
                             + name + " into the network");
                 }
-                // Thaumaturge 傀儡递出物品时放的挥手动作。
                 golem.swingArm();
                 return;
             }
@@ -129,11 +130,23 @@ public final class GolemBackpackTickHandler {
             return;
         }
         GolemBackpackPayload payload = payloadFor(golem, link);
-        // 只在变化时发；刚来观察的玩家由 [onStartTracking] 负责，不在这里。
         int[] last = LAST_SENT.get(golem.getUUID());
         if (last != null && last[0] == payload.status() && last[1] == payload.skinOrdinal()) {
             return;
         }
+        LAST_SENT.put(golem.getUUID(), new int[] {payload.status(), payload.skinOrdinal()});
+        PacketDistributor.sendToPlayersTrackingEntity(golem, payload);
+    }
+
+    public static void syncNow(EntityThaumaturgeGolem golem) {
+        if (golem.level().isClientSide()) {
+            return;
+        }
+        GlobalPos link = GolemBackpackHandler.getLink(golem);
+        if (link == null) {
+            return;
+        }
+        var payload = payloadFor(golem, link);
         LAST_SENT.put(golem.getUUID(), new int[] {payload.status(), payload.skinOrdinal()});
         PacketDistributor.sendToPlayersTrackingEntity(golem, payload);
     }
@@ -146,10 +159,6 @@ public final class GolemBackpackTickHandler {
         return new GolemBackpackPayload(golem.getId(), status, skin);
     }
 
-    /**
-     * 告诉刚来看某个傀儡的玩家它背上有什么：心跳只在变化时出声，
-     * 刚登录的客户端收不到，也就画不出背包。
-     */
     @SubscribeEvent
     public static void onStartTracking(PlayerEvent.StartTracking event) {
         if (!(event.getTarget() instanceof EntityThaumaturgeGolem golem)) {
@@ -160,7 +169,6 @@ public final class GolemBackpackTickHandler {
         }
         GlobalPos link = GolemBackpackHandler.getLink(golem);
         if (link == null) {
-            // 没什么可说的：没装背包的傀儡按普通傀儡画。
             return;
         }
         PacketDistributor.sendToPlayer(player, payloadFor(golem, link));

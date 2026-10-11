@@ -3,11 +3,15 @@
 	"package": "thaumicenergistics_ce.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"InterfaceLogicDropMixin"
+        "InterfaceLogicDropMixin",
+        "IOBusUpgradeSlotsMixin",
+        "IOBusRecoveryMixin",
+        "BusRecoveryItemMixin",
+        "ExportBusOperationMixin",
+        "StorageBusUpgradeSlotsMixin",
+        "TerminalVisibilityMixin"
 	],
-	"client": [
-		"PageLineStyleMixin"
-	],
+    "client": ["TerminalScreenVisibilityMixin"],
 	"injectors": {
 		"defaultRequire": 1
 	},

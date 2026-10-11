@@ -3,17 +3,11 @@ package thaumicenergistics_ce.blockentity.gachabox;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
-/**
- * 进行中的转动：还剩几秒、是不是给奖的那一类，以及把结果压在屏幕上的闪烁。
- * 箱子每秒 tick 一次并决定显示什么，本类只管把计数数准。
- */
 final class GachaTurn {
 
     private static final String TAG_SECONDS = "TurnSeconds";
     private static final String TAG_PAYS = "TurnPays";
 
-    /** 结果在下一次转动掷出前压在屏幕上多少秒。
-     * 箱子每秒只 tick 一次，这里数的是秒。 */
     private static final int FLASH_SECONDS = 2;
 
     private final BlockEntityGachaBox box;
@@ -34,7 +28,6 @@ final class GachaTurn {
         return flash > 0;
     }
 
-    /** 屏幕上的闪烁是给奖，还是什么都没抽到。 */
     boolean earned() {
         return flashPaid;
     }
@@ -43,7 +36,6 @@ final class GachaTurn {
         flash--;
     }
 
-    /** 开始一次掷出的转动；调用到这里时账已经付过。 */
     void start(GachaOdds.Turn drawn) {
         this.seconds = drawn.seconds();
         this.pays = drawn.pays();
@@ -55,7 +47,6 @@ final class GachaTurn {
         box.setChanged();
     }
 
-    /** 把结束的转动交给屏幕显示片刻，并退出进行中状态。 */
     void settle() {
         this.flash = FLASH_SECONDS;
         this.flashPaid = this.pays;
@@ -63,7 +54,6 @@ final class GachaTurn {
         box.setChanged();
     }
 
-    /** 进行中和显示都清空；箱子刚填装完时是这个状态。 */
     void reset() {
         this.seconds = 0;
         this.pays = false;

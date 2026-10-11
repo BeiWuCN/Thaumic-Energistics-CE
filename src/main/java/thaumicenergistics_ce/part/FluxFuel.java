@@ -8,10 +8,8 @@ import appeng.api.stacks.AEKey;
 import appeng.api.storage.MEStorage;
 import org.jspecify.annotations.Nullable;
 
-/** AE 先于燃料被取走，任一步失败即交还；不完整的支付买不到东西。 */
 final class FluxFuel {
 
-    /** 本 mod 的定价，一点 100 AE：设计上从来没给一点定过价。 */
     static final double AE_PER_POINT = 100.0;
 
     private FluxFuel() {}
@@ -34,7 +32,6 @@ final class FluxFuel {
             return false;
         }
         if (storage.extract(ordo, points, Actionable.MODULATE, source) < points) {
-            // [auram] 已经取出：放回去，别白烧掉。
             storage.insert(auram, points, Actionable.MODULATE, source);
             energy.injectPower(paid, Actionable.MODULATE);
             return false;

@@ -17,10 +17,6 @@ import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 import thaumicenergistics_ce.menu.slot.AspectSelectSlot;
 import thaumicenergistics_ce.network.EncoderActionPayload;
 
-/**
- * 蒸馏编码台的界面：整体 blit 本 mod 自己的美术图，槽位由菜单放在美术图画的坐标上。
- * 不走 AE2 的界面样式系统：它只解析 AE2 命名空间里的样式文档，附加模组的贴图引用不到。
- */
 public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDistillationEncoder> {
 
     private static final Identifier TEXTURE =
@@ -28,7 +24,6 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
 
     private static final int WIDTH = 176;
 
-    /** 234 行不是 229：美术图的不透明像素占 y=0..233，最后五行是底部斜面。 */
     private static final int HEIGHT = 234;
 
     private static final int TITLE_X = 8;
@@ -36,10 +31,8 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
     private static final int INVENTORY_LABEL_X = 8;
     private static final int INVENTORY_LABEL_Y = HEIGHT - 94;
 
-    /** 要素在格里的绘制大小，和 Thaumaturge 自己的 GUI 要素尺寸一致。 */
     private static final int ASPECT_SIZE = 16;
 
-    /** Encode 按钮左上角，单位是面板像素：格子之间那条 34x14 的裸面板。 */
     private static final int BUTTON_X = 140;
     private static final int BUTTON_Y = 94;
 
@@ -74,17 +67,11 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        // 这一行来自源物品，客户端菜单从不知道它什么时候到。
         menu.ensureAspects();
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         renderAspectTooltip(graphics, mouseX, mouseY);
     }
 
-    /**
-     * 悬停框画成 AE2 的样子：一像素浅青细框加半透明蓝底。
-     * 26.1.2 的原版高亮是私有的白方块 sprite，覆写不了也拦不住，
-     * 只能在它之后照 AE2 的画法再补一遍，见 {@link Ae2SlotHighlight}。
-     */
     @Override
     public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractContents(graphics, mouseX, mouseY, partialTick);
@@ -98,19 +85,12 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
         graphics.pose().popMatrix();
     }
 
-    /**
-     * 面板贴图归 [extractBackground]，不归 [extractContents]：这一版把一帧拆成两半，
-     * 槽里的物品、悬停的那个槽位和 tooltip 都在 [extractContents] 里，占住它又不调 super，
-     * 物品和 tooltip 就一起没了。
-     */
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
         graphics.blit(
                 RenderPipelines.GUI_TEXTURED, TEXTURE, leftPos, topPos, 0.0F, 0.0F, WIDTH, HEIGHT, 256, 256);
 
-        // 要素全未发现的物品行是空的，也没有解释，界面看着像坏了。
-        // 这里把该行清空，不画淡，免得盖住这条提示。
         if (menu.sourceRevealsNothing()) {
             graphics.centeredText(
                     font,
@@ -128,29 +108,22 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
         List<Holder<IAspect>> aspects = menu.aspects();
         for (Slot slot : menu.slots) {
             if (slot instanceof AspectSelectSlot aspectSlot && aspectSlot.aspectIndex() < 0) {
-                // 选中的格：槽位里什么都不放，这里存的是选择，不是物品堆。
                 Holder<IAspect> picked = menu.pickedAspect();
                 if (picked != null) {
-                    // 故意不写数量：这一格就是选择，数量由源格显示。
                     AspectRendering.renderGui(graphics, font, slot.x, slot.y, picked, 0.0F);
                 }
                 continue;
             }
             if (slot instanceof AspectSelectSlot aspectSlot && aspectSlot.isFilled()) {
                 int index = aspectSlot.aspectIndex();
-                // 未发现的要素在行里占位但不画：画出图标就等于宣称玩家已经知道它。
                 if (index < 0 || index >= aspects.size() || !menu.isAspectRevealed(index)) {
                     continue;
                 }
-                // 用槽位坐标，不用屏幕坐标：[renderLabels] 已在面板偏移的位姿里跑，
-                // 再加一次 [leftPos] 会让每个图标的距离翻倍。
                 int x = slot.x;
                 int y = slot.y;
-                // 数量交给渲染器画在格的角上：样板的产出数量。
                 AspectRendering.renderGui(graphics, font, x, y, aspects.get(index), menu.aspectAmountFor(index));
 
                 if (aspectSlot.isSelected()) {
-                    // 选中的井画一圈框，往里缩一格正好压在边框上；直接画线，不用美术图。
                     graphics.outline(x - 1, y - 1, ASPECT_SIZE + 2, ASPECT_SIZE + 2, 0xFFFFD700);
                 }
             }
@@ -167,7 +140,6 @@ public class ScreenDistillationEncoder extends AbstractContainerScreen<MenuDisti
             }
             return;
         }
-        // 两个样板槽是普通物品槽，tooltip 走原版。
     }
 
 }

@@ -31,10 +31,8 @@ side = "BOTH"
 [[dependencies."${mod_id}"]]
 modId = "thaumaturge"
 type = "required"
-# 0.2.1, not 0.4.0. Upstream's 26.1.2 line is mod_version 0.2.1, and that is the source tree this port
-# was compiled against; there is no 0.4.0 on this line to require. The old range was carried over
-# from the 1.21.1 manifest, where it matched a different Thaumaturge version numbering.
-versionRange = "[0.2.1,)"
+# Uses the node, caster and golem interfaces introduced in 1.0.3.
+versionRange = "[1.0.3,)"
 ordering = "AFTER"
 side = "BOTH"
 

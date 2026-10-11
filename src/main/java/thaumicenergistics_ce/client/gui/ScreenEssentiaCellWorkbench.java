@@ -16,14 +16,8 @@ import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 import thaumicenergistics_ce.network.PartitionWellPayload;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
-/**
- * 源质元件工作台的界面。AE2 可升级界面，美术、槽位、标题和升级面板都来自样式；
- * 齿轮从元件填井，X 清空，点一个标记就把它取回。AE2 的模糊和复制模式开关没留，
- * 源质 [AEKey] 没有耐久或 NBT 可匹配。
- */
 public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaCellWorkbench> {
 
-    /** 背后没有元件的井用这个色调：AE2 自己的槽位美术，亮度略高于一半。 */
     private static final float WELL_DISABLED_TINT = 0.6f;
 
     public ScreenEssentiaCellWorkbench(
@@ -33,11 +27,6 @@ public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaC
         addToLeftToolbar(new ActionButton(ActionItems.CLOSE, items -> menu.clearPartition()));
     }
 
-    /**
-     * 悬停框照 AE2 的画法补一遍，见 {@link Ae2SlotHighlight}：AE2 自己的高亮钩子在这一代
-     * 没接上，不补的话井和升级槽悬停时是原版白块。禁用的井不走这里——它们不是 active 槽位，
-     * 原版压根不会把指针放上去，那几口的框由 [extractRenderState] 代画。
-     */
     @Override
     public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractContents(graphics, mouseX, mouseY, partialTick);
@@ -51,10 +40,6 @@ public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaC
         graphics.pose().popMatrix();
     }
 
-    /**
-     * AE2 把禁用的井画成五分之一不透明度、还不给图标，本界面自己的美术图会把它吞掉：
-     * 同一套槽位美术调成灰色，井看着还是井，又说明放不进标记。
-     */
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
@@ -65,8 +50,6 @@ public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaC
                 continue;
             }
             Slot slot = menu.slots.get(menu.partitionSlotIndex(well));
-            // 禁用的井不是 active，AE2 从不把它当成鼠标下的槽位，也不给它高亮：
-            // 这里代它画这个框，灰色跟着指针走。
             if (isHovering(slot, mouseX, mouseY)) {
                 renderSlotHighlight(graphics, slot, mouseX, mouseY, partialTick);
                 continue;
@@ -88,7 +71,6 @@ public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaC
                 ClientPacketDistributor.sendToServer(
                         new PartitionWellPayload(menu.containerId, well, PartitionWellPayload.CLEAR));
             }
-            // 两种走法点击都在此止步，手上拿的物品落不进井里。
             return true;
         }
         return super.mouseClicked(event, doubleClick);

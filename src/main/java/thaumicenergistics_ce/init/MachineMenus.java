@@ -13,11 +13,6 @@ import thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
-/**
- * 机器菜单，由打开它们的机器构建。
- * 机器自己指名菜单类会让 {@code blockentity} 与 {@code menu} 互相引用；接线包两边都认识。
- * 注册仍留在 {@link ModMenuTypes}：这里只是构建菜单，不是定义菜单。
- */
 public final class MachineMenus {
 
     private MachineMenus() {}

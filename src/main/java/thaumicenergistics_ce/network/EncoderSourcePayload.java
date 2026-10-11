@@ -9,12 +9,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
 
-/**
- * 蒸馏编码器的源模板，由客户端设置。
- * 它对应一个槽位却仍要上路：物品留在玩家物品栏里，原版槽位同步没有东西可送。
- * @param containerId 它作用的菜单，发给已关闭屏幕的数据包被忽略
- * @param stack 要蒸馏的物品，数量为一，空则清空该槽位
- */
 public record EncoderSourcePayload(int containerId, ItemStack stack) implements CustomPacketPayload {
 
     public static final Type<EncoderSourcePayload> TYPE =

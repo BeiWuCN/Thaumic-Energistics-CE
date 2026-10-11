@@ -29,8 +29,6 @@ import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
-/** 内存卡绑定的一对：抽取端付 [auram]/[ordo] 并持有咒波缓冲，释放端把它排空。
- * 不是 vis 中继。 */
 public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInterface>
         implements IGridTickable {
 
@@ -43,23 +41,19 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
     public static final Identifier MODEL_HAS_CHANNEL =
             ThEIds.id("parts/flux_transfer_interface_has_channel");
 
-    /** 本部件可能画到的每个位置，自检据此断言文件存在。 */
     public static final List<Identifier> MODEL_LOCATIONS =
             List.of(MODEL_BASE, MODEL_OFF, MODEL_ON, MODEL_HAS_CHANNEL);
 
     private static final double IDLE_POWER = 1.0;
 
-    /** 一个周期 20 tick，即一秒。 */
     private static final int CYCLE_TICKS = 20;
 
     static final int FLUX_PER_CYCLE = 4;
 
-    /** 设计值 64 的四倍：到顶抽取端就停止购买燃料。 */
     private static final int POOL_LIMIT = 256;
 
     private static final String TAG_POOL = "fluxPool";
 
-    /** 从抽取端所在区块取走、还没释放；跟着那一端的区块一起消亡。 */
     private int fluxPool;
 
     private boolean workedThisCycle;
@@ -71,13 +65,11 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
 
     @Override
     public void getBoxes(IPartCollisionHelper bch) {
-        // 碰撞箱和 AE2 存储总线一样：借来的模型就按它做的。
         bch.addBox(5, 5, 12, 11, 11, 14);
         bch.addBox(2, 2, 14, 14, 14, 15);
         bch.addBox(3, 3, 15, 13, 13, 16);
     }
 
-    // 这一对在告诉玩家什么
 
     public @Nullable FluxWait waitReason() {
         if (!(getLevel() instanceof ServerLevel server) || !getMainNode().isActive()) {
@@ -87,8 +79,6 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         if (payer == null || !payer.live(server)) {
             return null;
         }
-        // 两端都会问，答案针对整对：tick 里的某种拒绝若被这份列表漏掉，
-        // 一台没动静的机器就会读成「idle」。
         if (!payer.volumeClear(server)) {
             return FluxWait.NO_SPACE;
         }
@@ -97,7 +87,6 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
             return blocked;
         }
         if (isDrawEnd()) {
-            // 什么都还没存下：抽取端没填满它的理由才是有用的答案。
             return fluxAvailable(server) ? payer.fuelShort(server) : FluxWait.NO_FLUX;
         }
         if (payer.fluxPool <= 0) {
@@ -106,15 +95,12 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         return null;
     }
 
-    /** 传输是否在进行中；本对 tooltip 那行的后半截。 */
     public boolean working() {
         PartFluxTransferInterface payer = drawEnd();
         return payer != null && payer.workedThisCycle;
     }
 
-    // -- tick 处理 -----
 
-    /** 绝不发休眠请求：休眠的设备不再留意自己的搭档。 */
     @Override
     public TickingRequest getTickingRequest(IGridNode node) {
         return new TickingRequest(CYCLE_TICKS, CYCLE_TICKS, false);
@@ -153,13 +139,11 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         }
     }
 
-    /** 燃料在抽取端已经付过，缓冲为空是等待，不是失败。 */
     private void releaseCycle(ServerLevel server) {
         PartFluxTransferInterface payer = drawEnd();
         if (payer == null || !payer.live(server)) {
             return;
         }
-        // 只查一次，把结果交给检查：一个周期不能为这次搜索付两遍。
         BlockPos landing = FluxCondensation.landing(server, grid(), fluxPos());
         if (releaseBlock(server, landing) != null) {
             return;
@@ -188,9 +172,7 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         return FluxFuel.shortOf(energy, storage, auram, ordo, actionSource(), FLUX_PER_CYCLE);
     }
 
-    // -- 这一对 -----
 
-    /** 抽取端就是输入侧；AE2 的 {@code isOutput()} 才是频率的说法。 */
     private boolean isDrawEnd() {
         return !isOutput();
     }
@@ -199,7 +181,6 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         return releaseBlockedReason(server) == null;
     }
 
-    /** 一次拒绝背后有四种不同的修法，这一对只说出它正等的第一个。 */
     private @Nullable FluxWait releaseBlockedReason(ServerLevel server) {
         FluxWait first = null;
         for (PartFluxTransferInterface output : getOutputStream().toList()) {
@@ -232,8 +213,6 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         return getLevel() == server && !getBlockEntity().isRemoved() && server.isLoaded(fluxPos());
     }
 
-    /** AE2 的 {@code getInput()} 在它自身就是输入时返回本部件，过滤器得知道这一点；
-     * 未配对的隧道返回 null。 */
     private @Nullable PartFluxTransferInterface drawEnd() {
         if (isDrawEnd()) {
             return this;
@@ -242,7 +221,6 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         return input == this ? null : input;
     }
 
-    /** 两端都在服务端线程上 tick，缓冲不用加锁。 */
     int takeFlux(int want) {
         int taken = Math.min(want, fluxPool);
         if (taken <= 0) {
@@ -254,13 +232,11 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         return taken;
     }
 
-    // 网格辅助方法
 
     private boolean volumeClear(ServerLevel server) {
         return FluxVolume.clear(server, fluxPos(), getSide());
     }
 
-    /** Thaumaturge 每 tick 从邻近区块回填，抽干了不等于空。 */
     private boolean fluxAvailable(ServerLevel server) {
         return TcAura.drainFlux(server, fluxPos(), FLUX_PER_CYCLE, true) >= FLUX_PER_CYCLE - 0.001f;
     }
@@ -293,9 +269,7 @@ public class PartFluxTransferInterface extends P2PTunnelPart<PartFluxTransferInt
         return holder == null ? null : AEssentiaKey.of(holder);
     }
 
-    // -- 持久化 -----
 
-    /** 读的时候夹取：来自限制更严的构建的标签不能让咒波搁浅在缓冲里。 */
     @Override
     public void readFromNBT(ValueInput input) {
         super.readFromNBT(input);

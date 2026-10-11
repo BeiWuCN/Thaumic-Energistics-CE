@@ -9,11 +9,6 @@ import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
-/**
- * 本 mod 的机器以 {@link IItemHandler} 暴露给漏斗和管道。
- * 区段可以带空洞，机器自己写入的区段不会被管道够到。
- * 不用 NeoForge 的 {@code InvWrapper}：它问的是槽位的上限，会把只装一个物品的机器报成能搬走一整堆。
- */
 public final class SlotRangeItemHandler extends SnapshotJournal<ItemStack[]> implements ResourceHandler<ItemResource> {
 
     private final Container container;
@@ -21,17 +16,12 @@ public final class SlotRangeItemHandler extends SnapshotJournal<ItemStack[]> imp
     private final int slotCount;
     private final IntPredicate band;
 
-    /**
-     * 该区段答不答读取。只可填充的区段不答：问它里面有什么，一律答「空的」，
-     * 管道因此填得进、取不出；而机器自己的代码握着容器而不是这个视图，仍看得到它写进去的东西。
-     */
     private final boolean readable;
 
     public SlotRangeItemHandler(Container container, int firstSlot, int slotCount) {
         this(container, firstSlot, slotCount, slot -> true, true);
     }
 
-    /** 带空洞的区段；{@code band} 收到的是容器自身的索引。 */
     public SlotRangeItemHandler(Container container, int firstSlot, int slotCount, IntPredicate band) {
         this(container, firstSlot, slotCount, band, true);
     }
@@ -45,24 +35,18 @@ public final class SlotRangeItemHandler extends SnapshotJournal<ItemStack[]> imp
         this.slotCount = Math.max(0, Math.min(slotCount, container.getContainerSize() - firstSlot));
     }
 
-    /** 该区段是否覆盖此处理器索引：在范围内，且不是空洞。 */
     private boolean reaches(int index) {
         return readable && index >= 0 && index < slotCount && band.test(firstSlot + index);
     }
 
-    /** 该区段是否覆盖此处理器索引，不论它答不答读取。 */
     private boolean covers(int index) {
         return index >= 0 && index < slotCount && band.test(firstSlot + index);
     }
 
-    /** 只可填充的区段：槽位与管道看到的一样，但取不出东西。 */
     public static SlotRangeItemHandler inputOnly(Container container, int firstSlot, int slotCount) {
         return new SlotRangeItemHandler(container, firstSlot, slotCount, slot -> true, false);
     }
 
-    // ------------------------------------------------------------------
-    // ResourceHandler
-    // ------------------------------------------------------------------
 
     @Override
     public int size() {
@@ -79,10 +63,6 @@ public final class SlotRangeItemHandler extends SnapshotJournal<ItemStack[]> imp
         return reaches(index) ? container.getItem(firstSlot + index).getCount() : 0;
     }
 
-    /**
-     * 槽位的上限取容器与物品堆两者的较小值，所以只收一张卡的槽位仍报一，
-     * 槽位会拒收的东西报零。
-     */
     @Override
     public long getCapacityAsLong(int index, ItemResource resource) {
         int containerSlot = covers(index) ? firstSlot + index : -1;
@@ -111,7 +91,6 @@ public final class SlotRangeItemHandler extends SnapshotJournal<ItemStack[]> imp
         if (!held.isEmpty() && !resource.matches(held)) {
             return 0;
         }
-        // 资源是类型不是物品堆：空间归槽位，问容器自己的过滤器拿一份这个类型就够。
         int limit = Math.min(container.getMaxStackSize(), resource.getMaxStackSize());
         int room = held.isEmpty() ? limit : limit - held.getCount();
         int moved = Math.min(room, amount);
@@ -155,9 +134,6 @@ public final class SlotRangeItemHandler extends SnapshotJournal<ItemStack[]> imp
         return moved;
     }
 
-    // ------------------------------------------------------------------
-    // 事务
-    // ------------------------------------------------------------------
 
     @Override
     protected ItemStack[] createSnapshot() {
@@ -175,20 +151,12 @@ public final class SlotRangeItemHandler extends SnapshotJournal<ItemStack[]> imp
         }
     }
 
-    /**
-     * 推迟到提交时做，不在每次写入时做：搬运中途通知容器已改变，
-     * 事务随后又回滚，就会保存并同步一个机器其实没到过的状态。
-     */
     @Override
     protected void onRootCommit(ItemStack[] originalState) {
         container.setChanged();
     }
 
-    // ------------------------------------------------------------------
-    // 槽位自己的过滤器
-    // ------------------------------------------------------------------
 
-    /** 容器收不收这个：问的是它自己的规则，不是区段的。 */
     private boolean insertable(int containerSlot, ItemStack stack) {
         return !stack.isEmpty() && container.canPlaceItem(containerSlot, stack);
     }

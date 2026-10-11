@@ -38,12 +38,6 @@ import thaumicenergistics_ce.arcane.TerminalAuraPayment;
 import thaumicenergistics_ce.compat.thaumaturge.TcWand;
 import thaumicenergistics_ce.init.ModMenuTypes;
 
-/**
- * ME 合成终端，合成网格是奥术工作台的那种：网格、水晶槽和法杖按工作台规则付费，
- * 网络只出 vis，来自法杖槽的法杖或网格的电力。物品栏归部件自己，
- * 不归网络，网格装的是玩家此刻摆的东西，网络不能取走。配方只在材料已就位时匹配，
- * 材料从不从网络拉取；填满网格是物品列表和 JEI 转移的活。
- */
 public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         implements ArcaneTerminalHost {
 
@@ -51,10 +45,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
 
     public static final Identifier INV_WAND = ThEIds.id("arcane_crafting_terminal_wand");
 
-    /**
-     * 放进网格的水晶付不了配方的水晶开销：它既算材料又算支付，
-     * {@code ArcaneShapedRecipePattern.matches} 会拒掉每个要水晶的配方。
-     */
     public static final Identifier INV_CRYSTALS = ThEIds.id("arcane_crafting_terminal_crystals");
 
     public static final Identifier MODEL_BASE = ThEIds.id("parts/arcane_crafting_terminal_base");
@@ -74,7 +64,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
 
     public static final int CRYSTAL_COLUMN = 3;
 
-    /** 虚拟工作台的所有者与宿主，不带坐标。固定不变：搬走终端不会影响过去的合成。 */
     public static final UUID CONTEXT_HOST =
             UUID.nameUUIDFromBytes("thaumicenergistics_ce:arcane_crafting_terminal".getBytes());
 
@@ -84,14 +73,12 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
 
     private final AppEngInternalInventory crystalInv = new AppEngInternalInventory(this, CRYSTAL_SLOTS);
 
-    /** 只有一张卡，vis 连接卡；它插的是 [AE2] 挂在本部件上的那个升级槽。 */
     private final IUpgradeInventory upgrades =
-            UpgradeInventories.forMachine(getPartItem(), 1, this::onUpgradesChanged);
+            UpgradeInventories.forMachine(getPartItem(), 2, this::onUpgradesChanged);
 
     public PartArcaneCraftingTerminal(IPartItem<?> partItem) {
         super(partItem);
         getMainNode().setIdlePowerUsage(0.5);
-        // 门口就拒：物品存在一瞬，就够菜单把它同步出去。
         wandInv.setFilter(new IAEItemFilter() {
             @Override
             public boolean allowInsert(
@@ -99,7 +86,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
                 return isWand(stack);
             }
         });
-        // 同理：槽里塞杂物，水晶需求会被判成付不起。
         crystalInv.setFilter(new IAEItemFilter() {
             @Override
             public boolean allowInsert(
@@ -109,7 +95,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         });
     }
 
-    /** 判断物品堆是不是法杖。按物品类认，不认标签，依赖保持单向。 */
     public static boolean isWand(ItemStack stack) {
         return TcWand.isWand(stack);
     }
@@ -128,7 +113,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         return true;
     }
 
-    /** 链接物品潜行点到本部件上才写入配对。不潜行不写：手持它路过终端不能重绑。 */
     @Override
     public boolean onUseItemOn(ItemStack held, Player player, InteractionHand hand, Vec3 pos) {
         if (!(held.getItem() instanceof ArcaneTerminalLink link) || !player.isSecondaryUseActive()) {
@@ -162,15 +146,12 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         return crystalInv;
     }
 
-    /** 部件自己的升级槽；[AE2] 的菜单构建器在这里读它，画出玩家用的那个槽。 */
     @Override
     public IUpgradeInventory getUpgrades() {
         return upgrades;
     }
 
-    /** 卡片进出时 [AE2] 会调这里；部件的内容物留在世界里。 */
     private void onUpgradesChanged() {
-        // 不在世界里的部件没东西可存，[AE2] 在加载时也会调这里。
         if (getHost() != null) {
             saveChanges();
         }
@@ -181,12 +162,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         return node == null ? null : node.getGrid();
     }
 
-    /**
-     * 为合成提供灵气里的 vis；少了它 Thaumaturge 回 {@code PAYMENT_UNAVAILABLE}，
-     * 因为无类型的 {@code baseVis} 来自线缆没有的缓冲。灵气会加入交给它的事务，合成中止就把 vis 放回去；
-     * 网络的电力不会，问它的那一刻就花掉了。
-     * @return 提供的 centivis，从不超过 {@code needCentivis}
-     */
     public int supplyAura(int needCentivis, TransactionContext transaction) {
         if (needCentivis <= 0 || !isActive()) {
             return 0;
@@ -196,9 +171,8 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
             return 0;
         }
         if (TerminalAuraPayment.visConnectionInstalled(this)) {
-            // 卡片直接扣线缆周围的灵气，不问网格也不问电力。
-            return TerminalAuraPayment.payAura(
-                    level, getBlockEntity().getBlockPos(), needCentivis, transaction);
+            return TerminalAuraPayment.payBoundAura(
+                    level, getBlockEntity().getBlockPos(), TerminalAuraPayment.visCard(this), needCentivis, transaction);
         }
         IGrid grid = gridOrNull();
         if (grid == null) {
@@ -209,7 +183,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         if (energy == null) {
             return 0;
         }
-        // 线缆周围的灵气，费用由网络电力结：无线终端费率相同，只是灵气取自玩家身边那块。见 TerminalAuraPayment。
         return TerminalAuraPayment.pay(
                 level, getBlockEntity().getBlockPos(), energy, needCentivis, transaction);
     }
@@ -267,7 +240,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         super.readFromNBT(input);
         craftingGrid.readFromNBT(input, "craftingGrid");
         wandInv.readFromNBT(input, "wandInv");
-        // 旧世界没有这个键；键缺失就留空，这个升级不会出事。
         crystalInv.readFromNBT(input, "crystalInv");
         upgrades.readFromNBT(input, "upgrades");
     }
