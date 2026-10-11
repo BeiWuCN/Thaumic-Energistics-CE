@@ -14,10 +14,10 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.arcane.ThEArcanePattern;
+import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
-import thaumicenergistics_ce.init.MachineMenus;
-import thaumicenergistics_ce.init.ModBlockEntities;
+import thaumicenergistics_ce.registry.MachineMenus;
+import thaumicenergistics_ce.registry.ModBlockEntities;
 
 public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
 

@@ -16,8 +16,8 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.arcane.ThEArcanePattern;
-import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
+import thaumicenergistics_ce.registry.ModItems;
 import thaumicenergistics_ce.util.ThELog;
 
 public final class HandlerKnowledgeCore {

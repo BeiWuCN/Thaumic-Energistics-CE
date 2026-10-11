@@ -19,8 +19,8 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
-import thaumicenergistics_ce.init.ModBlocks;
-import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.registry.ModBlocks;
+import thaumicenergistics_ce.registry.ModItems;
 
 public final class OccultMonitorRemovalChecks {
     private OccultMonitorRemovalChecks() {}

@@ -12,7 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
-import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.registry.ModItems;
 import thaumicenergistics_ce.part.PartVisInterface;
 
 final class DirectVisNodeChecks {

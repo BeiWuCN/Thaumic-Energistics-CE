@@ -18,7 +18,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
-import thaumicenergistics_ce.init.ModBlockEntities;
+import thaumicenergistics_ce.registry.ModBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implements IAspectSource {

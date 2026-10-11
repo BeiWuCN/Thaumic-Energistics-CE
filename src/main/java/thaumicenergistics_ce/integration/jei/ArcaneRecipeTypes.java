@@ -15,7 +15,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.arcane.ThEArcanePattern;
+import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.integration.ae2.ClientRegistries;
 import thaumicenergistics_ce.util.ThELog;
 import thaumicenergistics_ce.recipe.IngredientStacks;

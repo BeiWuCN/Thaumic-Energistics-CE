@@ -11,8 +11,8 @@ import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.arcane.ArcanePatternDetails;
-import thaumicenergistics_ce.arcane.ThEArcanePattern;
+import thaumicenergistics_ce.recipe.arcane.ArcanePatternDetails;
+import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.util.ThELog;
 

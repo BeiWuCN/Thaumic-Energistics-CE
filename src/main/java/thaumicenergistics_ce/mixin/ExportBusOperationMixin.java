@@ -7,7 +7,7 @@ import appeng.parts.automation.ExportBusPart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import thaumicenergistics_ce.busaccess.EssentiaBusAccess;
+import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusAccess;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 @Mixin(value = ExportBusPart.class, remap = false)

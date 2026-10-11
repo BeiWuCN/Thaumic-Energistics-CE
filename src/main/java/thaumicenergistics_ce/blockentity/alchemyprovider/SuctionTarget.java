@@ -5,7 +5,7 @@ import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
+import thaumicenergistics_ce.registry.capability.CachedEssentiaNeighbours;
 
 final class SuctionTarget {
 

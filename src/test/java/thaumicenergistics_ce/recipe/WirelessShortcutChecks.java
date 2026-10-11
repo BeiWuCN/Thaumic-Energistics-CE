@@ -8,7 +8,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.registry.ModItems;
 import thaumicenergistics_ce.item.WirelessTerminalShortcuts;
 
 public final class WirelessShortcutChecks {

@@ -26,7 +26,7 @@ public final class AEssentiaKeyType extends AEKeyType {
     public static final AEssentiaKeyType INSTANCE = new AEssentiaKeyType();
 
     private AEssentiaKeyType() {
-        super(ID, AEssentiaKey.class, Component.translatable("ae2.keytype.thaumicenergistics_ce.essentia"));
+        super(ID, AEssentiaKey.class, Component.translatable("ae2.keytype.thaumicenergistics_ce.integration.ae2.essentia"));
     }
 
     @Override

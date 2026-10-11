@@ -12,8 +12,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
-import thaumicenergistics_ce.arcane.TerminalAuraPayment;
-import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
+import thaumicenergistics_ce.registry.ModItems;
 import thaumicenergistics_ce.item.ItemVisConnectionCard;
 import thaumicenergistics_ce.part.PartVisInterface;
 

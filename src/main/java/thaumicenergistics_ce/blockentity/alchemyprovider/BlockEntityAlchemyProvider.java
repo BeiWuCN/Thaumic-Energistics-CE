@@ -31,7 +31,7 @@ import net.minecraft.nbt.LongTag;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.init.ModBlockEntities;
+import thaumicenergistics_ce.registry.ModBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity

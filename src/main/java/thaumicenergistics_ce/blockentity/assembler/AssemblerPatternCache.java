@@ -4,8 +4,8 @@ import appeng.api.crafting.IPatternDetails;
 import java.util.ArrayList;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.arcane.ArcanePatternDetails;
-import thaumicenergistics_ce.arcane.ThEArcanePattern;
+import thaumicenergistics_ce.recipe.arcane.ArcanePatternDetails;
+import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.util.ThELog;
 

@@ -23,8 +23,8 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.infusion.InfusionRisk;
-import thaumicenergistics_ce.init.ModBlockEntities;
+import thaumicenergistics_ce.recipe.infusion.InfusionRisk;
+import thaumicenergistics_ce.registry.ModBlockEntities;
 
 public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements IGridTickable {
 

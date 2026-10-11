@@ -12,7 +12,7 @@ import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
+import thaumicenergistics_ce.registry.capability.CachedEssentiaNeighbours;
 import thaumicenergistics_ce.util.ThETransaction;
 
 final class ChamberEssentiaTank {

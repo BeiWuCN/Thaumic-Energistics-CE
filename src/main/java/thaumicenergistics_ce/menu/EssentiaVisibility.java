@@ -7,11 +7,11 @@ public final class EssentiaVisibility {
     private EssentiaVisibility() {}
 
     public static boolean allowed(MEStorageMenu menu) {
-        if (!ThEConfig.RESTRICT_ESSENTIA_VISIBILITY.get()) {
-            return true;
-        }
         if (menu instanceof MenuArcaneCraftingTerminal arcane) {
             return arcane.hasEssentiaAccessCard();
+        }
+        if (!ThEConfig.RESTRICT_ESSENTIA_VISIBILITY.get()) {
+            return true;
         }
         return menu instanceof MenuEssentiaTerminalBase;
     }

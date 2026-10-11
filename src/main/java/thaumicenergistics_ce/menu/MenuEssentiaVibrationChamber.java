@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber.BurnState;
 import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
 import thaumicenergistics_ce.blockentity.vibrationchamber.VibrationChamberSync;
-import thaumicenergistics_ce.init.ModMenuTypes;
+import thaumicenergistics_ce.registry.ModMenuTypes;
 
 public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
 

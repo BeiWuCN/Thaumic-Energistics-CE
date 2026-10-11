@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcAspects;
-import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
+import thaumicenergistics_ce.registry.capability.CachedEssentiaNeighbours;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.util.ThETransaction;
 

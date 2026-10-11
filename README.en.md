@@ -13,7 +13,7 @@ The project continues the original Thaumic Energistics gameplay using Thaumaturg
 - **Essentia storage and transfer:** store aspects in ME Essentia Cells and fit Essentia Access Cards to ME Import, Export and Storage Buses to connect external essentia containers.
 - **Essentia terminals:** browse network aspects, search names in your language, and deposit or withdraw essentia using containers. The wireless terminal provides remote access.
 - **Arcane crafting:** wired and wireless arcane terminals provide wand and crystal slots with crafting cost displays. The Arcane Assembler handles automated crafting.
-- **Vis relay connections:** bind a Vis Connection Card to a Vis Relay Interface output to cover a terminal's local chunk VIS shortage. The output must be loaded and online.
+- **Vis relay connections:** bind a Vis Connection Card to a Vis Relay Interface output to recharge the wand in the terminal. Placed arcane terminals draw VIS directly from their own chunk without a card. Wireless arcane terminals share only the bound terminal's Vis Connection Card effect through a read-only indicator; the physical card stays in the placed terminal, and other upgrades remain independent. The output must be loaded and online.
 - **Alchemy and infusion supply:** use the Alchemy Provider, Infusion Provider and related devices to supply Thaumaturge crafting from the ME network.
 - **Golem wireless backpacks:** let golems exchange items with the network and choose backpack appearances using supported materials.
 - **Research and configuration:** unlock content through the Thaumonomicon and adjust machine values and feature switches on the server.
@@ -34,7 +34,7 @@ The current release was built and tested with:
 
 AE2 and Thaumaturge are required. JEI provides recipe viewing and transfer, Jade provides machine tooltips, and Curios adds accessory slots for wireless terminals. Configure the wireless terminal shortcuts in AE2's controls category; both are unbound by default.
 
-Server settings are stored in `config/thaumicenergistics_ce-server.toml`. By default, ordinary ME terminals hide essentia, and arcane terminals require an Essentia Access Card to display it. Spending AE to draw environmental VIS without a Vis Connection Card is disabled by default. The two cards serve different purposes.
+Server settings are stored in `config/thaumicenergistics_ce-server.toml`. `terminals.restrictEssentiaVisibility` is disabled by default; enabling it hides essentia in ordinary ME terminals. Essentia access in arcane terminals is disabled by default. Enable `terminals.arcaneEssentiaAccess` and install an Essentia Access Card to use it. Wireless terminals spending AE to draw environmental VIS is disabled by default. Placed terminals draw their own chunk VIS directly, independently of this setting. The two cards serve different purposes.
 
 ## Building from source
 

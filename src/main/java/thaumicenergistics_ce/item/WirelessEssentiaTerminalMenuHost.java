@@ -8,7 +8,7 @@ import java.util.function.BiConsumer;
 import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
-public class WirelessEssentiaTerminalMenuHost extends WirelessTerminalMenuHost<ItemWirelessEssentiaTerminal> {
+public class WirelessEssentiaTerminalMenuHost extends QuantumWirelessTerminalMenuHost<ItemWirelessEssentiaTerminal> {
 
     private final KeyTypeSelection essentiaOnly =
             new KeyTypeSelection(() -> {}, keyType -> keyType == AEssentiaKeyType.INSTANCE);

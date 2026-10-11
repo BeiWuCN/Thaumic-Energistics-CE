@@ -14,7 +14,7 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.registry.ModItems;
 import thaumicenergistics_ce.util.ThEItemTags;
 
 final class InscriberInventory {

@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.phys.Vec3;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.init.ModMenuTypes;
+import thaumicenergistics_ce.registry.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 public class PartEssentiaTerminal extends AbstractTerminalPart {

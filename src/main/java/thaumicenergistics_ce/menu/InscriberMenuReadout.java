@@ -3,7 +3,7 @@ package thaumicenergistics_ce.menu;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ContainerData;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
-import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.registry.ModItems;
 
 final class InscriberMenuReadout {
 

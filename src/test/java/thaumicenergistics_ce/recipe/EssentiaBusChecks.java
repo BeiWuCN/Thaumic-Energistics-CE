@@ -1,6 +1,6 @@
 package thaumicenergistics_ce.recipe;
 
-import thaumicenergistics_ce.busaccess.EssentiaBusAccess;
+import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusAccess;
 
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
@@ -54,12 +54,12 @@ import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import thaumicenergistics_ce.busaccess.EssentiaBusTransfer;
-import thaumicenergistics_ce.busaccess.EssentiaBusBuffer;
-import thaumicenergistics_ce.busaccess.EssentiaBusHost;
-import thaumicenergistics_ce.busaccess.EssentiaBusStorage;
+import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusTransfer;
+import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusBuffer;
+import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusHost;
+import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusStorage;
 import thaumicenergistics_ce.config.ThEConfig;
-import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.registry.ModItems;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.integration.ae2.EssentiaMEStorage;

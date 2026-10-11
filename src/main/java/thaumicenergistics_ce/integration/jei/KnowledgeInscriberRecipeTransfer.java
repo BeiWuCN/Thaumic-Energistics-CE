@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
-import thaumicenergistics_ce.init.ModMenuTypes;
+import thaumicenergistics_ce.registry.ModMenuTypes;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
 public class KnowledgeInscriberRecipeTransfer

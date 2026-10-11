@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
-import thaumicenergistics_ce.golem.BackpackSkins;
+import thaumicenergistics_ce.integration.thaumaturge.golem.BackpackSkins;
 import thaumicenergistics_ce.network.GolemBackpackPayload;
 
 public final class GolemBackpackClientData {

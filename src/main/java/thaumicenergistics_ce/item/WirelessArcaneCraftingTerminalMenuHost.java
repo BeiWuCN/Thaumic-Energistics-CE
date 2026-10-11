@@ -9,12 +9,12 @@ import appeng.menu.locator.ItemMenuHostLocator;
 import java.util.function.BiConsumer;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.arcane.ArcaneTerminalHost;
+import thaumicenergistics_ce.recipe.arcane.ArcaneTerminalHost;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.util.ThELog;
 
 public class WirelessArcaneCraftingTerminalMenuHost
-        extends WirelessTerminalMenuHost<ItemWirelessArcaneCraftingTerminal> implements ArcaneTerminalHost {
+        extends QuantumWirelessTerminalMenuHost<ItemWirelessArcaneCraftingTerminal> implements ArcaneTerminalHost {
 
     public WirelessArcaneCraftingTerminalMenuHost(
             ItemWirelessArcaneCraftingTerminal item,
@@ -33,6 +33,10 @@ public class WirelessArcaneCraftingTerminalMenuHost
     @Override
     public ILinkStatus getLinkStatus() {
         ILinkStatus status = super.getLinkStatus();
+        if (status.connected() && arcaneTerminal() == null) {
+            status = ILinkStatus.ofDisconnected(net.minecraft.network.chat.Component.translatable(
+                    "gui.thaumicenergistics_ce.wireless_arcane_crafting_terminal.not_bound"));
+        }
         String text = status.connected() ? "connected" : status.statusDescription().getString();
         if (!text.equals(this.lastLinkStatus)) {
             this.lastLinkStatus = text;
@@ -59,7 +63,10 @@ public class WirelessArcaneCraftingTerminalMenuHost
 
     @Override
     public @Nullable PartArcaneCraftingTerminal arcaneTerminal() {
-        return ItemWirelessArcaneCraftingTerminal.pairedTerminal(getPlayer().level(), getItemStack());
+        var part = ItemWirelessArcaneCraftingTerminal.pairedTerminal(getPlayer().level(), getItemStack(), quantumConnected());
+        var connected = getActionableNode();
+        var bound = part == null ? null : part.getGridNode();
+        return connected != null && bound != null && connected.getGrid() == bound.getGrid() ? part : null;
     }
 
 }

@@ -22,10 +22,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import thaumicenergistics_ce.arcane.ArcaneTerminalHost;
+import thaumicenergistics_ce.recipe.arcane.ArcaneTerminalHost;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
-import thaumicenergistics_ce.init.ModItems;
-import thaumicenergistics_ce.init.ModMenuTypes;
+import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.ModMenuTypes;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 

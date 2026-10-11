@@ -13,7 +13,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.busaccess.EssentiaBusAccess;
+import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusAccess;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 

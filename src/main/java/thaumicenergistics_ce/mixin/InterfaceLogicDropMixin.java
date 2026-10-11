@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceRows;
+import thaumicenergistics_ce.integration.ae2.interfaces.EssentiaInterfaceRows;
 
 @Mixin(InterfaceLogic.class)
 public abstract class InterfaceLogicDropMixin {

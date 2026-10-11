@@ -12,7 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.essentia.ThEImmediateStorage;
+import thaumicenergistics_ce.integration.ae2.essentia.ThEImmediateStorage;
 
 public final class EssentiaNeighbour {
 

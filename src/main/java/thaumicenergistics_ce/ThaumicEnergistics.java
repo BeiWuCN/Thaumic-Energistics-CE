@@ -31,17 +31,17 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
-import thaumicenergistics_ce.focus.FocusElements;
-import thaumicenergistics_ce.init.ModBlockEntities;
-import thaumicenergistics_ce.init.ModBlocks;
-import thaumicenergistics_ce.init.ModCreativeTab;
-import thaumicenergistics_ce.init.ModItems;
-import thaumicenergistics_ce.init.ModMenuTypes;
+import thaumicenergistics_ce.integration.thaumaturge.focus.FocusElements;
+import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.ModBlocks;
+import thaumicenergistics_ce.registry.ModCreativeTab;
+import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
-import thaumicenergistics_ce.init.ModNetwork;
-import thaumicenergistics_ce.init.capability.ThEItemCapabilities;
-import thaumicenergistics_ce.busaccess.EssentiaBusStrategies;
+import thaumicenergistics_ce.registry.ModNetwork;
+import thaumicenergistics_ce.registry.capability.ThEItemCapabilities;
+import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusStrategies;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 import thaumicenergistics_ce.part.PartEssentiaTerminal;
@@ -57,6 +57,7 @@ public final class ThaumicEnergistics {
 
         ModBlocks.register(modBus);
         ModItems.register(modBus);
+        thaumicenergistics_ce.registry.ModDataComponents.register(modBus);
         thaumicenergistics_ce.item.WirelessTerminalShortcuts.register();
         ModBlockEntities.register(modBus);
         ModMenuTypes.register(modBus);
@@ -153,10 +154,11 @@ public final class ThaumicEnergistics {
                     ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                     WirelessTerminalItem.LINKABLE_HANDLER);
             registerUpgrades();
+            thaumicenergistics_ce.item.QuantumTerminalSupport.registerUpgrades();
             EssentiaBusStrategies.register();
             warnIfSelftestsAreAbsent();
             ThELog.LOG.info("ThaumicEnergistics common setup complete");
-            thaumicenergistics_ce.arcane.TerminalWorkbenchVis.register();
+            thaumicenergistics_ce.recipe.arcane.TerminalWorkbenchVis.register();
         });
     }
 
@@ -180,11 +182,8 @@ public final class ThaumicEnergistics {
         Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEParts.STORAGE_BUS, 1);
         Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), ModItems.ARCANE_CRAFTING_TERMINAL.get(),
                 1, ARCANE_TERMINAL_PART_UPGRADE_NAME);
-        Upgrades.add(
-                ModItems.ESSENTIA_ACCESS_CARD.get(),
-                ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
-                1,
-                ARCANE_TERMINAL_UPGRADE_NAME);
+        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
+                1, ARCANE_TERMINAL_UPGRADE_NAME);
         Upgrades.add(
                 ModItems.VIS_CONNECTION_CARD.get(),
                 ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),

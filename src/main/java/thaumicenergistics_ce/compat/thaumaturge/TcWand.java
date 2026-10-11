@@ -28,6 +28,14 @@ public final class TcWand {
         return cost.isEmpty() || isWand(wand) && WandVisHelper.payExact(wand, cost, true);
     }
 
+    public static int chargeRoom(ItemStack wand, ResourceKey<IAspect> aspect) {
+        return Math.max(0, WandVisHelper.capacityOf(wand) - WandVisHelper.storedIn(wand, aspect));
+    }
+
+    public static void addCentivis(ItemStack wand, ResourceKey<IAspect> aspect, int amount) {
+        WandVisHelper.topUpCentivis(wand, aspect, amount, true);
+    }
+
     public static void setFocus(ItemStack wand, ItemStack focus) {
         if (wand.getItem() instanceof ItemWand item) {
             item.setFocus(wand, focus);

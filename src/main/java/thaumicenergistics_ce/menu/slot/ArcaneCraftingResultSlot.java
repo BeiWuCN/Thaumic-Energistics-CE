@@ -18,8 +18,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.arcane.TerminalArcaneCraftingInput;
-import thaumicenergistics_ce.arcane.TerminalArcaneCraftingStore;
+import thaumicenergistics_ce.recipe.arcane.TerminalArcaneCraftingInput;
+import thaumicenergistics_ce.recipe.arcane.TerminalArcaneCraftingStore;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.util.ThELog;
 

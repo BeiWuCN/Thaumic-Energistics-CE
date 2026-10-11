@@ -11,7 +11,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import thaumicenergistics_ce.blockentity.ClientSyncSend;
-import thaumicenergistics_ce.infusion.InfusionRisk;
+import thaumicenergistics_ce.recipe.infusion.InfusionRisk;
 import thaumicenergistics_ce.util.ThEItemTags;
 
 final class OccultMonitorSync {

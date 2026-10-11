@@ -23,9 +23,9 @@ import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.block.BlockAlchemyProviderConnection;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
-import thaumicenergistics_ce.essentia.ThEImmediateStorage;
-import thaumicenergistics_ce.init.ModBlockEntities;
-import thaumicenergistics_ce.init.capability.CachedEssentiaNeighbours;
+import thaumicenergistics_ce.integration.ae2.essentia.ThEImmediateStorage;
+import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.capability.CachedEssentiaNeighbours;
 import thaumicenergistics_ce.util.ThETransaction;
 
 public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity

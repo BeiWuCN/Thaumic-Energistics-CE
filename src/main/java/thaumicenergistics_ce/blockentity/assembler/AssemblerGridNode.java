@@ -11,7 +11,7 @@ import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.registry.ModItems;
 
 final class AssemblerGridNode {
 

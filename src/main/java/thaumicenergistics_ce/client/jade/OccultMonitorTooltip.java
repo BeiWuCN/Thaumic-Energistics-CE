@@ -13,7 +13,7 @@ import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.JadeUI;
-import thaumicenergistics_ce.infusion.InfusionRisk;
+import thaumicenergistics_ce.recipe.infusion.InfusionRisk;
 import thaumicenergistics_ce.integration.jade.OccultMonitorProvider;
 import thaumicenergistics_ce.integration.jade.JadeGridState;
 

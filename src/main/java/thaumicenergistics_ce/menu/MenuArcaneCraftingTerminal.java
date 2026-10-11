@@ -30,11 +30,11 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.arcane.ArcaneTerminalHost;
-import thaumicenergistics_ce.arcane.TerminalAuraPayment;
+import thaumicenergistics_ce.recipe.arcane.ArcaneTerminalHost;
+import thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
-import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.registry.ModItems;
 import thaumicenergistics_ce.menu.slot.ArcaneCraftingResultSlot;
 import thaumicenergistics_ce.menu.slot.CrystalSlot;
 import thaumicenergistics_ce.menu.slot.WandSlot;
@@ -89,6 +89,29 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     private @Nullable ArcaneCraftingResultSlot resultSlot;
 
     private int craftInputSignature = -1;
+    private long lastWandChargeTick = Long.MIN_VALUE;
+
+    @GuiSync(111)
+    public boolean essentiaAccessEnabled = ThEConfig.ARCANE_ESSENTIA_ACCESS.get();
+
+    @GuiSync(112)
+    public boolean inheritedVisConnection;
+
+    public void updateUpgradeSlotVisibility() {
+        var upgrades = getSlots(SlotSemantics.UPGRADE);
+        int hidden = -1;
+        if (!essentiaAccessEnabled) {
+            for (int i = upgrades.size() - 1; i >= 0; i--) {
+                if (!upgrades.get(i).hasItem()) {
+                    hidden = i;
+                    break;
+                }
+            }
+        }
+        for (int i = 0; i < upgrades.size(); i++) {
+            ((AppEngSlot) upgrades.get(i)).setSlotEnabled(i != hidden);
+        }
+    }
 
     @GuiSync(110)
     public int availableAuraVis;
@@ -98,11 +121,13 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     public MenuArcaneCraftingTerminal(
             MenuType<?> menuType, int id, Inventory playerInventory, ITerminalHost host) {
         super(menuType, id, playerInventory, host, false);
+        updateUpgradeSlotVisibility();
         this.part = host instanceof ArcaneTerminalHost arcane ? arcane.arcaneTerminal() : null;
         this.auraPayer = host instanceof IPortableTerminal portable ? portable : null;
         this.craftingGrid = part == null ? gridFallback : part.craftingGrid();
         this.wandInventory = part == null ? wandFallback : part.wandInventory();
         this.crystals = part == null ? crystalFallback : part.crystalInventory();
+        inheritedVisConnection = !inheritedVisCard().isEmpty();
 
         Player menuOwner = playerInventory.player;
         IAEItemFilter placeholdersTakeNothing = new IAEItemFilter() {
@@ -181,6 +206,21 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
     @Override
     public void broadcastChanges() {
+        if (!isClientSide()) {
+            essentiaAccessEnabled = ThEConfig.ARCANE_ESSENTIA_ACCESS.get();
+            inheritedVisConnection = !inheritedVisCard().isEmpty();
+            if (auraPayer != null && part != null && part.isActive() && hasVisConnectionCard()
+                    && !inheritedVisConnection
+                    && lastWandChargeTick != getPlayer().level().getGameTime()) {
+                lastWandChargeTick = getPlayer().level().getGameTime();
+                ItemStack wand = wandInventory.getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT);
+                ItemStack charged = TerminalAuraPayment.chargeWand(getPlayer().level(), visCard(), wand);
+                if (charged != wand) {
+                    wandInventory.setItemDirect(PartArcaneCraftingTerminal.WAND_SLOT, charged);
+                }
+            }
+        }
+        updateUpgradeSlotVisibility();
         if (!isClientSide()) {
             if (auraPayer != null) {
                 availableAuraVis = (int) Math.max(0, TcAura.vis(getPlayer().level(), getPlayer().blockPosition()));
@@ -286,7 +326,8 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
     @Override
     protected boolean essentiaAccessGranted() {
-        return getHost().getUpgrades().isInstalled(ModItems.ESSENTIA_ACCESS_CARD.get());
+        return thaumicenergistics_ce.config.ThEConfig.ARCANE_ESSENTIA_ACCESS.get()
+                && getHost().getUpgrades().isInstalled(ModItems.ESSENTIA_ACCESS_CARD.get());
     }
 
     public boolean hasEssentiaAccessCard() {
@@ -294,11 +335,22 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     }
 
     public ItemStack visCard() {
-        return TerminalAuraPayment.visCard(getHost());
+        ItemStack inherited = inheritedVisCard();
+        return inherited.isEmpty() ? TerminalAuraPayment.visCard(getHost()) : inherited;
     }
 
     public boolean hasVisConnectionCard() {
-        return TerminalAuraPayment.visConnectionInstalled(getHost());
+        return !visCard().isEmpty();
+    }
+
+    private ItemStack inheritedVisCard() {
+        if (!(getHost() instanceof thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost wireless)) {
+            return ItemStack.EMPTY;
+        }
+        // Resolve the live link rather than the part captured when the menu opened.
+        // Never write this card into the handheld item's upgrade inventory.
+        var bound = wireless.arcaneTerminal();
+        return bound == null ? ItemStack.EMPTY : TerminalAuraPayment.visCard(bound).copy();
     }
 
     private void refusePlaceholderInsert(Player player) {

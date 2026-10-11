@@ -260,6 +260,10 @@ dependencies {
     // rather than a split of compile and runtime on purpose: Thaumaturge's and AE2's public
     // signatures name GuideME, Curios and Jade types, so every one of these has to be on the compile
     // classpath for this mod to compile at all, and on the runtime classpath for the dev run.
+    if (project.hasProperty('addonCompatibility')) {
+        runtimeOnly files('build/ae2wtlib-26.1.1-beta.jar')
+    }
+
     implementation "maven.modrinth:ae2:${ae2_version}"
     implementation "maven.modrinth:guideme:${guideme_version}"
     // JEI is the one dependency here that does NOT come from the Modrinth maven repository: its

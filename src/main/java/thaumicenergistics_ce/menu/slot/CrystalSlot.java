@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.arcane.EssentiaCrystals;
+import thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import thaumicenergistics_ce.util.ThELog;
 

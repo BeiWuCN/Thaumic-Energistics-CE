@@ -27,11 +27,18 @@ public record ArcaneUnbindPayload() implements CustomPacketPayload {
 
     public void handle(Player player) {
         ItemStack held = player.getMainHandItem();
-        if (held.getItem() instanceof ItemWirelessArcaneCraftingTerminal
-                && ItemWirelessArcaneCraftingTerminal.unbind(held)) {
-            player.sendOverlayMessage(
-                    Component.translatable(
-                            "item.thaumicenergistics_ce.wireless_arcane_crafting_terminal.cleared"));
+        if (!player.isSecondaryUseActive()) return;
+        boolean cleared = false;
+        if (held.getItem() instanceof ItemWirelessArcaneCraftingTerminal) {
+            cleared = ItemWirelessArcaneCraftingTerminal.unbind(held);
+        } else if (held.getItem() instanceof thaumicenergistics_ce.item.ItemWirelessEssentiaTerminal
+                && held.has(appeng.api.ids.AEComponents.WIRELESS_LINK_TARGET)) {
+            appeng.items.tools.powered.WirelessTerminalItem.LINKABLE_HANDLER.unlink(held);
+            cleared = true;
+        }
+        if (cleared) {
+            player.sendOverlayMessage(Component.translatable(
+                    "item.thaumicenergistics_ce.wireless_terminal.cleared"));
         }
     }
 }

@@ -31,15 +31,15 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.arcane.ArcaneTerminalHost;
-import thaumicenergistics_ce.arcane.ArcaneTerminalLink;
-import thaumicenergistics_ce.arcane.EssentiaCrystals;
-import thaumicenergistics_ce.arcane.TerminalAuraPayment;
+import thaumicenergistics_ce.recipe.arcane.ArcaneTerminalHost;
+import thaumicenergistics_ce.recipe.arcane.ArcaneTerminalLink;
+import thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
+import thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
 import thaumicenergistics_ce.compat.thaumaturge.TcWand;
-import thaumicenergistics_ce.init.ModMenuTypes;
+import thaumicenergistics_ce.registry.ModMenuTypes;
 
 public class PartArcaneCraftingTerminal extends AbstractTerminalPart
-        implements ArcaneTerminalHost {
+        implements ArcaneTerminalHost, appeng.api.networking.ticking.IGridTickable {
 
     public static final Identifier INV_CRAFTING = AppEng.makeId("arcane_crafting_terminal_crafting");
 
@@ -78,7 +78,8 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
 
     public PartArcaneCraftingTerminal(IPartItem<?> partItem) {
         super(partItem);
-        getMainNode().setIdlePowerUsage(0.5);
+        getMainNode().setIdlePowerUsage(0.5)
+                .addService(appeng.api.networking.ticking.IGridTickable.class, this);
         wandInv.setFilter(new IAEItemFilter() {
             @Override
             public boolean allowInsert(
@@ -162,29 +163,34 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         return node == null ? null : node.getGrid();
     }
 
-    public int supplyAura(int needCentivis, TransactionContext transaction) {
-        if (needCentivis <= 0 || !isActive()) {
+    public int supplyAura(int needVis, TransactionContext transaction) {
+        if (needVis <= 0 || !isActive()) {
             return 0;
         }
         Level level = getLevel();
         if (level == null || level.isClientSide()) {
             return 0;
         }
-        if (TerminalAuraPayment.visConnectionInstalled(this)) {
-            return TerminalAuraPayment.payBoundAura(
-                    level, getBlockEntity().getBlockPos(), TerminalAuraPayment.visCard(this), needCentivis, transaction);
+        return TerminalAuraPayment.payChunkAura(
+                level, getBlockEntity().getBlockPos(), needVis, transaction);
+    }
+
+    @Override
+    public appeng.api.networking.ticking.TickingRequest getTickingRequest(IGridNode node) {
+        return new appeng.api.networking.ticking.TickingRequest(20, 20, false);
+    }
+
+    @Override
+    public appeng.api.networking.ticking.TickRateModulation tickingRequest(IGridNode node, int ticksSinceLast) {
+        if (isActive() && TerminalAuraPayment.visConnectionInstalled(this)) {
+            ItemStack wand = wandInv.getStackInSlot(WAND_SLOT);
+            ItemStack charged = TerminalAuraPayment.chargeWand(getLevel(), TerminalAuraPayment.visCard(this), wand);
+            if (charged != wand) {
+                wandInv.setItemDirect(WAND_SLOT, charged);
+                saveChanges();
+            }
         }
-        IGrid grid = gridOrNull();
-        if (grid == null) {
-            return 0;
-        }
-        IEnergyService energy =
-                grid.getService(IEnergyService.class);
-        if (energy == null) {
-            return 0;
-        }
-        return TerminalAuraPayment.pay(
-                level, getBlockEntity().getBlockPos(), energy, needCentivis, transaction);
+        return appeng.api.networking.ticking.TickRateModulation.SAME;
     }
 
     @Override

@@ -1,0 +1,56 @@
+[terminals]
+    #Hide essentia in ordinary ME terminals. Dedicated Essentia Terminals remain available. Arcane terminals use their own access setting.
+    restrictEssentiaVisibility = false
+    #Allow wired and wireless arcane crafting terminals to display and transfer essentia when an Essentia Access Card is installed. Disabled by default.
+    arcaneEssentiaAccess = false
+    #Shift-click wands and crystals into their dedicated arcane terminal slots before moving them to ordinary inventory slots.
+    quickInsertWandAndCrystals = true
+    #Allow wireless arcane terminals to spend AE when drawing environmental VIS. Placed terminals draw chunk VIS directly. Disabled by default.
+    allowAeForAuraVis = false
+    #AE cost per point of environmental VIS drawn by wireless arcane terminals. Placed terminals draw chunk VIS directly.
+    #Range: 0.01 ~ 1000000.0
+    aePerVis = 1000.0
+
+[buses]
+    #Allow ME Import, Export and Storage Buses with an Essentia Access Card to access essentia.
+    essentiaAccessEnabled = true
+    #AE cost per point of essentia transferred by import and export buses. Storage buses use AE2 storage access costs.
+    #Range: 0.0 ~ 1000000.0
+    aePerEssentia = 10.0
+
+[golemBackpack]
+    #Allow golem wireless backpacks to transfer items to the network. Disabling transfers does not prevent equipping or removing the backpack.
+    transferEnabled = true
+    #Ticks between backpack transfers. 20 ticks equal one second.
+    #Range: 1 ~ 12000
+    transferIntervalTicks = 20
+
+[arcaneAssembler]
+    #Allow arcane assemblers to craft. Disabling pauses existing jobs; enabling resumes them.
+    enabled = true
+    #Crafting time in ticks without acceleration cards. Each card reduces it by 4 ticks, to a minimum of 4 ticks.
+    #Range: 4 ~ 12000
+    craftTicks = 20
+    #AE consumed per tick while crafting.
+    #Range: 0.0 ~ 1000000.0
+    aePerTick = 1.5
+
+[essentiaVibrationChamber]
+    #Allow essentia vibration chambers to accept and burn essentia. Disabling preserves fuel progress and stored energy.
+    enabled = true
+    #Base burn time in ticks. Divide by 1.6 for Potentia and by 2 for other aspects. Applies only to newly ignited fuel.
+    #Range: 2 ~ 120000
+    baseBurnTicks = 800
+
+[gachaBox]
+    #Allow gacha boxes to operate. Disabling pauses active rounds and preserves the Brain in a Jar.
+    enabled = true
+    #AE consumed when a round starts. Does not affect rounds already in progress.
+    #Range: 0.0 ~ 1000000.0
+    aePerTurn = 500.0
+    #Payout chance for a 30-second round, from 0 to 1.
+    #Range: 0.0 ~ 1.0
+    chanceAt30Seconds = 0.75
+    #Payout chance for a 180-second round, from 0 to 1. Other round lengths use linear interpolation.
+    #Range: 0.0 ~ 1.0
+    chanceAt180Seconds = 0.45

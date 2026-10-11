@@ -11,7 +11,7 @@
         "StorageBusUpgradeSlotsMixin",
         "TerminalVisibilityMixin"
 	],
-    "client": ["TerminalScreenVisibilityMixin"],
+    "client": ["TerminalScreenVisibilityMixin", "ArcaneUpgradeTooltipMixin"],
 	"injectors": {
 		"defaultRequire": 1
 	},

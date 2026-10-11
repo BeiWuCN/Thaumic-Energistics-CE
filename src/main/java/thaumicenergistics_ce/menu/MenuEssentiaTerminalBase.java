@@ -10,21 +10,77 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.essentia.EssentiaFillHelper;
+import thaumicenergistics_ce.integration.ae2.essentia.EssentiaFillHelper;
 import thaumicenergistics_ce.menu.slot.ContainerSlot;
 import thaumicenergistics_ce.network.EssentiaTerminalReceiver;
 import thaumicenergistics_ce.util.ThELog;
 
 public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements EssentiaTerminalReceiver {
+    public static final appeng.menu.SlotSemantic QUANTUM_SINGULARITY =
+            appeng.menu.SlotSemantics.register("THAUMICENERGISTICS_QUANTUM_SINGULARITY", true);
+
+    private void addQuantumSlot(ITerminalHost host) {
+        if (!thaumicenergistics_ce.item.QuantumTerminalSupport.enabled()
+                || !(host instanceof thaumicenergistics_ce.item.QuantumWirelessTerminalMenuHost<?> quantum)) return;
+        var slot = new appeng.menu.slot.AppEngSlot(quantum.singularityInventory(), 0) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return thaumicenergistics_ce.item.QuantumTerminalSupport.validSingularity(stack) && super.mayPlace(stack);
+            }
+            @Override
+            public int getMaxStackSize() { return 1; }
+        };
+        slot.setIcon(appeng.util.Icon.BACKGROUND_SINGULARITY);
+        slot.setEmptyTooltip(() -> java.util.List.of(net.minecraft.network.chat.Component.translatable(
+                "gui.thaumicenergistics_ce.quantum_singularity")));
+        addSlot(slot, QUANTUM_SINGULARITY);
+    }
+
 
     public MenuEssentiaTerminalBase(
             MenuType<?> menuType, int id, Inventory playerInventory, ITerminalHost host) {
         super(menuType, id, playerInventory, host);
+        addQuantumSlot(host);
+        updateWirelessEssentiaUpgradeSlots();
     }
 
     protected MenuEssentiaTerminalBase(MenuType<?> menuType, int id, Inventory playerInventory,
             ITerminalHost host, boolean bindInventory) {
         super(menuType, id, playerInventory, host, bindInventory);
+        addQuantumSlot(host);
+        updateWirelessEssentiaUpgradeSlots();
+    }
+
+    public void updateWirelessEssentiaUpgradeSlots() {
+        if (!(getHost() instanceof thaumicenergistics_ce.item.WirelessEssentiaTerminalMenuHost)) return;
+        var slots = getSlots(appeng.menu.SlotSemantics.UPGRADE);
+        int remaining = thaumicenergistics_ce.item.QuantumTerminalSupport.enabled() ? 1 : 0;
+        for (var slot : slots) {
+            if (slot.hasItem()) remaining--;
+        }
+        for (var slot : slots) {
+            boolean visible = slot.hasItem() || remaining-- > 0;
+            ((appeng.menu.slot.AppEngSlot) slot).setSlotEnabled(visible);
+        }
+    }
+
+    @Override
+    public void broadcastChanges() {
+        updateWirelessEssentiaUpgradeSlots();
+        super.broadcastChanges();
+    }
+
+    @Override
+    protected int transferStackToMenu(ItemStack stack) {
+        var slots = getSlots(QUANTUM_SINGULARITY);
+        if (!slots.isEmpty() && thaumicenergistics_ce.item.QuantumTerminalSupport.validSingularity(stack)) {
+            var remaining = stack.copy();
+            for (var slot : slots) {
+                if (slot.isActive()) remaining = slot.safeInsert(remaining);
+            }
+            return stack.getCount() - remaining.getCount();
+        }
+        return super.transferStackToMenu(stack);
     }
 
     public boolean isServerSide() {
@@ -126,7 +182,7 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
     }
 
     public EssentiaFillHelper.DepositResult emptyIntoNetwork(ItemStack stack) {
-        if (isClientSide()) {
+        if (isClientSide() || !essentiaAccessGranted()) {
             return null;
         }
         return EssentiaFillHelper.emptyIntoNetwork(storage, energySource, getActionSource(), stack);

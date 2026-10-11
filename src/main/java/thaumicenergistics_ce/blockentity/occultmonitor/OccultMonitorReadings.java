@@ -7,7 +7,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor.EssentiaLine;
-import thaumicenergistics_ce.infusion.InfusionRisk;
+import thaumicenergistics_ce.recipe.infusion.InfusionRisk;
 import thaumicenergistics_ce.util.ThELog;
 
 final class OccultMonitorReadings {

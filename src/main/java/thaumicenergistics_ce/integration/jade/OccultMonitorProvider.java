@@ -10,7 +10,7 @@ import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IServerDataProvider;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
-import thaumicenergistics_ce.infusion.InfusionRisk;
+import thaumicenergistics_ce.recipe.infusion.InfusionRisk;
 
 public class OccultMonitorProvider implements IServerDataProvider<BlockAccessor> {
 

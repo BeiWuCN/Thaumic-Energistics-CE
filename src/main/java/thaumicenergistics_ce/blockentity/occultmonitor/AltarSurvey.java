@@ -10,7 +10,7 @@ import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor.
 import thaumicenergistics_ce.compat.thaumaturge.TcInfusion;
 import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Altar;
 import thaumicenergistics_ce.compat.thaumaturge.TcInfusion.Recipe;
-import thaumicenergistics_ce.infusion.InfusionRisk;
+import thaumicenergistics_ce.recipe.infusion.InfusionRisk;
 
 final class AltarSurvey {
 

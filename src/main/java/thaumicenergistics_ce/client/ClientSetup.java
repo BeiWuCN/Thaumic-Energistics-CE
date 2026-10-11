@@ -28,8 +28,8 @@ import thaumicenergistics_ce.client.render.ArcaneAssemblerRenderer;
 import thaumicenergistics_ce.client.render.EssentiaKeyRenderHandler;
 import thaumicenergistics_ce.client.render.GachaBoxRenderer;
 import thaumicenergistics_ce.client.render.bubble.OccultMonitorBubbleRenderer;
-import thaumicenergistics_ce.init.ModBlockEntities;
-import thaumicenergistics_ce.init.ModMenuTypes;
+import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.integration.ae2.ClientRegistries;
@@ -49,6 +49,9 @@ public final class ClientSetup {
 
     @SubscribeEvent
     public static void registerKeyRendering(FMLClientSetupEvent event) {
+        net.neoforged.fml.ModList.get().getModContainerById(ThEIds.MODID).ifPresent(container ->
+                container.registerExtensionPoint(net.neoforged.neoforge.client.gui.IConfigScreenFactory.class,
+                        net.neoforged.neoforge.client.gui.ConfigurationScreen::new));
         ClientSinks.install(new ClientboundReceiver() {
             @Override
             public void acceptArcaneCraftCost(ArcaneCraftCostPayload payload) {
@@ -140,7 +143,7 @@ public final class ClientSetup {
                                 menu,
                                 inventory,
                                 title,
-                                StyleManager.loadStyleDoc("/screens/terminals/wireless_terminal.json")));
+                                StyleManager.loadStyleDoc("/screens/wireless_essentia_terminal.json")));
         event.register(
                 ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                 (MenuArcaneCraftingTerminal menu, Inventory inventory, Component title) ->

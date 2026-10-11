@@ -18,8 +18,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcWand;
-import thaumicenergistics_ce.focus.FocusEffectAEWrench;
-import thaumicenergistics_ce.focus.FocusElements;
+import thaumicenergistics_ce.integration.thaumaturge.focus.FocusEffectAEWrench;
+import thaumicenergistics_ce.integration.thaumaturge.focus.FocusElements;
 
 public class ItemFocusAEWrench extends FocusItem {
 
@@ -45,7 +45,7 @@ public class ItemFocusAEWrench extends FocusItem {
     }
 
     public static ItemStack assembledStack() {
-        ItemStack stack = new ItemStack(thaumicenergistics_ce.init.ModItems.FOCUS_AEWRENCH.get());
+        ItemStack stack = new ItemStack(thaumicenergistics_ce.registry.ModItems.FOCUS_AEWRENCH.get());
         assemble(stack);
         return stack;
     }

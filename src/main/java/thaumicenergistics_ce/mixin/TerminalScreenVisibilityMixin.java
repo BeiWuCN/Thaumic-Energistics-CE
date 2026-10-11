@@ -21,6 +21,23 @@ public abstract class TerminalScreenVisibilityMixin {
     @Shadow @Final protected Repo repo;
     @Unique private Boolean thaumicenergistics$lastVisibility;
 
+    @org.spongepowered.asm.mixin.injection.ModifyArg(
+            method = "<init>",
+            at = @At(value = "INVOKE", target = "Lappeng/client/gui/widgets/UpgradesPanel;<init>(Ljava/util/List;Lappeng/api/upgrades/IUpgradeableObject;)V"),
+            index = 0)
+    private java.util.List<net.minecraft.world.inventory.Slot> joinQuantumSlot(
+            java.util.List<net.minecraft.world.inventory.Slot> upgrades) {
+        var menu = ((MEStorageScreen<?>) (Object) this).getMenu();
+        if (!(menu instanceof thaumicenergistics_ce.menu.MenuEssentiaTerminalBase terminal)) {
+            return upgrades;
+        }
+        var singularity = terminal.getSlots(thaumicenergistics_ce.menu.MenuEssentiaTerminalBase.QUANTUM_SINGULARITY);
+        if (singularity.isEmpty()) return upgrades;
+        var combined = new java.util.ArrayList<net.minecraft.world.inventory.Slot>(upgrades);
+        combined.addAll(singularity);
+        return combined;
+    }
+
     @Inject(method = "getSortKeyTypes", at = @At("RETURN"), cancellable = true)
     private void filterTypes(CallbackInfoReturnable<Set<AEKeyType>> cir) {
         var screen = (MEStorageScreen<?>) (Object) this;

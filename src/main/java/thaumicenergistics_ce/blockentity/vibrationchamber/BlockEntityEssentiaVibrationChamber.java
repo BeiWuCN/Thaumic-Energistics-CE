@@ -27,8 +27,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.init.MachineMenus;
-import thaumicenergistics_ce.init.ModBlockEntities;
+import thaumicenergistics_ce.registry.MachineMenus;
+import thaumicenergistics_ce.registry.ModBlockEntities;
 import thaumicenergistics_ce.util.ThETransaction;
 
 public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity

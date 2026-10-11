@@ -22,8 +22,8 @@ import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import thaumicenergistics_ce.blockentity.gachabox.GachaOdds;
 import thaumicenergistics_ce.config.ThEConfig;
-import thaumicenergistics_ce.init.ModItems;
-import thaumicenergistics_ce.init.ModMenuTypes;
+import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.ModMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
@@ -37,6 +37,7 @@ public final class TerminalVisibilityChecks {
         var inventory = FakePlayerFactory.getMinecraft(server.overworld()).getInventory();
         var key = AEssentiaKey.of(Identifier.parse("thaumaturge:ignis"));
         var host = new PartEssentiaTerminal(ModItems.ESSENTIA_TERMINAL.get());
+        boolean originalArcane = ThEConfig.ARCANE_ESSENTIA_ACCESS.get();
         boolean original = ThEConfig.RESTRICT_ESSENTIA_VISIBILITY.get();
         try {
             ThEConfig.RESTRICT_ESSENTIA_VISIBILITY.set(true);
@@ -54,7 +55,22 @@ public final class TerminalVisibilityChecks {
                 var arcane = new MenuArcaneCraftingTerminal(type, 0, inventory, part);
                 require(!arcane.isKeyVisible(key), "Arcane terminal without card exposes essentia");
                 part.getUpgrades().setItemDirect(0, new ItemStack(ModItems.ESSENTIA_ACCESS_CARD.get()));
-                require(arcane.isKeyVisible(key), "Installing card did not reveal essentia");
+                ThEConfig.ARCANE_ESSENTIA_ACCESS.set(false);
+                arcane.essentiaAccessEnabled = false;
+                arcane.updateUpgradeSlotVisibility();
+                require(arcane.getSlots(appeng.menu.SlotSemantics.UPGRADE).stream()
+                        .filter(net.minecraft.world.inventory.Slot::isActive).count() == 1,
+                        "Disabled feature did not hide the extra empty upgrade slot");
+                require(!arcane.isKeyVisible(key), "Disabled feature exposed essentia with a card");
+                require(!arcane.fillFromNetwork(inventory.player, 0, Identifier.parse("thaumaturge:ignis"), false),
+                        "Disabled feature allowed withdrawal");
+                require(arcane.emptyIntoNetwork(new ItemStack(Items.GLASS_BOTTLE)) == null,
+                        "Disabled feature allowed deposit");
+                ThEConfig.RESTRICT_ESSENTIA_VISIBILITY.set(false);
+                require(!arcane.isKeyVisible(key), "Ordinary visibility setting bypassed arcane feature switch");
+                ThEConfig.RESTRICT_ESSENTIA_VISIBILITY.set(true);
+                ThEConfig.ARCANE_ESSENTIA_ACCESS.set(true);
+                require(arcane.isKeyVisible(key), "Enabling feature with card did not reveal essentia");
                 part.getUpgrades().setItemDirect(0, ItemStack.EMPTY);
                 require(!arcane.isKeyVisible(key), "Removing card did not hide essentia");
                 liveUpdates(server, inventory, type, key);
@@ -74,8 +90,9 @@ public final class TerminalVisibilityChecks {
             }
         } finally {
             ThEConfig.RESTRICT_ESSENTIA_VISIBILITY.set(original);
+            ThEConfig.ARCANE_ESSENTIA_ACCESS.set(originalArcane);
         }
-        System.out.println("[terminal-visibility] PASS: both arcane menus resend unchanged stock on card insertion/removal; stable ticks stay incremental; empty inventory clears; ordinary/dedicated rules and config switch");
+        System.out.println("[terminal-visibility] PASS: arcane access disabled rejects display and transfers; enabling requires card; disabling clears stock; ordinary/dedicated visibility and live updates");
     }
 
     private static void liveUpdates(MinecraftServer server, net.minecraft.world.entity.player.Inventory inventory,
@@ -116,13 +133,14 @@ public final class TerminalVisibilityChecks {
             listener.updates.clear();
             menu.broadcastChanges();
             require(listener.updates.isEmpty(), "Unchanged permissions resent the inventory every tick");
-            part.getUpgrades().setItemDirect(0, ItemStack.EMPTY);
+            ThEConfig.ARCANE_ESSENTIA_ACCESS.set(false);
             menu.broadcastChanges();
             require(listener.updates.stream().anyMatch(p -> p.fullUpdate()) && listener.updates.stream()
                     .flatMap(p -> p.getActualEntries().stream()).noneMatch(e -> key.equals(e.getWhat())),
-                    "Removing card did not replace the visible inventory");
+                    "Disabling feature did not clear visible essentia");
             listener.updates.clear();
             stock.clear();
+            ThEConfig.ARCANE_ESSENTIA_ACCESS.set(true);
             part.getUpgrades().setItemDirect(0, new ItemStack(ModItems.ESSENTIA_ACCESS_CARD.get()));
             menu.broadcastChanges();
             require(listener.updates.stream().anyMatch(p -> p.fullUpdate() && p.getActualEntries().isEmpty()),

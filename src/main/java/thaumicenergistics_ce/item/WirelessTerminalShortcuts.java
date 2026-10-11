@@ -5,7 +5,7 @@ import appeng.hotkeys.InventoryHotkeyAction;
 import appeng.hotkeys.CuriosHotkeyAction;
 import java.util.function.Predicate;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.registry.ModItems;
 
 public final class WirelessTerminalShortcuts {
     public static final String ESSENTIA = "thaumicenergistics_ce.wireless_essentia_terminal";

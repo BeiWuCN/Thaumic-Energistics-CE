@@ -17,8 +17,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
-import thaumicenergistics_ce.init.ModBlocks;
-import thaumicenergistics_ce.init.ModMenuTypes;
+import thaumicenergistics_ce.registry.ModBlocks;
+import thaumicenergistics_ce.registry.ModMenuTypes;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
 import thaumicenergistics_ce.network.PartitionWellReceiver;
 

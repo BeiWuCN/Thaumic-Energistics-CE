@@ -7,8 +7,8 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.arcane.ArcanePatternDetails;
-import thaumicenergistics_ce.arcane.ThEArcanePattern;
+import thaumicenergistics_ce.recipe.arcane.ArcanePatternDetails;
+import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 
 public final class ItemArcanePattern extends Item {
 

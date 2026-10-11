@@ -28,8 +28,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.arcane.ArcaneTerminalLink;
-import thaumicenergistics_ce.init.ModMenuTypes;
+import thaumicenergistics_ce.recipe.arcane.ArcaneTerminalLink;
+import thaumicenergistics_ce.registry.ModMenuTypes;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem implements ArcaneTerminalLink {
@@ -44,6 +44,12 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
 
     public ItemWirelessArcaneCraftingTerminal(DoubleSupplier powerCapacity, Item.Properties properties) {
         super(powerCapacity, properties);
+    }
+
+    @Override
+    public appeng.api.upgrades.IUpgradeInventory getUpgrades(net.minecraft.world.item.ItemStack stack) {
+        return QuantumTerminalSupport.upgrades(stack, (changed, upgrades) ->
+                setAEMaxPowerMultiplier(changed, 1 + appeng.api.upgrades.Upgrades.getEnergyCardMultiplier(upgrades)));
     }
 
     @Override
@@ -64,6 +70,26 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
             }
         }
         return false;
+    }
+
+    @Override
+    public InteractionResult onItemUseFirst(ItemStack stack, net.minecraft.world.item.context.UseOnContext context) {
+        var player = context.getPlayer();
+        if (player != null && player.isSecondaryUseActive()
+                && context.getLevel().getBlockEntity(context.getClickedPos()) instanceof IPartHost host) {
+            var selected = host.selectPartWorld(context.getClickLocation());
+            if (selected.part instanceof PartArcaneCraftingTerminal part) {
+                if (!context.getLevel().isClientSide()) {
+                    pairWith(stack, context.getLevel(), context.getClickedPos(), part.getSide());
+                    var pos = context.getClickedPos();
+                    player.sendOverlayMessage(Component.translatable(
+                            "item.thaumicenergistics_ce.wireless_arcane_crafting_terminal.paired",
+                            pos.getX(), pos.getY(), pos.getZ()));
+                }
+                return InteractionResult.SUCCESS;
+            }
+        }
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -97,12 +123,22 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     }
 
     public static @Nullable PartArcaneCraftingTerminal pairedTerminal(Level level, ItemStack terminal) {
+        return pairedTerminal(level, terminal, false);
+    }
+
+    public static @Nullable PartArcaneCraftingTerminal pairedTerminal(Level level, ItemStack terminal, boolean crossDimension) {
         CompoundTag tag = bindingTag(terminal);
         if (tag == null || !tag.contains(NBT_POS)) {
             return null;
         }
         if (!level.dimension().identifier().toString().equals(tag.getStringOr(NBT_DIMENSION, ""))) {
-            return null;
+            var dimension = net.minecraft.resources.Identifier.tryParse(tag.getStringOr(NBT_DIMENSION, ""));
+            if (!crossDimension || !(level instanceof net.minecraft.server.level.ServerLevel server) || dimension == null) {
+                return null;
+            }
+            level = server.getServer().getLevel(net.minecraft.resources.ResourceKey.create(
+                    net.minecraft.core.registries.Registries.DIMENSION, dimension));
+            if (level == null) return null;
         }
         Direction side = Direction.byName(tag.getStringOr(NBT_SIDE, ""));
         BlockPos pos = BlockPos.of(tag.getLongOr(NBT_POS, 0L));

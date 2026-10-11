@@ -3,7 +3,7 @@ package thaumicenergistics_ce.blockentity.assembler;
 import appeng.core.definitions.AEItems;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.registry.ModItems;
 import thaumicenergistics_ce.inventory.GearSlots;
 
 final class AssemblerInventoryLayout extends SimpleContainer {

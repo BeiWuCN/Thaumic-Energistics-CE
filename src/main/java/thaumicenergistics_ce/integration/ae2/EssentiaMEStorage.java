@@ -10,7 +10,7 @@ import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import thaumicenergistics_ce.essentia.ThEImmediateStorage;
+import thaumicenergistics_ce.integration.ae2.essentia.ThEImmediateStorage;
 import thaumicenergistics_ce.util.ThETransaction;
 
 public final class EssentiaMEStorage implements MEStorage {

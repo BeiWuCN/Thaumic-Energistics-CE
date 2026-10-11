@@ -16,9 +16,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import thaumicenergistics_ce.busaccess.EssentiaBusBuffer;
-import thaumicenergistics_ce.busaccess.EssentiaBusHost;
-import thaumicenergistics_ce.busaccess.EssentiaBusAccess;
+import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusBuffer;
+import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusHost;
+import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusAccess;
 
 @Mixin(value = IOBusPart.class, remap = false)
 public abstract class IOBusRecoveryMixin extends UpgradeablePart implements EssentiaBusHost {

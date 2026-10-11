@@ -5,6 +5,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 public final class ThEConfig {
     public static final ModConfigSpec SPEC;
     public static final ModConfigSpec.BooleanValue RESTRICT_ESSENTIA_VISIBILITY;
+    public static final ModConfigSpec.BooleanValue ARCANE_ESSENTIA_ACCESS;
     public static final ModConfigSpec.BooleanValue QUICK_INSERT;
     public static final ModConfigSpec.BooleanValue ALLOW_AE_FOR_AURA_VIS;
     public static final ModConfigSpec.DoubleValue AE_PER_VIS;
@@ -24,45 +25,65 @@ public final class ThEConfig {
 
     static {
         var b = new ModConfigSpec.Builder();
-        b.push("terminals");
-        RESTRICT_ESSENTIA_VISIBILITY = b.comment("仅源质终端和装有源质访问卡的奥术终端显示源质。包含无线终端。")
-                .define("restrictEssentiaVisibility", true);
-        QUICK_INSERT = b.comment("Shift 点击时优先把法杖和水晶放入奥术终端的专用槽位。")
+        b.translation("thaumicenergistics_ce.config.terminals").push("terminals");
+        RESTRICT_ESSENTIA_VISIBILITY = b.comment("Hide essentia in ordinary ME terminals. Dedicated Essentia Terminals remain available. Arcane terminals use their own access setting.")
+                .translation("thaumicenergistics_ce.config.terminals.restrictEssentiaVisibility")
+                .define("restrictEssentiaVisibility", false);
+        ARCANE_ESSENTIA_ACCESS = b.comment("Allow wired and wireless arcane crafting terminals to display and transfer essentia when an Essentia Access Card is installed. Disabled by default.")
+                .translation("thaumicenergistics_ce.config.terminals.arcaneEssentiaAccess")
+                .define("arcaneEssentiaAccess", false);
+        QUICK_INSERT = b.comment("Shift-click wands and crystals into their dedicated arcane terminal slots before moving them to ordinary inventory slots.")
+                .translation("thaumicenergistics_ce.config.terminals.quickInsertWandAndCrystals")
                 .define("quickInsertWandAndCrystals", true);
-        ALLOW_AE_FOR_AURA_VIS = b.comment("允许未装魔力访问卡的奥术终端消耗 AE 取用环境 VIS。关闭时必须装卡；环境 VIS 不足时仍不能合成。")
+        ALLOW_AE_FOR_AURA_VIS = b.comment("Allow wireless arcane terminals to spend AE when drawing environmental VIS. Placed terminals draw chunk VIS directly. Disabled by default.")
+                .translation("thaumicenergistics_ce.config.terminals.allowAeForAuraVis")
                 .define("allowAeForAuraVis", false);
-        AE_PER_VIS = b.comment("终端支付未定型灵气时，每点 Vis 消耗的 AE。灵气连接卡仍直接取用环境灵气。")
+        AE_PER_VIS = b.comment("AE cost per point of environmental VIS drawn by wireless arcane terminals. Placed terminals draw chunk VIS directly.")
+                .translation("thaumicenergistics_ce.config.terminals.aePerVis")
                 .defineInRange("aePerVis", 1000.0, 0.01, 1000000.0);
-        b.pop().push("buses");
-        BUS_ACCESS = b.comment("允许装有源质访问卡的 ME 输入、输出和存储总线访问源质。")
+        b.pop().translation("thaumicenergistics_ce.config.buses").push("buses");
+        BUS_ACCESS = b.comment("Allow ME Import, Export and Storage Buses with an Essentia Access Card to access essentia.")
+                .translation("thaumicenergistics_ce.config.buses.essentiaAccessEnabled")
                 .define("essentiaAccessEnabled", true);
-        BUS_POWER = b.comment("输入和输出总线每传输一点源质消耗的 AE。存储总线沿用 AE2 的存储访问耗电。")
+        BUS_POWER = b.comment("AE cost per point of essentia transferred by import and export buses. Storage buses use AE2 storage access costs.")
+                .translation("thaumicenergistics_ce.config.buses.aePerEssentia")
                 .defineInRange("aePerEssentia", 10.0, 0.0, 1000000.0);
-        b.pop().push("golemBackpack");
-        GOLEM_TRANSFER = b.comment("允许傀儡无线背包向网络传输物品。关闭后仍可装备和取下。")
+        b.pop().translation("thaumicenergistics_ce.config.golemBackpack").push("golemBackpack");
+        GOLEM_TRANSFER = b.comment("Allow golem wireless backpacks to transfer items to the network. Disabling transfers does not prevent equipping or removing the backpack.")
+                .translation("thaumicenergistics_ce.config.golemBackpack.transferEnabled")
                 .define("transferEnabled", true);
-        GOLEM_COOLDOWN = b.comment("背包两次传输之间的间隔，单位 tick，20 tick 为一秒。")
+        GOLEM_COOLDOWN = b.comment("Ticks between backpack transfers. 20 ticks equal one second.")
+                .translation("thaumicenergistics_ce.config.golemBackpack.transferIntervalTicks")
                 .defineInRange("transferIntervalTicks", 20, 1, 12000);
-        b.pop().push("arcaneAssembler");
-        ASSEMBLER_ENABLED = b.comment("允许奥术装配室执行合成。关闭时保留已有任务，重新开启后继续。")
+        b.pop().translation("thaumicenergistics_ce.config.arcaneAssembler").push("arcaneAssembler");
+        ASSEMBLER_ENABLED = b.comment("Allow arcane assemblers to craft. Disabling pauses existing jobs; enabling resumes them.")
+                .translation("thaumicenergistics_ce.config.arcaneAssembler.enabled")
                 .define("enabled", true);
-        ASSEMBLER_TICKS = b.comment("无加速卡时的合成时长，单位 tick。每张加速卡减少4 tick，最低4 tick。")
+        ASSEMBLER_TICKS = b.comment("Crafting time in ticks without acceleration cards. Each card reduces it by 4 ticks, to a minimum of 4 ticks.")
+                .translation("thaumicenergistics_ce.config.arcaneAssembler.craftTicks")
                 .defineInRange("craftTicks", 20, 4, 12000);
-        ASSEMBLER_POWER = b.comment("合成进行时每 tick 的 AE 消耗。")
+        ASSEMBLER_POWER = b.comment("AE consumed per tick while crafting.")
+                .translation("thaumicenergistics_ce.config.arcaneAssembler.aePerTick")
                 .defineInRange("aePerTick", 1.5, 0.0, 1000000.0);
-        b.pop().push("essentiaVibrationChamber");
-        VIBRATION_ENABLED = b.comment("允许源质谐振仓吸入和燃烧源质。关闭时保留燃料进度和储存的能量。")
+        b.pop().translation("thaumicenergistics_ce.config.essentiaVibrationChamber").push("essentiaVibrationChamber");
+        VIBRATION_ENABLED = b.comment("Allow essentia vibration chambers to accept and burn essentia. Disabling preserves fuel progress and stored energy.")
+                .translation("thaumicenergistics_ce.config.essentiaVibrationChamber.enabled")
                 .define("enabled", true);
-        BURN_TICKS = b.comment("燃烧时长计算的基础 tick 数。能量要素除以1.6，其余除以2；仅对新点燃的燃料生效。")
+        BURN_TICKS = b.comment("Base burn time in ticks. Divide by 1.6 for Potentia and by 2 for other aspects. Applies only to newly ignited fuel.")
+                .translation("thaumicenergistics_ce.config.essentiaVibrationChamber.baseBurnTicks")
                 .defineInRange("baseBurnTicks", 800, 2, 120000);
-        b.pop().push("gachaBox");
-        GACHA_ENABLED = b.comment("允许概率之箱运行。关闭时暂停已有轮次，不删除缸中之脑。")
+        b.pop().translation("thaumicenergistics_ce.config.gachaBox").push("gachaBox");
+        GACHA_ENABLED = b.comment("Allow gacha boxes to operate. Disabling pauses active rounds and preserves the Brain in a Jar.")
+                .translation("thaumicenergistics_ce.config.gachaBox.enabled")
                 .define("enabled", true);
-        GACHA_POWER = b.comment("每轮开始时消耗的 AE，不影响已开始的轮次。")
+        GACHA_POWER = b.comment("AE consumed when a round starts. Does not affect rounds already in progress.")
+                .translation("thaumicenergistics_ce.config.gachaBox.aePerTurn")
                 .defineInRange("aePerTurn", 500.0, 0.0, 1000000.0);
-        GACHA_SHORT_CHANCE = b.comment("30秒轮次的获奖概率，0到1。")
+        GACHA_SHORT_CHANCE = b.comment("Payout chance for a 30-second round, from 0 to 1.")
+                .translation("thaumicenergistics_ce.config.gachaBox.chanceAt30Seconds")
                 .defineInRange("chanceAt30Seconds", 0.75, 0.0, 1.0);
-        GACHA_LONG_CHANCE = b.comment("180秒轮次的获奖概率，0到1，其余时长线性插值。")
+        GACHA_LONG_CHANCE = b.comment("Payout chance for a 180-second round, from 0 to 1. Other round lengths use linear interpolation.")
+                .translation("thaumicenergistics_ce.config.gachaBox.chanceAt180Seconds")
                 .defineInRange("chanceAt180Seconds", 0.45, 0.0, 1.0);
         b.pop();
         SPEC = b.build();

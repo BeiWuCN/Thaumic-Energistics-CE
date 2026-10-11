@@ -9,7 +9,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.init.ModMenuTypes;
+import thaumicenergistics_ce.registry.ModMenuTypes;
 
 public class ItemWirelessEssentiaTerminal extends WirelessTerminalItem {
 
@@ -17,6 +17,12 @@ public class ItemWirelessEssentiaTerminal extends WirelessTerminalItem {
 
     public ItemWirelessEssentiaTerminal(DoubleSupplier powerCapacity, Item.Properties properties) {
         super(powerCapacity, properties);
+    }
+
+    @Override
+    public appeng.api.upgrades.IUpgradeInventory getUpgrades(net.minecraft.world.item.ItemStack stack) {
+        return QuantumTerminalSupport.upgrades(stack, (changed, upgrades) ->
+                setAEMaxPowerMultiplier(changed, 1 + appeng.api.upgrades.Upgrades.getEnergyCardMultiplier(upgrades)));
     }
 
     @Override

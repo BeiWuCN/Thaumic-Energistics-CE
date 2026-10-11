@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.block.BlockGachaBox;
 import thaumicenergistics_ce.block.BlockGachaBoxAggregator;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
-import thaumicenergistics_ce.init.ModBlockEntities;
+import thaumicenergistics_ce.registry.ModBlockEntities;
 
 public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implements IGridTickable {
 

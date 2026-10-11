@@ -20,10 +20,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import thaumicenergistics_ce.arcane.TerminalArcaneCraftingInput;
+import thaumicenergistics_ce.recipe.arcane.TerminalArcaneCraftingInput;
 import thaumicenergistics_ce.compat.thaumaturge.TcArcanePayment;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
-import thaumicenergistics_ce.essentia.EssentiaFillHelper;
+import thaumicenergistics_ce.integration.ae2.essentia.EssentiaFillHelper;
 
 final class TransferAndPaymentChecks {
     private TransferAndPaymentChecks() {}

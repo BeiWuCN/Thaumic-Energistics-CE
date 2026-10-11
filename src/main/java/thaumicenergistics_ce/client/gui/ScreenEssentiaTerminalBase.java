@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.essentia.EssentiaFillHelper;
+import thaumicenergistics_ce.integration.ae2.essentia.EssentiaFillHelper;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminalBase;
 import thaumicenergistics_ce.menu.slot.ContainerSlot;
@@ -25,6 +25,15 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
     protected ScreenEssentiaTerminalBase(
             M menu, Inventory playerInventory, Component title, ScreenStyle style) {
         super(menu, playerInventory, title, style);
+    }
+
+    @Override
+    protected void updateBeforeRender() {
+        menu.updateWirelessEssentiaUpgradeSlots();
+        if (menu instanceof thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal arcane) {
+            arcane.updateUpgradeSlotVisibility();
+        }
+        super.updateBeforeRender();
     }
 
     protected abstract boolean essentiaGesturesAtAll();

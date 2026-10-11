@@ -34,11 +34,14 @@ public final class IngredientStacksChecks {
         try {
             TransactionChecks.run();
             TerminalAuraConfigChecks.run();
+            TerminalChunkAuraChecks.run(event.getServer());
+            ArcaneCardSyncChecks.run(event.getServer());
             VisCardBindingChecks.run(event.getServer());
             DirectVisNodeChecks.run(event.getServer());
+            QuantumTerminalChecks.run(event.getServer());
             EssentiaCellRecipeChecks.run(event.getServer());
             WirelessShortcutChecks.run();
-            thaumicenergistics_ce.golem.GolemRepaintChecks.run(event.getServer());
+            thaumicenergistics_ce.integration.thaumaturge.golem.GolemRepaintChecks.run(event.getServer());
             thaumicenergistics_ce.blockentity.assembler.AssemblerVisPoolChecks.run(event.getServer());
             TransferAndPaymentChecks.run(event.getServer());
             OccultMonitorRemovalChecks.run(event.getServer());

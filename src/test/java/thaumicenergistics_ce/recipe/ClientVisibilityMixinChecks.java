@@ -43,6 +43,8 @@ public final class ClientVisibilityMixinChecks {
         var client = Minecraft.getInstance();
         if (verified && client.screen != null && client.getOverlay() == null) {
             verified = false;
+            appeng.client.gui.style.StyleManager.loadStyleDoc("/screens/wireless_essentia_terminal.json");
+            appeng.client.gui.style.StyleManager.loadStyleDoc("/screens/wireless_arcane_crafting_terminal.json");
             System.out.println("[client-visibility] PASS: visibility mixin applied and client reached its first screen");
             client.stop();
         }

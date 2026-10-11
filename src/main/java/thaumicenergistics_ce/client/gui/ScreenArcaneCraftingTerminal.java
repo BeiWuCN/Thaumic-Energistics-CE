@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Inventory;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.arcane.EssentiaCrystals;
+import thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
 import thaumicenergistics_ce.client.GolemBackpackClientData;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
@@ -86,6 +86,7 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     public void drawFG(GuiGraphicsExtractor graphics, int offsetX, int offsetY, int mouseX, int mouseY) {
         super.drawFG(graphics, offsetX, offsetY, mouseX, mouseY);
         drawAvailableAura(graphics);
+        drawInheritedVisCard(graphics);
         if (costs.isEmpty() && crystals.isEmpty()) {
             return;
         }
@@ -158,5 +159,33 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         graphics.pose().scale(scale, scale);
         graphics.text(font, text, -font.width(text) / 2, 0, 0xFF6E6EEE, false);
         graphics.pose().popMatrix();
+    }
+
+    private void drawInheritedVisCard(GuiGraphicsExtractor graphics) {
+        if (!menu.inheritedVisConnection) {
+            return;
+        }
+        WidgetStyle badge = getStyle().getWidget("inheritedVisCard");
+        if (badge != null) {
+            Point at = badge.resolve(new Rect2i(0, 0, imageWidth, imageHeight));
+            graphics.item(new net.minecraft.world.item.ItemStack(
+                    thaumicenergistics_ce.registry.ModItems.VIS_CONNECTION_CARD.get()), at.getX(), at.getY());
+        }
+    }
+
+    @Override
+    protected void extractTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        WidgetStyle badge = getStyle().getWidget("inheritedVisCard");
+        if (menu.inheritedVisConnection && badge != null) {
+            Point at = badge.resolve(new Rect2i(0, 0, imageWidth, imageHeight));
+            if (mouseX >= leftPos + at.getX() && mouseX < leftPos + at.getX() + 16
+                    && mouseY >= topPos + at.getY() && mouseY < topPos + at.getY() + 16) {
+                graphics.setTooltipForNextFrame(font, List.of(Component.translatable(
+                        "gui.thaumicenergistics_ce.arcane_terminal.inherited_vis_card")),
+                        java.util.Optional.empty(), mouseX, mouseY);
+                return;
+            }
+        }
+        super.extractTooltip(graphics, mouseX, mouseY);
     }
 }

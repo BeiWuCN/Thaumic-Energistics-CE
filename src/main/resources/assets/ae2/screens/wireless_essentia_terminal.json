@@ -1,0 +1,6 @@
+{
+  "$schema": "../schema.json",
+  "includes": [
+    "terminals/wireless_terminal.json"
+  ]
+}

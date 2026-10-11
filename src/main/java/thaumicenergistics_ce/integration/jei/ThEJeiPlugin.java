@@ -8,8 +8,8 @@ import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.init.ModMenuTypes;
-import thaumicenergistics_ce.init.ModItems;
+import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.ModItems;
 import thaumicenergistics_ce.util.ThELog;
 
 @JeiPlugin

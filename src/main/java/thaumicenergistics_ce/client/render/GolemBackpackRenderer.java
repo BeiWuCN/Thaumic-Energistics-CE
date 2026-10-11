@@ -22,7 +22,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.client.GolemBackpackClientData;
-import thaumicenergistics_ce.golem.BackpackSkins;
+import thaumicenergistics_ce.integration.thaumaturge.golem.BackpackSkins;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 
 @EventBusSubscriber(modid = ThEIds.MODID, value = Dist.CLIENT)

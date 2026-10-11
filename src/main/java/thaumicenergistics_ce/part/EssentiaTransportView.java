@@ -6,7 +6,7 @@ import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.essentia.ThEImmediateStorage;
+import thaumicenergistics_ce.integration.ae2.essentia.ThEImmediateStorage;
 import thaumicenergistics_ce.util.ThETransaction;
 
 final class EssentiaTransportView implements IEssentiaTransport {

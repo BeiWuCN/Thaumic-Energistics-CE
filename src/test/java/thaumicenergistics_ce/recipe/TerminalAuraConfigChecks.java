@@ -2,7 +2,7 @@ package thaumicenergistics_ce.recipe;
 
 import net.minecraft.core.BlockPos;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
-import thaumicenergistics_ce.arcane.TerminalAuraPayment;
+import thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
 import thaumicenergistics_ce.config.ThEConfig;
 
 public final class TerminalAuraConfigChecks {

@@ -2,7 +2,7 @@ package thaumicenergistics_ce.blockentity.occultmonitor;
 
 import appeng.api.networking.IGridNode;
 import net.minecraft.world.level.Level;
-import thaumicenergistics_ce.infusion.InfusionRisk;
+import thaumicenergistics_ce.recipe.infusion.InfusionRisk;
 import thaumicenergistics_ce.util.ThELog;
 
 final class OccultMonitorTrace {
