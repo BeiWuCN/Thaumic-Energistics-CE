@@ -98,6 +98,7 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
 
         private static final int CHIP = 16;
         private static final int GAP = 1;
+        private static final float NUMBER_SCALE = 0.5F;
 
         private final Holder<IAspect> aspect;
         private final String badge;
@@ -105,7 +106,7 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
         private AspectIcon(Holder<IAspect> aspect, String badge) {
             this.aspect = aspect;
             this.badge = badge;
-            this.width = CHIP + GAP + Minecraft.getInstance().font.width(badge);
+            this.width = CHIP + GAP + (int) Math.ceil(Minecraft.getInstance().font.width(badge) * NUMBER_SCALE);
             this.height = CHIP;
             alignSelfStart();
         }
@@ -116,7 +117,11 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
             int left = getX();
             int top = getY();
             AspectRendering.renderGui(graphics, font, left, top, aspect, 0.0F);
-            graphics.text(font, badge, left + CHIP + GAP, top + 9, 0xFFFFFFFF, true);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(left + CHIP + GAP, top + CHIP - font.lineHeight * NUMBER_SCALE);
+            graphics.pose().scale(NUMBER_SCALE, NUMBER_SCALE);
+            graphics.text(font, badge, 0, 0, 0xFFFFFFFF, true);
+            graphics.pose().popMatrix();
         }
 
         @Override

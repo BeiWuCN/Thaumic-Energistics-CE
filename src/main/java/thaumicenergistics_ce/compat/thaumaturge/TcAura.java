@@ -61,12 +61,19 @@ public final class TcAura {
 
     public static @Nullable BlockPos nodeBehind(ServerLevel level, BlockPos consumer) {
         BlockEntityNode node = nodeAtEnd(level, VisRelayNetwork.findRelayNear(level, consumer));
-        return node == null ? null : node.getBlockPos();
+        return node == null || !node.isEnergized() ? null : node.getBlockPos();
+    }
+
+    public static @Nullable BlockPos energizedNodeInFront(ServerLevel level, BlockPos host,
+            net.minecraft.core.Direction side) {
+        BlockPos pos = host.relative(side);
+        return level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof BlockEntityNode node
+                && node.isEnergized() ? pos : null;
     }
 
     public static boolean nodeHolds(ServerLevel level, BlockPos nodePos, ResourceKey<IAspect> primal) {
         return level.hasChunkAt(nodePos) && level.getBlockEntity(nodePos) instanceof BlockEntityNode node
-                && node.capacity().amountOf(primal, level.registryAccess()) > 0;
+                && node.isEnergized() && node.capacity().amountOf(primal, level.registryAccess()) > 0;
     }
 
     public static int drainCentivis(ServerLevel level, BlockPos consumer,

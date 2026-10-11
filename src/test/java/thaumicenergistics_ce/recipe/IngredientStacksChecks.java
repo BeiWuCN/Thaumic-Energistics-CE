@@ -35,6 +35,7 @@ public final class IngredientStacksChecks {
             TransactionChecks.run();
             TerminalAuraConfigChecks.run();
             VisCardBindingChecks.run(event.getServer());
+            DirectVisNodeChecks.run(event.getServer());
             EssentiaCellRecipeChecks.run(event.getServer());
             WirelessShortcutChecks.run();
             thaumicenergistics_ce.golem.GolemRepaintChecks.run(event.getServer());

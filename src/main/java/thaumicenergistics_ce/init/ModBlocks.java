@@ -151,7 +151,8 @@ public final class ModBlocks {
                     .mapColor(MapColor.METAL)
                     .strength(2.0F, 6.0F)
                     .sound(SoundType.METAL)
-                    .requiresCorrectToolForDrops());
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion());
 
     private ModBlocks() {}
 

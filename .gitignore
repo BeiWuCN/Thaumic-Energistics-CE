@@ -41,5 +41,5 @@ Thaumic-Energistics-CE-2.0-Renewed.zip
 *.md
 !CHANGELOG*.md
 !changelog*.md
-!README.md
-!README.en.md
+!/README.md
+!/README.en.md

@@ -6,6 +6,7 @@ This update includes the unreleased 2.7.4.3 changes and the subsequent work for 
 
 ### Additions
 
+- Let Vis Relay Interfaces connect directly to an adjacent energized aura node in front of the interface, while retaining support for Vis Relays. A node stops supplying when it is de-energized or removed.
 - Add a server config for terminal access, essentia bus power costs, golem backpack transfers, arcane assembler speed and power use, essentia vibration chamber fuel duration, and gacha box settings. Example configs and a configuration guide are included in the repository.
 - Let ME Import, Export and Storage Buses handle essentia when fitted with an Essentia Access Card. Import and Export Buses have six upgrade slots; Storage Buses keep their five native slots. Cards can use any supported upgrade slot, subject to AE2's normal card limits.
 - Let both wireless terminals be equipped in Curios slots. Each terminal also has its own configurable key binding in AE2's controls category; neither key is assigned by default.
@@ -19,6 +20,9 @@ This update includes the unreleased 2.7.4.3 changes and the subsequent work for 
 
 ### Fixes
 
+- Fix the Gacha Box Aggregator incorrectly hiding the faces of adjacent blocks.
+- Reduce the essentia quantity text in the Infusion Provider's Jade tooltip to half its previous size.
+- Correct the Chinese item names and research titles for the Vis Relay Interface and Vis Connection Card to use the updated Vis terminology.
 - Refresh essentia immediately when an Essentia Access Card is inserted into or removed from an arcane terminal. Reopening the screen is no longer necessary, even when the stored amounts have not changed.
 - Hide essentia from ordinary ME terminals and from arcane terminals without an Essentia Access Card by default. Essentia terminals continue to display it; this setting does not remove anything from storage.
 - Preserve essentia and account for power correctly when a bus transfer is only partly accepted or fails. Pending transfers survive saves and dismantling, and export buses count their transfer operations correctly.
@@ -55,6 +59,7 @@ This update includes the unreleased 2.7.4.3 changes and the subsequent work for 
 
 ### 新增
 
+- 魔力中继接口可以直接接入正前方相邻的已充能灵气节点，同时保留魔力中继点供给。节点失去充能或被拆除后停止供给。
 - 增加服务端配置，可以调整终端访问规则、源质总线耗电、傀儡背包传输、奥术装配室速度与耗电、源质谐振仓燃料时长，以及概率之箱的运行参数。仓库中提供了配置示例和说明。
 - ME 输入总线、输出总线和存储总线装入源质访问卡后可以处理源质。输入和输出总线使用六个升级槽，存储总线保留原生五槽。升级卡可以放入任意支持的槽位，卡片数量上限仍按 AE2 的规则执行。
 - 无线源质终端和无线奥术合成终端支持放入 Curios 饰品栏。两种终端各有独立的打开按键，可以在 AE2 的按键分类中设置，默认不绑定。
@@ -68,6 +73,9 @@ This update includes the unreleased 2.7.4.3 changes and the subsequent work for 
 
 ### 修复
 
+- 修复概率之箱聚合器错误遮挡相邻方块接触面的问题。
+- 将注魔供应器 Jade 提示中的源质数量文字缩小为原来的 50%。
+- 将魔力中继接口和魔力访问卡的中文物品名、研究标题及正文中的旧名称同步更新，简繁中文均已处理。
 - 奥术终端插入或取出源质访问卡后立即刷新源质列表。即使网络库存没有变化，也不需要重新打开界面。
 - 默认在普通 ME 终端，以及未装源质访问卡的奥术终端中隐藏源质。源质终端仍然显示源质，隐藏不会删除网络中的库存。
 - 修复总线传输被部分接收或失败时的源质保留与耗电结算。未完成的传输可以随存档和拆卸保留，输出总线也会正确计算传输操作次数。

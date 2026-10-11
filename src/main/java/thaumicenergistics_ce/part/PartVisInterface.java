@@ -55,12 +55,6 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
 
     private boolean upstreamKnown;
 
-    private @Nullable BlockPos permitPos;
-
-    private long nextPermitLookup;
-
-    private boolean permitKnown;
-
     public PartVisInterface(IPartItem<?> partItem) {
         super(partItem);
         getMainNode().setIdlePowerUsage(1.0);
@@ -190,15 +184,13 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         if (!(visLevel() instanceof ServerLevel server)) {
             return null;
         }
-        long now = server.getGameTime();
-        if (permitKnown && now < nextPermitLookup) {
-            return permitPos;
-        }
-        permitKnown = true;
-        nextPermitLookup = now + UPSTREAM_POLL_INTERVAL;
         PartVisInterface end = upstream(server);
-        permitPos = end == null ? null : TcAura.nodeBehind(server, end.visPos());
-        return permitPos;
+        return end == null ? null : end.sourceNode(server);
+    }
+
+    private @Nullable BlockPos sourceNode(ServerLevel server) {
+        BlockPos direct = TcAura.energizedNodeInFront(server, visPos(), getSide());
+        return direct != null ? direct : TcAura.nodeBehind(server, visPos());
     }
 
     private @Nullable PartVisInterface upstream(ServerLevel server) {
@@ -213,7 +205,7 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
     }
 
     private boolean canReachRelay(ServerLevel server) {
-        return TcAura.relayResolves(server, visPos());
+        return sourceNode(server) != null;
     }
 
     private @Nullable PartVisInterface partnerWithRelay(ServerLevel server) {
