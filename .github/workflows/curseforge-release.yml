@@ -96,8 +96,9 @@ jobs:
           changelog: ${{ needs.prepare.outputs.changelog }}
           loaders: neoforge
           game-versions: ${{ matrix.minecraft }}
-          game-version-filter: all
+          game-version-filter: none
           dependencies: |
             applied-energistics-2(required)
             thaumaturge(required)
           retry-attempts: 2
+
