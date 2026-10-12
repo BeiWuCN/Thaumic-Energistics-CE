@@ -1,3 +1,13 @@
+> **安装前请注意 / Read before installing**
+>
+> **本版依赖 Thaumaturge 1.0.3 开发源码的固定提交 [`80903dd9`](https://github.com/Leclowndu93150/Thaumaturge/commit/80903dd9724ba20811b6ef3bc056a18082613ad6)。目前官方 CurseForge 的 Thaumaturge 1.0.2 缺少本版所需 API，不能直接搭配使用，可能导致启动失败或运行功能时出现 `NoSuchMethodError`。如果你只有官方 1.0.2，请暂缓安装 TECE 2.7.4.5，等待兼容更新。**
+>
+> 本仓库的 Gradle 自动获取并构建依赖，只用于从源码构建的开发流程；下载 TECE JAR 的玩家不会自动获得 Thaumaturge。TECE 的发布文件也不包含 Thaumaturge。
+>
+> **This release was built against the pinned Thaumaturge 1.0.3 development revision [`80903dd9`](https://github.com/Leclowndu93150/Thaumaturge/commit/80903dd9724ba20811b6ef3bc056a18082613ad6). The official CurseForge 1.0.2 file lacks required APIs and is not compatible. Combining it with TECE 2.7.4.5 may fail at startup or produce `NoSuchMethodError` during gameplay. If you only have the official 1.0.2 release, postpone installing this TECE version until a compatible update is available.**
+>
+> Automatic dependency preparation by Gradle is a source-build feature. Installing the TECE JAR does not download Thaumaturge, and the release does not bundle it.
+
 # TECE 2.7.4.5
 
 ## 26.1.2 / NeoForge
