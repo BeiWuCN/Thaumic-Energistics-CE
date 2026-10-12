@@ -112,9 +112,9 @@ public class ItemWirelessConnector extends Item {
             return;
         }
 
-        String refusal = receiver.link(provider);
+        var refusal = receiver.link(provider);
         if (refusal != null) {
-            player.sendOverlayMessage(Component.literal(refusal).withStyle(ChatFormatting.RED));
+            player.sendOverlayMessage(refusal.copy().withStyle(ChatFormatting.RED));
             return;
         }
         clearSelection(tool);

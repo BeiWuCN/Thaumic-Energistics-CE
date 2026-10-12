@@ -5,7 +5,6 @@ import net.minecraft.world.level.storage.ValueInput;
 import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
-import appeng.api.networking.energy.IEnergyService;
 import appeng.api.parts.IPartItem;
 import appeng.api.upgrades.IUpgradeInventory;
 import appeng.api.upgrades.UpgradeInventories;
@@ -18,8 +17,6 @@ import appeng.util.inv.filter.IAEItemFilter;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
@@ -36,7 +33,7 @@ import thaumicenergistics_ce.recipe.arcane.ArcaneTerminalLink;
 import thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
 import thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
 import thaumicenergistics_ce.compat.thaumaturge.TcWand;
-import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.TECEMenuTypes;
 
 public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         implements ArcaneTerminalHost, appeng.api.networking.ticking.IGridTickable {
@@ -103,7 +100,7 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
 
     @Override
     public MenuType<?> getMenuType(Player player) {
-        return ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get();
+        return TECEMenuTypes.ARCANE_CRAFTING_TERMINAL.get();
     }
 
     @Override
@@ -158,10 +155,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         }
     }
 
-    private appeng.api.networking.@Nullable IGrid gridOrNull() {
-        IGridNode node = getMainNode().getNode();
-        return node == null ? null : node.getGrid();
-    }
 
     public int supplyAura(int needVis, TransactionContext transaction) {
         if (needVis <= 0 || !isActive()) {

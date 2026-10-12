@@ -3,14 +3,6 @@
   "includes": [
     "arcane_crafting_terminal.json"
   ],
-  "widgets": {
-    "inheritedVisCard": {
-      "left": 110,
-      "bottom": 140,
-      "width": 16,
-      "height": 16
-    }
-  },
   "text": {
     "crafting_grid_title": {
       "text": {

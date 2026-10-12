@@ -21,9 +21,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.jetbrains.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 import thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
-import thaumicenergistics_ce.util.ThELog;
 import thaumicenergistics_ce.util.ThEItemTags;
 
 @EventBusSubscriber(modid = ThEIds.MODID)
@@ -35,15 +34,7 @@ public final class GolemBackpackHandler {
 
     private static final Map<UUID, GlobalPos> LINK_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
 
-    static final boolean TRACE = System.getenv("THAUMICENERGISTICS_BACKPACK_TRACE") != null;
-
     private GolemBackpackHandler() {}
-
-    private static void trace(String message) {
-        if (TRACE) {
-            ThELog.LOG.info("[pack] " + message);
-        }
-    }
 
     @SubscribeEvent
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
@@ -119,7 +110,7 @@ public final class GolemBackpackHandler {
 
         setLink(golem, link);
         setSkin(golem, BackpackSkins.Thaumium);
-        trace("equipped golem " + golem.getId() + " with link " + link);
+
         playEquipSound(golem);
         if (!player.isCreative()) {
             held.shrink(1);
@@ -137,7 +128,7 @@ public final class GolemBackpackHandler {
         }
 
         releasePack(golem, link, !player.isCreative());
-        trace("removed the backpack from golem " + golem.getId() + ", link " + link + " returned");
+
         playEquipSound(golem);
         return true;
     }
@@ -149,12 +140,12 @@ public final class GolemBackpackHandler {
         }
 
         releasePack(golem, link, true);
-        trace("took the backpack off golem " + golem.getId() + " before it was pocketed, link " + link);
+
         playEquipSound(golem);
     }
 
     private static void releasePack(EntityThaumaturgeGolem golem, GlobalPos link, boolean returnFacade) {
-        ItemStack backpack = new ItemStack(ModItems.GOLEM_WIFI_BACKPACK.get());
+        ItemStack backpack = new ItemStack(TECEItems.GOLEM_WIFI_BACKPACK.get());
         backpack.set(AEComponents.WIRELESS_LINK_TARGET, link);
         drop(golem, backpack);
 
@@ -179,7 +170,7 @@ public final class GolemBackpackHandler {
 
         golem.getPersistentData().remove(KEY_FACADE);
         setSkin(golem, skin);
-        trace("repainted golem " + golem.getId() + " as " + skin);
+
         playEquipSound(golem);
         return true;
     }
@@ -192,7 +183,6 @@ public final class GolemBackpackHandler {
         golem.level().playSound(null, golem.getX(), golem.getY(), golem.getZ(),
                 SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.NEUTRAL, 0.5F, 1.0F);
     }
-
 
     public static boolean hasBackpack(EntityThaumaturgeGolem golem) {
         return golem.getPersistentData().contains(KEY_LINK);

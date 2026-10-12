@@ -3,6 +3,7 @@ package thaumicenergistics_ce.blockentity.alchemyprovider;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
@@ -20,18 +21,20 @@ final class ReceiverLinks {
         this.provider = provider;
     }
 
-    @Nullable String add(BlockPos receiver) {
+    @Nullable Component add(BlockPos receiver) {
         if (linked.contains(receiver)) {
             return null;
         }
         if (linked.size() >= BlockEntityAlchemyProvider.MAX_LINKED_RECEIVERS) {
-            return "provider is already serving " + BlockEntityAlchemyProvider.MAX_LINKED_RECEIVERS
-                    + " receivers";
+            return Component.translatable(
+                    "item.thaumicenergistics_ce.wireless_connector.receiver_limit",
+                    BlockEntityAlchemyProvider.MAX_LINKED_RECEIVERS);
         }
         double distance = Math.sqrt(provider.getBlockPos().distSqr(receiver));
         if (distance > BlockEntityAlchemyProvider.MAX_LINK_DISTANCE) {
-            return "receiver is " + (int) Math.ceil(distance) + " blocks away, further than "
-                    + BlockEntityAlchemyProvider.MAX_LINK_DISTANCE;
+            return Component.translatable(
+                    "item.thaumicenergistics_ce.wireless_connector.too_far",
+                    (int) Math.ceil(distance), BlockEntityAlchemyProvider.MAX_LINK_DISTANCE);
         }
         linked.add(receiver.immutable());
         provider.setChanged();

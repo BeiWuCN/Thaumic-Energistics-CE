@@ -16,7 +16,7 @@ import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
-import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.TECEBlockEntities;
 
 public final class ThEItemCapabilities {
 
@@ -26,13 +26,13 @@ public final class ThEItemCapabilities {
     private ThEItemCapabilities() {}
 
     public static void install(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(ITEM, ModBlockEntities.DISTILLATION_ENCODER.get(), (machine, side) -> encoder(machine));
-        event.registerBlockEntity(ITEM, ModBlockEntities.KNOWLEDGE_INSCRIBER.get(),
+        event.registerBlockEntity(ITEM, TECEBlockEntities.DISTILLATION_ENCODER.get(), (machine, side) -> encoder(machine));
+        event.registerBlockEntity(ITEM, TECEBlockEntities.KNOWLEDGE_INSCRIBER.get(),
                 (machine, side) -> inscriber(machine));
-        event.registerBlockEntity(ITEM, ModBlockEntities.ESSENTIA_CELL_WORKBENCH.get(), (machine, side) -> workbench(machine));
-        event.registerBlockEntity(ITEM, ModBlockEntities.OCCULT_MONITOR.get(), (machine, side) -> monitor(machine.getInventory()));
-        event.registerBlockEntity(ITEM, ModBlockEntities.ARCANE_ASSEMBLER.get(), (machine, side) -> assembler(machine, side));
-        event.registerBlockEntity(ITEM, ModBlockEntities.GACHA_BOX.get(),
+        event.registerBlockEntity(ITEM, TECEBlockEntities.ESSENTIA_CELL_WORKBENCH.get(), (machine, side) -> workbench(machine));
+        event.registerBlockEntity(ITEM, TECEBlockEntities.OCCULT_MONITOR.get(), (machine, side) -> monitor(machine.getInventory()));
+        event.registerBlockEntity(ITEM, TECEBlockEntities.ARCANE_ASSEMBLER.get(), (machine, side) -> assembler(machine, side));
+        event.registerBlockEntity(ITEM, TECEBlockEntities.GACHA_BOX.get(),
                 (machine, side) -> brain(machine.brainSlot()));
     }
 

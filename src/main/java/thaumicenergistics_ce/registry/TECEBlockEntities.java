@@ -18,7 +18,7 @@ import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.blockentity.gachabox.BlockEntityGachaBox;
 
-public final class ModBlockEntities {
+public final class TECEBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> REGISTRY =
             DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, ThEIds.MODID);
 
@@ -26,71 +26,71 @@ public final class ModBlockEntities {
             ARCANE_ASSEMBLER = REGISTRY.register(
                     "arcane_assembler",
                     () -> new BlockEntityType<>(
-                            BlockEntityArcaneAssembler::new, Set.of(ModBlocks.ARCANE_ASSEMBLER.get())));
+                            BlockEntityArcaneAssembler::new, Set.of(TECEBlocks.ARCANE_ASSEMBLER.get())));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityKnowledgeInscriber>>
             KNOWLEDGE_INSCRIBER = REGISTRY.register(
                     "knowledge_inscriber",
                     () -> new BlockEntityType<>(
                             BlockEntityKnowledgeInscriber::new,
-                            Set.of(ModBlocks.KNOWLEDGE_INSCRIBER.get())));
+                            Set.of(TECEBlocks.KNOWLEDGE_INSCRIBER.get())));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityEssentiaCellWorkbench>>
             ESSENTIA_CELL_WORKBENCH = REGISTRY.register(
                     "essentia_cell_workbench",
                     () -> new BlockEntityType<>(
                             BlockEntityEssentiaCellWorkbench::new,
-                            Set.of(ModBlocks.ESSENTIA_CELL_WORKBENCH.get())));
+                            Set.of(TECEBlocks.ESSENTIA_CELL_WORKBENCH.get())));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityEssentiaVibrationChamber>>
             ESSENTIA_VIBRATION_CHAMBER = REGISTRY.register(
                     "essentia_vibration_chamber",
                     () -> new BlockEntityType<>(
                             BlockEntityEssentiaVibrationChamber::new,
-                            Set.of(ModBlocks.ESSENTIA_VIBRATION_CHAMBER.get())));
+                            Set.of(TECEBlocks.ESSENTIA_VIBRATION_CHAMBER.get())));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityAlchemyProvider>>
             ALCHEMY_PROVIDER = REGISTRY.register(
                     "alchemy_provider",
                     () -> new BlockEntityType<>(
                             BlockEntityAlchemyProvider::new,
-                            Set.of(ModBlocks.ALCHEMY_PROVIDER.get())));
+                            Set.of(TECEBlocks.ALCHEMY_PROVIDER.get())));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityInfusionProvider>>
             INFUSION_PROVIDER = REGISTRY.register(
                     "infusion_provider",
                     () -> new BlockEntityType<>(
                             BlockEntityInfusionProvider::new,
-                            Set.of(ModBlocks.INFUSION_PROVIDER.get())));
+                            Set.of(TECEBlocks.INFUSION_PROVIDER.get())));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityDistillationEncoder>>
             DISTILLATION_ENCODER = REGISTRY.register(
                     "distillation_encoder",
                     () -> new BlockEntityType<>(
                             BlockEntityDistillationEncoder::new,
-                            Set.of(ModBlocks.DISTILLATION_ENCODER.get())));
+                            Set.of(TECEBlocks.DISTILLATION_ENCODER.get())));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityOccultMonitor>>
             OCCULT_MONITOR = REGISTRY.register(
                     "occult_monitor",
                     () -> new BlockEntityType<>(
                             BlockEntityOccultMonitor::new,
-                            Set.of(ModBlocks.OCCULT_MONITOR.get())));
+                            Set.of(TECEBlocks.OCCULT_MONITOR.get())));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityAlchemyProviderConnection>>
             ALCHEMY_PROVIDER_CONNECTION = REGISTRY.register(
                     "alchemy_provider_connection",
                     () -> new BlockEntityType<>(
                             BlockEntityAlchemyProviderConnection::new,
-                            Set.of(ModBlocks.ALCHEMY_PROVIDER_CONNECTION.get())));
+                            Set.of(TECEBlocks.ALCHEMY_PROVIDER_CONNECTION.get())));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityGachaBox>>
             GACHA_BOX = REGISTRY.register(
                     "gacha_box",
                     () -> new BlockEntityType<>(
-                            BlockEntityGachaBox::new, Set.of(ModBlocks.GACHA_BOX.get())));
+                            BlockEntityGachaBox::new, Set.of(TECEBlocks.GACHA_BOX.get())));
 
-    private ModBlockEntities() {}
+    private TECEBlockEntities() {}
 
     public static void register(IEventBus modBus) {
         REGISTRY.register(modBus);

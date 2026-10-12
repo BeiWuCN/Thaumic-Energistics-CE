@@ -7,7 +7,6 @@ import appeng.api.parts.PartHelper;
 import appeng.helpers.WirelessTerminalMenuHost;
 import appeng.items.tools.powered.WirelessTerminalItem;
 import appeng.menu.locator.ItemMenuHostLocator;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 import net.minecraft.core.BlockPos;
@@ -29,7 +28,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.recipe.arcane.ArcaneTerminalLink;
-import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.TECEMenuTypes;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem implements ArcaneTerminalLink {
@@ -102,7 +101,7 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
 
     @Override
     public MenuType<?> getMenuType() {
-        return ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get();
+        return TECEMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get();
     }
 
     @Override

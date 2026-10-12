@@ -7,7 +7,6 @@ import appeng.api.storage.MEStorage;
 import appeng.util.ConfigInventory;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
-import thaumicenergistics_ce.util.ThELog;
 
 public final class EssentiaInterfaceRows {
 
@@ -24,8 +23,6 @@ public final class EssentiaInterfaceRows {
             }
             long rest = held.amount() - returnToNetwork(held, network, source);
             if (rest > 0) {
-                ThELog.LOG.info(
-                        "[essentia-interface] discarding {} of {} as the interface goes", rest, held.what());
             }
             storage.setStack(slot, null);
         }

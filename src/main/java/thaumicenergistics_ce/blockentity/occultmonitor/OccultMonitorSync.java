@@ -4,15 +4,10 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import thaumicenergistics_ce.blockentity.ClientSyncSend;
 import thaumicenergistics_ce.recipe.infusion.InfusionRisk;
-import thaumicenergistics_ce.util.ThEItemTags;
 
 final class OccultMonitorSync {
 

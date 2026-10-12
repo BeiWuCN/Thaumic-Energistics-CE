@@ -22,7 +22,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
-import thaumicenergistics_ce.util.ThELog;
 
 public final class EssentiaFillHelper {
 
@@ -120,7 +119,6 @@ public final class EssentiaFillHelper {
     }
 
     private static void log(String message, Object... args) {
-        ThELog.LOG.info("[essentia-terminal] " + message, args);
     }
 
     public static void dumpEssentia(MEStorage storage) {

@@ -17,7 +17,6 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.integration.ae2.ClientRegistries;
-import thaumicenergistics_ce.util.ThELog;
 import thaumicenergistics_ce.recipe.IngredientStacks;
 
 public final class ArcaneRecipeTypes {

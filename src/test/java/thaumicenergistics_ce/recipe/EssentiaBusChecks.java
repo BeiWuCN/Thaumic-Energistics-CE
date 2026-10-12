@@ -59,7 +59,7 @@ import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusBuffer;
 import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusHost;
 import thaumicenergistics_ce.integration.ae2.bus.EssentiaBusStorage;
 import thaumicenergistics_ce.config.ThEConfig;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.integration.ae2.EssentiaMEStorage;
@@ -335,7 +335,7 @@ public final class EssentiaBusChecks {
                 if (bus instanceof StorageBusPart storageBus) { storageUpgradeMigration(server, storageBus); }
                 var upgrades = bus.getUpgrades();
                 int accessSlot = upgrades.size() - 1;
-                var card = new ItemStack(ModItems.ESSENTIA_ACCESS_CARD.get());
+                var card = new ItemStack(TECEItems.ESSENTIA_ACCESS_CARD.get());
                 for (int slot = 0; slot < upgrades.size(); slot++) {
                     require(upgrades.insertItem(slot, card, false).isEmpty(),
                             "Access card rejected in upgrade slot " + slot);
@@ -441,9 +441,9 @@ public final class EssentiaBusChecks {
                 level.setBlock(hostPos, Blocks.AIR.defaultBlockState(), 3);
             }
             var interfacePart = new InterfacePart(AEParts.INTERFACE.get());
-            require(interfacePart.getUpgrades().getMaxInstalled(ModItems.ESSENTIA_ACCESS_CARD.get()) == 0,
+            require(interfacePart.getUpgrades().getMaxInstalled(TECEItems.ESSENTIA_ACCESS_CARD.get()) == 0,
                     "ME interface still accepts access card");
-            require(appeng.api.upgrades.Upgrades.getMaxInstallable(ModItems.ESSENTIA_ACCESS_CARD.get(),
+            require(appeng.api.upgrades.Upgrades.getMaxInstallable(TECEItems.ESSENTIA_ACCESS_CARD.get(),
                     AEBlocks.INTERFACE.asItem()) == 0, "Block interface still accepts access card");
         } finally {
             level.setBlock(hostPos, Blocks.AIR.defaultBlockState(), 3);
@@ -498,7 +498,7 @@ public final class EssentiaBusChecks {
             IPartHost host, AEssentiaKey key) {
         var bus = new BudgetExportBus();
         bus.setPartHostInfo(Direction.DOWN, host, original.getBlockEntity());
-        bus.getUpgrades().insertItem(5, new ItemStack(ModItems.ESSENTIA_ACCESS_CARD.get()), false);
+        bus.getUpgrades().insertItem(5, new ItemStack(TECEItems.ESSENTIA_ACCESS_CARD.get()), false);
         bus.getConfig().setStack(0, new appeng.api.stacks.GenericStack(key, 1));
         bus.getConfig().setStack(1, new appeng.api.stacks.GenericStack(key, 1));
         var network = new Network();
@@ -680,7 +680,7 @@ public final class EssentiaBusChecks {
                 }
             }
             var entry = upgrades.addChild();
-            entry.store(ItemStack.MAP_CODEC, new ItemStack(ModItems.ESSENTIA_ACCESS_CARD.get()));
+            entry.store(ItemStack.MAP_CODEC, new ItemStack(TECEItems.ESSENTIA_ACCESS_CARD.get()));
             entry.putInt("Slot", 5);
             bus.readFromNBT(TagValueInput.create(ProblemReporter.DISCARDING, server.registryAccess(), output.buildResult()));
             if (!full) {
@@ -693,7 +693,7 @@ public final class EssentiaBusChecks {
                 require(saved.buildResult().contains("tceLegacyUpgrade"), "Full bus lost its old sixth-slot card");
                 var drops = new ArrayList<ItemStack>();
                 bus.addAdditionalDrops(drops, true);
-                require(drops.stream().filter(s -> s.is(ModItems.ESSENTIA_ACCESS_CARD.get())).count() == 1,
+                require(drops.stream().filter(s -> s.is(TECEItems.ESSENTIA_ACCESS_CARD.get())).count() == 1,
                         "Dismantling did not return the pending card exactly once");
                 bus.getUpgrades().extractItem(2, 1, false);
                 require(EssentiaBusAccess.hasCard(bus) && bus.getUpgrades().size() == 5,

@@ -21,7 +21,7 @@ import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.block.BlockInfusionProvider;
 import thaumicenergistics_ce.block.BlockKnowledgeInscriber;
 
-public final class ModBlocks {
+public final class TECEBlocks {
     public static final DeferredRegister.Blocks REGISTRY = DeferredRegister.createBlocks(ThEIds.MODID);
 
     private static final BlockBehaviour.Properties ASSEMBLER_PROPERTIES = BlockBehaviour.Properties.of()
@@ -154,7 +154,7 @@ public final class ModBlocks {
                     .requiresCorrectToolForDrops()
                     .noOcclusion());
 
-    private ModBlocks() {}
+    private TECEBlocks() {}
 
     public static void register(IEventBus modBus) {
         REGISTRY.register(modBus);

@@ -12,7 +12,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.util.ThELog;
 
 final class ArcaneResearchGate {
 
@@ -44,9 +43,6 @@ final class ArcaneResearchGate {
         for (AspectInstance entry : crystals.entries()) {
             Holder<IAspect> holder = lookup.get(entry.aspect().getKey()).orElse(null);
             if (holder == null) {
-                ThELog.LOG.debug(
-                        "Arcane pattern references unregistered aspect {}",
-                        entry.aspect().getKey().identifier());
                 continue;
             }
             resolved = resolved.add(holder, entry.amount());

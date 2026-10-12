@@ -21,7 +21,7 @@ import thaumicenergistics_ce.menu.MenuEssentiaVibrationChamber;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 import thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 
-public final class ModMenuTypes {
+public final class TECEMenuTypes {
     public static final DeferredRegister<MenuType<?>> REGISTRY =
             DeferredRegister.create(Registries.MENU, ThEIds.MODID);
 
@@ -95,7 +95,7 @@ public final class ModMenuTypes {
                                     (host, menu, buffer) -> menu.setInitialValue(buffer.readVarLong()))
                             .buildUnregistered(ThEIds.id("essentia_level_emitter")));
 
-    private ModMenuTypes() {}
+    private TECEMenuTypes() {}
 
     public static void register(IEventBus bus) {
         REGISTRY.register(bus);

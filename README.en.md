@@ -4,7 +4,7 @@ Thaumic Energistics: CE connects Thaumaturge's essentia and Vis to Applied Energ
 
 The project continues the original Thaumic Energistics gameplay using Thaumaturge on newer Minecraft versions. This branch targets **Minecraft 26.1.2 / NeoForge**. For Minecraft 1.21.1, see the [1.21.1 branch](https://github.com/BeiWuCN/Thaumic-Energistics-CE/tree/1.21.1).
 
-[中文](README.md) · [Downloads](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) · [Changelog](CHANGELOG-2.7.4.4.md) · [Issues](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues)
+[中文](README.md) · [Downloads](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) · [Changelog](CHANGELOG-2.7.4.5.md) · [Issues](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues)
 
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/26.1.2/src/main/resources/icon.png" alt="Thaumic Energistics: CE" width="420">
 

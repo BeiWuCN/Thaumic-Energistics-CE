@@ -11,9 +11,6 @@ import appeng.api.upgrades.UpgradeInventories;
 import appeng.util.ConfigInventory;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
@@ -28,10 +25,9 @@ import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.registry.MachineMenus;
-import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.TECEBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
-import thaumicenergistics_ce.util.ThEItemTags;
 
 public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity implements IUpgradeableObject {
 
@@ -127,7 +123,7 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
     private boolean syncing;
 
     public BlockEntityEssentiaCellWorkbench(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.ESSENTIA_CELL_WORKBENCH.get(), pos, state);
+        super(TECEBlockEntities.ESSENTIA_CELL_WORKBENCH.get(), pos, state);
     }
 
     public SimpleContainer getInventory() {

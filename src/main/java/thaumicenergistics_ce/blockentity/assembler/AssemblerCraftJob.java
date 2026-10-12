@@ -14,7 +14,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.recipe.arcane.ArcanePatternDetails;
 import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
-import thaumicenergistics_ce.util.ThELog;
 
 final class AssemblerCraftJob {
 
@@ -58,7 +57,6 @@ final class AssemblerCraftJob {
             return;
         }
         owner.craft.setLastRefusal(why);
-        ThELog.LOG.info("[assembler] at {} turned a job away: {}", owner.getBlockPos(), why.getString());
     }
 
     Component cannotPay(int price) {
@@ -126,12 +124,6 @@ final class AssemblerCraftJob {
                 owner.craft.setCraftPrice(craftCost(recovered));
                 owner.craft.setCraftCrystals(crystalStacksOf(recovered));
             }
-            ThELog.LOG.info(
-                    "[assembler] at {} resumed the craft a save interrupted: {} for {} vis{}",
-                    owner.getBlockPos(),
-                    waiting.getHoverName().getString(),
-                    owner.craft.craftPrice(),
-                    recovered == null ? " (the knowledge core no longer has its pattern)" : "");
             owner.craft.setCraftTicks(owner.upgrades.ticksPerCraft());
             owner.craft.clearStall();
         } else {

@@ -11,7 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ItemLike;
 import thaumicenergistics_ce.config.ThEConfig;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 
 public final class EssentiaBusAccess {
     public static final int SLOT_COUNT = 6;
@@ -27,7 +27,7 @@ public final class EssentiaBusAccess {
 
     public static boolean hasCard(Object host) {
         return (host instanceof ImportBusPart || host instanceof ExportBusPart || host instanceof StorageBusPart)
-                && ((UpgradeablePart) host).getUpgrades().isInstalled(ModItems.ESSENTIA_ACCESS_CARD.get());
+                && ((UpgradeablePart) host).getUpgrades().isInstalled(TECEItems.ESSENTIA_ACCESS_CARD.get());
     }
 
     public static boolean enabled(Object host) {

@@ -16,7 +16,6 @@ import thaumicenergistics_ce.menu.MenuEssentiaTerminalBase;
 import thaumicenergistics_ce.menu.slot.ContainerSlot;
 import thaumicenergistics_ce.network.EssentiaDepositPayload;
 import thaumicenergistics_ce.network.EssentiaFillPayload;
-import thaumicenergistics_ce.util.ThELog;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalBase>
@@ -70,8 +69,6 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
     protected void slotClicked(Slot slot, int slotId, int mouseButton, ContainerInput type) {
         if (essentiaGesturesAtAll() && slot instanceof RepoSlot && cursorIsContainer()
                 && type != ContainerInput.QUICK_MOVE) {
-            ThELog.LOG.info("[源质手势] 吞掉仓库点击：光标拿着 {}，按键 {}，类型 {}（这一次 AE2 收不到）",
-                    getMenu().getCarried(), mouseButton, type);
             return;
         }
         super.slotClicked(slot, slotId, mouseButton, type);

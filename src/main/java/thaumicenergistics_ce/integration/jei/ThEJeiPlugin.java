@@ -8,9 +8,7 @@ import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.registry.ModMenuTypes;
-import thaumicenergistics_ce.registry.ModItems;
-import thaumicenergistics_ce.util.ThELog;
+import thaumicenergistics_ce.registry.TECEItems;
 
 @JeiPlugin
 public class ThEJeiPlugin implements IModPlugin {
@@ -19,7 +17,6 @@ public class ThEJeiPlugin implements IModPlugin {
             Identifier.fromNamespaceAndPath(ThEIds.MODID, "jei_plugin");
 
     public ThEJeiPlugin() {
-        ThELog.LOG.info("JEI plugin constructed ({})", UID);
     }
 
     @Override
@@ -29,9 +26,9 @@ public class ThEJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalyst(new ItemStack(ModItems.ARCANE_CRAFTING_TERMINAL.get()),
+        registration.addRecipeCatalyst(new ItemStack(TECEItems.ARCANE_CRAFTING_TERMINAL.get()),
                 ArcaneJeiRecipeType.arcane());
-        registration.addRecipeCatalyst(new ItemStack(ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()),
+        registration.addRecipeCatalyst(new ItemStack(TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()),
                 ArcaneJeiRecipeType.arcane());
     }
 
@@ -42,22 +39,15 @@ public class ThEJeiPlugin implements IModPlugin {
                 ArcaneJeiRecipeType.arcane());
         registration.addRecipeTransferHandler(
                 new ArcaneCraftingRecipeTransfer(
-                        registration.getTransferHelper(), ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get()),
+                        registration.getTransferHelper()),
                 ArcaneJeiRecipeType.arcane());
         registration.addRecipeTransferHandler(
                 new CraftingRecipeTransfer(
-                        registration.getTransferHelper(), ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get()),
+                        registration.getTransferHelper()),
                 RecipeTypes.CRAFTING);
         registration.addRecipeTransferHandler(
                 new CruciblePatternTransfer(registration.getTransferHelper()),
                 CrucibleJeiRecipeType.crucible());
-        registration.addRecipeTransferHandler(
-                new ArcaneCraftingRecipeTransfer(
-                        registration.getTransferHelper(), ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()),
-                ArcaneJeiRecipeType.arcane());
-        registration.addRecipeTransferHandler(
-                new CraftingRecipeTransfer(
-                        registration.getTransferHelper(), ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()),
-                RecipeTypes.CRAFTING);
+
     }
 }

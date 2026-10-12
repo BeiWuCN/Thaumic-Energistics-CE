@@ -15,14 +15,14 @@ import thaumicenergistics_ce.network.InscriberGridFillPayload;
 import thaumicenergistics_ce.network.InscriberGridPayload;
 import thaumicenergistics_ce.network.PartitionWellPayload;
 
-public final class ModNetwork {
+public final class TECENetwork {
 
-    private ModNetwork() {}
+    private TECENetwork() {}
 
     private static final String VERSION = "1";
 
     public static void register(IEventBus modBus) {
-        modBus.addListener(ModNetwork::onRegisterPayloads);
+        modBus.addListener(TECENetwork::onRegisterPayloads);
     }
 
     private static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {

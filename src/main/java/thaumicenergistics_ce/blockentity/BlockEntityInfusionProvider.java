@@ -15,10 +15,8 @@ import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspectSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
-import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.TECEBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implements IAspectSource {
@@ -28,7 +26,7 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
     private final IActionSource actionSource = IActionSource.ofMachine(this);
 
     public BlockEntityInfusionProvider(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.INFUSION_PROVIDER.get(), pos, state);
+        super(TECEBlockEntities.INFUSION_PROVIDER.get(), pos, state);
         getMainNode().setIdlePowerUsage(IDLE_POWER);
     }
 

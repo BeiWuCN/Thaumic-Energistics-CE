@@ -19,8 +19,8 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
-import thaumicenergistics_ce.registry.ModBlocks;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEBlocks;
+import thaumicenergistics_ce.registry.TECEItems;
 
 public final class OccultMonitorRemovalChecks {
     private OccultMonitorRemovalChecks() {}
@@ -44,7 +44,7 @@ public final class OccultMonitorRemovalChecks {
             }
         };
         NeoForge.EVENT_BUS.addListener(listener);
-        level.setBlockAndUpdate(pos, ModBlocks.OCCULT_MONITOR.get().defaultBlockState());
+        level.setBlockAndUpdate(pos, TECEBlocks.OCCULT_MONITOR.get().defaultBlockState());
         var monitor = (BlockEntityOccultMonitor) level.getBlockEntity(pos);
         require(monitor != null, "Monitor block entity missing");
         if (withBook) {
@@ -72,7 +72,7 @@ public final class OccultMonitorRemovalChecks {
                 if (item.getItem().is(TTItems.THAUMONOMICON.get())) {
                     books += item.getItem().getCount();
                 }
-                if (item.getItem().is(ModItems.OCCULT_MONITOR.get())) {
+                if (item.getItem().is(TECEItems.OCCULT_MONITOR.get())) {
                     blocks += item.getItem().getCount();
                 }
             }

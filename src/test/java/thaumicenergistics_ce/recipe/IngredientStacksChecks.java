@@ -36,6 +36,8 @@ public final class IngredientStacksChecks {
             TerminalAuraConfigChecks.run();
             TerminalChunkAuraChecks.run(event.getServer());
             ArcaneCardSyncChecks.run(event.getServer());
+            PatternProviderEssentiaChecks.run(event.getServer());
+            PatternProviderAddonChecks.run(event.getServer());
             VisCardBindingChecks.run(event.getServer());
             DirectVisNodeChecks.run(event.getServer());
             QuantumTerminalChecks.run(event.getServer());

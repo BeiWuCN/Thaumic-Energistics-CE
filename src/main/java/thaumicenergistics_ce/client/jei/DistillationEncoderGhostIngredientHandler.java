@@ -10,15 +10,12 @@ import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
 import thaumicenergistics_ce.menu.MenuDistillationEncoder;
 import thaumicenergistics_ce.network.EncoderActionPayload;
-import thaumicenergistics_ce.util.ThELog;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 public class DistillationEncoderGhostIngredientHandler
         implements IGhostIngredientHandler<ScreenDistillationEncoder> {
 
     private static final int SLOT_SIZE = 16;
-
-    static final boolean TRACE = System.getenv("THAUMICENERGISTICS_ENCODER_TRACE") != null;
 
     @Override
     public <I> List<Target<I>> getTargetsTyped(
@@ -34,10 +31,7 @@ public class DistillationEncoderGhostIngredientHandler
                 && menu.slots.get(MenuDistillationEncoder.MENU_BLANK).getItem().isEmpty()) {
             targets.add(new BlankTarget<>(menu, screen.getGuiLeft(), screen.getGuiTop()));
         }
-        if (TRACE && doStart) {
-            ThELog.LOG.info(
-                    "[encoder] JEI is starting a drag; offering one target at {}", targets.get(0).getArea());
-        }
+
         return targets;
     }
 
@@ -57,9 +51,7 @@ public class DistillationEncoderGhostIngredientHandler
             if (ingredient instanceof ItemStack stack && AEItems.BLANK_PATTERN.is(stack)) {
                 ClientPacketDistributor.sendToServer(new EncoderActionPayload(
                         menu.containerId, EncoderActionPayload.ACTION_INSERT_BLANK, 0));
-                if (TRACE) {
-                    ThELog.LOG.info("[encoder] JEI dropped a blank pattern on the blank well");
-                }
+
             }
         }
     }
@@ -75,10 +67,7 @@ public class DistillationEncoderGhostIngredientHandler
         @Override
         public void accept(I ingredient) {
             if (ingredient instanceof ItemStack stack && !stack.isEmpty()) {
-                if (TRACE) {
-                    ThELog.LOG.info(
-                            "[encoder] JEI dropped {} into the source well", stack.getHoverName().getString());
-                }
+
                 menu.requestSourceTemplate(stack.copyWithCount(1));
             }
         }

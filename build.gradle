@@ -253,6 +253,9 @@ if (thaumaturgeJars.isEmpty()) {
 }
 
 dependencies {
+    if (project.hasProperty('patternProviderCompatibility')) {
+        runtimeOnly fileTree(dir: 'build/compat-test-mods', include: '*.jar')
+    }
     compileOnly "org.jspecify:jspecify:1.0.0"
 
     // ---- Mod dependencies -------------------------------------------------

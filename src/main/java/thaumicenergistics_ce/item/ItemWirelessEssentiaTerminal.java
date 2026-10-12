@@ -9,7 +9,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.TECEMenuTypes;
 
 public class ItemWirelessEssentiaTerminal extends WirelessTerminalItem {
 
@@ -27,7 +27,7 @@ public class ItemWirelessEssentiaTerminal extends WirelessTerminalItem {
 
     @Override
     public MenuType<?> getMenuType() {
-        return ModMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get();
+        return TECEMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get();
     }
 
     @Override

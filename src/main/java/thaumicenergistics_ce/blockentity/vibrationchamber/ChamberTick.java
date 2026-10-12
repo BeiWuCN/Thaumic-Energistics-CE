@@ -23,7 +23,6 @@ final class ChamberTick {
         if (machine.tank().hasRoom() && !machine.burn().paused()) {
             machine.tank().pull();
         }
-        machine.trace().log();
 
         IGrid grid = node.getGrid();
         if (grid == null) {

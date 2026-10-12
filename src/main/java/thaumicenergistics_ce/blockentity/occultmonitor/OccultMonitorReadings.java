@@ -3,12 +3,9 @@ package thaumicenergistics_ce.blockentity.occultmonitor;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import java.util.List;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor.EssentiaLine;
 import thaumicenergistics_ce.recipe.infusion.InfusionRisk;
-import thaumicenergistics_ce.util.ThELog;
 
 final class OccultMonitorReadings {
 
@@ -68,13 +65,7 @@ final class OccultMonitorReadings {
     }
 
     void apply(ValueInput input) {
-        if (OccultMonitorTrace.TRACE && monitor.getLevel() != null && monitor.getLevel().isClientSide()) {
-            ThELog.LOG.info(
-                    "[bubble] tag at {} reporting={} tier={} instability={}",
-                    monitor.getBlockPos(), input.getBooleanOr(OccultMonitorSync.TAG_REPORTING, false),
-                    input.getIntOr(OccultMonitorSync.TAG_TIER, 0),
-                    input.getIntOr(OccultMonitorSync.TAG_INSTABILITY, 0));
-        }
+
         bubble.read(input);
     }
 }

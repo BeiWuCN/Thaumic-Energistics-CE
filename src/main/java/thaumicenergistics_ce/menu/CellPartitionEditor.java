@@ -98,15 +98,11 @@ final class CellPartitionEditor {
         partition.getDelegate().setStack(well, new GenericStack(key, 1));
         workbench.setChanged();
         menu.broadcastChanges();
-        ThELog.LOG.info(
-                "[cell-partition] wrote {} to well {}; it now holds {}",
-                key, well, keyInWell(well));
     }
 
     private void clearWell(int well) {
         partition.getDelegate().setStack(well, null);
         menu.workbench.setChanged();
         menu.broadcastChanges();
-        ThELog.LOG.info("[cell-partition] took the mark out of well {}; it now holds {}", well, keyInWell(well));
     }
 }

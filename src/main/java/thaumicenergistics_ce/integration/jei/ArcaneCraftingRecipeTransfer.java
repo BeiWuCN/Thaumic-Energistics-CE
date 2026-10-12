@@ -31,12 +31,10 @@ public class ArcaneCraftingRecipeTransfer
                 IRecipeTransferHandler<MenuArcaneCraftingTerminal, RecipeHolder<?>> {
 
     private final IRecipeTransferHandlerHelper helper;
-    private final MenuType<MenuArcaneCraftingTerminal> menuType;
 
     public ArcaneCraftingRecipeTransfer(
-            IRecipeTransferHandlerHelper helper, MenuType<MenuArcaneCraftingTerminal> menuType) {
+            IRecipeTransferHandlerHelper helper) {
         this.helper = helper;
-        this.menuType = menuType;
     }
 
 
@@ -47,7 +45,8 @@ public class ArcaneCraftingRecipeTransfer
 
     @Override
     public Optional<MenuType<MenuArcaneCraftingTerminal>> getMenuType() {
-        return Optional.of(menuType);
+        // JEI keys handlers by menu class, which is shared by both terminal types.
+        return Optional.empty();
     }
 
     @Override

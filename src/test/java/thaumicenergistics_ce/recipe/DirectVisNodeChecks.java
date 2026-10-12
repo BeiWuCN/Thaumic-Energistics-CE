@@ -12,7 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 import thaumicenergistics_ce.part.PartVisInterface;
 
 final class DirectVisNodeChecks {
@@ -33,7 +33,7 @@ final class DirectVisNodeChecks {
             require(nodePos.equals(TcAura.energizedNodeInFront(level, hostPos, Direction.EAST)), "Front node not found");
             require(TcAura.energizedNodeInFront(level, hostPos, Direction.WEST) == null, "Wrong face accepted");
             var host = (IPartHost) level.getBlockEntity(hostPos);
-            var part = (PartVisInterface) host.addPart(ModItems.VIS_INTERFACE.get(), Direction.EAST, FakePlayerFactory.getMinecraft(level));
+            var part = (PartVisInterface) host.addPart(TECEItems.VIS_INTERFACE.get(), Direction.EAST, FakePlayerFactory.getMinecraft(level));
             require(nodePos.equals(part.permitPosition()), "Interface did not resolve direct node");
             require(TcAura.nodeHolds(level, nodePos, TTAspects.IGNIS), "Node palette not available");
             node.setEnergized(false);

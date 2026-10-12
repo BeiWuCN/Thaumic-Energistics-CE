@@ -14,8 +14,8 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.util.layout.GuiLayout;
-import thaumicenergistics_ce.registry.ModItems;
-import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.TECEItems;
+import thaumicenergistics_ce.registry.TECEMenuTypes;
 import thaumicenergistics_ce.inventory.GearSlots;
 import thaumicenergistics_ce.menu.slot.PreviewSlot;
 import thaumicenergistics_ce.menu.slot.ReadOnlySlot;
@@ -84,7 +84,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
             Inventory playerInventory,
             @Nullable BlockEntityArcaneAssembler assembler,
             Container machine) {
-        super(ModMenuTypes.ARCANE_ASSEMBLER.get(), containerId);
+        super(TECEMenuTypes.ARCANE_ASSEMBLER.get(), containerId);
         this.assembler = assembler;
         this.playerInventory = playerInventory;
         this.mirror = new AssemblerPreviewMirror(this);
@@ -113,7 +113,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         addSlot(new Slot(machine, BlockEntityArcaneAssembler.CORE_SLOT, core.x(), core.y()) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return stack.is(ModItems.KNOWLEDGE_CORE.get());
+                return stack.is(TECEItems.KNOWLEDGE_CORE.get());
             }
 
             @Override
@@ -218,10 +218,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         return readout.getProgress();
     }
 
-    public String progressTrace() {
-        return readout.progressTrace();
-    }
-
     public int getGearDiscount() {
         return readout.getGearDiscount();
     }
@@ -238,7 +234,7 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
         if (index < PLAYER_SLOTS) {
             boolean merged = false;
 
-            if (stack.is(ModItems.KNOWLEDGE_CORE.get())) {
+            if (stack.is(TECEItems.KNOWLEDGE_CORE.get())) {
                 merged = moveItemStackTo(stack, IDX_CORE, IDX_CORE + 1, false);
             }
             if (!merged && AEItems.SPEED_CARD.is(stack)) {

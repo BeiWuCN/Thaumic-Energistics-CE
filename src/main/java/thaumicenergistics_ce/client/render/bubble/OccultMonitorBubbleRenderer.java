@@ -19,7 +19,6 @@ import thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
 import thaumicenergistics_ce.client.render.bubble.BubbleCells.Cell;
 import thaumicenergistics_ce.client.render.bubble.BubbleCells.ChipCell;
 import thaumicenergistics_ce.client.render.bubble.BubbleCells.TextCell;
-import thaumicenergistics_ce.util.ThELog;
 
 public class OccultMonitorBubbleRenderer
         implements BlockEntityRenderer<BlockEntityOccultMonitor, OccultMonitorBubbleRenderState> {
@@ -34,11 +33,6 @@ public class OccultMonitorBubbleRenderer
     private static final int CULL_RANGE = 8;
 
     private static final int SEE_THROUGH_TEXT = 553648127;
-
-    private static final boolean TRACE =
-            "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_MONITOR_TRACE"));
-
-    private static long lastTrace;
 
     private final BubbleCells cells = new BubbleCells();
 
@@ -69,17 +63,6 @@ public class OccultMonitorBubbleRenderer
         BlockEntityRenderer.super.extractRenderState(monitor, state, partialTick, cameraPosition, breakProgress);
         state.rows = null;
 
-        if (TRACE) {
-            long now = System.currentTimeMillis();
-            if (now - lastTrace > 2000) {
-                lastTrace = now;
-                ThELog.LOG.info(
-                        "[bubble] at {} reporting={} tier={} instability={} crafting={} essentia={} light={}",
-                        monitor.getBlockPos(), monitor.bubbleReporting(), monitor.bubbleTier(),
-                        monitor.bubbleInstability(), monitor.bubbleCrafting(), monitor.bubbleEssentia(),
-                        Integer.toHexString(state.lightCoords));
-            }
-        }
         if (!monitor.bubbleReporting()) {
             return;
         }

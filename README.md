@@ -4,7 +4,7 @@ Thaumic Energistics: CE（神秘能源 CE）将 Thaumaturge 的源质与魔力�
 
 项目延续原版 Thaumic Energistics 的玩法，并基于 Thaumaturge 适配新的 Minecraft 版本。当前分支面向 **Minecraft 26.1.2 / NeoForge**；1.21.1 版本请查看 [1.21.1 分支](https://github.com/BeiWuCN/Thaumic-Energistics-CE/tree/1.21.1)。
 
-[English](README.en.md) · [下载](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) · [更新记录](CHANGELOG-2.7.4.4.md) · [问题反馈](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues)
+[English](README.en.md) · [下载](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) · [更新记录](CHANGELOG-2.7.4.5.md) · [问题反馈](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues)
 
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/26.1.2/src/main/resources/icon.png" alt="Thaumic Energistics: CE" width="420">
 

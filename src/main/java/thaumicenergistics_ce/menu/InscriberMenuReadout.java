@@ -3,7 +3,7 @@ package thaumicenergistics_ce.menu;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ContainerData;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 
 final class InscriberMenuReadout {
 
@@ -14,7 +14,7 @@ final class InscriberMenuReadout {
     InscriberMenuReadout(MenuKnowledgeInscriber menu, Inventory playerInventory) {
         this.menu = menu;
         this.data = new KnowledgeInscriberReadings(menu.inscriber, playerInventory.player, () ->
-                menu.slotStack(MenuKnowledgeInscriber.IDX_CORE).is(ModItems.KNOWLEDGE_CORE.get()) ? 1 : 0);
+                menu.slotStack(MenuKnowledgeInscriber.IDX_CORE).is(TECEItems.KNOWLEDGE_CORE.get()) ? 1 : 0);
     }
 
     ContainerData data() {
@@ -29,7 +29,7 @@ final class InscriberMenuReadout {
         if (menu.inscriber == null) {
             return hasCore();
         }
-        return menu.slotStack(MenuKnowledgeInscriber.IDX_CORE).is(ModItems.KNOWLEDGE_CORE.get());
+        return menu.slotStack(MenuKnowledgeInscriber.IDX_CORE).is(TECEItems.KNOWLEDGE_CORE.get());
     }
 
     int buttonState() {

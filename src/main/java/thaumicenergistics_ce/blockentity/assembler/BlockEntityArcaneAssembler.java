@@ -27,7 +27,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -40,7 +39,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.registry.MachineMenus;
-import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.TECEBlockEntities;
 
 public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
         implements IInWorldGridNodeHost, IActionHost, IGridTickable, ICraftingProvider, ICraftingMachine {
@@ -79,7 +78,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     AssemblerCraftRunner craftRunner() { return craftParts.runner(); }
 
     public BlockEntityArcaneAssembler(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.ARCANE_ASSEMBLER.get(), pos, state);
+        super(TECEBlockEntities.ARCANE_ASSEMBLER.get(), pos, state);
 
         this.displaySync = new AssemblerDisplaySync(this);
         this.craft = new AssemblerCraftState();
@@ -114,7 +113,7 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
     public boolean isActive() { return active; }
     public int getBufferedVis() { return vis.bufferedVis(); }
     public int getAspectVis(int index) { return vis.aspectVis(index); }
-    public String aspectVisTrace() { return vis.aspectVisTrace(); }
+
     public float getAuraAround() { return vis.auraAround(); }
     public int getAuraCapacity() { return vis.auraCapacity(); }
     public int getCraftTicks() { return craft.craftTicks(); }

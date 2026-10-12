@@ -7,7 +7,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
-import thaumicenergistics_ce.util.ThELog;
 
 final class InscriberGridState {
 
@@ -73,14 +72,8 @@ final class InscriberGridState {
     void loadPattern(int index) {
         List<ItemStack> cells = storedGrid(index);
         if (cells == null) {
-            ThELog.LOG.info("[inscriber] pattern well {} holds nothing to load", index);
             return;
         }
-        ThELog.LOG.info(
-                "[inscriber] loading pattern well {} -> {} ({} cells)",
-                index,
-                cells.isEmpty() ? "empty grid" : cells.getFirst(),
-                cells.size());
         menu.fillGridFromRecipe(cells);
     }
 

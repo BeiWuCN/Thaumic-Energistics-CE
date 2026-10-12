@@ -1,7 +1,6 @@
 package thaumicenergistics_ce.menu;
 
 import appeng.api.storage.ITerminalHost;
-import appeng.menu.me.common.MEStorageMenu;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
 

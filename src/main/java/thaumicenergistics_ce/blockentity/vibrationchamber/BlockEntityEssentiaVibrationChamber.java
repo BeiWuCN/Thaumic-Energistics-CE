@@ -15,8 +15,6 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -28,7 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.registry.MachineMenus;
-import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.TECEBlockEntities;
 import thaumicenergistics_ce.util.ThETransaction;
 
 public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
@@ -60,17 +58,15 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     private final ChamberEssentiaTank tank = new ChamberEssentiaTank(this);
     private final ChamberEnergyOutput energy = new ChamberEnergyOutput(this);
     private final ChamberBurn burn = new ChamberBurn(this, tank, energy);
-    private final ChamberTrace trace = new ChamberTrace(this, tank, energy, burn);
 
     ChamberEssentiaTank tank() { return tank; }
     ChamberEnergyOutput energy() { return energy; }
     ChamberBurn burn() { return burn; }
-    ChamberTrace trace() { return trace; }
 
     void markChanged() { setChanged(); markForClientUpdate(); }
 
     public BlockEntityEssentiaVibrationChamber(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(), pos, state);
+        super(TECEBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(), pos, state);
         getMainNode().setIdlePowerUsage(0.0).setFlags().addService(IGridTickable.class, this);
     }
 

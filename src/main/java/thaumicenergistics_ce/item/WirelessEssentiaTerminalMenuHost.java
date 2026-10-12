@@ -1,7 +1,6 @@
 package thaumicenergistics_ce.item;
 
 import appeng.api.util.KeyTypeSelection;
-import appeng.helpers.WirelessTerminalMenuHost;
 import appeng.menu.ISubMenu;
 import appeng.menu.locator.ItemMenuHostLocator;
 import java.util.function.BiConsumer;

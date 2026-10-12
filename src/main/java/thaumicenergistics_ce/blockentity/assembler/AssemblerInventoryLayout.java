@@ -3,7 +3,7 @@ package thaumicenergistics_ce.blockentity.assembler;
 import appeng.core.definitions.AEItems;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 import thaumicenergistics_ce.inventory.GearSlots;
 
 final class AssemblerInventoryLayout extends SimpleContainer {
@@ -24,7 +24,7 @@ final class AssemblerInventoryLayout extends SimpleContainer {
             return false;
         }
         return switch (slot) {
-            case BlockEntityArcaneAssembler.CORE_SLOT -> stack.is(ModItems.KNOWLEDGE_CORE.get());
+            case BlockEntityArcaneAssembler.CORE_SLOT -> stack.is(TECEItems.KNOWLEDGE_CORE.get());
             default -> slot >= BlockEntityArcaneAssembler.GEAR_SLOT_START
                     && GearSlots.accepts(slot - BlockEntityArcaneAssembler.GEAR_SLOT_START, stack);
         };

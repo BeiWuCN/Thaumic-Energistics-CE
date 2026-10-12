@@ -32,29 +32,11 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.compat.thaumaturge.TcActionBar;
 import thaumicenergistics_ce.compat.thaumaturge.TcWand;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 import thaumicenergistics_ce.item.ItemFocusAEWrench;
-import thaumicenergistics_ce.util.ThELog;
 
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class AEWrenchActions {
-
-    private static final boolean DEBUG = Boolean.getBoolean("thaumicenergistics.aewrench.debug");
-
-    private static boolean debugEnabled() {
-        return DEBUG;
-    }
-
-    private static void debug(String message, Object... args) {
-        if (DEBUG) {
-            ThELog.LOG.info("[aewrench] " + message, args);
-        }
-    }
-
-    private static boolean reject(String reason) {
-        debug("no match: {}", reason);
-        return false;
-    }
 
     private static final double REACH = 24.0;
 
@@ -64,28 +46,28 @@ public final class AEWrenchActions {
 
     public static boolean matches(Player player, Level level, BlockPos pos) {
         if (!player.isSecondaryUseActive()) {
-            return reject("not sneaking");
+            return false;
         }
         ItemStack main = player.getMainHandItem();
         if (!main.isEmpty() && !holdsFocus(main)) {
-            return reject("main hand holds " + main.getItem());
+            return false;
         }
         if (findWand(player) == null) {
-            return reject("no wand carrying the focus in either hand");
+            return false;
         }
         BlockHitResult lookedAt = lookedAt(player, level);
         if (lookedAt == null) {
-            return reject("nothing in reach");
+            return false;
         }
         if (!lookedAt.getBlockPos().equals(pos)) {
-            return reject("cursor is on " + lookedAt.getBlockPos() + " but the event names " + pos);
+            return false;
         }
-        debug("matched at {}", pos);
+
         return true;
     }
 
     public static boolean holdsFocus(ItemStack stack) {
-        return TcWand.holdsFocus(stack, ModItems.FOCUS_AEWRENCH.get());
+        return TcWand.holdsFocus(stack, TECEItems.FOCUS_AEWRENCH.get());
     }
 
     public static @Nullable BlockHitResult lookedAt(Player player, Level level) {
@@ -138,10 +120,10 @@ public final class AEWrenchActions {
         try {
             if (level.getBlockEntity(pos) instanceof IPartHost host) {
                 changed = AEWrench.rotateSelectedPart(player, level, host, localPosOf(hit, pos));
-                debug("turned part at {} -> {}", pos, changed);
+
             } else {
                 changed = rotateBlock(level, pos, hit.getDirection());
-                debug("turned block at {} -> {}", pos, changed);
+
             }
         } finally {
             running = false;
@@ -161,11 +143,11 @@ public final class AEWrenchActions {
         }
         ItemStack wand = findWand(player);
         if (wand == null) {
-            debug("wouldTurn: no wand");
+
             return false;
         }
         if (!pay(wand, player, ItemFocusAEWrench.visCost(), false)) {
-            debug("wouldTurn: cannot pay {}", ItemFocusAEWrench.visCost());
+
             return false;
         }
 
@@ -176,7 +158,7 @@ public final class AEWrenchActions {
         } else {
             yes = turned(level, pos, hit.getDirection()) != null;
         }
-        debug("wouldTurn at {} -> {}", pos, yes);
+
         return yes;
     }
 
@@ -288,12 +270,7 @@ public final class AEWrenchActions {
     @SubscribeEvent
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         Player probe = event.getEntity();
-        if (debugEnabled() && event.getAction() != PlayerInteractEvent.LeftClickBlock.Action.CLIENT_HOLD) {
-            debug("event: side={} action={} canceled={} pos={} sneak={} main={} off={}",
-                    event.getLevel().isClientSide() ? "client" : "server", event.getAction(), event.isCanceled(),
-                    event.getPos(), probe.isSecondaryUseActive(), probe.getMainHandItem().getItem(),
-                    probe.getOffhandItem().getItem());
-        }
+
         if (event.getAction() != PlayerInteractEvent.LeftClickBlock.Action.START) {
             return;
         }

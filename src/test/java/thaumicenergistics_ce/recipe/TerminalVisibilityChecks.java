@@ -22,8 +22,8 @@ import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import thaumicenergistics_ce.blockentity.gachabox.GachaOdds;
 import thaumicenergistics_ce.config.ThEConfig;
-import thaumicenergistics_ce.registry.ModItems;
-import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.TECEItems;
+import thaumicenergistics_ce.registry.TECEMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.menu.MenuEssentiaTerminal;
@@ -36,7 +36,7 @@ public final class TerminalVisibilityChecks {
     public static void run(MinecraftServer server) {
         var inventory = FakePlayerFactory.getMinecraft(server.overworld()).getInventory();
         var key = AEssentiaKey.of(Identifier.parse("thaumaturge:ignis"));
-        var host = new PartEssentiaTerminal(ModItems.ESSENTIA_TERMINAL.get());
+        var host = new PartEssentiaTerminal(TECEItems.ESSENTIA_TERMINAL.get());
         boolean originalArcane = ThEConfig.ARCANE_ESSENTIA_ACCESS.get();
         boolean original = ThEConfig.RESTRICT_ESSENTIA_VISIBILITY.get();
         try {
@@ -44,17 +44,17 @@ public final class TerminalVisibilityChecks {
             var ordinary = new MEStorageMenu(MEStorageMenu.TYPE, 0, inventory, host);
             require(!ordinary.isKeyVisible(key), "Ordinary ME terminal exposes essentia");
             require(ordinary.isKeyVisible(AEItemKey.of(Items.STONE)), "Ordinary items were hidden");
-            for (var type : java.util.List.of(ModMenuTypes.ESSENTIA_TERMINAL.get(),
-                    ModMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get())) {
+            for (var type : java.util.List.of(TECEMenuTypes.ESSENTIA_TERMINAL.get(),
+                    TECEMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get())) {
                 require(new MenuEssentiaTerminal(type, 0, inventory, host).isKeyVisible(key),
                         "Dedicated essentia terminal hides essentia");
             }
-            for (var type : java.util.List.of(ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get(),
-                    ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get())) {
-                var part = new PartArcaneCraftingTerminal(ModItems.ARCANE_CRAFTING_TERMINAL.get());
+            for (var type : java.util.List.of(TECEMenuTypes.ARCANE_CRAFTING_TERMINAL.get(),
+                    TECEMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get())) {
+                var part = new PartArcaneCraftingTerminal(TECEItems.ARCANE_CRAFTING_TERMINAL.get());
                 var arcane = new MenuArcaneCraftingTerminal(type, 0, inventory, part);
                 require(!arcane.isKeyVisible(key), "Arcane terminal without card exposes essentia");
-                part.getUpgrades().setItemDirect(0, new ItemStack(ModItems.ESSENTIA_ACCESS_CARD.get()));
+                part.getUpgrades().setItemDirect(0, new ItemStack(TECEItems.ESSENTIA_ACCESS_CARD.get()));
                 ThEConfig.ARCANE_ESSENTIA_ACCESS.set(false);
                 arcane.essentiaAccessEnabled = false;
                 arcane.updateUpgradeSlotVisibility();
@@ -105,7 +105,7 @@ public final class TerminalVisibilityChecks {
             var stock = new KeyCounter();
             stock.add(key, 32);
             stock.add(AEItemKey.of(Items.STONE), 4);
-            var part = new PartArcaneCraftingTerminal(ModItems.ARCANE_CRAFTING_TERMINAL.get()) {
+            var part = new PartArcaneCraftingTerminal(TECEItems.ARCANE_CRAFTING_TERMINAL.get()) {
                 @Override
                 public MEStorage getInventory() {
                     return new MEStorage() {
@@ -122,7 +122,7 @@ public final class TerminalVisibilityChecks {
             long stoneSerial = initial.stream().filter(e -> AEItemKey.of(Items.STONE).equals(e.getWhat()))
                     .mapToLong(e -> e.getSerial()).findFirst().orElseThrow();
             listener.updates.clear();
-            part.getUpgrades().setItemDirect(0, new ItemStack(ModItems.ESSENTIA_ACCESS_CARD.get()));
+            part.getUpgrades().setItemDirect(0, new ItemStack(TECEItems.ESSENTIA_ACCESS_CARD.get()));
             menu.broadcastChanges();
             var revealed = listener.updates.stream().filter(p -> p.fullUpdate())
                     .flatMap(p -> p.getActualEntries().stream()).toList();
@@ -141,7 +141,7 @@ public final class TerminalVisibilityChecks {
             listener.updates.clear();
             stock.clear();
             ThEConfig.ARCANE_ESSENTIA_ACCESS.set(true);
-            part.getUpgrades().setItemDirect(0, new ItemStack(ModItems.ESSENTIA_ACCESS_CARD.get()));
+            part.getUpgrades().setItemDirect(0, new ItemStack(TECEItems.ESSENTIA_ACCESS_CARD.get()));
             menu.broadcastChanges();
             require(listener.updates.stream().anyMatch(p -> p.fullUpdate() && p.getActualEntries().isEmpty()),
                     "Empty inventory did not send a clearing full update");

@@ -15,16 +15,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.compat.thaumaturge.TcActionBar;
-import thaumicenergistics_ce.compat.thaumaturge.TcWand;
-import thaumicenergistics_ce.registry.ModItems;
-import thaumicenergistics_ce.item.ItemFocusAEWrench;
 
 public final class FocusEffectAEWrench extends AbstractEffectBehavior {
 

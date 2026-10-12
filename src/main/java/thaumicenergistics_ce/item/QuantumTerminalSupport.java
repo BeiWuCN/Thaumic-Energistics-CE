@@ -11,8 +11,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.neoforged.fml.ModList;
-import thaumicenergistics_ce.registry.ModDataComponents;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEDataComponents;
+import thaumicenergistics_ce.registry.TECEItems;
 
 public final class QuantumTerminalSupport {
     private QuantumTerminalSupport() {}
@@ -27,8 +27,8 @@ public final class QuantumTerminalSupport {
 
     public static void registerUpgrades() {
         if (!enabled() || card() == null || card() == Items.AIR) return;
-        Upgrades.add(card(), ModItems.WIRELESS_ESSENTIA_TERMINAL.get(), 1);
-        Upgrades.add(card(), ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(), 1);
+        Upgrades.add(card(), TECEItems.WIRELESS_ESSENTIA_TERMINAL.get(), 1);
+        Upgrades.add(card(), TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(), 1);
     }
 
     public static IUpgradeInventory upgrades(ItemStack stack, appeng.api.upgrades.ItemUpgradesChanged changed) {
@@ -37,7 +37,7 @@ public final class QuantumTerminalSupport {
 
     public static ItemStack singularity(ItemStack stack) {
         var items = net.minecraft.core.NonNullList.withSize(1, ItemStack.EMPTY);
-        stack.getOrDefault(ModDataComponents.QUANTUM_SINGULARITY.get(), ItemContainerContents.EMPTY).copyInto(items);
+        stack.getOrDefault(TECEDataComponents.QUANTUM_SINGULARITY.get(), ItemContainerContents.EMPTY).copyInto(items);
         return items.getFirst();
     }
 

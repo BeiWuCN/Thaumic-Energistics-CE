@@ -11,7 +11,7 @@ import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 
 final class AssemblerGridNode {
 
@@ -19,7 +19,7 @@ final class AssemblerGridNode {
 
     static IManagedGridNode create(BlockEntityArcaneAssembler machine) {
         return GridHelper.createManagedNode(machine, AssemblerNodeListener.INSTANCE)
-                .setVisualRepresentation(ModItems.ARCANE_ASSEMBLER.get())
+                .setVisualRepresentation(TECEItems.ARCANE_ASSEMBLER.get())
                 .setInWorldNode(true)
                 .setTagName("proxy")
                 .setFlags(GridFlags.REQUIRE_CHANNEL)
@@ -31,7 +31,7 @@ final class AssemblerGridNode {
 
     static PatternContainerGroup machineInfo() {
         return new PatternContainerGroup(
-                AEItemKey.of(ModItems.ARCANE_ASSEMBLER.get()),
+                AEItemKey.of(TECEItems.ARCANE_ASSEMBLER.get()),
                 Component.translatable("block.thaumicenergistics_ce.arcane_assembler"),
                 List.of());
     }

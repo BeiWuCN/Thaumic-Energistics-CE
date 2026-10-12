@@ -14,7 +14,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 
 public final class TerminalAuraPayment {
 
@@ -54,7 +54,10 @@ public final class TerminalAuraPayment {
             return 0;
         }
         TcAura.drainVis(level, where, (float) offered / CENTIVIS_PER_VIS, transaction);
-        energy.extractAEPower(cost, Actionable.MODULATE, PowerMultiplier.CONFIG);
+        double committedCost = cost;
+        new net.neoforged.neoforge.transfer.transaction.RootCommitJournal(() ->
+                energy.extractAEPower(committedCost, Actionable.MODULATE, PowerMultiplier.CONFIG))
+                .updateSnapshots(transaction);
         return offered;
     }
 
@@ -63,7 +66,7 @@ public final class TerminalAuraPayment {
         if (upgrades != null) {
             for (int i = 0; i < upgrades.size(); i++) {
                 var card = upgrades.getStackInSlot(i);
-                if (card.is(ModItems.VIS_CONNECTION_CARD.get())) {
+                if (card.is(TECEItems.VIS_CONNECTION_CARD.get())) {
                     return card;
                 }
             }
@@ -127,12 +130,12 @@ public final class TerminalAuraPayment {
             return false;
         }
         IUpgradeInventory upgrades = upgradeable.getUpgrades(terminal);
-        return upgrades != null && upgrades.isInstalled(ModItems.VIS_CONNECTION_CARD.get());
+        return upgrades != null && upgrades.isInstalled(TECEItems.VIS_CONNECTION_CARD.get());
     }
 
     public static boolean visConnectionInstalled(IUpgradeableObject machine) {
         IUpgradeInventory upgrades = machine.getUpgrades();
-        return upgrades != null && upgrades.isInstalled(ModItems.VIS_CONNECTION_CARD.get());
+        return upgrades != null && upgrades.isInstalled(TECEItems.VIS_CONNECTION_CARD.get());
     }
 
     public static int payAura(Level level, BlockPos where, int needCentivis, TransactionContext transaction) {

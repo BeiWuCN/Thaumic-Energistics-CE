@@ -19,14 +19,14 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 import thaumicenergistics_ce.item.QuantumTerminalSupport;
 import thaumicenergistics_ce.item.QuantumWirelessTerminalMenuHost;
 
 final class QuantumTerminalChecks {
     static void run(MinecraftServer server) {
         if (!QuantumTerminalSupport.enabled()) {
-            for (var item : List.of(ModItems.WIRELESS_ESSENTIA_TERMINAL.get(), ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get())) {
+            for (var item : List.of(TECEItems.WIRELESS_ESSENTIA_TERMINAL.get(), TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get())) {
                 require(item.getUpgrades(new ItemStack(item)).size() == 2, "Original slot count changed without WTLib");
             }
             System.out.println("[quantum-terminal] PASS: optional dependency absent, original upgrade slots retained");
@@ -78,7 +78,7 @@ final class QuantumTerminalChecks {
         });
         try {
             Locatables.quantumNetworkBridges().register(level, -frequency, (IActionHost) () -> node);
-            for (var item : List.of(ModItems.WIRELESS_ESSENTIA_TERMINAL.get(), ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get())) {
+            for (var item : List.of(TECEItems.WIRELESS_ESSENTIA_TERMINAL.get(), TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get())) {
                 var stack = new ItemStack(item);
                 player.setItemInHand(InteractionHand.MAIN_HAND, stack);
                 item.injectAEPower(stack, 1000, Actionable.MODULATE);
@@ -101,10 +101,10 @@ final class QuantumTerminalChecks {
                 double spent = 1000 - item.getAECurrentPower(stack);
                 require(spent > 0 && Math.abs(spent / 22.5 - Math.rint(spent / 22.5)) < 0.001,
                         "Quantum idle cost differs from WTLib: " + spent);
-                var type = item == ModItems.WIRELESS_ESSENTIA_TERMINAL.get()
-                        ? thaumicenergistics_ce.registry.ModMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get()
-                        : thaumicenergistics_ce.registry.ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get();
-                var menu = item == ModItems.WIRELESS_ESSENTIA_TERMINAL.get()
+                var type = item == TECEItems.WIRELESS_ESSENTIA_TERMINAL.get()
+                        ? thaumicenergistics_ce.registry.TECEMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get()
+                        : thaumicenergistics_ce.registry.TECEMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get();
+                var menu = item == TECEItems.WIRELESS_ESSENTIA_TERMINAL.get()
                         ? new thaumicenergistics_ce.menu.MenuEssentiaTerminal(type, 0, player.getInventory(), host)
                         : new thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal(type, 0, player.getInventory(), host);
                 var quantumSlot = menu.getSlots(thaumicenergistics_ce.menu.MenuEssentiaTerminalBase.QUANTUM_SINGULARITY).getFirst();
@@ -128,7 +128,9 @@ final class QuantumTerminalChecks {
                 }
                 require(menu.getSlots(thaumicenergistics_ce.menu.MenuEssentiaTerminalBase.QUANTUM_SINGULARITY).size() == 1,
                         "Singularity slot missing from terminal menu");
-                require(menu.getSlots(appeng.menu.SlotSemantics.UPGRADE).size() == 3, "Upgrade slot missing from menu");
+                require(menu.getSlots(appeng.menu.SlotSemantics.UPGRADE).size()
+                        == 3,
+                        "Upgrade/shared card slot missing from menu");
                 if (menu instanceof thaumicenergistics_ce.menu.MenuEssentiaTerminal
                         && !(menu instanceof thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal)) {
                     require(menu.getSlots(appeng.menu.SlotSemantics.UPGRADE).stream()
@@ -176,9 +178,9 @@ final class QuantumTerminalChecks {
         try {
             sourceLevel.setBlock(pos, appeng.core.definitions.AEBlocks.CABLE_BUS.block().defaultBlockState(), 3);
             var partHost = (appeng.api.parts.IPartHost) sourceLevel.getBlockEntity(pos);
-            var part = partHost.addPart(ModItems.ARCANE_CRAFTING_TERMINAL.get(), net.minecraft.core.Direction.NORTH,
+            var part = partHost.addPart(TECEItems.ARCANE_CRAFTING_TERMINAL.get(), net.minecraft.core.Direction.NORTH,
                     FakePlayerFactory.getMinecraft(sourceLevel));
-            var item = ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get();
+            var item = TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get();
             var stack = new ItemStack(item);
             item.pairWith(stack, sourceLevel, pos, net.minecraft.core.Direction.NORTH);
             player.setItemInHand(InteractionHand.MAIN_HAND, stack);

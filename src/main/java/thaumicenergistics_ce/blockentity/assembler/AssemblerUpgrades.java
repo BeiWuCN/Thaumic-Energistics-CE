@@ -5,7 +5,6 @@ import thaumicenergistics_ce.config.ThEConfig;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import com.leclowndu93150.thaumaturge.api.items.IVisDiscountGear;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
 public final class AssemblerUpgrades {

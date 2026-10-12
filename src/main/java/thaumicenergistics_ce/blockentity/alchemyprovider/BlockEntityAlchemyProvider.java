@@ -20,18 +20,14 @@ import appeng.blockentity.grid.AENetworkedBlockEntity;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
-import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.LongTag;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.TECEBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 
 public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
@@ -60,7 +56,7 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
             IActionSource.ofMachine(this);
 
     public BlockEntityAlchemyProvider(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.ALCHEMY_PROVIDER.get(), pos, state);
+        super(TECEBlockEntities.ALCHEMY_PROVIDER.get(), pos, state);
         links.updateIdlePower();
         getMainNode()
                 .addService(IStorageProvider.class, this)
@@ -140,7 +136,7 @@ public class BlockEntityAlchemyProvider extends AENetworkedBlockEntity
     }
 
 
-    public @Nullable String addLinkedReceiver(BlockPos receiver) {
+    public @Nullable Component addLinkedReceiver(BlockPos receiver) {
         return links.add(receiver);
     }
 

@@ -15,7 +15,6 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
 
 public final class AEssentiaKeyType extends AEKeyType {
 
@@ -26,7 +25,7 @@ public final class AEssentiaKeyType extends AEKeyType {
     public static final AEssentiaKeyType INSTANCE = new AEssentiaKeyType();
 
     private AEssentiaKeyType() {
-        super(ID, AEssentiaKey.class, Component.translatable("ae2.keytype.thaumicenergistics_ce.integration.ae2.essentia"));
+        super(ID, AEssentiaKey.class, Component.translatable("ae2.keytype.thaumicenergistics_ce.essentia"));
     }
 
     @Override

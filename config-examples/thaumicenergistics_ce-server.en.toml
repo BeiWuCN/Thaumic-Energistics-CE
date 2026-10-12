@@ -54,3 +54,9 @@
     #Payout chance for a 180-second round, from 0 to 1. Other round lengths use linear interpolation.
     #Range: 0.0 ~ 1.0
     chanceAt180Seconds = 0.45
+
+[patternProviders]
+    #Independent essentia support switches. Installed cards remain removable when disabled.
+    ae2Enabled = true
+    extendedAeEnabled = true
+    extendedAePlusEnabled = true

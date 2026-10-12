@@ -20,7 +20,6 @@ import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
-import thaumicenergistics_ce.util.ThELog;
 import thaumicenergistics_ce.util.ThETransaction;
 
 public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements IVisRelaySource {
@@ -47,8 +46,6 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
 
     private static final int UPSTREAM_POLL_INTERVAL = 20;
 
-    private static final boolean TRACE = "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_VIS_TRACE"));
-
     private @Nullable PartVisInterface upstreamEnd;
 
     private long nextUpstreamLookup;
@@ -59,7 +56,6 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         super(partItem);
         getMainNode().setIdlePowerUsage(1.0);
     }
-
 
     @Override
     public void getBoxes(IPartCollisionHelper bch) {
@@ -85,7 +81,6 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
     private BlockPos visPos() {
         return getBlockEntity().getBlockPos();
     }
-
 
     @Override
     public boolean isActive() {
@@ -156,11 +151,7 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
                 charged = snapshot;
             }
         }.record();
-        if (TRACE) {
-            ThELog.LOG.info(
-                    "[vis] supplied {} centivis of {} at {} for {} AE against the chain's aspects",
-                    offered, primal.identifier().getPath(), visPos(), paid);
-        }
+
         return offered;
     }
 

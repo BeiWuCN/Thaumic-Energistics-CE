@@ -5,12 +5,8 @@ import net.minecraft.world.level.storage.ValueInput;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.GenericStack;
 import java.util.List;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import thaumicenergistics_ce.blockentity.ClientSyncSend;
-import thaumicenergistics_ce.util.ThELog;
-import thaumicenergistics_ce.util.ThEItemTags;
 
 final class AssemblerDisplaySync {
 
@@ -73,8 +69,6 @@ final class AssemblerDisplaySync {
             owner.suppressNotify = false;
         }
         if (report && hadAnything) {
-            ThELog.LOG.info(
-                    "[assembler] at {} cleared a leftover craft display: nothing is crafting", owner.getBlockPos());
         }
     }
 

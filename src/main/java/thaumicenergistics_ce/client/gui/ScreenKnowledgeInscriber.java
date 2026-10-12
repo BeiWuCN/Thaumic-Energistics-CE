@@ -29,7 +29,6 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
     private static final int BUTTON_X = 109;
     private static final int BUTTON_Y = 90;
 
-    private static final int PLAYER_SLOTS = 36;
 
     private InscriberButton saveButton;
 

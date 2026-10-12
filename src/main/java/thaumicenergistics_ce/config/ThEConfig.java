@@ -9,6 +9,9 @@ public final class ThEConfig {
     public static final ModConfigSpec.BooleanValue QUICK_INSERT;
     public static final ModConfigSpec.BooleanValue ALLOW_AE_FOR_AURA_VIS;
     public static final ModConfigSpec.DoubleValue AE_PER_VIS;
+    public static final ModConfigSpec.BooleanValue PATTERN_PROVIDER_AE2;
+    public static final ModConfigSpec.BooleanValue PATTERN_PROVIDER_EXTENDED_AE;
+    public static final ModConfigSpec.BooleanValue PATTERN_PROVIDER_EXTENDED_AE_PLUS;
     public static final ModConfigSpec.BooleanValue BUS_ACCESS;
     public static final ModConfigSpec.DoubleValue BUS_POWER;
     public static final ModConfigSpec.BooleanValue GOLEM_TRANSFER;
@@ -41,6 +44,16 @@ public final class ThEConfig {
         AE_PER_VIS = b.comment("AE cost per point of environmental VIS drawn by wireless arcane terminals. Placed terminals draw chunk VIS directly.")
                 .translation("thaumicenergistics_ce.config.terminals.aePerVis")
                 .defineInRange("aePerVis", 1000.0, 0.01, 1000000.0);
+        b.pop().translation("thaumicenergistics_ce.config.patternProviders").push("patternProviders");
+        PATTERN_PROVIDER_AE2 = b.comment("Allow AE2 pattern providers to install Essentia Access Cards and send/receive essentia. Disabling preserves installed cards and buffered essentia; cards remain removable. Applies only to providers belonging to this mod.")
+                .translation("thaumicenergistics_ce.config.patternProviders.ae2Enabled")
+                .define("ae2Enabled", true);
+        PATTERN_PROVIDER_EXTENDED_AE = b.comment("Allow ExtendedAE pattern providers to install Essentia Access Cards and send/receive essentia. Disabling preserves installed cards and buffered essentia; cards remain removable. Applies only to providers belonging to this mod.")
+                .translation("thaumicenergistics_ce.config.patternProviders.extendedAeEnabled")
+                .define("extendedAeEnabled", true);
+        PATTERN_PROVIDER_EXTENDED_AE_PLUS = b.comment("Allow ExtendedAE Plus pattern providers to install Essentia Access Cards and send/receive essentia. Disabling preserves installed cards and buffered essentia; cards remain removable. Applies only to providers belonging to this mod.")
+                .translation("thaumicenergistics_ce.config.patternProviders.extendedAePlusEnabled")
+                .define("extendedAePlusEnabled", true);
         b.pop().translation("thaumicenergistics_ce.config.buses").push("buses");
         BUS_ACCESS = b.comment("Allow ME Import, Export and Storage Buses with an Essentia Access Card to access essentia.")
                 .translation("thaumicenergistics_ce.config.buses.essentiaAccessEnabled")

@@ -12,14 +12,12 @@ import static thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeIn
 
 import com.leclowndu93150.thaumaturge.api.recipe.ResearchGate;
 import java.util.List;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
-import thaumicenergistics_ce.util.ThELog;
 
 final class InscriberResolution {
 
@@ -75,9 +73,6 @@ final class InscriberResolution {
         refresh();
         ThEArcanePattern resolved = pattern();
         if (resolved == null) {
-            ThELog.LOG.info("[inscriber] save at {} found no recipe: status={} cells={}",
-                    inscriber.getBlockPos(), status,
-                    inventory.cells().stream().filter(s -> !s.isEmpty()).count());
             return lastResult = STATUS_NO_RECIPE;
         }
         HandlerKnowledgeCore core = core();
@@ -85,19 +80,11 @@ final class InscriberResolution {
             return lastResult;
         }
         if (player != null && !passesResearch(player, resolved)) {
-            ThELog.LOG.info(
-                    "[inscriber] save refused at {}: {} is gated by research this player has not unlocked",
-                    inscriber.getBlockPos(), resolved.result());
             return lastResult = STATUS_RESEARCH_LOCKED;
         }
         if (!core.store(resolved)) {
-            ThELog.LOG.info("[inscriber] save refused at {}: the core would not take {} (room {} of {})",
-                    inscriber.getBlockPos(), resolved.result(), core.size(),
-                    HandlerKnowledgeCore.MAXIMUM_STORED_PATTERNS);
             return lastResult = STATUS_CORE_FULL;
         }
-        ThELog.LOG.info("[inscriber] save at {} stored {} (status {})",
-                inscriber.getBlockPos(), resolved.result(), status());
         dirty = true;
         inventory.clear();
         return lastResult = STATUS_ENCODED;

@@ -20,9 +20,8 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.util.layout.GuiLayout;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 import thaumicenergistics_ce.menu.MenuArcaneAssembler;
-import thaumicenergistics_ce.util.ThELog;
 
 public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAssembler> {
 
@@ -38,11 +37,6 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
     private static final int FB_HEIGHT = 231;
 
     private static final int FILL_TOP = 240;
-
-    private static final boolean TRACE_PROGRESS =
-            "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_ASSEMBLER_SELFTEST"));
-
-    private float lastTracedProgress = -1.0F;
 
     private final @Nullable GuiLayout layout;
 
@@ -153,19 +147,12 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
     private float columnRatio(int index) {
         if (index >= GuiLayout.PRIMAL_COLUMNS) {
             float progress = menu.isCrafting() ? menu.getProgress() : 0.0F;
-            if (TRACE_PROGRESS && Math.abs(progress - lastTracedProgress) > 0.001F) {
-                lastTracedProgress = progress;
-                ThELog.LOG.info("[asmtest] bar={} {}", progress, menu.progressTrace());
-            }
+
             return progress;
         }
         return Math.min(1.0F, menu.getBarVis(index) / (float) VIS_BAR_MAX_PER_ASPECT);
     }
 
-    @Override
-    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        super.extractLabels(graphics, mouseX, mouseY);
-    }
 
     @Override
     protected void extractTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
@@ -188,7 +175,7 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
             }
             List<Component> lines = new ArrayList<>();
             lines.add(GuiText.CompatibleUpgrades.text().copy().withStyle(ChatFormatting.WHITE));
-            lines.addAll(Upgrades.getTooltipLinesForMachine(ModItems.ARCANE_ASSEMBLER.get()));
+            lines.addAll(Upgrades.getTooltipLinesForMachine(TECEItems.ARCANE_ASSEMBLER.get()));
             return lines;
         }
         return null;

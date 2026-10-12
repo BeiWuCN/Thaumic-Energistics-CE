@@ -13,14 +13,14 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 import thaumicenergistics_ce.item.ItemVisConnectionCard;
 import thaumicenergistics_ce.part.PartVisInterface;
 
 final class VisCardBindingChecks {
     static void run(MinecraftServer server) {
         var level = server.overworld();
-        var card = new ItemStack(ModItems.VIS_CONNECTION_CARD.get());
+        var card = new ItemStack(TECEItems.VIS_CONNECTION_CARD.get());
         var remote = new BlockPos(28000000, 64, 28000000);
         require(!level.hasChunkAt(remote), "Remote fixture already loaded");
         ItemVisConnectionCard.bind(card, level.dimension().identifier().toString(), remote, Direction.NORTH);
@@ -48,7 +48,7 @@ final class VisCardBindingChecks {
                     if (method.getName().equals("getService")) return energy;
                     throw new IllegalStateException("Unexpected grid call: " + method);
                 });
-        var relay = new PartVisInterface(ModItems.VIS_INTERFACE.get()) {
+        var relay = new PartVisInterface(TECEItems.VIS_INTERFACE.get()) {
             @Override
             public IGrid getGrid() { return grid; }
             @Override

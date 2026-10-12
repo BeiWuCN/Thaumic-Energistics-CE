@@ -10,10 +10,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -24,7 +23,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.block.BlockAlchemyProviderConnection;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.integration.ae2.essentia.ThEImmediateStorage;
-import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.TECEBlockEntities;
 import thaumicenergistics_ce.registry.capability.CachedEssentiaNeighbours;
 import thaumicenergistics_ce.util.ThETransaction;
 
@@ -68,7 +67,7 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
     private int tickCounter;
 
     public BlockEntityAlchemyProviderConnection(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.ALCHEMY_PROVIDER_CONNECTION.get(), pos, state);
+        super(TECEBlockEntities.ALCHEMY_PROVIDER_CONNECTION.get(), pos, state);
     }
 
 
@@ -80,17 +79,19 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity
         return resolveProvider() != null;
     }
 
-    public @Nullable String link(BlockPos toProvider) {
+    public @Nullable Component link(BlockPos toProvider) {
         if (level == null || level.isClientSide()) {
             return null;
         }
         if (!(level.getBlockEntity(toProvider) instanceof BlockEntityAlchemyProvider provider)) {
-            return "not a provider";
+            return Component.translatable(
+                    "item.thaumicenergistics_ce.wireless_connector.not_provider");
         }
         if (!(level.getBlockEntity(worldPosition) instanceof BlockEntityAlchemyProviderConnection)) {
-            return "receiver is gone";
+            return Component.translatable(
+                    "item.thaumicenergistics_ce.wireless_connector.receiver_gone");
         }
-        String refusal = provider.addLinkedReceiver(worldPosition);
+        var refusal = provider.addLinkedReceiver(worldPosition);
         if (refusal != null) {
             return refusal;
         }

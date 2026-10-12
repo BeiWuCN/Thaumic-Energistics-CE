@@ -56,3 +56,17 @@ type = "optional"
 versionRange = "[26.1.1-beta,)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "extendedae"
+type = "optional"
+versionRange = "*"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "extendedae_plus"
+type = "optional"
+versionRange = "*"
+ordering = "AFTER"
+side = "BOTH"

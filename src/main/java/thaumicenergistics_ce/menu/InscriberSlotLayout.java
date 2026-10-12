@@ -8,7 +8,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 import thaumicenergistics_ce.menu.slot.GhostGridSlot;
 import thaumicenergistics_ce.menu.slot.MachineGridSlot;
 import thaumicenergistics_ce.menu.slot.ReadOnlySlot;
@@ -56,7 +56,7 @@ final class InscriberSlotLayout {
         addSlot.accept(new Slot(machine, MACHINE_CORE, FB_CORE_X, FB_CORE_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return stack.is(ModItems.KNOWLEDGE_CORE.get());
+                return stack.is(TECEItems.KNOWLEDGE_CORE.get());
             }
         });
 

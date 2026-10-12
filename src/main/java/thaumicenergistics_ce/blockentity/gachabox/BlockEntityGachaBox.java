@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.block.BlockGachaBox;
 import thaumicenergistics_ce.block.BlockGachaBoxAggregator;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
-import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.TECEBlockEntities;
 
 public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implements IGridTickable {
 
@@ -42,7 +42,7 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
     private final GachaOwner owner = new GachaOwner();
 
     public BlockEntityGachaBox(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.GACHA_BOX.get(), pos, state);
+        super(TECEBlockEntities.GACHA_BOX.get(), pos, state);
         setInternalMaxPower(GachaPower.ENERGY_CAPACITY);
         setInternalPublicPowerStorage(true);
         setInternalPowerFlow(AccessRestriction.WRITE);

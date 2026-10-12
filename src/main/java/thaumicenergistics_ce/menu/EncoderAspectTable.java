@@ -13,7 +13,6 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
-import thaumicenergistics_ce.util.ThELog;
 
 final class EncoderAspectTable {
 
@@ -36,14 +35,6 @@ final class EncoderAspectTable {
     private int localSelection = -1;
 
     private ItemStack lastSourceItem = ItemStack.EMPTY;
-
-    private static final boolean TRACE = System.getenv("THAUMICENERGISTICS_ENCODER_TRACE") != null;
-
-    private ItemStack tracedSource = ItemStack.EMPTY;
-
-    private int tracedRevealed = -1;
-
-    private int tracedPick = -1;
 
     EncoderAspectTable(
             MenuDistillationEncoder menu,
@@ -99,7 +90,6 @@ final class EncoderAspectTable {
                 revealedTotal++;
             }
         }
-        traceSource(source, itemScanned, revealedTotal);
         this.revealedWells = revealedWells;
         this.revealedTotal = revealedTotal;
 
@@ -107,47 +97,12 @@ final class EncoderAspectTable {
             aspectDisplay.setItem(i, ItemStack.EMPTY);
         }
 
-        tracePick();
         selectedDisplay.setItem(0, ItemStack.EMPTY);
     }
 
     private boolean sourceIsScanned(ItemStack source) {
         return !source.isEmpty()
                 && KnowledgeAccess.of(menu.owner).isResearchKnown(ScanKeys.item(source.getItem()));
-    }
-
-    private void traceSource(ItemStack source, boolean itemScanned, int revealedTotal) {
-        if (!TRACE || (ItemStack.matches(source, tracedSource) && revealedTotal == tracedRevealed)) {
-            return;
-        }
-        tracedSource = source.copy();
-        tracedRevealed = revealedTotal;
-        ThELog.LOG.info(
-                "[encoder] source={} scanned={} itemAspects={} revealed={}",
-                source.isEmpty() ? "empty" : source.getItem(),
-                itemScanned,
-                aspects.size(),
-                revealedTotal);
-    }
-
-    private void tracePick() {
-        int raw = pickedIndexRaw();
-        if (!TRACE || raw == tracedPick) {
-            return;
-        }
-        tracedPick = raw;
-        String why = raw < 0
-                ? "nothing picked"
-                : raw >= aspects.size()
-                        ? "refused: no aspect at " + raw
-                        : !isRevealed(raw) ? "refused: aspect " + raw + " is not revealed" : "accepted";
-        ThELog.LOG.info(
-                "[encoder] pick {} of {} -> {} ({}), {} side",
-                raw,
-                aspects.size(),
-                pickedIndex(),
-                why,
-                encoder != null ? "server" : "client");
     }
 
     boolean revealsNothing() {

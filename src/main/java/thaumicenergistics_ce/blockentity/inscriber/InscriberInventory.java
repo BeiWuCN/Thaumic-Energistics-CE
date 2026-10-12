@@ -5,17 +5,12 @@ import net.minecraft.world.level.storage.ValueInput;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import thaumicenergistics_ce.registry.ModItems;
-import thaumicenergistics_ce.util.ThEItemTags;
+import thaumicenergistics_ce.registry.TECEItems;
 
 final class InscriberInventory {
 
@@ -36,7 +31,7 @@ final class InscriberInventory {
                 @Override
                 public boolean canPlaceItem(int slot, ItemStack stack) {
                     return slot == BlockEntityKnowledgeInscriber.CORE_SLOT
-                            && stack.is(ModItems.KNOWLEDGE_CORE.get());
+                            && stack.is(TECEItems.KNOWLEDGE_CORE.get());
                 }
             };
 
@@ -108,7 +103,7 @@ final class InscriberInventory {
     }
 
     boolean hasCore() {
-        return inventory.getItem(BlockEntityKnowledgeInscriber.CORE_SLOT).is(ModItems.KNOWLEDGE_CORE.get());
+        return inventory.getItem(BlockEntityKnowledgeInscriber.CORE_SLOT).is(TECEItems.KNOWLEDGE_CORE.get());
     }
 
     ItemStack coreStack() {

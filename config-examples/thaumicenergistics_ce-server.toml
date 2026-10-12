@@ -54,3 +54,9 @@
     #180秒轮次的获奖概率，0到1，其余时长线性插值。
     #Range: 0.0 ~ 1.0
     chanceAt180Seconds = 0.45
+
+[patternProviders]
+    #按供应器所属模组独立控制源质支持；关闭后禁止装卡和源质收发，保留已装卡及缓冲，卡仍可取出。
+    ae2Enabled = true
+    extendedAeEnabled = true
+    extendedAePlusEnabled = true

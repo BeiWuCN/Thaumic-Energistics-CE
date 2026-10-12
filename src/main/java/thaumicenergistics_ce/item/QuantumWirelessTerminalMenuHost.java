@@ -23,7 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.ItemContainerContents;
 import org.jspecify.annotations.Nullable;
-import thaumicenergistics_ce.registry.ModDataComponents;
+import thaumicenergistics_ce.registry.TECEDataComponents;
 
 public class QuantumWirelessTerminalMenuHost<T extends WirelessTerminalItem> extends WirelessTerminalMenuHost<T> {
     private @Nullable IGridNode quantumNode;
@@ -41,12 +41,12 @@ public class QuantumWirelessTerminalMenuHost<T extends WirelessTerminalItem> ext
             var inv = new AppEngInternalInventory(new InternalInventoryHost() {
                 @Override
                 public void saveChangedInventory(AppEngInternalInventory inventory) {
-                    stack.set(ModDataComponents.QUANTUM_SINGULARITY.get(), inventory.toItemContainerContents());
+                    stack.set(TECEDataComponents.QUANTUM_SINGULARITY.get(), inventory.toItemContainerContents());
                 }
                 @Override
                 public boolean isClientSide() { return player.level().isClientSide(); }
             }, 1, 1);
-            inv.fromItemContainerContents(stack.getOrDefault(ModDataComponents.QUANTUM_SINGULARITY.get(), ItemContainerContents.EMPTY));
+            inv.fromItemContainerContents(stack.getOrDefault(TECEDataComponents.QUANTUM_SINGULARITY.get(), ItemContainerContents.EMPTY));
             inv.setFilter(new appeng.util.inv.filter.IAEItemFilter() {
                 @Override
                 public boolean allowInsert(InternalInventory inventory, int slot, net.minecraft.world.item.ItemStack candidate) {

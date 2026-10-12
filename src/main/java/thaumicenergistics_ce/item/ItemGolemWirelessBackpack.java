@@ -4,7 +4,6 @@ import appeng.api.features.IGridLinkableHandler;
 import appeng.api.ids.AEComponents;
 import appeng.core.localization.GuiText;
 import appeng.core.localization.Tooltips;
-import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;

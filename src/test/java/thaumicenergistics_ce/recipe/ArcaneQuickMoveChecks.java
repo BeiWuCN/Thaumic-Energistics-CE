@@ -24,8 +24,8 @@ import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import thaumicenergistics_ce.recipe.arcane.ArcaneTerminalHost;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
-import thaumicenergistics_ce.registry.ModItems;
-import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.TECEItems;
+import thaumicenergistics_ce.registry.TECEMenuTypes;
 import thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
@@ -40,8 +40,8 @@ public final class ArcaneQuickMoveChecks {
             saved.add(inventory.getItem(i).copy());
         }
         try {
-            check(server, inventory, ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get());
-            check(server, inventory, ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get());
+            check(server, inventory, TECEMenuTypes.ARCANE_CRAFTING_TERMINAL.get());
+            check(server, inventory, TECEMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get());
         } finally {
             for (int i = 0; i < saved.size(); i++) {
                 inventory.setItem(i, saved.get(i));
@@ -52,7 +52,7 @@ public final class ArcaneQuickMoveChecks {
 
     private static void check(MinecraftServer server, Inventory inventory, MenuType<?> type) {
         inventory.clearContent();
-        var part = new PartArcaneCraftingTerminal(ModItems.ARCANE_CRAFTING_TERMINAL.get());
+        var part = new PartArcaneCraftingTerminal(TECEItems.ARCANE_CRAFTING_TERMINAL.get());
         var network = new TestStorage();
         ITerminalHost host = (ITerminalHost) Proxy.newProxyInstance(ArcaneQuickMoveChecks.class.getClassLoader(),
                 new Class<?>[] {ITerminalHost.class, ArcaneTerminalHost.class, IEnergySource.class, IPart.class},

@@ -13,7 +13,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.integration.ae2.essentia.EssentiaFillHelper;
 import thaumicenergistics_ce.menu.slot.ContainerSlot;
 import thaumicenergistics_ce.network.EssentiaTerminalReceiver;
-import thaumicenergistics_ce.util.ThELog;
 
 public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements EssentiaTerminalReceiver {
     public static final appeng.menu.SlotSemantic QUANTUM_SINGULARITY =
@@ -31,8 +30,6 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
             public int getMaxStackSize() { return 1; }
         };
         slot.setIcon(appeng.util.Icon.BACKGROUND_SINGULARITY);
-        slot.setEmptyTooltip(() -> java.util.List.of(net.minecraft.network.chat.Component.translatable(
-                "gui.thaumicenergistics_ce.quantum_singularity")));
         addSlot(slot, QUANTUM_SINGULARITY);
     }
 
@@ -102,7 +99,6 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
             return false;
         }
         if (!essentiaAccessGranted()) {
-            ThELog.LOG.info("[源质手势] 从网络装填被拒：这个终端里没插源质访问卡");
             return false;
         }
         ItemStack container = containerAt(player, where);
@@ -133,10 +129,8 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
             return;
         }
         if (!essentiaAccessGranted()) {
-            ThELog.LOG.info("[源质手势] 倒回网络被拒：这个终端里没插源质访问卡");
             return;
         }
-        ThELog.LOG.info("[源质手势] 收到倒回请求 where={}", where);
 
         if (where >= 0) {
             if (where >= slots.size()) {
@@ -148,11 +142,9 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
             }
             ItemStack inSlot = target.getItem();
             if (!EssentiaFillHelper.isSupportedContainer(inSlot)) {
-                ThELog.LOG.info("[源质手势] 倒回被拒：槽位 {} 里不是源质容器（{}）", where, inSlot);
                 return;
             }
             EssentiaFillHelper.DepositResult left = emptyIntoNetwork(inSlot);
-            ThELog.LOG.info("[源质手势] 槽位 {} 倒回结果：{} -> {}", where, inSlot, left);
             if (left != null) {
                 target.set(left.remaining());
                 giveOverflow(player, left);
@@ -163,12 +155,9 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
 
         ItemStack container = containerAt(player, where);
         if (container == null || !EssentiaFillHelper.isSupportedContainer(container)) {
-            ThELog.LOG.info("[源质手势] 倒回被拒：{} 那一侧不是源质容器（{}）",
-                    where == ContainerSlot.CURSOR ? "光标" : "主手", container);
             return;
         }
         EssentiaFillHelper.DepositResult left = emptyIntoNetwork(container);
-        ThELog.LOG.info("[源质手势] 倒回结果：{} -> {}", container, left);
         if (left == null) {
             return;
         }

@@ -57,12 +57,6 @@ final class AssemblerCraftRunner {
     private boolean noteStall(Component reason) {
         owner.craft.noteStall(reason);
         if (owner.craft.stalledTicks() == STALLED_CRAFT_REPORT_TICKS) {
-            ThELog.LOG.info(
-                    "[assembler] at {} a craft is waiting for {} ({} ticks so far); it will finish when it"
-                            + " can",
-                    owner.getBlockPos(),
-                    reason.getString(),
-                    owner.craft.stalledTicks());
         }
         return false;
     }
@@ -94,13 +88,6 @@ final class AssemblerCraftRunner {
                     price);
         }
         if (owner.vis.bufferedVis() < price) {
-            ThELog.LOG.info(
-                    "[assembler] at {} delivers {} without charging its {} vis: this chunk's aura can never hold"
-                            + " more than {}",
-                    owner.getBlockPos(),
-                    owner.inventory.getItem(BlockEntityArcaneAssembler.TARGET_SLOT),
-                    price,
-                    owner.vis.auraCapacity());
         }
 
         IStorageService storage = grid.getService(IStorageService.class);

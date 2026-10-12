@@ -8,17 +8,17 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 import thaumicenergistics_ce.item.WirelessTerminalShortcuts;
 
 public final class WirelessShortcutChecks {
     private WirelessShortcutChecks() {}
 
     public static void run() {
-        check(WirelessTerminalShortcuts.ESSENTIA, ModItems.WIRELESS_ESSENTIA_TERMINAL.get(),
-                ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get());
-        check(WirelessTerminalShortcuts.ARCANE, ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
-                ModItems.WIRELESS_ESSENTIA_TERMINAL.get());
+        check(WirelessTerminalShortcuts.ESSENTIA, TECEItems.WIRELESS_ESSENTIA_TERMINAL.get(),
+                TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get());
+        check(WirelessTerminalShortcuts.ARCANE, TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
+                TECEItems.WIRELESS_ESSENTIA_TERMINAL.get());
         System.out.println("[wireless-shortcuts] PASS: both curio tags and native inventory/curio actions; terminal types remain distinct");
     }
 

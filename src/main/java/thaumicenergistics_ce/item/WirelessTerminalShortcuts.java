@@ -5,7 +5,7 @@ import appeng.hotkeys.InventoryHotkeyAction;
 import appeng.hotkeys.CuriosHotkeyAction;
 import java.util.function.Predicate;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 
 public final class WirelessTerminalShortcuts {
     public static final String ESSENTIA = "thaumicenergistics_ce.wireless_essentia_terminal";
@@ -14,10 +14,10 @@ public final class WirelessTerminalShortcuts {
     private WirelessTerminalShortcuts() {}
 
     public static void register() {
-        register(ESSENTIA, stack -> stack.is(ModItems.WIRELESS_ESSENTIA_TERMINAL.get()),
-                (player, locator) -> ModItems.WIRELESS_ESSENTIA_TERMINAL.get().openFromInventory(player, locator));
-        register(ARCANE, stack -> stack.is(ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()),
-                (player, locator) -> ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get().openFromInventory(player, locator));
+        register(ESSENTIA, stack -> stack.is(TECEItems.WIRELESS_ESSENTIA_TERMINAL.get()),
+                (player, locator) -> TECEItems.WIRELESS_ESSENTIA_TERMINAL.get().openFromInventory(player, locator));
+        register(ARCANE, stack -> stack.is(TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()),
+                (player, locator) -> TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get().openFromInventory(player, locator));
     }
 
     private static void register(String id, Predicate<ItemStack> item, InventoryHotkeyAction.Opener opener) {

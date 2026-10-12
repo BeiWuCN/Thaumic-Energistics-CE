@@ -17,14 +17,13 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.recipe.infusion.InfusionRisk;
-import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.TECEBlockEntities;
 
 public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements IGridTickable {
 
@@ -38,24 +37,18 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
 
     static final int SCAN_INTERVAL = 10;
 
-
     private final OccultMonitorBookSlot bookSlot = new OccultMonitorBookSlot(this);
-
 
     private final EssentiaReach reach = new EssentiaReach(this);
 
     private final AltarSurvey survey = new AltarSurvey(this, reach);
 
-    private final OccultMonitorTrace trace = new OccultMonitorTrace(this, survey);
-
-
     private final OccultMonitorReadings readings = new OccultMonitorReadings(this, survey, reach);
-
 
     private long pulseUntil;
 
     public BlockEntityOccultMonitor(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.OCCULT_MONITOR.get(), pos, state);
+        super(TECEBlockEntities.OCCULT_MONITOR.get(), pos, state);
         getMainNode()
                 .setIdlePowerUsage(IDLE_POWER)
                 .addService(IGridTickable.class, this)
@@ -96,12 +89,10 @@ public class BlockEntityOccultMonitor extends AENetworkedBlockEntity implements 
         if (!getMainNode().isActive()) {
             survey.forget();
             readings.sync(canReport(), survey.risk());
-            trace.log(node);
             return TickRateModulation.SAME;
         }
         survey.scan();
         readings.sync(canReport(), survey.risk());
-        trace.log(node);
         return TickRateModulation.SAME;
     }
 

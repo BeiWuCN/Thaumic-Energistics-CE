@@ -12,7 +12,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -27,7 +26,7 @@ final class ArcanePatternTags {
     private ArcanePatternTags() {}
 
     static ItemStack toItem(ThEArcanePattern pattern, HolderLookup.Provider registries) {
-        ItemStack stack = new ItemStack(thaumicenergistics_ce.registry.ModItems.ARCANE_PATTERN.get());
+        ItemStack stack = new ItemStack(thaumicenergistics_ce.registry.TECEItems.ARCANE_PATTERN.get());
         CompoundTag tag = new CompoundTag();
         tag.put("Pattern", save(pattern, registries));
         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));

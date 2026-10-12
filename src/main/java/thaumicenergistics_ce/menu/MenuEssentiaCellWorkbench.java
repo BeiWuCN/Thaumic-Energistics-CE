@@ -17,8 +17,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityEssentiaCellWorkbench;
-import thaumicenergistics_ce.registry.ModBlocks;
-import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.TECEBlocks;
+import thaumicenergistics_ce.registry.TECEMenuTypes;
 import thaumicenergistics_ce.item.ItemEssentiaCell;
 import thaumicenergistics_ce.network.PartitionWellReceiver;
 
@@ -47,7 +47,7 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
 
     public MenuEssentiaCellWorkbench(
             int containerId, Inventory playerInventory, @Nullable BlockEntityEssentiaCellWorkbench workbench) {
-        super(ModMenuTypes.ESSENTIA_CELL_WORKBENCH.get(), containerId, playerInventory, host(workbench));
+        super(TECEMenuTypes.ESSENTIA_CELL_WORKBENCH.get(), containerId, playerInventory, host(workbench));
         this.workbench = getHost();
         this.shiftClick = new CellWorkbenchShiftClick(this);
         registerClientAction(ACTION_PARTITION, this::partitionToContents);
@@ -208,6 +208,6 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
 
     private static BlockEntityEssentiaCellWorkbench standIn(BlockPos pos) {
         return new BlockEntityEssentiaCellWorkbench(
-                pos, ModBlocks.ESSENTIA_CELL_WORKBENCH.get().defaultBlockState());
+                pos, TECEBlocks.ESSENTIA_CELL_WORKBENCH.get().defaultBlockState());
     }
 }

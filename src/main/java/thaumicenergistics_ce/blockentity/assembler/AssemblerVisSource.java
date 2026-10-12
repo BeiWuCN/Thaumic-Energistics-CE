@@ -3,11 +3,8 @@ package thaumicenergistics_ce.blockentity.assembler;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
-import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
 import thaumicenergistics_ce.part.PartVisInterface;
 import thaumicenergistics_ce.part.VisReservation;
@@ -35,17 +32,12 @@ final class AssemblerVisSource {
         this.owner = owner;
     }
 
-
     int bufferedVis() {
         return pool.bufferedVis();
     }
 
     int aspectVis(int index) {
         return pool.aspectVis(index);
-    }
-
-    String aspectVisTrace() {
-        return pool.aspectVisTrace();
     }
 
     int visTarget(boolean crafting, int craftPrice) {
@@ -67,7 +59,6 @@ final class AssemblerVisSource {
     void readSync(ValueInput input) {
         pool.readSync(input);
     }
-
 
     float auraAround() {
         return AssemblerAura.around(owner);

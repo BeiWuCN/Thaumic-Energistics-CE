@@ -3,7 +3,6 @@ package thaumicenergistics_ce.blockentity.assembler;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import java.util.Arrays;
-import net.minecraft.nbt.CompoundTag;
 
 final class AssemblerVisPool {
 
@@ -30,17 +29,6 @@ final class AssemblerVisPool {
 
     int aspectVis(int index) {
         return index >= 0 && index < aspectVis.length ? aspectVis[index] : 0;
-    }
-
-    String aspectVisTrace() {
-        StringBuilder text = new StringBuilder();
-        for (int value : aspectVis) {
-            if (text.length() > 0) {
-                text.append(' ');
-            }
-            text.append(value);
-        }
-        return text.toString();
     }
 
     int visTarget(boolean crafting, int craftPrice) {

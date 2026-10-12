@@ -9,9 +9,14 @@
         "BusRecoveryItemMixin",
         "ExportBusOperationMixin",
         "StorageBusUpgradeSlotsMixin",
-        "TerminalVisibilityMixin"
+        "TerminalVisibilityMixin",
+        "PatternProviderEssentiaMixin",
+        "PatternProviderMenuEssentiaMixin",
+        "GenericStackInvEssentiaMixin",
+        "PatternProviderReturnEssentiaMixin",
+        "PatternProviderCardSlotMixin"
 	],
-    "client": ["TerminalScreenVisibilityMixin", "ArcaneUpgradeTooltipMixin"],
+    "client": ["ConfigCommentI18nMixin", "TerminalScreenVisibilityMixin", "ArcaneUpgradeTooltipMixin", "PatternProviderScreenEssentiaMixin", "WidgetContainerAccessor"],
 	"injectors": {
 		"defaultRequire": 1
 	},

@@ -12,7 +12,6 @@ import appeng.helpers.ICraftingGridMenu;
 import appeng.menu.SlotSemantic;
 import appeng.menu.SlotSemantics;
 import appeng.menu.guisync.GuiSync;
-import appeng.menu.slot.AppEngSlot;
 import appeng.util.inv.AppEngInternalInventory;
 import appeng.util.inv.InternalInventoryHost;
 import appeng.util.inv.filter.IAEItemFilter;
@@ -31,16 +30,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.recipe.arcane.ArcaneTerminalHost;
-import thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
-import thaumicenergistics_ce.compat.thaumaturge.TcAura;
-import thaumicenergistics_ce.registry.ModItems;
 import thaumicenergistics_ce.menu.slot.ArcaneCraftingResultSlot;
-import thaumicenergistics_ce.menu.slot.CrystalSlot;
-import thaumicenergistics_ce.menu.slot.WandSlot;
 import thaumicenergistics_ce.network.ArcaneCraftCostPayload;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
-import thaumicenergistics_ce.util.ThELog;
 
 public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         implements ICraftingGridMenu, InternalInventoryHost {
@@ -53,18 +46,6 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
     public static final SlotSemantic CRYSTALS_RIGHT =
             SlotSemantics.register("THAUMICENERGISTICS_CRYSTALS_RIGHT", true);
-
-    private static final int GRID_X = 26;
-    private static final int GRID_Y = 96;
-    private static final int GRID_PITCH = 18;
-    private static final int GRID_COLS = 3;
-    private static final int RESULT_X = 134;
-    private static final int RESULT_Y = 96;
-    private static final int WAND_X = 116;
-    private static final int WAND_Y = 114;
-
-    private static final int CRYSTALS_LEFT_X = 8;
-    private static final int CRYSTALS_RIGHT_X = 80;
 
     private final @Nullable PartArcaneCraftingTerminal part;
 
@@ -89,7 +70,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     private @Nullable ArcaneCraftingResultSlot resultSlot;
 
     private int craftInputSignature = -1;
-    private long lastWandChargeTick = Long.MIN_VALUE;
+    private final ArcaneTerminalRuntime runtime = new ArcaneTerminalRuntime();
 
     @GuiSync(111)
     public boolean essentiaAccessEnabled = ThEConfig.ARCANE_ESSENTIA_ACCESS.get();
@@ -97,20 +78,15 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     @GuiSync(112)
     public boolean inheritedVisConnection;
 
+    @GuiSync(113)
+    public boolean sharedEssentiaInstalled;
+
+    private final ArcaneTerminalUpgrades upgrades;
+
+    public boolean usesSharedUpgrades() { return upgrades.shared(); }
+
     public void updateUpgradeSlotVisibility() {
-        var upgrades = getSlots(SlotSemantics.UPGRADE);
-        int hidden = -1;
-        if (!essentiaAccessEnabled) {
-            for (int i = upgrades.size() - 1; i >= 0; i--) {
-                if (!upgrades.get(i).hasItem()) {
-                    hidden = i;
-                    break;
-                }
-            }
-        }
-        for (int i = 0; i < upgrades.size(); i++) {
-            ((AppEngSlot) upgrades.get(i)).setSlotEnabled(i != hidden);
-        }
+        upgrades.updateVisibility(getSlots(SlotSemantics.UPGRADE), essentiaAccessEnabled);
     }
 
     @GuiSync(110)
@@ -121,6 +97,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     public MenuArcaneCraftingTerminal(
             MenuType<?> menuType, int id, Inventory playerInventory, ITerminalHost host) {
         super(menuType, id, playerInventory, host, false);
+        this.upgrades = new ArcaneTerminalUpgrades(host, getSlots(SlotSemantics.UPGRADE));
         updateUpgradeSlotVisibility();
         this.part = host instanceof ArcaneTerminalHost arcane ? arcane.arcaneTerminal() : null;
         this.auraPayer = host instanceof IPortableTerminal portable ? portable : null;
@@ -141,31 +118,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         crystalFallback.setFilter(placeholdersTakeNothing);
         wandFallback.setFilter(placeholdersTakeNothing);
 
-        for (int i = 0; i < GRID_SIZE; i++) {
-            int column = i % GRID_COLS;
-            int row = i / GRID_COLS;
-            Slot cell = addSlot(new AppEngSlot(craftingGrid, i), SlotSemantics.CRAFTING_GRID);
-            cell.x = GRID_X + column * GRID_PITCH;
-            cell.y = GRID_Y + row * GRID_PITCH;
-        }
-
-        Slot wandSlot = addSlot(
-                new WandSlot(wandInventory, PartArcaneCraftingTerminal.WAND_SLOT),
-                SlotSemantics.STORAGE);
-        wandSlot.x = WAND_X;
-        wandSlot.y = WAND_Y;
-
-        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_COLUMN; i++) {
-            Slot slot = addSlot(new CrystalSlot(crystals, i, aspectOf(i)), CRYSTALS_LEFT);
-            slot.x = CRYSTALS_LEFT_X;
-            slot.y = GRID_Y + i * GRID_PITCH;
-        }
-        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_COLUMN; i++) {
-            int index = PartArcaneCraftingTerminal.CRYSTAL_COLUMN + i;
-            Slot slot = addSlot(new CrystalSlot(crystals, index, aspectOf(index)), CRYSTALS_RIGHT);
-            slot.x = CRYSTALS_RIGHT_X;
-            slot.y = GRID_Y + i * GRID_PITCH;
-        }
+        ArcaneTerminalSlots.add((slot, semantic) -> addSlot(slot, semantic), craftingGrid, wandInventory, crystals);
 
         this.resultSlot = new ArcaneCraftingResultSlot(
                 playerInventory.player,
@@ -177,9 +130,9 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
                 this,
                 part);
         addSlot(resultSlot, SlotSemantics.CRAFTING_RESULT);
-        resultSlot.x = RESULT_X;
-        resultSlot.y = RESULT_Y;
+        ArcaneTerminalSlots.positionResult(resultSlot);
 
+        updateSharedEssentiaState();
         createPlayerInventorySlots(playerInventory);
 
         resultSlot.refresh();
@@ -204,31 +157,38 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         }
     }
 
+    public boolean connectionUnchanged() {
+        return isClientSide() || upgrades.connectionUnchanged(part);
+    }
+
+    @Override
+    public boolean stillValid(Player player) {
+        return connectionUnchanged() && super.stillValid(player);
+    }
+
+    @Override
+    public void clicked(int slotId, int button, net.minecraft.world.inventory.ContainerInput input, Player player) {
+        if (!connectionUnchanged()) { player.closeContainer(); return; }
+        super.clicked(slotId, button, input, player);
+    }
+
     @Override
     public void broadcastChanges() {
+        if (!connectionUnchanged()) { getPlayer().closeContainer(); return; }
         if (!isClientSide()) {
+            if (!upgrades.prepare()) {
+                getPlayer().sendOverlayMessage(Component.translatable(
+                        "gui.thaumicenergistics_ce.arcane_terminal.card_conflict"));
+                getPlayer().closeContainer();
+                return;
+            }
+            updateSharedEssentiaState();
             essentiaAccessEnabled = ThEConfig.ARCANE_ESSENTIA_ACCESS.get();
             inheritedVisConnection = !inheritedVisCard().isEmpty();
-            if (auraPayer != null && part != null && part.isActive() && hasVisConnectionCard()
-                    && !inheritedVisConnection
-                    && lastWandChargeTick != getPlayer().level().getGameTime()) {
-                lastWandChargeTick = getPlayer().level().getGameTime();
-                ItemStack wand = wandInventory.getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT);
-                ItemStack charged = TerminalAuraPayment.chargeWand(getPlayer().level(), visCard(), wand);
-                if (charged != wand) {
-                    wandInventory.setItemDirect(PartArcaneCraftingTerminal.WAND_SLOT, charged);
-                }
-            }
+            runtime.chargeWand(getPlayer(), part, auraPayer, inheritedVisConnection, visCard(), wandInventory);
         }
         updateUpgradeSlotVisibility();
-        if (!isClientSide()) {
-            if (auraPayer != null) {
-                availableAuraVis = (int) Math.max(0, TcAura.vis(getPlayer().level(), getPlayer().blockPosition()));
-            } else {
-                availableAuraVis = part == null || part.getBlockEntity() == null ? 0
-                        : (int) Math.max(0, TcAura.vis(getPlayer().level(), part.getBlockEntity().getBlockPos()));
-            }
-        }
+        refreshAvailableAura();
         super.broadcastChanges();
         if (resultSlot == null) {
             return;
@@ -240,28 +200,12 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         }
     }
 
+    public void refreshAvailableAura() {
+        if (!isClientSide()) availableAuraVis = runtime.availableAura(getPlayer(), upgrades.shared(), part);
+    }
+
     private int craftInputSignature() {
-        int hash = 1;
-        for (int i = 0; i < PartArcaneCraftingTerminal.GRID_SIZE; i++) {
-            hash = 31 * hash + StackSignatures.of(craftingGrid.getStackInSlot(i));
-        }
-        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
-            hash = 31 * hash + StackSignatures.of(crystals.getStackInSlot(i));
-        }
-        hash = 31 * hash + StackSignatures.of(visCard());
-        hash = 31 * hash + Boolean.hashCode(thaumicenergistics_ce.config.ThEConfig.ALLOW_AE_FOR_AURA_VIS.get());
-        hash = 31 * hash + availableAuraVis;
-        if (getPlayer().level() instanceof net.minecraft.server.level.ServerLevel server) {
-            var relay = thaumicenergistics_ce.item.ItemVisConnectionCard.resolve(server, visCard());
-            long relayVis = 0;
-            if (relay != null) {
-                for (var primal : thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler.PRIMALS) {
-                    relayVis += relay.availableCentivis(primal);
-                }
-            }
-            hash = 31 * hash + Long.hashCode(relayVis);
-        }
-        return 31 * hash + StackSignatures.of(wandInventory.getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT));
+        return runtime.inputSignature(getPlayer(), craftingGrid, crystals, wandInventory, visCard(), availableAuraVis);
     }
 
     public @Nullable PartArcaneCraftingTerminal part() {
@@ -324,41 +268,33 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     }
 
 
+    private void updateSharedEssentiaState() {
+        if (!isClientSide() && upgrades.shared()) sharedEssentiaInstalled = upgrades.hasEssentiaCard();
+    }
+
     @Override
     protected boolean essentiaAccessGranted() {
-        return thaumicenergistics_ce.config.ThEConfig.ARCANE_ESSENTIA_ACCESS.get()
-                && getHost().getUpgrades().isInstalled(ModItems.ESSENTIA_ACCESS_CARD.get());
+        if (isClientSide() && upgrades.shared()) return essentiaAccessEnabled && sharedEssentiaInstalled;
+        return ThEConfig.ARCANE_ESSENTIA_ACCESS.get() && upgrades.hasEssentiaCard();
     }
 
     public boolean hasEssentiaAccessCard() {
         return essentiaAccessGranted();
     }
 
-    public ItemStack visCard() {
-        ItemStack inherited = inheritedVisCard();
-        return inherited.isEmpty() ? TerminalAuraPayment.visCard(getHost()) : inherited;
-    }
+    public ItemStack visCard() { return upgrades.visCard(); }
 
     public boolean hasVisConnectionCard() {
         return !visCard().isEmpty();
     }
 
-    private ItemStack inheritedVisCard() {
-        if (!(getHost() instanceof thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost wireless)) {
-            return ItemStack.EMPTY;
-        }
-        // Resolve the live link rather than the part captured when the menu opened.
-        // Never write this card into the handheld item's upgrade inventory.
-        var bound = wireless.arcaneTerminal();
-        return bound == null ? ItemStack.EMPTY : TerminalAuraPayment.visCard(bound).copy();
-    }
+    private ItemStack inheritedVisCard() { return upgrades.inheritedVisCard(); }
 
     private void refusePlaceholderInsert(Player player) {
         if (!(player instanceof ServerPlayer server) || server.tickCount - lastPlaceholderRefusal < 40) {
             return;
         }
         lastPlaceholderRefusal = server.tickCount;
-        ThELog.LOG.info("[arcane] 替身槽位拒收：这个终端没连上已放置的奥术合成终端，放进去也没人存");
         server.sendOverlayMessage(
                 Component.translatable("gui.thaumicenergistics_ce.arcane_terminal.not_linked"));
     }
@@ -367,8 +303,4 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     public void saveChangedInventory(AppEngInternalInventory inventory) {
     }
 
-    @Override
-    public boolean isClientSide() {
-        return super.isClientSide();
-    }
 }

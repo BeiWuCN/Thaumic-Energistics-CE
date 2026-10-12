@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
-import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.TECEMenuTypes;
 import thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
 
 public class KnowledgeInscriberRecipeTransfer
@@ -40,7 +40,7 @@ public class KnowledgeInscriberRecipeTransfer
 
     @Override
     public Optional<MenuType<MenuKnowledgeInscriber>> getMenuType() {
-        return Optional.of(ModMenuTypes.KNOWLEDGE_INSCRIBER.get());
+        return Optional.of(TECEMenuTypes.KNOWLEDGE_INSCRIBER.get());
     }
 
     @Override

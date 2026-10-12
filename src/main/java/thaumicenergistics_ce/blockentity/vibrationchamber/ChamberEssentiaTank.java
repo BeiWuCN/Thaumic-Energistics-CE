@@ -29,18 +29,15 @@ final class ChamberEssentiaTank {
 
     private long revision;
 
-    private int tracedEssentia;
-
     private final SnapshotJournal<TankSnapshot> journal = new SnapshotJournal<>() {
         @Override
         protected TankSnapshot createSnapshot() {
-            return new TankSnapshot(storedEssentia, tracedEssentia, currentAspect, revision);
+            return new TankSnapshot(storedEssentia, currentAspect, revision);
         }
 
         @Override
         protected void revertToSnapshot(TankSnapshot snapshot) {
             storedEssentia = snapshot.stored();
-            tracedEssentia = snapshot.traced();
             currentAspect = snapshot.aspect();
             revision = snapshot.revision();
         }
@@ -48,7 +45,6 @@ final class ChamberEssentiaTank {
 
     private record TankSnapshot(
             int stored,
-            int traced,
             @Nullable Holder<IAspect> aspect,
             long revision) {}
 
@@ -67,14 +63,6 @@ final class ChamberEssentiaTank {
 
     long revision() {
         return revision;
-    }
-
-    int traced() {
-        return tracedEssentia;
-    }
-
-    void resetTraced() {
-        tracedEssentia = 0;
     }
 
     boolean hasRoom() {
@@ -167,7 +155,6 @@ final class ChamberEssentiaTank {
             return;
         }
         storedEssentia += taken;
-        tracedEssentia += taken;
         currentAspect = aspect;
         revision++;
         chamber.setChanged();

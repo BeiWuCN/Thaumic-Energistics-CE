@@ -1,6 +1,5 @@
 package thaumicenergistics_ce.item;
 
-import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.HolderLookup;
@@ -35,7 +34,7 @@ public class ItemKnowledgeCore extends Item {
         if (core == null) {
             return;
         }
-        lines.accept(Component.literal(core.describeCapacity().getString()).withStyle(ChatFormatting.AQUA));
+        lines.accept(core.describeCapacity().copy().withStyle(ChatFormatting.AQUA));
         core.describePatterns().forEach(lines);
         core.describeUnreadable().forEach(lines);
     }

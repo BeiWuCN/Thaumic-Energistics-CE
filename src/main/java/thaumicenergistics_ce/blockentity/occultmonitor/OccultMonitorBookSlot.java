@@ -2,8 +2,6 @@ package thaumicenergistics_ce.blockentity.occultmonitor;
 
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
@@ -12,7 +10,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.block.BlockOccultMonitor;
 import thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
-import thaumicenergistics_ce.util.ThEItemTags;
 
 final class OccultMonitorBookSlot {
 

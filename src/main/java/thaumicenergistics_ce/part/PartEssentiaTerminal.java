@@ -8,14 +8,12 @@ import appeng.menu.MenuOpener;
 import appeng.menu.locator.MenuLocators;
 import appeng.parts.reporting.AbstractTerminalPart;
 import java.util.List;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.phys.Vec3;
 import thaumicenergistics_ce.ThEIds;
-import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.TECEMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
 public class PartEssentiaTerminal extends AbstractTerminalPart {
@@ -38,7 +36,7 @@ public class PartEssentiaTerminal extends AbstractTerminalPart {
 
     @Override
     public MenuType<?> getMenuType(Player player) {
-        return ModMenuTypes.ESSENTIA_TERMINAL.get();
+        return TECEMenuTypes.ESSENTIA_TERMINAL.get();
     }
 
     @Override

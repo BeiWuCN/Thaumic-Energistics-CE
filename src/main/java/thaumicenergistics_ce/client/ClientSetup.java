@@ -28,8 +28,8 @@ import thaumicenergistics_ce.client.render.ArcaneAssemblerRenderer;
 import thaumicenergistics_ce.client.render.EssentiaKeyRenderHandler;
 import thaumicenergistics_ce.client.render.GachaBoxRenderer;
 import thaumicenergistics_ce.client.render.bubble.OccultMonitorBubbleRenderer;
-import thaumicenergistics_ce.registry.ModBlockEntities;
-import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.TECEBlockEntities;
+import thaumicenergistics_ce.registry.TECEMenuTypes;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.integration.ae2.ClientRegistries;
@@ -94,11 +94,11 @@ public final class ClientSetup {
     public static void registerRenderers(
             EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(
-                ModBlockEntities.OCCULT_MONITOR.get(), OccultMonitorBubbleRenderer::new);
+                TECEBlockEntities.OCCULT_MONITOR.get(), OccultMonitorBubbleRenderer::new);
         event.registerBlockEntityRenderer(
-                ModBlockEntities.ARCANE_ASSEMBLER.get(),
+                TECEBlockEntities.ARCANE_ASSEMBLER.get(),
                 ArcaneAssemblerRenderer::new);
-        event.registerBlockEntityRenderer(ModBlockEntities.GACHA_BOX.get(), GachaBoxRenderer::new);
+        event.registerBlockEntityRenderer(TECEBlockEntities.GACHA_BOX.get(), GachaBoxRenderer::new);
     }
 
     @SubscribeEvent
@@ -108,20 +108,20 @@ public final class ClientSetup {
 
     @SubscribeEvent
     public static void registerScreens(RegisterMenuScreensEvent event) {
-        event.register(ModMenuTypes.ARCANE_ASSEMBLER.get(), ScreenArcaneAssembler::new);
-        event.register(ModMenuTypes.KNOWLEDGE_INSCRIBER.get(), ScreenKnowledgeInscriber::new);
+        event.register(TECEMenuTypes.ARCANE_ASSEMBLER.get(), ScreenArcaneAssembler::new);
+        event.register(TECEMenuTypes.KNOWLEDGE_INSCRIBER.get(), ScreenKnowledgeInscriber::new);
         event.register(
-                ModMenuTypes.ESSENTIA_CELL_WORKBENCH.get(),
+                TECEMenuTypes.ESSENTIA_CELL_WORKBENCH.get(),
                 (MenuEssentiaCellWorkbench menu, Inventory inventory, Component title) ->
                         new ScreenEssentiaCellWorkbench(
                                 menu,
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/essentia_cell_workbench.json")));
-        event.register(ModMenuTypes.DISTILLATION_ENCODER.get(), ScreenDistillationEncoder::new);
-        event.register(ModMenuTypes.ESSENTIA_VIBRATION_CHAMBER.get(), ScreenEssentiaResonanceChamber::new);
+        event.register(TECEMenuTypes.DISTILLATION_ENCODER.get(), ScreenDistillationEncoder::new);
+        event.register(TECEMenuTypes.ESSENTIA_VIBRATION_CHAMBER.get(), ScreenEssentiaResonanceChamber::new);
         event.register(
-                ModMenuTypes.ESSENTIA_TERMINAL.get(),
+                TECEMenuTypes.ESSENTIA_TERMINAL.get(),
                 (MenuEssentiaTerminal menu, Inventory inventory, Component title) ->
                         new ScreenEssentiaTerminal(
                                 menu,
@@ -129,7 +129,7 @@ public final class ClientSetup {
                                 title,
                                 StyleManager.loadStyleDoc("/screens/terminals/terminal.json")));
         event.register(
-                ModMenuTypes.ARCANE_CRAFTING_TERMINAL.get(),
+                TECEMenuTypes.ARCANE_CRAFTING_TERMINAL.get(),
                 (MenuArcaneCraftingTerminal menu, Inventory inventory, Component title) ->
                         new ScreenArcaneCraftingTerminal(
                                 menu,
@@ -137,7 +137,7 @@ public final class ClientSetup {
                                 title,
                                 StyleManager.loadStyleDoc("/screens/arcane_crafting_terminal.json")));
         event.register(
-                ModMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get(),
+                TECEMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get(),
                 (MenuEssentiaTerminal menu, Inventory inventory, Component title) ->
                         new ScreenEssentiaTerminal(
                                 menu,
@@ -145,7 +145,7 @@ public final class ClientSetup {
                                 title,
                                 StyleManager.loadStyleDoc("/screens/wireless_essentia_terminal.json")));
         event.register(
-                ModMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
+                TECEMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                 (MenuArcaneCraftingTerminal menu, Inventory inventory, Component title) ->
                         new ScreenArcaneCraftingTerminal(
                                 menu,
@@ -153,7 +153,7 @@ public final class ClientSetup {
                                 title,
                                 StyleManager.loadStyleDoc("/screens/wireless_arcane_crafting_terminal.json")));
         event.register(
-                ModMenuTypes.ESSENTIA_LEVEL_EMITTER.get(),
+                TECEMenuTypes.ESSENTIA_LEVEL_EMITTER.get(),
                 (MenuEssentiaLevelEmitter menu, Inventory inventory, Component title) ->
                         new UpgradeableScreen<>(
                                 menu, inventory, title, StyleManager.loadStyleDoc("/screens/level_emitter.json")));

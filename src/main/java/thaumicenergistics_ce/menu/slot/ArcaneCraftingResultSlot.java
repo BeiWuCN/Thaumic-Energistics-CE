@@ -4,7 +4,6 @@ import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.storage.MEStorage;
-import appeng.helpers.ICraftingGridMenu;
 import appeng.helpers.InventoryAction;
 import appeng.menu.slot.CraftingTermSlot;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftingTransaction;
@@ -21,7 +20,6 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.recipe.arcane.TerminalArcaneCraftingInput;
 import thaumicenergistics_ce.recipe.arcane.TerminalArcaneCraftingStore;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
-import thaumicenergistics_ce.util.ThELog;
 
 public class ArcaneCraftingResultSlot extends CraftingTermSlot {
 
@@ -53,6 +51,11 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
     }
 
     public void refresh() {
+        if (!ownerMenu.connectionUnchanged()) {
+            setDisplayedCraftingOutput(ItemStack.EMPTY);
+            ownerMenu.sendCraftCost(null);
+            return;
+        }
         if (part == null || serverPlayer == null) {
             return;
         }
@@ -66,7 +69,6 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         var result = ArcaneCraftingTransaction.preview(workbenchContext(serverPlayer), serverPlayer, input);
         lastFailure = result.failure();
         if (!result.successful()) {
-            ThELog.LOG.info("[arcane] no craft offered for the grid: {}", result.failure());
         }
         setDisplayedCraftingOutput(result.successful() ? result.output() : ItemStack.EMPTY);
         ownerMenu.sendCraftCost(result.successful() ? result.cost() : null);
@@ -90,7 +92,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
     @Override
     public void doClick(InventoryAction action, Player who) {
         PartArcaneCraftingTerminal terminal = part;
-        if (terminal == null || !(who instanceof ServerPlayer server)) {
+        if (!ownerMenu.connectionUnchanged() || terminal == null || !(who instanceof ServerPlayer server)) {
             return;
         }
         int attempts = switch (action) {
@@ -107,20 +109,12 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
                     terminal.craftingGrid(), terminal.crystalInventory(), terminal.wandInventory(), who);
             var result = craftCommitted(server, input, store);
             if (!result.successful()) {
-                ThELog.LOG.info(
-                        "[arcane] craft click refused: successful={} failure={}",
-                        result.successful(), result.failure());
                 break;
             }
 
             ItemStack output = result.output().copy();
             String produced = output.toString();
             boolean placed = deliver(output, action, who);
-            ThELog.LOG.info(
-                    "[arcane] craft click committed: produced={} placed={} cost={}",
-                    produced,
-                    placed,
-                    result.cost());
             if (!placed) {
                 break;
             }

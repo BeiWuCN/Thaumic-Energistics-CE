@@ -5,18 +5,13 @@ import appeng.menu.slot.AppEngSlot;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import java.util.List;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
-import thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
 import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
-import thaumicenergistics_ce.util.ThELog;
 
 public class CrystalSlot extends AppEngSlot {
-    private static long lastLogAt;
-    private static String lastLogKey = "";
 
     private final ResourceKey<IAspect> required;
 
@@ -44,30 +39,7 @@ public class CrystalSlot extends AppEngSlot {
 
     @Override
     public boolean mayPlace(ItemStack stack) {
-        boolean door = super.mayPlace(stack);
-        boolean fits = door && TcWorkbench.isValidCrystal(stack, required);
-        if (!stack.isEmpty()) {
-            trace(stack, door, fits);
-        }
-        return fits;
+        return super.mayPlace(stack) && TcWorkbench.isValidCrystal(stack, required);
     }
 
-    private void trace(ItemStack stack, boolean door, boolean fits) {
-        long now = System.currentTimeMillis();
-        String key = stack.getItem() + "|" + required.identifier() + "|" + door + "|" + fits;
-        if (key.equals(lastLogKey) && now - lastLogAt < 1000L) {
-            return;
-        }
-        lastLogKey = key;
-        lastLogAt = now;
-        Holder<IAspect> carried = EssentiaCrystals.aspectOf(stack);
-        ThELog.LOG.info("[arcane] 水晶槽 {}：来的是 {}，自带要素 {} —— 容器闸门 {}，要素匹配 {}",
-                required.identifier(),
-                stack.getItem(),
-                carried == null
-                        ? "无（不是水晶物品，或者水晶没带要素）"
-                        : carried.unwrapKey().map(k -> k.identifier().toString()).orElse("?"),
-                door ? "过" : "拦",
-                fits ? "过" : "拦");
-    }
 }

@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber.BurnState;
 import thaumicenergistics_ce.blockentity.vibrationchamber.BlockEntityEssentiaVibrationChamber;
 import thaumicenergistics_ce.blockentity.vibrationchamber.VibrationChamberSync;
-import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.TECEMenuTypes;
 
 public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
 
@@ -41,7 +41,7 @@ public class MenuEssentiaVibrationChamber extends AbstractContainerMenu {
 
     public MenuEssentiaVibrationChamber(
             int containerId, Inventory inventory, BlockEntityEssentiaVibrationChamber chamber) {
-        super(ModMenuTypes.ESSENTIA_VIBRATION_CHAMBER.get(), containerId);
+        super(TECEMenuTypes.ESSENTIA_VIBRATION_CHAMBER.get(), containerId);
         this.chamber = chamber;
 
         for (int row = 0; row < 3; row++) {

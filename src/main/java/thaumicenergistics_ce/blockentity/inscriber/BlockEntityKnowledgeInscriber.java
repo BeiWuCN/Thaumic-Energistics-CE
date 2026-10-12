@@ -4,8 +4,6 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -17,7 +15,7 @@ import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.registry.MachineMenus;
-import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.TECEBlockEntities;
 
 public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
 
@@ -40,7 +38,7 @@ public class BlockEntityKnowledgeInscriber extends ThEBaseBlockEntity {
     private final InscriberResolution resolution = new InscriberResolution(this, inventory);
 
     public BlockEntityKnowledgeInscriber(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.KNOWLEDGE_INSCRIBER.get(), pos, state);
+        super(TECEBlockEntities.KNOWLEDGE_INSCRIBER.get(), pos, state);
     }
 
     void contentsChanged() {

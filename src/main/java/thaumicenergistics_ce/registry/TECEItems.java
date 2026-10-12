@@ -22,7 +22,7 @@ import thaumicenergistics_ce.item.ItemWirelessArcaneCraftingTerminal;
 import thaumicenergistics_ce.item.ItemWirelessConnector;
 import thaumicenergistics_ce.item.ItemWirelessEssentiaTerminal;
 
-public final class ModItems {
+public final class TECEItems {
     public static final DeferredRegister.Items REGISTRY = DeferredRegister.createItems(ThEIds.MODID);
 
     public static final DeferredItem<ItemKnowledgeCore> KNOWLEDGE_CORE = REGISTRY.registerItem(
@@ -33,60 +33,60 @@ public final class ModItems {
 
     public static final DeferredItem<BlockItem> ARCANE_ASSEMBLER = REGISTRY.registerItem(
             "arcane_assembler",
-            p -> new BlockItem(ModBlocks.ARCANE_ASSEMBLER.get(), p),
+            p -> new BlockItem(TECEBlocks.ARCANE_ASSEMBLER.get(), p),
             () -> new Item.Properties().useBlockDescriptionPrefix());
 
     public static final DeferredItem<BlockItem> KNOWLEDGE_INSCRIBER = REGISTRY.registerItem(
             "knowledge_inscriber",
-            p -> new BlockItem(ModBlocks.KNOWLEDGE_INSCRIBER.get(), p),
+            p -> new BlockItem(TECEBlocks.KNOWLEDGE_INSCRIBER.get(), p),
             () -> new Item.Properties().useBlockDescriptionPrefix());
 
     public static final DeferredItem<BlockItem> ESSENTIA_CELL_WORKBENCH =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.ESSENTIA_CELL_WORKBENCH);
+            REGISTRY.registerSimpleBlockItem(TECEBlocks.ESSENTIA_CELL_WORKBENCH);
 
     public static final DeferredItem<BlockItem> ESSENTIA_VIBRATION_CHAMBER = REGISTRY.registerItem(
             "essentia_vibration_chamber",
-            p -> new BlockItem(ModBlocks.ESSENTIA_VIBRATION_CHAMBER.get(), p),
+            p -> new BlockItem(TECEBlocks.ESSENTIA_VIBRATION_CHAMBER.get(), p),
             () -> new Item.Properties().useBlockDescriptionPrefix());
 
     public static final DeferredItem<BlockItem> ALCHEMY_PROVIDER = REGISTRY.registerItem(
             "alchemy_provider",
-            p -> new BlockItem(ModBlocks.ALCHEMY_PROVIDER.get(), p),
+            p -> new BlockItem(TECEBlocks.ALCHEMY_PROVIDER.get(), p),
             () -> new Item.Properties().useBlockDescriptionPrefix());
 
     public static final DeferredItem<BlockItem> INFUSION_PROVIDER = REGISTRY.registerItem(
             "infusion_provider",
-            p -> new BlockItem(ModBlocks.INFUSION_PROVIDER.get(), p),
+            p -> new BlockItem(TECEBlocks.INFUSION_PROVIDER.get(), p),
             () -> new Item.Properties().useBlockDescriptionPrefix());
 
     public static final DeferredItem<BlockItem> DISTILLATION_ENCODER = REGISTRY.registerItem(
             "distillation_encoder",
-            p -> new BlockItem(ModBlocks.DISTILLATION_ENCODER.get(), p),
+            p -> new BlockItem(TECEBlocks.DISTILLATION_ENCODER.get(), p),
             () -> new Item.Properties().useBlockDescriptionPrefix());
 
     public static final DeferredItem<BlockItem> OCCULT_MONITOR = REGISTRY.registerItem(
             "occult_monitor",
-            p -> new BlockItem(ModBlocks.OCCULT_MONITOR.get(), p),
+            p -> new BlockItem(TECEBlocks.OCCULT_MONITOR.get(), p),
             () -> new Item.Properties().useBlockDescriptionPrefix());
 
     public static final DeferredItem<BlockItem> ALCHEMY_PROVIDER_CONNECTION = REGISTRY.registerItem(
             "alchemy_provider_connection",
-            p -> new BlockItem(ModBlocks.ALCHEMY_PROVIDER_CONNECTION.get(), p),
+            p -> new BlockItem(TECEBlocks.ALCHEMY_PROVIDER_CONNECTION.get(), p),
             () -> new Item.Properties().useBlockDescriptionPrefix());
 
-    public static final DeferredItem<BlockItem> GACHA_BOX = REGISTRY.registerSimpleBlockItem(ModBlocks.GACHA_BOX);
+    public static final DeferredItem<BlockItem> GACHA_BOX = REGISTRY.registerSimpleBlockItem(TECEBlocks.GACHA_BOX);
 
     public static final DeferredItem<BlockItem> GACHA_BOX_AGGREGATOR =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.GACHA_BOX_AGGREGATOR);
+            REGISTRY.registerSimpleBlockItem(TECEBlocks.GACHA_BOX_AGGREGATOR);
 
     public static final DeferredItem<ItemWirelessConnector> WIRELESS_CONNECTOR = REGISTRY.registerItem(
             "wireless_connector", ItemWirelessConnector::new, () -> new Item.Properties());
 
     public static final DeferredItem<BlockItem> ALKUSURE86_FUMO =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.ALKUSURE86_FUMO);
+            REGISTRY.registerSimpleBlockItem(TECEBlocks.ALKUSURE86_FUMO);
 
     public static final DeferredItem<BlockItem> BEIWU_CN_FUMO =
-            REGISTRY.registerSimpleBlockItem(ModBlocks.BEIWU_CN_FUMO);
+            REGISTRY.registerSimpleBlockItem(TECEBlocks.BEIWU_CN_FUMO);
 
     public static final DeferredItem<ItemVisInterface> VIS_INTERFACE =
             REGISTRY.registerItem("vis_interface", ItemVisInterface::new, () -> new Item.Properties());
@@ -173,7 +173,7 @@ public final class ModItems {
     public static final DeferredItem<Item> VIS_CONNECTION_CARD = REGISTRY.registerItem(
             "vis_connection_card", thaumicenergistics_ce.item.ItemVisConnectionCard::new, () -> new Item.Properties().stacksTo(64));
 
-    private ModItems() {}
+    private TECEItems() {}
 
     public static void register(IEventBus modBus) {
         REGISTRY.register(modBus);

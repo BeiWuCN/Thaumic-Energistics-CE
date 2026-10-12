@@ -14,11 +14,8 @@ import java.util.Comparator;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
@@ -32,10 +29,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.block.ThEBaseBlockEntity;
 import thaumicenergistics_ce.registry.MachineMenus;
-import thaumicenergistics_ce.registry.ModBlockEntities;
+import thaumicenergistics_ce.registry.TECEBlockEntities;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import thaumicenergistics_ce.util.ThELog;
-import thaumicenergistics_ce.util.ThEItemTags;
 
 public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
 
@@ -79,7 +75,7 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
     private int selectedAspect = -1;
 
     public BlockEntityDistillationEncoder(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.DISTILLATION_ENCODER.get(), pos, state);
+        super(TECEBlockEntities.DISTILLATION_ENCODER.get(), pos, state);
     }
 
     public SimpleContainer getInventory() {
@@ -250,9 +246,6 @@ public class BlockEntityDistillationEncoder extends ThEBaseBlockEntity {
             placed.add(slot);
         }
         if (!placed.isEmpty()) {
-            ThELog.LOG.info(
-                    "[encoder] at {} read a tag saved before slot indices were written: {} entr{} placed at {}",
-                    worldPosition, kept, kept == 1 ? "y" : "ies", placed);
         }
     }
 

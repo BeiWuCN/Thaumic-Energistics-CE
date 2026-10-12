@@ -9,7 +9,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -17,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
-import thaumicenergistics_ce.registry.ModItems;
+import thaumicenergistics_ce.registry.TECEItems;
 import thaumicenergistics_ce.util.ThELog;
 
 public final class HandlerKnowledgeCore {
@@ -39,7 +38,7 @@ public final class HandlerKnowledgeCore {
     }
 
     public static @Nullable HandlerKnowledgeCore of(ItemStack stack, HolderLookup.Provider registries) {
-        if (stack.isEmpty() || !stack.is(ModItems.KNOWLEDGE_CORE.get())) {
+        if (stack.isEmpty() || !stack.is(TECEItems.KNOWLEDGE_CORE.get())) {
             return null;
         }
         return new HandlerKnowledgeCore(stack, registries);

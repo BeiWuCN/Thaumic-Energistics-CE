@@ -15,7 +15,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.BlockEntityDistillationEncoder;
-import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.TECEMenuTypes;
 import thaumicenergistics_ce.menu.slot.AspectSelectSlot;
 import thaumicenergistics_ce.menu.slot.MachineOutputSlot;
 import thaumicenergistics_ce.menu.slot.TemplateSlot;
@@ -78,7 +78,7 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
 
     public MenuDistillationEncoder(
             int containerId, Inventory playerInventory, @Nullable BlockEntityDistillationEncoder encoder) {
-        super(ModMenuTypes.DISTILLATION_ENCODER.get(), containerId);
+        super(TECEMenuTypes.DISTILLATION_ENCODER.get(), containerId);
         this.encoder = encoder;
         this.owner = playerInventory.player;
         this.table = new EncoderAspectTable(this, encoder, aspectDisplay, selectedDisplay);

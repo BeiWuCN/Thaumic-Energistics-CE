@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
-import thaumicenergistics_ce.registry.ModMenuTypes;
+import thaumicenergistics_ce.registry.TECEMenuTypes;
 import thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import thaumicenergistics_ce.network.KnowledgeInscriberReceiver;
 
@@ -66,7 +66,7 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
 
     public MenuKnowledgeInscriber(
             int containerId, Inventory playerInventory, @Nullable BlockEntityKnowledgeInscriber inscriber) {
-        super(ModMenuTypes.KNOWLEDGE_INSCRIBER.get(), containerId);
+        super(TECEMenuTypes.KNOWLEDGE_INSCRIBER.get(), containerId);
         this.inscriber = inscriber;
         this.playerInventory = playerInventory;
 
