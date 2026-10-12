@@ -38,23 +38,21 @@ AE2 和 Thaumaturge 为必需依赖。JEI 提供配方查看与转移，Jade 提
 
 ## 从源码构建
 
-需要 JDK 25。先按项目固定的版本构建 Thaumaturge，再构建本模组。
+需要 JDK 25 和 Git。直接执行 Gradle 构建即可，首次导入时自动在线准备固定版本的 Thaumaturge 依赖。
 
 Windows：
 
 ```powershell
-powershell -File tools/fetch-thaumaturge.ps1
 .\gradlew.bat build
 ```
 
 Linux / macOS：
 
 ```sh
-./tools/fetch-thaumaturge.sh
 ./gradlew build
 ```
 
-依赖版本与 Thaumaturge 提交固定在 `gradle.properties`。脚本会获取 Thaumaturge 源码、应用项目补丁、生成数据，并将构建出的依赖 JAR 放入 `libs`。本模组的产物位于 `build/libs`，不包含 Thaumaturge 的二进制。
+依赖版本与 Thaumaturge 提交固定在 `gradle.properties`。Gradle 会获取 Thaumaturge 源码、应用 `gradle/patches` 中的补丁、生成数据，并将构建出的依赖 JAR 放入 `libs`。首次准备需要联网；之后可复用本地依赖。使用 `prepareThaumaturge -PrebuildThaumaturge` 可重新准备。本模组的产物位于 `build/libs`，不包含 Thaumaturge 的二进制。
 
 ## 问题反馈
 

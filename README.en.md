@@ -38,23 +38,21 @@ Server settings are stored in `config/thaumicenergistics_ce-server.toml`. `termi
 
 ## Building from source
 
-Use JDK 25. Build the pinned Thaumaturge dependency first, then build this mod.
+Use JDK 25 and Git. Run Gradle directly; the first import automatically prepares the pinned Thaumaturge dependency online.
 
 Windows:
 
 ```powershell
-powershell -File tools/fetch-thaumaturge.ps1
 .\gradlew.bat build
 ```
 
 Linux / macOS:
 
 ```sh
-./tools/fetch-thaumaturge.sh
 ./gradlew build
 ```
 
-Dependency versions and the Thaumaturge revision are pinned in `gradle.properties`. The script fetches Thaumaturge's source, applies the project patches, generates its data and places the dependency JAR in `libs`. This mod's artifacts are written to `build/libs` and do not bundle Thaumaturge binaries.
+Dependency versions and the Thaumaturge revision are pinned in `gradle.properties`. Gradle fetches Thaumaturge's source, applies `gradle/patches`, generates its data and places the dependency JAR in `libs`. The first preparation requires network access; subsequent builds reuse the local dependency. Run `prepareThaumaturge -PrebuildThaumaturge` to prepare it again. This mod's artifacts are written to `build/libs` and do not bundle Thaumaturge binaries.
 
 ## Reporting issues
 

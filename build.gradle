@@ -236,28 +236,8 @@ neoForge {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 
-// ---- Thaumaturge: built by the builder, never shipped ---------------------
-// It is All Rights Reserved. Its LICENSE forbids publishing the mod or any binary built from it and
-// names "GitHub Releases on a fork" as forbidden, so this repository cannot carry the jar, and it
-// publishes no maven artifact either, so it cannot be resolved. Section 2.4 does allow building it
-// for your own use, which is what tools/fetch-thaumaturge.* does: once, from the canonical
-// repository, at the commit pinned in gradle.properties. See libs/README.md.
+apply from: 'gradle/thaumaturge.gradle'
 def thaumaturgeJars = fileTree(dir: 'libs', include: ['thaumaturge-*.jar'])
-if (thaumaturgeJars.isEmpty()) {
-    throw new GradleException("""
-        No Thaumaturge jar in libs/.
-
-        Thaumaturge is All Rights Reserved and publishes no maven artifact, so it cannot be
-        downloaded for you - every builder compiles it from the canonical repository themselves.
-        Run one of these once and it will be there:
-
-            tools/fetch-thaumaturge.sh                      (Linux, macOS, CI)
-            powershell -File tools/fetch-thaumaturge.ps1    (Windows PowerShell)
-
-        It clones github.com/Leclowndu93150/Thaumaturge at ${thaumaturge_commit} and leaves the
-        built jar in libs/. Do not commit it or pass it on; the licence forbids both.
-    """.stripIndent())
-}
 
 dependencies {
     if (project.hasProperty('patternProviderCompatibility')) {

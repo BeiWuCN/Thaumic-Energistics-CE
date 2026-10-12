@@ -35,9 +35,7 @@ replay_pid*.log
 _scratch/
 src/test/
 src/selftest/
-tools/__pycache__/
-tools/probe-jars.ps1
-tools/archive-java-comments.py
+tools/
 src/generated/resources/.cache/
 PLAN*.md
 Thaumic-Energistics-CE-2.0-Renewed.zip

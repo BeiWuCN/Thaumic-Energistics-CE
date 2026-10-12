@@ -1,0 +1,75 @@
+import java.util.zip.ZipFile
+
+// The official release does not yet expose the API used by this pinned revision.
+// Build the dependency locally; never bundle or publish it with TECE.
+def dependencyJars = { fileTree(dir: 'libs', include: 'thaumaturge-*.jar').files }
+def prepareDependency = {
+    if (!dependencyJars().isEmpty() && !project.hasProperty('rebuildThaumaturge')) return
+    if (gradle.startParameter.offline) {
+        throw new GradleException('Thaumaturge is missing. Run Gradle once online to prepare the pinned dependency.')
+    }
+    def source = file("thaumaturge-src/${thaumaturge_commit}")
+    def execute = { File directory, List<String> arguments ->
+        logger.lifecycle("Preparing Thaumaturge: ${arguments.join(' ')}")
+        def process = providers.exec {
+            workingDir directory
+            commandLine arguments
+            ignoreExitValue true
+        }
+        if (process.result.get().exitValue != 0) {
+            logger.error(process.standardOutput.asText.get())
+            logger.error(process.standardError.asText.get())
+            throw new GradleException('Thaumaturge preparation failed; see the command output above.')
+        }
+    }
+    if (!new File(source, '.git').isDirectory()) {
+        source.mkdirs()
+        execute(source, ['git', 'init', '--quiet'])
+        execute(source, ['git', 'remote', 'add', 'origin', 'https://github.com/Leclowndu93150/Thaumaturge.git'])
+        execute(source, ['git', 'fetch', '--quiet', '--depth=1', 'origin', thaumaturge_commit.toString()])
+        execute(source, ['git', 'checkout', '--quiet', '--detach', 'FETCH_HEAD'])
+    }
+    def revision = providers.exec {
+        workingDir source
+        commandLine 'git', 'rev-parse', 'HEAD'
+    }.standardOutput.asText.get().trim()
+    if (revision != thaumaturge_commit) throw new GradleException("Unexpected Thaumaturge revision: ${revision}")
+    fileTree('gradle/patches').matching { include '*.patch' }.files.sort().each { patch ->
+        def applied = providers.exec {
+            workingDir source
+            commandLine 'git', 'apply', '--reverse', '--check', patch.absolutePath
+            ignoreExitValue true
+        }.result.get().exitValue == 0
+        if (!applied) {
+            execute(source, ['git', 'apply', '--check', patch.absolutePath])
+            execute(source, ['git', 'apply', patch.absolutePath])
+        }
+    }
+    def windows = System.getProperty('os.name').toLowerCase().contains('windows')
+    def wrapper = windows ? ['cmd', '/c', 'gradlew.bat'] : ['sh', 'gradlew']
+    // Upstream does not wire datagen as a jar dependency; separate invocations enforce order.
+    ['runServerData', 'runClientData', 'jar'].each { task ->
+        execute(source, wrapper + ['--no-build-cache', '--no-daemon', task])
+    }
+    def jars = fileTree(new File(source, 'build/libs')).matching {
+        include 'thaumaturge-*.jar'
+        exclude '*-sources.jar', '*-javadoc.jar', '*-dev.jar'
+    }.files
+    if (jars.size() != 1) throw new GradleException("Expected one Thaumaturge JAR, found ${jars.size()}")
+    def built = jars.first()
+    new ZipFile(built).withCloseable { archive ->
+        def aspects = archive.entries().findAll {
+            it.name.startsWith('data/thaumaturge/thaumaturge/aspect/') && it.name.endsWith('.json')
+        }.size()
+        if (aspects < 37) throw new GradleException('Thaumaturge datagen is incomplete; refusing to install the dependency.')
+    }
+    copy { from built; into 'libs' }
+    logger.lifecycle("Prepared pinned Thaumaturge dependency: ${built.name}")
+}
+
+// Prepare before dependency resolution so IDE import works without a separate script.
+prepareDependency()
+tasks.register('prepareThaumaturge') {
+    group = 'build setup'
+    description = 'Fetches and builds the pinned Thaumaturge dependency when missing.'
+}
