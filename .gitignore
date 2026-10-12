@@ -37,9 +37,8 @@ src/generated/resources/.cache/
 PLAN*.md
 Thaumic-Energistics-CE-2.0-Renewed.zip
 
-# Keep Markdown documentation local, except changelogs and the two READMEs.
+# Keep Markdown documentation local, except the current changelog and the two READMEs.
 *.md
-!CHANGELOG*.md
-!changelog*.md
+!/CHANGELOG-2.7.4.5.md
 !/README.md
 !/README.en.md
