@@ -37,6 +37,7 @@ This update includes the changes made since 2.7.4.4.
 - Split arcane terminal upgrade management, crafting runtime state and slot layout into separate components.
 - Remove unused trace classes, diagnostic caches, timers, neighbour scans, redundant methods and unused imports from production code. Retain error reporting and keep verification code outside release artifacts.
 - Add regression checks for shared cards, connection changes, card-slot visibility, VIS refresh, transaction payment, JEI handler selection and provider integration switches, including actual ExtendedAE and ExtendedAE Plus menus.
+- Keep local verification sources and diagnostic scripts out of Git and exclude them explicitly from release artifacts; clean clones can build without local tests.
 - Add GitHub Release artifact synchronization to CurseForge and correct its Minecraft version filtering.
 
 # TECE 2.7.4.5
@@ -78,4 +79,5 @@ This update includes the changes made since 2.7.4.4.
 - 将奥术终端的升级卡管理、合成运行状态和槽位布局拆为独立组件。
 - 清理正式源码中的无用追踪类、诊断缓存、计时、邻居扫描、冗余方法及无用导入，保留错误报告；验证代码不进入发布产物。
 - 补充共享卡、连接变化、卡槽显隐、VIS 刷新、事务扣费、JEI 处理器匹配及供应器独立开关的回归检查，覆盖 ExtendedAE 和 ExtendedAE Plus 的实际菜单。
+- 测试源码及诊断脚本仅保留在本地，不再纳入 Git，并为发布产物添加明确的排除规则；全新克隆无需本地测试即可构建。
 - 增加 GitHub Release 产物同步到 CurseForge 的流程，并修正 Minecraft 版本筛选。

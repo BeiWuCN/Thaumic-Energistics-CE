@@ -16,6 +16,12 @@ java {
     withSourcesJar()
 }
 
+def localVerification = file('src/test/java').isDirectory()
+        && findProperty('localVerification') != 'false'
+if (!localVerification) {
+    sourceSets.test.java.setSrcDirs([])
+    sourceSets.test.resources.setSrcDirs([])
+}
 sourceSets.test.compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
 sourceSets.test.runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
 
@@ -60,7 +66,8 @@ repositories {
 // resources at src/selftest itself lists each one twice: javac tolerates that, the resource copy
 // does not - it fails the run with "Entry META-INF/services/... is a duplicate but no duplicate
 // handling strategy has been set".
-def selftestDir = ['src/selftest', '_scratch/selftest'].collect { file(it) }.find { it.isDirectory() }
+def selftestDir = findProperty('localVerification') == 'false' ? null
+        : ['src/selftest', '_scratch/selftest'].collect { file(it) }.find { it.isDirectory() }
 if (selftestDir != null) {
     sourceSets {
         selftest {
@@ -94,7 +101,7 @@ neoForge {
         "${mod_id}" {
             sourceSet(sourceSets.main)
             // 注册表集成检查只参与开发运行，不打入发布 JAR。
-            sourceSet(sourceSets.test)
+            if (localVerification) sourceSet(sourceSets.test)
             // The self-tests are a second folder of the SAME mod, which is what puts them in a dev run:
             // ModDevGradle hands a run its mods as MOD_CLASSES folders, not as a Java classpath, so a
             // runtimeOnly dependency would never be seen by the loader. They wire themselves up from
@@ -480,10 +487,11 @@ var thaumaturgeIsolation = tasks.register('thaumaturgeIsolation') {
 
 tasks.named('check') {
     dependsOn thaumaturgeIsolation
-    dependsOn 'researchFormattingCheck'
+    if (localVerification) dependsOn 'researchFormattingCheck'
 }
 
 tasks.register('researchFormattingCheck', JavaExec) {
+    onlyIf { localVerification }
     dependsOn tasks.named('testClasses')
     classpath = sourceSets.test.output + sourceSets.main.compileClasspath
     mainClass = 'thaumicenergistics_ce.recipe.ResearchFormattingChecks'
@@ -492,6 +500,8 @@ tasks.register('researchFormattingCheck', JavaExec) {
 
 tasks.withType(Jar).configureEach {
     exclude('doc/**')
+    exclude('src/test/**', 'test/**', '**/selftest/**', 'tools/**', 'scripts/**')
+    exclude('**/*Checks.java', '**/*Checks.class', '**/*.py', '**/*.ps1', '**/*.sh', '**/*.bat')
 }
 
 jar {
