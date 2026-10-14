@@ -34,6 +34,7 @@ public class QuantumWirelessTerminalMenuHost<T extends WirelessTerminalItem> ext
             BiConsumer<Player, ISubMenu> returnToMainMenu) {
         super(item, player, locator, returnToMainMenu);
         quantumStorage = new SupplierStorage(() -> {
+            if (!getLinkStatus().connected()) return NullInventory.of();
             var node = getActionableNode();
             return node == null ? NullInventory.of() : node.getGrid().getStorageService().getInventory();
         });
@@ -63,8 +64,12 @@ public class QuantumWirelessTerminalMenuHost<T extends WirelessTerminalItem> ext
 
     @Override
     protected void updateConnectedAccessPoint() {
-        super.updateConnectedAccessPoint();
         quantumNode = null;
+        updateQuantumConnection();
+        if (quantumNode == null) super.updateConnectedAccessPoint();
+    }
+
+    private void updateQuantumConnection() {
         if (!QuantumTerminalSupport.enabled() || getPlayer().level().isClientSide()
                 || !getUpgrades().isInstalled(QuantumTerminalSupport.card())) return;
         var singularity = QuantumTerminalSupport.singularity(getItemStack());
@@ -75,8 +80,6 @@ public class QuantumWirelessTerminalMenuHost<T extends WirelessTerminalItem> ext
         if (bridge == null) return;
         var node = bridge.getActionableNode();
         if (node == null || !node.getGrid().getEnergyService().isNetworkPowered()) return;
-        var linked = getItem().getLinkedGrid(getItemStack(), getPlayer().level(), null);
-        if (linked != null && linked != node.getGrid()) return;
         quantumNode = node;
     }
 

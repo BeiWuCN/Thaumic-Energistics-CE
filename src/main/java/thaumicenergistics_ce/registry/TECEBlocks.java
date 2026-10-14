@@ -134,6 +134,15 @@ public final class TECEBlocks {
                     .sound(SoundType.WOOL)
                     .noOcclusion());
 
+    public static final DeferredBlock<BlockDecorativeFigure> XIAO_LENG_FUMO = REGISTRY.registerBlock(
+            "xiao_leng_fumo",
+            BlockDecorativeFigure::new,
+            properties -> properties
+                    .mapColor(MapColor.WOOL)
+                    .strength(0.5F)
+                    .sound(SoundType.WOOL)
+                    .noOcclusion());
+
     public static final DeferredBlock<BlockGachaBox> GACHA_BOX = REGISTRY.registerBlock(
             "gacha_box",
             BlockGachaBox::new,

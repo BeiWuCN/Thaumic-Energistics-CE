@@ -1,24 +1,38 @@
 {
-	"required": true,
-	"package": "thaumicenergistics_ce.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-        "InterfaceLogicDropMixin",
-        "IOBusUpgradeSlotsMixin",
-        "IOBusRecoveryMixin",
-        "BusRecoveryItemMixin",
-        "ExportBusOperationMixin",
-        "StorageBusUpgradeSlotsMixin",
-        "TerminalVisibilityMixin",
-        "PatternProviderEssentiaMixin",
-        "PatternProviderMenuEssentiaMixin",
-        "GenericStackInvEssentiaMixin",
-        "PatternProviderReturnEssentiaMixin",
-        "PatternProviderCardSlotMixin"
-	],
-    "client": ["ConfigCommentI18nMixin", "TerminalScreenVisibilityMixin", "ArcaneUpgradeTooltipMixin", "PatternProviderScreenEssentiaMixin", "WidgetContainerAccessor"],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"minVersion": "0.8"
+  "required": true,
+  "package": "thaumicenergistics_ce.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "InterfaceLogicDropMixin",
+    "IOBusUpgradeSlotsMixin",
+    "IOBusRecoveryMixin",
+    "BusRecoveryItemMixin",
+    "ExportBusOperationMixin",
+    "StorageBusUpgradeSlotsMixin",
+    "TerminalVisibilityMixin",
+    "PatternProviderEssentiaMixin",
+    "PatternProviderMenuEssentiaMixin",
+    "GenericStackInvEssentiaMixin",
+    "PatternProviderReturnEssentiaMixin",
+    "PatternProviderCardSlotMixin",
+    "AdvancedProviderEssentiaMixin",
+    "AdvancedProviderMenuEssentiaMixin",
+    "LightningProviderEssentiaMixin",
+    "ProviderStorageTargetEssentiaMixin",
+    "PigmeeProviderEssentiaMixin",
+    "PigmeeProviderMenuEssentiaMixin"
+  ],
+  "client": [
+    "ConfigCommentI18nMixin",
+    "TerminalScreenVisibilityMixin",
+    "ArcaneUpgradeTooltipMixin",
+    "PatternProviderScreenEssentiaMixin",
+    "WidgetContainerAccessor",
+    "AdvancedProviderScreenEssentiaMixin",
+    "ScreenStyleAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
 }

@@ -2,7 +2,7 @@ package thaumicenergistics_ce.menu;
 
 import com.leclowndu93150.thaumaturge.api.aspect.AspectIndexAccess;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.capability.KnowledgeAccess;
+import com.leclowndu93150.thaumaturge.api.capability.PlayerResearchAccess;
 import com.leclowndu93150.thaumaturge.api.research.pool.AspectPoolAccess;
 import com.leclowndu93150.thaumaturge.api.research.scan.ScanKeys;
 import java.util.ArrayList;
@@ -102,7 +102,7 @@ final class EncoderAspectTable {
 
     private boolean sourceIsScanned(ItemStack source) {
         return !source.isEmpty()
-                && KnowledgeAccess.of(menu.owner).isResearchKnown(ScanKeys.item(source.getItem()));
+                && PlayerResearchAccess.of(menu.owner).knows(ScanKeys.item(source.getItem()));
     }
 
     boolean revealsNothing() {

@@ -88,6 +88,9 @@ public final class TECEItems {
     public static final DeferredItem<BlockItem> BEIWU_CN_FUMO =
             REGISTRY.registerSimpleBlockItem(TECEBlocks.BEIWU_CN_FUMO);
 
+    public static final DeferredItem<BlockItem> XIAO_LENG_FUMO =
+            REGISTRY.registerSimpleBlockItem(TECEBlocks.XIAO_LENG_FUMO);
+
     public static final DeferredItem<ItemVisInterface> VIS_INTERFACE =
             REGISTRY.registerItem("vis_interface", ItemVisInterface::new, () -> new Item.Properties());
 

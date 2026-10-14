@@ -43,5 +43,9 @@ Thaumic-Energistics-CE-2.0-Renewed.zip
 # Keep Markdown documentation local, except the current changelog and the two READMEs.
 *.md
 !/CHANGELOG-2.7.4.5.md
+!/CHANGELOG-2.7.4.6.md
 !/README.md
 !/README.en.md
+
+# Local provenance marker for the self-built Thaumaturge dependency.
+libs/thaumaturge-source.txt

@@ -1,6 +1,5 @@
 package thaumicenergistics_ce.recipe.arcane;
 
-import appeng.api.networking.energy.IEnergySource;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneWorkbenchContext;
 import com.leclowndu93150.thaumaturge.api.recipe.IArcaneWorkbench;
 import com.leclowndu93150.thaumaturge.api.recipe.IWorkbenchAuraSource;
@@ -39,17 +38,8 @@ public final class TerminalWorkbenchVis {
             return 0;
         }
         PartArcaneCraftingTerminal part = terminal.part();
-        if (part == null) {
-            return 0;
-        }
-        IEnergySource payer = terminal.payer();
-        int supplied = part.supplyAura(need, transaction);
-        if (supplied < need && payer != null && !player.level().isClientSide()) {
-            supplied += TerminalAuraPayment.pay(
-                    player.level(), player.blockPosition(), payer,
-                    Math.multiplyExact(need - supplied, TerminalAuraPayment.CENTIVIS_PER_VIS), transaction)
-                    / TerminalAuraPayment.CENTIVIS_PER_VIS;
-        }
-        return supplied;
+        return part != null ? part.supplyAura(need, transaction)
+                : terminal.payer() == null ? 0
+                : TerminalAuraPayment.payChunkAura(player.level(), player.blockPosition(), need, transaction);
     }
 }

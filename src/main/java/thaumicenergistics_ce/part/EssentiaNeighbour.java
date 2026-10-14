@@ -4,7 +4,7 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
-import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
+import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaConduit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -28,16 +28,16 @@ public final class EssentiaNeighbour {
             return null;
         }
 
-        IEssentiaTransport transport = server.getCapability(EssentiaCapabilities.TRANSPORT, target, from);
+        IEssentiaConduit transport = com.leclowndu93150.thaumaturge.api.essentia.EssentiaAccess.conduit(server, target, from);
         if (transport == null) {
             return server.getCapability(EssentiaCapabilities.STORAGE, target, from);
         }
-        if (!transport.isConnectable(from)) {
+        if (!transport.connectsOn(from)) {
             return null;
         }
 
         for (Direction accepted : FACES) {
-            if (!transport.isConnectable(accepted)) {
+            if (!transport.connectsOn(accepted)) {
                 continue;
             }
             IEssentiaStorage storage = server.getCapability(EssentiaCapabilities.STORAGE, target, accepted);
@@ -49,13 +49,13 @@ public final class EssentiaNeighbour {
         return new Adapter(transport, from);
     }
 
-    private record Adapter(IEssentiaTransport transport, Direction face)
+    private record Adapter(IEssentiaConduit transport, Direction face)
             implements IEssentiaStorage, ThEImmediateStorage {
 
         @Override
         public AspectList contents() {
-            var aspect = transport.getEssentiaType(face);
-            int amount = transport.getEssentiaAmount(face);
+            var aspect = transport.heldAspect(face);
+            int amount = transport.heldAmount(face);
             return aspect == null || amount <= 0
                     ? AspectList.EMPTY
                     : AspectList.EMPTY.add(aspect, amount);
@@ -63,28 +63,28 @@ public final class EssentiaNeighbour {
 
         @Override
         public int amount(Holder<IAspect> aspect) {
-            var held = transport.getEssentiaType(face);
-            return held != null && held.equals(aspect) ? transport.getEssentiaAmount(face) : 0;
+            var held = transport.heldAspect(face);
+            return held != null && held.equals(aspect) ? transport.heldAmount(face) : 0;
         }
 
         @Override
         public int insert(Holder<IAspect> aspect, int amount, TransactionContext transaction) {
-            return transport.addEssentia(aspect, amount, face);
+            return transport.insert(aspect, amount, face, false);
         }
 
         @Override
         public int extract(Holder<IAspect> aspect, int amount, TransactionContext transaction) {
-            return transport.takeEssentia(aspect, amount, face);
+            return transport.extract(aspect, amount, face, false);
         }
 
         @Override
         public int previewInsert(Holder<IAspect> aspect, int amount) {
-            return transport.addEssentia(aspect, amount, face, true);
+            return transport.insert(aspect, amount, face, true);
         }
 
         @Override
         public int previewExtract(Holder<IAspect> aspect, int amount) {
-            return transport.takeEssentia(aspect, amount, face, true);
+            return transport.extract(aspect, amount, face, true);
         }
 
         @Override

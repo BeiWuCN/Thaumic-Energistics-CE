@@ -36,9 +36,9 @@ public final class GolemBackpackClientData {
         return STATUS.containsKey(golem);
     }
 
-    public static boolean isInRange(EntityThaumaturgeGolem golem) {
+    public static boolean isWorking(EntityThaumaturgeGolem golem) {
         return STATUS.getOrDefault(golem, GolemBackpackPayload.STATUS_NO_BACKPACK)
-                == GolemBackpackPayload.STATUS_IN_RANGE;
+                == GolemBackpackPayload.STATUS_WORKING;
     }
 
     public static BackpackSkins skinOf(EntityThaumaturgeGolem golem) {

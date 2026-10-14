@@ -10,7 +10,7 @@ import appeng.api.networking.ticking.IGridTickable;
 import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
 import appeng.blockentity.grid.AENetworkedPoweredBlockEntity;
-import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
+import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaConduit;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -105,10 +105,6 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         if (!(level instanceof ServerLevel server)) {
             return TickRateModulation.IDLE;
         }
-        if (!ThEConfig.GACHA_ENABLED.get()) {
-            showScreen(BlockGachaBox.Screen.OFF);
-            return TickRateModulation.SAME;
-        }
         if (getMainNode().isActive()) {
             power.chargeFromGrid();
         }
@@ -155,9 +151,6 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
     }
 
     @Nullable GachaWait setupReason(ServerLevel server) {
-        if (!ThEConfig.GACHA_ENABLED.get()) {
-            return GachaWait.DISABLED;
-        }
         if (!structureComplete()) {
             return GachaWait.NO_STRUCTURE;
         }
@@ -184,8 +177,8 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         return cognitio;
     }
 
-    public @Nullable IEssentiaTransport essentiaTransport(@Nullable Direction face) {
-        return face == null || port.isConnectable(face) ? port : null;
+    public @Nullable IEssentiaConduit essentiaTransport(@Nullable Direction face) {
+        return face == null || port.connectsOn(face) ? port : null;
     }
 
     Direction backFace() {

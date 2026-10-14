@@ -31,6 +31,7 @@ import thaumicenergistics_ce.registry.TECEItems;
 public abstract class PatternProviderEssentiaMixin implements EssentiaPatternProvider {
     @Shadow @Final private PatternProviderLogicHost host;
     @Shadow @Final private IActionSource actionSource;
+    @Shadow @Final private appeng.helpers.patternprovider.PatternProviderReturnInventory returnInv;
     @Unique private AppEngInternalInventory tce$card;
     @Unique private thaumicenergistics_ce.integration.ae2.patternprovider.EssentiaProviderReturn tce$return;
 
@@ -39,7 +40,7 @@ public abstract class PatternProviderEssentiaMixin implements EssentiaPatternPro
     private void tce$initialize(appeng.api.networking.IManagedGridNode node, PatternProviderLogicHost host,
             int slots, CallbackInfo ci) {
         var returnGate = (thaumicenergistics_ce.integration.ae2.patternprovider.EssentiaReturnGate)
-                ((PatternProviderLogic) (Object) this).getReturnInv();
+                returnInv;
         returnGate.setEssentiaGate(this::essentiaEnabled);
         returnGate.setEssentiaChangeListener(() ->
                 ((thaumicenergistics_ce.integration.ae2.patternprovider.EssentiaProviderReturn)
@@ -47,9 +48,14 @@ public abstract class PatternProviderEssentiaMixin implements EssentiaPatternPro
     }
 
     @Override
+    public appeng.helpers.externalstorage.GenericStackInv essentiaBuffer() {
+        return ((PatternProviderLogic) (Object) this).getReturnInv();
+    }
+
+    @Override
     public com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage essentiaReturnStorage() {
         if (tce$return == null) tce$return = new thaumicenergistics_ce.integration.ae2.patternprovider.EssentiaProviderReturn(
-                (PatternProviderLogic) (Object) this);
+                this);
         return tce$return;
     }
 
@@ -79,6 +85,8 @@ public abstract class PatternProviderEssentiaMixin implements EssentiaPatternPro
             case "ae2" -> thaumicenergistics_ce.config.ThEConfig.PATTERN_PROVIDER_AE2.get();
             case "extendedae" -> thaumicenergistics_ce.config.ThEConfig.PATTERN_PROVIDER_EXTENDED_AE.get();
             case "extendedae_plus" -> thaumicenergistics_ce.config.ThEConfig.PATTERN_PROVIDER_EXTENDED_AE_PLUS.get();
+            case "advanced_ae" -> thaumicenergistics_ce.config.ThEConfig.PATTERN_PROVIDER_ADVANCED_AE.get();
+            case "ae2lt" -> thaumicenergistics_ce.config.ThEConfig.PATTERN_PROVIDER_LIGHTNING.get();
             default -> false;
         };
     }

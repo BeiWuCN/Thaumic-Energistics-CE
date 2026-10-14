@@ -13,7 +13,7 @@ public final class TcWand {
     private TcWand() {}
 
     public static ItemStack focus(ItemStack wand) {
-        return wand.getItem() instanceof ItemWand item ? item.getFocusStack(wand) : ItemStack.EMPTY;
+        return wand.getItem() instanceof ItemWand item ? item.socketedFocus(wand) : ItemStack.EMPTY;
     }
 
     public static boolean holdsFocus(ItemStack wand, Item focus) {
@@ -38,18 +38,18 @@ public final class TcWand {
 
     public static void setFocus(ItemStack wand, ItemStack focus) {
         if (wand.getItem() instanceof ItemWand item) {
-            item.setFocus(wand, focus);
+            item.socketFocus(wand, focus);
         }
     }
 
 
     public static boolean canPayVis(ItemStack wand, Player player, float amount) {
         return wand.getItem() instanceof ItemWand item
-                && item.consumeVis(wand, player, amount, false, true);
+                && item.drawVis(wand, player, amount, false, true);
     }
 
     public static boolean payVis(ItemStack wand, Player player, float amount) {
         return wand.getItem() instanceof ItemWand item
-                && item.consumeVis(wand, player, amount, false, false);
+                && item.drawVis(wand, player, amount, false, false);
     }
 }

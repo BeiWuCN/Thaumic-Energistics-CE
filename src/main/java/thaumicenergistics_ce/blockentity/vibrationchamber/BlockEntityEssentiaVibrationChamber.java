@@ -10,7 +10,7 @@ import appeng.blockentity.grid.AENetworkedBlockEntity;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
-import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
+import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaConduit;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -30,7 +30,7 @@ import thaumicenergistics_ce.registry.TECEBlockEntities;
 import thaumicenergistics_ce.util.ThETransaction;
 
 public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
-        implements IGridTickable, IEssentiaStorage, IEssentiaTransport, MenuProvider {
+        implements IGridTickable, IEssentiaStorage, IEssentiaConduit, MenuProvider {
 
     public static final int MAX_ESSENTIA = 64;
 
@@ -95,46 +95,43 @@ public class BlockEntityEssentiaVibrationChamber extends AENetworkedBlockEntity
     public long contentRevision() { return tank.revision(); }
 
     @Override
-    public boolean isConnectable(Direction side) { return true; }
+    public boolean connectsOn(Direction side) { return true; }
 
     @Override
-    public boolean canInputFrom(Direction side) { return true; }
+    public boolean receivesOn(Direction side) { return true; }
 
     @Override
-    public boolean canOutputTo(Direction side) { return true; }
+    public boolean releasesOn(Direction side) { return true; }
 
     @Override
-    public void setSuction(@Nullable Holder<IAspect> aspect, int amount) {}
-
-    @Override
-    public @Nullable Holder<IAspect> getSuctionType(Direction side) {
-        return null;
+    public com.leclowndu93150.thaumaturge.api.essentia.EssentiaPull pull(Direction side) {
+        return com.leclowndu93150.thaumaturge.api.essentia.EssentiaPull.any(tank.suctionAmount(burn.paused()));
     }
 
     @Override
-    public int getSuctionAmount(Direction side) { return tank.suctionAmount(burn.paused()); }
+    public int extract(Holder<IAspect> aspect, int amount, Direction side, boolean simulate) { return 0; }
 
     @Override
-    public int takeEssentia(Holder<IAspect> aspect, int amount, Direction side) { return 0; }
-
-    @Override
-    public int addEssentia(Holder<IAspect> aspect, int amount, Direction side) {
-        return ThETransaction.apply(transaction -> insert(aspect, amount, transaction));
+    public int insert(Holder<IAspect> aspect, int amount, Direction side, boolean simulate) {
+        return simulate ? ThETransaction.preview(transaction -> insert(aspect, amount, transaction))
+                : ThETransaction.apply(transaction -> insert(aspect, amount, transaction));
     }
 
     @Override
-    public @Nullable Holder<IAspect> getEssentiaType(Direction side) {
+    public @Nullable Holder<IAspect> heldAspect(Direction side) {
         return tank.amount() <= 0 ? null : tank.aspect();
     }
 
     @Override
-    public int getEssentiaAmount(Direction side) { return tank.amount(); }
+    public int heldAmount(Direction side) { return tank.amount(); }
 
     @Override
-    public int getMinimumSuction() { return 1; }
+    public int pullThreshold() { return 1; }
 
     @Override
-    public int spaceFor(Holder<IAspect> aspect, Direction side) { return tank.space(); }
+    public int roomFor(Holder<IAspect> aspect, Direction side) {
+        return aspect == null || burn.paused() ? 0 : tank.space();
+    }
 
     public int getStoredEssentia() { return tank.amount(); }
     public int getMaxEssentia() { return MAX_ESSENTIA; }

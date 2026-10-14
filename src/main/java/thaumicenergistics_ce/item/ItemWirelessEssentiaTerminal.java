@@ -31,6 +31,14 @@ public class ItemWirelessEssentiaTerminal extends WirelessTerminalItem {
     }
 
     @Override
+    public void appendHoverText(net.minecraft.world.item.ItemStack stack, TooltipContext context,
+            net.minecraft.world.item.component.TooltipDisplay display,
+            java.util.function.Consumer<net.minecraft.network.chat.Component> lines,
+            net.minecraft.world.item.TooltipFlag flag) {
+        super.appendHoverText(stack, context, display, QuantumTerminalSupport.connectionTooltip(stack, lines), flag);
+    }
+
+    @Override
     public @Nullable WirelessTerminalMenuHost<?> getMenuHost(
             Player player, ItemMenuHostLocator locator, @Nullable BlockHitResult hitResult) {
         return new WirelessEssentiaTerminalMenuHost(

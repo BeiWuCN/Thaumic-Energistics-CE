@@ -3,7 +3,6 @@ package thaumicenergistics_ce.blockentity.gachabox;
 import net.minecraft.network.chat.Component;
 
 public enum GachaWait {
-    DISABLED("disabled", "Disabled in server config"),
     NO_STRUCTURE("no_structure", "The upper half is missing"),
     NO_BRAIN("no_brain", "Not bound"),
     UNBOUND_BRAIN("unbound_brain", "Not bound"),
@@ -23,7 +22,7 @@ public enum GachaWait {
     }
 
     public boolean blankScreen() {
-        return this == DISABLED || this == NO_STRUCTURE || this == NO_CHANNEL;
+        return this == NO_STRUCTURE || this == NO_CHANNEL;
     }
 
     public Component label() {

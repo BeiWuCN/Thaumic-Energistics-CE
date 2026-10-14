@@ -56,7 +56,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
             ownerMenu.sendCraftCost(null);
             return;
         }
-        if (part == null || serverPlayer == null) {
+        if (serverPlayer == null) {
             return;
         }
         IArcaneCraftingInput input = buildInput();
@@ -91,8 +91,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
 
     @Override
     public void doClick(InventoryAction action, Player who) {
-        PartArcaneCraftingTerminal terminal = part;
-        if (!ownerMenu.connectionUnchanged() || terminal == null || !(who instanceof ServerPlayer server)) {
+        if (!ownerMenu.connectionUnchanged() || !(who instanceof ServerPlayer server)) {
             return;
         }
         int attempts = switch (action) {
@@ -106,14 +105,13 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
                 break;
             }
             var store = new TerminalArcaneCraftingStore(
-                    terminal.craftingGrid(), terminal.crystalInventory(), terminal.wandInventory(), who);
+                    ownerMenu.getCraftingMatrix(), ownerMenu.crystalInventory(), ownerMenu.wandInventory(), who);
             var result = craftCommitted(server, input, store);
             if (!result.successful()) {
                 break;
             }
 
             ItemStack output = result.output().copy();
-            String produced = output.toString();
             boolean placed = deliver(output, action, who);
             if (!placed) {
                 break;
@@ -147,16 +145,13 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
     }
 
     private @Nullable IArcaneCraftingInput buildInput() {
-        if (part == null) {
-            return null;
-        }
         List<ItemStack> cells = IntStream.range(0, PartArcaneCraftingTerminal.GRID_SIZE)
-                .mapToObj(i -> part.craftingGrid().getStackInSlot(i))
+                .mapToObj(i -> ownerMenu.getCraftingMatrix().getStackInSlot(i))
                 .toList();
-        ItemStack wand = part.wandInventory().getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT);
+        ItemStack wand = ownerMenu.wandInventory().getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT);
         List<ItemStack> crystals = new ArrayList<>(PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
-            crystals.add(part.crystalInventory().getStackInSlot(i));
+            crystals.add(ownerMenu.crystalInventory().getStackInSlot(i));
         }
         boolean visConnection = ownerMenu.hasVisConnectionCard();
         return new TerminalArcaneCraftingInput(

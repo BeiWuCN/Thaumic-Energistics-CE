@@ -32,9 +32,6 @@ final class AssemblerCraftRunner {
 
 
     TickRateModulation craftingTick(IGrid grid, int ticksSinceLast) {
-        if (!ThEConfig.ASSEMBLER_ENABLED.get()) {
-            return TickRateModulation.SAME;
-        }
         if (owner.craft.craftTicks() >= owner.upgrades.ticksPerCraft()) {
             return completeCraft(grid);
         }

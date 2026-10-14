@@ -15,6 +15,10 @@ public final class TECEDataComponents {
             REGISTRY.register("quantum_singularity", () -> DataComponentType.<ItemContainerContents>builder()
                     .persistent(ItemContainerContents.CODEC).networkSynchronized(ItemContainerContents.STREAM_CODEC).build());
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ItemContainerContents>> WIRELESS_ARCANE_ITEMS =
+            REGISTRY.register("wireless_arcane_items", () -> DataComponentType.<ItemContainerContents>builder()
+                    .persistent(ItemContainerContents.CODEC).networkSynchronized(ItemContainerContents.STREAM_CODEC).build());
+
     private TECEDataComponents() {}
 
     public static void register(IEventBus bus) {

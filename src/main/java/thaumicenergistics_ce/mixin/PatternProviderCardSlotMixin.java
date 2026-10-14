@@ -12,26 +12,12 @@ import thaumicenergistics_ce.integration.ae2.patternprovider.EssentiaPatternProv
 import thaumicenergistics_ce.registry.TECEItems;
 
 @Mixin(value = AppEngSlot.class, remap = false)
-public abstract class PatternProviderCardSlotMixin implements thaumicenergistics_ce.client.gui.ArcaneUpgradeSlotBinding {
-    @org.spongepowered.asm.mixin.Shadow @org.spongepowered.asm.mixin.Final @org.spongepowered.asm.mixin.Mutable
-    private appeng.api.inventories.InternalInventory inventory;
-
-    @Override
-    public void bindSharedInventory(appeng.api.inventories.InternalInventory shared) { inventory = shared; }
-
+public abstract class PatternProviderCardSlotMixin {
     @org.spongepowered.asm.mixin.Shadow
     protected abstract appeng.menu.AEBaseMenu getMenu();
     @Inject(method = "mayPlace", at = @At("HEAD"), cancellable = true)
     private void tce$dedicatedSlot(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
         var slot = (AppEngSlot) (Object) this;
-        if (getMenu() instanceof thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal sharedMenu
-                && sharedMenu.usesSharedUpgrades()
-                && sharedMenu.getSlots(appeng.menu.SlotSemantics.UPGRADE).contains(slot)
-                && (stack.is(TECEItems.ESSENTIA_ACCESS_CARD.get()) || stack.is(TECEItems.VIS_CONNECTION_CARD.get()))
-                && !(slot.getInventory() instanceof thaumicenergistics_ce.item.SharedArcaneUpgradeInventory)) {
-            cir.setReturnValue(false);
-            return;
-        }
         if (!stack.is(TECEItems.ESSENTIA_ACCESS_CARD.get())) return;
         if (getMenu() instanceof thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal arcane
                 && arcane.getSlots(appeng.menu.SlotSemantics.UPGRADE).contains(slot)

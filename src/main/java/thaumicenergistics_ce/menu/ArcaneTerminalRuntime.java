@@ -8,7 +8,6 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler;
 import thaumicenergistics_ce.compat.thaumaturge.TcAura;
-import thaumicenergistics_ce.config.ThEConfig;
 import thaumicenergistics_ce.item.ItemVisConnectionCard;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
@@ -24,8 +23,8 @@ final class ArcaneTerminalRuntime {
     }
 
     void chargeWand(Player player, @Nullable PartArcaneCraftingTerminal part,
-            @Nullable IEnergySource payer, boolean inheritedVis, ItemStack card, InternalInventory wandInventory) {
-        if (payer == null || part == null || !part.isActive() || card.isEmpty() || inheritedVis
+            @Nullable IEnergySource payer, ItemStack card, InternalInventory wandInventory) {
+        if (payer == null || (part != null && !part.isActive()) || card.isEmpty()
                 || lastWandChargeTick == player.level().getGameTime()) return;
         lastWandChargeTick = player.level().getGameTime();
         var wand = wandInventory.getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT);
@@ -43,7 +42,6 @@ final class ArcaneTerminalRuntime {
             hash = 31 * hash + StackSignatures.of(crystals.getStackInSlot(i));
         }
         hash = 31 * hash + StackSignatures.of(card);
-        hash = 31 * hash + Boolean.hashCode(ThEConfig.ALLOW_AE_FOR_AURA_VIS.get());
         hash = 31 * hash + availableAura;
         if (player.level() instanceof ServerLevel server) {
             var relay = ItemVisConnectionCard.resolve(server, card);

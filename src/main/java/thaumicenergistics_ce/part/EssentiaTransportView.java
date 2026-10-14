@@ -2,14 +2,14 @@ package thaumicenergistics_ce.part;
 
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
-import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
+import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaConduit;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.integration.ae2.essentia.ThEImmediateStorage;
 import thaumicenergistics_ce.util.ThETransaction;
 
-final class EssentiaTransportView implements IEssentiaTransport {
+final class EssentiaTransportView implements IEssentiaConduit {
 
     private static final int ACCEPTS_ANY_ASPECT = 32;
 
@@ -27,26 +27,27 @@ final class EssentiaTransportView implements IEssentiaTransport {
     }
 
     @Override
-    public boolean isConnectable(Direction side) {
+    public boolean connectsOn(Direction side) {
         return side == face;
     }
 
     @Override
-    public boolean canInputFrom(Direction side) {
+    public boolean receivesOn(Direction side) {
         return side == face;
     }
 
     @Override
-    public boolean canOutputTo(Direction side) {
+    public boolean releasesOn(Direction side) {
         return side == face;
     }
 
     @Override
-    public void setSuction(Holder<IAspect> aspect, int amount) {}
+    public com.leclowndu93150.thaumaturge.api.essentia.EssentiaPull pull(Direction side) {
+        return com.leclowndu93150.thaumaturge.api.essentia.EssentiaPull.of(wantedAspect(side), pullStrength(side));
+    }
 
-    @Override
-    public @Nullable Holder<IAspect> getSuctionType(Direction side) {
-        if (side != face) {
+    private @Nullable Holder<IAspect> wantedAspect(Direction side) {
+        if (side != null && side != face) {
             return null;
         }
         for (var entry : storage.contents().sortedByAmount()) {
@@ -57,9 +58,11 @@ final class EssentiaTransportView implements IEssentiaTransport {
         return null;
     }
 
-    @Override
-    public int getSuctionAmount(Direction side) {
-        Holder<IAspect> held = getSuctionType(side);
+    private int pullStrength(Direction side) {
+        if (side != null && side != face) {
+            return 0;
+        }
+        Holder<IAspect> held = wantedAspect(side);
         if (held != null) {
             return acceptsMore(held) ? ACCEPTS_ONE_ASPECT : 0;
         }
@@ -74,34 +77,38 @@ final class EssentiaTransportView implements IEssentiaTransport {
     }
 
     @Override
-    public int getMinimumSuction() {
+    public int pullThreshold() {
         return ACCEPTS_ANY_ASPECT;
     }
 
     @Override
-    public int addEssentia(Holder<IAspect> aspect, int amount, Direction side) {
-        if (!canInputFrom(side)) {
+    public int insert(Holder<IAspect> aspect, int amount, Direction side, boolean simulate) {
+        if (amount <= 0 || !receivesOn(side)) {
             return 0;
         }
-        return ThETransaction.apply(transaction -> storage.insert(aspect, amount, transaction));
+        return simulate ? storage instanceof ThEImmediateStorage immediate ? immediate.previewInsert(aspect, amount)
+                : ThETransaction.preview(transaction -> storage.insert(aspect, amount, transaction))
+                : ThETransaction.apply(transaction -> storage.insert(aspect, amount, transaction));
     }
 
     @Override
-    public int takeEssentia(Holder<IAspect> aspect, int amount, Direction side) {
-        if (!canOutputTo(side)) {
+    public int extract(Holder<IAspect> aspect, int amount, Direction side, boolean simulate) {
+        if (amount <= 0 || !releasesOn(side)) {
             return 0;
         }
-        return ThETransaction.apply(transaction -> storage.extract(aspect, amount, transaction));
+        return simulate ? storage instanceof ThEImmediateStorage immediate ? immediate.previewExtract(aspect, amount)
+                : ThETransaction.preview(transaction -> storage.extract(aspect, amount, transaction))
+                : ThETransaction.apply(transaction -> storage.extract(aspect, amount, transaction));
     }
 
     @Override
-    public @Nullable Holder<IAspect> getEssentiaType(Direction side) {
-        return getSuctionType(side);
+    public @Nullable Holder<IAspect> heldAspect(Direction side) {
+        return wantedAspect(side);
     }
 
     @Override
-    public int getEssentiaAmount(Direction side) {
-        Holder<IAspect> held = getSuctionType(side);
+    public int heldAmount(Direction side) {
+        Holder<IAspect> held = wantedAspect(side);
         return held == null ? 0 : storage.contents().amountOf(held);
     }
 }

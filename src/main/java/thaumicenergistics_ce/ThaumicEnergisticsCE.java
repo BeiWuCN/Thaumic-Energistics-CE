@@ -17,7 +17,7 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectCapabilities;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspectSource;
 import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
-import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
+import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaConduit;
 import java.util.List;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -44,9 +44,9 @@ import thaumicenergistics_ce.part.PartVisInterface;
 import thaumicenergistics_ce.util.ThELog;
 
 @Mod(ThEIds.MODID)
-public final class ThaumicEnergistics {
-    public ThaumicEnergistics(IEventBus modBus, ModContainer container) {
-        ThELog.LOG.info("ThaumicEnergistics loading");
+public final class ThaumicEnergisticsCE {
+    public ThaumicEnergisticsCE(IEventBus modBus, ModContainer container) {
+        ThELog.LOG.info("ThaumicEnergisticsCE loading");
         container.registerConfig(net.neoforged.fml.config.ModConfig.Type.SERVER,
                 ThEConfig.SPEC, "thaumicenergistics_ce-server.toml");
 
@@ -62,7 +62,7 @@ public final class ThaumicEnergistics {
 
         modBus.addListener(this::registerCapabilities);
         modBus.addListener(ThEItemCapabilities::install);
-        modBus.addListener(ThaumicEnergistics::registerPartCapabilities);
+        modBus.addListener(ThaumicEnergisticsCE::registerPartCapabilities);
         modBus.addListener(this::registerKeyTypes);
         modBus.addListener(this::commonSetup);
 
@@ -105,14 +105,12 @@ public final class ThaumicEnergistics {
                 TECEBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(),
                 (blockEntity, context) -> (IEssentiaStorage)
                         blockEntity);
-        event.registerBlockEntity(
-                EssentiaCapabilities.TRANSPORT,
+        EssentiaCapabilities.registerConduit(event,
                 TECEBlockEntities.ESSENTIA_VIBRATION_CHAMBER.get(),
-                (blockEntity, context) -> (IEssentiaTransport)
+                (blockEntity, context) -> (IEssentiaConduit)
                         blockEntity);
 
-        event.registerBlockEntity(
-                EssentiaCapabilities.TRANSPORT,
+        EssentiaCapabilities.registerConduit(event,
                 TECEBlockEntities.GACHA_BOX.get(),
                 (blockEntity, context) -> blockEntity.essentiaTransport(context));
 
@@ -151,7 +149,7 @@ public final class ThaumicEnergistics {
             registerUpgrades();
             thaumicenergistics_ce.item.QuantumTerminalSupport.registerUpgrades();
             EssentiaBusStrategies.register();
-            ThELog.LOG.info("ThaumicEnergistics common setup complete");
+            ThELog.LOG.info("ThaumicEnergisticsCE common setup complete");
             thaumicenergistics_ce.recipe.arcane.TerminalWorkbenchVis.register();
         });
     }

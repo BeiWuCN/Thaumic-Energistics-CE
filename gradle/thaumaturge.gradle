@@ -4,9 +4,14 @@ import java.util.zip.ZipFile
 // Build the dependency locally; never bundle or publish it with TECE.
 def dependencyJars = { fileTree(dir: 'libs', include: 'thaumaturge-*.jar').files }
 def prepareDependency = {
-    if (!dependencyJars().isEmpty() && !project.hasProperty('rebuildThaumaturge')) return
+    def stamp = file('libs/thaumaturge-source.txt')
+    def installed = dependencyJars()
+    if (installed.size() == 1
+            && installed.first().name.endsWith("-${thaumaturge_commit.toString().take(8)}.jar") && stamp.exists()
+            && stamp.text.trim() == thaumaturge_commit
+            && !project.hasProperty('rebuildThaumaturge')) return
     if (gradle.startParameter.offline) {
-        throw new GradleException('Thaumaturge is missing. Run Gradle once online to prepare the pinned dependency.')
+        throw new GradleException('Thaumaturge is missing or does not match the pinned source revision. Run Gradle once online to prepare it.')
     }
     def source = file("thaumaturge-src/${thaumaturge_commit}")
     def execute = { File directory, List<String> arguments ->
@@ -63,7 +68,10 @@ def prepareDependency = {
         }.size()
         if (aspects < 37) throw new GradleException('Thaumaturge datagen is incomplete; refusing to install the dependency.')
     }
-    copy { from built; into 'libs' }
+    dependencyJars().each { existing -> existing.delete() }
+    def pinnedName = built.name.replaceFirst(/\.jar$/, "-${thaumaturge_commit.toString().take(8)}.jar")
+    copy { from built; into 'libs'; rename { pinnedName } }
+    stamp.text = thaumaturge_commit.toString() + '\n'
     logger.lifecycle("Prepared pinned Thaumaturge dependency: ${built.name}")
 }
 

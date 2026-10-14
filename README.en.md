@@ -4,16 +4,17 @@ Thaumic Energistics: CE connects Thaumaturge's essentia and Vis to Applied Energ
 
 The project continues the original Thaumic Energistics gameplay using Thaumaturge on newer Minecraft versions. This branch targets **Minecraft 26.1.2 / NeoForge**. For Minecraft 1.21.1, see the [1.21.1 branch](https://github.com/BeiWuCN/Thaumic-Energistics-CE/tree/1.21.1).
 
-[中文](README.md) · [Downloads](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) · [Changelog](CHANGELOG-2.7.4.5.md) · [Issues](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues)
+[中文](README.md) · [Downloads](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) · [Changelog](CHANGELOG-2.7.4.6.md) · [Issues](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues)
 
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/26.1.2/src/main/resources/icon.png" alt="Thaumic Energistics: CE" width="420">
 
 ## Features
 
 - **Essentia storage and transfer:** store aspects in ME Essentia Cells and fit Essentia Access Cards to ME Import, Export and Storage Buses to connect external essentia containers.
+- **Pattern provider compatibility:** AdvancedAE block and part providers, and the regular, extended and Pigmee providers in AE2 Lightning Tech Reborn’s 26.1.2 development branch, recognize arcane patterns. An Essentia Access Card enables essentia input and return. Each integration has its own configuration switch.
 - **Essentia terminals:** browse network aspects, search names in your language, and deposit or withdraw essentia using containers. The wireless terminal provides remote access.
 - **Arcane crafting:** wired and wireless arcane terminals provide wand and crystal slots with crafting cost displays. The Arcane Assembler handles automated crafting.
-- **Vis relay connections:** bind a Vis Connection Card to a Vis Relay Interface output to recharge the wand in the terminal. Placed arcane terminals draw VIS directly from their own chunk without a card. Wireless arcane terminals share only the bound terminal's Vis Connection Card effect through a read-only indicator; the physical card stays in the placed terminal, and other upgrades remain independent. The output must be loaded and online.
+- **Vis relay connections:** bind a Vis Connection Card to a Vis Relay Interface output to recharge the wand in the terminal. Placed arcane terminals draw VIS directly from their own chunk without a card. Wireless terminals need no placed terminal binding. Ingredients, crystals, the wand and upgrade cards stay in the handheld terminal. The output must be loaded and online.
 - **Alchemy and infusion supply:** use the Alchemy Provider, Infusion Provider and related devices to supply Thaumaturge crafting from the ME network.
 - **Golem wireless backpacks:** let golems exchange items with the network and choose backpack appearances using supported materials.
 - **Research and configuration:** unlock content through the Thaumonomicon and adjust machine values and feature switches on the server.
@@ -30,11 +31,13 @@ The current release was built and tested with:
 | NeoForge | 26.1.2.112 |
 | Java | 25 |
 | Applied Energistics 2 | 26.1.13-beta |
-| Thaumaturge | 1.0.3, source revision `80903dd9` |
+| Thaumaturge | 1.0.3, source revision `ee2abf29` (older 1.0.3 builds are incompatible) |
 
 AE2 and Thaumaturge are required. JEI provides recipe viewing and transfer, Jade provides machine tooltips, and Curios adds accessory slots for wireless terminals. Configure the wireless terminal shortcuts in AE2's controls category; both are unbound by default.
 
-Server settings are stored in `config/thaumicenergistics_ce-server.toml`. `terminals.restrictEssentiaVisibility` is disabled by default; enabling it hides essentia in ordinary ME terminals. Essentia access in arcane terminals is disabled by default. Enable `terminals.arcaneEssentiaAccess` and install an Essentia Access Card to use it. Wireless terminals spending AE to draw environmental VIS is disabled by default. Placed terminals draw their own chunk VIS directly, independently of this setting. The two cards serve different purposes.
+Both wireless terminals can be opened without a network binding, with an empty network inventory. The wireless arcane terminal keeps its own ingredients, crystals, wand and upgrades accessible. With a Quantum Bridge Card and a matching entangled singularity, a loaded, powered quantum bridge provides network access without a wireless access point binding.
+
+Server settings are stored in `config/thaumicenergistics_ce-server.toml`. `terminals.restrictEssentiaVisibility` is disabled by default; enabling it hides essentia in ordinary ME terminals. Essentia access in arcane terminals is disabled by default. Enable `terminals.arcaneEssentiaAccess` and install an Essentia Access Card to use it. Wireless arcane terminals draw VIS directly from the player's chunk; placed terminals use their own chunk. The two cards serve different purposes.
 
 ## Building from source
 

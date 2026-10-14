@@ -1,7 +1,7 @@
 package thaumicenergistics_ce.blockentity.alchemyprovider;
 
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
-import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
+import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaConduit;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import org.jspecify.annotations.Nullable;
@@ -9,32 +9,32 @@ import thaumicenergistics_ce.registry.capability.CachedEssentiaNeighbours;
 
 final class SuctionTarget {
 
-    private final IEssentiaTransport transport;
+    private final IEssentiaConduit transport;
 
     private final Direction face;
 
-    private SuctionTarget(IEssentiaTransport transport, Direction face) {
+    private SuctionTarget(IEssentiaConduit transport, Direction face) {
         this.transport = transport;
         this.face = face;
     }
 
     static @Nullable SuctionTarget on(CachedEssentiaNeighbours neighbours, Direction side) {
-        IEssentiaTransport transport = neighbours.transport(side);
+        IEssentiaConduit transport = neighbours.transport(side);
         if (transport == null) {
             return null;
         }
         Direction face = side.getOpposite();
-        return transport.isConnectable(face) ? new SuctionTarget(transport, face) : null;
+        return transport.connectsOn(face) ? new SuctionTarget(transport, face) : null;
     }
 
     @Nullable Holder<IAspect> wants() {
-        if (transport.getSuctionAmount(face) <= 0) {
+        if (transport.pull(face).strength() <= 0) {
             return null;
         }
-        return transport.getSuctionType(face);
+        return transport.pull(face).aspect();
     }
 
     int accept(Holder<IAspect> aspect, int amount) {
-        return transport.addEssentia(aspect, amount, face, false);
+        return transport.insert(aspect, amount, face, false);
     }
 }

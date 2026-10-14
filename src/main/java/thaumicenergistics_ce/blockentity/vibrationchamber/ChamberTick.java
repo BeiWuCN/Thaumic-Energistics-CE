@@ -1,7 +1,5 @@
 package thaumicenergistics_ce.blockentity.vibrationchamber;
 
-import thaumicenergistics_ce.config.ThEConfig;
-
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.ticking.TickRateModulation;
@@ -15,9 +13,6 @@ final class ChamberTick {
             int ticksSinceLast) {
         if (machine.getLevel() == null || machine.getLevel().isClientSide()) {
             return TickRateModulation.IDLE;
-        }
-        if (!ThEConfig.VIBRATION_ENABLED.get()) {
-            return TickRateModulation.SAME;
         }
 
         if (machine.tank().hasRoom() && !machine.burn().paused()) {

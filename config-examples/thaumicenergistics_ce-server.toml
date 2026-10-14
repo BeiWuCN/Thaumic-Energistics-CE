@@ -3,13 +3,18 @@
     restrictEssentiaVisibility = false
     #允许装有源质访问卡的有线和无线奥术合成终端显示及存取源质。默认关闭，不影响源质终端和总线。
     arcaneEssentiaAccess = false
-    #Shift 点击时优先把法杖和水晶放入奥术终端的专用槽位。
-    quickInsertWandAndCrystals = true
-    #允许未装魔力访问卡的奥术终端消耗 AE 取用环境 VIS。关闭时必须装卡；环境 VIS 不足时仍不能合成。
-    allowAeForAuraVis = false
-    #终端支付未定型灵气时，每点 Vis 消耗的 AE。灵气连接卡仍直接取用环境灵气。
-    #Range: 0.01 ~ 1000000.0
-    aePerVis = 1000.0
+
+[patternProviders]
+    #允许 AE2 样板供应器安装源质访问卡并发送、回收源质。关闭后保留已装卡和缓冲源质，卡仍可取出；不影响其他模组的供应器。
+    ae2Enabled = true
+    #允许 ExtendedAE 样板供应器安装源质访问卡并发送、回收源质。关闭后保留已装卡和缓冲源质，卡仍可取出；不影响其他模组的供应器。
+    extendedAeEnabled = true
+    #允许 ExtendedAE Plus 样板供应器安装源质访问卡并发送、回收源质。关闭后保留已装卡和缓冲源质，卡仍可取出；不影响其他模组的供应器。
+    extendedAePlusEnabled = true
+    #允许 AdvancedAE 样板供应器安装源质访问卡并收发源质。关闭后保留已安装的卡片与缓冲源质，卡片仍可取出。
+    advancedAeEnabled = true
+    #允许 AE2 Lightning Tech Reborn 样板供应器安装源质访问卡并收发源质。关闭后保留已安装的卡片与缓冲源质，卡片仍可取出。
+    lightningTechEnabled = true
 
 [buses]
     #允许装有源质访问卡的 ME 输入、输出和存储总线访问源质。
@@ -19,15 +24,11 @@
     aePerEssentia = 10.0
 
 [golemBackpack]
-    #允许傀儡无线背包向网络传输物品。关闭后仍可装备和取下。
-    transferEnabled = true
     #背包两次传输之间的间隔，单位 tick，20 tick 为一秒。
     #Range: 1 ~ 12000
     transferIntervalTicks = 20
 
 [arcaneAssembler]
-    #允许奥术装配室执行合成。关闭时保留已有任务，重新开启后继续。
-    enabled = true
     #无加速卡时的合成时长，单位 tick。每张加速卡减少4 tick，最低4 tick。
     #Range: 4 ~ 12000
     craftTicks = 20
@@ -36,15 +37,11 @@
     aePerTick = 1.5
 
 [essentiaVibrationChamber]
-    #允许源质谐振仓吸入和燃烧源质。关闭时保留燃料进度和储存的能量。
-    enabled = true
     #燃烧时长计算的基础 tick 数。能量要素除以1.6，其余除以2；仅对新点燃的燃料生效。
     #Range: 2 ~ 120000
     baseBurnTicks = 800
 
 [gachaBox]
-    #允许概率之箱运行。关闭时暂停已有轮次，不删除缸中之脑。
-    enabled = true
     #每轮开始时消耗的 AE，不影响已开始的轮次。
     #Range: 0.0 ~ 1000000.0
     aePerTurn = 500.0
@@ -54,9 +51,3 @@
     #180秒轮次的获奖概率，0到1，其余时长线性插值。
     #Range: 0.0 ~ 1.0
     chanceAt180Seconds = 0.45
-
-[patternProviders]
-    #按供应器所属模组独立控制源质支持；关闭后禁止装卡和源质收发，保留已装卡及缓冲，卡仍可取出。
-    ae2Enabled = true
-    extendedAeEnabled = true
-    extendedAePlusEnabled = true

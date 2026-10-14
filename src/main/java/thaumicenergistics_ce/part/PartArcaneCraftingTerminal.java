@@ -29,7 +29,6 @@ import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
 import thaumicenergistics_ce.ThEIds;
 import thaumicenergistics_ce.recipe.arcane.ArcaneTerminalHost;
-import thaumicenergistics_ce.recipe.arcane.ArcaneTerminalLink;
 import thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
 import thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
 import thaumicenergistics_ce.compat.thaumaturge.TcWand;
@@ -108,22 +107,6 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         if (!super.onUseWithoutItem(player, pos) && !player.level().isClientSide()) {
             MenuOpener.open(getMenuType(player), player, MenuLocators.forPart(this));
         }
-        return true;
-    }
-
-    @Override
-    public boolean onUseItemOn(ItemStack held, Player player, InteractionHand hand, Vec3 pos) {
-        if (!(held.getItem() instanceof ArcaneTerminalLink link) || !player.isSecondaryUseActive()) {
-            return super.onUseItemOn(held, player, hand, pos);
-        }
-        BlockPos where = getBlockEntity().getBlockPos();
-        if (!player.level().isClientSide()) {
-            link.pairWith(held, player.level(), where, getSide());
-        }
-        player.sendOverlayMessage(
-                Component.translatable(
-                        "item.thaumicenergistics_ce.wireless_arcane_crafting_terminal.paired",
-                        where.getX(), where.getY(), where.getZ()));
         return true;
     }
 

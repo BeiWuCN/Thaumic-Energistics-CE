@@ -2,7 +2,7 @@ package thaumicenergistics_ce.blockentity.gachabox;
 
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
-import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
+import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaConduit;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
@@ -13,7 +13,7 @@ import thaumicenergistics_ce.registry.capability.CachedEssentiaNeighbours;
 import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import thaumicenergistics_ce.util.ThETransaction;
 
-final class GachaEssentiaPort implements IEssentiaTransport {
+final class GachaEssentiaPort implements IEssentiaConduit {
 
     private static final int SUCTION = 128;
 
@@ -41,7 +41,7 @@ final class GachaEssentiaPort implements IEssentiaTransport {
             got += ThETransaction.apply(transaction -> storage.extract(aspect, need, transaction));
         }
         if (got < need) {
-            IEssentiaTransport tube = neighbours.transport(back);
+            IEssentiaConduit tube = neighbours.transport(back);
             if (tube != null) {
                 got += drainTube(tube, back, aspect, need - got);
             }
@@ -49,14 +49,14 @@ final class GachaEssentiaPort implements IEssentiaTransport {
         box.cognitio().add(got);
     }
 
-    private static int drainTube(IEssentiaTransport tube, Direction face, Holder<IAspect> aspect, int want) {
+    private static int drainTube(IEssentiaConduit tube, Direction face, Holder<IAspect> aspect, int want) {
         Direction into = face.getOpposite();
-        if (!tube.canOutputTo(into) || !aspect.equals(tube.getEssentiaType(into))) {
+        if (!tube.releasesOn(into) || !aspect.equals(tube.heldAspect(into))) {
             return 0;
         }
         int got = 0;
         while (got < want) {
-            int taken = tube.takeEssentia(aspect, want - got, into);
+            int taken = tube.extract(aspect, want - got, into, false);
             if (taken <= 0) {
                 break;
             }
@@ -74,67 +74,41 @@ final class GachaEssentiaPort implements IEssentiaTransport {
     }
 
     @Override
-    public boolean isConnectable(Direction face) {
-        return face == box.backFace();
+    public boolean connectsOn(Direction face) { return face == box.backFace(); }
+
+    @Override
+    public boolean receivesOn(Direction face) { return face == box.backFace(); }
+
+    @Override
+    public boolean releasesOn(Direction face) { return false; }
+
+    @Override
+    public com.leclowndu93150.thaumaturge.api.essentia.EssentiaPull pull(Direction face) {
+        return face == box.backFace() && hungry()
+                ? com.leclowndu93150.thaumaturge.api.essentia.EssentiaPull.of(cognitio(box.getLevel()), SUCTION)
+                : com.leclowndu93150.thaumaturge.api.essentia.EssentiaPull.NONE;
     }
 
     @Override
-    public boolean canInputFrom(Direction face) {
-        return face == box.backFace();
+    public int extract(Holder<IAspect> aspect, int amount, Direction face, boolean simulate) { return 0; }
+
+    @Override
+    public int insert(Holder<IAspect> aspect, int amount, Direction face, boolean simulate) {
+        int accepted = Math.min(Math.max(0, amount), roomFor(aspect, face));
+        return simulate ? accepted : box.cognitio().add(accepted);
     }
 
     @Override
-    public boolean canOutputTo(Direction face) {
-        return false;
+    public int roomFor(Holder<IAspect> aspect, Direction face) {
+        return face == box.backFace() && hungry() && aspect.equals(cognitio(box.getLevel())) ? box.cognitio().room() : 0;
     }
 
     @Override
-    public void setSuction(@Nullable Holder<IAspect> aspect, int amount) {}
+    public @Nullable Holder<IAspect> heldAspect(Direction face) { return null; }
 
     @Override
-    public @Nullable Holder<IAspect> getSuctionType(Direction face) {
-        return face == box.backFace() && hungry() ? cognitio(box.getLevel()) : null;
-    }
+    public int heldAmount(Direction face) { return 0; }
 
     @Override
-    public int getSuctionAmount(Direction face) {
-        return face == box.backFace() && hungry() ? SUCTION : 0;
-    }
-
-    @Override
-    public int takeEssentia(Holder<IAspect> aspect, int amount, Direction face) {
-        return 0;
-    }
-
-    @Override
-    public int addEssentia(Holder<IAspect> aspect, int amount, Direction face) {
-        int room = spaceFor(aspect, face);
-        if (amount <= 0 || room <= 0) {
-            return 0;
-        }
-        return box.cognitio().add(Math.min(amount, room));
-    }
-
-    @Override
-    public int spaceFor(Holder<IAspect> aspect, Direction face) {
-        if (face != box.backFace() || !hungry() || !aspect.equals(cognitio(box.getLevel()))) {
-            return 0;
-        }
-        return box.cognitio().room();
-    }
-
-    @Override
-    public @Nullable Holder<IAspect> getEssentiaType(Direction face) {
-        return null;
-    }
-
-    @Override
-    public int getEssentiaAmount(Direction face) {
-        return 0;
-    }
-
-    @Override
-    public int getMinimumSuction() {
-        return 0;
-    }
+    public int pullThreshold() { return 0; }
 }

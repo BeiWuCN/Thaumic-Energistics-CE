@@ -29,8 +29,7 @@ public final class TcInfusion {
     }
 
     public static @Nullable List<BlockPos> problemBlocks(Level level, BlockPos matrix) {
-        InfusionStabilitySurvey.Result survey = InfusionStabilitySurvey.survey(level, matrix);
-        return survey == null ? null : List.copyOf(survey.problemBlocks());
+        return AltarProblemSurvey.find(level, matrix);
     }
 
 

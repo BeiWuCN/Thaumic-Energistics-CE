@@ -32,6 +32,7 @@ public final class TECECreativeTab {
                         output.accept(TECEItems.WIRELESS_CONNECTOR.get());
                         output.accept(TECEItems.ALKUSURE86_FUMO.get());
                         output.accept(TECEItems.BEIWU_CN_FUMO.get());
+                        output.accept(TECEItems.XIAO_LENG_FUMO.get());
                         output.accept(TECEItems.STORAGE_CASING.get());
                         output.accept(TECEItems.STORAGE_COMPONENT_1K.get());
                         output.accept(TECEItems.STORAGE_COMPONENT_4K.get());

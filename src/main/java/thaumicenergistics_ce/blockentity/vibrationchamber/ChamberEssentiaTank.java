@@ -4,7 +4,7 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
-import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
+import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaConduit;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
@@ -128,20 +128,20 @@ final class ChamberEssentiaTank {
 
     private boolean pullFromTube(Direction side) {
         Direction facing = side.getOpposite();
-        IEssentiaTransport tube = neighbours.transport(side);
-        if (tube == null || !tube.canOutputTo(facing)) {
+        IEssentiaConduit tube = neighbours.transport(side);
+        if (tube == null || !tube.releasesOn(facing)) {
             return false;
         }
-        if (tube.getEssentiaAmount(facing) <= 0
-                || tube.getSuctionAmount(facing) >= chamber.getSuctionAmount(side)
-                || chamber.getSuctionAmount(side) < tube.getMinimumSuction()) {
+        if (tube.heldAmount(facing) <= 0
+                || tube.pull(facing).strength() >= chamber.pull(side).strength()
+                || chamber.pull(side).strength() < tube.pullThreshold()) {
             return false;
         }
-        Holder<IAspect> aspect = tube.getEssentiaType(facing);
+        Holder<IAspect> aspect = tube.heldAspect(facing);
         if (aspect == null) {
             return false;
         }
-        int taken = tube.takeEssentia(aspect, 1, facing);
+        int taken = tube.extract(aspect, 1, facing, false);
         if (taken > 0) {
             accept(aspect, taken);
             return true;
