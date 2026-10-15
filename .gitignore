@@ -11,15 +11,9 @@ logs/
 .idea/
 *.iml
 
-# The one dependency that cannot come from maven (see libs/README.md for why, and for how to build
-# it). Its jar is All Rights Reserved and must never be committed.
+# Locally supplied dependencies and optional compatibility mods.
 libs/*.jar
 libs/compat/
-
-# Where tools/fetch-thaumaturge.* checks Thaumaturge out. CI points it at the workspace root so the
-# path is stable for the run; it is deliberately not cached (see .github/workflows/build.yml, which
-# explains why a Thaumaturge checkout must not end up in this repository's Actions cache). Not a
-# dot-directory: Gradle refuses to configure a project whose directory name begins with a dot.
 thaumaturge-src/
 
 # JVM crash logs

@@ -20,9 +20,9 @@ Building uses JDK 21 and `gradlew build`.
 
 AE2, JEI, Jade and other Maven dependencies are pinned in `gradle.properties`.
 
-Supply Thaumaturge 1.0.2 at `libs/thaumaturge-1.21.1-NeoForge-1.0.2.jar`, or set `-Pthaumaturge_jar=/absolute/path/to.jar`. TECE does not bundle this dependency. The local installer accepts `tools/fetch-thaumaturge.ps1 -SourceJar 'path/to.jar'` on Windows, or `tools/fetch-thaumaturge.sh 'path/to.jar'` on Unix. These scripts no longer build an obsolete source revision.
+Supply Thaumaturge 1.0.2 at `libs/thaumaturge-1.21.1-NeoForge-1.0.2.jar`, or set `-Pthaumaturge_jar=/absolute/path/to.jar`. TECE does not bundle this dependency.
 
-Run `tools/install-compat-mods.ps1` to install the versions in `tools/compat-mods.lock.json`. Verify with `gradlew portRegression build` and `gradlew -PportRuntimeRegression runPortRuntimeRegression`. Add `-PwithoutCompatibilityMods` for the optional-mod absence check.
+Install optional compatibility mods separately as needed. Development tools and local verification scripts are not included in this repository.
 
 ## License
 

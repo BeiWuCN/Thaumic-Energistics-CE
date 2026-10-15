@@ -22,9 +22,7 @@ AE2、JEI、Jade 等依赖由 Modrinth Maven 提供，版本固定在 `gradle.pr
 
 本分支使用已发布的 Thaumaturge 1.0.2，将自行取得的文件放到 `libs/thaumaturge-1.21.1-NeoForge-1.0.2.jar`，或通过 `-Pthaumaturge_jar=绝对路径` 指定。此依赖不会打包进 TECE。
 
-Windows 可运行 `tools/fetch-thaumaturge.ps1 -SourceJar '文件路径'` 安装本地依赖；该脚本不再从旧源码修订构建。
-
-联动开发环境运行 `tools/install-compat-mods.ps1` 安装锁定版本，详见 `tools/compat-mods.lock.json`。构建验证使用 `gradlew portRegression build`；真实游戏回归使用 `gradlew -PportRuntimeRegression runPortRuntimeRegression`，追加 `-PwithoutCompatibilityMods` 可检查未装联动模组的情况。
+联动模组按需自行安装。本分支不包含开发工具或本地验证脚本。
 
 ## 许可
 

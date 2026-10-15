@@ -99,16 +99,27 @@ neoForge {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-// Keep repository directories stable; emit the mandatory runtime resource paths at build time.
-def generatePortResources = tasks.register('generatePortResources', Copy) {
-    from('tools/tece-curio-tag.json') { into 'data/curios/tags/item'; rename { 'curio.json' } }
-    into layout.buildDirectory.dir('generated/portResources')
+// Curios requires this resource path; generate it without adding repository directories.
+def curioItems = ["${mod_id}:wireless_essentia_terminal", "${mod_id}:wireless_arcane_crafting_terminal"]
+def generatePortResources = tasks.register('generatePortResources') {
+    def output = layout.buildDirectory.file('generated/portResources/data/curios/tags/item/curio.json')
+    inputs.property('curioItems', curioItems)
+    outputs.file output
+    doLast {
+        def target = output.get().asFile
+        target.parentFile.mkdirs()
+        target.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([replace: false, values: curioItems]))
+    }
 }
-sourceSets.main.resources.srcDir generatePortResources
-sourceSets.test.java.setSrcDirs(['tools'])
-sourceSets.test.java.include('Port*.java', 'AssemblerVisPoolRegression.java')
+sourceSets.main.resources.srcDir(layout.buildDirectory.dir('generated/portResources'))
+tasks.named('processResources') { dependsOn generatePortResources }
+tasks.named('sourcesJar') { dependsOn generatePortResources }
 
-
+// Optional local verification sources are deliberately outside the published repository.
+def portVerificationDir = providers.gradleProperty('portVerificationDir')
+if (project.hasProperty('portRuntimeRegression') && !portVerificationDir.isPresent()) {
+    throw new GradleException('Set -PportVerificationDir=/path/to/local/verification/sources for game regressions')
+}
 
 // Compile against the supported public 1.21.1 release, never a 26.1.2 source build.
 // This local dependency is excluded from version control and from the release JAR.
@@ -182,30 +193,34 @@ tasks.named('test') {
     enabled = false
 }
 
-tasks.register('portRegression', JavaExec) {
-    group = 'verification'
-    description = 'Verify 1.21.1 backport VIS bounds and legacy-save conservation.'
-    dependsOn tasks.named('testClasses')
-    classpath = sourceSets.test.runtimeClasspath + sourceSets.main.runtimeClasspath
-    mainClass = 'thaumicenergistics_ce.blockentity.assembler.AssemblerVisPoolRegression'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+if (portVerificationDir.isPresent()) {
+    sourceSets.test.java.setSrcDirs([file(portVerificationDir.get())])
+    sourceSets.test.java.include('Port*.java', 'AssemblerVisPoolRegression.java')
+    tasks.register('portRegression', JavaExec) {
+        group = 'verification'
+        description = 'Verify 1.21.1 backport VIS bounds and legacy-save conservation.'
+        dependsOn tasks.named('testClasses')
+        classpath = sourceSets.test.runtimeClasspath + sourceSets.main.runtimeClasspath
+        mainClass = 'thaumicenergistics_ce.blockentity.assembler.AssemblerVisPoolRegression'
+        javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    }
+    
+    sourceSets.test.compileClasspath += sourceSets.main.compileClasspath
+    sourceSets.test.resources.setSrcDirs([layout.buildDirectory.dir('generated/portTestResources')])
+    def generatePortTestRecipe = tasks.register('generatePortTestRecipe', Copy) {
+        from(file(portVerificationDir.get() + '/port_payment_regression.json'))
+        into layout.buildDirectory.dir('generated/portTestResources/data/thaumicenergistics_ce/recipe')
+    }
+    def generatePortTestStructure = tasks.register('generatePortTestStructure', JavaExec) {
+        dependsOn tasks.named('compileTestJava')
+        classpath = sourceSets.test.output.classesDirs + sourceSets.main.runtimeClasspath
+        mainClass = 'thaumicenergistics_ce.PortTestStructure'
+        def target = layout.buildDirectory.file('generated/portTestResources/data/thaumicenergistics_ce/structure/empty.nbt')
+        args target.get().asFile.absolutePath
+        outputs.file target
+    }
+    tasks.named('processTestResources') { dependsOn generatePortTestStructure, generatePortTestRecipe }
 }
-
-sourceSets.test.compileClasspath += sourceSets.main.compileClasspath
-sourceSets.test.resources.setSrcDirs([layout.buildDirectory.dir('generated/portTestResources')])
-def generatePortTestRecipe = tasks.register('generatePortTestRecipe', Copy) {
-    from('tools/port_payment_regression.json')
-    into layout.buildDirectory.dir('generated/portTestResources/data/thaumicenergistics_ce/recipe')
-}
-def generatePortTestStructure = tasks.register('generatePortTestStructure', JavaExec) {
-    dependsOn tasks.named('compileTestJava')
-    classpath = sourceSets.test.output.classesDirs + sourceSets.main.runtimeClasspath
-    mainClass = 'thaumicenergistics_ce.PortTestStructure'
-    def target = layout.buildDirectory.file('generated/portTestResources/data/thaumicenergistics_ce/structure/empty.nbt')
-    args target.get().asFile.absolutePath
-    outputs.file target
-}
-tasks.named('processTestResources') { dependsOn generatePortTestStructure, generatePortTestRecipe }
 
 jar {
     manifest {
