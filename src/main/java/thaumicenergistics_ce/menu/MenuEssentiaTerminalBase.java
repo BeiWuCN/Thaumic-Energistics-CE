@@ -22,14 +22,69 @@ import thaumicenergistics_ce.network.EssentiaTerminalReceiver;
  */
 public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements EssentiaTerminalReceiver {
 
+    public static final appeng.menu.SlotSemantic QUANTUM_SINGULARITY =
+            appeng.menu.SlotSemantics.register("THAUMICENERGISTICS_QUANTUM_SINGULARITY", true);
+
+    private void addQuantumSlot(ITerminalHost host) {
+        if (!thaumicenergistics_ce.item.QuantumTerminalSupport.enabled()
+                || !(host instanceof thaumicenergistics_ce.item.QuantumWirelessTerminalMenuHost<?> quantum)) return;
+        var slot = new appeng.menu.slot.AppEngSlot(quantum.singularityInventory(), 0) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return thaumicenergistics_ce.item.QuantumTerminalSupport.validSingularity(stack) && super.mayPlace(stack);
+            }
+            @Override
+            public int getMaxStackSize() { return 1; }
+        };
+        slot.setIcon(appeng.client.gui.Icon.BACKGROUND_SINGULARITY);
+        addSlot(slot, QUANTUM_SINGULARITY);
+    }
+
+
     public MenuEssentiaTerminalBase(
             MenuType<?> menuType, int id, Inventory playerInventory, ITerminalHost host) {
         super(menuType, id, playerInventory, host);
+        addQuantumSlot(host);
+        updateWirelessEssentiaUpgradeSlots();
     }
 
     protected MenuEssentiaTerminalBase(MenuType<?> menuType, int id, Inventory playerInventory,
             ITerminalHost host, boolean bindInventory) {
         super(menuType, id, playerInventory, host, bindInventory);
+        addQuantumSlot(host);
+        updateWirelessEssentiaUpgradeSlots();
+    }
+
+    public void updateWirelessEssentiaUpgradeSlots() {
+        if (!(getHost() instanceof thaumicenergistics_ce.item.WirelessEssentiaTerminalMenuHost)) return;
+        var slots = getSlots(appeng.menu.SlotSemantics.UPGRADE);
+        int remaining = thaumicenergistics_ce.item.QuantumTerminalSupport.enabled() ? 1 : 0;
+        for (var slot : slots) {
+            if (slot.hasItem()) remaining--;
+        }
+        for (var slot : slots) {
+            boolean visible = slot.hasItem() || remaining-- > 0;
+            ((appeng.menu.slot.AppEngSlot) slot).setSlotEnabled(visible);
+        }
+    }
+
+    @Override
+    public void broadcastChanges() {
+        updateWirelessEssentiaUpgradeSlots();
+        super.broadcastChanges();
+    }
+
+    @Override
+    protected int transferStackToMenu(ItemStack stack) {
+        var slots = getSlots(QUANTUM_SINGULARITY);
+        if (!slots.isEmpty() && thaumicenergistics_ce.item.QuantumTerminalSupport.validSingularity(stack)) {
+            var remaining = stack.copy();
+            for (var slot : slots) {
+                if (slot.isActive()) remaining = slot.safeInsert(remaining);
+            }
+            return stack.getCount() - remaining.getCount();
+        }
+        return super.transferStackToMenu(stack);
     }
 
     public boolean isServerSide() {

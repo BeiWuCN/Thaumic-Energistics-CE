@@ -237,7 +237,7 @@ public class BlockEntityGachaBox extends AENetworkedPoweredBlockEntity implement
         if (!cognitio.ready() || !power.canPay()) {
             return false;
         }
-        if (!power.spend(GachaOdds.AE_PER_TURN)) {
+        if (!power.spend(thaumicenergistics_ce.ThEConfig.GACHA_POWER.get())) {
             return false;
         }
         return cognitio.spend();

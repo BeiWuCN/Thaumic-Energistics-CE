@@ -13,6 +13,15 @@ import net.minecraft.world.item.ItemStack;
 public final class TcWand {
     private TcWand() {}
 
+    public static int chargeRoom(ItemStack wand, net.minecraft.resources.ResourceKey<com.leclowndu93150.thaumaturge.api.aspect.IAspect> aspect) {
+        return Math.max(0, com.leclowndu93150.thaumaturge.content.wands.WandVisHelper.getMaxVis(wand)
+                - com.leclowndu93150.thaumaturge.content.wands.WandVisHelper.getVis(wand, aspect));
+    }
+
+    public static void addCentivis(ItemStack wand, net.minecraft.resources.ResourceKey<com.leclowndu93150.thaumaturge.api.aspect.IAspect> aspect, int amount) {
+        com.leclowndu93150.thaumaturge.content.wands.WandVisHelper.addRealVis(wand, aspect, amount, true);
+    }
+
     /** 没插东西的法杖读出空物品堆，不是 null。 */
     public static ItemStack focus(ItemStack wand) {
         return wand.getItem() instanceof ItemWand item ? item.getFocusStack(wand) : ItemStack.EMPTY;

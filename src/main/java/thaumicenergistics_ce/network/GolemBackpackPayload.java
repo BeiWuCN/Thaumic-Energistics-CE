@@ -18,6 +18,7 @@ public record GolemBackpackPayload(int entityId, int status, int skinOrdinal) im
     public static final int STATUS_NO_BACKPACK = 0;
     public static final int STATUS_IN_RANGE = 1;
     public static final int STATUS_OUT_OF_RANGE = 2;
+    public static final int STATUS_WORKING = 3;
 
     public static final CustomPacketPayload.Type<GolemBackpackPayload> TYPE =
             new CustomPacketPayload.Type<>(ThEIds.id("golem_backpack"));

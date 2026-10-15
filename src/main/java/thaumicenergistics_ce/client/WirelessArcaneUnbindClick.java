@@ -26,7 +26,8 @@ public final class WirelessArcaneUnbindClick {
     public static void onLeftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
         Player player = event.getEntity();
         ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
-        if (player.isSecondaryUseActive() && held.getItem() instanceof ItemWirelessArcaneCraftingTerminal) {
+        if (player.isSecondaryUseActive() && (held.getItem() instanceof ItemWirelessArcaneCraftingTerminal
+                || held.getItem() instanceof thaumicenergistics_ce.item.ItemWirelessEssentiaTerminal)) {
             PacketDistributor.sendToServer(ArcaneUnbindPayload.INSTANCE);
         }
     }

@@ -79,6 +79,9 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> ALKUSURE86_FUMO =
             REGISTRY.registerSimpleBlockItem(ModBlocks.ALKUSURE86_FUMO);
 
+    public static final DeferredItem<BlockItem> XIAO_LENG_FUMO =
+            REGISTRY.registerSimpleBlockItem(ModBlocks.XIAO_LENG_FUMO);
+
     public static final DeferredItem<BlockItem> BEIWU_CN_FUMO =
             REGISTRY.registerSimpleBlockItem(ModBlocks.BEIWU_CN_FUMO);
 
@@ -181,7 +184,7 @@ public final class ModItems {
             "essentia_access_card", Upgrades::createUpgradeCardItem, new Item.Properties().stacksTo(64));
 
     public static final DeferredItem<Item> VIS_CONNECTION_CARD = REGISTRY.registerItem(
-            "vis_connection_card", Upgrades::createUpgradeCardItem, new Item.Properties().stacksTo(64));
+            "vis_connection_card", thaumicenergistics_ce.item.ItemVisConnectionCard::new, new Item.Properties().stacksTo(64));
 
     private ModItems() {}
 

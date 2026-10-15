@@ -34,6 +34,14 @@ public class ThEJeiPlugin implements IModPlugin {
     }
 
     @Override
+    public void registerRecipeCatalysts(mezz.jei.api.registration.IRecipeCatalystRegistration registration) {
+        registration.addRecipeCatalyst(new net.minecraft.world.item.ItemStack(
+                thaumicenergistics_ce.init.ModItems.ARCANE_CRAFTING_TERMINAL.get()), ArcaneJeiRecipeType.arcane());
+        registration.addRecipeCatalyst(new net.minecraft.world.item.ItemStack(
+                thaumicenergistics_ce.init.ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()), ArcaneJeiRecipeType.arcane());
+    }
+
+    @Override
     public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
         // 用自带配方类型的处理器，别只给 [IRecipeTransferInfo]。
         // info 会被 JEI 的 [BasicRecipeTransferHandler] 包起来：它假定槽位一一对应，12 对 9 时就拒绝。

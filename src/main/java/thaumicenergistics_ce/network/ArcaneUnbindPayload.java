@@ -33,7 +33,9 @@ public record ArcaneUnbindPayload() implements CustomPacketPayload {
     /** 清掉手持终端上的配对与 AE2 链接并告知；两样都没绑的物品不出声。 */
     public void handle(Player player) {
         ItemStack held = player.getMainHandItem();
-        if (held.getItem() instanceof ItemWirelessArcaneCraftingTerminal
+        if (player.isSecondaryUseActive()
+                && (held.getItem() instanceof ItemWirelessArcaneCraftingTerminal
+                || held.getItem() instanceof thaumicenergistics_ce.item.ItemWirelessEssentiaTerminal)
                 && ItemWirelessArcaneCraftingTerminal.unbind(held)) {
             player.displayClientMessage(
                     Component.translatable(

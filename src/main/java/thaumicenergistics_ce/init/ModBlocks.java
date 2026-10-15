@@ -126,6 +126,14 @@ public final class ModBlocks {
                     .sound(SoundType.WOOL)
                     .noOcclusion()));
 
+    public static final DeferredBlock<BlockDecorativeFigure> XIAO_LENG_FUMO = REGISTRY.register(
+            "xiao_leng_fumo",
+            () -> new BlockDecorativeFigure(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOL)
+                    .strength(0.5F)
+                    .sound(SoundType.WOOL)
+                    .noOcclusion()));
+
     /** 第二个玩偶，模型只有坐姿。属性与上一个一致，各自一个 lambda：注册会把 id 盖到属性对象上。 */
     public static final DeferredBlock<BlockBeiWuCnFumo> BEIWU_CN_FUMO = REGISTRY.register(
             "beiwu_cn_fumo",

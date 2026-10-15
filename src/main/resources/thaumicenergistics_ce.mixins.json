@@ -1,15 +1,37 @@
 {
-	"required": true,
-	"package": "thaumicenergistics_ce.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-		"InterfaceLogicDropMixin"
-	],
-	"client": [
-		"PageLineStyleMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"minVersion": "0.8"
+  "required": true,
+  "package": "thaumicenergistics_ce.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "InterfaceLogicDropMixin",
+    "TerminalVisibilityMixin",
+    "IOBusUpgradeSlotsMixin",
+    "IOBusRecoveryMixin",
+    "ExportBusOperationMixin",
+    "StorageBusEssentiaMixin",
+    "BusRecoveryItemMixin",
+    "PatternProviderEssentiaMixin",
+    "PatternProviderMenuEssentiaMixin",
+    "GenericStackInvEssentiaMixin",
+    "PatternProviderReturnEssentiaMixin",
+    "AdvancedProviderEssentiaMixin",
+    "AdvancedProviderMenuEssentiaMixin",
+    "LightningProviderEssentiaMixin",
+    "PigmeeProviderEssentiaMixin",
+    "PigmeeProviderMenuEssentiaMixin",
+    "ProviderStorageTargetEssentiaMixin"
+  ],
+  "client": [
+    "PageLineStyleMixin",
+    "TerminalScreenVisibilityMixin",
+    "WidgetContainerAccessor",
+    "ArcaneUpgradeTooltipMixin",
+    "PatternProviderScreenEssentiaMixin",
+    "ConfigCommentI18nMixin",
+    "AdvancedProviderScreenEssentiaMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
 }

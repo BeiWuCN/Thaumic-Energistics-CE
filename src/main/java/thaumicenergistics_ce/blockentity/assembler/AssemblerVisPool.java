@@ -8,7 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 final class AssemblerVisPool {
 
     /** 空闲时的 vis 上限；{@link #visTarget} 把它提到一次合成的价格，灵气封顶。 */
-    static final int IDLE_TARGET = 512;
+    static final int IDLE_TARGET = 300;
 
     /** 池子的写入名。存档标签与更新标签共用，Jade 载荷在自己的契约里写明第一个；两个名字得一致。 */
     private static final String TAG_BUFFERED_VIS = "BufferedVis";
@@ -29,7 +29,8 @@ final class AssemblerVisPool {
     }
 
     void setBufferedVis(int amount) {
-        this.bufferedVis = amount;
+        this.bufferedVis = Math.clamp(amount, 0, IDLE_TARGET);
+        reconcileAspectVis();
     }
 
     int aspectVis(int index) {
@@ -48,7 +49,7 @@ final class AssemblerVisPool {
     }
 
     int visTarget(boolean crafting, int craftPrice) {
-        return crafting ? Math.max(IDLE_TARGET, craftPrice) : IDLE_TARGET;
+        return IDLE_TARGET;
     }
 
     /** 把整数 vis 记到某个要素名下并加进池子；进入缓冲只有这一条路。 */
@@ -56,6 +57,7 @@ final class AssemblerVisPool {
         if (amount <= 0 || primalIndex < 0 || primalIndex >= aspectVis.length) {
             return;
         }
+        amount = Math.min(amount, IDLE_TARGET - bufferedVis);
         aspectVis[primalIndex] += amount;
         bufferedVis += amount;
     }
@@ -68,6 +70,7 @@ final class AssemblerVisPool {
         }
         // 先给存量最少的，一次一 vis。按索引取余会把零头每次都塞给
         // 同样那几个低存量要素，末尾的要素永远补不上。
+        amount = Math.min(amount, IDLE_TARGET - bufferedVis);
         for (int i = 0; i < amount; i++) {
             aspectVis[lowestAspect()]++;
         }
@@ -125,8 +128,9 @@ final class AssemblerVisPool {
 
     void reconcileAspectVis() {
         int sum = 0;
-        for (int value : aspectVis) {
-            sum += value;
+        for (int i = 0; i < aspectVis.length; i++) {
+            aspectVis[i] = Math.clamp(aspectVis[i], 0, IDLE_TARGET);
+            sum += aspectVis[i];
         }
         int difference = bufferedVis - sum;
         if (difference == 0) {
@@ -159,7 +163,7 @@ final class AssemblerVisPool {
     /** 从存档标签恢复池子和拆分，并做与加载相同的修复：拆分对不上的标签
      * 是柱子拆分之前写的，按平均铺开。 */
     void readNbt(CompoundTag tag) {
-        bufferedVis = tag.getInt(TAG_BUFFERED_VIS);
+        bufferedVis = Math.clamp(tag.getInt(TAG_BUFFERED_VIS), 0, IDLE_TARGET);
         int[] savedAspects = tag.getIntArray(TAG_ASPECT_VIS);
         if (savedAspects.length == aspectVis.length) {
             System.arraycopy(savedAspects, 0, aspectVis, 0, aspectVis.length);
@@ -177,10 +181,11 @@ final class AssemblerVisPool {
     }
 
     void readSync(CompoundTag tag) {
-        bufferedVis = tag.getInt(TAG_BUFFERED_VIS);
+        bufferedVis = Math.clamp(tag.getInt(TAG_BUFFERED_VIS), 0, IDLE_TARGET);
         int[] syncedAspects = tag.getIntArray(TAG_ASPECT_VIS);
         if (syncedAspects.length == aspectVis.length) {
             System.arraycopy(syncedAspects, 0, aspectVis, 0, aspectVis.length);
         }
+        reconcileAspectVis();
     }
 }

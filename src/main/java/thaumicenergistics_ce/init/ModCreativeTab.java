@@ -18,7 +18,7 @@ public final class ModCreativeTab {
             "main",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.thaumicenergistics_ce"))
-                    .icon(() -> new ItemStack(ModItems.ARCANE_ASSEMBLER.get()))
+                    .icon(() -> new ItemStack(ModItems.FOCUS_AEWRENCH.get()))
                     .displayItems((parameters, output) -> {
                         output.accept(ModItems.KNOWLEDGE_CORE.get());
                         output.accept(ModItems.ARCANE_ASSEMBLER.get());
@@ -33,6 +33,7 @@ public final class ModCreativeTab {
                         output.accept(ModItems.WIRELESS_CONNECTOR.get());
                         output.accept(ModItems.ALKUSURE86_FUMO.get());
                         output.accept(ModItems.BEIWU_CN_FUMO.get());
+                        output.accept(ModItems.XIAO_LENG_FUMO.get());
                         output.accept(ModItems.STORAGE_CASING.get());
                         output.accept(ModItems.STORAGE_COMPONENT_1K.get());
                         output.accept(ModItems.STORAGE_COMPONENT_4K.get());
@@ -52,6 +53,12 @@ public final class ModCreativeTab {
                         output.accept(ModItems.ESSENTIA_LEVEL_EMITTER.get());
                         output.accept(ModItems.WIRELESS_ESSENTIA_TERMINAL.get());
                         output.accept(ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get());
+                        var essentia = new ItemStack(ModItems.WIRELESS_ESSENTIA_TERMINAL.get());
+                        ModItems.WIRELESS_ESSENTIA_TERMINAL.get().injectAEPower(essentia, 200_000, appeng.api.config.Actionable.MODULATE);
+                        output.accept(essentia);
+                        var arcane = new ItemStack(ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get());
+                        ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get().injectAEPower(arcane, 200_000, appeng.api.config.Actionable.MODULATE);
+                        output.accept(arcane);
                         output.accept(ModItems.ESSENTIA_ACCESS_CARD.get());
                         output.accept(ModItems.VIS_CONNECTION_CARD.get());
                         // 与物品用的是同一个调用，标签页里的物品堆不会是第二个未组装的副本：

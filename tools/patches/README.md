@@ -1,3 +1,7 @@
+# Historical source patches
+
+These patches belong to the former source-build workflow. The 1.0.2 port uses a supplied release jar and does not apply them. The notes below describe the earlier workflow.
+
 # tools/patches
 
 Patches this project applies to Thaumaturge on top of `thaumaturge_commit`. Both fetch scripts

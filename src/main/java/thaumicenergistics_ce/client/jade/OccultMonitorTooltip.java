@@ -65,15 +65,17 @@ public final class OccultMonitorTooltip implements IBlockComponentProvider {
                 "thaumicenergistics_ce.jade.monitor.stability",
                 String.format("%.1f", stability),
                 Component.translatable("gui.thaumaturge.infusion.stability." + tierKeyOf(stability)))));
-        tooltip.add(helper.text(Component.translatable(
-                        "thaumicenergistics_ce.jade.monitor.instability",
-                        tag.getInt(OccultMonitorProvider.TAG_BASE)
-                                + tag.getInt(OccultMonitorProvider.TAG_ALTAR),
-                        tag.getInt(OccultMonitorProvider.TAG_BASE),
-                        tag.getInt(OccultMonitorProvider.TAG_ALTAR))
-                .withStyle(ChatFormatting.GRAY)));
-        tooltip.add(helper.text(Component.translatable("thaumicenergistics_ce.jade.monitor.tier." + tier)
-                .withStyle(ChatFormatting.GRAY)));
+        if (accessor.getPlayer() != null && accessor.getPlayer().isShiftKeyDown()) {
+            tooltip.add(helper.text(Component.translatable(
+                            "thaumicenergistics_ce.jade.monitor.instability",
+                            tag.getInt(OccultMonitorProvider.TAG_BASE)
+                                    + tag.getInt(OccultMonitorProvider.TAG_ALTAR),
+                            tag.getInt(OccultMonitorProvider.TAG_BASE),
+                            tag.getInt(OccultMonitorProvider.TAG_ALTAR))
+                    .withStyle(ChatFormatting.GRAY)));
+            tooltip.add(helper.text(Component.translatable("thaumicenergistics_ce.jade.monitor.tier." + tier)
+                    .withStyle(ChatFormatting.GRAY)));
+        }
 
         if (tag.getBoolean(OccultMonitorProvider.TAG_CRAFTING)) {
             tooltip.add(helper.text(

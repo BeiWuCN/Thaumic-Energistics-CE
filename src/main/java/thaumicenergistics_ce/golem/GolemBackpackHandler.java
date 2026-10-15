@@ -133,6 +133,7 @@ public final class GolemBackpackHandler {
 
         setLink(golem, link);
         setSkin(golem, BackpackSkins.Thaumium);
+        GolemBackpackTickHandler.syncNow(golem);
         trace("equipped golem " + golem.getId() + " with link " + link);
         playEquipSound(golem);
         if (!player.isCreative()) {
@@ -197,14 +198,9 @@ public final class GolemBackpackHandler {
         if (!previous.isEmpty() && !player.isCreative()) {
             golem.spawnAtLocation(previous);
         }
-
-        ItemStack facade = held.copyWithCount(1);
-        setFacade(golem, facade);
+        golem.getPersistentData().remove(KEY_FACADE);
         setSkin(golem, skin);
-
-        if (!player.isCreative()) {
-            held.shrink(1);
-        }
+        GolemBackpackTickHandler.syncNow(golem);
         trace("repainted golem " + golem.getId() + " as " + skin);
         playEquipSound(golem);
         return true;
@@ -280,5 +276,6 @@ public final class GolemBackpackHandler {
         data.remove(KEY_SKIN);
         data.remove(KEY_FACADE);
         LINK_CACHE.remove(golem.getUUID());
+        GolemBackpackTickHandler.clearBackpackState(golem);
     }
 }

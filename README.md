@@ -10,7 +10,7 @@
 
 本模组是原版 Thaumic Energistics（止于 1.12.2）在 1.21.1 上的重做，基于 Thaumaturge 的 API 编写。
 
-运行环境：Minecraft 1.21.1、NeoForge 21.1.250 或更高、Applied Energistics 2 19.2.x、Thaumaturge 0.4.4 或更高
+运行环境：Minecraft 1.21.1、NeoForge 21.1.250 或更高、Applied Energistics 2 19.2.x、Thaumaturge 1.0.2（本次适配目标）
 
 内容包含源质存储元件、源质终端、若干源质机器、无线连接与奥术合成，以及一套完整的 Thaumaturge 研究树。
 
@@ -18,16 +18,13 @@
 
 编译使用 JDK 21 与 `gradlew build`。
 
-依赖由 Modrinth 的 maven 仓库提供，版本固定在 `gradle.properties`：Applied Energistics 2、JEI、Jade、Thaumaturge。
+AE2、JEI、Jade 等依赖由 Modrinth Maven 提供，版本固定在 `gradle.properties`。
 
-Thaumaturge 需要本地构建一次。它以 All Rights Reserved 发布，没有 maven 制品，其许可也禁止分发它以及由它构建的任何二进制，所以本仓库不包含它。许可 §2.4 允许自行构建并使用：
+本分支使用已发布的 Thaumaturge 1.0.2，将自行取得的文件放到 `libs/thaumaturge-1.21.1-NeoForge-1.0.2.jar`，或通过 `-Pthaumaturge_jar=绝对路径` 指定。此依赖不会打包进 TECE。
 
-```sh
-tools/fetch-thaumaturge.sh                      # Linux / macOS / CI
-powershell -File tools/fetch-thaumaturge.ps1    # Windows
-```
+Windows 可运行 `tools/fetch-thaumaturge.ps1 -SourceJar '文件路径'` 安装本地依赖；该脚本不再从旧源码修订构建。
 
-脚本按 `gradle.properties` 中 `thaumaturge_commit` 指定的 commit 克隆 <https://github.com/Leclowndu93150/Thaumaturge/>，并把构建出的 jar 放进 `libs/`。该 jar 存在时不需要上述命令；缺少它时 `gradlew build` 在配置阶段停止并给出这两条命令。这个 jar 不提交、不转发。
+联动开发环境运行 `tools/install-compat-mods.ps1` 安装锁定版本，详见 `tools/compat-mods.lock.json`。构建验证使用 `gradlew portRegression build`；真实游戏回归使用 `gradlew -PportRuntimeRegression runPortRuntimeRegression`，追加 `-PwithoutCompatibilityMods` 可检查未装联动模组的情况。
 
 ## 许可
 

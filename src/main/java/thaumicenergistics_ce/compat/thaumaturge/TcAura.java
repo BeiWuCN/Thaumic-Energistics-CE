@@ -71,8 +71,16 @@ public final class TcAura {
     }
 
     public static boolean nodeHolds(ServerLevel level, BlockPos nodePos, ResourceKey<IAspect> primal) {
-        return level.getBlockEntity(nodePos) instanceof BlockEntityNode node
+        return level.hasChunkAt(nodePos) && level.getBlockEntity(nodePos) instanceof BlockEntityNode node
+                && node.isEnergized()
                 && node.getAspectsBase().amountOf(primal, level.registryAccess()) > 0;
+    }
+
+    public static @Nullable BlockPos energizedNodeInFront(ServerLevel level, BlockPos host,
+            net.minecraft.core.Direction side) {
+        BlockPos pos = host.relative(side);
+        return level.hasChunkAt(pos) && level.getBlockEntity(pos) instanceof BlockEntityNode node
+                && node.isEnergized() ? pos : null;
     }
 
     /** centivis 是链自身的单位：100 centivis 等于 1 vis。 */

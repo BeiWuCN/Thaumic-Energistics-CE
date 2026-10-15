@@ -115,6 +115,10 @@ public final class AEssentiaKey extends AEKey {
      */
     @Override
     protected Component computeDisplayName() {
+        if (id.getNamespace().equals("thaumaturge")) {
+            return Component.translatableWithFallback(
+                    "thaumicenergistics_ce.essentia_name." + id.getNamespace() + "." + id.getPath(), id.getPath());
+        }
         Holder<IAspect> aspect = resolveAspect();
         return aspect == null
                 ? Component.literal(id.getPath())

@@ -30,8 +30,24 @@ public class ItemWirelessEssentiaTerminal extends WirelessTerminalItem {
     }
 
     @Override
+    protected boolean checkPreconditions(net.minecraft.world.item.ItemStack stack) { return true; }
+
+    @Override
+    public appeng.api.upgrades.IUpgradeInventory getUpgrades(net.minecraft.world.item.ItemStack stack) {
+        return QuantumTerminalSupport.upgrades(stack, (changed, upgrades) -> {});
+    }
+
+    @Override
     public MenuType<?> getMenuType() {
         return ModMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get();
+    }
+
+    @Override
+    public void appendHoverText(net.minecraft.world.item.ItemStack stack, @Nullable TooltipContext context,
+            java.util.List<net.minecraft.network.chat.Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
+        var original = new java.util.ArrayList<net.minecraft.network.chat.Component>();
+        super.appendHoverText(stack, context, original, flag);
+        original.forEach(QuantumTerminalSupport.connectionTooltip(stack, tooltip::add));
     }
 
     @Override

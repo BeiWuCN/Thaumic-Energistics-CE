@@ -13,7 +13,7 @@ import thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
  * 唯一的覆写是按键。按键经基于部件的 {@code PartEssentiaTerminal} 读，
  * 后者用同样方式施加同样的限制：两个都说「只要源质」的终端该走同一套机制。
  */
-public class WirelessEssentiaTerminalMenuHost extends WirelessTerminalMenuHost<ItemWirelessEssentiaTerminal> {
+public class WirelessEssentiaTerminalMenuHost extends QuantumWirelessTerminalMenuHost<ItemWirelessEssentiaTerminal> {
 
     /** 只要源质。监听器为空是因没有东西要存：宿主每次都答同一句，
      * 「玩家改了选择」这类回调没有可记的。 */

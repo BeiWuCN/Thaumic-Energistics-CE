@@ -31,12 +31,10 @@ import thaumicenergistics_ce.init.ModMenuTypes;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
- * 无线奥术合成终端：一个能带走的奥术工作台。工作台来自配对的已放置终端，
- * ME 网络来自 AE2 的无线访问点链接，两件事互不干涉。
- * 在已放置的终端上潜行就配对，潜行左键把配对和链接一起下掉。
- * vis 从玩家周围的灵气取，可携带的工作台没有方块可抽。
+ * 随身奥术工作台：材料、水晶和法杖存在物品组件内。
+ * 旧方块绑定数据仅供迁移提示和玩家主动解除，不再提供共享库存。
  */
-public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem implements ArcaneTerminalLink {
+public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem {
 
     public static final double POWER_CAPACITY = 200_000;
 
@@ -48,6 +46,14 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
 
     public ItemWirelessArcaneCraftingTerminal(DoubleSupplier powerCapacity, Item.Properties properties) {
         super(powerCapacity, properties);
+    }
+
+    @Override
+    protected boolean checkPreconditions(ItemStack stack) { return true; }
+
+    @Override
+    public appeng.api.upgrades.IUpgradeInventory getUpgrades(ItemStack stack) {
+        return QuantumTerminalSupport.upgrades(stack, (changed, upgrades) -> {});
     }
 
     /**
@@ -104,7 +110,6 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
     /**
      * 在物品上记住一个已放置的终端；维度一起存，两个终端可能坐标相同。
      */
-    @Override
     public void pairWith(ItemStack terminal, Level level, BlockPos pos, Direction side) {
         CompoundTag tag = bindingTag(terminal);
         CompoundTag updated = tag == null ? new CompoundTag() : tag.copy();
@@ -181,12 +186,14 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem imp
             @Nullable TooltipContext context,
             List<Component> tooltip,
             TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
+        var original = new java.util.ArrayList<Component>();
+        super.appendHoverText(stack, context, original, flag);
+        original.forEach(QuantumTerminalSupport.connectionTooltip(stack, tooltip::add));
         CompoundTag tag = bindingTag(stack);
         if (tag != null && tag.contains(NBT_POS)) {
             BlockPos pos = BlockPos.of(tag.getLong(NBT_POS));
             tooltip.add(Component.translatable(
-                    "tooltip.thaumicenergistics_ce.wireless_arcane_crafting_terminal.paired",
+                    "tooltip.thaumicenergistics_ce.wireless_arcane_crafting_terminal.legacy_binding",
                     pos.getX(), pos.getY(), pos.getZ()));
         }
     }

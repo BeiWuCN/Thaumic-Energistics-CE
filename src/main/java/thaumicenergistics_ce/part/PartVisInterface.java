@@ -194,15 +194,13 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
         if (!(visLevel() instanceof ServerLevel server)) {
             return null;
         }
-        long now = server.getGameTime();
-        if (permitKnown && now < nextPermitLookup) {
-            return permitPos;
-        }
-        permitKnown = true;
-        nextPermitLookup = now + UPSTREAM_POLL_INTERVAL;
         PartVisInterface end = upstream(server);
-        permitPos = end == null ? null : TcAura.nodeBehind(server, end.visPos());
-        return permitPos;
+        return end == null || !end.isActive() || !server.hasChunkAt(end.visPos()) ? null : end.sourceNode(server);
+    }
+
+    private @Nullable BlockPos sourceNode(ServerLevel server) {
+        BlockPos direct = TcAura.energizedNodeInFront(server, visPos(), getSide());
+        return direct == null ? TcAura.nodeBehind(server, visPos()) : direct;
     }
 
     private @Nullable PartVisInterface upstream(ServerLevel server) {
@@ -218,7 +216,7 @@ public class PartVisInterface extends P2PTunnelPart<PartVisInterface> implements
 
     private boolean canReachRelay(ServerLevel server) {
         // 解析不到东西的中继通向虚无；这里扫的是中继方块，不是部件。
-        return TcAura.relayResolves(server, visPos());
+        return server.hasChunkAt(visPos()) && sourceNode(server) != null;
     }
 
     private @Nullable PartVisInterface partnerWithRelay(ServerLevel server) {

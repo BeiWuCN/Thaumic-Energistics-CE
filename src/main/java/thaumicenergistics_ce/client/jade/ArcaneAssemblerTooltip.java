@@ -92,7 +92,8 @@ public final class ArcaneAssemblerTooltip implements IBlockComponentProvider {
         int discount = tag.getInt(ArcaneAssemblerProvider.TAG_DISCOUNT);
         if (discount > 0) {
             tooltip.add(helper.text(Component.translatable(
-                            "jade.thaumicenergistics_ce.arcane_assembler.discount", discount)
+                            "jade.thaumicenergistics_ce.arcane_assembler.discount",
+                            Component.literal(discount + "%").withStyle(ChatFormatting.GOLD))
                     .withStyle(ChatFormatting.GRAY)));
         }
 

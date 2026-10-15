@@ -27,6 +27,7 @@
     }
   },
   "widgets": {
+    "visAvailable": {"left": 99, "bottom": 163, "width": 31, "height": 16},
     "visCraftCost": {
       "left": 97,
       "bottom": 120,

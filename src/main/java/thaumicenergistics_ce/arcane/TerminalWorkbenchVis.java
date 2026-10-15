@@ -14,11 +14,7 @@ import thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 import thaumicenergistics_ce.util.ThELog;
 
-/**
- * 让奥术合成终端用网络付奥术合成的无属性 vis 消耗。
- * 没有它就合不了：{@code baseVis} 取自工作台的灵气，线缆周围没有灵气。
- * 装了 vis 连接卡的终端直接取那份灵气，不为这个花电。
- */
+/** Register direct environmental VIS for both arcane terminal variants. */
 @EventBusSubscriber(modid = ThEIds.MODID)
 public final class TerminalWorkbenchVis {
 
@@ -61,18 +57,10 @@ public final class TerminalWorkbenchVis {
             return 0;
         }
         PartArcaneCraftingTerminal part = terminal.part();
-        if (part == null) {
-            return 0;
-        }
         IEnergySource payer = terminal.payer();
         if (payer != null && !player.level().isClientSide) {
-            // 手持终端没有方块：它的灵气取自携带它的玩家周围。
-            if (terminal.visConnection()) {
-                // 这条路完全碰不到能量源，装了卡片的合成没有电可花。
-                return TerminalAuraPayment.payAura(player.level(), player.blockPosition(), need, simulate);
-            }
-            return TerminalAuraPayment.pay(player.level(), player.blockPosition(), payer, need, simulate);
+            return TerminalAuraPayment.payAura(player.level(), player.blockPosition(), need, simulate);
         }
-        return part.supplyAura(need, simulate);
+        return part == null ? 0 : part.supplyAura(need, simulate);
     }
 }

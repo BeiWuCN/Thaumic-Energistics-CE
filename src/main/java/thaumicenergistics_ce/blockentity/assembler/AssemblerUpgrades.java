@@ -84,7 +84,7 @@ public final class AssemblerUpgrades {
 
     int ticksPerCraft() {
         return Math.max(MIN_TICKS_PER_CRAFT,
-                BASE_TICKS_PER_CRAFT - TICKS_PER_SPEED_UPGRADE * speedUpgrades);
+                thaumicenergistics_ce.ThEConfig.ASSEMBLER_TICKS.get() - TICKS_PER_SPEED_UPGRADE * speedUpgrades);
     }
 
     void readNbt(CompoundTag tag) {

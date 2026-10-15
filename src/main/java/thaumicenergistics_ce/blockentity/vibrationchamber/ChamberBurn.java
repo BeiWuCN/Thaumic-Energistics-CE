@@ -130,9 +130,9 @@ final class ChamberBurn {
     private int burnTicksFor() {
         String path = tank.aspectPath();
         if (ASPECT_POTENTIA.equals(path)) {
-            return (int) (BASE_BURN_TICKS / 1.6F);
+            return (int) (thaumicenergistics_ce.ThEConfig.BURN_TICKS.get() / 1.6F);
         }
-        return BASE_BURN_TICKS / 2;
+        return thaumicenergistics_ce.ThEConfig.BURN_TICKS.get() / 2;
     }
 
     private double powerFor() {

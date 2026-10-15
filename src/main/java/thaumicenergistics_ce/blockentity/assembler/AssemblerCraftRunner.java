@@ -47,7 +47,7 @@ final class AssemblerCraftRunner {
 
         IEnergyService energy = grid.getService(IEnergyService.class);
         if (energy != null) {
-            double needed = ACTIVE_POWER * ticksSinceLast;
+            double needed = thaumicenergistics_ce.ThEConfig.ASSEMBLER_POWER.get() * ticksSinceLast;
             double extracted = energy.extractAEPower(needed, Actionable.MODULATE, PowerMultiplier.CONFIG);
             if (extracted < needed * 0.9) {
                 noteStall(AssemblerStatus.waitReason(AssemblerStatus.WAIT_NO_POWER, "no power"));

@@ -67,7 +67,7 @@ public final class ModMenuTypes {
                                     (menuType, id, playerInventory, host) ->
                                             new MenuArcaneCraftingTerminal(menuType, id, playerInventory, host),
                                     ITerminalHost.class)
-                            .withMenuTitle(host -> Component.translatable(TERMINAL_TITLE))
+                            .withMenuTitle(host -> Component.translatable("gui.thaumicenergistics_ce.ArcaneCraftingTerminal"))
                             .buildUnregistered(ThEIds.id("arcane_crafting_terminal")));
 
     /**
@@ -101,7 +101,7 @@ public final class ModMenuTypes {
             WIRELESS_ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
                     "wireless_arcane_crafting_terminal",
                     () -> MenuTypeBuilder.create(MenuArcaneCraftingTerminal::new, IPortableTerminal.class)
-                            .withMenuTitle(host -> Component.translatable(TERMINAL_TITLE))
+                            .withMenuTitle(host -> Component.translatable("gui.thaumicenergistics_ce.wireless_arcane_crafting_terminal"))
                             .buildUnregistered(ThEIds.id("wireless_arcane_crafting_terminal")));
 
     /**

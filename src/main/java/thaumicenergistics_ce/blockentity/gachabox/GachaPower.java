@@ -45,7 +45,7 @@ final class GachaPower {
     /** 现在能不能付一次转动，缓冲区和它背后的网络都算进去。 */
     boolean canPay() {
         double banked = box.getInternalCurrentPower();
-        if (banked >= GachaOdds.AE_PER_TURN) {
+        if (banked >= thaumicenergistics_ce.ThEConfig.GACHA_POWER.get()) {
             return true;
         }
         IGrid grid = box.getMainNode().getGrid();
@@ -53,7 +53,7 @@ final class GachaPower {
             return false;
         }
         IEnergyService energy = grid.getEnergyService();
-        return banked + energy.getStoredPower() >= GachaOdds.AE_PER_TURN;
+        return banked + energy.getStoredPower() >= thaumicenergistics_ce.ThEConfig.GACHA_POWER.get();
     }
 
     /** 从缓冲区取走这次转动的电力，缓冲区缺的部分由网格补上。 */

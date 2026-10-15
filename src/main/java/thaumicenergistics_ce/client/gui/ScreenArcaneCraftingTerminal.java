@@ -25,7 +25,7 @@ import thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 /**
  * 奥术合成终端的界面。
  * 费用行在样式的 [visCraftCost] 条带里：右端是法杖出的 vis，左端接着要扣的晶体。
- * vis 显示只有这一处，不带灵气是刻意的。
+ * 环境 VIS 独立显示在法杖槽旁。
  * 样式文档放在 AE2 命名空间下：[StyleManager] 只解析自己命名空间里的文档。
  * 罐和药瓶手势来自 {@link ScreenEssentiaTerminalBase}，只在装了源质访问卡时提供。
  */
@@ -58,7 +58,7 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
 
     public ScreenArcaneCraftingTerminal(
             MenuArcaneCraftingTerminal menu, Inventory inventory, Component title, ScreenStyle style) {
-        super(menu, inventory, title, style);
+        super(menu, inventory, Component.translatable("gui.ae2.Terminal"), style);
         terminalName = title;
     }
 
@@ -75,8 +75,11 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         super.init();
         // AE2 的 [getGuiDisplayName] 只要 title 非空就用 title 顶掉样式文档里的值，改文档换不掉顶行，
         // 只能走 [setTextContent] 覆写：顶行给通用「终端」，终端自己的名字下移到格子上方。
-        setTextContent(AEBaseScreen.TEXT_ID_DIALOG_TITLE, Component.translatable("gui.ae2.Terminal"));
         setTextContent(CRAFTING_GRID_TITLE, terminalName);
+        var subtitle = getStyle().getText().get(CRAFTING_GRID_TITLE);
+        if (subtitle != null) {
+            subtitle.setScale(Math.min(1.0F, (imageWidth - 16.0F) / Math.max(1, font.width(terminalName))));
+        }
         open = this;
     }
 
@@ -114,6 +117,7 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     @Override
     public void drawFG(GuiGraphics graphics, int offsetX, int offsetY, int mouseX, int mouseY) {
         super.drawFG(graphics, offsetX, offsetY, mouseX, mouseY);
+        drawAvailableAura(graphics);
         if (costs.isEmpty() && crystals.isEmpty()) {
             return;
         }
@@ -183,4 +187,18 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
             x -= chip;
         }
     }
+    private void drawAvailableAura(GuiGraphics graphics) {
+        WidgetStyle strip = getStyle().getWidget("visAvailable");
+        if (strip == null) return;
+        Point at = strip.resolve(new Rect2i(0, 0, imageWidth, imageHeight));
+        Component text = Component.translatable("gui.thaumaturge.arcane_workbench.vis_available", menu.availableAuraVis);
+        float scale = Math.min(0.5F, (float) strip.getWidth() / Math.max(1, font.width(text)));
+        graphics.pose().pushPose();
+        graphics.pose().translate(at.getX() + strip.getWidth() / 2.0F,
+                at.getY() + (strip.getHeight() - font.lineHeight * scale) / 2.0F, 0.0F);
+        graphics.pose().scale(scale, scale, 1.0F);
+        graphics.drawString(font, text, -font.width(text) / 2, 0, 0xFF6E6EEE, false);
+        graphics.pose().popPose();
+    }
+
 }

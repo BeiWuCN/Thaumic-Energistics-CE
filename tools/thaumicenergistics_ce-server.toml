@@ -1,0 +1,53 @@
+[terminals]
+    #开启后普通 ME 终端隐藏源质，默认关闭。源质终端始终显示；奥术终端由 arcaneEssentiaAccess 和源质访问卡共同控制。包含无线终端。
+    restrictEssentiaVisibility = false
+    #允许装有源质访问卡的有线和无线奥术合成终端显示及存取源质。默认关闭，不影响源质终端和总线。
+    arcaneEssentiaAccess = false
+
+[patternProviders]
+    #允许 AE2 样板供应器安装源质访问卡并发送、回收源质。关闭后保留已装卡和缓冲源质，卡仍可取出；不影响其他模组的供应器。
+    ae2Enabled = true
+    #允许 ExtendedAE 样板供应器安装源质访问卡并发送、回收源质。关闭后保留已装卡和缓冲源质，卡仍可取出；不影响其他模组的供应器。
+    extendedAeEnabled = true
+    #允许 ExtendedAE Plus 样板供应器安装源质访问卡并发送、回收源质。关闭后保留已装卡和缓冲源质，卡仍可取出；不影响其他模组的供应器。
+    extendedAePlusEnabled = true
+    #允许 AdvancedAE 样板供应器安装源质访问卡并收发源质。关闭后保留已安装的卡片与缓冲源质，卡片仍可取出。
+    advancedAeEnabled = true
+    #允许 AE2 Lightning Tech Reborn 样板供应器安装源质访问卡并收发源质。关闭后保留已安装的卡片与缓冲源质，卡片仍可取出。
+    lightningTechEnabled = true
+
+[buses]
+    #允许装有源质访问卡的 ME 输入、输出和存储总线访问源质。
+    essentiaAccessEnabled = true
+    #输入和输出总线每传输一点源质消耗的 AE。存储总线沿用 AE2 的存储访问耗电。
+    #Range: 0.0 ~ 1000000.0
+    aePerEssentia = 10.0
+
+[golemBackpack]
+    #背包两次传输之间的间隔，单位 tick，20 tick 为一秒。
+    #Range: 1 ~ 12000
+    transferIntervalTicks = 20
+
+[arcaneAssembler]
+    #无加速卡时的合成时长，单位 tick。每张加速卡减少4 tick，最低4 tick。
+    #Range: 4 ~ 12000
+    craftTicks = 20
+    #合成进行时每 tick 的 AE 消耗。
+    #Range: 0.0 ~ 1000000.0
+    aePerTick = 1.5
+
+[essentiaVibrationChamber]
+    #燃烧时长计算的基础 tick 数。能量要素除以1.6，其余除以2；仅对新点燃的燃料生效。
+    #Range: 2 ~ 120000
+    baseBurnTicks = 800
+
+[gachaBox]
+    #每轮开始时消耗的 AE，不影响已开始的轮次。
+    #Range: 0.0 ~ 1000000.0
+    aePerTurn = 500.0
+    #30秒轮次的获奖概率，0到1。
+    #Range: 0.0 ~ 1.0
+    chanceAt30Seconds = 0.75
+    #180秒轮次的获奖概率，0到1，其余时长线性插值。
+    #Range: 0.0 ~ 1.0
+    chanceAt180Seconds = 0.45

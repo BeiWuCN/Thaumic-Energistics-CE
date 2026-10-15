@@ -14,7 +14,7 @@ public class ScreenEssentiaTerminal extends ScreenEssentiaTerminalBase<MenuEssen
 
     public ScreenEssentiaTerminal(
             MenuEssentiaTerminal menu, Inventory playerInventory, Component title, ScreenStyle style) {
-        super(menu, playerInventory, title, style);
+        super(menu, playerInventory, Component.translatable("gui.thaumicenergistics_ce.essentia_terminal"), style);
     }
 
     @Override

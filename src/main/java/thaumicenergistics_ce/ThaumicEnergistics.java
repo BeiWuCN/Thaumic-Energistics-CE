@@ -61,9 +61,13 @@ import thaumicenergistics_ce.util.ThELog;
 public final class ThaumicEnergistics {
     public ThaumicEnergistics(IEventBus modBus, ModContainer container) {
         ThELog.LOG.info("ThaumicEnergistics loading");
+        container.registerConfig(net.neoforged.fml.config.ModConfig.Type.SERVER,
+                thaumicenergistics_ce.ThEConfig.SPEC);
 
         ModBlocks.register(modBus);
         ModItems.register(modBus);
+        thaumicenergistics_ce.item.WirelessTerminalShortcuts.register();
+        thaumicenergistics_ce.init.TECEDataComponents.register(modBus);
         ModBlockEntities.register(modBus);
         ModMenuTypes.register(modBus);
         ModCreativeTab.register(modBus);
@@ -81,7 +85,6 @@ public final class ThaumicEnergistics {
         FluxTransferStatusProvider.register();
         // [ME 接口] 的访问卡挂游戏总线，不挂网格的可 tick 对象：[AE2] 在卡片进出时不发通知。
         // 见 [EssentiaInterfaceRegistry]。
-        EssentiaInterfaceRegistry.register();
     }
 
     /**
@@ -103,6 +106,12 @@ public final class ThaumicEnergistics {
      * 没有 {@code IN_WORLD_GRID_NODE_HOST}，机器自成一张孤立网格，[ME 终端] 看不见它。
      */
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        thaumicenergistics_ce.integration.ae2.PatternProviderAddonCompat.registerBlocks(event);
+        event.registerBlockEntity(EssentiaCapabilities.STORAGE,
+                appeng.core.definitions.AEBlockEntities.PATTERN_PROVIDER.get(),
+                (provider, side) -> side == null ? null
+                        : ((thaumicenergistics_ce.integration.ae2.EssentiaPatternProvider)
+                                provider.getLogic()).essentiaReturnStorage());
         // 只实现接口不够，[能力] 不注册就不生效。
         for (BlockEntityType<?> type : List.of(
                 ModBlockEntities.ARCANE_ASSEMBLER.get(),
@@ -169,6 +178,12 @@ public final class ThaumicEnergistics {
      * 监听器要交给总线，只能写成静态。
      */
     public static void registerPartCapabilities(RegisterPartCapabilitiesEvent event) {
+        thaumicenergistics_ce.integration.ae2.PatternProviderAddonCompat.registerParts(event);
+        event.register(EssentiaCapabilities.STORAGE,
+                (appeng.parts.crafting.PatternProviderPart provider, net.minecraft.core.Direction side) -> side == null ? null
+                        : ((thaumicenergistics_ce.integration.ae2.EssentiaPatternProvider)
+                                provider.getLogic()).essentiaReturnStorage(),
+                appeng.parts.crafting.PatternProviderPart.class);
         TcAura.registerVisSource(event, PartVisInterface.class);
     }
 
@@ -185,6 +200,8 @@ public final class ThaumicEnergistics {
                     ModItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                     WirelessTerminalItem.LINKABLE_HANDLER);
             registerUpgrades();
+            thaumicenergistics_ce.integration.ae2.EssentiaBusStrategies.register();
+            thaumicenergistics_ce.item.QuantumTerminalSupport.registerUpgrades();
             ThELog.LOG.info("ThaumicEnergistics common setup complete");
             // 不注册，每次终端合成都以 PAYMENT_UNAVAILABLE 失败。见 [TerminalWorkbenchVis]。
             thaumicenergistics_ce.arcane.TerminalWorkbenchVis.register();
@@ -215,8 +232,12 @@ public final class ThaumicEnergistics {
                 BlockEntityArcaneAssembler.UPGRADE_SLOT_COUNT);
         // 每个 [ME 接口] 一张访问卡，方块形态和线缆部件都要。少了这两条，
         // [AE2] 的升级槽拒收我们的卡。同一个名称键让方块和部件共用一行。
-        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEBlocks.INTERFACE, 1, INTERFACE_UPGRADE_NAME);
-        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEParts.INTERFACE, 1, INTERFACE_UPGRADE_NAME);
+        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEParts.IMPORT_BUS, 1);
+        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEParts.EXPORT_BUS, 1);
+        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEParts.STORAGE_BUS, 1);
+        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEBlocks.PATTERN_PROVIDER, 1);
+        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), AEParts.PATTERN_PROVIDER, 1);
+        Upgrades.add(ModItems.ESSENTIA_ACCESS_CARD.get(), ModItems.ARCANE_CRAFTING_TERMINAL.get(), 1);
         // 同一张卡也进无线奥术终端自己的两个槽。少了这一行，[AE2] 槽位过滤器拒收，未注册的组合报告说放不下。
         Upgrades.add(
                 ModItems.ESSENTIA_ACCESS_CARD.get(),

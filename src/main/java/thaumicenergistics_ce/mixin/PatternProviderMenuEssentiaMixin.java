@@ -1,0 +1,64 @@
+package thaumicenergistics_ce.mixin;
+
+import appeng.helpers.patternprovider.PatternProviderLogicHost;
+import appeng.menu.AEBaseMenu;
+import appeng.menu.SlotSemantics;
+import appeng.menu.implementations.PatternProviderMenu;
+import appeng.menu.slot.AppEngSlot;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.MenuType;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import thaumicenergistics_ce.integration.ae2.EssentiaPatternProvider;
+
+@Mixin(value = PatternProviderMenu.class, priority = 900, remap = false)
+public abstract class PatternProviderMenuEssentiaMixin extends AEBaseMenu
+        implements thaumicenergistics_ce.integration.ae2.EssentiaProviderMenuState {
+    @appeng.menu.guisync.GuiSync(11745)
+    public boolean tce$essentiaSupportEnabled;
+
+    @Override
+    public boolean essentiaSupportEnabled() { return tce$essentiaSupportEnabled; }
+
+    @Inject(method = "broadcastChanges", at = @At("HEAD"))
+    private void tce$syncSupport(CallbackInfo ci) {
+        if (!isClientSide() && getTarget() instanceof PatternProviderLogicHost host) {
+            tce$essentiaSupportEnabled = ((EssentiaPatternProvider) host.getLogic()).essentiaSupportEnabled();
+        }
+    }
+
+    @org.spongepowered.asm.mixin.Unique
+    private net.minecraft.world.inventory.Slot tce$essentiaSlot;
+    protected PatternProviderMenuEssentiaMixin(MenuType<?> type, int id, Inventory inv, Object host) {
+        super(type, id, inv, host);
+    }
+
+    @Override
+    public boolean isValidForSlot(net.minecraft.world.inventory.Slot slot, net.minecraft.world.item.ItemStack stack) {
+        if (stack.is(thaumicenergistics_ce.init.ModItems.ESSENTIA_ACCESS_CARD.get())
+                && getSlots(SlotSemantics.UPGRADE).contains(slot) && slot != tce$essentiaSlot) return false;
+        return super.isValidForSlot(slot, stack);
+    }
+
+    @Override
+    protected boolean isValidQuickMoveDestination(net.minecraft.world.inventory.Slot slot,
+            net.minecraft.world.item.ItemStack stack, boolean fromPlayerSide) {
+        if (fromPlayerSide && stack.is(thaumicenergistics_ce.init.ModItems.ESSENTIA_ACCESS_CARD.get())
+                && slot != tce$essentiaSlot) {
+            return false;
+        }
+        return super.isValidQuickMoveDestination(slot, stack, fromPlayerSide);
+    }
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void tce$slot(MenuType<?> type, int id, Inventory inv, PatternProviderLogicHost host, CallbackInfo ci) {
+        if (!isClientSide()) {
+            tce$essentiaSupportEnabled = ((EssentiaPatternProvider) host.getLogic()).essentiaSupportEnabled();
+        }
+        var slot = new AppEngSlot(((EssentiaPatternProvider) host.getLogic()).essentiaCardInventory(), 0);
+        slot.setIcon(appeng.client.gui.Icon.BACKGROUND_UPGRADE);
+        tce$essentiaSlot = addSlot(slot, SlotSemantics.UPGRADE);
+    }
+}

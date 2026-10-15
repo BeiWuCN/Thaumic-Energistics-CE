@@ -62,7 +62,12 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
 
     /** 变化时才重算，不每帧：一次完整配方匹配加一次开销计算。 */
     public void refresh() {
-        if (part == null || serverPlayer == null) {
+        if (serverPlayer == null) {
+            return;
+        }
+        if (!ownerMenu.canCraft()) {
+            setDisplayedCraftingOutput(ItemStack.EMPTY);
+            ownerMenu.sendCraftCost(null);
             return;
         }
         IArcaneCraftingInput input = buildInput();
@@ -89,7 +94,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
     @Override
     public void doClick(InventoryAction action, Player who) {
         PartArcaneCraftingTerminal terminal = part;
-        if (terminal == null || !(who instanceof ServerPlayer server)) {
+        if (!ownerMenu.canCraft() || !(who instanceof ServerPlayer server)) {
             return;
         }
         int attempts = switch (action) {
@@ -105,7 +110,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
             // 支付来自终端自己的容器：网格、水晶槽、法杖，和 Thaumaturge 工作台一致。
             // 向网络收费等于再要一份玩家已经摆好的东西。
             var store = new TerminalArcaneCraftingStore(
-                    terminal.craftingGrid(), terminal.crystalInventory(), terminal.wandInventory(), who);
+                    ownerMenu.craftingInventory(), ownerMenu.crystalInventory(), ownerMenu.wandInventory(), who);
             var result = ArcaneCraftingTransaction.craft(workbenchContext(), server, input, store, false);
             if (!result.successful()) {
                 ThELog.LOG.info(
@@ -161,20 +166,20 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
 
     /** 按当前网格建输入，没有可匹配的返回 {@code null}。 */
     private @Nullable IArcaneCraftingInput buildInput() {
-        if (part == null) {
+        if (!ownerMenu.canCraft()) {
             return null;
         }
         // 九个单元，空的也算：Thaumaturge 不管网格里有什么都按九个索引。
         // 列表不能裁剪，见 [TerminalArcaneCraftingInput]。
         List<ItemStack> cells = IntStream.range(0, PartArcaneCraftingTerminal.GRID_SIZE)
-                .mapToObj(i -> part.craftingGrid().getStackInSlot(i))
+                .mapToObj(i -> ownerMenu.craftingInventory().getStackInSlot(i))
                 .toList();
-        ItemStack wand = part.wandInventory().getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT);
+        ItemStack wand = ownerMenu.wandInventory().getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT);
         // 水晶只从自己的槽位取，不从网格取。
         // 网格单元里的水晶是匹配材料，再算一次支付就对不上了。
         List<ItemStack> crystals = new ArrayList<>(PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
-            crystals.add(part.crystalInventory().getStackInSlot(i));
+            crystals.add(ownerMenu.crystalInventory().getStackInSlot(i));
         }
         // 卡片只在这里读一次：一次合成的两遍灵气处理都读这个冻结结果，
         // 不再问槽位，提交才不会和模拟对不上。

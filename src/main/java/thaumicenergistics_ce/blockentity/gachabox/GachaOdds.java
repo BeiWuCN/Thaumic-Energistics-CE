@@ -48,7 +48,7 @@ public final class GachaOdds {
     /** 这个时长的转动给奖的赔率，只看时长。 */
     public static double payoutChance(int seconds) {
         double along = (double) (seconds - MIN_SECONDS) / (LONGEST_SECONDS - MIN_SECONDS);
-        return CHANCE_AT_MIN_SECONDS + (CHANCE_AT_LONGEST_SECONDS - CHANCE_AT_MIN_SECONDS) * along;
+        return thaumicenergistics_ce.ThEConfig.GACHA_SHORT_CHANCE.get() + (thaumicenergistics_ce.ThEConfig.GACHA_LONG_CHANCE.get() - thaumicenergistics_ce.ThEConfig.GACHA_SHORT_CHANCE.get()) * along;
     }
 
     /** 一次抽取定下两半：落到的时长决定这次转动的赔率。 */

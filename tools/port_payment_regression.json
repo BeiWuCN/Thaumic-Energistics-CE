@@ -1,0 +1,7 @@
+{
+  "type": "thaumaturge:arcane_workbench_shapeless",
+  "crystals": [{"aspect": "thaumaturge:aer", "amount": 1}],
+  "ingredients": [{"item": "minecraft:structure_void"}],
+  "result": {"id": "minecraft:barrier", "count": 1},
+  "vis": 5
+}

@@ -1,0 +1,34 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "crystals": [],
+  "key": {
+    "W": {
+      "item": "minecraft:white_wool"
+    },
+    "C": {
+      "type": "neoforge:components",
+      "items": "thaumaturge:essentia_crystal",
+      "components": {
+        "thaumaturge:crystal_aspect": {
+          "aspect": "thaumaturge:fabrico"
+        }
+      }
+    },
+    "T": {
+      "item": "thaumaturge:ingot_thaumium"
+    },
+    "B": {
+      "item": "minecraft:light_blue_dye"
+    }
+  },
+  "pattern": [
+    " B ",
+    "WCW",
+    " T "
+  ],
+  "vis": 10,
+  "result": {
+    "id": "thaumicenergistics_ce:xiao_leng_fumo",
+    "count": 1
+  }
+}

@@ -110,7 +110,7 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
         private static final int CHIP = 16;
         private static final int GAP = 1;
         /** 比图标小，数字就排在图标下方，不在旁边。 */
-        private static final float BADGE_SCALE = 0.75F;
+        private static final float BADGE_SCALE = 0.5F;
 
         private final Holder<IAspect> aspect;
         private final String badge;
@@ -132,7 +132,7 @@ public final class InfusionProviderTooltip implements IBlockComponentProvider {
             // 图标最下一行，一行读起来就是一整条数字。
             // 上面的数量写 0：这个角标才是那个数字，图标自己的标签不是。
             graphics.pose().pushPose();
-            graphics.pose().translate(x + CHIP + GAP, y + 9, 0.0F);
+            graphics.pose().translate(x + CHIP + GAP, y + CHIP - font.lineHeight * BADGE_SCALE, 0.0F);
             graphics.pose().scale(BADGE_SCALE, BADGE_SCALE, 1.0F);
             graphics.drawString(font, badge, 0, 0, 0xFFFFFFFF, true);
             graphics.pose().popPose();

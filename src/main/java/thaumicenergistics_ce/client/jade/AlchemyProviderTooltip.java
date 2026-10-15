@@ -49,7 +49,8 @@ public final class AlchemyProviderTooltip implements IBlockComponentProvider {
         // 用进度条不用数字，形状沿用 Jade 给能量缓冲画的那种：
         // 普通的 [progress()] 是箭头仪表，储备改用带条纹的条，数字写在条上面。
         int cache = tag.getInt(AlchemyProviderProvider.TAG_CACHE);
-        ProgressStyle style = helper.progressStyle().color(0xFFAA0000, 0xFF660000);
+        ProgressStyle style = helper.progressStyle().overlay(
+                helper.sprite(ResourceLocation.fromNamespaceAndPath("jade", "energy"), 16, 16));
         tooltip.add(helper.progress(
                 (float) Math.min(1.0, cache / BlockEntityAlchemyProvider.AE_CACHE),
                 Component.translatable("thaumicenergistics_ce.jade.alchemy_provider.reserve", cache,

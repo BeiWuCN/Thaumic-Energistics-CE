@@ -91,7 +91,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
     private final InternalInventory crystals;
 
-    /** 只有无线终端有：自己买灵气，买到的就是玩家周围的灵气。 */
+    /** 只有无线终端有：用于标识手持终端，环境 VIS 取自玩家所在区块。 */
     private final @Nullable IEnergySource auraPayer;
 
     private final AppEngInternalInventory resultInventory =
@@ -100,6 +100,12 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     private @Nullable ArcaneCraftingResultSlot resultSlot;
 
     private int craftInputSignature = -1;
+    private boolean lastConnected;
+    @appeng.menu.guisync.GuiSync(110)
+    public int availableAuraVis;
+
+    @appeng.menu.guisync.GuiSync(111)
+    public boolean essentiaAccessEnabled;
 
     /** 上次说「替身槽位不收东西」的时刻。初值 -100 让第一次点击就能出声，之后两秒一次。 */
     private int lastPlaceholderRefusal = -100;
@@ -109,9 +115,10 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         super(menuType, id, playerInventory, host, false);
         this.part = host instanceof ArcaneTerminalHost arcane ? arcane.arcaneTerminal() : null;
         this.auraPayer = host instanceof IPortableTerminal portable ? portable : null;
-        this.craftingGrid = part == null ? gridFallback : part.craftingGrid();
-        this.wandInventory = part == null ? wandFallback : part.wandInventory();
-        this.crystals = part == null ? crystalFallback : part.crystalInventory();
+        var wireless = host instanceof thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost w ? w : null;
+        this.craftingGrid = wireless != null ? wireless.craftingGrid() : part == null ? gridFallback : part.craftingGrid();
+        this.wandInventory = wireless != null ? wireless.wandInventory() : part == null ? wandFallback : part.wandInventory();
+        this.crystals = wireless != null ? wireless.crystalInventory() : part == null ? crystalFallback : part.crystalInventory();
 
         // 替身容器一概拒收：这一侧既写不进存档，也合不了成（part == null 时结果槽直接返回），
         // 收下等于吃掉。玩家点击走 [AppEngSlot#mayPlace] 到这里，与部件容器的过滤器同一条门。
@@ -206,19 +213,88 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
     @Override
     public void broadcastChanges() {
+        if (!isClientSide()) {
+            var pos = part == null ? getPlayer().blockPosition() : part.getBlockEntity().getBlockPos();
+            availableAuraVis = Math.max(0, (int) thaumicenergistics_ce.compat.thaumaturge.TcAura.vis(getPlayer().level(), pos));
+        }
+        if (!isClientSide()) essentiaAccessEnabled = thaumicenergistics_ce.ThEConfig.ARCANE_ESSENTIA_ACCESS.get();
+        updateUpgradeSlotVisibility();
         super.broadcastChanges();
         if (resultSlot == null) {
             return;
         }
+        if (!isClientSide()) chargeWand();
+        boolean connected = canCraft();
         int signature = craftInputSignature();
-        if (signature != craftInputSignature) {
+        if (signature != craftInputSignature || connected != lastConnected) {
             craftInputSignature = signature;
+            lastConnected = connected;
             resultSlot.refresh();
         }
     }
 
+    @Override
+    public boolean isValidForSlot(Slot slot, ItemStack stack) {
+        if (stack.is(ModItems.ESSENTIA_ACCESS_CARD.get())
+                && getSlots(SlotSemantics.UPGRADE).contains(slot)
+                && !thaumicenergistics_ce.ThEConfig.ARCANE_ESSENTIA_ACCESS.get()) return false;
+        return super.isValidForSlot(slot, stack);
+    }
+
+    public void updateUpgradeSlotVisibility() {
+        var slots = getSlots(SlotSemantics.UPGRADE);
+        int hidden = -1;
+        if (!essentiaAccessEnabled) {
+            int limit = getHost() instanceof thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost
+                    ? Math.min(2, slots.size()) : slots.size();
+            for (int i = limit - 1; i >= 0; i--) {
+                if (!slots.get(i).hasItem()) { hidden = i; break; }
+            }
+        }
+        for (int i = 0; i < slots.size(); i++) ((AppEngSlot) slots.get(i)).setSlotEnabled(i != hidden);
+    }
+
+    private void chargeWand() {
+        if (!(getPlayer().level() instanceof net.minecraft.server.level.ServerLevel server)) return;
+        ItemStack wand = wandInventory.getStackInSlot(0);
+        if (!thaumicenergistics_ce.compat.thaumaturge.TcWand.isWand(wand)) return;
+        for (ItemStack card : getHost().getUpgrades()) {
+            if (!card.is(ModItems.VIS_CONNECTION_CARD.get())) continue;
+            var relay = thaumicenergistics_ce.item.ItemVisConnectionCard.resolve(server, card);
+            if (relay == null) return;
+            ItemStack charged = wand.copy();
+            boolean changed = false;
+            for (var primal : thaumicenergistics_ce.blockentity.assembler.BlockEntityArcaneAssembler.PRIMALS) {
+                int room = thaumicenergistics_ce.compat.thaumaturge.TcWand.chargeRoom(charged, primal);
+                int supplied = relay.drainCentivis(primal, Math.min(100, room), false);
+                if (supplied > 0) {
+                    thaumicenergistics_ce.compat.thaumaturge.TcWand.addCentivis(charged, primal, supplied);
+                    changed = true;
+                }
+            }
+            if (changed) wandInventory.setItemDirect(0, charged);
+            return;
+        }
+    }
+
+    @Override
+    protected int transferStackToMenu(ItemStack stack) {
+        var remaining = stack.copy();
+        if (thaumicenergistics_ce.compat.thaumaturge.TcWand.isWand(stack)) {
+            var slot = wandSlot();
+            if (slot != null && slot.mayPlace(remaining)) remaining = slot.safeInsert(remaining);
+        } else {
+            for (Slot slot : crystalSlots()) {
+                if (slot.mayPlace(remaining)) remaining = slot.safeInsert(remaining);
+            }
+        }
+        int moved = stack.getCount() - remaining.getCount();
+        return moved > 0 ? moved : super.transferStackToMenu(stack);
+    }
+
     private int craftInputSignature() {
-        int hash = 1;
+        int hash = availableAuraVis;
+        for (ItemStack upgrade : getHost().getUpgrades()) hash = 31 * hash + StackSignatures.of(upgrade);
         for (int i = 0; i < PartArcaneCraftingTerminal.GRID_SIZE; i++) {
             hash = 31 * hash + StackSignatures.of(craftingGrid.getStackInSlot(i));
         }
@@ -232,11 +308,20 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         return part;
     }
 
+    public InternalInventory craftingInventory() { return craftingGrid; }
+    public InternalInventory crystalInventory() { return crystals; }
+    public InternalInventory wandInventory() { return wandInventory; }
+
+    public boolean canCraft() {
+        return getLinkStatus().connected() && (part != null
+                || getHost() instanceof thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost);
+    }
+
     public @Nullable ArcaneCraftingResultSlot resultSlot() {
         return resultSlot;
     }
 
-    /** 无线终端的电池；放置式终端为 {@code null}，它的 vis 找网络买。 */
+    /** 无线终端的电池；放置式终端为 {@code null}。 */
     public @Nullable IEnergySource auraPayer() {
         return auraPayer;
     }
@@ -271,7 +356,8 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     @Override
     protected boolean essentiaAccessGranted() {
         // 玩家看到的就是宿主自己的升级栏；AE2 菜单按它构建。
-        return getHost().getUpgrades().isInstalled(ModItems.ESSENTIA_ACCESS_CARD.get());
+        return (isClientSide() ? essentiaAccessEnabled : thaumicenergistics_ce.ThEConfig.ARCANE_ESSENTIA_ACCESS.get())
+                && getHost().getUpgrades().isInstalled(ModItems.ESSENTIA_ACCESS_CARD.get());
     }
 
     /** 屏幕问它只为隐藏手势；服务端在动东西之前会再问一次。 */

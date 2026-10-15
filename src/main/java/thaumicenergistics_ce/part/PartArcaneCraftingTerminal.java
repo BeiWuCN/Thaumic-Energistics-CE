@@ -98,7 +98,7 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
 
     /** 只有一张卡，vis 连接卡；它插的是 [AE2] 挂在本部件上的那个升级槽。 */
     private final IUpgradeInventory upgrades =
-            UpgradeInventories.forMachine(getPartItem(), 1, this::onUpgradesChanged);
+            UpgradeInventories.forMachine(getPartItem(), 2, this::onUpgradesChanged);
 
     public PartArcaneCraftingTerminal(IPartItem<?> partItem) {
         super(partItem);
@@ -201,32 +201,17 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
     /**
      * 为合成提供灵气里的 vis，先模拟再提交。少了它 Thaumaturge 回 {@code PAYMENT_UNAVAILABLE}，
      * 无类型的 {@code baseVis} 来自线缆没有的缓冲。
-     * @return 提供的 centivis，不超过 {@code needCentivis}
+     * @return 提供的 centivis，不超过 {@code needVis}
      */
-    public int supplyAura(int needCentivis, boolean simulate) {
-        if (needCentivis <= 0 || !isActive()) {
+    public int supplyAura(int needVis, boolean simulate) {
+        if (needVis <= 0 || !isActive()) {
             return 0;
         }
         Level level = getLevel();
         if (level == null || level.isClientSide()) {
             return 0;
         }
-        if (TerminalAuraPayment.visConnectionInstalled(this)) {
-            // 卡片直接扣线缆周围的灵气，不问网格也不问电力。
-            return TerminalAuraPayment.payAura(
-                    level, getBlockEntity().getBlockPos(), needCentivis, simulate);
-        }
-        IGrid grid = gridOrNull();
-        if (grid == null) {
-            return 0;
-        }
-        IEnergyService energy =
-                grid.getService(IEnergyService.class);
-        if (energy == null) {
-            return 0;
-        }
-        // 线缆周围的灵气，费用由网络电力结：无线终端费率相同，灵气管玩家身边那块。见 [TerminalAuraPayment]。
-        return TerminalAuraPayment.pay(level, getBlockEntity().getBlockPos(), energy, needCentivis, simulate);
+        return TerminalAuraPayment.payAura(level, getBlockEntity().getBlockPos(), needVis, simulate);
     }
 
     @Override

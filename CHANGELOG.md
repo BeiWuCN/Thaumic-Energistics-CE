@@ -1,3 +1,17 @@
+# TECE 2.7.4.6 — Minecraft 1.21.1 / NeoForge
+
+- Port the 2.7.4.6 feature set to Thaumaturge 1.0.2 on Minecraft 1.21.1.
+- Add native essentia import/export/storage buses and provider integration for ExtendedAE, ExtendedAE Plus, AdvancedAE and Lightning Tech.
+- Give wireless arcane terminals independent inventories, offline local access, optional quantum connectivity and Curios shortcuts.
+- Use environmental VIS directly and bound relay cards for wand charging; correct 1.0.2 aura payment units.
+- Add 16 server settings; fix terminal access permissions, upgrade slot visibility and overlapping titles.
+- Update backpack models, skins, transfer indicators, research text, recipes, Jade, JEI and decorative resources.
+- Set the creative tab icon to the AE Wrench Focus.
+
+Validation: build, 10,000-cycle VIS conservation regression, and game tests with and without optional compatibility mods.
+
+---
+
 # TECE 2.7.4.2-hotfix1
 
 ## Fixes
