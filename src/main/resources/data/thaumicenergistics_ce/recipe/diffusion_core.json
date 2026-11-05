@@ -1,9 +1,16 @@
 {
   "type": "thaumaturge:arcane_workbench_shapeless",
-  "_note": "The reference build's DIFFUSION_CORE: three quicksilver drops, an entropy shard and an AE2 annihilation core. The shard becomes thaumaturge's perditio vis crystal, which is what the reference's entropy shard is.",
+  "research": {
+    "entry": "thaumicenergistics_ce:digisentia"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:diffusion_core",
+    "count": 1
+  },
   "crystals": [],
   "ingredients": [
-    "thaumaturge:nugget_quicksilver",
+    "ae2:annihilation_core",
+    "thaumicenergistics_ce:mystic_crystal",
     "thaumaturge:nugget_quicksilver",
     "thaumaturge:nugget_quicksilver",
     {
@@ -14,12 +21,7 @@
           "aspect": "thaumaturge:perditio"
         }
       }
-    },
-    "ae2:annihilation_core"
+    }
   ],
-  "vis": 20,
-  "result": {
-    "id": "thaumicenergistics_ce:diffusion_core",
-    "count": 1
-  }
+  "vis": 20
 }

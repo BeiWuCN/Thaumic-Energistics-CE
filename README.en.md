@@ -4,12 +4,13 @@ Thaumic Energistics: CE connects Thaumaturge's essentia and Vis to Applied Energ
 
 The project continues the original Thaumic Energistics gameplay using Thaumaturge on newer Minecraft versions. This branch targets **Minecraft 26.1.2 / NeoForge**. For Minecraft 1.21.1, see the [1.21.1 branch](https://github.com/BeiWuCN/Thaumic-Energistics-CE/tree/1.21.1).
 
-[中文](README.md) · [Downloads](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) · [Changelog](CHANGELOG-2.7.4.6.md) · [Issues](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues)
+[中文](README.md) · [Downloads](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) · [Changelog](CHANGELOG-2.7.5.md) · [Issues](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues)
 
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/26.1.2/src/main/resources/icon.png" alt="Thaumic Energistics: CE" width="420">
 
 ## Features
 
+- **Crystal materials and research:** infuse a growing matrix, harvest mystic crystals, and process them into dust, circuit boards and processors for storage, terminals, automation and wireless devices. Research follows a horizontal material progression, with storage tiers up to 256k.
 - **Essentia storage and transfer:** store aspects in ME Essentia Cells and fit Essentia Access Cards to ME Import, Export and Storage Buses to connect external essentia containers.
 - **Pattern provider compatibility:** AdvancedAE block and part providers, and the regular, extended and Pigmee providers in AE2 Lightning Tech Reborn’s 26.1.2 development branch, recognize arcane patterns. An Essentia Access Card enables essentia input and return. Each integration has its own configuration switch.
 - **Essentia terminals:** browse network aspects, search names in your language, and deposit or withdraw essentia using containers. The wireless terminal provides remote access.
@@ -28,10 +29,10 @@ The current release was built and tested with:
 | Component | Version |
 | --- | --- |
 | Minecraft | 26.1.2 |
-| NeoForge | 26.1.2.112 |
+| NeoForge | 26.1.2.122 |
 | Java | 25 |
 | Applied Energistics 2 | 26.1.13-beta |
-| Thaumaturge | 1.0.3, source revision `ee2abf29` (older 1.0.3 builds are incompatible) |
+| Thaumaturge | 1.1.0, source revision `c71c2a27` (older 1.0.3 builds are incompatible) |
 
 AE2 and Thaumaturge are required. JEI provides recipe viewing and transfer, Jade provides machine tooltips, and Curios adds accessory slots for wireless terminals. Configure the wireless terminal shortcuts in AE2's controls category; both are unbound by default.
 
@@ -68,3 +69,7 @@ This repository handles the CE versions. Report issues with the original Thaumic
 This project is licensed under [MIT](LICENSE). Parts of the code derive from Nividica's [Thaumic Energistics](https://github.com/Nividica/ThaumicEnergistics); the original copyright notices for Chris and BrockWS are preserved in the license file.
 
 Thaumaturge is developed by Leclowndu93150. Textures for the newer versions are drawn by @麦淇淋. Thaumaturge has its own license; follow the upstream terms. This repository does not distribute its binaries.
+
+## License and attribution
+
+Port modifications are licensed under LGPL-3.0; original code retains its MIT notices. Textures by 麦淇淋 are licensed under CC BY-NC-SA 3.0; third-party assets retain their original licenses. See [LICENSE](LICENSE) and [asset scope and attribution](LICENSE-ASSETS.md).

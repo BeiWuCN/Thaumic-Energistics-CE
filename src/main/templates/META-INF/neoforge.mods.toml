@@ -31,8 +31,8 @@ side = "BOTH"
 [[dependencies."${mod_id}"]]
 modId = "thaumaturge"
 type = "required"
-# Uses the node, caster and golem interfaces introduced in 1.0.3.
-versionRange = "[1.0.3,)"
+# 1.1.0 replaced the essentia conduit capability with IEssentiaTransport.
+versionRange = "[1.1.0,)"
 ordering = "AFTER"
 side = "BOTH"
 

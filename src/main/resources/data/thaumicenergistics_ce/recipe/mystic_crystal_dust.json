@@ -1,0 +1,15 @@
+{
+  "type": "thaumaturge:arcane_workbench_shapeless",
+  "research": {
+    "entry": "thaumicenergistics_ce:mystic_crystal_circuit"
+  },
+  "crystals": [],
+  "ingredients": [
+    "thaumicenergistics_ce:mystic_crystal"
+  ],
+  "vis": 5,
+  "result": {
+    "id": "thaumicenergistics_ce:mystic_crystal_dust",
+    "count": 2
+  }
+}

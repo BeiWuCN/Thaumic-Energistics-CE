@@ -1,0 +1,12 @@
+{
+  "type": "ae2:inscriber",
+  "ingredients": {
+    "top": "ae2:calculation_processor_press",
+    "middle": "thaumicenergistics_ce:mystic_crystal"
+  },
+  "mode": "inscribe",
+  "result": {
+    "id": "thaumicenergistics_ce:mystic_circuit_board",
+    "count": 1
+  }
+}

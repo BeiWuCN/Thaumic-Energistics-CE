@@ -4,12 +4,13 @@ Thaumic Energistics: CE（神秘能源 CE）将 Thaumaturge 的源质与魔力�
 
 项目延续原版 Thaumic Energistics 的玩法，并基于 Thaumaturge 适配新的 Minecraft 版本。当前分支面向 **Minecraft 26.1.2 / NeoForge**；1.21.1 版本请查看 [1.21.1 分支](https://github.com/BeiWuCN/Thaumic-Energistics-CE/tree/1.21.1)。
 
-[English](README.en.md) · [下载](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) · [更新记录](CHANGELOG-2.7.4.6.md) · [问题反馈](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues)
+[English](README.en.md) · [下载](https://github.com/BeiWuCN/Thaumic-Energistics-CE/releases) · [更新记录](CHANGELOG-2.7.5.md) · [问题反馈](https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues)
 
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/26.1.2/src/main/resources/icon.png" alt="Thaumic Energistics: CE" width="420">
 
 ## 主要功能
 
+- **水晶材料与研究主线**：注魔制作母岩，培育神秘水晶，再加工为水晶粉、电路板与处理器，为存储、终端、自动化和无线设备提供材料。研究树按材料进度横向展开，存储最高支持 256k。
 - **源质存储与传输**：使用 ME 源质存储单元保存要素，给 ME 输入、输出和存储总线装上源质访问卡，即可与外部源质容器交互。
 - **样板供应器兼容**：AdvancedAE 的方块与面板供应器，以及 AE2 Lightning Tech Reborn 26.1.2 开发分支的普通、扩展和 Pigmee 供应器，可识别奥术样板；安装源质访问卡后可收发源质。两项兼容可分别在配置中关闭。
 - **源质终端**：查看网络中的源质，按当前语言搜索名称，并通过容器存取源质。无线源质终端可以远程访问网络。
@@ -28,10 +29,10 @@ Thaumic Energistics: CE（神秘能源 CE）将 Thaumaturge 的源质与魔力�
 | 项目 | 版本 |
 | --- | --- |
 | Minecraft | 26.1.2 |
-| NeoForge | 26.1.2.112 |
+| NeoForge | 26.1.2.122 |
 | Java | 25 |
 | Applied Energistics 2 | 26.1.13-beta |
-| Thaumaturge | 1.0.3，源码提交 `ee2abf29`（旧 1.0.3 构建不适用） |
+| Thaumaturge | 1.1.0，源码提交 `c71c2a27`（旧 1.0.3 构建不适用） |
 
 AE2 和 Thaumaturge 为必需依赖。JEI 提供配方查看与转移，Jade 提供设备提示，Curios 提供无线终端的饰品栏支持。无线终端的打开按键可在 AE2 按键分类中设置，默认未绑定。
 
@@ -68,3 +69,7 @@ Linux / macOS：
 本项目使用 [MIT 许可](LICENSE)。部分代码源自 Nividica 的 [Thaumic Energistics](https://github.com/Nividica/ThaumicEnergistics)，原作者 Chris、BrockWS 的版权声明保留在许可文件中。
 
 Thaumaturge 由 Leclowndu93150 开发，高版本材质由 @麦淇淋 绘制。Thaumaturge 使用独立许可，请遵守其上游许可；本仓库不分发其二进制。
+
+## 协议与署名
+
+代码移植与修改采用 LGPL-3.0；原始代码保留 MIT 授权。麦淇淋创作的材质采用 CC BY-NC-SA 3.0，第三方资源保留原授权。详见 [LICENSE](LICENSE) 与 [材质授权和署名](LICENSE-ASSETS.md)。

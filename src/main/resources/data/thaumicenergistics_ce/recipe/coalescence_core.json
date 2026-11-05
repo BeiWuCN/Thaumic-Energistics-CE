@@ -1,9 +1,16 @@
 {
   "type": "thaumaturge:arcane_workbench_shapeless",
-  "_note": "The reference build's COALESCENCE_CORE: three quicksilver drops, an order shard and an AE2 formation core. The shard becomes thaumaturge's ordo vis crystal.",
+  "research": {
+    "entry": "thaumicenergistics_ce:digisentia"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:coalescence_core",
+    "count": 1
+  },
   "crystals": [],
   "ingredients": [
-    "thaumaturge:nugget_quicksilver",
+    "ae2:formation_core",
+    "thaumicenergistics_ce:mystic_crystal",
     "thaumaturge:nugget_quicksilver",
     "thaumaturge:nugget_quicksilver",
     {
@@ -14,12 +21,7 @@
           "aspect": "thaumaturge:ordo"
         }
       }
-    },
-    "ae2:formation_core"
+    }
   ],
-  "vis": 20,
-  "result": {
-    "id": "thaumicenergistics_ce:coalescence_core",
-    "count": 1
-  }
+  "vis": 20
 }

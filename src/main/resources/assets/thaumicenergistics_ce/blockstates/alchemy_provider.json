@@ -1,1 +1,6 @@
-{"variants":{"":{"model":"thaumicenergistics_ce:block/alchemy_provider"}}}
+{
+  "variants": {
+    "lit=false": { "model": "thaumicenergistics_ce:block/alchemy_provider" },
+    "lit=true": { "model": "thaumicenergistics_ce:block/alchemy_provider_on" }
+  }
+}

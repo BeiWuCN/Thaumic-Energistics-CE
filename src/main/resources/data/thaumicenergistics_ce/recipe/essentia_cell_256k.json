@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "a": "#thaumicenergistics_ce:essentia_cell_glass",
+    "b": "minecraft:redstone",
+    "c": "thaumicenergistics_ce:storage_component_256k",
+    "d": "thaumaturge:ingot_thaumium"
+  },
+  "pattern": [
+    "aba",
+    "bcb",
+    "ddd"
+  ],
+  "result": {
+    "id": "thaumicenergistics_ce:essentia_cell_256k",
+    "count": 1
+  }
+}

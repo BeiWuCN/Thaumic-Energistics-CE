@@ -8,7 +8,8 @@
 	],
 	"textures": {
 		"model": "thaumicenergistics_ce:block/arcane_assembler_fallback",
-		"particle": "ae2:block/molecular_assembler"
+		"particle": "ae2:block/molecular_assembler",
+		"glass": "ae2:block/molecular_assembler"
 	},
 	"elements": [
 		{
@@ -370,349 +371,70 @@
 			}
 		},
 		{
-			"name": "cube_outline",
 			"from": [
-				1.02,
-				2.02,
-				2.02
+				2,
+				2,
+				2
 			],
 			"to": [
-				1.98,
-				13.98,
-				13.98
-			],
-			"faces": {
-				"east": {
-					"uv": [
-						4,
-						0,
-						7,
-						3
-					],
-					"texture": "#model"
-				},
-				"west": {
-					"uv": [
-						4,
-						0,
-						7,
-						3
-					],
-					"texture": "#model"
-				},
-				"up": {
-					"uv": [
-						3.25,
-						9.5,
-						3,
-						6.5
-					],
-					"texture": "#model"
-				},
-				"down": {
-					"uv": [
-						6.75,
-						6,
-						6.5,
-						3
-					],
-					"texture": "#model"
-				}
-			}
-		},
-		{
-			"name": "cube_outline",
-			"from": [
-				14.02,
-				2.02,
-				2.02
-			],
-			"to": [
-				14.98,
-				13.98,
-				13.98
-			],
-			"faces": {
-				"east": {
-					"uv": [
-						4,
-						0,
-						7,
-						3
-					],
-					"texture": "#model"
-				},
-				"west": {
-					"uv": [
-						4,
-						3,
-						7,
-						0
-					],
-					"texture": "#model"
-				},
-				"up": {
-					"uv": [
-						3,
-						6.5,
-						3.25,
-						9.5
-					],
-					"texture": "#model"
-				},
-				"down": {
-					"uv": [
-						6.75,
-						3,
-						6.5,
-						6
-					],
-					"texture": "#model"
-				}
-			}
-		},
-		{
-			"name": "cube_outline",
-			"from": [
-				2.02,
-				2.02,
-				14.02
-			],
-			"to": [
-				13.98,
-				13.98,
-				14.98
+				14,
+				14,
+				14
 			],
 			"faces": {
 				"north": {
 					"uv": [
-						4,
-						3,
-						7,
-						0
+						2,
+						2,
+						14,
+						14
 					],
-					"texture": "#model"
-				},
-				"south": {
-					"uv": [
-						4,
-						0,
-						7,
-						3
-					],
-					"texture": "#model"
-				},
-				"up": {
-					"uv": [
-						3,
-						6.5,
-						3.25,
-						9.5
-					],
-					"rotation": 90,
-					"texture": "#model"
-				},
-				"down": {
-					"uv": [
-						6.75,
-						6,
-						6.5,
-						3
-					],
-					"rotation": 90,
-					"texture": "#model"
-				}
-			}
-		},
-		{
-			"name": "cube_outline",
-			"from": [
-				2.02,
-				2.02,
-				1.02
-			],
-			"to": [
-				13.98,
-				13.98,
-				1.98
-			],
-			"faces": {
-				"north": {
-					"uv": [
-						4,
-						0,
-						7,
-						3
-					],
-					"texture": "#model"
-				},
-				"south": {
-					"uv": [
-						4,
-						3,
-						7,
-						0
-					],
-					"texture": "#model"
-				},
-				"up": {
-					"uv": [
-						3,
-						6.5,
-						3.25,
-						9.5
-					],
-					"rotation": 270,
-					"texture": "#model"
-				},
-				"down": {
-					"uv": [
-						6.75,
-						3,
-						6.5,
-						6
-					],
-					"rotation": 90,
-					"texture": "#model"
-				}
-			}
-		},
-		{
-			"name": "cube_outline",
-			"from": [
-				3.02,
-				15.02,
-				3.02
-			],
-			"to": [
-				12.98,
-				15.98,
-				12.98
-			],
-			"faces": {
-				"north": {
-					"uv": [
-						6.5,
-						6,
-						9,
-						6.25
-					],
-					"texture": "#model"
+					"texture": "#glass"
 				},
 				"east": {
 					"uv": [
-						6.5,
-						6.25,
-						9,
-						6.5
+						2,
+						2,
+						14,
+						14
 					],
-					"texture": "#model"
+					"texture": "#glass"
 				},
 				"south": {
 					"uv": [
-						6.5,
-						6.5,
-						9,
-						6.75
+						2,
+						2,
+						14,
+						14
 					],
-					"texture": "#model"
+					"texture": "#glass"
 				},
 				"west": {
 					"uv": [
-						6.75,
-						3,
-						9.25,
-						3.25
+						2,
+						2,
+						14,
+						14
 					],
-					"texture": "#model"
+					"texture": "#glass"
 				},
 				"up": {
 					"uv": [
-						5.5,
-						6.5,
-						3,
-						4
+						2,
+						2,
+						14,
+						14
 					],
-					"texture": "#model"
+					"texture": "#glass"
 				},
 				"down": {
 					"uv": [
-						3,
-						4,
-						5.5,
-						6.5
+						2,
+						2,
+						14,
+						14
 					],
-					"texture": "#model"
-				}
-			}
-		},
-		{
-			"name": "cube_outline",
-			"from": [
-				3.02,
-				0.02,
-				3.02
-			],
-			"to": [
-				12.98,
-				0.98,
-				12.98
-			],
-			"faces": {
-				"north": {
-					"uv": [
-						9,
-						6,
-						6.5,
-						6.25
-					],
-					"texture": "#model"
-				},
-				"east": {
-					"uv": [
-						6.5,
-						6.25,
-						9,
-						6.5
-					],
-					"texture": "#model"
-				},
-				"south": {
-					"uv": [
-						6.5,
-						6.5,
-						9,
-						6.75
-					],
-					"texture": "#model"
-				},
-				"west": {
-					"uv": [
-						6.75,
-						3,
-						9.25,
-						3.25
-					],
-					"texture": "#model"
-				},
-				"up": {
-					"uv": [
-						3,
-						4,
-						5.5,
-						6.5
-					],
-					"texture": "#model"
-				},
-				"down": {
-					"uv": [
-						3,
-						4,
-						5.5,
-						6.5
-					],
-					"texture": "#model",
-					"cullface": "up"
+					"texture": "#glass"
 				}
 			}
 		}

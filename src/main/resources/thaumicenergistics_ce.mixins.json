@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "thaumicenergistics_ce.mixin",
+  "package": "com.beiwu.thaumicenergistics_ce.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "InterfaceLogicDropMixin",

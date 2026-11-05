@@ -1,56 +1,48 @@
 {
-    "type":  "thaumaturge:infusion",
-    "catalyst":  "thaumicenergistics_ce:knowledge_core",
-    "components":  [
-                       {
-                           "neoforge:ingredient_type":  "neoforge:components",
-                           "items":  "thaumaturge:essentia_crystal",
-                           "components":  {
-                                              "thaumaturge:crystal_aspect":  {
-                                                                                 "aspect":  "thaumaturge:cognitio"
-                                                                             }
-                                          }
-                       },
-                       "thaumicenergistics_ce:diffusion_core",
-                       "thaumaturge:crystal_vitium",
-                       "ae2:formation_core",
-                       "ae2:calculation_processor",
-                       "thaumaturge:ingot_thaumium",
-                       "thaumaturge:ingot_thaumium",
-                       "thaumaturge:salis_mundus"
-                   ],
-    "aspects":  [
-                    {
-                        "aspect":  "thaumaturge:cognitio",
-                        "amount":  32
-                    },
-                    {
-                        "aspect":  "thaumaturge:permutatio",
-                        "amount":  16
-                    },
-                    {
-                        "aspect":  "thaumaturge:praecantatio",
-                        "amount":  16
-                    },
-                    {
-                        "aspect":  "thaumaturge:motus",
-                        "amount":  8
-                    },
-                    {
-                        "aspect":  "thaumaturge:machina",
-                        "amount":  8
-                    },
-                    {
-                        "aspect":  "thaumaturge:vitium",
-                        "amount":  8
-                    }
-                ],
-    "instability":  8,
-    "research":  {
-                     "entry":  "thaumicenergistics_ce:gacha_box"
-                 },
-    "result":  {
-                   "id":  "thaumicenergistics_ce:gacha_box",
-                   "count":  1
-               }
+  "type": "thaumaturge:infusion",
+  "research": {
+    "entry": "thaumicenergistics_ce:gacha_box"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:gacha_box",
+    "count": 1
+  },
+  "catalyst": "thaumicenergistics_ce:knowledge_core",
+  "components": [
+    {
+      "neoforge:ingredient_type": "neoforge:components",
+      "items": "thaumaturge:essentia_crystal",
+      "components": {
+        "thaumaturge:crystal_aspect": {
+          "aspect": "thaumaturge:cognitio"
+        }
+      }
+    },
+    "thaumicenergistics_ce:coalescence_core",
+    "thaumicenergistics_ce:diffusion_core",
+    "ae2:calculation_processor",
+    "thaumaturge:ingot_thaumium",
+    "thaumaturge:ingot_thaumium",
+    "thaumaturge:salis_mundus",
+    "thaumicenergistics_ce:mystic_circuit_board"
+  ],
+  "instability": 4,
+  "aspects": [
+    {
+      "aspect": "thaumaturge:cognitio",
+      "amount": 24
+    },
+    {
+      "aspect": "thaumaturge:permutatio",
+      "amount": 24
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
+      "amount": 16
+    },
+    {
+      "aspect": "thaumaturge:machina",
+      "amount": 16
+    }
+  ]
 }

@@ -1,12 +1,21 @@
-MIT License
+This is a community-port of ThaumicEnergistics.
 
-Copyright (c) 2026 Thaumic Energistics: CE contributors
+Textures created by 麦淇淋: Licensed under Creative Commons
+Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0).
+See LICENSE-ASSETS.md for scope and attribution, and
+LICENSE-CC-BY-NC-SA-3.0.txt for the complete license text.
+Third-party assets retain their original licenses and attribution.
+The code licenses below do not replace the separate texture license.
 
-Portions of this work derive from Thaumic Energistics
-(https://github.com/Nividica/ThaumicEnergistics), distributed under the same MIT terms:
+Modifications and port code: Copyright (c) 2026 AlkSur, Licensed under GNU LGPL-3.0.
+
+Original source code: Copyright (c) Chris, BrockWS, Licensed under MIT License (see LICENSE-ORIGINAL-MIT).
+
+Original License:
+
+The MIT License (MIT)
 
 Copyright (c) 2018-2019 Chris, BrockWS
-Copyright (c) 2014 Chris
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

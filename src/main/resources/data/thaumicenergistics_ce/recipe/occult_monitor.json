@@ -1,17 +1,23 @@
 {
-  "type": "thaumaturge:infusion",
-  "_note": "The Occult Monitor. The thaumometer in the recipe is the lens the machine is built around; its slot takes a thaumonomicon, which is what it reads with. An infusion altar's own pillar stone gives it a frame, a coalescence core reads the altar's aura, salis mundus binds the lens to the metal, and an auram crystal keeps the reading honest. 64 vis: the 1.12.2 tree puts this behind the infusion provider and gives it a cost in more than materials.",
-  "_crystal": "The auram crystal is the only crystal the altar needs; it is matched on its aspect component, so any crystal carrying auram will do.",
-  "catalyst": "thaumaturge:stone_arcane_brick",
-  "components": [
-    "thaumaturge:thaumometer",
-    "thaumaturge:stone_arcane_brick",
-    "thaumicenergistics_ce:coalescence_core",
-    "ae2:quartz_vibrant_glass",
-    "thaumaturge:ingot_thaumium",
-    "thaumaturge:ingot_thaumium",
-    "thaumaturge:salis_mundus",
-    {
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "research": {
+    "entry": "thaumicenergistics_ce:occult_monitor"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:occult_monitor",
+    "count": 1
+  },
+  "crystals": [],
+  "pattern": [
+    "GTG",
+    "BAB",
+    "VCV"
+  ],
+  "key": {
+    "G": "thaumaturge:ingot_thaumium",
+    "T": "thaumaturge:thaumometer",
+    "B": "thaumaturge:stone_arcane_brick",
+    "A": {
       "neoforge:ingredient_type": "neoforge:components",
       "items": "thaumaturge:essentia_crystal",
       "components": {
@@ -19,21 +25,9 @@
           "aspect": "thaumaturge:auram"
         }
       }
-    }
-  ],
-  "aspects": [
-    { "aspect": "thaumaturge:auram", "amount": 16 },
-    { "aspect": "thaumaturge:cognitio", "amount": 16 },
-    { "aspect": "thaumaturge:praecantatio", "amount": 16 },
-    { "aspect": "thaumaturge:sensus", "amount": 8 },
-    { "aspect": "thaumaturge:machina", "amount": 8 }
-  ],
-  "instability": 6,
-  "research": {
-    "entry": "thaumicenergistics_ce:occult_monitor"
+    },
+    "C": "thaumicenergistics_ce:mystic_circuit_board",
+    "V": "ae2:quartz_vibrant_glass"
   },
-  "result": {
-    "id": "thaumicenergistics_ce:occult_monitor",
-    "count": 1
-  }
+  "vis": 60
 }

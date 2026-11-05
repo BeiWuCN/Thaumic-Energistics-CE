@@ -11,6 +11,15 @@
     "thaumicenergistics_ce:distillation_encoder",
     "thaumicenergistics_ce:occult_monitor",
     "thaumicenergistics_ce:gacha_box",
-    "thaumicenergistics_ce:gacha_box_aggregator"
+    "thaumicenergistics_ce:gacha_box_aggregator",
+    "thaumicenergistics_ce:mystic_crystal_block",
+    "thaumicenergistics_ce:flawless_budding_thaumic_crystal",
+    "thaumicenergistics_ce:flawed_budding_thaumic_crystal",
+    "thaumicenergistics_ce:chipped_budding_thaumic_crystal",
+    "thaumicenergistics_ce:damaged_budding_thaumic_crystal",
+    "thaumicenergistics_ce:small_mystic_crystal_bud",
+    "thaumicenergistics_ce:medium_mystic_crystal_bud",
+    "thaumicenergistics_ce:large_mystic_crystal_bud",
+    "thaumicenergistics_ce:mystic_crystal_cluster"
   ]
 }

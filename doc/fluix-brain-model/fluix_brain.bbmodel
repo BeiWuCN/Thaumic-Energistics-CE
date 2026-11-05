@@ -1,0 +1,1037 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "free",
+    "box_uv": false
+  },
+  "name": "Fluix Brain - anatomical rebuild",
+  "credit": "TECE Fluix Brain; anatomical reference: Pixel Brain by sparkskye (CC BY 4.0); geometry redrawn, AE2-inspired palette and implants added",
+  "resolution": {
+    "width": 128,
+    "height": 128
+  },
+  "elements": [
+    {
+      "name": "left_cerebrum",
+      "from": [
+        -4,
+        -1.285544846693248,
+        -4.794269636165834
+      ],
+      "to": [
+        -0.3,
+        5.014455153306752,
+        4.605730363834166
+      ],
+      "material": "cortex",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1,
+            1,
+            8,
+            14
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            10,
+            1,
+            29,
+            14
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            31,
+            1,
+            38,
+            14
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            40,
+            1,
+            59,
+            14
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            61,
+            1,
+            68,
+            20
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            70,
+            1,
+            77,
+            20
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "6bd8c3b9-acb2-484d-b867-f104241896e1",
+      "box_uv": false
+    },
+    {
+      "name": "left_temporal_lobe",
+      "from": [
+        -5.25,
+        -1.7855448466932478,
+        -2.7942696361658337
+      ],
+      "to": [
+        -3.65,
+        2.2144551533067522,
+        4.105730363834166
+      ],
+      "material": "cortex",
+      "rotation": [
+        -8,
+        0,
+        12
+      ],
+      "origin": [
+        -3.8,
+        1.014455153306752,
+        0.5057303638341661
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            79,
+            1,
+            82,
+            9
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            84,
+            1,
+            98,
+            9
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            100,
+            1,
+            103,
+            9
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            105,
+            1,
+            119,
+            9
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            121,
+            1,
+            124,
+            15
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            1,
+            22,
+            4,
+            36
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "b9f4dffd-254c-4dae-b9a3-dcdf9e5aa307",
+      "box_uv": false
+    },
+    {
+      "name": "left_cerebellum",
+      "from": [
+        -2.9,
+        -3.085544846693248,
+        1.1057303638341662
+      ],
+      "to": [
+        -0.2,
+        -0.9855448466932479,
+        4.4057303638341665
+      ],
+      "material": "cerebellum",
+      "rotation": [
+        -12,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        -0.9855448466932479,
+        2.2057303638341663
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            22,
+            11,
+            26
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            13,
+            22,
+            20,
+            26
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            22,
+            22,
+            27,
+            26
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            29,
+            22,
+            36,
+            26
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            38,
+            22,
+            43,
+            29
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            45,
+            22,
+            50,
+            29
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "d052e6c8-0df1-4f0b-92c0-d407c53ea951",
+      "box_uv": false
+    },
+    {
+      "name": "left_neural_wafer",
+      "from": [
+        -4.2,
+        2.764455153306752,
+        -2.194269636165834
+      ],
+      "to": [
+        -4.015,
+        3.864455153306752,
+        0.5057303638341661
+      ],
+      "material": "wafer",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            52,
+            22,
+            54,
+            24
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            56,
+            22,
+            61,
+            24
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            63,
+            22,
+            65,
+            24
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            67,
+            22,
+            72,
+            24
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            74,
+            22,
+            76,
+            27
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            78,
+            22,
+            80,
+            27
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "19519c6e-eb6d-42b2-bbc6-fefa85e98906",
+      "box_uv": false
+    },
+    {
+      "name": "left_fluix_contact",
+      "from": [
+        -4.55,
+        2.914455153306752,
+        -1.444269636165834
+      ],
+      "to": [
+        -4.2,
+        3.664455153306752,
+        -0.644269636165834
+      ],
+      "material": "crystal",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            82,
+            22,
+            84,
+            24
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            86,
+            22,
+            88,
+            24
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            90,
+            22,
+            92,
+            24
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            94,
+            22,
+            96,
+            24
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            98,
+            22,
+            100,
+            24
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            102,
+            22,
+            104,
+            24
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "3373f6e2-6df7-49f9-b442-1c2a90be9534",
+      "box_uv": false
+    },
+    {
+      "name": "right_cerebrum",
+      "from": [
+        0.3,
+        -1.285544846693248,
+        -4.794269636165834
+      ],
+      "to": [
+        4,
+        5.014455153306752,
+        4.605730363834166
+      ],
+      "material": "cortex",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            106,
+            22,
+            113,
+            35
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            1,
+            38,
+            20,
+            51
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            22,
+            38,
+            29,
+            51
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            31,
+            38,
+            50,
+            51
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            52,
+            38,
+            59,
+            57
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            61,
+            38,
+            68,
+            57
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "d3f10a01-dfbc-4ed9-82a3-eed752b0dedc",
+      "box_uv": false
+    },
+    {
+      "name": "right_temporal_lobe",
+      "from": [
+        3.65,
+        -1.7855448466932478,
+        -2.7942696361658337
+      ],
+      "to": [
+        5.25,
+        2.2144551533067522,
+        4.105730363834166
+      ],
+      "material": "cortex",
+      "rotation": [
+        -8,
+        0,
+        -12
+      ],
+      "origin": [
+        3.8,
+        1.014455153306752,
+        0.5057303638341661
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            70,
+            38,
+            73,
+            46
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            75,
+            38,
+            89,
+            46
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            91,
+            38,
+            94,
+            46
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            96,
+            38,
+            110,
+            46
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            112,
+            38,
+            115,
+            52
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            117,
+            38,
+            120,
+            52
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "55a4ee6c-f532-4bcf-8393-813e3bc3a0ab",
+      "box_uv": false
+    },
+    {
+      "name": "right_cerebellum",
+      "from": [
+        0.2,
+        -3.085544846693248,
+        1.1057303638341662
+      ],
+      "to": [
+        2.9,
+        -0.9855448466932479,
+        4.4057303638341665
+      ],
+      "material": "cerebellum",
+      "rotation": [
+        -12,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        -0.9855448466932479,
+        2.2057303638341663
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1,
+            59,
+            6,
+            63
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            8,
+            59,
+            15,
+            63
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            17,
+            59,
+            22,
+            63
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            24,
+            59,
+            31,
+            63
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            33,
+            59,
+            38,
+            66
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            40,
+            59,
+            45,
+            66
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "66ffea6e-2bac-4e48-96db-eaa59935b519",
+      "box_uv": false
+    },
+    {
+      "name": "right_neural_wafer",
+      "from": [
+        4.015,
+        2.764455153306752,
+        0.25573036383416614
+      ],
+      "to": [
+        4.2,
+        3.864455153306752,
+        2.9557303638341663
+      ],
+      "material": "wafer",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            47,
+            59,
+            49,
+            61
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            51,
+            59,
+            56,
+            61
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            58,
+            59,
+            60,
+            61
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            62,
+            59,
+            67,
+            61
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            69,
+            59,
+            71,
+            64
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            73,
+            59,
+            75,
+            64
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "44037e99-a160-408d-9149-d6baabcf464c",
+      "box_uv": false
+    },
+    {
+      "name": "right_fluix_contact",
+      "from": [
+        4.2,
+        2.914455153306752,
+        1.0057303638341661
+      ],
+      "to": [
+        4.55,
+        3.664455153306752,
+        1.8057303638341662
+      ],
+      "material": "crystal",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            77,
+            59,
+            79,
+            61
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            81,
+            59,
+            83,
+            61
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            85,
+            59,
+            87,
+            61
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            89,
+            59,
+            91,
+            61
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            93,
+            59,
+            95,
+            61
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            97,
+            59,
+            99,
+            61
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "d1a6071b-7774-4719-b379-f4a153f77338",
+      "box_uv": false
+    },
+    {
+      "name": "corpus_callosum",
+      "from": [
+        -0.8,
+        -2.085544846693248,
+        -2.494269636165834
+      ],
+      "to": [
+        0.8,
+        -0.6855448466932479,
+        2.005730363834166
+      ],
+      "material": "nerve",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            101,
+            59,
+            104,
+            62
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            106,
+            59,
+            115,
+            62
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            117,
+            59,
+            120,
+            62
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            1,
+            68,
+            10,
+            71
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            12,
+            68,
+            15,
+            77
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            17,
+            68,
+            20,
+            77
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "f98da727-94ab-4af6-be3e-dda0ac505b7b",
+      "box_uv": false
+    },
+    {
+      "name": "brainstem",
+      "from": [
+        -0.8,
+        -4.985544846693248,
+        0.6057303638341661
+      ],
+      "to": [
+        0.8,
+        -1.6855448466932481,
+        2.2057303638341663
+      ],
+      "material": "nerve",
+      "rotation": [
+        25,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        -1.6855448466932481,
+        1.405730363834166
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            22,
+            68,
+            25,
+            75
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            27,
+            68,
+            30,
+            75
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            32,
+            68,
+            35,
+            75
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            37,
+            68,
+            40,
+            75
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            42,
+            68,
+            45,
+            71
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            47,
+            68,
+            50,
+            71
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "2c72a3b0-ffe9-4165-b3ef-ea6f7cfd74cc",
+      "box_uv": false
+    }
+  ],
+  "outliner": [
+    "6bd8c3b9-acb2-484d-b867-f104241896e1",
+    "b9f4dffd-254c-4dae-b9a3-dcdf9e5aa307",
+    "d052e6c8-0df1-4f0b-92c0-d407c53ea951",
+    "19519c6e-eb6d-42b2-bbc6-fefa85e98906",
+    "3373f6e2-6df7-49f9-b442-1c2a90be9534",
+    "d3f10a01-dfbc-4ed9-82a3-eed752b0dedc",
+    "55a4ee6c-f532-4bcf-8393-813e3bc3a0ab",
+    "66ffea6e-2bac-4e48-96db-eaa59935b519",
+    "44037e99-a160-408d-9149-d6baabcf464c",
+    "d1a6071b-7774-4719-b379-f4a153f77338",
+    "f98da727-94ab-4af6-be3e-dda0ac505b7b",
+    "2c72a3b0-ffe9-4165-b3ef-ea6f7cfd74cc"
+  ],
+  "textures": [
+    {
+      "name": "fluix_brain.png",
+      "id": "cortex",
+      "uuid": "066ceb30-7f09-4f7f-883a-43eefc61d58a",
+      "width": 128,
+      "height": 128,
+      "uv_width": 128,
+      "uv_height": 128,
+      "source": "data:image/png;base64,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"
+    }
+  ]
+}

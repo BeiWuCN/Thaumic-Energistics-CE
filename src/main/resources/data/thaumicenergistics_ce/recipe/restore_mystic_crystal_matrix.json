@@ -1,0 +1,28 @@
+{
+  "type": "thaumaturge:infusion",
+  "research": {
+    "entry": "thaumicenergistics_ce:mystic_crystal_growth"
+  },
+  "catalyst": "thaumicenergistics_ce:damaged_budding_thaumic_crystal",
+  "components": [
+    "thaumaturge:ingot_thaumium",
+    "thaumicenergistics_ce:mystic_crystal",
+    "thaumicenergistics_ce:mystic_crystal",
+    "thaumaturge:salis_mundus"
+  ],
+  "aspects": [
+    {
+      "aspect": "thaumaturge:vitreus",
+      "amount": 8
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
+      "amount": 8
+    }
+  ],
+  "instability": 1,
+  "result": {
+    "id": "thaumicenergistics_ce:chipped_budding_thaumic_crystal",
+    "count": 1
+  }
+}

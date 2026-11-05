@@ -52,8 +52,8 @@ def prepareDependency = {
     }
     def windows = System.getProperty('os.name').toLowerCase().contains('windows')
     def wrapper = windows ? ['cmd', '/c', 'gradlew.bat'] : ['sh', 'gradlew']
-    // Upstream does not wire datagen as a jar dependency; separate invocations enforce order.
-    ['runServerData', 'runClientData', 'jar'].each { task ->
+    // Upstream 1.1.0 generates everything in the client data run; runServerData no longer exists.
+    ['runClientData', 'jar'].each { task ->
         execute(source, wrapper + ['--no-build-cache', '--no-daemon', task])
     }
     def jars = fileTree(new File(source, 'build/libs')).matching {

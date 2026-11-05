@@ -49,3 +49,7 @@ Thaumic-Energistics-CE-2.0-Renewed.zip
 
 # Local provenance marker for the self-built Thaumaturge dependency.
 libs/thaumaturge-source.txt
+
+# Published release notes and asset license notice
+!/CHANGELOG-2.7.5.md
+!/LICENSE-ASSETS.md

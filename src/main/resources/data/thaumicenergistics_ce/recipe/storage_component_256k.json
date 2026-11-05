@@ -1,0 +1,82 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "research": {
+    "entry": "thaumicenergistics_ce:essentia_storage_256k"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:storage_component_256k",
+    "count": 1
+  },
+  "crystals": [],
+  "pattern": [
+    "EPE",
+    "LGL",
+    " C "
+  ],
+  "key": {
+    "E": {
+      "neoforge:ingredient_type": "neoforge:compound",
+      "children": [
+        {
+          "neoforge:ingredient_type": "neoforge:components",
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:aer"
+            }
+          }
+        },
+        {
+          "neoforge:ingredient_type": "neoforge:components",
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:ignis"
+            }
+          }
+        },
+        {
+          "neoforge:ingredient_type": "neoforge:components",
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:aqua"
+            }
+          }
+        },
+        {
+          "neoforge:ingredient_type": "neoforge:components",
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:terra"
+            }
+          }
+        },
+        {
+          "neoforge:ingredient_type": "neoforge:components",
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:ordo"
+            }
+          }
+        },
+        {
+          "neoforge:ingredient_type": "neoforge:components",
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:perditio"
+            }
+          }
+        }
+      ]
+    },
+    "P": "ae2:engineering_processor",
+    "L": "thaumicenergistics_ce:storage_component_64k",
+    "G": "ae2:quartz_glass",
+    "C": "thaumicenergistics_ce:mystic_processor"
+  },
+  "vis": 200
+}

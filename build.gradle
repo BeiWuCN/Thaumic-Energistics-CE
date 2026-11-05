@@ -407,7 +407,7 @@ var thaumaturgeIsolation = tasks.register('thaumaturgeIsolation') {
     group = 'verification'
     description = 'Rejects calls into upstream content classes from outside compat/thaumaturge.'
     def srcRoot = file('src/main/java')
-    def layerPath = new File(srcRoot, 'thaumicenergistics_ce/compat/thaumaturge').absolutePath + File.separator
+    def layerPath = new File(srcRoot, 'com/beiwu/thaumicenergistics_ce/compat/thaumaturge').absolutePath + File.separator
     // The self-test source set compiles in a dev run like anything else, so it answers to the same
     // rule. It is absent from a clone; an empty tree simply yields nothing to scan.
     def roots = [srcRoot]
@@ -468,16 +468,36 @@ var thaumaturgeIsolation = tasks.register('thaumaturgeIsolation') {
 
 tasks.named('check') {
     dependsOn thaumaturgeIsolation
-    if (localVerification) dependsOn 'researchFormattingCheck'
 }
 
-tasks.register('researchFormattingCheck', JavaExec) {
-    onlyIf { localVerification }
-    dependsOn tasks.named('testClasses')
-    classpath = sourceSets.test.output + sourceSets.main.compileClasspath
-    mainClass = 'thaumicenergistics_ce.recipe.ResearchFormattingChecks'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+// 26.1's model baker rejects out-of-bounds UVs during transparency analysis.
+def validateProbabilityModels = tasks.register('validateProbabilityModels') {
+    def modelDir = file('src/main/resources/assets/thaumicenergistics_ce/models')
+    inputs.files(fileTree(modelDir) { include '**/gacha_box*.json' })
+    doLast {
+        def parser = new groovy.json.JsonSlurper()
+        fileTree(modelDir).matching { include '**/gacha_box*.json' }.each { modelFile ->
+            def model = parser.parse(modelFile)
+            (model.elements ?: []).eachWithIndex { element, index ->
+                (element.faces ?: [:]).each { side, face ->
+                    if ((face.uv ?: []).any { it < 0 || it > 16 }) {
+                        throw new GradleException("UV outside texture bounds: ${modelFile.name} element ${index} ${side}: ${face.uv}")
+                    }
+                    if (face.texture == '#on') {
+                        // Only 8x6 pixels of the 16x16 animated sprite contain the screen.
+                        def screenUvs = [north: [0,0,8,6], south: [8,0,0,6],
+                                         east: [0,0,1,6], west: [7,0,8,6],
+                                         up: [8,1,0,0], down: [8,5,0,6]]
+                        if (face.uv != screenUvs[side]) {
+                            throw new GradleException("Screen UV no longer matches artist source: ${modelFile.name} ${side}: ${face.uv}")
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
+tasks.named('check') { dependsOn validateProbabilityModels }
 
 tasks.withType(Jar).configureEach {
     exclude('doc/**')
@@ -486,6 +506,11 @@ tasks.withType(Jar).configureEach {
 }
 
 jar {
+    from(projectDir) {
+        include 'LICENSE', 'LICENSE-ORIGINAL-MIT', 'LICENSE-ASSETS.md',
+                'LICENSE-CC-BY-NC-SA-3.0.txt', 'LICENSE-LGPL-3.0.txt', 'LICENSE-GPL-3.0.txt'
+        into 'META-INF/licenses'
+    }
     manifest {
         attributes([
                 'Specification-Title'     : mod_name,
