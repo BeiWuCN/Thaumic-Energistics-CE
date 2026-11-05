@@ -24,6 +24,7 @@ public class ArcaneAssemblerProvider implements IServerDataProvider<BlockAccesso
             Identifier.fromNamespaceAndPath(ThEIds.MODID, "arcane_assembler");
 
     public static final String TAG_VIS = "BufferedVis";
+    public static final String TAG_VIS_SOURCE = "VisSource";
     public static final String TAG_AURA = "AuraAround";
     public static final String TAG_DISCOUNT = "GearDiscount";
     public static final String TAG_SPEED = "SpeedUpgrades";
@@ -51,6 +52,10 @@ public class ArcaneAssemblerProvider implements IServerDataProvider<BlockAccesso
         JadeGridState.of(node).write(tag, node);
 
         tag.putInt(TAG_VIS, assembler.getBufferedVis());
+        Short frequency = assembler.attachedVisSourceFrequency();
+        if (frequency != null) {
+            tag.putString(TAG_VIS_SOURCE, String.format(java.util.Locale.ROOT, "%04X", Short.toUnsignedInt(frequency)));
+        }
         tag.putInt(TAG_AURA, Math.round(assembler.getAuraAround()));
         tag.putInt(TAG_DISCOUNT, assembler.upgrades().getGearDiscount());
         tag.putInt(TAG_SPEED, assembler.upgrades().getSpeedUpgrades());

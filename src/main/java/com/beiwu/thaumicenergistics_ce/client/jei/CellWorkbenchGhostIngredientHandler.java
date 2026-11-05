@@ -27,7 +27,7 @@ public class CellWorkbenchGhostIngredientHandler
         }
         MenuEssentiaCellWorkbench menu = screen.getMenu();
         for (int well = 0; well < MenuEssentiaCellWorkbench.partitionSlotCount(); well++) {
-            Target<I> target = WellTarget.of(menu, well, screen.getGuiLeft(), screen.getGuiTop());
+            Target<I> target = WellTarget.of(menu, well, screen.getLeftPos(), screen.getTopPos());
             if (target != null) {
                 targets.add(target);
             }

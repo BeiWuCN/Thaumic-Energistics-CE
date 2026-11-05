@@ -28,7 +28,7 @@ final class FluixBrainModel {
 
     FluixBrainModel() {
         try (var reader = Minecraft.getInstance().getResourceManager()
-                .getResourceOrThrow(ThEIds.id("models/entity/fluix_brain.json")).openAsReader()) {
+                .getResourceOrThrow(ThEIds.id("render_models/fluix_brain.json")).openAsReader()) {
             var data = JsonParser.parseReader(reader).getAsJsonObject();
             texture = Identifier.parse(data.getAsJsonObject("textures").get("cortex").getAsString());
             emissive = Identifier.parse(data.getAsJsonObject("textures").get("emissive").getAsString());

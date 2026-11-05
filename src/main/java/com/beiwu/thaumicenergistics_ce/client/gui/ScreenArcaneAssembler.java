@@ -28,7 +28,7 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
     private static final Identifier FALLBACK_TEXTURE =
             Identifier.fromNamespaceAndPath(ThEIds.MODID, "textures/gui/arcane_assembler.png");
 
-    private static final int VIS_BAR_MAX = BlockEntityArcaneAssembler.visBufferTarget();
+    private static final int VIS_BAR_MAX = BlockEntityArcaneAssembler.aspectVisBufferCapacity();
 
     private static final String[] ASPECT_NAMES = {"air", "water", "fire", "order", "entropy", "earth"};
 
@@ -178,7 +178,7 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
     }
 
     private @Nullable List<Component> hoveredUpgradeLines() {
-        Slot hovered = getSlotUnderMouse();
+        Slot hovered = getHoveredSlot();
         if (hovered == null) {
             return null;
         }

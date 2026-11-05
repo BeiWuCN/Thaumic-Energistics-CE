@@ -37,6 +37,15 @@ public final class ArcaneAssemblerTooltip implements IBlockComponentProvider {
         JadeGridState state = JadeGridState.read(tag);
         tooltip.add(JadeUI.text(state.label().copy().withStyle(state.colour())));
 
+        String source = tag.getStringOr(ArcaneAssemblerProvider.TAG_VIS_SOURCE, "");
+        if (source.matches("[0-9A-F]{4}")) {
+            Component address = new appeng.util.helpers.P2PHelper()
+                    .toColoredHexString((short) Integer.parseInt(source, 16));
+            tooltip.add(JadeUI.text(Component.translatable(
+                            "jade.thaumicenergistics_ce.arcane_assembler.vis_source", address)
+                    .withStyle(ChatFormatting.GRAY)));
+        }
+
         if (tag.getBooleanOr(ArcaneAssemblerProvider.TAG_CRAFTING, false)) {
             tooltip.add(JadeUI.text(
                     Component.translatable("jade.thaumicenergistics_ce.arcane_assembler.crafting")
@@ -74,7 +83,7 @@ public final class ArcaneAssemblerTooltip implements IBlockComponentProvider {
         tooltip.add(JadeUI.text(Component.translatable(
                         "jade.thaumicenergistics_ce.arcane_assembler.vis",
                         tag.getIntOr(ArcaneAssemblerProvider.TAG_VIS, 0),
-                        BlockEntityArcaneAssembler.visBufferTarget(),
+                        BlockEntityArcaneAssembler.totalVisBufferCapacity(),
                         tag.getIntOr(ArcaneAssemblerProvider.TAG_AURA, 0))
                 .withStyle(ChatFormatting.GRAY)));
 

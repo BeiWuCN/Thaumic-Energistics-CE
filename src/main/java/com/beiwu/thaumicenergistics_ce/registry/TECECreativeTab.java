@@ -23,6 +23,15 @@ public final class TECECreativeTab {
                         output.accept(TECEItems.MYSTIC_CRYSTAL_DUST.get());
                         output.accept(TECEItems.MYSTIC_CIRCUIT_BOARD.get());
                         output.accept(TECEItems.MYSTIC_PROCESSOR.get());
+                        output.accept(TECEItems.THAUMIC_PROCESSOR_PRESS.get());
+                        output.accept(TECEItems.THAUMIC_UPGRADE_TEMPLATE.get());
+                        output.accept(TECEItems.THAUMIC_CRYSTAL_SWORD.get());
+                        output.accept(TECEItems.THAUMIC_CRYSTAL_PICKAXE.get());
+                        output.accept(TECEItems.THAUMIC_CRYSTAL_AXE.get());
+                        output.accept(TECEItems.THAUMIC_CRYSTAL_SHOVEL.get());
+                        output.accept(TECEItems.THAUMIC_CRYSTAL_HOE.get());
+                        output.accept(TECEItems.THAUMIC_CRYSTAL_WRENCH.get());
+                        output.accept(TECEItems.THAUMIC_CRYSTAL_KNIFE.get());
                         output.accept(TECEItems.FLUIX_BRAIN.get());
                         output.accept(TECEItems.MYSTIC_CRYSTAL_BLOCK.get());
                         output.accept(TECEItems.CHIPPED_BUDDING_THAUMIC_CRYSTAL.get());

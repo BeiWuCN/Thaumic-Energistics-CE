@@ -42,6 +42,7 @@ import com.beiwu.thaumicenergistics_ce.network.ArcaneCraftCostPayload;
 import com.beiwu.thaumicenergistics_ce.network.ClientSinks;
 import com.beiwu.thaumicenergistics_ce.network.ClientboundReceiver;
 import com.beiwu.thaumicenergistics_ce.network.GolemBackpackPayload;
+import com.beiwu.thaumicenergistics_ce.network.InscriberCostPayload;
 
 @EventBusSubscriber(modid = ThEIds.MODID, value = Dist.CLIENT)
 public final class ClientSetup {
@@ -88,6 +89,11 @@ public final class ClientSetup {
     public static void registerPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
         event.register(GolemBackpackPayload.TYPE, (payload, context) -> ClientSinks.acceptGolemBackpack(payload));
         event.register(ArcaneCraftCostPayload.TYPE, (payload, context) -> ClientSinks.acceptArcaneCraftCost(payload));
+        event.register(InscriberCostPayload.TYPE, (payload, context) -> {
+            if (Minecraft.getInstance().screen instanceof ScreenKnowledgeInscriber screen) {
+                screen.acceptCost(payload);
+            }
+        });
     }
 
     @SubscribeEvent

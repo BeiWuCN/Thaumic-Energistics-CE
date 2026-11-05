@@ -6,7 +6,9 @@ import java.util.Arrays;
 
 final class AssemblerVisPool {
 
+    // 300 Vis total, split equally across the six primal tanks.
     static final int IDLE_TARGET = 300;
+    static final int ASPECT_CAPACITY = 50;
 
     private static final String TAG_BUFFERED_VIS = "BufferedVis";
     private static final String TAG_ASPECT_VIS = "AspectVis";
@@ -23,7 +25,7 @@ final class AssemblerVisPool {
     }
 
     void setBufferedVis(int amount) {
-        this.bufferedVis = Math.clamp(amount, 0, IDLE_TARGET);
+        this.bufferedVis = Math.clamp(amount, 0, capacity());
         reconcileAspectVis();
     }
 
@@ -31,15 +33,27 @@ final class AssemblerVisPool {
         return index >= 0 && index < aspectVis.length ? aspectVis[index] : 0;
     }
 
+    int[] elements() {
+        return aspectVis.clone();
+    }
+
+    void applyPayment(AssemblerVisPayment.Plan plan) {
+        restoreAspects(plan.remainingElements());
+    }
+
     int visTarget(boolean crafting, int craftPrice) {
-        return IDLE_TARGET;
+        return capacity();
+    }
+
+    private int capacity() {
+        return ASPECT_CAPACITY * aspectVis.length;
     }
 
     void bankVis(int amount, int primalIndex) {
         if (amount <= 0 || primalIndex < 0 || primalIndex >= aspectVis.length) {
             return;
         }
-        amount = Math.min(amount, IDLE_TARGET - bufferedVis);
+        amount = Math.min(amount, ASPECT_CAPACITY - aspectVis[primalIndex]);
         aspectVis[primalIndex] += amount;
         bufferedVis += amount;
     }
@@ -48,7 +62,7 @@ final class AssemblerVisPool {
         if (amount <= 0) {
             return;
         }
-        amount = Math.min(amount, IDLE_TARGET - bufferedVis);
+        amount = Math.min(amount, capacity() - bufferedVis);
         for (int i = 0; i < amount; i++) {
             aspectVis[lowestAspect()]++;
         }
@@ -104,8 +118,9 @@ final class AssemblerVisPool {
 
     void reconcileAspectVis() {
         int sum = 0;
-        for (int value : aspectVis) {
-            sum += value;
+        for (int i = 0; i < aspectVis.length; i++) {
+            aspectVis[i] = Math.clamp(aspectVis[i], 0, ASPECT_CAPACITY);
+            sum += aspectVis[i];
         }
         int difference = bufferedVis - sum;
         if (difference == 0) {
@@ -135,11 +150,10 @@ final class AssemblerVisPool {
     }
 
     void readNbt(ValueInput input) {
-        bufferedVis = Math.clamp(input.getIntOr(TAG_BUFFERED_VIS, 0), 0, IDLE_TARGET);
+        bufferedVis = Math.clamp(input.getIntOr(TAG_BUFFERED_VIS, 0), 0, capacity());
         int[] savedAspects = input.getIntArray(TAG_ASPECT_VIS).orElse(new int[0]);
         if (savedAspects.length == aspectVis.length) {
-            System.arraycopy(savedAspects, 0, aspectVis, 0, aspectVis.length);
-            reconcileAspectVis();
+            restoreAspects(savedAspects);
         } else {
             spreadEvenly(bufferedVis);
         }
@@ -151,11 +165,20 @@ final class AssemblerVisPool {
     }
 
     void readSync(ValueInput input) {
-        bufferedVis = Math.clamp(input.getIntOr(TAG_BUFFERED_VIS, 0), 0, IDLE_TARGET);
+        bufferedVis = Math.clamp(input.getIntOr(TAG_BUFFERED_VIS, 0), 0, capacity());
         int[] syncedAspects = input.getIntArray(TAG_ASPECT_VIS).orElse(new int[0]);
         if (syncedAspects.length == aspectVis.length) {
-            System.arraycopy(syncedAspects, 0, aspectVis, 0, aspectVis.length);
+            restoreAspects(syncedAspects);
+        } else {
+            spreadEvenly(bufferedVis);
         }
-        reconcileAspectVis();
+    }
+
+    private void restoreAspects(int[] saved) {
+        bufferedVis = 0;
+        for (int i = 0; i < aspectVis.length; i++) {
+            aspectVis[i] = Math.clamp(saved[i], 0, ASPECT_CAPACITY);
+            bufferedVis += aspectVis[i];
+        }
     }
 }

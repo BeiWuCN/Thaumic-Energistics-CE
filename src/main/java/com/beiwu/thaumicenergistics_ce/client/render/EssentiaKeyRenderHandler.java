@@ -1,9 +1,10 @@
 package com.beiwu.thaumicenergistics_ce.client.render;
 
-import appeng.client.api.AEKeyRenderState;
 import appeng.client.api.AEKeyRenderer;
 import appeng.util.Platform;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectKnowledge;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectKnowledgeAccess;
 import com.leclowndu93150.thaumaturge.api.client.AspectRendering;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
@@ -20,7 +21,12 @@ import com.beiwu.thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import com.beiwu.thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 import com.beiwu.thaumicenergistics_ce.util.ThELog;
 
-public class EssentiaKeyRenderHandler implements AEKeyRenderer<AEssentiaKey, AEKeyRenderState> {
+public class EssentiaKeyRenderHandler implements AEKeyRenderer<AEssentiaKey, EssentiaKeyRenderHandler.State> {
+
+    public static final class State {
+        private Holder<IAspect> aspect;
+        private AspectKnowledge knowledge = AspectKnowledge.UNKNOWN;
+    }
 
     private static final Set<Identifier> REPORTED = ConcurrentHashMap.newKeySet();
 
@@ -41,22 +47,40 @@ public class EssentiaKeyRenderHandler implements AEKeyRenderer<AEssentiaKey, AEK
     }
 
     @Override
-    public Class<AEKeyRenderState> stateClass() {
-        return AEKeyRenderState.class;
+    public Class<State> stateClass() {
+        return State.class;
     }
 
     @Override
-    public AEKeyRenderState createState() {
-        return new AEKeyRenderState();
+    public State createState() {
+        return new State();
     }
 
     @Override
-    public void extract(AEKeyRenderState state, AEssentiaKey key, Level level, int packedLight) {
+    public void extract(State state, AEssentiaKey key, Level level, int seed) {
+        state.aspect = key.resolveAspect();
+        state.knowledge = state.aspect == null ? AspectKnowledge.UNKNOWN : AspectKnowledgeAccess.of(state.aspect);
     }
 
     @Override
     public void submit(
-            PoseStack poseStack, AEKeyRenderState state, SubmitNodeCollector submitNodeCollector, int packedLight) {
+            PoseStack poseStack, State state, SubmitNodeCollector submitNodeCollector, int packedLight) {
+        poseStack.pushPose();
+        // Match AE2's item/fluid screen icons: move along the monitor's local
+        // outward normal, after its face rotation, to avoid coplanar flicker.
+        poseStack.translate(0, 0, 0.01F);
+        var aspect = state.aspect;
+        var knowledge = state.knowledge;
+        if (aspect == null) {
+            submitNodeCollector.submitCustomGeometry(poseStack,
+                    AspectRendering.missingRenderType(AspectRendering.BlendMode.ALPHA),
+                    (pose, buffer) -> AspectRendering.renderMissingQuad(pose, buffer, 1.0F, packedLight));
+        } else {
+            submitNodeCollector.submitCustomGeometry(poseStack,
+                    AspectRendering.renderType(aspect, knowledge, AspectRendering.BlendMode.ALPHA),
+                    (pose, buffer) -> AspectRendering.renderQuad(pose, buffer, aspect, knowledge, 1.0F, false, packedLight));
+        }
+        poseStack.popPose();
     }
 
     @Override

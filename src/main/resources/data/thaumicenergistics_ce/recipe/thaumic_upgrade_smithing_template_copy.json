@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CTC",
+    "CIC",
+    "CCC"
+  ],
+  "key": {
+    "T": "thaumicenergistics_ce:thaumic_upgrade_smithing_template",
+    "C": "thaumicenergistics_ce:mystic_crystal_block",
+    "I": "thaumaturge:ingot_thaumium"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:thaumic_upgrade_smithing_template",
+    "count": 2
+  }
+}

@@ -26,7 +26,7 @@ public final class EssentiaBusGhostIngredientHandler<T extends UpgradeableScreen
             var slot = slots.get(index);
             if (slot.isActive()) {
                 targets.add(new MarkTarget<>(menu.containerId, index,
-                        new Rect2i(screen.getGuiLeft() + slot.x, screen.getGuiTop() + slot.y, 16, 16)));
+                        new Rect2i(screen.getLeftPos() + slot.x, screen.getTopPos() + slot.y, 16, 16)));
             }
         }
         return targets;

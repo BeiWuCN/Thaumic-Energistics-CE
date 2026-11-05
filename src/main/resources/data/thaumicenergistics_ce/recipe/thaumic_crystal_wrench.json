@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "a a",
+    " a ",
+    "a a"
+  ],
+  "key": {
+    "a": "thaumicenergistics_ce:mystic_crystal"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:thaumic_crystal_wrench"
+  }
+}

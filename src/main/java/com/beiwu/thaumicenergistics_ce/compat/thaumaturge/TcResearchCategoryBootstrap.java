@@ -35,7 +35,7 @@ public final class TcResearchCategoryBootstrap {
                 entry(aspects, TTAspects.METALLUM, 5)));
         context.register(CATEGORY, new ResearchCategory(
                 Optional.of(ThEIds.thaumaturge("unlock_infusion")), formula,
-                ThEIds.id("textures/research/tab_icon.png"),
+                ThEIds.id("textures/item/focus_aewrench.png"),
                 ThEIds.id("textures/research/research_background.png"),
                 Optional.of(ThEIds.thaumaturge("textures/gui/gui_research_back_over.png")), 7));
     }

@@ -27,6 +27,8 @@ final class AssemblerInterfaceFinder {
     }
 
     @Nullable PartVisInterface nearby(ServerLevel server, BlockPos machinePos) {
+        PartVisInterface attached = attached(server, machinePos);
+        if (attached != null && attached.isActive()) return attached;
         long now = server.getGameTime();
         if (now < nextInterfaceLookup) {
             return nearbyInterface;
@@ -37,6 +39,21 @@ final class AssemblerInterfaceFinder {
                 ? Math.min(INTERFACE_MISS_MAX, interfaceMissBackoff * 2)
                 : pollInterval;
         return nearbyInterface;
+    }
+
+    static @Nullable PartVisInterface attached(ServerLevel server, BlockPos machinePos) {
+        PartVisInterface inactive = null;
+        for (Direction direction : Direction.values()) {
+            BlockPos cablePos = machinePos.relative(direction);
+            var chunk = server.getChunkSource().getChunkNow(cablePos.getX() >> 4, cablePos.getZ() >> 4);
+            if (chunk == null) continue;
+            if (chunk.getBlockEntity(cablePos) instanceof IPartHost host
+                    && host.getPart(direction.getOpposite()) instanceof PartVisInterface part) {
+                if (part.isActive()) return part;
+                if (inactive == null) inactive = part;
+            }
+        }
+        return inactive;
     }
 
     private @Nullable PartVisInterface find(ServerLevel server, BlockPos machinePos) {

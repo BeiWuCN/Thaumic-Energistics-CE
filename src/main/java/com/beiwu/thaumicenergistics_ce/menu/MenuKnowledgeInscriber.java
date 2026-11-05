@@ -16,6 +16,9 @@ import com.beiwu.thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledg
 import com.beiwu.thaumicenergistics_ce.registry.TECEMenuTypes;
 import com.beiwu.thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
 import com.beiwu.thaumicenergistics_ce.network.KnowledgeInscriberReceiver;
+import com.beiwu.thaumicenergistics_ce.network.InscriberCostPayload;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class MenuKnowledgeInscriber extends AbstractContainerMenu implements KnowledgeInscriberReceiver {
 
@@ -61,6 +64,8 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
     private final InscriberPreview preview;
 
     private final InscriberMenuReadout readout;
+
+    private @Nullable InscriberCostPayload lastCost;
 
     public static final int DATA_HAS_CORE = 0;
     public static final int DATA_STATE = 1;
@@ -146,6 +151,13 @@ public class MenuKnowledgeInscriber extends AbstractContainerMenu implements Kno
         updatePreview();
         refreshMirrors();
         super.broadcastChanges();
+        if (playerInventory.player instanceof ServerPlayer player) {
+            InscriberCostPayload cost = preview.cost();
+            if (!cost.equals(lastCost)) {
+                PacketDistributor.sendToPlayer(player, cost);
+                lastCost = cost;
+            }
+        }
     }
 
     public boolean hasCore() {

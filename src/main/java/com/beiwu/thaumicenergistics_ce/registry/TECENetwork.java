@@ -4,6 +4,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import com.beiwu.thaumicenergistics_ce.network.ArcaneCraftCostPayload;
+import com.beiwu.thaumicenergistics_ce.network.InscriberCostPayload;
 import com.beiwu.thaumicenergistics_ce.network.ArcaneUnbindPayload;
 import com.beiwu.thaumicenergistics_ce.network.EncoderActionPayload;
 import com.beiwu.thaumicenergistics_ce.network.EncoderSourcePayload;
@@ -61,6 +62,7 @@ public final class TECENetwork {
                 (payload, context) -> payload.handle(context.player()));
         registrar.playToClient(GolemBackpackPayload.TYPE, GolemBackpackPayload.CODEC);
         registrar.playToClient(ArcaneCraftCostPayload.TYPE, ArcaneCraftCostPayload.CODEC);
+        registrar.playToClient(InscriberCostPayload.TYPE, InscriberCostPayload.CODEC);
         registrar.playToServer(
                 ArcaneUnbindPayload.TYPE,
                 ArcaneUnbindPayload.CODEC,

@@ -1,0 +1,25 @@
+{
+  "type": "thaumaturge:crucible",
+  "catalyst": "#thaumicenergistics_ce:inscriber_presses",
+  "aspects": [
+    {
+      "aspect": "thaumaturge:ordo",
+      "amount": 8
+    },
+    {
+      "aspect": "thaumaturge:cognitio",
+      "amount": 8
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
+      "amount": 8
+    }
+  ],
+  "research": {
+    "entry": "thaumicenergistics_ce:mystic_crystal_circuit"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:thaumic_processor_press",
+    "count": 1
+  }
+}

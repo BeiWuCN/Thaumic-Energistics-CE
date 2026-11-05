@@ -6,7 +6,6 @@ import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.ItemStack;
 import com.beiwu.thaumicenergistics_ce.ThEIds;
 import com.beiwu.thaumicenergistics_ce.registry.TECEItems;
 
@@ -26,10 +25,9 @@ public class ThEJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalyst(new ItemStack(TECEItems.ARCANE_CRAFTING_TERMINAL.get()),
-                ArcaneJeiRecipeType.arcane());
-        registration.addRecipeCatalyst(new ItemStack(TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()),
-                ArcaneJeiRecipeType.arcane());
+        registration.addCraftingStation(ArcaneJeiRecipeType.arcane(),
+                TECEItems.ARCANE_CRAFTING_TERMINAL.get(),
+                TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get());
     }
 
     @Override

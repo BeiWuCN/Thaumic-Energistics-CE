@@ -25,11 +25,11 @@ public class DistillationEncoderGhostIngredientHandler
             return targets;
         }
         MenuDistillationEncoder menu = screen.getMenu();
-        targets.add(new SourceTarget<>(menu, screen.getGuiLeft(), screen.getGuiTop()));
+        targets.add(new SourceTarget<>(menu, screen.getLeftPos(), screen.getTopPos()));
         if (ingredient.getIngredient() instanceof ItemStack stack
                 && AEItems.BLANK_PATTERN.is(stack)
                 && menu.slots.get(MenuDistillationEncoder.MENU_BLANK).getItem().isEmpty()) {
-            targets.add(new BlankTarget<>(menu, screen.getGuiLeft(), screen.getGuiTop()));
+            targets.add(new BlankTarget<>(menu, screen.getLeftPos(), screen.getTopPos()));
         }
 
         return targets;

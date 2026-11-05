@@ -21,10 +21,7 @@ final class AssemblerGridTick {
         if (!machine.mainNode.isActive()) {
             return TickRateModulation.IDLE;
         }
-        if (machine.vis.bufferedVis()
-                < machine.vis.visTarget(machine.craft.isCrafting(), machine.craft.craftPrice())) {
-            machine.vis.replenishVis();
-        }
+        machine.vis.replenishVis();
         if (!machine.craft.isCrafting()) {
             return TickRateModulation.IDLE;
         }

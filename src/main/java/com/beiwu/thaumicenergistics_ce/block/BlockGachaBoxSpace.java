@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
-/** The complete machine's upper occupied space; never a separate item or model. */
+/** Upper occupied space: no visible geometry or item, but its own terrain-particle material. */
 public final class BlockGachaBoxSpace extends Block {
     public static final MapCodec<BlockGachaBoxSpace> CODEC = simpleCodec(BlockGachaBoxSpace::new);
 

@@ -24,7 +24,7 @@ public class KnowledgeInscriberGhostIngredientHandler
         }
         MenuKnowledgeInscriber menu = screen.getMenu();
         for (int cell = 0; cell < BlockEntityKnowledgeInscriber.GRID_SLOT_COUNT; cell++) {
-            targets.add(new GridTarget<>(menu, cell, screen.getGuiLeft(), screen.getGuiTop()));
+            targets.add(new GridTarget<>(menu, cell, screen.getLeftPos(), screen.getTopPos()));
         }
         return targets;
     }

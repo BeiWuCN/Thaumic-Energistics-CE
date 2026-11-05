@@ -52,4 +52,5 @@ libs/thaumaturge-source.txt
 
 # Published release notes and asset license notice
 !/CHANGELOG-2.7.5.md
+!/CHANGELOG-2.7.5.1.md
 !/LICENSE-ASSETS.md

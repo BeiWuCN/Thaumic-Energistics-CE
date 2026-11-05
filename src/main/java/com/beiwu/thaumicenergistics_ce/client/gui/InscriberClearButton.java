@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 /** The small x painted in the inscriber panel: clearing the grid has no label of its own. */
 public class InscriberClearButton extends Button {
 
-    private static final int SIZE = 10;
+    private static final int SIZE = 8;
 
     public InscriberClearButton(int x, int y, Component tooltip, OnPress onPress) {
         super(x, y, SIZE, SIZE, Component.empty(), onPress, DEFAULT_NARRATION);

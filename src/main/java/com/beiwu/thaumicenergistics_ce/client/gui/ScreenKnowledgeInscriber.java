@@ -10,6 +10,11 @@ import net.minecraft.world.inventory.Slot;
 import com.beiwu.thaumicenergistics_ce.ThEIds;
 import com.beiwu.thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 import com.beiwu.thaumicenergistics_ce.menu.MenuKnowledgeInscriber;
+import com.beiwu.thaumicenergistics_ce.network.InscriberCostPayload;
+import com.beiwu.thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
+import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
+import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
+import net.minecraft.resources.ResourceKey;
 
 public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowledgeInscriber> {
 
@@ -30,12 +35,20 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
     private static final int BUTTON_Y = 101;
 
     private static final int CLEAR_X = 71;
-    private static final int CLEAR_Y = 85;
+    private static final int CLEAR_Y = 89;
 
 
     private InscriberButton saveButton;
 
     private InscriberClearButton clearButton;
+
+    private InscriberCostPayload recipeCost;
+
+    public void acceptCost(InscriberCostPayload payload) {
+        if (payload.containerId() == menu.containerId) {
+            recipeCost = payload;
+        }
+    }
 
     public ScreenKnowledgeInscriber(MenuKnowledgeInscriber menu, Inventory inventory, Component title) {
         super(menu, inventory, title, WIDTH, HEIGHT);
@@ -82,6 +95,10 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
     @Override
     public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractContents(graphics, mouseX, mouseY, partialTick);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(leftPos, topPos);
+        drawRecipeCost(graphics);
+        graphics.pose().popMatrix();
         Slot hovered = this.hoveredSlot;
         if (hovered == null) {
             return;
@@ -90,6 +107,38 @@ public class ScreenKnowledgeInscriber extends AbstractContainerScreen<MenuKnowle
         graphics.pose().translate(leftPos, topPos);
         Ae2SlotHighlight.render(graphics, hovered);
         graphics.pose().popMatrix();
+    }
+
+    private void drawRecipeCost(GuiGraphicsExtractor graphics) {
+        if (recipeCost == null || !recipeCost.hasRecipe() || minecraft == null || minecraft.level == null) {
+            return;
+        }
+        String vis = recipeCost.vis() + " Vis";
+        float scale = Math.min(0.75F, 24.0F / Math.max(1, font.width(vis)));
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(113, 94);
+        graphics.pose().scale(scale, scale);
+        graphics.text(font, vis, -font.width(vis) / 2, 0, 0xFF60477F, false);
+        graphics.pose().popMatrix();
+
+        int count = recipeCost.crystals().size();
+        if (count == 0) return;
+        float chip = Math.min(10.0F, 50.0F / count);
+        float x = 124.0F - chip;
+        for (var crystal : recipeCost.crystals()) {
+            var aspect = Aspects.resolve(minecraft.level,
+                    ResourceKey.create(IAspect.REGISTRY_KEY, crystal.aspect()));
+            if (aspect != null) {
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(x, 132);
+                graphics.pose().scale(chip / 16.0F, chip / 16.0F);
+                graphics.item(EssentiaCrystals.create(aspect, 1), 0, 0);
+                String amount = Integer.toString(crystal.count());
+                graphics.text(font, amount, 17 - font.width(amount), 10, 0xFFFFFFFF, true);
+                graphics.pose().popMatrix();
+            }
+            x -= chip;
+        }
     }
 
     @Override

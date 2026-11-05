@@ -188,6 +188,16 @@ public class BlockEntityArcaneAssembler extends ThEBaseBlockEntity
 
     public static int visBufferTarget() { return AssemblerVisPool.IDLE_TARGET; }
 
+    public static int totalVisBufferCapacity() { return visBufferTarget(); }
+
+    public static int aspectVisBufferCapacity() { return AssemblerVisPool.ASPECT_CAPACITY; }
+
+    public @Nullable Short attachedVisSourceFrequency() {
+        if (!(getLevel() instanceof net.minecraft.server.level.ServerLevel server)) return null;
+        var source = AssemblerInterfaceFinder.attached(server, getBlockPos());
+        return source == null ? null : source.getFrequency();
+    }
+
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);

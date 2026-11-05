@@ -34,6 +34,8 @@
     {
       "text": "tc.research_text.MYSTIC_CRYSTAL_CIRCUIT.stage.2",
       "recipes": [
+        "thaumicenergistics_ce:thaumic_processor_press",
+        "thaumicenergistics_ce:thaumic_processor_press_copy",
         "thaumicenergistics_ce:mystic_crystal_dust",
         "thaumicenergistics_ce:mystic_circuit_board"
       ]

@@ -33,7 +33,7 @@ public record ArcaneCraftCostPayload(
                     AspectCost::centivis,
                     AspectCost::new);
 
-    private static final StreamCodec<RegistryFriendlyByteBuf, CrystalCost> CRYSTAL_COST_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, CrystalCost> CRYSTAL_COST_CODEC =
             StreamCodec.composite(
                     Identifier.STREAM_CODEC,
                     CrystalCost::aspect,

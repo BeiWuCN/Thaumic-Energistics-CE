@@ -94,7 +94,8 @@ function png(w,h,rgba){const head=Buffer.alloc(13);head.writeUInt32BE(w,0);head.
 const texture=png(size,size,atlas),emissive=png(size,size,glow),texDir=path.join(assets,'textures/entity');fs.mkdirSync(texDir,{recursive:true});
 fs.writeFileSync(path.join(texDir,'fluix_brain.png'),texture);fs.writeFileSync(path.join(texDir,'fluix_brain_emissive.png'),emissive);
 const model={credit:'TECE Fluix Brain; anatomical reference: Pixel Brain by sparkskye (CC BY 4.0); geometry redrawn, AE2-inspired palette and implants added',texture_size:[size,size],scale,textures:{cortex:'thaumicenergistics_ce:textures/entity/fluix_brain.png',emissive:'thaumicenergistics_ce:textures/entity/fluix_brain_emissive.png'},elements};
-fs.writeFileSync(path.join(assets,'models/entity/fluix_brain.json'),JSON.stringify(model,null,2)+'\n');
+fs.mkdirSync(path.join(assets,'render_models'),{recursive:true});
+fs.writeFileSync(path.join(assets,'render_models/fluix_brain.json'),JSON.stringify(model,null,2)+'\n');
 const bbElements=elements.map(e=>({...e,type:'cube',uuid:crypto.randomUUID(),box_uv:false,faces:Object.fromEntries(Object.entries(e.faces).map(([s,f])=>[s,{uv:f.uv,texture:0}]))}));
 fs.writeFileSync(path.join(doc,'fluix_brain.bbmodel'),JSON.stringify({meta:{format_version:'4.10',model_format:'free',box_uv:false},name:'Fluix Brain - anatomical rebuild',credit:model.credit,resolution:{width:size,height:size},elements:bbElements,outliner:bbElements.map(e=>e.uuid),textures:[{name:'fluix_brain.png',id:'cortex',uuid:crypto.randomUUID(),width:size,height:size,uv_width:size,uv_height:size,source:'data:image/png;base64,'+texture.toString('base64')}]},null,2));
 // Actual geometry preview: depth-tested nearest-neighbor texture rendering.

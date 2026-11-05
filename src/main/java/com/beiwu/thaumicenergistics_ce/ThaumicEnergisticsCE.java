@@ -65,9 +65,18 @@ public final class ThaumicEnergisticsCE {
         modBus.addListener(ThaumicEnergisticsCE::registerPartCapabilities);
         modBus.addListener(this::registerKeyTypes);
         modBus.addListener(this::registerRecipeDisplays);
+        modBus.addListener(ThaumicEnergisticsCE::registerLootModifiers);
         modBus.addListener(ThaumicEnergisticsCE::registerCrystalAliases);
         modBus.addListener(this::commonSetup);
 
+    }
+
+    private static void registerLootModifiers(RegisterEvent event) {
+        if (event.getRegistryKey() == net.neoforged.neoforge.registries.NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS) {
+            event.register(net.neoforged.neoforge.registries.NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS,
+                    ThEIds.id("archaeology_template"),
+                    () -> com.beiwu.thaumicenergistics_ce.loot.ArchaeologyTemplateModifier.CODEC);
+        }
     }
 
     private static void registerCrystalAliases(RegisterEvent event) {

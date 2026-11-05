@@ -29,6 +29,16 @@ public final class TECEItems {
     public static final DeferredItem<Item> MYSTIC_CRYSTAL_DUST = REGISTRY.registerSimpleItem("mystic_crystal_dust");
     public static final DeferredItem<Item> MYSTIC_CIRCUIT_BOARD = REGISTRY.registerSimpleItem("mystic_circuit_board");
     public static final DeferredItem<Item> MYSTIC_PROCESSOR = REGISTRY.registerSimpleItem("mystic_processor");
+    public static final DeferredItem<Item> THAUMIC_PROCESSOR_PRESS = REGISTRY.registerSimpleItem("thaumic_processor_press");
+    public static final DeferredItem<net.minecraft.world.item.SmithingTemplateItem> THAUMIC_UPGRADE_TEMPLATE =
+            REGISTRY.registerItem("thaumic_upgrade_smithing_template", com.beiwu.thaumicenergistics_ce.item.ThaumicTools::template);
+    public static final DeferredItem<Item> THAUMIC_CRYSTAL_SWORD = REGISTRY.registerItem("thaumic_crystal_sword", com.beiwu.thaumicenergistics_ce.item.ThaumicTools.Sword::new);
+    public static final DeferredItem<Item> THAUMIC_CRYSTAL_PICKAXE = REGISTRY.registerItem("thaumic_crystal_pickaxe", com.beiwu.thaumicenergistics_ce.item.ThaumicTools.Pickaxe::new);
+    public static final DeferredItem<com.beiwu.thaumicenergistics_ce.item.ThaumicTools.Axe> THAUMIC_CRYSTAL_AXE = REGISTRY.registerItem("thaumic_crystal_axe", com.beiwu.thaumicenergistics_ce.item.ThaumicTools.Axe::new);
+    public static final DeferredItem<com.beiwu.thaumicenergistics_ce.item.ThaumicTools.Shovel> THAUMIC_CRYSTAL_SHOVEL = REGISTRY.registerItem("thaumic_crystal_shovel", com.beiwu.thaumicenergistics_ce.item.ThaumicTools.Shovel::new);
+    public static final DeferredItem<com.beiwu.thaumicenergistics_ce.item.ThaumicTools.Hoe> THAUMIC_CRYSTAL_HOE = REGISTRY.registerItem("thaumic_crystal_hoe", com.beiwu.thaumicenergistics_ce.item.ThaumicTools.Hoe::new);
+    public static final DeferredItem<com.beiwu.thaumicenergistics_ce.item.ThaumicTools.Wrench> THAUMIC_CRYSTAL_WRENCH = REGISTRY.registerItem("thaumic_crystal_wrench", com.beiwu.thaumicenergistics_ce.item.ThaumicTools.Wrench::new);
+    public static final DeferredItem<com.beiwu.thaumicenergistics_ce.item.ThaumicTools.Knife> THAUMIC_CRYSTAL_KNIFE = REGISTRY.registerItem("thaumic_crystal_cutting_knife", com.beiwu.thaumicenergistics_ce.item.ThaumicTools.Knife::new);
     public static final DeferredItem<Item> FLUIX_BRAIN = REGISTRY.registerItem(
             "fluix_brain", Item::new,
             () -> new Item.Properties().rarity(Rarity.RARE));

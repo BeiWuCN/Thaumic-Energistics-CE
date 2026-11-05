@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "thaumicenergistics_ce:thaumic_crystal_sword",
+    "thaumicenergistics_ce:thaumic_crystal_pickaxe",
+    "thaumicenergistics_ce:thaumic_crystal_axe",
+    "thaumicenergistics_ce:thaumic_crystal_shovel",
+    "thaumicenergistics_ce:thaumic_crystal_hoe",
+    "thaumicenergistics_ce:thaumic_crystal_wrench",
+    "thaumicenergistics_ce:thaumic_crystal_cutting_knife"
+  ]
+}

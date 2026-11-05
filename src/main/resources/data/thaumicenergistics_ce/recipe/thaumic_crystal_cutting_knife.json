@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "  a",
+    "ba ",
+    "cc "
+  ],
+  "key": {
+    "a": "#c:rods/wooden",
+    "b": "#c:ingots/iron",
+    "c": "thaumicenergistics_ce:mystic_crystal"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:thaumic_crystal_cutting_knife"
+  }
+}

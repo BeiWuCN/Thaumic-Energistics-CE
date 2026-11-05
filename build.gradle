@@ -16,8 +16,12 @@ java {
     withSourcesJar()
 }
 
-def localVerification = file('src/test/java').isDirectory()
-        && findProperty('localVerification') != 'false'
+// Verification is opt-in. Merely having local test files must never add their
+// event subscribers to an ordinary client/server run or a release build.
+def verificationRequested = findProperty('localVerification') == 'true'
+        || (findProperty('localVerification') == null
+            && !(findProperty('selftests') ?: '').toString().trim().isEmpty())
+def localVerification = verificationRequested && file('src/test/java').isDirectory()
 if (!localVerification) {
     sourceSets.test.java.setSrcDirs([])
     sourceSets.test.resources.setSrcDirs([])
@@ -66,7 +70,7 @@ repositories {
 // resources at src/selftest itself lists each one twice: javac tolerates that, the resource copy
 // does not - it fails the run with "Entry META-INF/services/... is a duplicate but no duplicate
 // handling strategy has been set".
-def selftestDir = findProperty('localVerification') == 'false' ? null
+def selftestDir = !verificationRequested ? null
         : ['src/selftest', '_scratch/selftest'].collect { file(it) }.find { it.isDirectory() }
 if (selftestDir != null) {
     sourceSets {
@@ -502,8 +506,38 @@ tasks.named('check') { dependsOn validateProbabilityModels }
 tasks.withType(Jar).configureEach {
     exclude('doc/**')
     exclude('src/test/**', 'test/**', '**/selftest/**', 'tools/**', 'scripts/**')
-    exclude('**/*Checks.java', '**/*Checks.class', '**/*.py', '**/*.ps1', '**/*.sh', '**/*.bat')
+    exclude('**/*Checks*.java', '**/*Checks*.class', '**/*SelfTest*.java', '**/*SelfTest*.class')
+    exclude('**/*.py', '**/*.ps1', '**/*.sh', '**/*.bat', '**/*.cjs', '**/*.mjs', '**/*.js')
 }
+
+def verifyReleaseIsolation = tasks.register('verifyReleaseIsolation') {
+    group = 'verification'
+    description = 'Checks mod and source JARs contain no verification entry points or scripts.'
+    dependsOn tasks.named('jar'), tasks.named('sourcesJar')
+    doLast {
+        [tasks.named('jar').get(), tasks.named('sourcesJar').get()].each { archiveTask ->
+            def artifact = archiveTask.archiveFile.get().asFile
+            def rejected = []
+            new java.util.zip.ZipFile(artifact).withCloseable { zip ->
+                zip.entries().each { entry ->
+                    def name = entry.name
+                    if (name ==~ /(?i)(?:tools|scripts|test|tests|selftest|_scratch)\/.*/
+                            || name ==~ /(?i).*\/selftest\/.*/
+                            || name ==~ /.*(?:Checks|SelfTest)(?:\$[^\/]*)?\.(?:class|java)/
+                            || name ==~ /(?i).*\.(?:py|ps1|sh|bat|cjs|mjs|js)/) {
+                        rejected << name
+                    }
+                }
+            }
+            if (!rejected.isEmpty()) {
+                throw new GradleException("Verification files in ${artifact.name}: ${rejected.join(', ')}")
+            }
+            logger.lifecycle("Release isolation PASS: ${artifact.name}")
+        }
+    }
+}
+
+tasks.named('check') { dependsOn verifyReleaseIsolation }
 
 jar {
     from(projectDir) {

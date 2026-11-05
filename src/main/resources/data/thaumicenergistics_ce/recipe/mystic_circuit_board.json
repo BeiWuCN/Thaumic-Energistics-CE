@@ -1,7 +1,7 @@
 {
   "type": "ae2:inscriber",
   "ingredients": {
-    "top": "ae2:calculation_processor_press",
+    "top": "thaumicenergistics_ce:thaumic_processor_press",
     "middle": "thaumicenergistics_ce:mystic_crystal"
   },
   "mode": "inscribe",

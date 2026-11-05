@@ -7,6 +7,8 @@ import net.minecraft.world.level.Level;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import com.beiwu.thaumicenergistics_ce.blockentity.inscriber.BlockEntityKnowledgeInscriber;
 import com.beiwu.thaumicenergistics_ce.inventory.HandlerKnowledgeCore;
+import com.beiwu.thaumicenergistics_ce.network.InscriberCostPayload;
+import org.jspecify.annotations.Nullable;
 
 final class InscriberPreview {
 
@@ -24,6 +26,12 @@ final class InscriberPreview {
     private int sampledCore = -1;
 
     private int previewedSignature = -1;
+
+    private @Nullable InscriberCostPayload cost;
+
+    InscriberCostPayload cost() {
+        return cost == null ? InscriberCostPayload.of(menu.containerId, null) : cost;
+    }
 
     InscriberPreview(MenuKnowledgeInscriber menu, InscriberGridState grid) {
         this.menu = menu;
@@ -51,9 +59,11 @@ final class InscriberPreview {
         List<ItemStack> cells = grid.cells();
         if (ThEArcanePattern.isGridEmpty(cells)) {
             result.setItem(0, ItemStack.EMPTY);
+            cost = InscriberCostPayload.of(menu.containerId, null);
             return;
         }
         ThEArcanePattern pattern = ThEArcanePattern.resolveGrid(level, cells);
+        cost = InscriberCostPayload.of(menu.containerId, pattern);
         result.setItem(0, pattern == null ? ItemStack.EMPTY : pattern.result());
     }
 

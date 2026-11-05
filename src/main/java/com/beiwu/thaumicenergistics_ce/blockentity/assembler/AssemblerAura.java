@@ -13,7 +13,7 @@ final class AssemblerAura {
         return owner.getLevel() == null ? 0 : TcAura.auraBase(owner.getLevel(), owner.getBlockPos());
     }
 
-    static float drain(BlockEntityArcaneAssembler owner, int amount) {
+    static float drain(BlockEntityArcaneAssembler owner, float amount) {
         return owner.getLevel() == null || amount <= 0 ? 0
                 : TcAura.drainVis(owner.getLevel(), owner.getBlockPos(), amount, false);
     }

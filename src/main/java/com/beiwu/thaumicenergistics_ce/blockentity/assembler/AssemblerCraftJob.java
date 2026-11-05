@@ -38,18 +38,16 @@ final class AssemblerCraftJob {
 
     public int craftCost(ThEArcanePattern pattern) {
         float modifier = Math.max(1.0F - owner.upgrades.gearDiscount() / 100.0F, MIN_CONSUMPTION_MODIFIER);
-        return Math.max(1, (int) Math.ceil(pattern.chargedVis() * modifier));
+        // Primal crystals are charged as their actual elemental types below,
+        // rather than being added to a fungible plain-Vis bill.
+        return Math.max(0, (int) Math.ceil(pattern.baseVis() * modifier));
     }
 
     boolean canEverPay(ThEArcanePattern pattern) {
         if (craftCost(pattern) > AssemblerVisPool.IDLE_TARGET) {
             return false;
         }
-        int capacity = owner.vis.auraCapacity();
-        return capacity <= 0
-                || owner.vis.relayNetworkInReach()
-                || owner.vis.interfaceInReach()
-                || craftCost(pattern) <= capacity;
+        return true;
     }
 
     void noteRefusal(Component why) {
@@ -60,9 +58,7 @@ final class AssemblerCraftJob {
     }
 
     Component cannotPay(int price) {
-        int capacity = owner.vis.auraCapacity();
-        return AssemblerStatus.tooExpensive(price,
-                capacity <= 0 ? AssemblerVisPool.IDLE_TARGET : Math.min(AssemblerVisPool.IDLE_TARGET, capacity));
+        return AssemblerStatus.tooExpensive(price, AssemblerVisPool.IDLE_TARGET);
     }
 
     @Nullable ThEArcanePattern resolveExternal(IPatternDetails details) {

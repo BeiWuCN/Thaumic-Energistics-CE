@@ -14,13 +14,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
-import com.beiwu.thaumicenergistics_ce.util.ThELog;
 
 final class AssemblerCraftRunner {
 
     private static final int STALLED_CRAFT_REPORT_TICKS = 100;
-
-    private static final int STALL_RELEASE_TICKS = 1200;
 
     private final BlockEntityArcaneAssembler owner;
 
@@ -59,34 +56,14 @@ final class AssemblerCraftRunner {
     }
 
     private TickRateModulation completeCraft(IGrid grid) {
-        int price = owner.craft.craftPrice();
-        boolean unpayableForever = price > 0
-                && owner.vis.auraCapacity() > 0
-                && price > owner.vis.auraCapacity()
-                && !owner.vis.relayNetworkInReach()
-                && !owner.vis.interfaceInReach();
-        boolean stalledOut = !unpayableForever && owner.craft.stalledTicks() >= STALL_RELEASE_TICKS;
-        if (owner.vis.bufferedVis() < price && !unpayableForever && !stalledOut) {
+        if (!owner.vis.canPayCraft()) {
             noteStall(AssemblerStatus.waitReason(
                     AssemblerStatus.WAIT_NO_VIS,
-                    "no vis (%s banked of %s needed, target %s)",
+                    "Insufficient Vis (%s/%s)",
                     owner.vis.bufferedVis(),
-                    price,
-                    owner.vis.visTarget(owner.craft.isCrafting(), owner.craft.craftPrice())));
+                    owner.craft.craftPrice()));
             return TickRateModulation.SAME;
         }
-        if (owner.vis.bufferedVis() < price && stalledOut) {
-            ThELog.LOG.warn(
-                    "[assembler] at {} delivers {} after {} ticks of waiting for {} vis: a machine that waits"
-                            + " for ever refuses every later job",
-                    owner.getBlockPos(),
-                    owner.inventory.getItem(BlockEntityArcaneAssembler.TARGET_SLOT),
-                    owner.craft.stalledTicks(),
-                    price);
-        }
-        if (owner.vis.bufferedVis() < price) {
-        }
-
         IStorageService storage = grid.getService(IStorageService.class);
         if (storage == null) {
             return TickRateModulation.IDLE;
@@ -116,9 +93,15 @@ final class AssemblerCraftRunner {
             noteStall(AssemblerStatus.waitReason(AssemblerStatus.WAIT_NO_CRYSTALS_RECHECK, "no crystals (recheck)"));
             return TickRateModulation.SAME;
         }
+        // Recheck and deduct the whole resource bill together, only after all
+        // output-space and physical-crystal checks have passed.
+        if (!owner.vis.payCraft()) {
+            noteStall(AssemblerStatus.waitReason(AssemblerStatus.WAIT_NO_VIS, "Insufficient Vis (%s/%s)",
+                    owner.vis.bufferedVis(), owner.craft.craftPrice()));
+            return TickRateModulation.SAME;
+        }
         takeCrystals(storage);
         storage.getInventory().insert(outputKey, output.getCount(), Actionable.MODULATE, owner.actionSource);
-        owner.vis.spendVis(price);
         finishCraft();
         return TickRateModulation.URGENT;
     }

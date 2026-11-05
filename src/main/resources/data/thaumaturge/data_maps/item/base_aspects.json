@@ -1,5 +1,5 @@
 {
-  "_note": "This file lives in the thaumaturge namespace on purpose: NeoForge derives a data map type's id from the folder namespace plus the file name, so a copy under data/thaumicenergistics_ce/ would be rejected as a non-existent type 'thaumicenergistics_ce:base_aspects'. Several packs may provide this path; the loader stacks and merges them, and Thaumaturge's own copy sets no replace flag, so this entry adds to it. The ME controller is unscannable without it: Thaumaturge derives item aspects from crafting recipes, but the controller's three inputs (smooth sky stone, fluix crystal, engineering processor) are all made outside a crafting grid, so nothing derives and the index holds no entry for it.",
+  "_note": "Explicit, bounded aspect compositions for TECE items. Machine/infusion/Inscriber recipes are not reliably covered by crafting inference. Uses Thaumaturge scan/discovery rules unchanged; stored cell contents do not change the item composition. Equipment bonuses are added by Thaumaturge itself.",
   "values": {
     "ae2:controller": [
       {
@@ -21,6 +21,1012 @@
       {
         "aspect": "thaumaturge:permutatio",
         "amount": 8
+      }
+    ],
+    "thaumicenergistics_ce:mystic_crystal": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:mystic_crystal_dust": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:mystic_crystal_block": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 16
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 8
+      }
+    ],
+    "thaumicenergistics_ce:flawless_budding_thaumic_crystal": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 16
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:herba",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:flawed_budding_thaumic_crystal": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 16
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:herba",
+        "amount": 3
+      }
+    ],
+    "thaumicenergistics_ce:chipped_budding_thaumic_crystal": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 16
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:herba",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:damaged_budding_thaumic_crystal": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 16
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:herba",
+        "amount": 1
+      }
+    ],
+    "thaumicenergistics_ce:small_mystic_crystal_bud": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 1
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 1
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 1
+      }
+    ],
+    "thaumicenergistics_ce:medium_mystic_crystal_bud": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 1
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 1
+      }
+    ],
+    "thaumicenergistics_ce:large_mystic_crystal_bud": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 3
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 1
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 1
+      }
+    ],
+    "thaumicenergistics_ce:mystic_crystal_cluster": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 1
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 1
+      }
+    ],
+    "thaumicenergistics_ce:mystic_circuit_board": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:ordo",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:mystic_processor": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:ordo",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:thaumic_processor_press": [
+      {
+        "aspect": "thaumaturge:metallum",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:fabrico",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:ordo",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:thaumic_upgrade_smithing_template": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:fabrico",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:thaumic_crystal_sword": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:thaumic_crystal_pickaxe": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:thaumic_crystal_axe": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:thaumic_crystal_shovel": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:thaumic_crystal_hoe": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:thaumic_crystal_wrench": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:thaumic_crystal_cutting_knife": [
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:fluix_brain": [
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:exanimis",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:knowledge_core": [
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:ordo",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:arcane_pattern": [
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:fabrico",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:arcane_assembler": [
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:fabrico",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 8
+      }
+    ],
+    "thaumicenergistics_ce:knowledge_inscriber": [
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:ordo",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:essentia_cell_workbench": [
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:instrumentum",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:essentia_vibration_chamber": [
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 8
+      }
+    ],
+    "thaumicenergistics_ce:alchemy_provider": [
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:permutatio",
+        "amount": 8
+      }
+    ],
+    "thaumicenergistics_ce:infusion_provider": [
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 8
+      }
+    ],
+    "thaumicenergistics_ce:distillation_encoder": [
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 8
+      }
+    ],
+    "thaumicenergistics_ce:occult_monitor": [
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:sensus",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 8
+      }
+    ],
+    "thaumicenergistics_ce:alchemy_provider_connection": [
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:vinculum",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:gacha_box": [
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:permutatio",
+        "amount": 8
+      }
+    ],
+    "thaumicenergistics_ce:gacha_box_aggregator": [
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:vinculum",
+        "amount": 8
+      }
+    ],
+    "thaumicenergistics_ce:vis_interface": [
+      {
+        "aspect": "thaumaturge:auram",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:vinculum",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:flux_transfer_interface": [
+      {
+        "aspect": "thaumaturge:vitium",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:permutatio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:vinculum",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:focus_aewrench": [
+      {
+        "aspect": "thaumaturge:instrumentum",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:permutatio",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:golem_wifi_backpack": [
+      {
+        "aspect": "thaumaturge:vinculum",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:machina",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:motus",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:wireless_connector": [
+      {
+        "aspect": "thaumaturge:vinculum",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:motus",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:metallum",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:arcane_crafting_terminal": [
+      {
+        "aspect": "thaumaturge:fabrico",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:essentia_terminal": [
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:sensus",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:wireless_essentia_terminal": [
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:vinculum",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:wireless_arcane_crafting_terminal": [
+      {
+        "aspect": "thaumaturge:fabrico",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:vinculum",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:potentia",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:essentia_level_emitter": [
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:sensus",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:ordo",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:storage_casing": [
+      {
+        "aspect": "thaumaturge:metallum",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:vacuos",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:diffusion_core": [
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:permutatio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:motus",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:coalescence_core": [
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:ordo",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:vinculum",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:essentia_access_card": [
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:vinculum",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:vis_connection_card": [
+      {
+        "aspect": "thaumaturge:auram",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:vinculum",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:storage_component_1k": [
+      {
+        "aspect": "thaumaturge:vacuos",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:essentia_cell_1k": [
+      {
+        "aspect": "thaumaturge:vacuos",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:metallum",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:storage_component_4k": [
+      {
+        "aspect": "thaumaturge:vacuos",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 3
+      },
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 3
+      }
+    ],
+    "thaumicenergistics_ce:essentia_cell_4k": [
+      {
+        "aspect": "thaumaturge:vacuos",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 3
+      },
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 3
+      },
+      {
+        "aspect": "thaumaturge:metallum",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:storage_component_16k": [
+      {
+        "aspect": "thaumaturge:vacuos",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:essentia_cell_16k": [
+      {
+        "aspect": "thaumaturge:vacuos",
+        "amount": 10
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:metallum",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:storage_component_64k": [
+      {
+        "aspect": "thaumaturge:vacuos",
+        "amount": 10
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 5
+      },
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 5
+      }
+    ],
+    "thaumicenergistics_ce:essentia_cell_64k": [
+      {
+        "aspect": "thaumaturge:vacuos",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 5
+      },
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 5
+      },
+      {
+        "aspect": "thaumaturge:metallum",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:storage_component_256k": [
+      {
+        "aspect": "thaumaturge:vacuos",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 10
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 6
+      }
+    ],
+    "thaumicenergistics_ce:essentia_cell_256k": [
+      {
+        "aspect": "thaumaturge:vacuos",
+        "amount": 14
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 10
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:vitreus",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:metallum",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:essentia_cell_creative": [
+      {
+        "aspect": "thaumaturge:vacuos",
+        "amount": 16
+      },
+      {
+        "aspect": "thaumaturge:alkimia",
+        "amount": 12
+      },
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:metallum",
+        "amount": 4
+      }
+    ],
+    "thaumicenergistics_ce:alkusure86fumo": [
+      {
+        "aspect": "thaumaturge:humanus",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:sensus",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:fabrico",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:beiwu_cn_fumo": [
+      {
+        "aspect": "thaumaturge:humanus",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:sensus",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:fabrico",
+        "amount": 2
+      }
+    ],
+    "thaumicenergistics_ce:xiao_leng_fumo": [
+      {
+        "aspect": "thaumaturge:humanus",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:sensus",
+        "amount": 2
+      },
+      {
+        "aspect": "thaumaturge:fabrico",
+        "amount": 2
       }
     ]
   }

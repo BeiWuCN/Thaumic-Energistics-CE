@@ -3,6 +3,7 @@
   "package": "com.beiwu.thaumicenergistics_ce.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "StorageMonitorEssentiaMixin",
     "InterfaceLogicDropMixin",
     "IOBusUpgradeSlotsMixin",
     "IOBusRecoveryMixin",
@@ -20,9 +21,11 @@
     "LightningProviderEssentiaMixin",
     "ProviderStorageTargetEssentiaMixin",
     "PigmeeProviderEssentiaMixin",
-    "PigmeeProviderMenuEssentiaMixin"
+    "PigmeeProviderMenuEssentiaMixin",
+    "RechargePedestalToolsMixin"
   ],
   "client": [
+    "ResearchMachineRecipeMixin",
     "ConfigCommentI18nMixin",
     "TerminalScreenVisibilityMixin",
     "ArcaneUpgradeTooltipMixin",
