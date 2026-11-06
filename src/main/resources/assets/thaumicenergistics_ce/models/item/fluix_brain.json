@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {"layer0": "thaumicenergistics_ce:item/fluix_zombie_brain"}
+}

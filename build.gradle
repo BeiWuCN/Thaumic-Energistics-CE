@@ -17,6 +17,7 @@ java {
 }
 
 repositories {
+    maven { url = 'https://cursemaven.com'; content { includeGroup 'curse.maven' } }
     maven {
         url = 'https://api.modrinth.com/maven'
         content { includeGroup 'maven.modrinth' }
@@ -55,6 +56,9 @@ neoForge {
         }
         client {
             client()
+            if (project.hasProperty('clientGameDirectory')) {
+                gameDirectory.set(layout.projectDirectory.dir(project.property('clientGameDirectory')))
+            }
             // A run without this mod cannot be produced: its classes stay on the run classpath, and with
             // the mod gone its datapack still loads, so research entries naming its items fail:
             //
@@ -84,6 +88,8 @@ neoForge {
         }
         configureEach {
             systemProperty 'forge.logging.markers', 'REGISTRIES'
+            if (project.hasProperty('clientPortSmoke')) systemProperty 'tece.portClientSmoke', 'true'
+            if (project.hasProperty('clientWorldSmoke')) systemProperty 'tece.portWorldSmoke', 'true'
             logLevel = org.slf4j.event.Level.DEBUG
 
             // A forked run does not inherit the shell's environment, so the THAUMICENERGISTICS_* trace
@@ -111,24 +117,28 @@ def generatePortResources = tasks.register('generatePortResources') {
         target.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([replace: false, values: curioItems]))
     }
 }
-sourceSets.main.resources.srcDir(layout.buildDirectory.dir('generated/portResources'))
+// Curios tags are supplied directly by src/main/resources.
 tasks.named('processResources') { dependsOn generatePortResources }
 tasks.named('sourcesJar') { dependsOn generatePortResources }
+tasks.named('sourcesJar') {
+    from(projectDir) {
+        include 'LICENSE', 'LICENSE-ASSETS.md', 'LICENSE-CC-BY-NC-SA-3.0.txt'
+        into 'META-INF/licenses'
+    }
+}
 
 // Optional local verification sources are deliberately outside the published repository.
-def portVerificationDir = providers.gradleProperty('portVerificationDir')
+def portVerificationDir = providers.gradleProperty('portVerificationDir').orElse(
+        providers.provider { file('_scratch/verification').isDirectory() ? '_scratch/verification' : null })
 if (project.hasProperty('portRuntimeRegression') && !portVerificationDir.isPresent()) {
     throw new GradleException('Set -PportVerificationDir=/path/to/local/verification/sources for game regressions')
 }
 
-// Compile against the supported public 1.21.1 release, never a 26.1.2 source build.
-// This local dependency is excluded from version control and from the release JAR.
-def thaumaturgeFile = file(providers.gradleProperty('thaumaturge_jar')
-        .getOrElse('libs/thaumaturge-1.21.1-NeoForge-1.0.2.jar'))
-if (!thaumaturgeFile.isFile()) {
-    throw new GradleException('Place Thaumaturge 1.21.1 NeoForge 1.0.2 in libs/, or set -Pthaumaturge_jar=/path/to/the/release.jar')
-}
-def thaumaturgeJars = files(thaumaturgeFile)
+// The CF release is the compatibility target. A local JAR can be supplied for diagnostics.
+def thaumaturgeDependency = providers.gradleProperty('thaumaturge_jar').isPresent()
+        ? files(providers.gradleProperty('thaumaturge_jar').get())
+        : "curse.maven:thaumaturge-1628024:9452543"
+
 dependencies {
     compileOnly "org.jspecify:jspecify:1.0.0"
 
@@ -144,7 +154,7 @@ dependencies {
     implementation "maven.modrinth:apollib:${apollib_version}"
 
     // Thaumaturge, from the local build the guard above insists on.
-    implementation thaumaturgeJars
+    implementation thaumaturgeDependency
     compileOnly("maven.modrinth:advancedae:1.6.12-1.21.1") { transitive = false }
     if (!project.hasProperty('withoutCompatibilityMods')) {
         runtimeOnly fileTree(dir: 'libs/compat', include: ['*.jar'])
@@ -201,7 +211,7 @@ if (portVerificationDir.isPresent()) {
         description = 'Verify 1.21.1 backport VIS bounds and legacy-save conservation.'
         dependsOn tasks.named('testClasses')
         classpath = sourceSets.test.runtimeClasspath + sourceSets.main.runtimeClasspath
-        mainClass = 'thaumicenergistics_ce.blockentity.assembler.AssemblerVisPoolRegression'
+        mainClass = 'com.beiwu.thaumicenergistics_ce.blockentity.assembler.AssemblerVisPoolRegression'
         javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
     }
     
@@ -214,7 +224,7 @@ if (portVerificationDir.isPresent()) {
     def generatePortTestStructure = tasks.register('generatePortTestStructure', JavaExec) {
         dependsOn tasks.named('compileTestJava')
         classpath = sourceSets.test.output.classesDirs + sourceSets.main.runtimeClasspath
-        mainClass = 'thaumicenergistics_ce.PortTestStructure'
+        mainClass = 'com.beiwu.thaumicenergistics_ce.PortTestStructure'
         def target = layout.buildDirectory.file('generated/portTestResources/data/thaumicenergistics_ce/structure/empty.nbt')
         args target.get().asFile.absolutePath
         outputs.file target
@@ -223,6 +233,10 @@ if (portVerificationDir.isPresent()) {
 }
 
 jar {
+    from(projectDir) {
+        include 'LICENSE', 'LICENSE-ASSETS.md', 'LICENSE-CC-BY-NC-SA-3.0.txt'
+        into 'META-INF/licenses'
+    }
     manifest {
         attributes([
                 'Specification-Title'     : mod_name,

@@ -2,10 +2,11 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.ESSENTIALEVELEMITTER",
   "parents": [
-    "thaumicenergistics_ce:digisentia"
+    "thaumicenergistics_ce:essentia_terminal",
+    "~thaumicenergistics_ce:mystic_crystal_circuit"
   ],
-  "column": -8,
-  "row": -2,
+  "column": 8,
+  "row": 0,
   "meta": [
     "round"
   ],

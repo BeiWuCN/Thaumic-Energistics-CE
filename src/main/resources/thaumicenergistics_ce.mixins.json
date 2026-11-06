@@ -1,34 +1,41 @@
 {
   "required": true,
-  "package": "thaumicenergistics_ce.mixin",
+  "package": "com.beiwu.thaumicenergistics_ce.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "StorageMonitorEssentiaMixin",
     "InterfaceLogicDropMixin",
-    "TerminalVisibilityMixin",
     "IOBusUpgradeSlotsMixin",
     "IOBusRecoveryMixin",
-    "ExportBusOperationMixin",
-    "StorageBusEssentiaMixin",
     "BusRecoveryItemMixin",
+    "ExportBusOperationMixin",
+    "TerminalVisibilityMixin",
     "PatternProviderEssentiaMixin",
     "PatternProviderMenuEssentiaMixin",
     "GenericStackInvEssentiaMixin",
     "PatternProviderReturnEssentiaMixin",
+    "PatternProviderCardSlotMixin",
     "AdvancedProviderEssentiaMixin",
     "AdvancedProviderMenuEssentiaMixin",
     "LightningProviderEssentiaMixin",
+    "ProviderStorageTargetEssentiaMixin",
+    "RechargePedestalToolsMixin",
     "PigmeeProviderEssentiaMixin",
     "PigmeeProviderMenuEssentiaMixin",
-    "ProviderStorageTargetEssentiaMixin"
+    "StorageBusUpgradeSlotsMixin",
+    "ThaumicToolCraftRepairMixin",
+    "ThaumicToolAnvilRepairMixin",
+    "SmithingRecipeIngredientsAccessor"
   ],
   "client": [
-    "PageLineStyleMixin",
+    "ResearchMachineRecipeMixin",
+    "ConfigCommentI18nMixin",
     "TerminalScreenVisibilityMixin",
-    "WidgetContainerAccessor",
     "ArcaneUpgradeTooltipMixin",
     "PatternProviderScreenEssentiaMixin",
-    "ConfigCommentI18nMixin",
-    "AdvancedProviderScreenEssentiaMixin"
+    "WidgetContainerAccessor",
+    "AdvancedProviderScreenEssentiaMixin",
+    "ScreenStyleAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

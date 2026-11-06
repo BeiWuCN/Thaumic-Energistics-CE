@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "W": {
+      "item": "thaumaturge:warded_glass"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "T": {
+      "item": "thaumaturge:ingot_void"
+    }
+  },
+  "pattern": [
+    "WRW",
+    "R R",
+    "TTT"
+  ],
+  "result": {
+    "id": "thaumicenergistics_ce:advanced_storage_casing",
+    "count": 1
+  },
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "megacells"
+    }
+  ]
+}

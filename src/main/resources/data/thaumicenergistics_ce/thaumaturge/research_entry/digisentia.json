@@ -2,10 +2,11 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.DIGISENTIA",
   "parents": [
-    "thaumicenergistics_ce:base_energistics"
+    "thaumicenergistics_ce:base_energistics",
+    "~thaumicenergistics_ce:mystic_crystal_growth"
   ],
-  "column": 0,
-  "row": -2,
+  "column": 4,
+  "row": 0,
   "meta": [
     "round"
   ],

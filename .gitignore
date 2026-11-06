@@ -33,3 +33,14 @@ MOD-DESCRIPTION.en.md
 
 # Scratch space for javap dumps and other throwaway evidence gathered while reading a dependency.
 _scratch/
+
+# Local authoring files and obsolete license copies; synchronized with 26.1.2 bda6631.
+doc/
+LICENSE-GPL-3.0.txt
+LICENSE-LGPL-3.0.txt
+LICENSE-ORIGINAL-MIT
+
+# Local migration evidence and verification-only launchers.
+porting/
+config-examples/
+.run/TECE Game Tests*.run.xml

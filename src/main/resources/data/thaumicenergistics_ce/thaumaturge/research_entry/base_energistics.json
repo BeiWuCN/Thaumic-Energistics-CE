@@ -2,9 +2,9 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.BASEENERGISTICS",
   "parents": [
-    "thaumaturge:unlock_infusion"
+    "~thaumaturge:unlock_infusion"
   ],
-  "column": 0,
+  "column": 2,
   "row": 0,
   "meta": [
     "round"
@@ -14,10 +14,7 @@
   ],
   "stages": [
     {
-      "text": "tc.research_text.BASEENERGISTICS",
-      "recipes": [
-        "thaumicenergistics_ce:storage_casing"
-      ]
+      "text": "tc.research_text.BASEENERGISTICS"
     }
   ],
   "complexity": 1

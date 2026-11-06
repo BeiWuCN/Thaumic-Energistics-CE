@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "thaumicenergistics_ce:wireless_essentia_terminal",
+    "thaumicenergistics_ce:wireless_arcane_crafting_terminal"
+  ]
+}

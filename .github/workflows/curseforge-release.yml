@@ -100,5 +100,6 @@ jobs:
           dependencies: |
             applied-energistics-2(required)
             thaumaturge(required)
+            mega-cells(optional)
           retry-attempts: 2
 

@@ -4,8 +4,8 @@
   "parents": [
     "thaumicenergistics_ce:alchemy_provider"
   ],
-  "column": -6,
-  "row": -4,
+  "column": 8,
+  "row": -2,
   "meta": [
     "round"
   ],

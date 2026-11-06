@@ -2,14 +2,14 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.KNOWLEDGECORE",
   "parents": [
-    "thaumicenergistics_ce:arcane_assembler"
+    "thaumicenergistics_ce:digisentia",
+    "~thaumicenergistics_ce:mystic_crystal_circuit"
   ],
-  "column": -2,
-  "row": -6,
+  "column": 6,
+  "row": 2,
   "meta": [
     "round",
-    "spiky",
-    "hidden"
+    "spiky"
   ],
   "icons": [
     "thaumicenergistics_ce:knowledge_core"
@@ -29,18 +29,18 @@
           "amount": 1
         }
       ],
-      "craft": [
+      "required_research": [
+        "thaumicenergistics_ce:mystic_crystal_circuit"
+      ],
+      "warp": 1,
+      "obtain": [
         {
           "items": [
-            "thaumicenergistics_ce:arcane_assembler"
+            "thaumicenergistics_ce:mystic_circuit_board"
           ],
           "amount": 1
         }
-      ],
-      "required_research": [
-        "thaumicenergistics_ce:arcane_assembler"
-      ],
-      "warp": 1
+      ]
     },
     {
       "text": "tc.research_text.KNOWLEDGECORE",

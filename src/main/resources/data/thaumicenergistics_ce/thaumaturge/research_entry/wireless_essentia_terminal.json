@@ -2,10 +2,11 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.WIRELESSESSENTIATERMINAL",
   "parents": [
-    "thaumicenergistics_ce:essentia_terminal"
+    "thaumicenergistics_ce:essentia_access_card",
+    "~thaumicenergistics_ce:mystic_processor"
   ],
-  "column": -4,
-  "row": -2,
+  "column": 12,
+  "row": 0,
   "meta": [
     "round"
   ],

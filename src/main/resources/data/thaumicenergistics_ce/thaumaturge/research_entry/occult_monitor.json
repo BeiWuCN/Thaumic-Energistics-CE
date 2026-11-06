@@ -2,11 +2,10 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.OCCULTMONITOR",
   "parents": [
-    "thaumicenergistics_ce:infusion_provider",
-    "thaumaturge:infusion"
+    "thaumicenergistics_ce:infusion_provider"
   ],
-  "column": 2,
-  "row": -6,
+  "column": 12,
+  "row": -2,
   "meta": [
     "round"
   ],

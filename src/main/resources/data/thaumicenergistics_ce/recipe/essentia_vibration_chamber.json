@@ -1,19 +1,18 @@
 {
   "type": "thaumaturge:arcane_workbench_shaped",
-  "_note": "The Essentia Vibration Chamber. Shaped after AE2's own vibration chamber - an energy acceptor to draw on the network, a diffusion core to reduce essentia to power, thaumium for the casing - with an essentia crystal and a tube standing in for the arcane plumbing that feeds it. 30 vis, the same order as this mod's other mid-tier machines.",
   "crystals": [],
   "key": {
     "T": {
       "item": "thaumaturge:ingot_thaumium"
     },
     "E": {
-      "type": "neoforge:components",
       "items": "thaumaturge:essentia_crystal",
       "components": {
         "thaumaturge:crystal_aspect": {
           "aspect": "thaumaturge:potentia"
         }
-      }
+      },
+      "type": "neoforge:components"
     },
     "U": {
       "item": "thaumaturge:tube"
@@ -23,16 +22,22 @@
     },
     "A": {
       "item": "ae2:energy_acceptor"
+    },
+    "M": {
+      "item": "thaumicenergistics_ce:mystic_crystal"
     }
   },
   "pattern": [
-    "TET",
+    "MEM",
     "TDT",
     "UAU"
   ],
-  "vis": 30,
+  "vis": 40,
   "result": {
     "id": "thaumicenergistics_ce:essentia_vibration_chamber",
     "count": 1
+  },
+  "research": {
+    "entry": "thaumicenergistics_ce:essentia_vibration_chamber"
   }
 }

@@ -1,0 +1,1 @@
+{"model":{"type":"ae2:composite","models":[{"type":"ae2:model","model":"thaumicenergistics_ce:parts/arcane_crafting_terminal_base"},{"type":"ae2:status_indicator","active":"thaumicenergistics_ce:parts/arcane_crafting_terminal_has_channel","powered":"thaumicenergistics_ce:parts/arcane_crafting_terminal_on","unpowered":"thaumicenergistics_ce:parts/arcane_crafting_terminal_off"}]}}

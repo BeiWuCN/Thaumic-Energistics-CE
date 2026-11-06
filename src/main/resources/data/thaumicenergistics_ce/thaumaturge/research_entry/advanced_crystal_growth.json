@@ -1,0 +1,60 @@
+{
+  "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+  "name": "tc.research_name.ADVANCED_CRYSTAL_GROWTH",
+  "parents": [
+    "thaumicenergistics_ce:mystic_crystal_growth",
+    "~thaumicenergistics_ce:mystic_processor",
+    "~thaumaturge:base_eldritch"
+  ],
+  "column": 2,
+  "row": -6,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics_ce:flawless_budding_thaumic_crystal"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.ADVANCED_CRYSTAL_GROWTH.stage.1",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
+      ],
+      "obtain": [
+        {
+          "items": [
+            "thaumicenergistics_ce:mystic_processor"
+          ],
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.ADVANCED_CRYSTAL_GROWTH.stage.2",
+      "recipes": [
+        "thaumicenergistics_ce:flawless_budding_thaumic_crystal",
+        "thaumicenergistics_ce:restore_void_crystal_matrix",
+        "thaumicenergistics_ce:flawed_budding_thaumic_crystal"
+      ]
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:vacuos",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:vitreus",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
+      "amount": 1
+    }
+  ],
+  "complexity": 3
+}

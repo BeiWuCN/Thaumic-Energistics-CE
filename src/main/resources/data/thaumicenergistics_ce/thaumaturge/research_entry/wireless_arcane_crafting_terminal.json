@@ -2,9 +2,10 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.WIRELESSARCANECRAFTINGTERMINAL",
   "parents": [
-    "thaumicenergistics_ce:arcane_terminal"
+    "thaumicenergistics_ce:arcane_terminal",
+    "~thaumicenergistics_ce:mystic_processor"
   ],
-  "column": 0,
+  "column": 10,
   "row": 4,
   "meta": [
     "round"

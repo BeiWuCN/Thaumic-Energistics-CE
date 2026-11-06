@@ -1,8 +1,12 @@
 {
   "variants": {
-    "facing=north": { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber" },
-    "facing=south": { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber", "y": 180 },
-    "facing=west":  { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber", "y": 270 },
-    "facing=east":  { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber", "y": 90 }
+    "facing=north,lit=false": { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber" },
+    "facing=north,lit=true": { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber_lit" },
+    "facing=south,lit=false": { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber", "y": 180 },
+    "facing=south,lit=true": { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber_lit", "y": 180 },
+    "facing=west,lit=false": { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber", "y": 270 },
+    "facing=west,lit=true": { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber_lit", "y": 270 },
+    "facing=east,lit=false": { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber", "y": 90 },
+    "facing=east,lit=true": { "model": "thaumicenergistics_ce:block/essentia_vibration_chamber_lit", "y": 90 }
   }
 }

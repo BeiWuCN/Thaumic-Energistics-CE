@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "megacells"
+    }
+  ],
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "thaumicenergistics_ce:advanced_storage_casing"
+    },
+    {
+      "item": "thaumicenergistics_ce:storage_component_16m"
+    }
+  ],
+  "result": {
+    "id": "thaumicenergistics_ce:essentia_cell_16m",
+    "count": 1
+  }
+}

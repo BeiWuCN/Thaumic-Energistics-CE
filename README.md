@@ -10,7 +10,7 @@
 
 本模组是原版 Thaumic Energistics（止于 1.12.2）在 1.21.1 上的重做，基于 Thaumaturge 的 API 编写。
 
-运行环境：Minecraft 1.21.1、NeoForge 21.1.250 或更高、Applied Energistics 2 19.2.x、Thaumaturge 1.0.2（本次适配目标）
+运行环境：Minecraft 1.21.1、NeoForge 21.1.250 或更高、Applied Energistics 2 19.2.x、Thaumaturge 1.1.0（1.21.1 正式发布包）
 
 内容包含源质存储元件、源质终端、若干源质机器、无线连接与奥术合成，以及一套完整的 Thaumaturge 研究树。
 
@@ -18,17 +18,19 @@
 
 编译使用 JDK 21 与 `gradlew build`。
 
+IDEA 打开本项目根目录并重新加载 Gradle 后，可在运行配置中选择 `TECE Client`、`TECE Server` 或 `TECE Build`。联动环境已验证 JEI 19.57.0.451 与 ExtendedAE Plus 1.6.3。
+
 AE2、JEI、Jade 等依赖由 Modrinth Maven 提供，版本固定在 `gradle.properties`。
 
-本分支使用已发布的 Thaumaturge 1.0.2，将自行取得的文件放到 `libs/thaumaturge-1.21.1-NeoForge-1.0.2.jar`，或通过 `-Pthaumaturge_jar=绝对路径` 指定。此依赖不会打包进 TECE。
+Gradle 自动从 Curse Maven 获取 Thaumaturge 1.1.0（CF 文件 9452543）；也可通过 `-Pthaumaturge_jar=绝对路径` 指定本地文件。此依赖不会打包进 TECE。
 
 联动模组按需自行安装。本分支不包含开发工具或本地验证脚本。
 
-## 许可
+## 许可与致谢
 
-MIT，见 `LICENSE`。
+本版本由 **BeiWuCN** 主导开发，代码采用 [MIT 许可](LICENSE)。旧版 Thaumic Energistics 的历史版权声明保留在 LICENSE 中。
 
-代码源自 Nividica 的 Thaumic Energistics，后者同样以 MIT 发布。那部分版权仍属原作者，`LICENSE` 中已一并保留上游的版权声明（Chris 与 BrockWS），再分发时请保留该声明。Thaumaturge 是 Leclowndu93150 的项目。高版本材质由 @麦淇淋 绘制。
+麦淇淋创作的材质采用 **CC BY-NC-SA 3.0**，模型及第三方资源的署名和适用范围见 [LICENSE-ASSETS.md](LICENSE-ASSETS.md)。Thaumaturge、AE2 等依赖保留各自的许可，本仓库不分发 Thaumaturge 二进制。
 
 ## 问题反馈
 

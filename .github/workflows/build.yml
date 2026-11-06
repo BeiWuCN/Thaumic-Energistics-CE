@@ -30,24 +30,7 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('gradle.properties', 'gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
 
-      # The supported 1.0.2 dependency is supplied separately, never committed or uploaded.
-      - name: Check dependency availability
-        id: dependency
-        env:
-          DEPENDENCY_URL: ${{ vars.THAUMATURGE_1211_URL }}
-        run: |
-          if [ -z "$DEPENDENCY_URL" ]; then
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Compilation requires the supplied Thaumaturge 1.21.1 1.0.2 JAR. Configure THAUMATURGE_1211_URL to enable cloud builds; releases are built and verified locally."
-          else
-            mkdir -p libs
-            curl --fail --location --retry 3 "$DEPENDENCY_URL" -o libs/thaumaturge-1.21.1-NeoForge-1.0.2.jar
-            unzip -t libs/thaumaturge-1.21.1-NeoForge-1.0.2.jar
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Build
-        if: steps.dependency.outputs.available == 'true'
         run: ./gradlew build --stacktrace
 
       # The upload step below hands out build/libs/*.jar. Keep it that way: libs/ holds a build of
@@ -60,7 +43,6 @@ jobs:
           fi
 
       - name: Upload the jar
-        if: steps.dependency.outputs.available == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: thaumicenergistics-ce

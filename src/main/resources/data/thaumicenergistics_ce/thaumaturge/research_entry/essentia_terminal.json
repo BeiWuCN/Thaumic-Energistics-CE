@@ -2,11 +2,10 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.ESSENTIATERMINAL",
   "parents": [
-    "thaumicenergistics_ce:digisentia",
-    "thaumicenergistics_ce:essentia_storage_1k"
+    "thaumicenergistics_ce:digisentia"
   ],
-  "column": -2,
-  "row": -2,
+  "column": 6,
+  "row": 0,
   "meta": [
     "round"
   ],

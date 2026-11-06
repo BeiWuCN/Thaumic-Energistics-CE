@@ -2,10 +2,12 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.VISINTERFACE",
   "parents": [
-    "thaumicenergistics_ce:essentia_terminal"
+    "thaumicenergistics_ce:digisentia",
+    "~thaumicenergistics_ce:mystic_crystal_circuit",
+    "~thaumaturge:vis_relay"
   ],
-  "column": -4,
-  "row": -4,
+  "column": 2,
+  "row": 4,
   "meta": [
     "round"
   ],

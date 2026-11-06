@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "${loader_version_range}"
 license = "${mod_license}"
-issueTrackerURL = "https://github.com/BeiWuCN/Thaumic-Energistics-CE/issues"
+issueTrackerURL = "https://github.com/BeiWuCN/ThaumicEnergistics/issues"
 
 [[mods]]
 modId = "${mod_id}"
@@ -31,7 +31,8 @@ side = "BOTH"
 [[dependencies."${mod_id}"]]
 modId = "thaumaturge"
 type = "required"
-versionRange = "[1.0.2,1.1)"
+# Tested against the official Thaumaturge 1.1.0 release for Minecraft 1.21.1.
+versionRange = "[1.1.0,)"
 ordering = "AFTER"
 side = "BOTH"
 
@@ -46,5 +47,33 @@ side = "BOTH"
 modId = "jade"
 type = "optional"
 versionRange = "[15.0.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "megacells"
+type = "optional"
+versionRange = "[4,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "ae2wtlib"
+type = "optional"
+versionRange = "[19.5.1,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "extendedae"
+type = "optional"
+versionRange = "*"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "extendedae_plus"
+type = "optional"
+versionRange = "*"
 ordering = "AFTER"
 side = "BOTH"

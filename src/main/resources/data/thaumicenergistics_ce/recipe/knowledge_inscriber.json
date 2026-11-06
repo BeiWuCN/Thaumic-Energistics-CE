@@ -1,21 +1,37 @@
 {
   "type": "thaumaturge:arcane_workbench_shaped",
-  "category": "misc",
-  "vis": 50,
-  "crystals": [],
-  "pattern": [
-    "QlQ",
-    "lCl",
-    "QPQ"
-  ],
-  "key": {
-    "Q": { "item": "ae2:quartz_glass" },
-    "l": { "item": "minecraft:gold_ingot" },
-    "C": { "item": "thaumaturge:brain" },
-    "P": { "item": "ae2:calculation_processor" }
+  "research": {
+    "entry": "thaumicenergistics_ce:knowledge_inscriber"
   },
   "result": {
     "id": "thaumicenergistics_ce:knowledge_inscriber",
     "count": 1
-  }
+  },
+  "crystals": [],
+  "pattern": [
+    "GPG",
+    "ICI",
+    "BQB"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "P": {
+      "item": "ae2:calculation_processor"
+    },
+    "I": {
+      "item": "minecraft:piston"
+    },
+    "C": {
+      "item": "thaumicenergistics_ce:knowledge_core"
+    },
+    "B": {
+      "item": "ae2:quartz_glass"
+    },
+    "Q": {
+      "item": "thaumicenergistics_ce:mystic_circuit_board"
+    }
+  },
+  "vis": 80
 }

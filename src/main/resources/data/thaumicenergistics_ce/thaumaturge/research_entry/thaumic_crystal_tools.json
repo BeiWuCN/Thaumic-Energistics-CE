@@ -1,0 +1,63 @@
+{
+  "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+  "name": "tc.research_name.THAUMIC_CRYSTAL_TOOLS",
+  "parents": [
+    "thaumicenergistics_ce:mystic_crystal_growth"
+  ],
+  "column": 2,
+  "row": -4,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics_ce:thaumic_crystal_pickaxe"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.THAUMIC_CRYSTAL_TOOLS.stage.1",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
+      ],
+      "obtain": [
+        {
+          "items": [
+            "thaumicenergistics_ce:mystic_crystal"
+          ],
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.THAUMIC_CRYSTAL_TOOLS.stage.2",
+      "recipes": [
+        "thaumicenergistics_ce:thaumic_upgrade_smithing_template_copy",
+        "thaumicenergistics_ce:thaumic_crystal_sword",
+        "thaumicenergistics_ce:thaumic_crystal_pickaxe",
+        "thaumicenergistics_ce:thaumic_crystal_axe",
+        "thaumicenergistics_ce:thaumic_crystal_shovel",
+        "thaumicenergistics_ce:thaumic_crystal_hoe",
+        "thaumicenergistics_ce:thaumic_crystal_wrench",
+        "thaumicenergistics_ce:thaumic_crystal_cutting_knife"
+      ]
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:vitreus",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:instrumentum",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
+      "amount": 1
+    }
+  ],
+  "complexity": 2
+}

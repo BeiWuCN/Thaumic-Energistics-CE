@@ -2,10 +2,11 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.VISCONNECTIONCARD",
   "parents": [
-    "thaumicenergistics_ce:digisentia"
+    "thaumicenergistics_ce:arcane_terminal",
+    "~thaumicenergistics_ce:mystic_crystal_circuit"
   ],
-  "column": 4,
-  "row": -4,
+  "column": 8,
+  "row": 4,
   "meta": [
     "round"
   ],

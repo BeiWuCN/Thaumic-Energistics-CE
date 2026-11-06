@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "thaumicenergistics_ce:block/medium_mystic_crystal_bud"
+    },
+    "facing=down": {
+      "model": "thaumicenergistics_ce:block/medium_mystic_crystal_bud",
+      "x": 180
+    },
+    "facing=north": {
+      "model": "thaumicenergistics_ce:block/medium_mystic_crystal_bud",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "thaumicenergistics_ce:block/medium_mystic_crystal_bud",
+      "x": 90,
+      "y": 180
+    },
+    "facing=east": {
+      "model": "thaumicenergistics_ce:block/medium_mystic_crystal_bud",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west": {
+      "model": "thaumicenergistics_ce:block/medium_mystic_crystal_bud",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

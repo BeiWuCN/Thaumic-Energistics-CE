@@ -1,0 +1,56 @@
+{
+  "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+  "name": "tc.research_name.MYSTIC_PROCESSOR",
+  "parents": [
+    "thaumicenergistics_ce:mystic_crystal_circuit"
+  ],
+  "column": 8,
+  "row": -4,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics_ce:mystic_processor"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.MYSTIC_PROCESSOR.stage.1",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
+      ],
+      "obtain": [
+        {
+          "items": [
+            "thaumicenergistics_ce:mystic_circuit_board"
+          ],
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.MYSTIC_PROCESSOR.stage.2",
+      "recipes": [
+        "thaumicenergistics_ce:mystic_processor"
+      ]
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:cognitio",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:machina",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:ordo",
+      "amount": 1
+    }
+  ],
+  "complexity": 2
+}

@@ -2,10 +2,10 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.ESSENTIAVIBRATIONCHAMBER",
   "parents": [
-    "thaumicenergistics_ce:essentia_storage_64k"
+    "thaumicenergistics_ce:mystic_processor"
   ],
-  "column": -6,
-  "row": 2,
+  "column": 10,
+  "row": -4,
   "meta": [
     "round"
   ],

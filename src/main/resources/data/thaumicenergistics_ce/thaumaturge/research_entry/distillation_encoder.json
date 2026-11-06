@@ -2,11 +2,10 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.DISTILLATIONENCODER",
   "parents": [
-    "thaumicenergistics_ce:digisentia",
-    "thaumicenergistics_ce:alchemy_provider"
+    "thaumicenergistics_ce:essentia_vibration_chamber"
   ],
-  "column": -2,
-  "row": 4,
+  "column": 12,
+  "row": -4,
   "meta": [
     "round"
   ],

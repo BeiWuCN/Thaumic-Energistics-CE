@@ -2,11 +2,12 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.GACHABOX",
   "parents": [
-    "thaumicenergistics_ce:digisentia",
-    "thaumaturge:jar_brain"
+    "thaumicenergistics_ce:distillation_encoder",
+    "~thaumaturge:jar_brain",
+    "~thaumicenergistics_ce:knowledge_core"
   ],
-  "column": 4,
-  "row": -2,
+  "column": 14,
+  "row": -4,
   "meta": [
     "round"
   ],
@@ -32,8 +33,7 @@
     {
       "text": "tc.research_text.GACHABOX.stage.2",
       "recipes": [
-        "thaumicenergistics_ce:gacha_box",
-        "thaumicenergistics_ce:gacha_box_aggregator"
+        "thaumicenergistics_ce:gacha_box"
       ],
       "warp": 1
     }

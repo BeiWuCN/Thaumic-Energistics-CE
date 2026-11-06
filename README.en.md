@@ -10,7 +10,7 @@ A Minecraft mod about essentia and networks. It connects Thaumaturge's essentia 
 
 This mod is the original Thaumic Energistics (stopped at 1.12.2) redone on 1.21.1, written against Thaumaturge's API.
 
-Requirements: Minecraft 1.21.1, NeoForge 21.1.250 or newer, Applied Energistics 2 19.2.x, Thaumaturge 1.0.2 (the supported target for this port).
+Requirements: Minecraft 1.21.1, NeoForge 21.1.250 or newer, Applied Energistics 2 19.2.x, Thaumaturge 1.1.0 (the official Minecraft 1.21.1 release).
 
 It contains essentia storage components, the essentia terminal, several essentia machines, wireless links and arcane crafting, plus a complete Thaumaturge research tree.
 
@@ -18,17 +18,19 @@ It contains essentia storage components, the essentia terminal, several essentia
 
 Building uses JDK 21 and `gradlew build`.
 
+After opening this directory in IDEA and reloading Gradle, select `TECE Client`, `TECE Server`, or `TECE Build`. The verified optional-mod combination is JEI 19.57.0.451 with ExtendedAE Plus 1.6.3.
+
 AE2, JEI, Jade and other Maven dependencies are pinned in `gradle.properties`.
 
-Supply Thaumaturge 1.0.2 at `libs/thaumaturge-1.21.1-NeoForge-1.0.2.jar`, or set `-Pthaumaturge_jar=/absolute/path/to.jar`. TECE does not bundle this dependency.
+Gradle resolves the official Thaumaturge 1.1.0 release from Curse Maven (file 9452543). Override it with `-Pthaumaturge_jar=/absolute/path/to.jar` for local diagnostics. TECE does not bundle this dependency.
 
 Install optional compatibility mods separately as needed. Development tools and local verification scripts are not included in this repository.
 
-## License
+## License and credits
 
-MIT, see `LICENSE`.
+This version is developed and maintained by **BeiWuCN**. The code is licensed under [MIT](LICENSE). Historical copyright notices for original Thaumic Energistics code are retained in LICENSE.
 
-The code derives from Thaumic Energistics by Nividica, which is MIT as well. That part remains the original authors' copyright, so the upstream notice (Chris and BrockWS) is carried in `LICENSE` too; keep it there when redistributing. Thaumaturge is Leclowndu93150's project. High-version textures are drawn by @麦淇淋.
+Textures by 麦淇淋 are licensed under **CC BY-NC-SA 3.0**. See [LICENSE-ASSETS.md](LICENSE-ASSETS.md) for model and third-party attribution and scope. Dependencies such as Thaumaturge and AE2 retain their own licenses; Thaumaturge binaries are not distributed here.
 
 ## Issues
 

@@ -2,14 +2,14 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.ARCANEASSEMBLER",
   "parents": [
-    "thaumicenergistics_ce:essentia_terminal",
-    "thaumicenergistics_ce:digisentia"
+    "thaumicenergistics_ce:knowledge_inscriber",
+    "~thaumicenergistics_ce:arcane_terminal",
+    "~thaumicenergistics_ce:mystic_processor"
   ],
-  "column": 0,
-  "row": -4,
+  "column": 10,
+  "row": 2,
   "meta": [
-    "round",
-    "hidden"
+    "round"
   ],
   "icons": [
     "thaumicenergistics_ce:arcane_assembler"
@@ -32,14 +32,15 @@
       "craft": [
         {
           "items": [
-            "thaumicenergistics_ce:essentia_terminal"
+            "thaumicenergistics_ce:arcane_crafting_terminal"
           ],
           "amount": 1
         }
       ],
       "required_research": [
-        "thaumicenergistics_ce:essentia_terminal",
-        "thaumicenergistics_ce:digisentia"
+        "thaumicenergistics_ce:arcane_terminal",
+        "thaumicenergistics_ce:mystic_processor",
+        "thaumicenergistics_ce:knowledge_inscriber"
       ]
     },
     {
