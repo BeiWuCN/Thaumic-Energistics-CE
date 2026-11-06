@@ -42,8 +42,6 @@ Thaumic-Energistics-CE-2.0-Renewed.zip
 
 # Keep Markdown documentation local, except the current changelog and the two READMEs.
 *.md
-!/CHANGELOG-2.7.4.5.md
-!/CHANGELOG-2.7.4.6.md
 !/README.md
 !/README.en.md
 
@@ -54,3 +52,9 @@ libs/thaumaturge-source.txt
 !/CHANGELOG-2.7.5.md
 !/CHANGELOG-2.7.5.1.md
 !/LICENSE-ASSETS.md
+
+# Local authoring sources and obsolete license copies are not repository content.
+doc/
+LICENSE-GPL-3.0.txt
+LICENSE-LGPL-3.0.txt
+LICENSE-ORIGINAL-MIT

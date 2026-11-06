@@ -541,8 +541,7 @@ tasks.named('check') { dependsOn verifyReleaseIsolation }
 
 jar {
     from(projectDir) {
-        include 'LICENSE', 'LICENSE-ORIGINAL-MIT', 'LICENSE-ASSETS.md',
-                'LICENSE-CC-BY-NC-SA-3.0.txt', 'LICENSE-LGPL-3.0.txt', 'LICENSE-GPL-3.0.txt'
+        include 'LICENSE', 'LICENSE-ASSETS.md', 'LICENSE-CC-BY-NC-SA-3.0.txt'
         into 'META-INF/licenses'
     }
     manifest {

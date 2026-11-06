@@ -47,7 +47,7 @@ Requires AE2 **26.1.13-beta** and Thaumaturge **1.1.0**, built from source revis
 
 ### Licensing and credits
 - Textures created by **麦淇淋**: **CC BY-NC-SA 3.0**. See `LICENSE-ASSETS.md` for scope and third-party attribution.
-- Modifications and port code: Copyright (c) 2026 **AlkSur**, **GNU LGPL-3.0**. Original source by **Chris, BrockWS** retains **MIT** notices. Complete license texts are supplied.
+- This version is authored by **BeiWuCN**. Code is licensed under **MIT**; historical copyright notices for original Thaumic Energistics code are retained. Textures keep their separate CC licenses.
 - Fluix brain anatomy references **Pixel Brain by sparkskye**, **CC BY 4.0**; geometry redrawn and recolored with added neural implants.
 
 ## 中文
@@ -93,7 +93,7 @@ Requires AE2 **26.1.13-beta** and Thaumaturge **1.1.0**, built from source revis
 
 ### 协议与署名
 - **麦淇淋**创作的材质采用 **CC BY-NC-SA 3.0**，范围和第三方署名见 `LICENSE-ASSETS.md`。
-- 移植与修改代码：Copyright (c) 2026 **AlkSur**，采用 **GNU LGPL-3.0**；**Chris、BrockWS**的原始代码保留 **MIT** 授权声明，附完整协议文本。
+- 本版本由 **BeiWuCN** 主导开发，代码采用 **MIT**；保留旧版 Thaumic Energistics 的历史版权声明。材质保留独立的 CC 授权。
 - 福鲁伊克斯脑部造型参考 **sparkskye** 的 **Pixel Brain**（**CC BY 4.0**），重新建模、配色并增加植入结构。
 
 ## Validation / 验证

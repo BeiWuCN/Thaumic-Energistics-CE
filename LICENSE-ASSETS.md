@@ -10,9 +10,9 @@ This is an authorship-based scope, not a blanket relicensing of every file in th
 
 ## Third-party references and retained rights
 
-- **Pixel Brain**, **sparkskye**: https://sketchfab.com/3d-models/pixel-brain-aca75b2c430a483ea5af5731cf3d755a — [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reference for the Fluix brain anatomy. The geometry was redrawn, recolored and given neural implants; its generated entity textures and editable Blockbench source are separate from the artist's supplied item artwork. Attribution applies to render_models/fluix_brain.json, textures/entity/fluix_brain*.png and the accompanying editable source.
+- **Pixel Brain**, **sparkskye**: https://sketchfab.com/3d-models/pixel-brain-aca75b2c430a483ea5af5731cf3d755a — [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reference for the Fluix brain anatomy. The geometry was redrawn, recolored and given neural implants; its generated entity textures and editable Blockbench source are separate from the artist's supplied item artwork. Attribution applies to render_models/fluix_brain.json, textures/entity/fluix_brain*.png.
 - The supplied Arcane Assembly Chamber model export retains its original **Made with _leng** credit.
-- **Thaumic Energistics**, Chris and BrockWS: retained original source notices are in LICENSE-ORIGINAL-MIT. Existing upstream assets retain their applicable upstream notices.
+- **Thaumic Energistics**, Chris and BrockWS: retained original source notices are in LICENSE. Existing upstream assets retain their applicable upstream notices.
 - **Applied Energistics 2** and **Thaumaturge**: references to their resource namespaces use the installed dependencies. Their assets and licenses are not replaced by this project's code or texture license. Thaumaturge is not bundled.
 
-The LGPL code license does not grant separate rights to the artist's textures. See LICENSE for the overall attribution and code licensing statement.
+The MIT code license does not grant separate rights to the artist's textures. See LICENSE for the overall attribution and code licensing statement.

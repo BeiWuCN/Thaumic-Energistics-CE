@@ -66,10 +66,6 @@ Linux / macOS：
 
 ## 许可与致谢
 
-本项目使用 [MIT 许可](LICENSE)。部分代码源自 Nividica 的 [Thaumic Energistics](https://github.com/Nividica/ThaumicEnergistics)，原作者 Chris、BrockWS 的版权声明保留在许可文件中。
+本版本由 **BeiWuCN** 主导开发，代码采用 [MIT 许可](LICENSE)。旧版 Thaumic Energistics 的历史版权声明保留在 LICENSE 中。
 
-Thaumaturge 由 Leclowndu93150 开发，高版本材质由 @麦淇淋 绘制。Thaumaturge 使用独立许可，请遵守其上游许可；本仓库不分发其二进制。
-
-## 协议与署名
-
-代码移植与修改采用 LGPL-3.0；原始代码保留 MIT 授权。麦淇淋创作的材质采用 CC BY-NC-SA 3.0，第三方资源保留原授权。详见 [LICENSE](LICENSE) 与 [材质授权和署名](LICENSE-ASSETS.md)。
+麦淇淋创作的材质采用 **CC BY-NC-SA 3.0**，模型及第三方资源的署名和适用范围见 [LICENSE-ASSETS.md](LICENSE-ASSETS.md)。Thaumaturge、AE2 等依赖保留各自的许可，本仓库不分发 Thaumaturge 二进制。

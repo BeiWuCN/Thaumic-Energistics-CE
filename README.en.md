@@ -66,10 +66,6 @@ This repository handles the CE versions. Report issues with the original Thaumic
 
 ## License and credits
 
-This project is licensed under [MIT](LICENSE). Parts of the code derive from Nividica's [Thaumic Energistics](https://github.com/Nividica/ThaumicEnergistics); the original copyright notices for Chris and BrockWS are preserved in the license file.
+This version is developed and maintained by **BeiWuCN**. The code is licensed under [MIT](LICENSE). Historical copyright notices for original Thaumic Energistics code are retained in LICENSE.
 
-Thaumaturge is developed by Leclowndu93150. Textures for the newer versions are drawn by @麦淇淋. Thaumaturge has its own license; follow the upstream terms. This repository does not distribute its binaries.
-
-## License and attribution
-
-Port modifications are licensed under LGPL-3.0; original code retains its MIT notices. Textures by 麦淇淋 are licensed under CC BY-NC-SA 3.0; third-party assets retain their original licenses. See [LICENSE](LICENSE) and [asset scope and attribution](LICENSE-ASSETS.md).
+Textures by 麦淇淋 are licensed under **CC BY-NC-SA 3.0**. See [LICENSE-ASSETS.md](LICENSE-ASSETS.md) for model and third-party attribution and scope. Dependencies such as Thaumaturge and AE2 retain their own licenses; Thaumaturge binaries are not distributed here.
