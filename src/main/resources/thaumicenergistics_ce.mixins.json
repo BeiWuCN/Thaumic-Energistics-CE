@@ -29,7 +29,6 @@
   ],
   "client": [
     "ResearchMachineRecipeMixin",
-    "ConfigCommentI18nMixin",
     "TerminalScreenVisibilityMixin",
     "ArcaneUpgradeTooltipMixin",
     "PatternProviderScreenEssentiaMixin",

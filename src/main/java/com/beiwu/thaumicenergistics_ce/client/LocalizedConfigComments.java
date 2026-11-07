@@ -1,5 +1,6 @@
 package com.beiwu.thaumicenergistics_ce.client;
 
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.locale.Language;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -66,7 +67,7 @@ public final class LocalizedConfigComments {
         for (var entry : spec.entrySet()) {
             Object value = entry.getValue();
             if (value instanceof net.neoforged.neoforge.common.ModConfigSpec.ValueSpec definition) {
-                var comment = definition.getComment();
+                var comment = localizedComment(definition);
                 if (!java.util.Objects.equals(data.getComment(entry.getKey()), comment)) {
                     data.setComment(entry.getKey(), comment);
                     changed = true;
@@ -77,5 +78,13 @@ public final class LocalizedConfigComments {
             }
         }
         return changed;
+    }
+
+    private static String localizedComment(net.neoforged.neoforge.common.ModConfigSpec.ValueSpec definition) {
+        var key = definition.getTranslationKey();
+        if (key != null && key.startsWith("thaumicenergistics_ce.config.") && I18n.exists(key + ".tooltip")) {
+            return I18n.get(key + ".tooltip");
+        }
+        return definition.getComment();
     }
 }

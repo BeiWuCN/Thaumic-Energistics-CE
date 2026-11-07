@@ -1,3 +1,11 @@
+# TECE 2.7.5.2 — Minecraft 1.21.1 / NeoForge
+
+- Remove `ConfigCommentI18nMixin`; NeoForge loads `ModConfigSpec$ValueSpec` before mixin preparation on 1.21.1, so the mixin aborted startup with `MixinTargetAlreadyLoadedException`.
+- Read localized config comments through `ValueSpec.getTranslationKey()` on the client tick instead, without mixing into the config class.
+- Lower the required NeoForge version from 21.1.250 to 21.1.248.
+
+---
+
 # TECE 2.7.4.6 — Minecraft 1.21.1 / NeoForge
 
 - Port the 2.7.4.6 feature set to Thaumaturge 1.0.2 on Minecraft 1.21.1.
