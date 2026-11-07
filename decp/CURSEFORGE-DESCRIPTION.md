@@ -54,7 +54,7 @@ Supply essentia with **Alchemy Providers**, **Alchemy Wireless Receivers** and *
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/raw/decp/Img/golem_wifi_backpack.png" alt="golem wifi backpack" title="golem wifi backpack" width="64" height="64" style="image-rendering:pixelated" /></p>
 
 
-Carry your network with the **Wireless Essentia Terminal** and **Wireless Arcane Crafting Terminal**. The wireless arcane terminal stores its own ingredients, crystals, wand and upgrades, without needing a placed arcane terminal. Equip a **Golem Wireless Backpack** to let a golem exchange items with your network, and customize its appearance with supported materials.
+Carry your network with the **Wireless Essentia Terminal** and **Wireless Arcane Crafting Terminal**. The wireless arcane terminal stores its own ingredients, crystals, wand and upgrades, without needing a placed arcane terminal. Equip a **Golem Wireless Backpack** to let an idle golem deposit carried items into your network, and customize its appearance with supported materials.
 
 ### Crystal cultivation and research
 
@@ -88,6 +88,20 @@ Equip a **Thaumic Crystal sword, pickaxe, axe, shovel, hoe, wrench or cutting kn
 
 Burn essentia for AE power in the **Essentia Vibration Chamber**, control devices with an **Essentia Level Emitter**, or try your luck earning research points with the **Box of Probability** and its **Fluix Brain** upgrade.
 
+
+## Quality of life
+
+Spend less time setting up recipes and moving resources:
+
+- **One-click crucible recipe transfer:** send a JEI crucible recipe to an AE2 Pattern Encoding Terminal, including its catalyst, essentia amounts and output. Encode the processing pattern without entering every ingredient by hand.
+- **Quick arcane recipe setup:** transfer JEI recipes into wired or wireless Arcane Crafting Terminals, or into the Knowledge Inscriber for recording. Terminal transfers choose available alternatives from your network and inventory where the recipe allows them.
+- **Drag-and-drop configuration:** drag JEI aspect icons into supported bus filters and Essentia Cell Workbench partition slots. Configure the aspects you want without first filling a container with each one.
+- **Quick wand and crystal insertion:** Shift-click wands and primal crystals into their dedicated arcane terminal slots.
+- **Convenient container access:** fill supported empty essentia containers by clicking an aspect in the terminal, or hold Shift to fill a stack. Deposit essentia from filled containers with a right-click, including Shift-right-click from your inventory.
+- **Search in your language:** find aspects by their translated names in your current game language, where supported, with Latin names as the fallback.
+- **Useful status information:** crafting-cost displays, assembler Vis bars and Jade tooltips help you see resource needs and why supported machines are waiting.
+
+Recipe transfers and JEI drag-and-drop features require **JEI**. Jade tooltips require **Jade**.
 
 ## Integrations
 
