@@ -11,11 +11,9 @@
 
 *In-game showcase from an earlier version; some models have since been updated.*
 
-**Bring Thaumaturge's essentia and arcane crafting into your ME network.**
+Thaumic Energistics: CE connects **Thaumaturge** and **Applied Energistics 2**, adding essentia storage, arcane crafting, alchemy and infusion supply, and wireless terminals to the ME network.
 
-Thaumic Energistics: CE connects **Thaumaturge** and **Applied Energistics 2** on modern Minecraft. Store essentia, supply alchemy and infusion from your network, automate arcane recipes, and access your resources through wireless terminals.
-
-Based on the original Thaumic Energistics, CE expands the experience with crystal cultivation, a material and research progression, thaumic tools and more ways to use your ME network.
+Based on the original Thaumic Energistics, CE also includes crystal cultivation, research, thaumic tools and other equipment.
 
 ## Features
 
@@ -27,7 +25,6 @@ Based on the original Thaumic Energistics, CE expands the experience with crysta
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/raw/decp/Img/essentia_cell_64k.png" alt="essentia cell 64k" title="essentia cell 64k" width="64" height="64" style="image-rendering:pixelated" />
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/raw/decp/Img/essentia_cell_256k.png" alt="essentia cell 256k" title="essentia cell 256k" width="64" height="64" style="image-rendering:pixelated" /></p>
 
-
 Store aspects in **ME Essentia Storage Cells from 1k to 256k**. Browse your stock through an **Essentia Terminal** and search for aspects by their translated names in your current game language, where supported. Untranslated names fall back to their Latin names. Use containers to deposit or withdraw essentia. **Essentia Access Cards** let standard ME Import, Export and Storage Buses work with external essentia containers.
 
 ### Arcane crafting and automation
@@ -35,7 +32,7 @@ Store aspects in **ME Essentia Storage Cells from 1k to 256k**. Browse your stoc
 <p><img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/raw/decp/Img/knowledge_inscriber-model.png" alt="Knowledge Inscriber" title="Knowledge Inscriber" width="112" height="112" />
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/raw/decp/Img/arcane_assembler-model.png" alt="Arcane Assembly Chamber" title="Arcane Assembly Chamber" width="112" height="112" /></p>
 
-Craft from your network with the **Arcane Crafting Terminal**, complete with wand and crystal slots and crafting-cost information. Use the **Knowledge Inscriber** to record researched recipes in Knowledge Cores, then let the **Arcane Assembly Chamber** handle automated crafting. **Vis Relay Interfaces** connect your equipment to Thaumaturge's magic supply.
+The **Arcane Crafting Terminal** provides network access, wand and crystal slots, and crafting-cost information. The **Knowledge Inscriber** records researched recipes in Knowledge Cores for automated crafting in the **Arcane Assembly Chamber**. **Vis Relay Interfaces** connect equipment to Thaumaturge's magic supply.
 
 ### Alchemy and infusion
 
@@ -53,8 +50,7 @@ Supply essentia with **Alchemy Providers**, **Alchemy Wireless Receivers** and *
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/raw/decp/Img/wireless_arcane_crafting_terminal.png" alt="wireless arcane crafting terminal" title="wireless arcane crafting terminal" width="64" height="64" style="image-rendering:pixelated" />
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/raw/decp/Img/golem_wifi_backpack.png" alt="golem wifi backpack" title="golem wifi backpack" width="64" height="64" style="image-rendering:pixelated" /></p>
 
-
-Carry your network with the **Wireless Essentia Terminal** and **Wireless Arcane Crafting Terminal**. The wireless arcane terminal stores its own ingredients, crystals, wand and upgrades, without needing a placed arcane terminal. Equip a **Golem Wireless Backpack** to let an idle golem deposit carried items into your network, and customize its appearance with supported materials.
+The **Wireless Essentia Terminal** and **Wireless Arcane Crafting Terminal** provide remote network access. Ingredients, crystals, the wand and upgrades are stored in the wireless arcane terminal itself. A **Golem Wireless Backpack** lets an idle golem deposit carried items into the network; supported materials can change its appearance.
 
 ### Crystal cultivation and research
 
@@ -65,8 +61,7 @@ Carry your network with the **Wireless Essentia Terminal** and **Wireless Arcane
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/raw/decp/Img/thaumic_processor_press.png" alt="thaumic processor press" title="thaumic processor press" width="64" height="64" style="image-rendering:pixelated" />
 </p>
 
-
-Grow **Thaumic Crystals** and process them into circuit boards, processors and equipment. Follow the research in your Thaumonomicon to unlock storage, terminals and automation. Use your harvest to develop your network, or turn it into Thaumic Crystal tools.
+**Thaumic Crystals** can be cultivated and processed into circuit boards, processors and equipment. Research in the Thaumonomicon covers the materials, storage, terminals and automation.
 
 ### Thaumic Crystal tools
 
@@ -79,29 +74,20 @@ Grow **Thaumic Crystals** and process them into circuit boards, processors and e
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/raw/decp/Img/thaumic_crystal_wrench.gif" alt="thaumic crystal wrench" title="thaumic crystal wrench" width="64" height="64" style="image-rendering:pixelated" />
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/raw/decp/Img/thaumic_crystal_cutting_knife.gif" alt="thaumic crystal cutting knife" title="thaumic crystal cutting knife" width="64" height="64" style="image-rendering:pixelated" /></p>
 
-Equip a **Thaumic Crystal sword, pickaxe, axe, shovel, hoe, wrench or cutting knife**. Upgrade the five ordinary Fluix tools through smithing, or craft the wrench and knife directly. Repair the tools with Vis on a recharge pedestal.
+The **Thaumic Crystal tools** include a sword, pickaxe, axe, shovel, hoe, wrench and cutting knife. The five ordinary Fluix tools can be upgraded through smithing; the wrench and knife have crafting recipes. The tools are repaired with Vis on a recharge pedestal.
 
-### More to discover
+### Other equipment
 
 <p><img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/raw/decp/Img/gacha_box-model.png" alt="Box of Probability" title="Box of Probability" width="112" height="112" />
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/raw/decp/Img/fluix_zombie_brain.png" alt="fluix zombie brain" title="fluix zombie brain" width="64" height="64" style="image-rendering:pixelated" /></p>
 
-Burn essentia for AE power in the **Essentia Vibration Chamber**, control devices with an **Essentia Level Emitter**, or try your luck earning research points with the **Box of Probability** and its **Fluix Brain** upgrade.
-
+The **Essentia Vibration Chamber** generates AE power from essentia, and the **Essentia Level Emitter** outputs redstone signals based on network stock. The **Box of Probability** consumes Cognitio and power for a chance to produce research points; a **Fluix Brain** upgrade changes its payout odds.
 
 ## Quality of life
 
-Spend less time setting up recipes and moving resources:
-
-- **One-click crucible recipe transfer:** send a JEI crucible recipe to an AE2 Pattern Encoding Terminal, including its catalyst, essentia amounts and output. Encode the processing pattern without entering every ingredient by hand.
-- **Quick arcane recipe setup:** transfer JEI recipes into wired or wireless Arcane Crafting Terminals, or into the Knowledge Inscriber for recording. Terminal transfers choose available alternatives from your network and inventory where the recipe allows them.
-- **Drag-and-drop configuration:** drag JEI aspect icons into supported bus filters and Essentia Cell Workbench partition slots. Configure the aspects you want without first filling a container with each one.
-- **Quick wand and crystal insertion:** Shift-click wands and primal crystals into their dedicated arcane terminal slots.
-- **Convenient container access:** fill supported empty essentia containers by clicking an aspect in the terminal, or hold Shift to fill a stack. Deposit essentia from filled containers with a right-click, including Shift-right-click from your inventory.
-- **Search in your language:** find aspects by their translated names in your current game language, where supported, with Latin names as the fallback.
-- **Useful status information:** crafting-cost displays, assembler Vis bars and Jade tooltips help you see resource needs and why supported machines are waiting.
-
-Recipe transfers and JEI drag-and-drop features require **JEI**. Jade tooltips require **Jade**.
+- **Recipe transfer:** JEI can fill crucible recipes into the AE2 Pattern Encoding Terminal, including catalyst, essentia quantities and output. Arcane recipes can be transferred to wired and wireless arcane terminals and the Knowledge Inscriber.
+- **Drag-and-drop configuration:** JEI aspect icons can be dragged into supported bus filters and Essentia Cell Workbench partition slots.
+- **Terminal shortcuts:** Shift-click inserts wands and primal crystals into their dedicated slots. Supported essentia containers have click and Shift-click actions for filling and depositing.
 
 ## Integrations
 
