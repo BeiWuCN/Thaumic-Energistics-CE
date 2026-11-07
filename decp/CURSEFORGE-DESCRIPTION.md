@@ -28,7 +28,7 @@ Based on the original Thaumic Energistics, CE expands the experience with crysta
 <img src="https://raw.githubusercontent.com/BeiWuCN/Thaumic-Energistics-CE/raw/decp/Img/essentia_cell_256k.png" alt="essentia cell 256k" title="essentia cell 256k" width="64" height="64" style="image-rendering:pixelated" /></p>
 
 
-Store aspects in **ME Essentia Storage Cells from 1k to 256k**. Browse your stock through an Essentia Terminal, search by localized aspect names, and use containers to deposit or withdraw essentia. **Essentia Access Cards** let standard ME Import, Export and Storage Buses work with external essentia containers.
+Store aspects in **ME Essentia Storage Cells from 1k to 256k**. Browse your stock through an **Essentia Terminal** and search for aspects by their translated names in your current game language, where supported. Untranslated names fall back to their Latin names. Use containers to deposit or withdraw essentia. **Essentia Access Cards** let standard ME Import, Export and Storage Buses work with external essentia containers.
 
 ### Arcane crafting and automation
 
