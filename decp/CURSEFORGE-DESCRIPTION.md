@@ -1,4 +1,4 @@
-# Thaumic Energistics: CE
+# Thaumic Energistics CE
 
 <p>
 <a href="https://www.curseforge.com/minecraft/mc-mods/thaumic-energistics-ce"><img src="https://img.shields.io/curseforge/dt/1731454?style=for-the-badge&amp;logo=curseforge&amp;color=55bb00&amp;label=Downloads" alt="CurseForge downloads" height="28" /></a>
@@ -11,7 +11,7 @@
 
 *In-game showcase from an earlier version; some models have since been updated.*
 
-Thaumic Energistics: CE connects **Thaumaturge** and **Applied Energistics 2**, adding essentia storage, arcane crafting, alchemy and infusion supply, and wireless terminals to the ME network.
+Thaumic Energistics CE connects **Thaumaturge** and **Applied Energistics 2**, adding essentia storage, arcane crafting, alchemy and infusion supply, and wireless terminals to the ME network.
 
 Based on the original Thaumic Energistics, CE also includes crystal cultivation, research, thaumic tools and other equipment.
 
