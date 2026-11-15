@@ -11,6 +11,7 @@ import appeng.helpers.patternprovider.PatternProviderTarget;
 import appeng.util.inv.AppEngInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
 import java.util.List;
+import com.beiwu.thaumicenergistics_ce.integration.ae2.patternprovider.EssentiaProviderReturn;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -117,6 +118,7 @@ public abstract class AdvancedProviderEssentiaMixin implements EssentiaPatternPr
     private void tce$drop(List<ItemStack> drops, CallbackInfo ci) {
         var card = essentiaCardInventory().getStackInSlot(0);
         if (!card.isEmpty()) drops.add(card.copy());
+        EssentiaProviderReturn.addEssentiaDrops(essentiaBuffer(), drops);
     }
 
     @Inject(method = "clearContent", at = @At("TAIL"))

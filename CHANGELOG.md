@@ -1,3 +1,21 @@
+# Thaumic Energistics: CE 2.7.5.4 / MC 1.21.1 / NeoForge
+
+## 中文
+
+- 修复拆卸样板供应器时丢失待回流源质的问题。缓冲中的源质会装进安瓿随供应器掉落，保留原有要素和数量，包括不足一整瓶的余量。
+- 修复覆盖 AE2、ExtendedAE、ExtendedAE Plus、AdvancedAE 和 AE2 Lightning Tech 的样板供应器联动路径。
+
+验证：在 AE2 原版供应器上验证了 12 点退料的掉落与清空流程。安装可选联动模组的环境通过 14 项回归测试。
+
+## English
+
+- Fixed an issue where dismantling a pattern provider discarded essentia waiting to return to the ME network. Buffered essentia now drops in phials, preserving the aspect and exact amount, including partial phials.
+- Applied the fix to the provider integration paths for AE2, ExtendedAE, ExtendedAE Plus, AdvancedAE, and AE2 Lightning Tech.
+
+Validation: Verified the drop and clear sequence with 12 essentia on a standard AE2 Pattern Provider. All 14 regression tests passed with optional integrations installed.
+
+---
+
 # TECE 2.7.5.2 — Minecraft 1.21.1 / NeoForge
 
 - Remove `ConfigCommentI18nMixin`; NeoForge loads `ModConfigSpec$ValueSpec` before mixin preparation on 1.21.1, so the mixin aborted startup with `MixinTargetAlreadyLoadedException`.

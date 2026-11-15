@@ -10,6 +10,7 @@ import appeng.util.inv.InternalInventoryHost;
 import appeng.util.inv.filter.IAEItemFilter;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
 import java.util.List;
+import com.beiwu.thaumicenergistics_ce.integration.ae2.patternprovider.EssentiaProviderReturn;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -87,6 +88,7 @@ public abstract class PigmeeProviderEssentiaMixin extends AENetworkedBlockEntity
     private void tce$drop(Level level, BlockPos pos, List<ItemStack> drops, CallbackInfo ci) {
         var card = essentiaCardInventory().getStackInSlot(0);
         if (!card.isEmpty()) drops.add(card.copy());
+        EssentiaProviderReturn.addEssentiaDrops(essentiaBuffer(), drops);
     }
     @Inject(method = "clearContent", at = @At("TAIL"))
     private void tce$clear(CallbackInfo ci) { essentiaCardInventory().clear(); }
