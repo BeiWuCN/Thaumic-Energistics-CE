@@ -215,6 +215,8 @@ public final class ThaumicEnergisticsCE {
                     WirelessTerminalItem.LINKABLE_HANDLER);
             registerUpgrades();
             com.beiwu.thaumicenergistics_ce.integration.ae2.bus.EssentiaBusStrategies.register();
+            // 让 AE2 认得「安瓿里装着什么」：过滤槽、分区槽都走这一条。
+            com.beiwu.thaumicenergistics_ce.integration.ae2.EssentiaContainerStrategy.register();
             com.beiwu.thaumicenergistics_ce.item.QuantumTerminalSupport.registerUpgrades();
             ThELog.LOG.info("ThaumicEnergisticsCE common setup complete");
             // 不注册，每次终端合成都以 PAYMENT_UNAVAILABLE 失败。见 [TerminalWorkbenchVis]。
