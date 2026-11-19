@@ -2,12 +2,12 @@
 item_ids:
   - thaumicenergistics_ce:essentia_level_emitter
 navigation:
-  title: 源质等级发射器
+  title: ME源质发信器
   icon: thaumicenergistics_ce:essentia_level_emitter
   parent: thaumicenergistics_ce:basics.md
   position: 40
 ---
-# 源质等级发射器
+# ME源质发信器
 
 红石灯亮了，恰好在存量越过设定值的时候。
 

@@ -2,12 +2,12 @@
 item_ids:
   - thaumicenergistics_ce:essentia_terminal
 navigation:
-  title: 源质终端
+  title: ME源质终端
   icon: thaumicenergistics_ce:essentia_terminal
   parent: thaumicenergistics_ce:basics.md
   position: 30
 ---
-# 源质终端
+# ME源质终端
 
 数字化的源质既看不见，也闻不到。我站在驱动器前，忽然很想念那些能看见液面的罐子。
 

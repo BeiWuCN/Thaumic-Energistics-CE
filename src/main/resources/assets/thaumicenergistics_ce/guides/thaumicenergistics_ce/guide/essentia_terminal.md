@@ -2,12 +2,12 @@
 item_ids:
   - thaumicenergistics_ce:essentia_terminal
 navigation:
-  title: Essentia Terminal
+  title: ME Essentia Terminal
   icon: thaumicenergistics_ce:essentia_terminal
   parent: thaumicenergistics_ce:basics.md
   position: 30
 ---
-# Essentia Terminal
+# ME Essentia Terminal
 
 Digitised essentia cannot be seen or smelled. There ought to be somewhere to check how much remains.
 
