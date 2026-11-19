@@ -21,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
+import com.beiwu.thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
 
 /**
  * ME 网络眼中的一种要素：不可变，按注册表 id 驻留。
@@ -129,6 +130,17 @@ public final class AEssentiaKey extends AEKey {
     public @Nullable Holder<IAspect> resolveAspect() {
         var registries = AEssentiaKeyType.clientOrServerRegistries();
         return registries == null ? null : AEssentiaKeyType.aspectOf(registries, id);
+    }
+
+    /**
+     * 分区槽、过滤槽这些地方只认物品堆：AE2 会把 key 折成物品再画、再拿去做比较。
+     * 源质本身没有物品形态，折成那颗魔力水晶——图标正是 Thaumaturge 注册的要素纹理，
+     * 不折的话这些槽位一律画成空格子，看上去像标记没生效。
+     */
+    @Override
+    public ItemStack wrapForDisplayOrFilter() {
+        Holder<IAspect> aspect = resolveAspect();
+        return aspect == null ? ItemStack.EMPTY : EssentiaCrystals.create(aspect, 1);
     }
 
     @Override

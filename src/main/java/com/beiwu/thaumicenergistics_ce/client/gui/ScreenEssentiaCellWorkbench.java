@@ -7,11 +7,18 @@ import appeng.client.gui.style.ScreenStyle;
 import appeng.client.gui.widgets.ActionButton;
 import appeng.client.gui.widgets.ToggleButton;
 import appeng.core.localization.GuiText;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
+import com.leclowndu93150.thaumaturge.content.item.PhialItem;
+import com.leclowndu93150.thaumaturge.registry.TTDataComponents;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.jspecify.annotations.Nullable;
+import com.beiwu.thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import com.beiwu.thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 import com.beiwu.thaumicenergistics_ce.network.PartitionWellPayload;
 
@@ -75,12 +82,32 @@ public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaC
         int well = hovered == null ? -1 : menu.wellOf(hovered);
         if (well >= 0) {
             if (menu.isPartitionSlotEnabled(well)) {
-                PacketDistributor.sendToServer(
-                        new PartitionWellPayload(menu.containerId, well, PartitionWellPayload.CLEAR));
+                // 右键、且光标上是一瓶只装一味源质的安瓿：把那一味标进井里。
+                // 其余情况（左键、空手、装了好几味的安瓿）仍旧是取回标记。
+                ResourceLocation marked = button == 1 ? aspectOfCarriedPhial() : null;
+                PacketDistributor.sendToServer(new PartitionWellPayload(
+                        menu.containerId, well, marked == null ? PartitionWellPayload.CLEAR : marked));
             }
             // 两种走法点击都在此止步，手上拿的物品落不进井里。
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    /**
+     * 光标上那瓶安瓿装的是哪一味；不是安瓿、或是混装的，返回 {@code null}。
+     * 安瓿把内容存在 {@code ASPECTS} 组件里，只有一条时才算「单一源质」。
+     */
+    private @Nullable ResourceLocation aspectOfCarriedPhial() {
+        ItemStack carried = menu.getCarried();
+        if (!(carried.getItem() instanceof PhialItem)) {
+            return null;
+        }
+        AspectList aspects = carried.get(TTDataComponents.ASPECTS.get());
+        if (aspects == null || aspects.entries().size() != 1) {
+            return null;
+        }
+        AEssentiaKey key = AEssentiaKey.of(aspects.entries().get(0).aspect());
+        return key == null ? null : key.getId();
     }
 }
