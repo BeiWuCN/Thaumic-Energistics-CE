@@ -51,6 +51,12 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     private static final int VIS_COST_COLOR = 0xFFC1C1FF;
 
     /**
+     * 两行 vis 文字的缩放上限。条带只有 9 px 高，再大就压不住行高；
+     * 取 0.8 是让短文案能比原来的半尺寸大一档，长文案仍按宽度自己缩。
+     */
+    private static final float VIS_TEXT_MAX_SCALE = 0.8F;
+
+    /**
      * 样式控件名，指向图标所在的木质条带。位置由美术图决定，换皮或改尺寸的窗口会带着这行走：
      * 屏幕样式文档里的 {@code widgets.visCraftCost}。
      */
@@ -328,9 +334,9 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         drawCentered(graphics, strip, at, text, VIS_COST_COLOR);
     }
 
-    /** 一行文字在条带里居中并按宽度缩放；条带比文字窄时才会缩，正常尺寸下是原大。 */
+    /** 一行文字在条带里居中并按宽度缩放：先按上限，条带装不下再往下缩。 */
     private void drawCentered(GuiGraphics graphics, WidgetStyle strip, Point at, Component text, int color) {
-        float scale = Math.min(0.5F, (float) strip.getWidth() / Math.max(1, font.width(text)));
+        float scale = Math.min(VIS_TEXT_MAX_SCALE, (float) strip.getWidth() / Math.max(1, font.width(text)));
         graphics.pose().pushPose();
         graphics.pose().translate(at.getX() + strip.getWidth() / 2.0F,
                 at.getY() + (strip.getHeight() - font.lineHeight * scale) / 2.0F, 0.0F);

@@ -28,15 +28,15 @@
   },
   "widgets": {
     "visUpcoming": {
-      "left": 128,
+      "left": 121,
       "bottom": 165,
-      "width": 40,
+      "width": 41,
       "height": 9
     },
     "visAvailable": {
-      "left": 128,
+      "left": 121,
       "bottom": 156,
-      "width": 40,
+      "width": 41,
       "height": 9
     },
     "visCraftCost": {
