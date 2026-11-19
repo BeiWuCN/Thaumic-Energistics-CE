@@ -35,6 +35,9 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
     /** 客户端动作：清空所有井。 */
     private static final String ACTION_CLEAR = "clear";
 
+    /** 客户端动作：切换复制模式（换元件时保留分区还是从元件读回）。 */
+    private static final String ACTION_COPY_MODE = "copyMode";
+
     // 存储元件槽的 x，出自美术图。
     private static final int CELL_X = 152;
     private static final int CELL_Y = 8;
@@ -51,6 +54,10 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
     // 井会问这个菜单是否启用，槽位得留着；[setupInventorySlots] 赋值。
     private Slot cellSlot;
 
+    /** 复制模式：true 换元件时保留工作台分区，false 从元件读回。 */
+    @appeng.menu.guisync.GuiSync(112)
+    public boolean keepOnRemove;
+
     public MenuEssentiaCellWorkbench(
             int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
         this(containerId, playerInventory, hostFrom(playerInventory, buf));
@@ -64,6 +71,8 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         this.shiftClick = new CellWorkbenchShiftClick(this);
         registerClientAction(ACTION_PARTITION, this::partitionToContents);
         registerClientAction(ACTION_CLEAR, this::clearPartition);
+        registerClientAction(ACTION_COPY_MODE, this::toggleCopyMode);
+        this.keepOnRemove = workbench != null && workbench.keepOnRemove();
     }
 
     @Override
@@ -122,8 +131,8 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         return cellSlot != null && cellSlot.getItem().getItem() instanceof ItemEssentiaCell;
     }
 
-    /** 元件槽，元件就放这里；shift 点击协作者靠它定位区间。 */
-    Slot cellSlot() {
+    /** 元件槽，元件就放这里；shift 点击协作者和屏幕的槽位覆盖层都靠它定位。 */
+    public Slot cellSlot() {
         return getSlots(SlotSemantics.STORAGE_CELL).get(0);
     }
 
@@ -174,6 +183,17 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
             return;
         }
         partitionEditor.clearPartition();
+    }
+
+    /** 切换复制模式。客户端只发信号，服务端改宿主状态并靠 broadcast 同步回来。 */
+    public void toggleCopyMode() {
+        if (isClientSide()) {
+            sendClientAction(ACTION_COPY_MODE);
+            return;
+        }
+        workbench.setKeepOnRemove(!workbench.keepOnRemove());
+        keepOnRemove = workbench.keepOnRemove();
+        broadcastChanges();
     }
 
     /**
