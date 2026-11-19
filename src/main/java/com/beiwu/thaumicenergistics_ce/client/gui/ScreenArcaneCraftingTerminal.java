@@ -12,6 +12,7 @@ import com.leclowndu93150.thaumaturge.api.client.AspectRendering;
 import com.leclowndu93150.thaumaturge.client.screen.TTTooltips;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.Holder;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -88,6 +89,14 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
 
     /** 这一次实际是法杖要素在顶水晶，不是「优先用哪个」的设置。 */
     private boolean paidFromWand;
+
+    /**
+     * 费用条上每一枚图标的位置和它自己的提示，每次 {@code drawFG} 重填。
+     * 六枚各说各的：要素说「消耗多少 vis」，晶体说「消耗多少颗」。
+     */
+    private final List<ChipHit> chipHits = new java.util.ArrayList<>();
+
+    private record ChipHit(int x, int y, int size, List<Component> tooltip) {}
 
     /** 付费源按钮，图标跟着菜单里的模式走。 */
     private PaymentModeButton paymentModeButton;
@@ -231,6 +240,7 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         // Thaumaturge 的渲染器总按 [CHIP_UNITS] 见方画图标，不问界面尺寸，
         // 这里用位姿把它缩到条带容得下的大小。
         float shrink = (float) chip / CHIP_UNITS;
+        chipHits.clear();
         for (ArcaneCraftCostPayload.AspectCost cost : costs) {
             if (x < at.getX()) {
                 break;
@@ -245,10 +255,15 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
                 AspectRendering.renderGui(graphics, font, 0, 0, aspect, 0.0F);
                 // centivis 折算成整数 vis 并向上取整：1 centivis 也要一个 vis 才付得起，
                 // 显示 0 会被读成免费。数字以图标为单位，靠位姿缩放。
-                String text = String.valueOf((cost.centivis() + 99) / 100);
+                int vis = (cost.centivis() + 99) / 100;
+                String text = String.valueOf(vis);
                 graphics.drawString(
                         font, text, CHIP_UNITS - font.width(text) + 1, CHIP_UNITS - 6, 0xFFFFFF, true);
                 graphics.pose().popPose();
+                chipHits.add(new ChipHit(x, y, chip, List.of(
+                        aspectName(aspect),
+                        Component.translatable(
+                                "gui.thaumicenergistics_ce.arcane_terminal.chip.vis", vis))));
             }
             x -= pitch;
         }
@@ -271,6 +286,10 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
                 graphics.drawString(
                         font, text, CHIP_UNITS - font.width(text) + 1, CHIP_UNITS - 6, 0xFFFFFF, true);
                 graphics.pose().popPose();
+                chipHits.add(new ChipHit(x, y, chip, List.of(
+                        aspectName(aspect),
+                        Component.translatable(
+                                "gui.thaumicenergistics_ce.arcane_terminal.chip.crystals", cost.count()))));
             }
             x -= pitch;
         }
@@ -340,6 +359,12 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     }
 
     private @Nullable List<Component> hoveredVisTooltip(int mouseX, int mouseY) {
+        // 逐枚先问：六枚图标各自有自己的说法，整条的花费说明只在缝隙里兜底。
+        for (ChipHit hit : chipHits) {
+            if (isHovering(hit.x(), hit.y(), hit.size(), hit.size(), mouseX, mouseY)) {
+                return hit.tooltip();
+            }
+        }
         if (hovering(VIS_COST_STRIP, mouseX, mouseY) && hasCostToShow()) {
             return costTooltip();
         }
@@ -381,6 +406,11 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         return List.of(
                 Component.translatable(base + suffix + ".title"),
                 Component.translatable(base + suffix + ".line"));
+    }
+
+    /** 要素名走 Thaumaturge 自己的翻译键，和手册、JEI 里写的是同一个词。 */
+    private static Component aspectName(Holder<IAspect> aspect) {
+        return Component.translatable("aspect.thaumaturge." + aspect.value().tag());
     }
 
     /** 样式文档里那一块矩形是否含鼠标；没写 width/height 的控件不参与。 */

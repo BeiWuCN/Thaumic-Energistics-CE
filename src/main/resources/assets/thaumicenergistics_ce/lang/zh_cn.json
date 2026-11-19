@@ -495,5 +495,7 @@
   "gui.thaumicenergistics_ce.arcane_terminal.cost.wand.title": "法杖vis消耗",
   "gui.thaumicenergistics_ce.arcane_terminal.cost.wand.line": "法杖每2点vis对应1点元始魔力",
   "gui.thaumicenergistics_ce.arcane_terminal.cost.crystals.title": "水晶vis消耗",
-  "gui.thaumicenergistics_ce.arcane_terminal.cost.crystals.line": "水晶每1颗对应1点元始魔力"
+  "gui.thaumicenergistics_ce.arcane_terminal.cost.crystals.line": "水晶每1颗对应1点元始魔力",
+  "gui.thaumicenergistics_ce.arcane_terminal.chip.vis": "消耗 %s 点 vis",
+  "gui.thaumicenergistics_ce.arcane_terminal.chip.crystals": "消耗 %s 颗晶体"
 }
