@@ -469,6 +469,12 @@
   "tc.research_name.ESSENTIA_STORAGE_256M": "256M Essentia Storage",
   "tc.research_text.ESSENTIA_STORAGE_256M.stage.1": "I can no longer measure the space within.",
   "tc.research_text.ESSENTIA_STORAGE_256M.stage.2": "Such a small crystal, such a vast abyss.",
+  "gui.thaumicenergistics_ce.arcane_terminal.craft_failed": "Cannot craft: %s",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.no_recipe": "The grid matches no arcane workbench recipe",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.research_locked": "The required research is missing",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.ingredients_changed": "The ingredients changed during crafting",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.payment_unavailable": "Not enough aura, essentia crystals, or wand vis",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.internal": "Internal error, see the log",
   "gui.thaumicenergistics_ce.guide.name": "Thaumic Energistics: CE Guide",
   "gui.thaumicenergistics_ce.guide.tooltip": "Notes on essentia and the ME network",
   "gui.thaumicenergistics_ce.guide.stage": "Step %d",
@@ -478,5 +484,9 @@
   "gui.thaumicenergistics_ce.guide.thaumaturge.title": "Thaumonomicon chapters",
   "gui.thaumicenergistics_ce.guide.thaumaturge": "Research in this mod unlocks through the Thaumaturge Thaumonomicon. The chapters below belong to the upstream manual; consult it there. They are prerequisites for the entries in this guide.",
   "gui.thaumicenergistics_ce.guide.extra.title": "Additional research",
-  "gui.thaumicenergistics_ce.guide.extra": "These entries also come from the Thaumaturge Thaumonomicon and cover infusion, wand foci and golems. This guide does not repeat them; they are listed here for reference."
+  "gui.thaumicenergistics_ce.guide.extra": "These entries also come from the Thaumaturge Thaumonomicon and cover infusion, wand foci and golems. This guide does not repeat them; they are listed here for reference.",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line1": "Wand payment",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line2": "Spends 2 points of matching wand vis first",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line1": "Crystal payment",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line2": "Spends 1 essentia crystal shard first"
 }

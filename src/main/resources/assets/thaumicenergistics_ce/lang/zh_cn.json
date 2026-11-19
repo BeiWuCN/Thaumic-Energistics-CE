@@ -470,6 +470,12 @@
   "tc.research_name.ESSENTIA_STORAGE_256M": "256M 源质存储",
   "tc.research_text.ESSENTIA_STORAGE_256M.stage.1": "我已无法丈量晶体内部的空间。",
   "tc.research_text.ESSENTIA_STORAGE_256M.stage.2": "小小晶体，竟藏得下如此深渊。",
+  "gui.thaumicenergistics_ce.arcane_terminal.craft_failed": "无法合成：%s",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.no_recipe": "网格与任何奥术工作台配方都不匹配",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.research_locked": "还需要对应的研究",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.ingredients_changed": "材料在合成时发生了变化",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.payment_unavailable": "灵气、魔力水晶或法杖中的 vis 不足",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.internal": "内部错误，请查看日志",
   "gui.thaumicenergistics_ce.guide.name": "神秘能源：CE 指南",
   "gui.thaumicenergistics_ce.guide.tooltip": "源质与 ME 网络的连接记录",
   "gui.thaumicenergistics_ce.guide.stage": "步骤 %d",
@@ -479,5 +485,9 @@
   "gui.thaumicenergistics_ce.guide.thaumaturge.title": "魔导手册篇章",
   "gui.thaumicenergistics_ce.guide.thaumaturge": "本模组的研究以 Thaumaturge 的魔导手册为准解锁。下列篇章属于上游手册，请在魔导手册中查阅；它们也是本模组研究的 前置研究。",
   "gui.thaumicenergistics_ce.guide.extra.title": "附加研究",
-  "gui.thaumicenergistics_ce.guide.extra": "这些研究同样出自 Thaumaturge 魔导手册，涉及注魔、法杖核心与傀儡等内容。本指南不重复它们，只在这里列出名称以便对照。"
+  "gui.thaumicenergistics_ce.guide.extra": "这些研究同样出自 Thaumaturge 魔导手册，涉及注魔、法杖核心与傀儡等内容。本指南不重复它们，只在这里列出名称以便对照。",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line1": "法杖支付",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line2": "优先消耗法杖对应2点魔力",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line1": "水晶支付",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line2": "优先消耗1颗魔力水晶碎片"
 }

@@ -468,5 +468,15 @@
   "item.thaumicenergistics_ce.storage_component_256m": "256M 源質儲存組件",
   "tc.research_name.ESSENTIA_STORAGE_256M": "256M 源質儲存",
   "tc.research_text.ESSENTIA_STORAGE_256M.stage.1": "我已無法丈量晶體內部的空間。",
-  "tc.research_text.ESSENTIA_STORAGE_256M.stage.2": "小小晶體，竟藏得下如此深淵。"
+  "tc.research_text.ESSENTIA_STORAGE_256M.stage.2": "小小晶體，竟藏得下如此深淵。",
+  "gui.thaumicenergistics_ce.arcane_terminal.craft_failed": "無法合成：%s",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.no_recipe": "網格與任何奧術工作台配方都不匹配",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.research_locked": "還需要對應的研究",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.ingredients_changed": "材料在合成時發生了變化",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.payment_unavailable": "靈氣、魔力水晶或法杖中的 vis 不足",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.internal": "內部錯誤，請查看日誌",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line1": "法杖支付",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line2": "優先消耗法杖對應2點魔力",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line1": "水晶支付",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line2": "優先消耗1顆魔力水晶碎片"
 }

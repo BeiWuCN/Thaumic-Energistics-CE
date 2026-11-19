@@ -13,6 +13,7 @@ import com.leclowndu93150.thaumaturge.api.recipe.IArcaneCraftingInput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -120,6 +121,13 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
                 ThELog.LOG.info(
                         "[arcane] craft click refused: successful={} failure={}",
                         result.successful(), result.failure());
+                // 失败原本只写日志，玩家看到的是「点了没反应」。把原因也说出来，
+                // 这样配方没匹配、研究没解锁、材料或灵气不够就能当场分清。
+                who.displayClientMessage(
+                        Component.translatable(
+                                "gui.thaumicenergistics_ce.arcane_terminal.craft_failed",
+                                Component.translatable(failureKey(result.failure()))),
+                        true);
                 break;
             }
 
@@ -168,6 +176,18 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         return false;
     }
 
+    /** 把失败枚举翻成给玩家看的键；未知值也留个能读的回退。 */
+    private static String failureKey(ArcaneCraftingTransaction.Failure failure) {
+        return switch (failure) {
+            case NO_RECIPE -> "gui.thaumicenergistics_ce.arcane_terminal.failure.no_recipe";
+            case RESEARCH_LOCKED -> "gui.thaumicenergistics_ce.arcane_terminal.failure.research_locked";
+            case INGREDIENTS_CHANGED -> "gui.thaumicenergistics_ce.arcane_terminal.failure.ingredients_changed";
+            case PAYMENT_UNAVAILABLE -> "gui.thaumicenergistics_ce.arcane_terminal.failure.payment_unavailable";
+            case NOT_SERVER_THREAD, INVALID_CONTEXT, NONE ->
+                    "gui.thaumicenergistics_ce.arcane_terminal.failure.internal";
+        };
+    }
+
     /** 按当前网格建输入，没有可匹配的返回 {@code null}。 */
     private @Nullable IArcaneCraftingInput buildInput() {
         if (!ownerMenu.canCraft()) {
@@ -189,7 +209,8 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         // 不再问槽位，提交才不会和模拟对不上。
         boolean visConnection = ownerMenu.hasVisConnectionCard();
         return new TerminalArcaneCraftingInput(
-                cells, serverPlayer, wand, crystals, part, ownerMenu.auraPayer(), visConnection);
+                cells, serverPlayer, wand, crystals, part, ownerMenu.auraPayer(), visConnection,
+                ownerMenu.crystalFirst());
     }
 
     /** 归这台机器和这名玩家的虚拟工作台：线缆上的终端没有方块可指。 */

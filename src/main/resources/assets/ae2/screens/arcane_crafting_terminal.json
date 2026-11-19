@@ -38,6 +38,14 @@
       "bottom": 120,
       "width": 69,
       "height": 21
+    },
+    "clearCraftingGrid": {
+      "left": 133,
+      "bottom": 116
+    },
+    "clearToPlayerInv": {
+      "left": 143,
+      "bottom": 116
     }
   },
   "text": {

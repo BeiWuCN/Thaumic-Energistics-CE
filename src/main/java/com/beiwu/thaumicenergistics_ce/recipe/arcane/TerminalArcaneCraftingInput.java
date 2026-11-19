@@ -42,6 +42,9 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
      */
     private final boolean visConnection;
 
+    /** true = 先用水晶槽里的整颗晶体付；false = 让法杖 6 要素按 2:1 顶替水晶。 */
+    private final boolean crystalFirst;
+
     /**
      * 晶体支付只收终端自己的晶体槽，网格里的不收：
      * 网格里的晶体会计入 {@code ingredientCount}，这类配方就匹配不上。
@@ -94,6 +97,23 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
             @Nullable PartArcaneCraftingTerminal part,
             @Nullable IEnergySource payer,
             boolean visConnection) {
+        this(grid, player, wand, crystalSlots, part, payer, visConnection, false);
+    }
+
+    /**
+     * 完整形式：{@code visConnection} 记下建这个输入时终端装没装 vis 连接卡，
+     * 同一场合成的两次灵气询问才会给同一个数；{@code crystalFirst} 冻结付费源模式，
+     * 切换按钮和扣费事件读的是同一次合成的同一个值。
+     */
+    public TerminalArcaneCraftingInput(
+            List<ItemStack> grid,
+            Player player,
+            ItemStack wand,
+            List<ItemStack> crystalSlots,
+            @Nullable PartArcaneCraftingTerminal part,
+            @Nullable IEnergySource payer,
+            boolean visConnection,
+            boolean crystalFirst) {
         this.grid = List.copyOf(grid);
         this.player = player;
         this.wand = wand == null ? ItemStack.EMPTY : wand;
@@ -101,6 +121,7 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
         this.part = part;
         this.payer = payer;
         this.visConnection = visConnection;
+        this.crystalFirst = crystalFirst;
 
         // 九个格位全算，不只算占用的：数量跟配方材料列表比，
         // 内容给材料匹配读。
@@ -136,6 +157,11 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
      */
     public boolean visConnection() {
         return visConnection;
+    }
+
+    /** 当前付费源：true 用整颗水晶先付，false 让法杖要素顶。切换按钮冻结在输入里。 */
+    public boolean crystalFirst() {
+        return crystalFirst;
     }
 
     // ---- IArcaneCraftingInput -------------------------------------------------

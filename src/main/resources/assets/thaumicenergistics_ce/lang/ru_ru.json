@@ -468,5 +468,15 @@
   "item.thaumicenergistics_ce.storage_component_256m": "Компонент хранения эссенции (256M)",
   "tc.research_name.ESSENTIA_STORAGE_256M": "Хранилище эссенции 256M",
   "tc.research_text.ESSENTIA_STORAGE_256M.stage.1": "Я больше не могу измерить пространство внутри.",
-  "tc.research_text.ESSENTIA_STORAGE_256M.stage.2": "Столь малый кристалл скрывает целую бездну."
+  "tc.research_text.ESSENTIA_STORAGE_256M.stage.2": "Столь малый кристалл скрывает целую бездну.",
+  "gui.thaumicenergistics_ce.arcane_terminal.craft_failed": "Нельзя создать: %s",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.no_recipe": "Сетка не соответствует ни одному рецепту магического верстака",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.research_locked": "Не хватает необходимого исследования",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.ingredients_changed": "Ингредиенты изменились во время создания",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.payment_unavailable": "Не хватает ауры, кристаллов эссенции или vis жезла",
+  "gui.thaumicenergistics_ce.arcane_terminal.failure.internal": "Внутренняя ошибка, смотрите журнал",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line1": "Оплата жезлом",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line2": "Сначала тратит 2 очка соответствующей vis жезла",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line1": "Оплата кристаллами",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line2": "Сначала тратит 1 осколок кристалла эссенции"
 }

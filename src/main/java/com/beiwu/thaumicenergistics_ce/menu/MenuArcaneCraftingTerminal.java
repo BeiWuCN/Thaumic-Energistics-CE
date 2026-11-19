@@ -6,13 +6,16 @@ import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.security.IActionHost;
+import appeng.api.stacks.AEItemKey;
 import appeng.api.storage.ITerminalHost;
+import appeng.api.storage.StorageHelper;
 import appeng.helpers.ICraftingGridMenu;
 import appeng.menu.SlotSemantic;
 import appeng.menu.SlotSemantics;
 import appeng.menu.slot.AppEngSlot;
 import appeng.util.inv.AppEngInternalInventory;
 import appeng.util.inv.InternalInventoryHost;
+import appeng.util.inv.PlayerInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftCost;
@@ -60,6 +63,15 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     public static final SlotSemantic CRYSTALS_RIGHT =
             SlotSemantics.register("THAUMICENERGISTICS_CRYSTALS_RIGHT", true);
 
+    /** 客户端动作：把合成网格退回 ME 网络。 */
+    private static final String ACTION_CLEAR_TO_NETWORK = "clearToNetwork";
+
+    /** 客户端动作：把合成网格退回玩家背包。 */
+    private static final String ACTION_CLEAR_TO_PLAYER = "clearToPlayer";
+
+    /** 客户端动作：翻转付费源，法杖 6 要素 2:1 顶水晶 ↔ 用水晶槽的整颗晶体先付。 */
+    private static final String ACTION_TOGGLE_PAYMENT = "togglePayment";
+
     // 网格底部锚在 26,158，三列一行，取自屏幕样式。
     private static final int GRID_X = 26;
     private static final int GRID_Y = 96;
@@ -74,6 +86,9 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     private static final int CRYSTALS_RIGHT_X = 80;
 
     private final @Nullable PartArcaneCraftingTerminal part;
+
+    /** 结果槽的刷新签名与节流：vis 卡与绑定 relay 的存量也参与，见 [ArcaneTerminalRuntime]。 */
+    private final ArcaneTerminalRuntime runtime = new ArcaneTerminalRuntime();
 
     /**
      * 终端还没解析出来时的替身容器：只管占住槽位，槽位数量两侧不一致菜单就会错位。
@@ -107,6 +122,10 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
     @appeng.menu.guisync.GuiSync(111)
     public boolean essentiaAccessEnabled;
+
+    /** 付费源模式：true 先用水晶槽的整颗晶体，false 让法杖 6 要素按 2:1 顶水晶。 */
+    @appeng.menu.guisync.GuiSync(112)
+    public boolean crystalFirst;
 
     /** 上次说「替身槽位不收东西」的时刻。初值 -100 让第一次点击就能出声，之后两秒一次。 */
     private int lastPlaceholderRefusal = -100;
@@ -186,6 +205,10 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
         // 开菜单时刷一次结果，上次留下的网格才显示得出来。
         resultSlot.refresh();
+
+        registerClientAction(ACTION_CLEAR_TO_NETWORK, this::clearCraftingGridToNetwork);
+        registerClientAction(ACTION_CLEAR_TO_PLAYER, this::clearCraftingGridToPlayer);
+        registerClientAction(ACTION_TOGGLE_PAYMENT, this::togglePaymentSource);
     }
 
 
@@ -282,16 +305,111 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         return moved > 0 ? moved : super.transferStackToMenu(stack);
     }
 
+    /**
+     * 把网格里的东西退回 ME 网络。按钮在客户端，实际搬运只在服务端做。
+     * 每格单独算插入量：网络满、断电或被过滤时插多少扣多少，剩下的留在原格，
+     * 不整个丢掉。走 [setItemDirect] 才会触发部件 NBT 或无线物品组件的存档。
+     */
+    public void clearCraftingGridToNetwork() {
+        if (isClientSide()) {
+            sendClientAction(ACTION_CLEAR_TO_NETWORK);
+            return;
+        }
+        boolean changed = false;
+        for (int i = 0; i < GRID_SIZE; i++) {
+            ItemStack stack = craftingGrid.getStackInSlot(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+            AEItemKey key = AEItemKey.of(stack);
+            if (key == null) {
+                continue;
+            }
+            long moved = StorageHelper.poweredInsert(
+                    energySource, storage, key, stack.getCount(), getActionSource());
+            if (moved <= 0) {
+                continue;
+            }
+            ItemStack left = stack.copy();
+            left.shrink((int) Math.min(moved, left.getCount()));
+            craftingGrid.setItemDirect(i, left);
+            changed = true;
+        }
+        if (changed) {
+            broadcastChanges();
+        }
+    }
+
+    /**
+     * 把网格里的东西退回玩家背包，热键栏优先、两遍填充，先合并已有堆再占空格。
+     * 装不下的部分留在网格：这里没有掉落，也不会像结果槽那样交出费用后丢产物。
+     */
+    public void clearCraftingGridToPlayer() {
+        if (isClientSide()) {
+            sendClientAction(ACTION_CLEAR_TO_PLAYER);
+            return;
+        }
+        PlayerInternalInventory playerInv = new PlayerInternalInventory(getPlayerInventory());
+        boolean changed = false;
+        for (int i = 0; i < GRID_SIZE; i++) {
+            ItemStack stack = craftingGrid.getStackInSlot(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+            ItemStack left = stack.copy();
+            for (int emptyLoop = 0; emptyLoop < 2; emptyLoop++) {
+                boolean allowEmpty = emptyLoop == 1;
+                for (int j = 9; j-- > 0;) {
+                    if (playerInv.getStackInSlot(j).isEmpty() == allowEmpty) {
+                        left = playerInv.getSlotInv(j).addItems(left);
+                    }
+                }
+                for (int j = 9; j < Inventory.INVENTORY_SIZE; j++) {
+                    if (playerInv.getStackInSlot(j).isEmpty() == allowEmpty) {
+                        left = playerInv.getSlotInv(j).addItems(left);
+                    }
+                }
+            }
+            if (left.getCount() != stack.getCount()) {
+                craftingGrid.setItemDirect(i, left);
+                changed = true;
+            }
+        }
+        if (changed) {
+            broadcastChanges();
+        }
+    }
+
+    /** 切换付费源。客户端只发信号，翻转和清签名都在服务端做，下一次 broadcast 重算结果。 */
+    public void togglePaymentSource() {
+        if (isClientSide()) {
+            sendClientAction(ACTION_TOGGLE_PAYMENT);
+            return;
+        }
+        crystalFirst = !crystalFirst;
+        craftInputSignature = -1;
+        broadcastChanges();
+    }
+
+    public boolean crystalFirst() {
+        return crystalFirst;
+    }
+
+    /**
+     * 结果槽的重算键。用 [ArcaneTerminalRuntime] 的实现：它把 vis 连接卡和它绑定的 relay
+     * 存量也算进去。原先这里漏了这两项，插卡、换绑定、relay 耗尽时签名不变，
+     * 结果槽就一直显示上一次的「合不了」，直到玩家动一下网格。
+     */
     private int craftInputSignature() {
-        int hash = availableAuraVis;
-        for (ItemStack upgrade : getHost().getUpgrades()) hash = 31 * hash + StackSignatures.of(upgrade);
-        for (int i = 0; i < PartArcaneCraftingTerminal.GRID_SIZE; i++) {
-            hash = 31 * hash + StackSignatures.of(craftingGrid.getStackInSlot(i));
+        ItemStack card = ItemStack.EMPTY;
+        for (ItemStack upgrade : getHost().getUpgrades()) {
+            if (upgrade.is(TECEItems.VIS_CONNECTION_CARD.get())) {
+                card = upgrade;
+                break;
+            }
         }
-        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
-            hash = 31 * hash + StackSignatures.of(crystals.getStackInSlot(i));
-        }
-        return 31 * hash + StackSignatures.of(wandInventory.getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT));
+        return runtime.inputSignature(
+                getPlayer(), craftingGrid, crystals, wandInventory, card, availableAuraVis);
     }
 
     public @Nullable PartArcaneCraftingTerminal part() {

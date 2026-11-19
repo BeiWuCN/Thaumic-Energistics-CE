@@ -1,9 +1,11 @@
 package com.beiwu.thaumicenergistics_ce.client.gui;
 
+import appeng.api.config.ActionItems;
 import appeng.client.Point;
 import appeng.client.gui.AEBaseScreen;
 import appeng.client.gui.style.ScreenStyle;
 import appeng.client.gui.style.WidgetStyle;
+import appeng.client.gui.widgets.ActionButton;
 import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.client.AspectRendering;
@@ -12,6 +14,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import org.jspecify.annotations.Nullable;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
@@ -53,6 +56,9 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     /** 同一次合成要从六个晶体槽里扣掉的晶体，画在要素左边。 */
     private List<ArcaneCraftCostPayload.CrystalCost> crystals = List.of();
 
+    /** 付费源按钮，图标跟着菜单里的模式走。 */
+    private PaymentModeButton paymentModeButton;
+
     /** 终端自己的名字。原先是顶行，现在下移到格子上方那行。 */
     private final Component terminalName;
 
@@ -60,6 +66,33 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
             MenuArcaneCraftingTerminal menu, Inventory inventory, Component title, ScreenStyle style) {
         super(menu, inventory, Component.translatable("gui.ae2.Terminal"), style);
         terminalName = title;
+
+        // 和 AE2 1.21.1 的合成终端同款：半尺寸图标加去掉按钮底框，缺任一项都会画成
+        // 全尺寸的白色大箭头压在木纹条上。图标、tooltip 都来自 [ActionItems]，样式文档里只有坐标。
+        ActionButton toNetwork = new ActionButton(ActionItems.S_STASH, btn -> menu.clearCraftingGridToNetwork());
+        toNetwork.setHalfSize(true);
+        toNetwork.setDisableBackground(true);
+        widgets.add("clearCraftingGrid", toNetwork);
+
+        ActionButton toPlayer = new ActionButton(ActionItems.S_STASH_TO_PLAYER_INV, btn -> menu.clearCraftingGridToPlayer());
+        toPlayer.setHalfSize(true);
+        toPlayer.setDisableBackground(true);
+        widgets.add("clearToPlayerInv", toPlayer);
+        // 付费源按钮进 AE 的统一左侧工具栏，位置由工具栏自动排，和 help 等按钮同列。
+        // 两个清空按钮仍是 widgets 里的半尺寸图标，不进工具栏。
+        paymentModeButton = addToLeftToolbar(new PaymentModeButton(btn -> menu.togglePaymentSource()));
+        paymentModeButton.setCrystals(menu.crystalFirst());
+    }
+
+    /** AE2 的 help 按钮指向本 mod 的 ME 指南页，而不是 AE2 自己的指南。 */
+    @Override
+    protected guideme.PageAnchor getHelpTopic() {
+        return guideme.PageAnchor.page(ResourceLocation.parse(ModGuide.PAGE_ARCANE_TERMINAL));
+    }
+
+    @Override
+    protected void openHelp() {
+        ModGuide.open(menu.getPlayer(), ModGuide.PAGE_ARCANE_TERMINAL);
     }
 
     /** 没有这张卡时终端就是普通终端，手势全落到 AE2 自己的实现上。 */
@@ -68,6 +101,14 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         // 每次点击都重新问，不缓存答案：菜单读的是玩家看到的升级槽，
         // 卡被取出后下一次点击就没手势了，缓存的标志做不到。
         return menu.hasEssentiaAccessCard();
+    }
+
+    @Override
+    protected void updateBeforeRender() {
+        super.updateBeforeRender();
+        if (paymentModeButton != null) {
+            paymentModeButton.setCrystals(menu.crystalFirst());
+        }
     }
 
     @Override
