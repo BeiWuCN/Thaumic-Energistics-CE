@@ -50,9 +50,6 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     /** 「即将消耗」那一行：工作台在深色底上用的浅紫，比可用行的紫更亮一档。 */
     private static final int VIS_COST_COLOR = 0xFFC1C1FF;
 
-    /** 格子上方那行标题最多占多宽：右边要留给两行 vis 文字。 */
-    private static final float GRID_TITLE_MAX_WIDTH = 88.0F;
-
     /**
      * 样式控件名，指向图标所在的木质条带。位置由美术图决定，换皮或改尺寸的窗口会带着这行走：
      * 屏幕样式文档里的 {@code widgets.visCraftCost}。
@@ -158,8 +155,9 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         setTextContent(CRAFTING_GRID_TITLE, terminalName);
         var subtitle = getStyle().getText().get(CRAFTING_GRID_TITLE);
         if (subtitle != null) {
-            // 上限按左半边算：右半边让给两行 vis 文字，标题不能压过去。
-            subtitle.setScale(Math.min(1.0F, GRID_TITLE_MAX_WIDTH / Math.max(1, font.width(terminalName))));
+            // 和 AE2 合成终端同一套：整行宽度、最多原大，长名字才缩。
+            // 之前压到 88 px 是为了给右侧两行 vis 文字让位，那两行已经搬进中部框，不用再让了。
+            subtitle.setScale(Math.min(1.0F, (imageWidth - 16.0F) / Math.max(1, font.width(terminalName))));
         }
         open = this;
     }
