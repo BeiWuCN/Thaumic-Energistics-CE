@@ -1,31 +1,29 @@
 package com.beiwu.thaumicenergistics_ce.client.gui;
 
 import appeng.api.config.ActionItems;
+import appeng.api.stacks.GenericStack;
 import appeng.client.gui.Icon;
 import appeng.client.gui.implementations.UpgradeableScreen;
 import appeng.client.gui.style.ScreenStyle;
 import appeng.client.gui.widgets.ActionButton;
 import appeng.client.gui.widgets.ToggleButton;
 import appeng.core.localization.GuiText;
-import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectKnowledgeAccess;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.client.AspectRendering;
 import com.leclowndu93150.thaumaturge.client.render.aspect.AspectTagRenderer;
-import com.leclowndu93150.thaumaturge.content.item.PhialItem;
-import com.leclowndu93150.thaumaturge.registry.TTDataComponents;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
 import com.beiwu.thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import com.beiwu.thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 import com.beiwu.thaumicenergistics_ce.network.PartitionWellPayload;
+import com.beiwu.thaumicenergistics_ce.util.EssentiaContainers;
 
 /**
  * 源质元件工作台的界面。AE2 可升级界面，美术、槽位、标题和升级面板都来自样式；
@@ -116,32 +114,25 @@ public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaC
         int well = hovered == null ? -1 : menu.wellOf(hovered);
         if (well >= 0) {
             if (menu.isPartitionSlotEnabled(well)) {
-                // 右键、且光标上是一瓶只装一味源质的安瓿：把那一味标进井里。
-                // 其余情况（左键、空手、装了好几味的安瓿）仍旧是取回标记。
-                ResourceLocation marked = button == 1 ? aspectOfCarriedPhial() : null;
+                // 照 AE2 配置槽的规矩：手上那件东西装着什么就标什么，一桶水标成水。
+                // 手上没有装着源质的东西（空手、或普通物品）就取下标记。
+                ResourceLocation marked = markedAspect();
                 PacketDistributor.sendToServer(new PartitionWellPayload(
                         menu.containerId, well, marked == null ? PartitionWellPayload.CLEAR : marked));
             }
-            // 两种走法点击都在此止步，手上拿的物品落不进井里。
+            // 点击都在此止步，手上拿的物品落不进井里。
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
     /**
-     * 光标上那瓶安瓿装的是哪一味；不是安瓿、或是混装的，返回 {@code null}。
-     * 安瓿把内容存在 {@code ASPECTS} 组件里，只有一条时才算「单一源质」。
+     * 光标上那件容器物品装着哪一味源质；空手、普通物品、或混装的容器都返回 {@code null}。
+     * 走 {@link EssentiaContainers}，和「一桶水标记成水」是同一条判断：
+     * 认的是内容物，不是物品类型。
      */
-    private @Nullable ResourceLocation aspectOfCarriedPhial() {
-        ItemStack carried = menu.getCarried();
-        if (!(carried.getItem() instanceof PhialItem)) {
-            return null;
-        }
-        AspectList aspects = carried.get(TTDataComponents.ASPECTS.get());
-        if (aspects == null || aspects.entries().size() != 1) {
-            return null;
-        }
-        AEssentiaKey key = AEssentiaKey.of(aspects.entries().get(0).aspect());
-        return key == null ? null : key.getId();
+    private @Nullable ResourceLocation markedAspect() {
+        GenericStack contained = EssentiaContainers.contained(menu.getCarried());
+        return contained != null && contained.what() instanceof AEssentiaKey key ? key.getId() : null;
     }
 }
