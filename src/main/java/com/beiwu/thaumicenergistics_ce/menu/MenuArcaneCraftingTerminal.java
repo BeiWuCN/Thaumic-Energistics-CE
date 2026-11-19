@@ -17,10 +17,15 @@ import appeng.util.inv.AppEngInternalInventory;
 import appeng.util.inv.InternalInventoryHost;
 import appeng.util.inv.PlayerInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftCost;
+import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftingTransaction;
+import com.leclowndu93150.thaumaturge.api.recipe.ArcaneWorkbenchContext;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,6 +37,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.ArcaneTerminalHost;
+import com.beiwu.thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
+import com.beiwu.thaumicenergistics_ce.recipe.arcane.TerminalArcaneCraftingInput;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
 import com.beiwu.thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import com.beiwu.thaumicenergistics_ce.registry.TECEItems;
@@ -448,6 +455,138 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     public @Nullable Slot wandSlot() {
         List<Slot> slots = getSlots(SlotSemantics.STORAGE);
         return slots.isEmpty() ? null : slots.getFirst();
+    }
+
+    /**
+     * 网格刚摆好时补晶体：把缺的那几颗从 ME 网络拉进六个晶体槽。
+     * JEI 转移只认九个格子，晶体槽是终端自己的容器，客户端改不动，只能走服务端。
+     * <p>全补或全不补：网络里少一味就把已取出的整笔退回，一颗都不放进去 ——
+     * 半补的槽位会让玩家以为合成条件已经满足，点下去才发现还差。
+     */
+    public void fillCrystalsFromNetwork() {
+        if (isClientSide() || !(getPlayer() instanceof ServerPlayer server)) {
+            return;
+        }
+        AspectList need = crystalCostOfGrid(server);
+        if (need == null || need.isEmpty()) {
+            return;
+        }
+        // 先全部取到手上，任何一味不够就整笔退回。
+        List<ItemStack> pulled = new ArrayList<>();
+        for (AspectInstance entry : need.entries()) {
+            int deficit = entry.amount() - countCrystals(entry.aspect());
+            if (deficit <= 0) {
+                continue;
+            }
+            ItemStack crystalsForAspect = EssentiaCrystals.create(entry.aspect(), deficit);
+            AEItemKey key = AEItemKey.of(crystalsForAspect);
+            if (key == null) {
+                refund(pulled);
+                return;
+            }
+            long got = storage.extract(key, deficit, appeng.api.config.Actionable.MODULATE, getActionSource());
+            if (got < deficit) {
+                if (got > 0) {
+                    storage.insert(key, got, appeng.api.config.Actionable.MODULATE, getActionSource());
+                }
+                refund(pulled);
+                return;
+            }
+            pulled.add(crystalsForAspect);
+        }
+        // 全部到手才落进槽位。
+        for (ItemStack stack : pulled) {
+            int slot = crystalSlotFor(EssentiaCrystals.aspectOf(stack));
+            if (slot < 0) {
+                // 没有绑这个要素的槽位：还回网络，别吞掉玩家的东西。
+                AEItemKey key = AEItemKey.of(stack);
+                if (key != null) {
+                    storage.insert(key, stack.getCount(), appeng.api.config.Actionable.MODULATE, getActionSource());
+                }
+                continue;
+            }
+            ItemStack existing = crystals.getStackInSlot(slot);
+            if (existing.isEmpty()) {
+                crystals.setItemDirect(slot, stack);
+            } else if (ItemStack.isSameItemSameComponents(existing, stack)) {
+                existing.grow(stack.getCount());
+                crystals.setItemDirect(slot, existing);
+            }
+        }
+        broadcastChanges();
+    }
+
+    /** 把已经取出的晶体还回网络；中途放弃时用。 */
+    private void refund(List<ItemStack> pulled) {
+        for (ItemStack stack : pulled) {
+            AEItemKey key = AEItemKey.of(stack);
+            if (key != null) {
+                storage.insert(key, stack.getCount(), appeng.api.config.Actionable.MODULATE, getActionSource());
+            }
+        }
+    }
+
+    /**
+     * 这个网格背后的配方要几颗什么晶体；没有配方、或研究没解锁时为 {@code null}。
+     * 走 Thaumaturge 自己的匹配，和合成时看到的是同一份需求。
+     */
+    private @Nullable AspectList crystalCostOfGrid(ServerPlayer server) {
+        List<ItemStack> cells = new ArrayList<>(GRID_SIZE);
+        for (int i = 0; i < GRID_SIZE; i++) {
+            cells.add(craftingGrid.getStackInSlot(i));
+        }
+        List<ItemStack> crystalSlots = new ArrayList<>(PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
+        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
+            crystalSlots.add(crystals.getStackInSlot(i));
+        }
+        TerminalArcaneCraftingInput input = new TerminalArcaneCraftingInput(
+                cells,
+                server,
+                wandInventory.getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT),
+                crystalSlots,
+                part,
+                auraPayer,
+                hasVisConnectionCard(),
+                crystalFirst);
+        var inspection = ArcaneCraftingTransaction.inspect(
+                ArcaneWorkbenchContext.virtual(
+                        server, PartArcaneCraftingTerminal.CONTEXT_HOST, server.getUUID()),
+                server,
+                input);
+        if (!inspection.successful() || inspection.requirements() == null) {
+            return null;
+        }
+        return inspection.requirements().crystals();
+    }
+
+    /** 六个槽里这个要素一共有几颗。 */
+    private int countCrystals(Holder<IAspect> aspect) {
+        int total = 0;
+        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
+            ItemStack stack = crystals.getStackInSlot(i);
+            Holder<IAspect> carried = EssentiaCrystals.aspectOf(stack);
+            if (carried != null && carried.equals(aspect)) {
+                total += stack.getCount();
+            }
+        }
+        return total;
+    }
+
+    /** 绑这个要素的晶体槽；没有就是 -1。 */
+    private int crystalSlotFor(@Nullable Holder<IAspect> aspect) {
+        if (aspect == null) {
+            return -1;
+        }
+        ResourceKey<IAspect> key = aspect.unwrapKey().orElse(null);
+        if (key == null) {
+            return -1;
+        }
+        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
+            if (key.equals(aspectOf(i))) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
