@@ -2,12 +2,12 @@
 item_ids:
   - thaumicenergistics_ce:arcane_crafting_terminal
 navigation:
-  title: 奥术合成终端
+  title: ME奥术合成终端
   icon: thaumicenergistics_ce:arcane_crafting_terminal
   parent: thaumicenergistics_ce:terminals.md
   position: 20
 ---
-# 奥术合成终端
+# ME奥术合成终端
 
 工作台上的材料刚好够，缺少的那一件偏偏在网络里。
 

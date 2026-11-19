@@ -2,12 +2,12 @@
 item_ids:
   - thaumicenergistics_ce:arcane_crafting_terminal
 navigation:
-  title: Arcane Crafting Terminal
+  title: ME Arcane Crafting Terminal
   icon: thaumicenergistics_ce:arcane_crafting_terminal
   parent: thaumicenergistics_ce:terminals.md
   position: 20
 ---
-# Arcane Crafting Terminal
+# ME Arcane Crafting Terminal
 
 The workbench can draw its materials from the network and return the finished item to storage. There is no longer a reason to walk between two benches.
 
