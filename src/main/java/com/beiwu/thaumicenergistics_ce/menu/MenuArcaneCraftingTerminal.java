@@ -465,8 +465,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
                         cost.wandCentivis(),
                         cost.crystalsNeeded(),
                         cost.auraVis(),
-                        discountPercent,
-                        cost.paidFromWand()));
+                        discountPercent));
     }
 
 

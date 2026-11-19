@@ -87,9 +87,6 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     /** 灵气减免百分比；0 表示未聚焦。 */
     private int discountPercent;
 
-    /** 这一次实际是法杖要素在顶水晶，不是「优先用哪个」的设置。 */
-    private boolean paidFromWand;
-
     /**
      * 费用条上每一枚图标的位置和它自己的提示，每次 {@code drawFG} 重填。
      * 六枚各说各的：要素说「消耗多少 vis」，晶体说「消耗多少颗」。
@@ -197,7 +194,6 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
             screen.crystals = payload.crystals();
             screen.auraVis = payload.auraVis();
             screen.discountPercent = payload.discountPercent();
-            screen.paidFromWand = payload.paidFromWand();
         }
     }
 
@@ -359,14 +355,11 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     }
 
     private @Nullable List<Component> hoveredVisTooltip(int mouseX, int mouseY) {
-        // 逐枚先问：六枚图标各自有自己的说法，整条的花费说明只在缝隙里兜底。
+        // 费用条只认逐枚：每枚图标自己说清是什么、花多少，条带本身不再另有一句总说明。
         for (ChipHit hit : chipHits) {
             if (isHovering(hit.x(), hit.y(), hit.size(), hit.size(), mouseX, mouseY)) {
                 return hit.tooltip();
             }
-        }
-        if (hovering(VIS_COST_STRIP, mouseX, mouseY) && hasCostToShow()) {
-            return costTooltip();
         }
         if (hovering(VIS_UPCOMING_STRIP, mouseX, mouseY)) {
             return discountPercent > 0
@@ -379,33 +372,6 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
             return TTTooltips.workbenchVisAvailable(!auraEnough());
         }
         return null;
-    }
-
-    /** 费用条上有没有东西可看；空格子上的悬停不该弹出一句换算说明。 */
-    private boolean hasCostToShow() {
-        return !costs.isEmpty() || !crystals.isEmpty();
-    }
-
-    /**
-     * 费用条的提示按这次合成**实际**用掉的支付源换一套：法杖是 2 点 vis 顶 1 点元始魔力，
-     * 水晶是 1 颗顶 1 点，两者混着说会让人以为扣的是同一种东西。
-     * 读的是 {@code paidFromWand}，不是付费源按钮那个「优先用哪个」的设置 ——
-     * 设成优先法杖但法杖不够时，实际扣的是水晶，提示也该说水晶。
-     */
-    private List<Component> costTooltip() {
-        // 只有一边有东西时按那一边说，最贴近眼前这几枚图标；
-        // 两边都有才回头看 Thaumaturge 报的 paidFromWand。
-        boolean wand = paidFromWand;
-        if (costs.isEmpty()) {
-            wand = false;
-        } else if (crystals.isEmpty()) {
-            wand = true;
-        }
-        String base = "gui.thaumicenergistics_ce.arcane_terminal.cost";
-        String suffix = wand ? ".wand" : ".crystals";
-        return List.of(
-                Component.translatable(base + suffix + ".title"),
-                Component.translatable(base + suffix + ".line"));
     }
 
     /** 要素名走 Thaumaturge 自己的翻译键，和手册、JEI 里写的是同一个词。 */

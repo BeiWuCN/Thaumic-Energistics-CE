@@ -23,11 +23,10 @@ import com.beiwu.thaumicenergistics_ce.ThEIds;
  * @param crystals 要从六个晶体槽里扣掉的晶体，按配方列出的顺序
  * @param auraVis 这次合成要从灵气里抽走的 vis，已算上减免
  * @param discountPercent 减免百分比；0 表示未聚焦，屏幕按工作台那两句话换着说
- * @param paidFromWand 这一次实际是法杖要素在顶水晶，不是「优先用哪个」的设置
  */
 public record ArcaneCraftCostPayload(
         int containerId, List<AspectCost> aspects, List<CrystalCost> crystals,
-        int auraVis, int discountPercent, boolean paidFromWand)
+        int auraVis, int discountPercent)
         implements ClientboundPacket {
 
     /**
@@ -73,8 +72,6 @@ public record ArcaneCraftCostPayload(
                     ArcaneCraftCostPayload::auraVis,
                     ByteBufCodecs.VAR_INT,
                     ArcaneCraftCostPayload::discountPercent,
-                    ByteBufCodecs.BOOL,
-                    ArcaneCraftCostPayload::paidFromWand,
                     ArcaneCraftCostPayload::new);
 
     @Override
@@ -97,8 +94,7 @@ public record ArcaneCraftCostPayload(
             Map<ResourceKey<IAspect>, Integer> costs,
             AspectList crystals,
             int auraVis,
-            int discountPercent,
-            boolean paidFromWand) {
+            int discountPercent) {
         List<AspectCost> list = new ArrayList<>();
         // 键用 {@link ResourceKey}：配方指名的是要素键。只有位置会发出去，
         // 客户端拿自己的注册表解析名称和图标。
@@ -114,11 +110,10 @@ public record ArcaneCraftCostPayload(
                 gems.add(new CrystalCost(id, entry.amount()));
             }
         }
-        return new ArcaneCraftCostPayload(
-                containerId, list, gems, Math.max(0, auraVis), discountPercent, paidFromWand);
+        return new ArcaneCraftCostPayload(containerId, list, gems, Math.max(0, auraVis), discountPercent);
     }
 
     public static ArcaneCraftCostPayload none(int containerId) {
-        return new ArcaneCraftCostPayload(containerId, List.of(), List.of(), 0, 0, false);
+        return new ArcaneCraftCostPayload(containerId, List.of(), List.of(), 0, 0);
     }
 }

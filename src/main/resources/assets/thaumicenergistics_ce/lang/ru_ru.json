@@ -481,10 +481,6 @@
   "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line1": "Оплата vis кристаллами",
   "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line2": "Сначала тратятся кристаллы",
   "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line3": "Каждый кристалл заменяет 1 изначальную vis",
-  "gui.thaumicenergistics_ce.arcane_terminal.cost.wand.title": "Расход vis жезла",
-  "gui.thaumicenergistics_ce.arcane_terminal.cost.wand.line": "Каждые 2 очка vis жезла заменяют 1 изначальную vis",
-  "gui.thaumicenergistics_ce.arcane_terminal.cost.crystals.title": "Расход vis кристаллов",
-  "gui.thaumicenergistics_ce.arcane_terminal.cost.crystals.line": "Каждый кристалл заменяет 1 изначальную vis",
   "gui.thaumicenergistics_ce.arcane_terminal.chip.vis": "Тратит %s vis",
   "gui.thaumicenergistics_ce.arcane_terminal.chip.crystals": "Тратит %s кристаллов"
 }

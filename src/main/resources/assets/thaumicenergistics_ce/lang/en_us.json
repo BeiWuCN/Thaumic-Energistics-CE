@@ -491,10 +491,6 @@
   "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line1": "Crystal vis payment",
   "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line2": "Spends crystals first",
   "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line3": "Every 1 crystal counts as 1 primal vis",
-  "gui.thaumicenergistics_ce.arcane_terminal.cost.wand.title": "Wand vis cost",
-  "gui.thaumicenergistics_ce.arcane_terminal.cost.wand.line": "Every 2 points of wand vis count as 1 primal vis",
-  "gui.thaumicenergistics_ce.arcane_terminal.cost.crystals.title": "Crystal vis cost",
-  "gui.thaumicenergistics_ce.arcane_terminal.cost.crystals.line": "Every 1 crystal counts as 1 primal vis",
   "gui.thaumicenergistics_ce.arcane_terminal.chip.vis": "Consumes %s vis",
   "gui.thaumicenergistics_ce.arcane_terminal.chip.crystals": "Consumes %s crystals"
 }

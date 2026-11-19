@@ -30,7 +30,7 @@ public record InscriberCostPayload(
                 ? new InscriberCostPayload(containerId, false, 0, List.of())
                 : new InscriberCostPayload(containerId, true, Math.max(0, pattern.baseVis()),
                         ArcaneCraftCostPayload.of(
-                                containerId, java.util.Map.of(), pattern.crystals(), 0, 0, false).crystals());
+                                containerId, java.util.Map.of(), pattern.crystals(), 0, 0).crystals());
     }
 
     @Override public void handleOnClient(net.minecraft.world.entity.player.Player player) {
