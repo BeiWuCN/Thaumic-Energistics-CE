@@ -475,8 +475,14 @@
   "gui.thaumicenergistics_ce.arcane_terminal.failure.ingredients_changed": "材料在合成時發生了變化",
   "gui.thaumicenergistics_ce.arcane_terminal.failure.payment_unavailable": "靈氣、魔力水晶或法杖中的 vis 不足",
   "gui.thaumicenergistics_ce.arcane_terminal.failure.internal": "內部錯誤，請查看日誌",
-  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line1": "法杖支付",
-  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line2": "優先消耗法杖對應2點魔力",
-  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line1": "水晶支付",
-  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line2": "優先消耗1顆魔力水晶碎片"
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line1": "法杖支付vis",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line2": "優先消耗法杖vis",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line3": "每2點vis對應1點元始魔力",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line1": "水晶支付vis",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line2": "優先消耗水晶",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line3": "每1顆對應1點元始魔力",
+  "gui.thaumicenergistics_ce.arcane_terminal.cost.wand.title": "法杖vis消耗",
+  "gui.thaumicenergistics_ce.arcane_terminal.cost.wand.line": "法杖每2點vis對應1點元始魔力",
+  "gui.thaumicenergistics_ce.arcane_terminal.cost.crystals.title": "水晶vis消耗",
+  "gui.thaumicenergistics_ce.arcane_terminal.cost.crystals.line": "水晶每1顆對應1點元始魔力"
 }

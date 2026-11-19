@@ -450,13 +450,23 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         return slots.isEmpty() ? null : slots.getFirst();
     }
 
-    public void sendCraftCost(@Nullable ArcaneCraftCost cost) {
+    /**
+     * 把这次合成的开销发给屏幕。
+     * @param discountPercent 灵气减免百分比，0 表示未聚焦；屏幕据此在「（未聚焦）」和「（n% 减免）」之间选
+     */
+    public void sendCraftCost(@Nullable ArcaneCraftCost cost, int discountPercent) {
         if (isClientSide()) {
             return;
         }
         sendPacketToClient(cost == null
                 ? ArcaneCraftCostPayload.none(containerId)
-                : ArcaneCraftCostPayload.of(containerId, cost.wandCentivis(), cost.crystalsNeeded()));
+                : ArcaneCraftCostPayload.of(
+                        containerId,
+                        cost.wandCentivis(),
+                        cost.crystalsNeeded(),
+                        cost.auraVis(),
+                        discountPercent,
+                        cost.paidFromWand()));
     }
 
 

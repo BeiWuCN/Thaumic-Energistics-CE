@@ -7,9 +7,11 @@ import appeng.api.storage.MEStorage;
 import appeng.helpers.ICraftingGridMenu;
 import appeng.helpers.InventoryAction;
 import appeng.menu.slot.CraftingTermSlot;
+import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftCost;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftingTransaction;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneWorkbenchContext;
-import com.leclowndu93150.thaumaturge.api.recipe.IArcaneCraftingInput;
+import com.leclowndu93150.thaumaturge.api.recipe.IArcaneRecipe;
+import com.leclowndu93150.thaumaturge.content.workbench.WorkbenchPayment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -68,13 +70,13 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         }
         if (!ownerMenu.canCraft()) {
             setDisplayedCraftingOutput(ItemStack.EMPTY);
-            ownerMenu.sendCraftCost(null);
+            ownerMenu.sendCraftCost(null, 0);
             return;
         }
-        IArcaneCraftingInput input = buildInput();
+        TerminalArcaneCraftingInput input = buildInput();
         if (input == null) {
             setDisplayedCraftingOutput(ItemStack.EMPTY);
-            ownerMenu.sendCraftCost(null);
+            ownerMenu.sendCraftCost(null, 0);
             lastFailure = ArcaneCraftingTransaction.Failure.NONE;
             return;
         }
@@ -85,7 +87,35 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         }
         setDisplayedCraftingOutput(result.successful() ? result.output() : ItemStack.EMPTY);
         // 和结果一起发，屏幕就不会给已经变了的网格画开销。
-        ownerMenu.sendCraftCost(result.successful() ? result.cost() : null);
+        // 失败也照发：灵气、法杖要素或晶体不够时配方其实是匹配上的，
+        // 这几行正该留着告诉玩家差多少，而不是整片消失。
+        ArcaneCraftCost cost = result.cost();
+        ownerMenu.sendCraftCost(cost, cost == null ? 0 : discountPercent(input, cost));
+    }
+
+    /**
+     * 灵气减免百分比。工作台那一行在「未聚焦」和「n% 减免」之间二选一，
+     * 比的正是未聚焦开销与实际开销：法杖杖端和减免装备把前者压到后者。
+     * @return 0 表示没有减免，屏幕说「未聚焦」
+     */
+    private int discountPercent(TerminalArcaneCraftingInput input, ArcaneCraftCost cost) {
+        if (cost == null || cost.auraVis() <= 0) {
+            return 0;
+        }
+        var inspection = ArcaneCraftingTransaction.inspect(workbenchContext(), serverPlayer, input);
+        if (!inspection.successful() || inspection.recipeId() == null) {
+            return 0;
+        }
+        var holder = serverPlayer.level().getRecipeManager().byKey(inspection.recipeId().location()).orElse(null);
+        if (holder == null || !(holder.value() instanceof IArcaneRecipe recipe)) {
+            return 0;
+        }
+        int crude = WorkbenchPayment.crudeCost(recipe);
+        if (crude <= 0) {
+            return 0;
+        }
+        int percent = (int) Math.round((crude - cost.auraVis()) * 100.0 / crude);
+        return Math.max(0, Math.min(100, percent));
     }
 
     public ArcaneCraftingTransaction.Failure lastFailure() {
@@ -104,14 +134,22 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         };
 
         for (int i = 0; i < attempts; i++) {
-            IArcaneCraftingInput input = buildInput();
+            TerminalArcaneCraftingInput input = buildInput();
             if (input == null || input.isEmpty()) {
                 break;
             }
             // 支付来自终端自己的容器：网格、水晶槽、法杖，和 Thaumaturge 工作台一致。
             // 向网络收费等于再要一份玩家已经摆好的东西。
+            // 消耗表按输入的包围盒打包，仓库要拿同一套偏移才映射得回九个格位。
             var store = new TerminalArcaneCraftingStore(
-                    ownerMenu.craftingInventory(), ownerMenu.crystalInventory(), ownerMenu.wandInventory(), who);
+                    ownerMenu.craftingInventory(),
+                    ownerMenu.crystalInventory(),
+                    ownerMenu.wandInventory(),
+                    who,
+                    input.left(),
+                    input.top(),
+                    input.width(),
+                    input.height());
             ArcaneCraftingTransaction.Result result;
             try (var transaction = com.leclowndu93150.thaumaturge.api.transaction.Transaction.openRoot()) {
                 result = ArcaneCraftingTransaction.craft(workbenchContext(), server, input, store, transaction);
@@ -189,7 +227,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
     }
 
     /** 按当前网格建输入，没有可匹配的返回 {@code null}。 */
-    private @Nullable IArcaneCraftingInput buildInput() {
+    private @Nullable TerminalArcaneCraftingInput buildInput() {
         if (!ownerMenu.canCraft()) {
             return null;
         }

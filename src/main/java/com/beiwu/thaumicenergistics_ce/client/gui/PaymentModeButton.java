@@ -43,9 +43,10 @@ public class PaymentModeButton extends IconButton {
     }
 
     /**
-     * 和 AE2 的 ToggleButton 一样返回两行独立 Component，走 AEBaseScreen 的 ITooltip 渲染，
+     * 和 AE2 的 ToggleButton 一样返回多行独立 Component，走 AEBaseScreen 的 ITooltip 渲染，
      * 格式（字体/行距）才和「终端风格/最长」那些 AE2 按钮一致。
-     * 用 MC 原生 setTooltip 会把两行拼进一个 Component，走另一套渲染，看起来就不一样。
+     * 用 MC 原生 setTooltip 会把几行拼进一个 Component，走另一套渲染，看起来就不一样。
+     * 三行分别是：标题、当前优先消耗哪一边、换算比例。
      */
     @Override
     public List<Component> getTooltipMessage() {
@@ -53,7 +54,8 @@ public class PaymentModeButton extends IconButton {
         String base = "gui.thaumicenergistics_ce.arcane_terminal.payment";
         return List.of(
                 Component.translatable(base + prefix + ".line1"),
-                Component.translatable(base + prefix + ".line2"));
+                Component.translatable(base + prefix + ".line2"),
+                Component.translatable(base + prefix + ".line3"));
     }
 
     @Override

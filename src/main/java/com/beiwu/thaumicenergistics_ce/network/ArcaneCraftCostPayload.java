@@ -21,9 +21,13 @@ import com.beiwu.thaumicenergistics_ce.ThEIds;
  * @param containerId 它所属的菜单；发给已关闭屏幕的数据包被忽略
  * @param aspects 每个要素和它以 centivis 计的开销，按配方列出它们的顺序
  * @param crystals 要从六个晶体槽里扣掉的晶体，按配方列出的顺序
+ * @param auraVis 这次合成要从灵气里抽走的 vis，已算上减免
+ * @param discountPercent 减免百分比；0 表示未聚焦，屏幕按工作台那两句话换着说
+ * @param paidFromWand 这一次实际是法杖要素在顶水晶，不是「优先用哪个」的设置
  */
 public record ArcaneCraftCostPayload(
-        int containerId, List<AspectCost> aspects, List<CrystalCost> crystals)
+        int containerId, List<AspectCost> aspects, List<CrystalCost> crystals,
+        int auraVis, int discountPercent, boolean paidFromWand)
         implements ClientboundPacket {
 
     /**
@@ -65,6 +69,12 @@ public record ArcaneCraftCostPayload(
                     ArcaneCraftCostPayload::aspects,
                     CRYSTAL_COST_CODEC.apply(ByteBufCodecs.list()),
                     ArcaneCraftCostPayload::crystals,
+                    ByteBufCodecs.VAR_INT,
+                    ArcaneCraftCostPayload::auraVis,
+                    ByteBufCodecs.VAR_INT,
+                    ArcaneCraftCostPayload::discountPercent,
+                    ByteBufCodecs.BOOL,
+                    ArcaneCraftCostPayload::paidFromWand,
                     ArcaneCraftCostPayload::new);
 
     @Override
@@ -85,7 +95,10 @@ public record ArcaneCraftCostPayload(
     public static ArcaneCraftCostPayload of(
             int containerId,
             Map<ResourceKey<IAspect>, Integer> costs,
-            AspectList crystals) {
+            AspectList crystals,
+            int auraVis,
+            int discountPercent,
+            boolean paidFromWand) {
         List<AspectCost> list = new ArrayList<>();
         // 键用 {@link ResourceKey}：配方指名的是要素键。只有位置会发出去，
         // 客户端拿自己的注册表解析名称和图标。
@@ -101,10 +114,11 @@ public record ArcaneCraftCostPayload(
                 gems.add(new CrystalCost(id, entry.amount()));
             }
         }
-        return new ArcaneCraftCostPayload(containerId, list, gems);
+        return new ArcaneCraftCostPayload(
+                containerId, list, gems, Math.max(0, auraVis), discountPercent, paidFromWand);
     }
 
     public static ArcaneCraftCostPayload none(int containerId) {
-        return new ArcaneCraftCostPayload(containerId, List.of(), List.of());
+        return new ArcaneCraftCostPayload(containerId, List.of(), List.of(), 0, 0, false);
     }
 }

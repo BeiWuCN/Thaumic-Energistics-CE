@@ -475,8 +475,14 @@
   "gui.thaumicenergistics_ce.arcane_terminal.failure.ingredients_changed": "Ингредиенты изменились во время создания",
   "gui.thaumicenergistics_ce.arcane_terminal.failure.payment_unavailable": "Не хватает ауры, кристаллов эссенции или vis жезла",
   "gui.thaumicenergistics_ce.arcane_terminal.failure.internal": "Внутренняя ошибка, смотрите журнал",
-  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line1": "Оплата жезлом",
-  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line2": "Сначала тратит 2 очка соответствующей vis жезла",
-  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line1": "Оплата кристаллами",
-  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line2": "Сначала тратит 1 осколок кристалла эссенции"
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line1": "Оплата vis жезла",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line2": "Сначала тратится vis жезла",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.wand.line3": "Каждые 2 очка vis заменяют 1 изначальную vis",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line1": "Оплата vis кристаллами",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line2": "Сначала тратятся кристаллы",
+  "gui.thaumicenergistics_ce.arcane_terminal.payment.crystals.line3": "Каждый кристалл заменяет 1 изначальную vis",
+  "gui.thaumicenergistics_ce.arcane_terminal.cost.wand.title": "Расход vis жезла",
+  "gui.thaumicenergistics_ce.arcane_terminal.cost.wand.line": "Каждые 2 очка vis жезла заменяют 1 изначальную vis",
+  "gui.thaumicenergistics_ce.arcane_terminal.cost.crystals.title": "Расход vis кристаллов",
+  "gui.thaumicenergistics_ce.arcane_terminal.cost.crystals.line": "Каждый кристалл заменяет 1 изначальную vis"
 }

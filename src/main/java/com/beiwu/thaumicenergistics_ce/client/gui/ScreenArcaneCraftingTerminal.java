@@ -9,6 +9,7 @@ import appeng.client.gui.widgets.ActionButton;
 import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.client.AspectRendering;
+import com.leclowndu93150.thaumaturge.client.screen.TTTooltips;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
@@ -18,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import org.jspecify.annotations.Nullable;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
+import com.beiwu.thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import com.beiwu.thaumicenergistics_ce.client.GolemBackpackClientData;
 import com.beiwu.thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
 import com.beiwu.thaumicenergistics_ce.network.ArcaneCraftCostPayload;
@@ -38,10 +40,32 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     private static final int CHIP_UNITS = AspectRendering.GUI_ICON_SIZE;
 
     /**
+     * 三行 vis 文字的配色直接取奥术工作台那套：可用、不足、消耗各一个色，
+     * 和 {@code ArcaneWorkbenchScreen} 里画同一批文字用的是同几个值。
+     */
+    private static final int VIS_AVAILABLE_COLOR = 0xFF6E6EEE;
+    private static final int VIS_SHORT_COLOR = 0xFFEE6E6E;
+
+    /** 「即将消耗」那一行：工作台在深色底上用的浅紫，比可用行的紫更亮一档。 */
+    private static final int VIS_COST_COLOR = 0xFFC1C1FF;
+
+    /** 格子上方那行标题最多占多宽：右边要留给两行 vis 文字。 */
+    private static final float GRID_TITLE_MAX_WIDTH = 88.0F;
+
+    /**
      * 样式控件名，指向图标所在的木质条带。位置由美术图决定，换皮或改尺寸的窗口会带着这行走：
      * 屏幕样式文档里的 {@code widgets.visCraftCost}。
      */
     private static final String VIS_COST_STRIP = "visCraftCost";
+
+    /**
+     * 样式控件名，指向「即将消耗」那一行：屏幕样式文档里的 {@code widgets.visUpcoming}。
+     * 它占的是「可用 vis」原来的位置，可用 vis 让到下一行。
+     */
+    private static final String VIS_UPCOMING_STRIP = "visUpcoming";
+
+    /** 样式控件名，指向「可用 vis」那一行：屏幕样式文档里的 {@code widgets.visAvailable}。 */
+    private static final String VIS_AVAILABLE_STRIP = "visAvailable";
 
     /**
      * 样式控件名，指向格子上方那行文字：屏幕样式文档里的 {@code text.crafting_grid_title}。
@@ -55,6 +79,15 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
 
     /** 同一次合成要从六个晶体槽里扣掉的晶体，画在要素左边。 */
     private List<ArcaneCraftCostPayload.CrystalCost> crystals = List.of();
+
+    /** 这次合成要从灵气里抽走的 vis，已算上减免。 */
+    private int auraVis;
+
+    /** 灵气减免百分比；0 表示未聚焦。 */
+    private int discountPercent;
+
+    /** 这一次实际是法杖要素在顶水晶，不是「优先用哪个」的设置。 */
+    private boolean paidFromWand;
 
     /** 付费源按钮，图标跟着菜单里的模式走。 */
     private PaymentModeButton paymentModeButton;
@@ -119,7 +152,8 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         setTextContent(CRAFTING_GRID_TITLE, terminalName);
         var subtitle = getStyle().getText().get(CRAFTING_GRID_TITLE);
         if (subtitle != null) {
-            subtitle.setScale(Math.min(1.0F, (imageWidth - 16.0F) / Math.max(1, font.width(terminalName))));
+            // 上限按左半边算：右半边让给两行 vis 文字，标题不能压过去。
+            subtitle.setScale(Math.min(1.0F, GRID_TITLE_MAX_WIDTH / Math.max(1, font.width(terminalName))));
         }
         open = this;
     }
@@ -152,6 +186,9 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         if (screen != null && screen.getMenu().containerId == payload.containerId()) {
             screen.costs = payload.aspects();
             screen.crystals = payload.crystals();
+            screen.auraVis = payload.auraVis();
+            screen.discountPercent = payload.discountPercent();
+            screen.paidFromWand = payload.paidFromWand();
         }
     }
 
@@ -159,6 +196,7 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     public void drawFG(GuiGraphics graphics, int offsetX, int offsetY, int mouseX, int mouseY) {
         super.drawFG(graphics, offsetX, offsetY, mouseX, mouseY);
         drawAvailableAura(graphics);
+        drawUpcomingVis(graphics);
         if (costs.isEmpty() && crystals.isEmpty()) {
             return;
         }
@@ -169,13 +207,22 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
             return;
         }
         Point at = strip.resolve(new Rect2i(0, 0, imageWidth, imageHeight));
-        // 基数仍是「水晶能占的格数」：美术图 69 列除以六个格得 11，六个图标占满这 66 列。
-        // 超过六件按件数等比缩小，下限 6 px；到下限还排不下的才会像以前那样丢掉尾巴。
+        // 基数仍是「水晶能占的格数」：六个图标按条带宽度等分。超过六件按件数等比缩小，下限 6 px；
+        // 到下限还排不下的才会像以前那样丢掉尾巴。
         int wanted = Math.max(PartArcaneCraftingTerminal.CRYSTAL_SLOTS, costs.size() + crystals.size());
         int chip = Math.min(strip.getHeight(), strip.getWidth() / wanted);
         chip = Math.max(chip, Math.min(6, strip.getHeight()));
         if (chip <= 0) {
             return;
+        }
+        // 图标大小和间隔分开算：多出来的宽度摊进间隔里，图标本身不跟着长。
+        // 整除的余数留不下就退回紧排，避免最后一件被挤出去。
+        int pitch = chip;
+        if (wanted > 1) {
+            int slack = strip.getWidth() - chip * wanted;
+            if (slack > 0) {
+                pitch = chip + slack / (wanted - 1);
+            }
         }
         // 从右往左排：第一个要素占住条带右端，剩下的往回排。
         // 单要素配方永远落在同一位置，不随要素列表长度漂移。
@@ -203,7 +250,7 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
                         font, text, CHIP_UNITS - font.width(text) + 1, CHIP_UNITS - 6, 0xFFFFFF, true);
                 graphics.pose().popPose();
             }
-            x -= chip;
+            x -= pitch;
         }
         // 晶体接着要素往左排：单要素配方仍占住条带右端，不因为多了晶体而挪位。
         // 晶体是物品，画的就是那一颗本身，同样是十六见方，跟着同一个位姿缩到条带容得下。
@@ -225,21 +272,125 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
                         font, text, CHIP_UNITS - font.width(text) + 1, CHIP_UNITS - 6, 0xFFFFFF, true);
                 graphics.pose().popPose();
             }
-            x -= chip;
+            x -= pitch;
         }
     }
+    /**
+     * 「可用 vis」那一行。灵气不够这次合成时改用工作台的告警色，
+     * 和 {@code ArcaneWorkbenchScreen} 在同一个条件下换同一个颜色。
+     */
     private void drawAvailableAura(GuiGraphics graphics) {
-        WidgetStyle strip = getStyle().getWidget("visAvailable");
+        WidgetStyle strip = getStyle().getWidget(VIS_AVAILABLE_STRIP);
         if (strip == null) return;
         Point at = strip.resolve(new Rect2i(0, 0, imageWidth, imageHeight));
         Component text = Component.translatable("gui.thaumaturge.arcane_workbench.vis_available", menu.availableAuraVis);
+        drawCentered(graphics, strip, at, text, auraEnough() ? VIS_AVAILABLE_COLOR : VIS_SHORT_COLOR);
+    }
+
+    /** 这一行要不要报「不够」：没有合成需求时永远是够的。 */
+    private boolean auraEnough() {
+        return auraVis <= 0 || menu.availableAuraVis >= auraVis;
+    }
+
+    /**
+     * 「即将消耗」那一行：数值和「（未聚焦）」/「（n% 减免）」都沿用奥术工作台自己的文案键，
+     * 两个界面说的才是同一句话。减免由服务端按未聚焦开销与实际开销的差算好发下来，
+     * 客户端不重复一遍减免规则。
+     * <p>配方匹配上但灵气、法杖要素或晶体不够时也要留着：那一行正是「差多少」的来源。
+     */
+    private void drawUpcomingVis(GuiGraphics graphics) {
+        if (auraVis <= 0 && costs.isEmpty() && crystals.isEmpty()) {
+            return;
+        }
+        WidgetStyle strip = getStyle().getWidget(VIS_UPCOMING_STRIP);
+        if (strip == null) {
+            return;
+        }
+        Point at = strip.resolve(new Rect2i(0, 0, imageWidth, imageHeight));
+        Component text = discountPercent > 0
+                ? Component.translatable(
+                        "gui.thaumaturge.arcane_workbench.required_vis_discount", auraVis, discountPercent)
+                : Component.translatable(
+                        "gui.thaumaturge.arcane_workbench.required_vis_crude", auraVis);
+        drawCentered(graphics, strip, at, text, VIS_COST_COLOR);
+    }
+
+    /** 一行文字在条带里居中并按宽度缩放；条带比文字窄时才会缩，正常尺寸下是原大。 */
+    private void drawCentered(GuiGraphics graphics, WidgetStyle strip, Point at, Component text, int color) {
         float scale = Math.min(0.5F, (float) strip.getWidth() / Math.max(1, font.width(text)));
         graphics.pose().pushPose();
         graphics.pose().translate(at.getX() + strip.getWidth() / 2.0F,
                 at.getY() + (strip.getHeight() - font.lineHeight * scale) / 2.0F, 0.0F);
         graphics.pose().scale(scale, scale, 1.0F);
-        graphics.drawString(font, text, -font.width(text) / 2, 0, 0xFF6E6EEE, false);
+        graphics.drawString(font, text, -font.width(text) / 2, 0, color, false);
         graphics.pose().popPose();
+    }
+
+    /**
+     * 悬停提示画在 {@code super.render} 之后，坐标就是屏幕坐标，{@code isHovering} 会自己减掉面板偏移。
+     * 文案全部取自 {@code TTTooltips}，与奥术工作台那几行是同一份。
+     */
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
+        List<Component> tooltip = hoveredVisTooltip(mouseX, mouseY);
+        if (tooltip != null && !tooltip.isEmpty()) {
+            drawTooltipWithHeader(graphics, mouseX, mouseY, tooltip);
+        }
+    }
+
+    private @Nullable List<Component> hoveredVisTooltip(int mouseX, int mouseY) {
+        if (hovering(VIS_COST_STRIP, mouseX, mouseY) && hasCostToShow()) {
+            return costTooltip();
+        }
+        if (hovering(VIS_UPCOMING_STRIP, mouseX, mouseY)) {
+            return discountPercent > 0
+                    ? TTTooltips.workbenchVisCostDiscounted(discountPercent)
+                    : TTTooltips.workbenchVisCostUnfocused(
+                            Math.round((ThEArcanePattern.CRAFT_AURA_SURCHARGE - 1.0F) * 100.0F));
+        }
+        if (hovering(VIS_AVAILABLE_STRIP, mouseX, mouseY)) {
+            // 参数是「显示灵气不足那句警告」，不是「够不够」：传反了会在这行说反话。
+            return TTTooltips.workbenchVisAvailable(!auraEnough());
+        }
+        return null;
+    }
+
+    /** 费用条上有没有东西可看；空格子上的悬停不该弹出一句换算说明。 */
+    private boolean hasCostToShow() {
+        return !costs.isEmpty() || !crystals.isEmpty();
+    }
+
+    /**
+     * 费用条的提示按这次合成**实际**用掉的支付源换一套：法杖是 2 点 vis 顶 1 点元始魔力，
+     * 水晶是 1 颗顶 1 点，两者混着说会让人以为扣的是同一种东西。
+     * 读的是 {@code paidFromWand}，不是付费源按钮那个「优先用哪个」的设置 ——
+     * 设成优先法杖但法杖不够时，实际扣的是水晶，提示也该说水晶。
+     */
+    private List<Component> costTooltip() {
+        // 只有一边有东西时按那一边说，最贴近眼前这几枚图标；
+        // 两边都有才回头看 Thaumaturge 报的 paidFromWand。
+        boolean wand = paidFromWand;
+        if (costs.isEmpty()) {
+            wand = false;
+        } else if (crystals.isEmpty()) {
+            wand = true;
+        }
+        String base = "gui.thaumicenergistics_ce.arcane_terminal.cost";
+        String suffix = wand ? ".wand" : ".crystals";
+        return List.of(
+                Component.translatable(base + suffix + ".title"),
+                Component.translatable(base + suffix + ".line"));
+    }
+
+    /** 样式文档里那一块矩形是否含鼠标；没写 width/height 的控件不参与。 */
+    private boolean hovering(String widget, int mouseX, int mouseY) {
+        WidgetStyle strip = getStyle().getWidget(widget);
+        if (strip == null || strip.getWidth() <= 0 || strip.getHeight() <= 0) {
+            return false;
+        }
+        Point at = strip.resolve(new Rect2i(0, 0, imageWidth, imageHeight));
+        return isHovering(at.getX(), at.getY(), strip.getWidth(), strip.getHeight(), mouseX, mouseY);
     }
 
 }
