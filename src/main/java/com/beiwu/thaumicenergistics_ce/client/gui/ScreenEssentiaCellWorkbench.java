@@ -8,9 +8,12 @@ import appeng.client.gui.widgets.ActionButton;
 import appeng.client.gui.widgets.ToggleButton;
 import appeng.core.localization.GuiText;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
+import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
+import com.leclowndu93150.thaumaturge.api.client.AspectRendering;
 import com.leclowndu93150.thaumaturge.content.item.PhialItem;
 import com.leclowndu93150.thaumaturge.registry.TTDataComponents;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -73,6 +76,27 @@ public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaC
             graphics.pose().translate(leftPos, topPos, 0.0f);
             Icon.BACKGROUND_STORAGE_CELL.getBlitter().dest(cell.x, cell.y).blit(graphics);
             graphics.pose().popPose();
+        }
+        drawEssentiaWells(graphics);
+    }
+
+    /**
+     * 井里存的是源质时，补画 Thaumaturge 注册的要素纹理。
+     * AE2 画槽位只会把 key 折回物品堆，源质折出来是那颗魔力水晶——有自己的模型和颜色，
+     * 和 JEI、手册里的要素字形不是一个东西。这里绕开物品那一层直接画字形。
+     */
+    private void drawEssentiaWells(GuiGraphics graphics) {
+        for (int well = 0; well < MenuEssentiaCellWorkbench.partitionSlotCount(); well++) {
+            if (!(menu.keyInWell(well) instanceof AEssentiaKey key)) {
+                continue;
+            }
+            Holder<IAspect> aspect = key.resolveAspect();
+            if (aspect == null) {
+                continue;
+            }
+            Slot slot = menu.getSlot(menu.partitionSlotIndex(well));
+            // 数量写 0：井是标记，不是存货，画数字会被读成「要几颗」。
+            AspectRendering.renderGui(graphics, font, leftPos + slot.x, topPos + slot.y, aspect, 0.0F);
         }
     }
 
