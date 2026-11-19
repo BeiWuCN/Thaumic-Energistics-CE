@@ -17,7 +17,7 @@ Research in this mod unlocks through the Thaumaturge Thaumonomicon. The chapters
 | Research | Thaumonomicon chapter |
 | --- | --- |
 | Base Energistics / Digitised Essentia | `thaumicenergistics_ce:base_energistics` |
-| Essentia Storage / Essentia Terminal | `thaumicenergistics_ce:essentia_storage_1k` |
+| Essentia Storage / ME Essentia Terminal | `thaumicenergistics_ce:essentia_storage_1k` |
 | Arcane Crafting / Knowledge Core | `thaumicenergistics_ce:arcane_terminal` |
 
 ## Additional research

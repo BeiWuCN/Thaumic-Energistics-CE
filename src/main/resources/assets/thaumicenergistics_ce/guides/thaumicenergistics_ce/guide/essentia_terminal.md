@@ -13,9 +13,9 @@ Digitised essentia cannot be seen or smelled. There ought to be somewhere to che
 
 ## Step 1
 
-I compared the terminal readings with each jar until I could account for the network's essentia. With a vessel connected, the amount withdrawn agreed as well. The §lEssentia Terminal§r is ready for regular use.
+I compared the terminal readings with each jar until I could account for the network's essentia. With a vessel connected, the amount withdrawn agreed as well. The §lME Essentia Terminal§r is ready for regular use.
 
-Watching the display all day is less appealing. I connected an §lEssentia Level Emitter§r, chose an aspect and quantity, and had it signal when the supply rose above or fell below that amount. A distillation setup can use that signal to start or stop.
+Watching the display all day is less appealing. I connected an §lME Essentia Level Emitter§r, chose an aspect and quantity, and had it signal when the supply rose above or fell below that amount. A distillation setup can use that signal to start or stop.
 
 ## Step 2
 

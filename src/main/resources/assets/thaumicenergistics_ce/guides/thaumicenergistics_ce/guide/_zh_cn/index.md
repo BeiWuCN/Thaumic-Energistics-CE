@@ -17,7 +17,7 @@ navigation:
 | 研究 | 魔导手册篇章 |
 | --- | --- |
 | 基础能源学 / 数字化源质 | `thaumicenergistics_ce:base_energistics` |
-| 源质存储 / 源质终端 | `thaumicenergistics_ce:essentia_storage_1k` |
+| 源质存储 / ME源质终端 | `thaumicenergistics_ce:essentia_storage_1k` |
 | 奥术合成 / 知识核心 | `thaumicenergistics_ce:arcane_terminal` |
 
 ## 附加研究
