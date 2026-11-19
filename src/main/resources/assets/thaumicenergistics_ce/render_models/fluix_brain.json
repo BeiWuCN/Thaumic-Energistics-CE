@@ -1,0 +1,974 @@
+{
+  "credit": "TECE Fluix Brain; anatomical reference: Pixel Brain by sparkskye (CC BY 4.0); geometry redrawn, AE2-inspired palette and implants added",
+  "texture_size": [
+    128,
+    128
+  ],
+  "scale": 0.65,
+  "textures": {
+    "cortex": "thaumicenergistics_ce:textures/entity/fluix_brain.png",
+    "emissive": "thaumicenergistics_ce:textures/entity/fluix_brain_emissive.png"
+  },
+  "elements": [
+    {
+      "name": "left_cerebrum",
+      "from": [
+        -4,
+        -1.285544846693248,
+        -4.794269636165834
+      ],
+      "to": [
+        -0.3,
+        5.014455153306752,
+        4.605730363834166
+      ],
+      "material": "cortex",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1,
+            1,
+            8,
+            14
+          ],
+          "texture": "#cortex"
+        },
+        "east": {
+          "uv": [
+            10,
+            1,
+            29,
+            14
+          ],
+          "texture": "#cortex"
+        },
+        "south": {
+          "uv": [
+            31,
+            1,
+            38,
+            14
+          ],
+          "texture": "#cortex"
+        },
+        "west": {
+          "uv": [
+            40,
+            1,
+            59,
+            14
+          ],
+          "texture": "#cortex"
+        },
+        "up": {
+          "uv": [
+            61,
+            1,
+            68,
+            20
+          ],
+          "texture": "#cortex"
+        },
+        "down": {
+          "uv": [
+            70,
+            1,
+            77,
+            20
+          ],
+          "texture": "#cortex"
+        }
+      }
+    },
+    {
+      "name": "left_temporal_lobe",
+      "from": [
+        -5.25,
+        -1.7855448466932478,
+        -2.7942696361658337
+      ],
+      "to": [
+        -3.65,
+        2.2144551533067522,
+        4.105730363834166
+      ],
+      "material": "cortex",
+      "rotation": [
+        -8,
+        0,
+        12
+      ],
+      "origin": [
+        -3.8,
+        1.014455153306752,
+        0.5057303638341661
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            79,
+            1,
+            82,
+            9
+          ],
+          "texture": "#cortex"
+        },
+        "east": {
+          "uv": [
+            84,
+            1,
+            98,
+            9
+          ],
+          "texture": "#cortex"
+        },
+        "south": {
+          "uv": [
+            100,
+            1,
+            103,
+            9
+          ],
+          "texture": "#cortex"
+        },
+        "west": {
+          "uv": [
+            105,
+            1,
+            119,
+            9
+          ],
+          "texture": "#cortex"
+        },
+        "up": {
+          "uv": [
+            121,
+            1,
+            124,
+            15
+          ],
+          "texture": "#cortex"
+        },
+        "down": {
+          "uv": [
+            1,
+            22,
+            4,
+            36
+          ],
+          "texture": "#cortex"
+        }
+      }
+    },
+    {
+      "name": "left_cerebellum",
+      "from": [
+        -2.9,
+        -3.085544846693248,
+        1.1057303638341662
+      ],
+      "to": [
+        -0.2,
+        -0.9855448466932479,
+        4.4057303638341665
+      ],
+      "material": "cerebellum",
+      "rotation": [
+        -12,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        -0.9855448466932479,
+        2.2057303638341663
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            22,
+            11,
+            26
+          ],
+          "texture": "#cortex"
+        },
+        "east": {
+          "uv": [
+            13,
+            22,
+            20,
+            26
+          ],
+          "texture": "#cortex"
+        },
+        "south": {
+          "uv": [
+            22,
+            22,
+            27,
+            26
+          ],
+          "texture": "#cortex"
+        },
+        "west": {
+          "uv": [
+            29,
+            22,
+            36,
+            26
+          ],
+          "texture": "#cortex"
+        },
+        "up": {
+          "uv": [
+            38,
+            22,
+            43,
+            29
+          ],
+          "texture": "#cortex"
+        },
+        "down": {
+          "uv": [
+            45,
+            22,
+            50,
+            29
+          ],
+          "texture": "#cortex"
+        }
+      }
+    },
+    {
+      "name": "left_neural_wafer",
+      "from": [
+        -4.2,
+        2.764455153306752,
+        -2.194269636165834
+      ],
+      "to": [
+        -4.015,
+        3.864455153306752,
+        0.5057303638341661
+      ],
+      "material": "wafer",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            52,
+            22,
+            54,
+            24
+          ],
+          "texture": "#cortex"
+        },
+        "east": {
+          "uv": [
+            56,
+            22,
+            61,
+            24
+          ],
+          "texture": "#cortex"
+        },
+        "south": {
+          "uv": [
+            63,
+            22,
+            65,
+            24
+          ],
+          "texture": "#cortex"
+        },
+        "west": {
+          "uv": [
+            67,
+            22,
+            72,
+            24
+          ],
+          "texture": "#cortex"
+        },
+        "up": {
+          "uv": [
+            74,
+            22,
+            76,
+            27
+          ],
+          "texture": "#cortex"
+        },
+        "down": {
+          "uv": [
+            78,
+            22,
+            80,
+            27
+          ],
+          "texture": "#cortex"
+        }
+      }
+    },
+    {
+      "name": "left_fluix_contact",
+      "from": [
+        -4.55,
+        2.914455153306752,
+        -1.444269636165834
+      ],
+      "to": [
+        -4.2,
+        3.664455153306752,
+        -0.644269636165834
+      ],
+      "material": "crystal",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            82,
+            22,
+            84,
+            24
+          ],
+          "texture": "#cortex"
+        },
+        "east": {
+          "uv": [
+            86,
+            22,
+            88,
+            24
+          ],
+          "texture": "#cortex"
+        },
+        "south": {
+          "uv": [
+            90,
+            22,
+            92,
+            24
+          ],
+          "texture": "#cortex"
+        },
+        "west": {
+          "uv": [
+            94,
+            22,
+            96,
+            24
+          ],
+          "texture": "#cortex"
+        },
+        "up": {
+          "uv": [
+            98,
+            22,
+            100,
+            24
+          ],
+          "texture": "#cortex"
+        },
+        "down": {
+          "uv": [
+            102,
+            22,
+            104,
+            24
+          ],
+          "texture": "#cortex"
+        }
+      }
+    },
+    {
+      "name": "right_cerebrum",
+      "from": [
+        0.3,
+        -1.285544846693248,
+        -4.794269636165834
+      ],
+      "to": [
+        4,
+        5.014455153306752,
+        4.605730363834166
+      ],
+      "material": "cortex",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            106,
+            22,
+            113,
+            35
+          ],
+          "texture": "#cortex"
+        },
+        "east": {
+          "uv": [
+            1,
+            38,
+            20,
+            51
+          ],
+          "texture": "#cortex"
+        },
+        "south": {
+          "uv": [
+            22,
+            38,
+            29,
+            51
+          ],
+          "texture": "#cortex"
+        },
+        "west": {
+          "uv": [
+            31,
+            38,
+            50,
+            51
+          ],
+          "texture": "#cortex"
+        },
+        "up": {
+          "uv": [
+            52,
+            38,
+            59,
+            57
+          ],
+          "texture": "#cortex"
+        },
+        "down": {
+          "uv": [
+            61,
+            38,
+            68,
+            57
+          ],
+          "texture": "#cortex"
+        }
+      }
+    },
+    {
+      "name": "right_temporal_lobe",
+      "from": [
+        3.65,
+        -1.7855448466932478,
+        -2.7942696361658337
+      ],
+      "to": [
+        5.25,
+        2.2144551533067522,
+        4.105730363834166
+      ],
+      "material": "cortex",
+      "rotation": [
+        -8,
+        0,
+        -12
+      ],
+      "origin": [
+        3.8,
+        1.014455153306752,
+        0.5057303638341661
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            70,
+            38,
+            73,
+            46
+          ],
+          "texture": "#cortex"
+        },
+        "east": {
+          "uv": [
+            75,
+            38,
+            89,
+            46
+          ],
+          "texture": "#cortex"
+        },
+        "south": {
+          "uv": [
+            91,
+            38,
+            94,
+            46
+          ],
+          "texture": "#cortex"
+        },
+        "west": {
+          "uv": [
+            96,
+            38,
+            110,
+            46
+          ],
+          "texture": "#cortex"
+        },
+        "up": {
+          "uv": [
+            112,
+            38,
+            115,
+            52
+          ],
+          "texture": "#cortex"
+        },
+        "down": {
+          "uv": [
+            117,
+            38,
+            120,
+            52
+          ],
+          "texture": "#cortex"
+        }
+      }
+    },
+    {
+      "name": "right_cerebellum",
+      "from": [
+        0.2,
+        -3.085544846693248,
+        1.1057303638341662
+      ],
+      "to": [
+        2.9,
+        -0.9855448466932479,
+        4.4057303638341665
+      ],
+      "material": "cerebellum",
+      "rotation": [
+        -12,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        -0.9855448466932479,
+        2.2057303638341663
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1,
+            59,
+            6,
+            63
+          ],
+          "texture": "#cortex"
+        },
+        "east": {
+          "uv": [
+            8,
+            59,
+            15,
+            63
+          ],
+          "texture": "#cortex"
+        },
+        "south": {
+          "uv": [
+            17,
+            59,
+            22,
+            63
+          ],
+          "texture": "#cortex"
+        },
+        "west": {
+          "uv": [
+            24,
+            59,
+            31,
+            63
+          ],
+          "texture": "#cortex"
+        },
+        "up": {
+          "uv": [
+            33,
+            59,
+            38,
+            66
+          ],
+          "texture": "#cortex"
+        },
+        "down": {
+          "uv": [
+            40,
+            59,
+            45,
+            66
+          ],
+          "texture": "#cortex"
+        }
+      }
+    },
+    {
+      "name": "right_neural_wafer",
+      "from": [
+        4.015,
+        2.764455153306752,
+        0.25573036383416614
+      ],
+      "to": [
+        4.2,
+        3.864455153306752,
+        2.9557303638341663
+      ],
+      "material": "wafer",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            47,
+            59,
+            49,
+            61
+          ],
+          "texture": "#cortex"
+        },
+        "east": {
+          "uv": [
+            51,
+            59,
+            56,
+            61
+          ],
+          "texture": "#cortex"
+        },
+        "south": {
+          "uv": [
+            58,
+            59,
+            60,
+            61
+          ],
+          "texture": "#cortex"
+        },
+        "west": {
+          "uv": [
+            62,
+            59,
+            67,
+            61
+          ],
+          "texture": "#cortex"
+        },
+        "up": {
+          "uv": [
+            69,
+            59,
+            71,
+            64
+          ],
+          "texture": "#cortex"
+        },
+        "down": {
+          "uv": [
+            73,
+            59,
+            75,
+            64
+          ],
+          "texture": "#cortex"
+        }
+      }
+    },
+    {
+      "name": "right_fluix_contact",
+      "from": [
+        4.2,
+        2.914455153306752,
+        1.0057303638341661
+      ],
+      "to": [
+        4.55,
+        3.664455153306752,
+        1.8057303638341662
+      ],
+      "material": "crystal",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            77,
+            59,
+            79,
+            61
+          ],
+          "texture": "#cortex"
+        },
+        "east": {
+          "uv": [
+            81,
+            59,
+            83,
+            61
+          ],
+          "texture": "#cortex"
+        },
+        "south": {
+          "uv": [
+            85,
+            59,
+            87,
+            61
+          ],
+          "texture": "#cortex"
+        },
+        "west": {
+          "uv": [
+            89,
+            59,
+            91,
+            61
+          ],
+          "texture": "#cortex"
+        },
+        "up": {
+          "uv": [
+            93,
+            59,
+            95,
+            61
+          ],
+          "texture": "#cortex"
+        },
+        "down": {
+          "uv": [
+            97,
+            59,
+            99,
+            61
+          ],
+          "texture": "#cortex"
+        }
+      }
+    },
+    {
+      "name": "corpus_callosum",
+      "from": [
+        -0.8,
+        -2.085544846693248,
+        -2.494269636165834
+      ],
+      "to": [
+        0.8,
+        -0.6855448466932479,
+        2.005730363834166
+      ],
+      "material": "nerve",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        0.5144551533067521,
+        0.005730363834166141
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            101,
+            59,
+            104,
+            62
+          ],
+          "texture": "#cortex"
+        },
+        "east": {
+          "uv": [
+            106,
+            59,
+            115,
+            62
+          ],
+          "texture": "#cortex"
+        },
+        "south": {
+          "uv": [
+            117,
+            59,
+            120,
+            62
+          ],
+          "texture": "#cortex"
+        },
+        "west": {
+          "uv": [
+            1,
+            68,
+            10,
+            71
+          ],
+          "texture": "#cortex"
+        },
+        "up": {
+          "uv": [
+            12,
+            68,
+            15,
+            77
+          ],
+          "texture": "#cortex"
+        },
+        "down": {
+          "uv": [
+            17,
+            68,
+            20,
+            77
+          ],
+          "texture": "#cortex"
+        }
+      }
+    },
+    {
+      "name": "brainstem",
+      "from": [
+        -0.8,
+        -4.985544846693248,
+        0.6057303638341661
+      ],
+      "to": [
+        0.8,
+        -1.6855448466932481,
+        2.2057303638341663
+      ],
+      "material": "nerve",
+      "rotation": [
+        25,
+        0,
+        0
+      ],
+      "origin": [
+        0,
+        -1.6855448466932481,
+        1.405730363834166
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            22,
+            68,
+            25,
+            75
+          ],
+          "texture": "#cortex"
+        },
+        "east": {
+          "uv": [
+            27,
+            68,
+            30,
+            75
+          ],
+          "texture": "#cortex"
+        },
+        "south": {
+          "uv": [
+            32,
+            68,
+            35,
+            75
+          ],
+          "texture": "#cortex"
+        },
+        "west": {
+          "uv": [
+            37,
+            68,
+            40,
+            75
+          ],
+          "texture": "#cortex"
+        },
+        "up": {
+          "uv": [
+            42,
+            68,
+            45,
+            71
+          ],
+          "texture": "#cortex"
+        },
+        "down": {
+          "uv": [
+            47,
+            68,
+            50,
+            71
+          ],
+          "texture": "#cortex"
+        }
+      }
+    }
+  ]
+}

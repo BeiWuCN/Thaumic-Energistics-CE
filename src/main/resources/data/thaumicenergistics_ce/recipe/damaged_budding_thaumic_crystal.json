@@ -1,0 +1,36 @@
+{
+  "type": "thaumaturge:infusion",
+  "research": {
+    "entry": "thaumicenergistics_ce:mystic_crystal_growth"
+  },
+  "catalyst": {
+    "item": "ae2:damaged_budding_quartz"
+  },
+  "components": [
+    {
+      "item": "thaumaturge:ingot_thaumium"
+    },
+    {
+      "item": "thaumaturge:salis_mundus"
+    }
+  ],
+  "aspects": [
+    {
+      "aspect": "thaumaturge:vitreus",
+      "amount": 16
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
+      "amount": 16
+    },
+    {
+      "aspect": "thaumaturge:terra",
+      "amount": 8
+    }
+  ],
+  "instability": 1,
+  "result": {
+    "id": "thaumicenergistics_ce:damaged_budding_thaumic_crystal",
+    "count": 1
+  }
+}

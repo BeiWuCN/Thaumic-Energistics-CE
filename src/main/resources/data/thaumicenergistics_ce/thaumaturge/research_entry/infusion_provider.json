@@ -2,11 +2,12 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.INFUSIONPROVIDER",
   "parents": [
-    "thaumicenergistics_ce:digisentia",
-    "thaumaturge:infusion"
+    "thaumicenergistics_ce:alchemy_provider",
+    "~thaumaturge:infusion",
+    "~thaumicenergistics_ce:mystic_processor"
   ],
-  "column": 2,
-  "row": -4,
+  "column": 10,
+  "row": -2,
   "meta": [
     "round"
   ],

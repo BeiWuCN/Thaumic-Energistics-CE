@@ -2,11 +2,11 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.ARCANECRAFTINGTERMINAL",
   "parents": [
-    "thaumicenergistics_ce:base_energistics",
-    "thaumicenergistics_ce:digisentia"
+    "thaumicenergistics_ce:digisentia",
+    "~thaumicenergistics_ce:mystic_crystal_circuit"
   ],
-  "column": 0,
-  "row": 2,
+  "column": 6,
+  "row": 4,
   "meta": [
     "round"
   ],

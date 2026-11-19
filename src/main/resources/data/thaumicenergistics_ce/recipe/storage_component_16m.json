@@ -1,0 +1,96 @@
+{
+  "type": "thaumaturge:arcane_workbench_shaped",
+  "research": {
+    "entry": "thaumicenergistics_ce:essentia_storage_16m"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:storage_component_16m",
+    "count": 1
+  },
+  "crystals": [],
+  "pattern": [
+    "LPL",
+    "EGE",
+    "LCL"
+  ],
+  "key": {
+    "E": {
+      "children": [
+        {
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:aer"
+            }
+          },
+          "type": "neoforge:components"
+        },
+        {
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:ignis"
+            }
+          },
+          "type": "neoforge:components"
+        },
+        {
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:aqua"
+            }
+          },
+          "type": "neoforge:components"
+        },
+        {
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:terra"
+            }
+          },
+          "type": "neoforge:components"
+        },
+        {
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:ordo"
+            }
+          },
+          "type": "neoforge:components"
+        },
+        {
+          "items": "thaumaturge:essentia_crystal",
+          "components": {
+            "thaumaturge:crystal_aspect": {
+              "aspect": "thaumaturge:perditio"
+            }
+          },
+          "type": "neoforge:components"
+        }
+      ],
+      "type": "neoforge:compound"
+    },
+    "P": {
+      "item": "megacells:accumulation_processor"
+    },
+    "L": {
+      "item": "thaumicenergistics_ce:storage_component_4m"
+    },
+    "G": {
+      "item": "thaumaturge:warded_glass"
+    },
+    "C": {
+      "item": "thaumicenergistics_ce:mystic_processor"
+    }
+  },
+  "vis": 200,
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "megacells"
+    }
+  ]
+}

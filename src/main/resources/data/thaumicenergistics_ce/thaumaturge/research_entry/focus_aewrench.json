@@ -4,8 +4,8 @@
   "parents": [
     "thaumicenergistics_ce:base_energistics"
   ],
-  "column": 2,
-  "row": 2,
+  "column": 0,
+  "row": -2,
   "meta": [
     "round"
   ],

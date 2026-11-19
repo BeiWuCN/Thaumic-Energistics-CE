@@ -5,6 +5,7 @@
 	"textures": {
 		"positive": "thaumicenergistics_ce:block/distillation_encoder_face",
 		"particle": "thaumicenergistics_ce:block/distillation_encoder_bottom",
+		"all": "thaumicenergistics_ce:block/distillation_encoder_bottom",
 		"bottom": "thaumicenergistics_ce:block/distillation_encoder_bottom",
 		"side": "thaumicenergistics_ce:block/distillation_encoder_front",
 		"top": "thaumicenergistics_ce:block/distillation_encoder_top"

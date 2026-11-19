@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": {
+    "item": "thaumicenergistics_ce:thaumic_upgrade_smithing_template"
+  },
+  "base": {
+    "item": "ae2:fluix_axe"
+  },
+  "addition": {
+    "item": "thaumicenergistics_ce:mystic_crystal_block"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:thaumic_crystal_axe"
+  }
+}

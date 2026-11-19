@@ -1,0 +1,64 @@
+{
+  "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+  "name": "tc.research_name.ESSENTIA_STORAGE_16M",
+  "parents": [
+    "thaumicenergistics_ce:essentia_storage_4m"
+  ],
+  "column": 8,
+  "row": -8,
+  "meta": [
+    "round"
+  ],
+  "icons": [
+    "thaumicenergistics_ce:essentia_cell_16m"
+  ],
+  "stages": [
+    {
+      "text": "tc.research_text.ESSENTIA_STORAGE_16M.stage.1",
+      "required_knowledge": [
+        {
+          "type": "theory",
+          "category": "thaumicenergistics_ce:thaumicenergistics_ce",
+          "amount": 1
+        }
+      ],
+      "obtain": [
+        {
+          "items": [
+            "thaumicenergistics_ce:storage_component_4m"
+          ],
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "text": "tc.research_text.ESSENTIA_STORAGE_16M.stage.2",
+      "recipes": [
+        "thaumicenergistics_ce:storage_component_16m",
+        "thaumicenergistics_ce:essentia_cell_16m",
+        "thaumicenergistics_ce:essentia_cell_16m_from_casing"
+      ]
+    }
+  ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:vacuos",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:cognitio",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:vitreus",
+      "amount": 1
+    }
+  ],
+  "complexity": 2,
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "megacells"
+    }
+  ]
+}

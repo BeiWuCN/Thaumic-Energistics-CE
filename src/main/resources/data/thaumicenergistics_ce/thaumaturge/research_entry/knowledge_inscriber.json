@@ -2,10 +2,10 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.KNOWLEDGEINSCRIBER",
   "parents": [
-    "thaumicenergistics_ce:arcane_assembler"
+    "thaumicenergistics_ce:knowledge_core"
   ],
-  "column": 0,
-  "row": -8,
+  "column": 8,
+  "row": 2,
   "meta": [
     "round"
   ],

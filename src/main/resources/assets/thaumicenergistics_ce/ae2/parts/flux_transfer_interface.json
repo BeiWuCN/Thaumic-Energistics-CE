@@ -1,0 +1,1 @@
+{"model":{"type":"ae2:composite","models":[{"type":"ae2:model","model":"thaumicenergistics_ce:parts/flux_transfer_interface_base"},{"type":"ae2:status_indicator","active":"thaumicenergistics_ce:parts/flux_transfer_interface_has_channel","powered":"thaumicenergistics_ce:parts/flux_transfer_interface_on","unpowered":"thaumicenergistics_ce:parts/flux_transfer_interface_off"}]}}

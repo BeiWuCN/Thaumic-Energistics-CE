@@ -2,9 +2,10 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.ALCHEMYPROVIDER",
   "parents": [
-    "thaumicenergistics_ce:essentia_terminal"
+    "thaumicenergistics_ce:digisentia",
+    "~thaumicenergistics_ce:mystic_crystal_circuit"
   ],
-  "column": -6,
+  "column": 6,
   "row": -2,
   "meta": [
     "round"

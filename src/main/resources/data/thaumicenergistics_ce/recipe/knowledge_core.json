@@ -1,6 +1,5 @@
 {
   "type": "thaumaturge:arcane_workbench_shaped",
-  "_note": "The 1.12.2 build's KNOWLEDGE_CORE: vibrant quartz glass, blue dye, a zombie brain and a calculation processor, at 100 vis. The newer reference uses plain quartz glass and a cheaper price; the 1.12.2 shape is taken because it is the complete 3x3, and because this mod's other recipes already follow that build's forms.",
   "crystals": [],
   "key": {
     "G": {
@@ -14,16 +13,22 @@
     },
     "P": {
       "item": "ae2:calculation_processor"
+    },
+    "M": {
+      "item": "thaumicenergistics_ce:mystic_circuit_board"
     }
   },
   "pattern": [
-    "GLG",
+    "GMG",
     "LBL",
     "GPG"
   ],
-  "vis": 100,
+  "vis": 60,
   "result": {
     "id": "thaumicenergistics_ce:knowledge_core",
     "count": 1
+  },
+  "research": {
+    "entry": "thaumicenergistics_ce:knowledge_core"
   }
 }

@@ -1,0 +1,196 @@
+package com.beiwu.thaumicenergistics_ce.client.render.bubble;
+
+import com.leclowndu93150.thaumaturge.api.aspect.AspectKnowledgeAccess;
+import com.leclowndu93150.thaumaturge.api.client.AspectRendering;
+import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.List;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import com.beiwu.thaumicenergistics_ce.blockentity.occultmonitor.BlockEntityOccultMonitor;
+import com.beiwu.thaumicenergistics_ce.client.render.bubble.BubbleCells.Cell;
+import com.beiwu.thaumicenergistics_ce.client.render.bubble.BubbleCells.ChipCell;
+import com.beiwu.thaumicenergistics_ce.client.render.bubble.BubbleCells.TextCell;
+import com.beiwu.thaumicenergistics_ce.util.ThELog;
+
+/**
+ * 神秘监控器浮在自己上方的气泡：祭坛多危险、在做什么、房间能不能做完，
+ * 以及它是画出来的不是生成的实体，崩溃会漏下 {@code TextDisplay}。内容是
+ * {@link BubbleCells}，底框是 {@link RoundedPanel}；留在这里的是姿态、单元格的两种画法，
+ * 和面板绘制所及的几个方块。
+ */
+public class OccultMonitorBubbleRenderer implements BlockEntityRenderer<BlockEntityOccultMonitor> {
+
+    private static final double HEIGHT = 1.7;
+
+    private static final float SCALE = 0.0125F;
+
+    private static final float PADDING_X = 5.0F;
+    private static final float PADDING_Y = 4.0F;
+
+    /** 气泡画到多远：8 个方块。超过就是玩家走开了，面板不构建、不测量也不绘制，根本传不到这里。 */
+    private static final int CULL_RANGE = 8;
+
+    /** 穿墙那份文本的颜色，取自命名牌的原版值。 */
+    private static final int SEE_THROUGH_TEXT = 553648127;
+
+    /** 默认关，除非 {@code THAUMICENERGISTICS_MONITOR_TRACE=true}；气泡是画出来的，不是发出来的。 */
+    private static final boolean TRACE =
+            "true".equalsIgnoreCase(System.getenv("THAUMICENERGISTICS_MONITOR_TRACE"));
+
+    private static long lastTrace;
+
+    private final BubbleCells cells = new BubbleCells();
+
+    public OccultMonitorBubbleRenderer(BlockEntityRendererProvider.Context context) {}
+
+    /** 同样是 8 个方块，在 {@link #shouldRender} 之前问：机器直接从客户端列表剔除，不是遍历到了才跳过。 */
+    @Override
+    public int getViewDistance() {
+        return CULL_RANGE;
+    }
+
+    /** 剔除的近端：阅读距离，从机器自己那格起算。 */
+    @Override
+    public boolean shouldRender(BlockEntityOccultMonitor monitor, Vec3 cameraPos) {
+        return Vec3.atCenterOf(monitor.getBlockPos()).closerThan(cameraPos, CULL_RANGE);
+    }
+
+    @Override
+    public void render(
+            BlockEntityOccultMonitor monitor,
+            float partialTick,
+            PoseStack pose,
+            MultiBufferSource buffers,
+            int packedLight,
+            int packedOverlay) {
+        if (TRACE) {
+            long now = System.currentTimeMillis();
+            if (now - lastTrace > 2000) {
+                lastTrace = now;
+                ThELog.LOG.info(
+                        "[bubble] at {} reporting={} tier={} instability={} crafting={} essentia={} light={}",
+                        monitor.getBlockPos(), monitor.bubbleReporting(), monitor.bubbleTier(),
+                        monitor.bubbleInstability(), monitor.bubbleCrafting(), monitor.bubbleEssentia(),
+                        Integer.toHexString(packedLight));
+            }
+        }
+        if (!monitor.bubbleReporting()) {
+            return;
+        }
+        Minecraft minecraft = Minecraft.getInstance();
+        Font font = minecraft.font;
+        List<List<Cell>> rows = cells.rowsFor(font, monitor);
+        if (rows.isEmpty()) {
+            return;
+        }
+
+        float width = 0;
+        float height = 0;
+        for (List<Cell> row : rows) {
+            width = Math.max(width, BubbleCells.rowWidth(font, row));
+            height += BubbleCells.rowHeight(row);
+        }
+        float panelWidth = width + PADDING_X * 2;
+        float panelHeight = height + PADDING_Y * 2;
+
+        pose.pushPose();
+        pose.translate(0.5, HEIGHT, 0.5);
+        pose.mulPose(minecraft.getEntityRenderDispatcher().cameraOrientation());
+        pose.scale(SCALE, -SCALE, SCALE);
+        Matrix4f matrix = pose.last().pose();
+
+        // 以锚点居中，面板往两边长，不从方块表面往下伸。
+        float left = -panelWidth / 2.0F;
+        float top = -panelHeight / 2.0F;
+        RoundedPanel.draw(buffers, matrix, left, top, left + panelWidth, top + panelHeight);
+
+        float y = top + PADDING_Y;
+        for (List<Cell> row : rows) {
+            float rowWidth = BubbleCells.rowWidth(font, row);
+            float x = -rowWidth / 2.0F;
+            // 按行居中：芯片行比文字行高。
+            float textY = y + (BubbleCells.rowHeight(row) - font.lineHeight) / 2.0F;
+            for (Cell cell : row) {
+                drawCell(pose, buffers, font, cell, x, y, textY, true);
+                x += BubbleCells.stride(font, cell);
+            }
+            y += BubbleCells.rowHeight(row);
+        }
+        // 关掉深度测试再画一遍文字，数字能穿墙看；芯片不重画。
+        y = top + PADDING_Y;
+        for (List<Cell> row : rows) {
+            float rowWidth = BubbleCells.rowWidth(font, row);
+            float x = -rowWidth / 2.0F;
+            float textY = y + (BubbleCells.rowHeight(row) - font.lineHeight) / 2.0F;
+            for (Cell cell : row) {
+                if (cell instanceof TextCell text) {
+                    drawText(font, text.text(), x, textY, buffers, matrix, false);
+                }
+                x += BubbleCells.stride(font, cell);
+            }
+            y += BubbleCells.rowHeight(row);
+        }
+        pose.popPose();
+    }
+
+    /** 在 {@code x}、{@code y} 画一个单元格，即该行左上角。 */
+    private static void drawCell(
+            PoseStack pose,
+            MultiBufferSource buffers,
+            Font font,
+            Cell cell,
+            float x,
+            float rowTop,
+            float textY,
+            boolean solid) {
+        switch (cell) {
+            case TextCell text -> drawText(font, text.text(), x, textY, buffers, pose.last().pose(), solid);
+            case ChipCell chip -> {
+                // 由 Thaumaturge 自己的世界渲染器画，纹理、混合和未发现要素遮罩才对。
+                // 纵向取负缩放：面板姿态是 (x, -y)，纹理会翻。
+                float size = BubbleCells.CHIP;
+                pose.pushPose();
+                pose.translate(x + size / 2.0F, rowTop + size / 2.0F, 0.0F);
+                pose.scale(size, -size, 1.0F);
+                var knowledge = AspectKnowledgeAccess.of(chip.aspect());
+                AspectRendering.renderQuad(
+                        pose,
+                        buffers.getBuffer(AspectRendering.renderType(
+                                chip.aspect(), knowledge, AspectRendering.BlendMode.ALPHA)),
+                        chip.aspect(),
+                        1.0F,
+                        false,
+                        LightTexture.FULL_BRIGHT);
+                pose.popPose();
+            }
+        }
+    }
+
+    private static void drawText(
+            Font font,
+            Component text,
+            float x,
+            float y,
+            MultiBufferSource buffers,
+            Matrix4f matrix,
+            boolean solid) {
+        font.drawInBatch(
+                text,
+                x,
+                y,
+                solid ? 0xFFFFFFFF : SEE_THROUGH_TEXT,
+                true,
+                matrix,
+                buffers,
+                solid ? Font.DisplayMode.NORMAL : Font.DisplayMode.SEE_THROUGH,
+                0,
+                LightTexture.FULL_BRIGHT);
+    }
+}

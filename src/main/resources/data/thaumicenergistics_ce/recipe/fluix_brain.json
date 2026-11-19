@@ -1,0 +1,58 @@
+{
+  "type": "thaumaturge:infusion",
+  "research": {
+    "entry": "thaumicenergistics_ce:fluix_brain"
+  },
+  "catalyst": {
+    "item": "thaumaturge:brain"
+  },
+  "components": [
+    {
+      "item": "ae2:fluix_crystal"
+    },
+    {
+      "item": "ae2:fluix_crystal"
+    },
+    {
+      "item": "ae2:fluix_crystal"
+    },
+    {
+      "item": "ae2:fluix_crystal"
+    },
+    {
+      "item": "thaumicenergistics_ce:mystic_processor"
+    },
+    {
+      "item": "thaumicenergistics_ce:mystic_processor"
+    },
+    {
+      "item": "minecraft:ender_pearl"
+    },
+    {
+      "item": "thaumaturge:salis_mundus"
+    }
+  ],
+  "aspects": [
+    {
+      "aspect": "thaumaturge:cognitio",
+      "amount": 64
+    },
+    {
+      "aspect": "thaumaturge:permutatio",
+      "amount": 32
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
+      "amount": 32
+    },
+    {
+      "aspect": "thaumaturge:vitium",
+      "amount": 16
+    }
+  ],
+  "instability": 6,
+  "result": {
+    "id": "thaumicenergistics_ce:fluix_brain",
+    "count": 1
+  }
+}

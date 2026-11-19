@@ -4,8 +4,8 @@
   "parents": [
     "thaumicenergistics_ce:essentia_storage_1k"
   ],
-  "column": -4,
-  "row": 2,
+  "column": 4,
+  "row": -6,
   "meta": [
     "round"
   ],
@@ -25,7 +25,7 @@
       "obtain": [
         {
           "items": [
-            "ae2:cell_component_1k"
+            "thaumicenergistics_ce:storage_component_1k"
           ],
           "amount": 1
         }

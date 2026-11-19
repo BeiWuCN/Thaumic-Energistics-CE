@@ -7,13 +7,13 @@
       "item": "minecraft:white_wool"
     },
     "C": {
-      "type": "neoforge:components",
       "items": "thaumaturge:essentia_crystal",
       "components": {
         "thaumaturge:crystal_aspect": {
           "aspect": "thaumaturge:fabrico"
         }
-      }
+      },
+      "type": "neoforge:components"
     },
     "T": {
       "item": "thaumaturge:ingot_thaumium"

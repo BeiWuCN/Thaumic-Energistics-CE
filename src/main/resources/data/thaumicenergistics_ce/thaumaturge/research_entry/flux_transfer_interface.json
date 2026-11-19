@@ -3,10 +3,12 @@
   "name": "tc.research_name.FLUXTRANSFERINTERFACE",
   "parents": [
     "thaumicenergistics_ce:vis_interface",
-    "thaumaturge:flux"
+    "~thaumaturge:flux",
+    "~thaumicenergistics_ce:mystic_processor",
+    "~thaumaturge:base_eldritch"
   ],
-  "column": -4,
-  "row": -8,
+  "column": 0,
+  "row": 4,
   "meta": [
     "round"
   ],

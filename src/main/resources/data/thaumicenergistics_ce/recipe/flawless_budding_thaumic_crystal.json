@@ -1,0 +1,46 @@
+{
+  "type": "thaumaturge:infusion",
+  "research": {
+    "entry": "thaumicenergistics_ce:advanced_crystal_growth"
+  },
+  "catalyst": {
+    "item": "ae2:flawless_budding_quartz"
+  },
+  "components": [
+    {
+      "item": "thaumaturge:ingot_void"
+    },
+    {
+      "item": "thaumaturge:ingot_void"
+    },
+    {
+      "item": "thaumicenergistics_ce:mystic_processor"
+    },
+    {
+      "item": "thaumaturge:salis_mundus"
+    }
+  ],
+  "aspects": [
+    {
+      "aspect": "thaumaturge:vitreus",
+      "amount": 32
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
+      "amount": 32
+    },
+    {
+      "aspect": "thaumaturge:vacuos",
+      "amount": 16
+    },
+    {
+      "aspect": "thaumaturge:ordo",
+      "amount": 16
+    }
+  ],
+  "instability": 3,
+  "result": {
+    "id": "thaumicenergistics_ce:flawless_budding_thaumic_crystal",
+    "count": 1
+  }
+}

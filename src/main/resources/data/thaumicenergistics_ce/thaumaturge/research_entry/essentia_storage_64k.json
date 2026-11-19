@@ -2,10 +2,11 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.ESSENTIASTORAGE64k",
   "parents": [
-    "thaumicenergistics_ce:essentia_storage_16k"
+    "thaumicenergistics_ce:essentia_storage_16k",
+    "~thaumicenergistics_ce:mystic_processor"
   ],
-  "column": -8,
-  "row": 0,
+  "column": 12,
+  "row": -6,
   "meta": [
     "round"
   ],
@@ -52,6 +53,12 @@
             "ae2:engineering_processor"
           ],
           "amount": 1
+        },
+        {
+          "items": [
+            "thaumicenergistics_ce:mystic_processor"
+          ],
+          "amount": 1
         }
       ]
     },
@@ -59,7 +66,8 @@
       "text": "tc.research_text.ESSENTIASTORAGE64k.stage.2",
       "recipes": [
         "thaumicenergistics_ce:storage_component_64k",
-        "thaumicenergistics_ce:essentia_cell_64k"
+        "thaumicenergistics_ce:essentia_cell_64k",
+        "thaumicenergistics_ce:essentia_cell_64k_from_casing"
       ],
       "knowledge": [
         {

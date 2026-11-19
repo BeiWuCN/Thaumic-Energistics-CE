@@ -2,10 +2,11 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.ESSENTIASTORAGE1k",
   "parents": [
-    "thaumicenergistics_ce:base_energistics"
+    "thaumicenergistics_ce:mystic_crystal_growth",
+    "~thaumicenergistics_ce:mystic_crystal_circuit"
   ],
-  "column": -2,
-  "row": 0,
+  "column": 6,
+  "row": -6,
   "meta": [
     "round"
   ],
@@ -31,21 +32,15 @@
       "obtain": [
         {
           "items": [
-            "thaumaturge:salis_mundus"
-          ],
-          "amount": 4
-        },
-        {
-          "items": [
-            "ae2:quartz_vibrant_glass"
-          ],
-          "amount": 4
-        },
-        {
-          "items": [
-            "ae2:calculation_processor"
+            "thaumicenergistics_ce:mystic_circuit_board"
           ],
           "amount": 1
+        },
+        {
+          "items": [
+            "thaumicenergistics_ce:mystic_crystal"
+          ],
+          "amount": 4
         }
       ]
     },
@@ -53,7 +48,9 @@
       "text": "tc.research_text.ESSENTIASTORAGE1k.stage.2",
       "recipes": [
         "thaumicenergistics_ce:storage_component_1k",
-        "thaumicenergistics_ce:essentia_cell_1k"
+        "thaumicenergistics_ce:essentia_cell_1k",
+        "thaumicenergistics_ce:storage_casing",
+        "thaumicenergistics_ce:essentia_cell_1k_from_casing"
       ],
       "knowledge": [
         {

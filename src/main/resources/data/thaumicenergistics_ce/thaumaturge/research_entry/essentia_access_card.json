@@ -2,9 +2,9 @@
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
   "name": "tc.research_name.ESSENTIAACCESSCARD",
   "parents": [
-    "thaumicenergistics_ce:digisentia"
+    "thaumicenergistics_ce:essentia_level_emitter"
   ],
-  "column": 4,
+  "column": 10,
   "row": 0,
   "meta": [
     "round"

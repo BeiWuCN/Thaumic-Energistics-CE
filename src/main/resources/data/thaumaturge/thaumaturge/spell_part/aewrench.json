@@ -1,0 +1,9 @@
+{
+    "aspect": "thaumaturge:potentia",
+    "behavior": {
+        "type": "thaumaturge:aewrench"
+    },
+    "color": 5227511,
+    "complexity": 10,
+    "icon": "thaumicenergistics_ce:textures/foci/aewrench.png"
+}

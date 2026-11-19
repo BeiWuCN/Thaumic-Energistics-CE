@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "thaumicenergistics_ce:item/thaumic_crystal_pickaxe"
+  }
+}

@@ -27,5 +27,8 @@
   "result": {
     "id": "thaumicenergistics_ce:focus_aewrench",
     "count": 1
+  },
+  "research": {
+    "entry": "thaumicenergistics_ce:focus_aewrench"
   }
 }
