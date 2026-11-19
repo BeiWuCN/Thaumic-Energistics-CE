@@ -3,7 +3,6 @@ import com.beiwu.thaumicenergistics_ce.registry.TECEItems;
 
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import net.minecraft.resources.ResourceLocation;
@@ -14,7 +13,7 @@ import com.beiwu.thaumicenergistics_ce.util.ThELog;
  * Thaumic Energistics 的 JEI 插件，配方转移那一半，两侧 JEI 都会向它索取。
  * 这里不写任何界面类，专用服务端也要跑它。
  * 幽灵原料处理器在另一个插件 [client.jei.ThEJeiClientPlugin] 里，有自己的 UID。
- * 两个插件都用 Thaumaturge 的配方分类，铭刻机编码的内容与合成一致。
+ * 奥术合成终端只接奥术工作台的分类：原版合成页上不再给它转移按钮。
  */
 @JeiPlugin
 public class ThEJeiPlugin implements IModPlugin {
@@ -53,10 +52,7 @@ public class ThEJeiPlugin implements IModPlugin {
         registration.addRecipeTransferHandler(
                 new ArcaneCraftingRecipeTransfer(registration.getTransferHelper()),
                 ArcaneJeiRecipeType.arcane());
-        // 普通合成配方也注册：终端网格就是九个普通槽位。
-        // 玩家打开木板配方发现没有转移按钮，会以为终端坏了。
-        registration.addRecipeTransferHandler(
-                new CraftingRecipeTransfer(registration.getTransferHelper()), RecipeTypes.CRAFTING);
+        // 原版合成页上不再给终端注册：终端只认奥术配方，普通合成交给工作台自己。
         // 坩埚配方编成处理样板，不从合成分类走：它要的是源质，不是九个格子。
         // 这条也把坩埚配方从 AE2 的通用处理器手里接过来——通用那条会把要素丢掉。
         registration.addRecipeTransferHandler(
