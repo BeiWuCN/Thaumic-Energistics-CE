@@ -1,0 +1,15 @@
+{
+  "default_language": "en_us",
+  "item_settings": {
+    "display_name": {
+      "type": "translatable",
+      "translate": "gui.thaumicenergistics_ce.guide.name"
+    },
+    "tooltip_lines": [
+      {
+        "text": "Essentia and the ME network",
+        "color": "dark_gray"
+      }
+    ]
+  }
+}

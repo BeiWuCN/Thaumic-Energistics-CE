@@ -468,5 +468,15 @@
   "item.thaumicenergistics_ce.storage_component_256m": "256M Essentia Storage Component",
   "tc.research_name.ESSENTIA_STORAGE_256M": "256M Essentia Storage",
   "tc.research_text.ESSENTIA_STORAGE_256M.stage.1": "I can no longer measure the space within.",
-  "tc.research_text.ESSENTIA_STORAGE_256M.stage.2": "Such a small crystal, such a vast abyss."
+  "tc.research_text.ESSENTIA_STORAGE_256M.stage.2": "Such a small crystal, such a vast abyss.",
+  "gui.thaumicenergistics_ce.guide.name": "Thaumic Energistics: CE Guide",
+  "gui.thaumicenergistics_ce.guide.tooltip": "Notes on essentia and the ME network",
+  "gui.thaumicenergistics_ce.guide.stage": "Step %d",
+  "gui.thaumicenergistics_ce.guide.back": "Back to index",
+  "gui.thaumicenergistics_ce.guide.intro.title": "About this guide",
+  "gui.thaumicenergistics_ce.guide.intro": "This guide collects every research entry of Thaumic Energistics: CE, organised along the same chapters as the Thaumonomicon. Each entry keeps the original wording from the manual so it can be read from the ME side at any time.",
+  "gui.thaumicenergistics_ce.guide.thaumaturge.title": "Thaumonomicon chapters",
+  "gui.thaumicenergistics_ce.guide.thaumaturge": "Research in this mod unlocks through the Thaumaturge Thaumonomicon. The chapters below belong to the upstream manual; consult it there. They are prerequisites for the entries in this guide.",
+  "gui.thaumicenergistics_ce.guide.extra.title": "Additional research",
+  "gui.thaumicenergistics_ce.guide.extra": "These entries also come from the Thaumaturge Thaumonomicon and cover infusion, wand foci and golems. This guide does not repeat them; they are listed here for reference."
 }
