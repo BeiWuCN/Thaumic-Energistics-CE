@@ -18,8 +18,6 @@ import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.recipe.transfer.IRecipeTransferInfo;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import com.leclowndu93150.thaumaturge.registry.TTItems;
-import com.leclowndu93150.thaumaturge.registry.TTDataComponents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
@@ -29,6 +27,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
 import com.beiwu.thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
+import com.beiwu.thaumicenergistics_ce.network.ArcaneCrystalFillPayload;
 import com.beiwu.thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
@@ -141,11 +140,9 @@ public class ArcaneCraftingRecipeTransfer
 
         // 不传配方 id：配方不在原版管理器里，只能走数据包的模板路径。
         PacketDistributor.sendToServer(new FillCraftingGridFromRecipePacket(null, templates, false));
-        if (maxTransfer) {
-            menu.fillRecipeMax(holder.id().toString());
-        } else {
-            menu.fillRecipeCrystals(holder.id().toString());
-        }
+        // 网格摆好后紧跟着补晶体：晶体槽不在转移范围里，客户端也改不动，
+        // 交给服务端照网格反查配方再补。网络不够时那边整笔放弃，网格保持已转移的样子。
+        PacketDistributor.sendToServer(new ArcaneCrystalFillPayload(menu.containerId));
         return null;
     }
 
@@ -158,7 +155,7 @@ public class ArcaneCraftingRecipeTransfer
     private static ItemStack pickSuppliable(List<ItemStack> variants, @Nullable IClientRepo repo, Player player) {
         ItemStack best = ItemStack.EMPTY;
         long bestSupply = 0;
-        for (ItemStack variant : expandCrystalVariants(variants, repo, player)) {
+        for (ItemStack variant : variants) {
             if (variant.isEmpty()) {
                 continue;
             }
@@ -169,30 +166,6 @@ public class ArcaneCraftingRecipeTransfer
             }
         }
         return best;
-    }
-
-    private static List<ItemStack> expandCrystalVariants(
-            List<ItemStack> variants, @Nullable IClientRepo repo, Player player) {
-        if (variants.stream().noneMatch(stack -> stack.is(TTItems.ESSENTIA_CRYSTAL.get())
-                && !stack.has(TTDataComponents.CRYSTAL_ASPECT.get()))) {
-            return variants;
-        }
-        var expanded = new ArrayList<>(variants);
-        Ingredient crystal = Ingredient.of(TTItems.ESSENTIA_CRYSTAL.get());
-        if (repo != null) {
-            for (GridInventoryEntry entry : repo.getByIngredient(crystal)) {
-                if (entry.getWhat() instanceof AEItemKey key) {
-                    expanded.add(key.toStack());
-                }
-            }
-        }
-        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
-            ItemStack stack = player.getInventory().getItem(slot);
-            if (crystal.test(stack)) {
-                expanded.add(stack);
-            }
-        }
-        return expanded;
     }
 
     /** 网络对这个确切物品报的数量，加玩家身上带的。 */

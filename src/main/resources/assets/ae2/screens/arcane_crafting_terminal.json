@@ -3,17 +3,17 @@
   "includes": ["terminals/terminal.json"],
   "slots": {
     "CRAFTING_GRID": {
-      "left": 26,
+      "left": 33,
       "bottom": 158,
       "grid": "BREAK_AFTER_3COLS"
     },
     "THAUMICENERGISTICS_CRYSTALS_LEFT": {
-      "left": 8,
+      "left": 15,
       "bottom": 158,
       "grid": "VERTICAL"
     },
     "THAUMICENERGISTICS_CRYSTALS_RIGHT": {
-      "left": 80,
+      "left": 87,
       "bottom": 158,
       "grid": "VERTICAL"
     },
@@ -22,34 +22,36 @@
       "bottom": 140
     },
     "STORAGE": {
-      "left": 134,
-      "bottom": 163
+      "left": 111,
+      "bottom": 140
     }
   },
   "widgets": {
-    "visRequired": {
-      "left": 99,
-      "bottom": 172,
-      "width": 31,
-      "height": 16
+    "visUpcoming": {
+      "left": 121,
+      "bottom": 165,
+      "width": 41,
+      "height": 9
     },
     "visAvailable": {
-      "left": 99,
-      "bottom": 163,
-      "width": 31,
-      "height": 16
-    },
-    "visShortage": {
-      "left": 99,
-      "bottom": 154,
-      "width": 31,
-      "height": 16
+      "left": 121,
+      "bottom": 156,
+      "width": 41,
+      "height": 9
     },
     "visCraftCost": {
-      "left": 97,
-      "bottom": 120,
-      "width": 69,
-      "height": 21
+      "left": 109,
+      "bottom": 118,
+      "width": 59,
+      "height": 19
+    },
+    "clearCraftingGrid": {
+      "left": 109,
+      "bottom": 165
+    },
+    "clearToPlayerInv": {
+      "left": 109,
+      "bottom": 156
     }
   },
   "text": {
@@ -68,7 +70,7 @@
       },
       "position": {
         "left": 8,
-        "bottom": 179
+        "bottom": 177
       }
     },
     "player_inventory_title": {

@@ -30,7 +30,6 @@
   "client": [
     "ResearchMachineRecipeMixin",
     "TerminalScreenVisibilityMixin",
-    "TerminalInventoryScanMixin",
     "TECEGuideSidebarMixin",
     "ArcaneUpgradeTooltipMixin",
     "ArcaneJeiCrystalLayoutMixin",

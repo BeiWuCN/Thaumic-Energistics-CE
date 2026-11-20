@@ -2,9 +2,9 @@
 	"format_version": "1.21.6",
 	"credit": "Made with _leng",
 	"textures": {
-		"sides": "thaumicenergistics_ce:part/arcane_crafting_terminal/arcane_crafting_side",
-		"particle": "ae2:part/monitor_back_no_status",
-		"back": "ae2:part/monitor_back_no_status",
+		"sides": "ae2:part/monitor_sides",
+		"particle": "ae2:part/monitor_back",
+		"back": "ae2:part/monitor_back",
 		"front": "ae2:part/monitor_front"
 	},
 	"elements": [

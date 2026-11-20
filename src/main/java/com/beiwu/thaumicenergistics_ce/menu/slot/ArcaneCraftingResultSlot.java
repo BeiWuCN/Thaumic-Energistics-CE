@@ -7,12 +7,11 @@ import appeng.api.storage.MEStorage;
 import appeng.helpers.ICraftingGridMenu;
 import appeng.helpers.InventoryAction;
 import appeng.menu.slot.CraftingTermSlot;
-import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftCost;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftingTransaction;
+import com.leclowndu93150.thaumaturge.api.recipe.ArcaneWorkbenchContext;
 import com.leclowndu93150.thaumaturge.api.recipe.IArcaneRecipe;
 import com.leclowndu93150.thaumaturge.content.workbench.WorkbenchPayment;
-import com.leclowndu93150.thaumaturge.api.recipe.ArcaneWorkbenchContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -20,7 +19,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingInput;
 import org.jspecify.annotations.Nullable;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.TerminalArcaneCraftingInput;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.TerminalArcaneCraftingStore;
@@ -72,27 +70,18 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         }
         if (!ownerMenu.canCraft()) {
             setDisplayedCraftingOutput(ItemStack.EMPTY);
-            ownerMenu.clearCraftCost();
+            ownerMenu.sendCraftCost(null, 0);
             return;
         }
         TerminalArcaneCraftingInput input = buildInput();
         if (input == null) {
             setDisplayedCraftingOutput(ItemStack.EMPTY);
-            ownerMenu.clearCraftCost();
+            ownerMenu.sendCraftCost(null, 0);
             lastFailure = ArcaneCraftingTransaction.Failure.NONE;
             return;
         }
         var result = ArcaneCraftingTransaction.preview(workbenchContext(), serverPlayer, input);
         lastFailure = result.failure();
-        if (lastFailure == ArcaneCraftingTransaction.Failure.NO_RECIPE) {
-            ItemStack output = vanillaOutput(serverPlayer);
-            if (!output.isEmpty()) {
-                lastFailure = ArcaneCraftingTransaction.Failure.NONE;
-                setDisplayedCraftingOutput(output);
-                ownerMenu.clearCraftCost();
-                return;
-            }
-        }
         if (!result.successful()) {
             ThELog.LOG.info("[arcane] no craft offered for the grid: {}", result.failure());
         }
@@ -100,12 +89,17 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         // 和结果一起发，屏幕就不会给已经变了的网格画开销。
         // 失败也照发：灵气、法杖要素或晶体不够时配方其实是匹配上的，
         // 这几行正该留着告诉玩家差多少，而不是整片消失。
-        var cost = result.cost();
-        ownerMenu.sendCraftCost(cost, auraDiscountPercent(input, cost));
+        ArcaneCraftCost cost = result.cost();
+        ownerMenu.sendCraftCost(cost, cost == null ? 0 : discountPercent(input, cost));
     }
 
-    private int auraDiscountPercent(TerminalArcaneCraftingInput input, @Nullable ArcaneCraftCost cost) {
-        if (cost == null || cost.auraVis() <= 0 || serverPlayer == null) {
+    /**
+     * 灵气减免百分比。工作台那一行在「未聚焦」和「n% 减免」之间二选一，
+     * 比的正是未聚焦开销与实际开销：法杖杖端和减免装备把前者压到后者。
+     * @return 0 表示没有减免，屏幕说「未聚焦」
+     */
+    private int discountPercent(TerminalArcaneCraftingInput input, ArcaneCraftCost cost) {
+        if (cost == null || cost.auraVis() <= 0) {
             return 0;
         }
         var inspection = ArcaneCraftingTransaction.inspect(workbenchContext(), serverPlayer, input);
@@ -116,41 +110,12 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         if (holder == null || !(holder.value() instanceof IArcaneRecipe recipe)) {
             return 0;
         }
-        int undiscounted = WorkbenchPayment.crudeCost(recipe);
-        if (undiscounted <= 0) {
+        int crude = WorkbenchPayment.crudeCost(recipe);
+        if (crude <= 0) {
             return 0;
         }
-        return Math.clamp(Math.round(100.0F * (undiscounted - cost.auraVis()) / undiscounted), 0, 100);
-    }
-
-    public boolean matchesTransferredRecipe(String recipeId) {
-        return inspectTransferredRecipe(recipeId) != null;
-    }
-
-    public AspectList crystalsForTransfer(String recipeId) {
-        var inspection = inspectTransferredRecipe(recipeId);
-        if (inspection == null) {
-            return AspectList.EMPTY;
-        }
-        if (ownerMenu.crystalFirst) {
-            return inspection.requirements().crystals();
-        }
-        var cost = ArcaneCraftingTransaction.preview(workbenchContext(), serverPlayer, buildInput()).cost();
-        return cost == null ? AspectList.EMPTY : cost.crystalsNeeded();
-    }
-
-    private ArcaneCraftingTransaction.@Nullable Inspection inspectTransferredRecipe(String recipeId) {
-        var input = buildInput();
-        if (serverPlayer == null || input == null) {
-            return null;
-        }
-        var context = workbenchContext();
-        var inspection = ArcaneCraftingTransaction.inspect(context, serverPlayer, input);
-        if (!inspection.successful() || inspection.recipeId() == null
-                || !inspection.recipeId().location().toString().equals(recipeId)) {
-            return null;
-        }
-        return inspection;
+        int percent = (int) Math.round((crude - cost.auraVis()) * 100.0 / crude);
+        return Math.max(0, Math.min(100, percent));
     }
 
     public ArcaneCraftingTransaction.Failure lastFailure() {
@@ -191,15 +156,6 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
                 if (result.successful()) transaction.commit();
             }
             if (!result.successful()) {
-                if (i == 0 && result.failure() == ArcaneCraftingTransaction.Failure.NO_RECIPE) {
-                    ItemStack output = vanillaOutput(server);
-                    if (!output.isEmpty()) {
-                        setDisplayedCraftingOutput(output);
-                        super.doClick(action, who);
-                        refresh();
-                        return;
-                    }
-                }
                 ThELog.LOG.info(
                         "[arcane] craft click refused: successful={} failure={}",
                         result.successful(), result.failure());
@@ -228,16 +184,6 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
             }
             refresh();
         }
-    }
-
-    private ItemStack vanillaOutput(ServerPlayer player) {
-        var level = player.level();
-        var grid = ownerMenu.craftingInventory();
-        var input = CraftingInput.of(3, 3, IntStream.range(0, grid.size())
-                .mapToObj(grid::getStackInSlot)
-                .toList());
-        var recipe = findRecipe(input, level);
-        return recipe == null ? ItemStack.EMPTY : recipe.value().assemble(input, level.registryAccess());
     }
 
     /** 普通点击把产物放到光标上，批量合成填满物品栏；提交时费用已扣。
@@ -301,7 +247,8 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         // 不再问槽位，提交才不会和模拟对不上。
         boolean visConnection = ownerMenu.hasVisConnectionCard();
         return new TerminalArcaneCraftingInput(
-                cells, serverPlayer, wand, crystals, part, ownerMenu.auraPayer(), visConnection, ownerMenu.crystalFirst);
+                cells, serverPlayer, wand, crystals, part, ownerMenu.auraPayer(), visConnection,
+                ownerMenu.crystalFirst());
     }
 
     /** 归这台机器和这名玩家的虚拟工作台：线缆上的终端没有方块可指。 */

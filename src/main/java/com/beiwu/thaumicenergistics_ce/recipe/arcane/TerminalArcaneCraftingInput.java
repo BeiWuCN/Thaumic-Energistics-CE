@@ -58,6 +58,8 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
      * 供给调用里再读卡片，就可能中途换答案。
      */
     private final boolean visConnection;
+
+    /** true = 先用水晶槽里的整颗晶体付；false = 让法杖 6 要素按 2:1 顶替水晶。 */
     private final boolean crystalFirst;
 
     /**
@@ -112,7 +114,7 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
             @Nullable PartArcaneCraftingTerminal part,
             @Nullable IEnergySource payer,
             boolean visConnection) {
-        this(grid, player, wand, crystalSlots, part, payer, visConnection, true);
+        this(grid, player, wand, crystalSlots, part, payer, visConnection, false);
     }
 
     /**
@@ -219,6 +221,7 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
         return visConnection;
     }
 
+    /** 当前付费源：true 用整颗水晶先付，false 让法杖要素顶。切换按钮冻结在输入里。 */
     public boolean crystalFirst() {
         return crystalFirst;
     }

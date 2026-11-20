@@ -54,12 +54,6 @@ import com.beiwu.thaumicenergistics_ce.network.GolemBackpackPayload;
 public final class ClientSetup {
     private ClientSetup() {}
 
-    @SubscribeEvent
-    public static void registerScanTooltip(
-            net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent event) {
-        event.register(com.beiwu.thaumicenergistics_ce.client.gui.TerminalScanTooltip.Aspects.class, row -> row);
-    }
-
     /**
      * 客户端的 AE2 注册，挂在 {@code FMLClientSetupEvent} 上。
      * 它和界面都要赶在任何绘制之前就位。
