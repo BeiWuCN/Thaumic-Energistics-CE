@@ -27,9 +27,21 @@
     }
   },
   "widgets": {
+    "visRequired": {
+      "left": 99,
+      "bottom": 172,
+      "width": 31,
+      "height": 16
+    },
     "visAvailable": {
       "left": 99,
       "bottom": 163,
+      "width": 31,
+      "height": 16
+    },
+    "visShortage": {
+      "left": 99,
+      "bottom": 154,
       "width": 31,
       "height": 16
     },

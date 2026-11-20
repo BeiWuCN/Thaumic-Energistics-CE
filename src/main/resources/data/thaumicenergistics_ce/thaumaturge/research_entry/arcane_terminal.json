@@ -42,11 +42,11 @@
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:potentia",
+      "aspect": "thaumaturge:praecantatio",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:machina",
+      "aspect": "thaumaturge:ordo",
       "amount": 1
     }
   ],

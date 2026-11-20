@@ -18,9 +18,22 @@
     {"text": "tc.research_text.FLUIX_BRAIN.stage.2", "recipes": ["thaumicenergistics_ce:fluix_brain"], "warp": 1}
   ],
   "note_aspects": [
-    {"aspect": "thaumaturge:cognitio", "amount": 3},
-    {"aspect": "thaumaturge:permutatio", "amount": 2},
-    {"aspect": "thaumaturge:vitium", "amount": 2}
+    {
+      "aspect": "thaumaturge:cognitio",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:spiritus",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:potentia",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:vitreus",
+      "amount": 1
+    }
   ],
   "complexity": 3
 }

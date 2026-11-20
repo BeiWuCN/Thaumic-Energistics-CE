@@ -68,15 +68,15 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:cognitio",
-      "amount": 1
-    },
-    {
-      "aspect": "thaumaturge:fabrico",
-      "amount": 1
-    },
-    {
       "aspect": "thaumaturge:permutatio",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:ordo",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
       "amount": 1
     }
   ],

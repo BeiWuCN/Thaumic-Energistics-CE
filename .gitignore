@@ -43,4 +43,4 @@ LICENSE-ORIGINAL-MIT
 # Local migration evidence and verification-only launchers.
 porting/
 config-examples/
-.run/TECE Game Tests*.run.xml
+/.run/

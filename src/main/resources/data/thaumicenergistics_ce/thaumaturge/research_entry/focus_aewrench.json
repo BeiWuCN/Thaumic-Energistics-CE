@@ -37,11 +37,11 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:machina",
+      "aspect": "thaumaturge:instrumentum",
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:instrumentum",
+      "aspect": "thaumaturge:machina",
       "amount": 1
     },
     {

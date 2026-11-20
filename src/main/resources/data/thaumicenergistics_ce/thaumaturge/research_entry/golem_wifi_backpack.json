@@ -38,19 +38,19 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:potentia",
+      "aspect": "thaumaturge:exanimis",
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:auram",
-      "amount": 1
-    },
-    {
-      "aspect": "thaumaturge:humanus",
-      "amount": 1
-    },
-    {
       "aspect": "thaumaturge:motus",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:aer",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:vacuos",
       "amount": 1
     }
   ],

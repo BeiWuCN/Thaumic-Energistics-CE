@@ -7,7 +7,10 @@
     "id": "thaumicenergistics_ce:distillation_encoder",
     "count": 1
   },
-  "crystals": [],
+  "crystals": [
+    { "aspect": "thaumaturge:aqua" },
+    { "aspect": "thaumaturge:perditio" }
+  ],
   "pattern": [
     "GEG",
     "UDU",

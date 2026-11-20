@@ -15,63 +15,7 @@
   ],
   "key": {
     "E": {
-      "children": [
-        {
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:aer"
-            }
-          },
-          "type": "neoforge:components"
-        },
-        {
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:ignis"
-            }
-          },
-          "type": "neoforge:components"
-        },
-        {
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:aqua"
-            }
-          },
-          "type": "neoforge:components"
-        },
-        {
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:terra"
-            }
-          },
-          "type": "neoforge:components"
-        },
-        {
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:ordo"
-            }
-          },
-          "type": "neoforge:components"
-        },
-        {
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:perditio"
-            }
-          },
-          "type": "neoforge:components"
-        }
-      ],
-      "type": "neoforge:compound"
+      "tag": "thaumaturge:vis_crystals"
     },
     "P": {
       "item": "ae2:calculation_processor"

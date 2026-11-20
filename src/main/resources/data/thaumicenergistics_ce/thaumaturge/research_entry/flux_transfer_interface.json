@@ -48,17 +48,21 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:auram",
-      "amount": 2
-    },
-    {
-      "aspect": "thaumaturge:machina",
+      "aspect": "thaumaturge:vitium",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:ordo",
+      "aspect": "thaumaturge:motus",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:vinculum",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:perditio",
       "amount": 1
     }
   ],
-  "complexity": 2
+  "complexity": 3
 }

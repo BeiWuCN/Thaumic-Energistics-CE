@@ -1,12 +1,16 @@
 package com.beiwu.thaumicenergistics_ce.menu;
 import com.beiwu.thaumicenergistics_ce.config.ThEConfig;
 
+import appeng.api.config.Actionable;
 import appeng.api.implementations.menuobjects.IPortableTerminal;
 import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.security.IActionHost;
 import appeng.api.storage.ITerminalHost;
+import appeng.api.storage.StorageHelper;
+import appeng.api.stacks.AEItemKey;
+import appeng.util.inv.PlayerInternalInventory;
 import appeng.helpers.ICraftingGridMenu;
 import appeng.menu.SlotSemantic;
 import appeng.menu.SlotSemantics;
@@ -18,6 +22,8 @@ import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftCost;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,6 +35,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.ArcaneTerminalHost;
+import com.beiwu.thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
 import com.beiwu.thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import com.beiwu.thaumicenergistics_ce.registry.TECEItems;
@@ -100,6 +107,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
     private @Nullable ArcaneCraftingResultSlot resultSlot;
 
+    private final ArcaneTerminalRuntime runtime = new ArcaneTerminalRuntime();
     private int craftInputSignature = -1;
     private boolean lastConnected;
     @appeng.menu.guisync.GuiSync(110)
@@ -107,6 +115,21 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
     @appeng.menu.guisync.GuiSync(111)
     public boolean essentiaAccessEnabled;
+
+    @appeng.menu.guisync.GuiSync(112)
+    public boolean crystalFirst = true;
+    @appeng.menu.guisync.GuiSync(113)
+    public int requiredAuraVis;
+
+    @appeng.menu.guisync.GuiSync(114)
+    public int auraDiscountPercent;
+
+    private static final String CRYSTAL_FIRST_PREFERENCE = "thaumicenergistics_ce:arcane_crystal_first";
+    private static final String ACTION_FILL_RECIPE_MAX = "fillRecipeMax";
+    private static final String ACTION_FILL_CRYSTALS = "fillRecipeCrystals";
+    private static final String ACTION_TOGGLE_PAYMENT = "togglePayment";
+    private static final String ACTION_RETURN_TO_NETWORK = "returnToNetwork";
+    private static final String ACTION_RETURN_TO_INVENTORY = "returnToInventory";
 
     /** 上次说「替身槽位不收东西」的时刻。初值 -100 让第一次点击就能出声，之后两秒一次。 */
     private int lastPlaceholderRefusal = -100;
@@ -183,9 +206,19 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
         // 5. 玩家槽位，最后加，且只加一次；父类调用传 [createPlayerSlots] = false。
         createPlayerInventorySlots(playerInventory);
+        if (playerInventory.player instanceof ServerPlayer server) {
+            var preferences = server.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG);
+            crystalFirst = !preferences.contains(CRYSTAL_FIRST_PREFERENCE, Tag.TAG_BYTE)
+                    || preferences.getBoolean(CRYSTAL_FIRST_PREFERENCE);
+        }
 
         // 开菜单时刷一次结果，上次留下的网格才显示得出来。
         resultSlot.refresh();
+        registerClientAction(ACTION_TOGGLE_PAYMENT, this::togglePaymentSource);
+        registerClientAction(ACTION_FILL_CRYSTALS, String.class, this::fillRecipeCrystals);
+        registerClientAction(ACTION_FILL_RECIPE_MAX, String.class, this::fillRecipeMax);
+        registerClientAction(ACTION_RETURN_TO_NETWORK, () -> returnCraftingGrid(true));
+        registerClientAction(ACTION_RETURN_TO_INVENTORY, () -> returnCraftingGrid(false));
     }
 
 
@@ -282,16 +315,219 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         return moved > 0 ? moved : super.transferStackToMenu(stack);
     }
 
+    public void fillRecipeMax(String recipeId) {
+        if (isClientSide()) {
+            sendClientAction(ACTION_FILL_RECIPE_MAX, recipeId);
+            return;
+        }
+        if (!isValidMenu() || !stillValid(getPlayer()) || !canCraft() || resultSlot == null
+                || !resultSlot.matchesTransferredRecipe(recipeId)) {
+            return;
+        }
+
+        var byItem = new LinkedHashMap<AEItemKey, List<Integer>>();
+        int batches = Integer.MAX_VALUE;
+        for (int slot = 0; slot < craftingGrid.size(); slot++) {
+            ItemStack stack = craftingGrid.getStackInSlot(slot);
+            var key = AEItemKey.of(stack);
+            if (key != null) {
+                byItem.computeIfAbsent(key, ignored -> new ArrayList<>()).add(slot);
+                batches = Math.min(batches, stack.getMaxStackSize());
+            }
+        }
+        if (byItem.isEmpty()) {
+            return;
+        }
+
+        Inventory playerInventory = getPlayerInventory();
+        for (var entry : byItem.entrySet()) {
+            var key = entry.getKey();
+            var slots = entry.getValue();
+            int needed = extraIngredientsFor(slots, batches);
+            long available = StorageHelper.poweredExtraction(
+                    energySource, storage, key, needed, getActionSource(), Actionable.SIMULATE);
+            for (int slot = 0; slot < Inventory.INVENTORY_SIZE && available < needed; slot++) {
+                ItemStack stack = playerInventory.getItem(slot);
+                if (key.equals(AEItemKey.of(stack))) {
+                    available += stack.getCount();
+                }
+            }
+            while (batches > 1 && extraIngredientsFor(slots, batches) > available) {
+                batches--;
+            }
+        }
+
+        for (int batch = 2; batch <= batches; batch++) {
+            for (var entry : byItem.entrySet()) {
+                var key = entry.getKey();
+                for (int slot : entry.getValue()) {
+                    ItemStack stack = craftingGrid.getStackInSlot(slot);
+                    if (stack.getCount() >= batch) {
+                        continue;
+                    }
+                    if (!takeExtraIngredient(playerInventory, key)) {
+                        fillRecipeCrystals(recipeId, batch - 1);
+                        broadcastChanges();
+                        return;
+                    }
+                    craftingGrid.setItemDirect(slot, stack.copyWithCount(stack.getCount() + 1));
+                }
+            }
+        }
+        fillRecipeCrystals(recipeId, batches);
+        broadcastChanges();
+    }
+
+    private int extraIngredientsFor(List<Integer> slots, int batches) {
+        int needed = 0;
+        for (int slot : slots) {
+            needed += Math.max(0, batches - craftingGrid.getStackInSlot(slot).getCount());
+        }
+        return needed;
+    }
+
+    private boolean takeExtraIngredient(Inventory inventory, AEItemKey key) {
+        if (StorageHelper.poweredExtraction(energySource, storage, key, 1, getActionSource()) > 0) {
+            return true;
+        }
+        for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
+            if (key.equals(AEItemKey.of(inventory.getItem(slot)))) {
+                return !inventory.removeItem(slot, 1).isEmpty();
+            }
+        }
+        return false;
+    }
+
+    public void fillRecipeCrystals(String recipeId) {
+        if (isClientSide()) {
+            sendClientAction(ACTION_FILL_CRYSTALS, recipeId);
+            return;
+        }
+        fillRecipeCrystals(recipeId, 1);
+    }
+
+    private void fillRecipeCrystals(String recipeId, int batches) {
+        if (!isValidMenu() || !stillValid(getPlayer()) || !canCraft() || resultSlot == null) {
+            return;
+        }
+
+        boolean changed = false;
+        var slots = crystalSlots();
+        for (var entry : resultSlot.crystalsForTransfer(recipeId).entries()) {
+            var aspect = entry.aspect().unwrapKey().orElse(null);
+            if (aspect == null) {
+                continue;
+            }
+            ItemStack crystal = EssentiaCrystals.create(entry.aspect(), 1);
+            var key = AEItemKey.of(crystal);
+            if (key == null) {
+                continue;
+            }
+            for (Slot slot : slots) {
+                if (!(slot instanceof CrystalSlot target) || !aspect.equals(target.requiredAspect())
+                        || !target.mayPlace(crystal)) {
+                    continue;
+                }
+                ItemStack existing = target.getItem();
+                if (!existing.isEmpty() && !ItemStack.isSameItemSameComponents(existing, crystal)) {
+                    break;
+                }
+                int wanted = (int) Math.min((long) entry.amount() * batches, target.getMaxStackSize(crystal)) - existing.getCount();
+                if (wanted > 0) {
+                    long moved = StorageHelper.poweredExtraction(energySource, storage, key, wanted, getActionSource());
+                    var inventory = getPlayerInventory();
+                    for (int i = 0; i < Inventory.INVENTORY_SIZE && moved < wanted; i++) {
+                        if (key.equals(AEItemKey.of(inventory.getItem(i)))) {
+                            moved += inventory.removeItem(i, wanted - (int) moved).getCount();
+                        }
+                    }
+                    if (moved > 0) {
+                        // Commit the accepted amount directly to the checked slot. No refund is needed.
+                        crystals.setItemDirect(target.getContainerSlot(),
+                                crystal.copyWithCount(existing.getCount() + (int) moved));
+                        changed = true;
+                    }
+                }
+                break;
+            }
+        }
+        if (changed) {
+            broadcastChanges();
+        }
+    }
+
+    public void returnCraftingGrid(boolean toNetwork) {
+        if (isClientSide()) {
+            sendClientAction(toNetwork ? ACTION_RETURN_TO_NETWORK : ACTION_RETURN_TO_INVENTORY);
+            return;
+        }
+        if (!isValidMenu() || !stillValid(getPlayer()) || (toNetwork && !canCraft())) {
+            return;
+        }
+
+        var playerInventory = new PlayerInternalInventory(getPlayerInventory());
+        boolean movedAny = returnSlots(craftingGrid, playerInventory, toNetwork);
+        movedAny |= returnSlots(crystals, playerInventory, toNetwork);
+        if (movedAny) {
+            broadcastChanges();
+        }
+    }
+
+    private boolean returnSlots(InternalInventory source, PlayerInternalInventory playerInventory, boolean toNetwork) {
+        boolean movedAny = false;
+        for (int slot = 0; slot < source.size(); slot++) {
+            ItemStack stack = source.getStackInSlot(slot);
+            if (stack.isEmpty()) {
+                continue;
+            }
+
+            ItemStack remaining;
+            if (toNetwork) {
+                var key = AEItemKey.of(stack);
+                if (key == null) {
+                    continue;
+                }
+                long moved = StorageHelper.poweredInsert(energySource, storage, key, stack.getCount(), getActionSource());
+                remaining = stack.copyWithCount(stack.getCount() - (int) moved);
+            } else {
+                remaining = playerInventory.addItems(stack.copy());
+            }
+
+            if (remaining.getCount() != stack.getCount()) {
+                source.setItemDirect(slot, remaining);
+                movedAny = true;
+            }
+        }
+        return movedAny;
+    }
+
+    public void togglePaymentSource() {
+        if (isClientSide()) {
+            sendClientAction(ACTION_TOGGLE_PAYMENT);
+            return;
+        }
+        if (!(getPlayer() instanceof ServerPlayer server) || !isValidMenu() || !stillValid(server)) {
+            return;
+        }
+        crystalFirst = !crystalFirst;
+        var data = server.getPersistentData();
+        var preferences = data.getCompound(Player.PERSISTED_NBT_TAG);
+        preferences.putBoolean(CRYSTAL_FIRST_PREFERENCE, crystalFirst);
+        data.put(Player.PERSISTED_NBT_TAG, preferences);
+        resultSlot.refresh();
+        broadcastChanges();
+    }
+
     private int craftInputSignature() {
-        int hash = availableAuraVis;
-        for (ItemStack upgrade : getHost().getUpgrades()) hash = 31 * hash + StackSignatures.of(upgrade);
-        for (int i = 0; i < PartArcaneCraftingTerminal.GRID_SIZE; i++) {
-            hash = 31 * hash + StackSignatures.of(craftingGrid.getStackInSlot(i));
+        ItemStack card = ItemStack.EMPTY;
+        for (ItemStack upgrade : getHost().getUpgrades()) {
+            if (upgrade.is(TECEItems.VIS_CONNECTION_CARD.get())) {
+                card = upgrade;
+                break;
+            }
         }
-        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
-            hash = 31 * hash + StackSignatures.of(crystals.getStackInSlot(i));
-        }
-        return 31 * hash + StackSignatures.of(wandInventory.getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT));
+        return runtime.inputSignature(
+                getPlayer(), craftingGrid, crystals, wandInventory, card, availableAuraVis);
     }
 
     public @Nullable PartArcaneCraftingTerminal part() {
@@ -332,7 +568,13 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         return slots.isEmpty() ? null : slots.getFirst();
     }
 
-    public void sendCraftCost(@Nullable ArcaneCraftCost cost) {
+    public void clearCraftCost() {
+        sendCraftCost(null, 0);
+    }
+
+    public void sendCraftCost(@Nullable ArcaneCraftCost cost, int discountPercent) {
+        auraDiscountPercent = discountPercent;
+        requiredAuraVis = cost == null ? 0 : cost.auraVis();
         if (isClientSide()) {
             return;
         }

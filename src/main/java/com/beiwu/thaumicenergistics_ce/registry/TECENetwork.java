@@ -15,6 +15,7 @@ import com.beiwu.thaumicenergistics_ce.network.GolemBackpackPayload;
 import com.beiwu.thaumicenergistics_ce.network.InscriberGridFillPayload;
 import com.beiwu.thaumicenergistics_ce.network.InscriberGridPayload;
 import com.beiwu.thaumicenergistics_ce.network.PartitionWellPayload;
+import com.beiwu.thaumicenergistics_ce.network.TerminalScanPayload;
 
 public final class TECENetwork {
 
@@ -28,6 +29,10 @@ public final class TECENetwork {
 
     private static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar(VERSION);
+        registrar.playToServer(
+                TerminalScanPayload.TYPE,
+                TerminalScanPayload.CODEC,
+                (payload, context) -> payload.handle(context.player()));
         registrar.playToServer(
                 InscriberGridPayload.TYPE,
                 InscriberGridPayload.CODEC,

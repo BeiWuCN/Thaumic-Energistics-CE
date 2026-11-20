@@ -40,11 +40,11 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:machina",
+      "aspect": "thaumaturge:praecantatio",
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:permutatio",
+      "aspect": "thaumaturge:vinculum",
       "amount": 2
     },
     {
@@ -52,7 +52,7 @@
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:sensus",
+      "aspect": "thaumaturge:ordo",
       "amount": 2
     }
   ],

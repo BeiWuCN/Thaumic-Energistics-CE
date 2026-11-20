@@ -14,7 +14,13 @@
       "item": "thaumaturge:ingot_thaumium"
     },
     {
-      "item": "thaumaturge:salis_mundus"
+      "type": "neoforge:components",
+      "items": "thaumaturge:essentia_crystal",
+      "components": {
+        "thaumaturge:crystal_aspect": {
+          "aspect": "thaumaturge:terra"
+        }
+      }
     }
   ],
   "aspects": [

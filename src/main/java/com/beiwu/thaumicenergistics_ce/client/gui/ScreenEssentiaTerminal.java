@@ -21,4 +21,15 @@ public class ScreenEssentiaTerminal extends ScreenEssentiaTerminalBase<MenuEssen
     protected boolean essentiaGesturesAtAll() {
         return true;
     }
+
+    @Override
+    protected guideme.PageAnchor getHelpTopic() {
+        return TECEGuide.page("terminals");
+    }
+
+    @Override
+    protected void openHelp() {
+        TECEGuide.open(menu.getPlayer(), "terminals");
+    }
+
 }

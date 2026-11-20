@@ -40,7 +40,11 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:cognitio",
+      "aspect": "thaumaturge:ordo",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:potentia",
       "amount": 1
     },
     {
@@ -48,7 +52,7 @@
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:ordo",
+      "aspect": "thaumaturge:cognitio",
       "amount": 1
     }
   ],

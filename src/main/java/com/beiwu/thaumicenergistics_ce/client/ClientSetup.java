@@ -1,11 +1,13 @@
 package com.beiwu.thaumicenergistics_ce.client;
 
 import appeng.api.client.AEKeyRendering;
+import appeng.api.client.StorageCellModels;
 import appeng.client.gui.implementations.UpgradeableScreen;
 import appeng.client.gui.style.StyleManager;
 import com.leclowndu93150.thaumaturge.client.model.entity.BrainModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.api.distmarker.Dist;
@@ -28,6 +30,7 @@ import com.beiwu.thaumicenergistics_ce.client.render.ArcaneAssemblerRenderer;
 import com.beiwu.thaumicenergistics_ce.client.render.EssentiaKeyRenderHandler;
 import com.beiwu.thaumicenergistics_ce.client.render.GachaBoxRenderer;
 import com.beiwu.thaumicenergistics_ce.client.render.bubble.OccultMonitorBubbleRenderer;
+import com.beiwu.thaumicenergistics_ce.item.ItemEssentiaCell;
 import com.beiwu.thaumicenergistics_ce.registry.TECEBlockEntities;
 import com.beiwu.thaumicenergistics_ce.registry.TECEMenuTypes;
 import com.beiwu.thaumicenergistics_ce.integration.ae2.AEssentiaKey;
@@ -50,6 +53,12 @@ import com.beiwu.thaumicenergistics_ce.network.GolemBackpackPayload;
 @EventBusSubscriber(modid = ThEIds.MODID, value = Dist.CLIENT)
 public final class ClientSetup {
     private ClientSetup() {}
+
+    @SubscribeEvent
+    public static void registerScanTooltip(
+            net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent event) {
+        event.register(com.beiwu.thaumicenergistics_ce.client.gui.TerminalScanTooltip.Aspects.class, row -> row);
+    }
 
     /**
      * 客户端的 AE2 注册，挂在 {@code FMLClientSetupEvent} 上。
@@ -97,6 +106,14 @@ public final class ClientSetup {
                     AEssentiaKeyType.INSTANCE, AEssentiaKey.class, new EssentiaKeyRenderHandler());
             // tooltip 的绘制一半；服务端一半在 mod 构造函数里注册。
             FluxTransferTooltip.register();
+            var standardCell = ThEIds.id("block/drive/cells/essentia_cell");
+            var megaCell = ThEIds.id("block/drive/cells/mega_essentia_cell");
+            for (var item : BuiltInRegistries.ITEM) {
+                if (item instanceof ItemEssentiaCell cell
+                        && BuiltInRegistries.ITEM.getKey(cell).getNamespace().equals(ThEIds.MODID)) {
+                    StorageCellModels.registerModel(cell, cell.tier().endsWith("m") ? megaCell : standardCell);
+                }
+            }
         });
     }
 

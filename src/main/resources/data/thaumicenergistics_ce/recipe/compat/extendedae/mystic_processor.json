@@ -1,0 +1,38 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "extendedae"
+    },
+    {
+      "type": "extendedae:config",
+      "config_id": "assembler_circuit"
+    }
+  ],
+  "type": "extendedae:crystal_assembler",
+  "energy": 4000,
+  "input_items": [
+    {
+      "ingredient": {
+        "item": "thaumicenergistics_ce:mystic_circuit_board"
+      },
+      "amount": 4
+    },
+    {
+      "ingredient": {
+        "item": "ae2:printed_silicon"
+      },
+      "amount": 4
+    },
+    {
+      "ingredient": {
+        "tag": "c:dusts/redstone"
+      },
+      "amount": 4
+    }
+  ],
+  "output": {
+    "id": "thaumicenergistics_ce:mystic_processor",
+    "count": 4
+  }
+}

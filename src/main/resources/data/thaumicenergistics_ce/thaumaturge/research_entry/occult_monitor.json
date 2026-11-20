@@ -38,11 +38,11 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:machina",
+      "aspect": "thaumaturge:sensus",
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:sensus",
+      "aspect": "thaumaturge:ordo",
       "amount": 2
     },
     {
@@ -50,5 +50,5 @@
       "amount": 1
     }
   ],
-  "complexity": 3
+  "complexity": 2
 }

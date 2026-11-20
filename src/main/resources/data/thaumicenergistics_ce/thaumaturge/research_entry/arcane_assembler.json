@@ -64,8 +64,12 @@
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:auram",
-      "amount": 2
+      "aspect": "thaumaturge:potentia",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:praecantatio",
+      "amount": 1
     }
   ],
   "complexity": 3

@@ -45,15 +45,19 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:cognitio",
-      "amount": 2
-    },
-    {
-      "aspect": "thaumaturge:machina",
+      "aspect": "thaumaturge:fabrico",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:fabrico",
+      "aspect": "thaumaturge:cognitio",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:instrumentum",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:ordo",
       "amount": 1
     }
   ],
