@@ -12,6 +12,7 @@ import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import net.minecraft.resources.ResourceLocation;
 import com.beiwu.thaumicenergistics_ce.ThEIds;
+import com.beiwu.thaumicenergistics_ce.client.jei.AspectFromItemCategory;
 import com.beiwu.thaumicenergistics_ce.util.ThELog;
 
 /**
@@ -41,6 +42,7 @@ public class ThEJeiPlugin implements IModPlugin {
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         registration.addRecipeCatalyst(new net.minecraft.world.item.ItemStack(TECEItems.ARCANE_CRAFTING_TERMINAL.get()), ArcaneJeiRecipeType.arcane());
+        registration.addRecipeCatalyst(new net.minecraft.world.item.ItemStack(TECEItems.ARCANE_ENCODING_TERMINAL.get()), ArcaneJeiRecipeType.arcane());
         registration.addRecipeCatalyst(new net.minecraft.world.item.ItemStack(TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()), ArcaneJeiRecipeType.arcane());
     }
 
@@ -56,6 +58,10 @@ public class ThEJeiPlugin implements IModPlugin {
         registration.addRecipeTransferHandler(
                 new ArcaneCraftingRecipeTransfer(registration.getTransferHelper()),
                 ArcaneJeiRecipeType.arcane());
+        // 编码终端：只接奥术配方，把模板填进九格编码网格，不搬运库存。
+        registration.addRecipeTransferHandler(
+                new ArcaneEncodingRecipeTransfer(registration.getTransferHelper()),
+                ArcaneJeiRecipeType.arcane());
         registration.addRecipeTransferHandler(
                 new CraftingRecipeTransfer(registration.getTransferHelper()), RecipeTypes.CRAFTING);
         // 坩埚配方编成处理样板，不从合成分类走：它要的是源质，不是九个格子。
@@ -65,6 +71,10 @@ public class ThEJeiPlugin implements IModPlugin {
             registration.addRecipeTransferHandler(
                     new ThaumaturgeProcessingPatternTransfer(registration.getTransferHelper(), type), type);
         }
+        // 从物品提取要素：反过来的一条，物品当输入、要素当输出，落进同一个处理编码页。
+        registration.addRecipeTransferHandler(
+                new AspectFromItemTransfer(registration.getTransferHelper()),
+                AspectFromItemCategory.RECIPE_TYPE);
         // 一个配方类型一个处理器就能服务有线和无线终端。
         // 分开注册只会让其中一个把另一个替换掉。
     }

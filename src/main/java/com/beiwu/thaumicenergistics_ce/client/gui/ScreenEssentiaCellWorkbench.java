@@ -24,8 +24,6 @@ import com.beiwu.thaumicenergistics_ce.network.PartitionWellPayload;
  */
 public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaCellWorkbench> {
 
-    /** 背后没有元件的井用这个色调：AE2 自己的槽位美术，亮度略高于一半。 */
-    private static final float WELL_DISABLED_TINT = 0.6f;
     private final ToggleButton copyMode;
 
     public ScreenEssentiaCellWorkbench(
@@ -46,32 +44,22 @@ public class ScreenEssentiaCellWorkbench extends UpgradeableScreen<MenuEssentiaC
     }
 
     /**
-     * AE2 把禁用的井画成五分之一不透明度且不给图标，本界面的美术会把它吞掉：
-     * 同一张槽位图改灰，井还像井，又表示这里放不进标记。
+     * AE2 的元件工作台用 RestrictedInputSlot 在元件槽下画 BACKGROUND_STORAGE_CELL 图标。
+     * 本 mod 的元件槽是普通 Slot（宿主不是 InternalInventory），这里补画同一张原生图标，
+     * 让空槽看起来和 AE2 的一致。
+     * 井的禁用态交给 {@code CellPartitionSlot.isSlotEnabled} 自己画：AE2 的
+     * {@code AEBaseScreen.renderAppEngSlot} 会把禁用的可选槽按 0.2 不透明度铺一层
+     * SLOT_BACKGROUND，再往上盖任何东西都是在替它做决定。
      */
     @Override
-    public void drawFG(GuiGraphics graphics, int offsetX, int offsetY, int mouseX, int mouseY) {
-        super.drawFG(graphics, offsetX, offsetY, mouseX, mouseY);
-        // AE2 draws tooltips after this foreground pass.
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
         Slot cell = menu.cellSlot();
         if (cell != null && cell.getItem().isEmpty()) {
+            graphics.pose().pushPose();
+            graphics.pose().translate(leftPos, topPos, 0.0f);
             Icon.BACKGROUND_STORAGE_CELL.getBlitter().dest(cell.x, cell.y).blit(graphics);
-        }
-        for (int well = 0; well < MenuEssentiaCellWorkbench.partitionSlotCount(); well++) {
-            if (menu.isPartitionSlotEnabled(well)) {
-                continue;
-            }
-            Slot slot = menu.slots.get(menu.partitionSlotIndex(well));
-            // 禁用的井不是 active，AE2 从不把它当成鼠标下的槽位，也不给它高亮：
-            // 这里代它画这个框，灰色跟着指针走。
-            if (isHovering(slot, mouseX, mouseY)) {
-                renderSlotHighlight(graphics, slot, mouseX, mouseY, 0.0f);
-                continue;
-            }
-            Icon.SLOT_BACKGROUND.getBlitter()
-                    .dest(slot.x - 1, slot.y - 1)
-                    .color(WELL_DISABLED_TINT, WELL_DISABLED_TINT, WELL_DISABLED_TINT, 1.0f)
-                    .blit(graphics);
+            graphics.pose().popPose();
         }
     }
 

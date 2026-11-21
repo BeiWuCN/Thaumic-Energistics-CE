@@ -59,7 +59,12 @@ public final class EssentiaProviderReturn extends SnapshotJournal<GenericStack[]
             var stack = inventory.getStack(i);
             if (stack != null && stack.what() instanceof AEssentiaKey key) {
                 var aspect = key.resolveAspect();
-                if (aspect != null) result = result.add(aspect, (int) Math.min(stack.amount(), Integer.MAX_VALUE));
+                // AspectList.add 内部就是 new AspectInstance(aspect, amount)，
+                // 0 会直接抛 IllegalArgumentException。返回库存里理论上不该有条目为 0 的，
+                // 但 AE2 的 GenericStack 允许 amount=0 表示「只关心 key」，不防一手就崩。
+                if (aspect != null && stack.amount() > 0) {
+                    result = result.add(aspect, (int) Math.min(stack.amount(), Integer.MAX_VALUE));
+                }
             }
         }
         return result;

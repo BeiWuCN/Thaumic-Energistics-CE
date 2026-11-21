@@ -11,6 +11,7 @@ navigation:
 - [入门](getting-started.md)
 - [源质存储](essentia-storage.md)
 - [终端](terminals.md)
+- [奥术编码](arcane-encoding.md)
 - [奥术合成](arcane-crafting.md)
 - [自动化](automation.md)
 - [神秘水晶](thaumic-crystals.md)

@@ -93,7 +93,9 @@ final class ArcanePatternLookup {
                 recipe.visCost(),
                 gate == null ? null : gate.entry(),
                 gate == null ? null : gate.stage().orElse(null),
-                gridTags(layout));
+                gridTags(layout),
+                // 新解析出来的样板默认放行桶装输入的流体替代；编码终端上的开关会覆盖它。
+                true);
     }
 
     /**
@@ -105,7 +107,6 @@ final class ArcanePatternLookup {
             return null;
         }
         RecipeManager manager = level.getRecipeManager();
-        ArcaneRecipeIndex.index(manager);
 
         // 按物品取交集，只有收得下全部现有物品的配方留下。
         // 索引里查不到的物品（索引由默认物品堆建）走全量扫描，不丢配方。
@@ -114,7 +115,7 @@ final class ArcanePatternLookup {
             if (cell.isEmpty()) {
                 continue;
             }
-            Set<ResourceLocation> accepting = ArcaneRecipeIndex.accepting(cell.getItem());
+            Set<ResourceLocation> accepting = ArcaneRecipeIndex.accepting(manager, cell.getItem());
             if (accepting == null) {
                 candidates = null;
                 break;

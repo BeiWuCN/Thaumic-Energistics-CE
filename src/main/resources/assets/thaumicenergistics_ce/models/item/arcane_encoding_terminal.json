@@ -1,0 +1,12 @@
+{
+  "parent": "ae2:item/display_base",
+  "textures": {
+    "front_base": "ae2:part/monitor_front",
+    "front_bright": "thaumicenergistics_ce:part/arcane_encoding_terminal/bright",
+    "front_medium": "thaumicenergistics_ce:part/arcane_encoding_terminal/medium",
+    "front_dark": "thaumicenergistics_ce:part/arcane_encoding_terminal/dark",
+    "front_medium_bright": "thaumicenergistics_ce:part/arcane_encoding_terminal/dark",
+    "back": "ae2:part/monitor_back",
+    "sides": "ae2:part/monitor_sides"
+  }
+}

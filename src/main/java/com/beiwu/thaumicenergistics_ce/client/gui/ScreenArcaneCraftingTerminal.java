@@ -157,13 +157,17 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
     public void init() {
         super.init();
         // AE2 的 [getGuiDisplayName] 只要 title 非空就用 title 顶掉样式文档里的值，改文档换不掉顶行，
-        // 只能走 [setTextContent] 覆写：顶行给通用「终端」，终端自己的名字下移到格子上方。
-        setTextContent(CRAFTING_GRID_TITLE, terminalName);
+        // 只能走 [setTextContent] 覆写：顶行统一给通用「终端」（无线版从菜单进来的是物品名）。
+        setTextContent(AEBaseScreen.TEXT_ID_DIALOG_TITLE, Component.translatable("gui.ae2.Terminal"));
+        // 副标题不在这里覆写：它属于样式文档，无线版与面板版共用同一句
+        // （AE2 的 wireless_terminal.json 也只改 dialog_title）。
+        // 之前拿菜单标题顶上去，结果面板版和无线版各自显示一串物品名，比别的终端长一截。
         var subtitle = getStyle().getText().get(CRAFTING_GRID_TITLE);
         if (subtitle != null) {
             // 和 AE2 合成终端同一套：整行宽度、最多原大，长名字才缩。
             // 之前压到 88 px 是为了给右侧两行 vis 文字让位，那两行已经搬进中部框，不用再让了。
-            subtitle.setScale(Math.min(1.0F, (imageWidth - 16.0F) / Math.max(1, font.width(terminalName))));
+            Component shown = subtitle.getText();
+            subtitle.setScale(Math.min(1.0F, (imageWidth - 16.0F) / Math.max(1, font.width(shown))));
         }
         open = this;
     }

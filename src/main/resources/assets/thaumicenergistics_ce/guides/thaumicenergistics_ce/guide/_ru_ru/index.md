@@ -11,6 +11,7 @@ Thaumic Energistics CE связывает эссенцию и магическо
 - [Начало работы](getting-started.md)
 - [Хранение эссенции](essentia-storage.md)
 - [Терминалы эссенции](terminals.md)
+- [Магическое кодирование](arcane-encoding.md)
 - [Магическое создание](arcane-crafting.md)
 - [Автоматизация](automation.md)
 - [Таум-кристаллы](thaumic-crystals.md)

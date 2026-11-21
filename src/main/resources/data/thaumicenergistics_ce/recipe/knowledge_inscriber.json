@@ -1,7 +1,7 @@
 {
   "type": "thaumaturge:arcane_workbench_shaped",
   "research": {
-    "entry": "thaumicenergistics_ce:knowledge_inscriber"
+    "entry": "thaumicenergistics_ce:arcane_encoding_terminal"
   },
   "result": {
     "id": "thaumicenergistics_ce:knowledge_inscriber",

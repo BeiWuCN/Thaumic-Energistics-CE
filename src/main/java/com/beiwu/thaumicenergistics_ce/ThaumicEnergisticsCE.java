@@ -20,6 +20,7 @@ import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaTransport;
 import java.util.List;
+import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -46,6 +47,7 @@ import com.beiwu.thaumicenergistics_ce.registry.TECENetwork;
 import com.beiwu.thaumicenergistics_ce.registry.capability.ThEItemCapabilities;
 import com.beiwu.thaumicenergistics_ce.interfaceaccess.EssentiaInterfaceRegistry;
 import com.beiwu.thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
+import com.beiwu.thaumicenergistics_ce.part.PartArcaneEncodingTerminal;
 import com.beiwu.thaumicenergistics_ce.part.PartEssentiaLevelEmitter;
 import com.beiwu.thaumicenergistics_ce.part.PartEssentiaTerminal;
 import com.beiwu.thaumicenergistics_ce.part.PartFluxTransferInterface;
@@ -86,6 +88,10 @@ public final class ThaumicEnergisticsCE {
         modBus.addListener(this::commonSetup);
 
         registerPartModels();
+        // 两个无线奥术终端在 AE2WTLib 在场时换成 ItemWT 实现，并登记进通用终端体系。
+        // 构造阶段登记最稳：AddTerminalEvent 是一次性回调列表，api 在 RegisterEvent(ITEM)
+        // 中执行它并随即关闭。registerTerminals 内部再查一次 ModList，缺依赖时直接返回。
+        com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.registerTerminals();
         // [tooltip] 的服务端那一半走 [AE2] 部件注册表，[Jade] 只看得到方块实体。
         FluxTransferStatusProvider.register();
         // [ME 接口] 的访问卡挂游戏总线，不挂网格的可 tick 对象：[AE2] 在卡片进出时不发通知。
@@ -213,6 +219,9 @@ public final class ThaumicEnergisticsCE {
             GridLinkables.register(
                     TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                     WirelessTerminalItem.LINKABLE_HANDLER);
+            GridLinkables.register(
+                    TECEItems.WIRELESS_ARCANE_ENCODING_TERMINAL.get(),
+                    WirelessTerminalItem.LINKABLE_HANDLER);
             registerUpgrades();
             com.beiwu.thaumicenergistics_ce.integration.ae2.bus.EssentiaBusStrategies.register();
             // 让 AE2 认得「安瓿里装着什么」：过滤槽、分区槽都走这一条。
@@ -276,6 +285,47 @@ public final class ThaumicEnergisticsCE {
                 TECEItems.ARCANE_CRAFTING_TERMINAL.get(),
                 1,
                 ARCANE_TERMINAL_PART_UPGRADE_NAME);
+        // 无线奥术编码终端：源质访问卡让它能看见并存取网络源质，
+        // 与合成终端同一张卡同一套语义（见 MenuArcaneEncodingTerminal#essentiaAccessGranted）。
+        Upgrades.add(
+                TECEItems.ESSENTIA_ACCESS_CARD.get(),
+                TECEItems.WIRELESS_ARCANE_ENCODING_TERMINAL.get(),
+                1,
+                ARCANE_ENCODING_TERMINAL_UPGRADE_NAME);
+        // 面板版编码终端只开 1 个槽，就是这一张。
+        Upgrades.add(
+                TECEItems.ESSENTIA_ACCESS_CARD.get(),
+                TECEItems.ARCANE_ENCODING_TERMINAL.get(),
+                1,
+                ARCANE_ENCODING_TERMINAL_PART_UPGRADE_NAME);
+        // 量子桥接卡在 [QuantumTerminalSupport] 里登记（带 Tooltip 名称）。
+        // vis 卡不登记：编码菜单不付 vis，登了就是能装不生效。
+        // AE2WTLib 的通用终端是另一个物品，上面这些登记到不了它那里，单独走它的 UpgradeHelper。
+        if (com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.enabled()) {
+            com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.registerUniversalTerminalUpgrades();
+        }
+        logAccessCardRegistration();
+    }
+
+    /**
+     * 启动时把「源质访问卡到底能装进哪些终端」打到日志里。
+     * <p>
+     * 这张卡的登记结果没有其它地方看得到：游戏里插不进去时，分不清是
+     * {@code Upgrades.add} 没跑到、还是槽位数量不对、还是客户端与服务端不同步。
+     * 一行日志就能把前两种排除掉。
+     */
+    private static void logAccessCardRegistration() {
+        var card = TECEItems.ESSENTIA_ACCESS_CARD.get();
+        for (var entry : List.of(
+                Map.entry("arcane_crafting_terminal", TECEItems.ARCANE_CRAFTING_TERMINAL.get()),
+                Map.entry("wireless_arcane_crafting_terminal", TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()),
+                Map.entry("arcane_encoding_terminal", TECEItems.ARCANE_ENCODING_TERMINAL.get()),
+                Map.entry("wireless_arcane_encoding_terminal", TECEItems.WIRELESS_ARCANE_ENCODING_TERMINAL.get()))) {
+            ThELog.LOG.info(
+                    "[upgrades] essentia_access_card in {} -> max installed {}",
+                    entry.getKey(),
+                    Upgrades.getMaxInstallable(card, entry.getValue()));
+        }
     }
 
     /** 卡片 [tooltip] 对整本源质存储元件家族的称呼，所有尺寸共用。 */
@@ -287,6 +337,14 @@ public final class ThaumicEnergisticsCE {
     /** 访问卡 [tooltip] 对无线奥术终端的称呼，用物品自己的名称键。 */
     private static final String ARCANE_TERMINAL_UPGRADE_NAME =
             "item.thaumicenergistics_ce.wireless_arcane_crafting_terminal";
+
+    /** 访问卡 [tooltip] 对无线奥术编码终端的称呼。 */
+    private static final String ARCANE_ENCODING_TERMINAL_UPGRADE_NAME =
+            "item.thaumicenergistics_ce.wireless_arcane_encoding_terminal";
+
+    /** 访问卡 [tooltip] 对面板奥术编码终端的称呼。 */
+    private static final String ARCANE_ENCODING_TERMINAL_PART_UPGRADE_NAME =
+            "item.thaumicenergistics_ce.arcane_encoding_terminal";
 
     /** 装在电缆上的终端是另一个物品，[tooltip] 行要自己的名称键。 */
     private static final String ARCANE_TERMINAL_PART_UPGRADE_NAME =
@@ -309,6 +367,9 @@ public final class ThaumicEnergisticsCE {
         models.addAll(PartFluxTransferInterface.MODEL_LOCATIONS);
         models.addAll(PartEssentiaLevelEmitter.MODEL_LOCATIONS);
         models.addAll(PartArcaneCraftingTerminal.MODEL_LOCATIONS);
+        // 编码终端要连带父类 AbstractDisplayPart 的 display_base / display_status_* 一起注册：
+        // PartModelsHelper.createModels 会递归父类，手写列表只列自己的 on/off 会漏掉壳体。
+        models.addAll(appeng.items.parts.PartModelsHelper.createModels(PartArcaneEncodingTerminal.class));
         // [P2P] 部件用 [AE2] 自己的 [P2P] 模型集绘制，含状态模型。
         models.addAll(PartVisInterface.MODEL_LOCATIONS);
         PartModels.registerModels(models);

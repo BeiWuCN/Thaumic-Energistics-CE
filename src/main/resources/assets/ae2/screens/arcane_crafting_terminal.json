@@ -1,6 +1,8 @@
 {
   "$schema": "../schema.json",
-  "includes": ["terminals/terminal.json"],
+  "includes": [
+    "terminals/terminal.json"
+  ],
   "slots": {
     "CRAFTING_GRID": {
       "left": 33,
@@ -66,7 +68,7 @@
     },
     "crafting_grid_title": {
       "text": {
-        "translate": "item.thaumicenergistics_ce.arcane_crafting_terminal"
+        "translate": "gui.thaumicenergistics_ce.ArcaneCrafting"
       },
       "position": {
         "left": 8,
@@ -86,23 +88,48 @@
   "terminalStyle": {
     "header": {
       "texture": "thaumicenergistics_ce:textures/gui/arcane_crafting.png",
-      "srcRect": [0, 0, 195, 17]
+      "srcRect": [
+        0,
+        0,
+        195,
+        17
+      ]
     },
     "firstRow": {
       "texture": "thaumicenergistics_ce:textures/gui/arcane_crafting.png",
-      "srcRect": [0, 17, 195, 18]
+      "srcRect": [
+        0,
+        17,
+        195,
+        18
+      ]
     },
     "row": {
       "texture": "thaumicenergistics_ce:textures/gui/arcane_crafting.png",
-      "srcRect": [0, 35, 195, 18]
+      "srcRect": [
+        0,
+        35,
+        195,
+        18
+      ]
     },
     "lastRow": {
       "texture": "thaumicenergistics_ce:textures/gui/arcane_crafting.png",
-      "srcRect": [0, 53, 195, 18]
+      "srcRect": [
+        0,
+        53,
+        195,
+        18
+      ]
     },
     "bottom": {
       "texture": "thaumicenergistics_ce:textures/gui/arcane_crafting.png",
-      "srcRect": [0, 71, 195, 180]
+      "srcRect": [
+        0,
+        71,
+        195,
+        180
+      ]
     }
   }
 }

@@ -8,7 +8,7 @@ item_ids:
 - thaumicenergistics_ce:alchemy_provider
 - thaumicenergistics_ce:arcane_assembler
 - thaumicenergistics_ce:knowledge_core
-- thaumicenergistics_ce:knowledge_inscriber
+- thaumicenergistics_ce:arcane_encoding_terminal
 ---
 
 # 源質與奧術自動化
@@ -25,4 +25,4 @@ item_ids:
 
 ## 奧術裝配
 
-用 <ItemLink id="thaumicenergistics_ce:knowledge_inscriber" /> 將已研究的配方寫進知識核心。放入核心、按奧術工作臺的配方擺材料，確認產物後儲存。將核心放入 <ItemLink id="thaumicenergistics_ce:arcane_assembler" />，接好物品與 Vis 供應，再送出合成任務。
+在 <ItemLink id="thaumicenergistics_ce:arcane_encoding_terminal" /> 上編碼配方：按奧術工作臺的擺法放好材料，確認產物預覽無誤後按下編碼按鈕，樣板就寫進知識核心。將核心放入 <ItemLink id="thaumicenergistics_ce:arcane_assembler" />，接好物品與 Vis 供應，再送出合成任務。

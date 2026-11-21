@@ -151,8 +151,11 @@ public class ArcaneCraftingRecipeTransfer
     /**
      * 一个格子的模板：背后供给最多的变体，标签第一个成员没库存也能转移。
      * 没东西能供给这个格子时为空。
+     * <p>
+     * 包级而非 private：{@link CraftingRecipeTransfer} 处理 JEI 的原版合成页签，
+     * 两个页签对缺料的判定必须是同一套，否则同一个配方在两边表现不一样。
      */
-    private static ItemStack pickSuppliable(List<ItemStack> variants, @Nullable IClientRepo repo, Player player) {
+    static ItemStack pickSuppliable(List<ItemStack> variants, @Nullable IClientRepo repo, Player player) {
         ItemStack best = ItemStack.EMPTY;
         long bestSupply = 0;
         for (ItemStack variant : variants) {

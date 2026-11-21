@@ -1,8 +1,9 @@
 {
   "category": "thaumicenergistics_ce:thaumicenergistics_ce",
-  "name": "tc.research_name.KNOWLEDGEINSCRIBER",
+  "name": "tc.research_name.ARCANEENCODINGTERMINAL",
   "parents": [
-    "thaumicenergistics_ce:knowledge_core"
+    "thaumicenergistics_ce:knowledge_core",
+    "~thaumicenergistics_ce:arcane_terminal"
   ],
   "column": 8,
   "row": 2,
@@ -10,11 +11,11 @@
     "round"
   ],
   "icons": [
-    "thaumicenergistics_ce:knowledge_inscriber"
+    "thaumicenergistics_ce:arcane_encoding_terminal"
   ],
   "stages": [
     {
-      "text": "tc.research_text.KNOWLEDGEINSCRIBER.stage.1",
+      "text": "tc.research_text.ARCANEENCODINGTERMINAL.stage.1",
       "required_knowledge": [
         {
           "type": "theory",
@@ -37,19 +38,19 @@
       ]
     },
     {
-      "text": "tc.research_text.KNOWLEDGEINSCRIBER.stage.2",
+      "text": "tc.research_text.ARCANEENCODINGTERMINAL.stage.2",
       "recipes": [
-        "thaumicenergistics_ce:knowledge_inscriber"
+        "thaumicenergistics_ce:arcane_encoding_terminal"
       ]
     }
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:fabrico",
-      "amount": 1
+      "aspect": "thaumaturge:cognitio",
+      "amount": 2
     },
     {
-      "aspect": "thaumaturge:cognitio",
+      "aspect": "thaumaturge:fabrico",
       "amount": 1
     },
     {

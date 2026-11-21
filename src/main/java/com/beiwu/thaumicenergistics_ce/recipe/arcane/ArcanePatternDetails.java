@@ -1,15 +1,20 @@
 package com.beiwu.thaumicenergistics_ce.recipe.arcane;
 
+import appeng.api.behaviors.ContainerItemStrategies;
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
+import appeng.api.stacks.AEKeyType;
 import appeng.api.stacks.GenericStack;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MilkBucketItem;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
@@ -63,7 +68,7 @@ public final class ArcanePatternDetails implements IPatternDetails {
 
         List<IInput> inputs = new ArrayList<>();
         int cell = 0;
-        for (ItemStack ignored : pattern.grid()) {
+        for (ItemStack display : pattern.grid()) {
             // 格位接受的全部物品，不只是它显示的那一个：
             // 按标签写入的格位接受该标签的任意成员。
             List<GenericStack> choices = new ArrayList<>();
@@ -71,6 +76,14 @@ public final class ArcanePatternDetails implements IPatternDetails {
                 AEItemKey key = AEItemKey.of(option);
                 if (key != null) {
                     choices.add(new GenericStack(key, Math.max(1, option.getCount())));
+                }
+            }
+            // 桶装输入：开关打开时，网络里的流体也能顶替那只桶。
+            // 本机器把推过来的投入物原样归还，流体也一样，所以这里不用算余料。
+            if (pattern.fluidSubstitution()) {
+                GenericStack fluid = containedFluid(display);
+                if (fluid != null) {
+                    choices.add(fluid);
                 }
             }
             cell++;
@@ -99,6 +112,25 @@ public final class ArcanePatternDetails implements IPatternDetails {
         if (refusal != null) {
             refusal.accept(reason);
         }
+    }
+
+    /**
+     * 桶里装着的流体。范围和 AE2 自己的合成样板一致：只认桶和奶桶——
+     * 别的容器（储罐、安瓿）倒出来是什么、剩下的算什么，没有统一的答案。
+     */
+    private static @Nullable GenericStack containedFluid(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return null;
+        }
+        Item item = stack.getItem();
+        if (!(item instanceof BucketItem) && !(item instanceof MilkBucketItem)) {
+            return null;
+        }
+        GenericStack contained = ContainerItemStrategies.getContainedStack(stack, AEKeyType.fluids());
+        if (contained == null || contained.amount() <= 0) {
+            return null;
+        }
+        return new GenericStack(contained.what(), contained.amount());
     }
 
     public ThEArcanePattern pattern() {
@@ -153,11 +185,9 @@ public final class ArcanePatternDetails implements IPatternDetails {
 
         @Override
         public boolean isValid(AEKey input, Level level) {
-            if (!(input instanceof AEItemKey itemKey)) {
-                return false;
-            }
             for (GenericStack choice : choices) {
-                if (itemKey.equals(choice.what())) {
+                // 不再限定物品：流体替代打开时，流体 key 也是这个格位的合法输入。
+                if (input.equals(choice.what())) {
                     return true;
                 }
             }

@@ -11,6 +11,7 @@ navigation:
 - [入門](getting-started.md)
 - [源質儲存](essentia-storage.md)
 - [源質終端](terminals.md)
+- [奧術編碼](arcane-encoding.md)
 - [奧術合成](arcane-crafting.md)
 - [源質與奧術自動化](automation.md)
 - [神秘水晶](thaumic-crystals.md)

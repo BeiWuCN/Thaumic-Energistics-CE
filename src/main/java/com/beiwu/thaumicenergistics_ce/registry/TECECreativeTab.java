@@ -4,6 +4,7 @@ import com.beiwu.thaumicenergistics_ce.registry.TECEItems;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -71,6 +72,9 @@ public final class TECECreativeTab {
                         output.accept(TECEItems.ESSENTIA_CELL_CREATIVE.get());
                         output.accept(TECEItems.ESSENTIA_TERMINAL.get());
                         output.accept(TECEItems.ARCANE_CRAFTING_TERMINAL.get());
+                        output.accept(TECEItems.ARCANE_ENCODING_TERMINAL.get());
+                        output.accept(TECEItems.WIRELESS_ARCANE_ENCODING_TERMINAL.get());
+                        output.accept(charged(TECEItems.WIRELESS_ARCANE_ENCODING_TERMINAL.get()));
                         output.accept(TECEItems.VIS_INTERFACE.get());
                         output.accept(TECEItems.DIFFUSION_CORE.get());
                         output.accept(TECEItems.COALESCENCE_CORE.get());
@@ -89,9 +93,13 @@ public final class TECECreativeTab {
                     })
                     .build());
 
-    private static ItemStack charged(appeng.items.tools.powered.WirelessTerminalItem item) {
+    private static ItemStack charged(Item item) {
         var stack = new ItemStack(item);
-        item.injectAEPower(stack, item.getAEMaxPower(stack), appeng.api.config.Actionable.MODULATE);
+        // 无线奥术终端的两种实现都继承自 AE2 的无线终端，电池接口一致；
+        // 按接口充能而不是按具体类，免得给两个物品各写一份。
+        if (item instanceof appeng.items.tools.powered.WirelessTerminalItem wireless) {
+            wireless.injectAEPower(stack, wireless.getAEMaxPower(stack), appeng.api.config.Actionable.MODULATE);
+        }
         return stack;
     }
 

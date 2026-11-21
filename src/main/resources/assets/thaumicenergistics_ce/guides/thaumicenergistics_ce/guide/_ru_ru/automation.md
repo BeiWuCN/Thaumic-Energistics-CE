@@ -8,7 +8,7 @@ item_ids:
 - thaumicenergistics_ce:alchemy_provider
 - thaumicenergistics_ce:arcane_assembler
 - thaumicenergistics_ce:knowledge_core
-- thaumicenergistics_ce:knowledge_inscriber
+- thaumicenergistics_ce:arcane_encoding_terminal
 ---
 
 # Автоматизация эссенции и магического создания
@@ -25,4 +25,4 @@ item_ids:
 
 ## Магическая сборка
 
-Запишите изученный рецепт в ядро знаний через <ItemLink id="thaumicenergistics_ce:knowledge_inscriber" />. Вставьте ядро, разложите ингредиенты как на магическом верстаке, проверьте результат и сохраните запись. Перенесите ядро в <ItemLink id="thaumicenergistics_ce:arcane_assembler" />, наладьте подачу предметов и vis, затем запустите задание.
+Закодируйте рецепт на <ItemLink id="thaumicenergistics_ce:arcane_encoding_terminal" />: разложите ингредиенты как на магическом верстаке, проверьте предпросмотр и нажмите кнопку кодирования — шаблон запишется в ядро знаний. Перенесите ядро в <ItemLink id="thaumicenergistics_ce:arcane_assembler" />, наладьте подачу предметов и vis, затем запустите задание.

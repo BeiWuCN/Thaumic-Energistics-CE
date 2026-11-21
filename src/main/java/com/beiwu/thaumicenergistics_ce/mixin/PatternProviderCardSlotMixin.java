@@ -1,5 +1,4 @@
 package com.beiwu.thaumicenergistics_ce.mixin;
-import com.beiwu.thaumicenergistics_ce.config.ThEConfig;
 
 import appeng.helpers.patternprovider.PatternProviderLogicHost;
 import appeng.menu.implementations.PatternProviderMenu;
@@ -20,12 +19,6 @@ public abstract class PatternProviderCardSlotMixin {
     private void tce$dedicatedSlot(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
         var slot = (AppEngSlot) (Object) this;
         if (!stack.is(TECEItems.ESSENTIA_ACCESS_CARD.get())) return;
-        if (getMenu() instanceof com.beiwu.thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal arcane
-                && arcane.getSlots(appeng.menu.SlotSemantics.UPGRADE).contains(slot)
-                && !com.beiwu.thaumicenergistics_ce.config.ThEConfig.ARCANE_ESSENTIA_ACCESS.get()) {
-            cir.setReturnValue(false);
-            return;
-        }
         if (getMenu() instanceof PatternProviderMenu menu
                 && menu.getSlots(appeng.menu.SlotSemantics.UPGRADE).contains(slot)
                 && menu.getTarget() instanceof PatternProviderLogicHost host

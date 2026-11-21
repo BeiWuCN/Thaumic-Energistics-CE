@@ -17,8 +17,10 @@ import com.beiwu.thaumicenergistics_ce.item.ItemFluxTransferInterface;
 import com.beiwu.thaumicenergistics_ce.item.ItemFocusAEWrench;
 import com.beiwu.thaumicenergistics_ce.item.ItemGolemWirelessBackpack;
 import com.beiwu.thaumicenergistics_ce.item.ItemKnowledgeCore;
+import com.beiwu.thaumicenergistics_ce.item.ItemKnowledgeInscriber;
 import com.beiwu.thaumicenergistics_ce.item.ItemVisInterface;
 import com.beiwu.thaumicenergistics_ce.item.ItemWirelessArcaneCraftingTerminal;
+import com.beiwu.thaumicenergistics_ce.item.ItemWirelessArcaneEncodingTerminal;
 import com.beiwu.thaumicenergistics_ce.item.ItemWirelessConnector;
 import com.beiwu.thaumicenergistics_ce.item.ItemWirelessEssentiaTerminal;
 
@@ -70,8 +72,10 @@ public final class TECEItems {
     public static final DeferredItem<BlockItem> ARCANE_ASSEMBLER =
             REGISTRY.registerSimpleBlockItem(TECEBlocks.ARCANE_ASSEMBLER);
 
-    public static final DeferredItem<BlockItem> KNOWLEDGE_INSCRIBER =
-            REGISTRY.registerSimpleBlockItem(TECEBlocks.KNOWLEDGE_INSCRIBER);
+    public static final DeferredItem<BlockItem> KNOWLEDGE_INSCRIBER = REGISTRY.registerItem(
+            "knowledge_inscriber",
+            properties -> new ItemKnowledgeInscriber(TECEBlocks.KNOWLEDGE_INSCRIBER.get(), properties),
+            new Item.Properties());
 
     public static final DeferredItem<BlockItem> ESSENTIA_CELL_WORKBENCH =
             REGISTRY.registerSimpleBlockItem(TECEBlocks.ESSENTIA_CELL_WORKBENCH);
@@ -132,6 +136,12 @@ public final class TECEItems {
     public static final DeferredItem<ItemArcaneCraftingTerminal> ARCANE_CRAFTING_TERMINAL =
             REGISTRY.registerItem(
                     "arcane_crafting_terminal", ItemArcaneCraftingTerminal::new, new Item.Properties());
+
+    public static final DeferredItem<com.beiwu.thaumicenergistics_ce.item.ItemArcaneEncodingTerminal>
+            ARCANE_ENCODING_TERMINAL = REGISTRY.registerItem(
+                    "arcane_encoding_terminal",
+                    com.beiwu.thaumicenergistics_ce.item.ItemArcaneEncodingTerminal::new,
+                    new Item.Properties());
 
     // 容量按字节计，与 AE2 一致：以源质算是名称数字的八倍，1k 存 8192。
 
@@ -204,11 +214,35 @@ public final class TECEItems {
                             () -> ItemWirelessEssentiaTerminal.POWER_CAPACITY, properties),
                     new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
 
-    public static final DeferredItem<ItemWirelessArcaneCraftingTerminal> WIRELESS_ARCANE_CRAFTING_TERMINAL =
-            REGISTRY.registerItem(
-                    "wireless_arcane_crafting_terminal",
-                    properties -> new ItemWirelessArcaneCraftingTerminal(
-                            () -> ItemWirelessArcaneCraftingTerminal.POWER_CAPACITY, properties),
+    /**
+     * 两个无线奥术终端在装有 AE2WTLib 时换成 {@code ItemWT} 子类，才能被通用终端收下；
+     * 缺依赖时退回本 mod 自己的无线终端基类（自研量子桥 + 配对面板终端）。
+     *
+     * <p>声明成 {@code DeferredItem<Item>} 而不是具体类型：集成分支的类引用可选依赖
+     * {@code ae2wtlib_api}，具体类型会把那个名字写进本类的常量池。
+     */
+    public static final DeferredItem<Item> WIRELESS_ARCANE_CRAFTING_TERMINAL =
+            REGISTRY.registerItem("wireless_arcane_crafting_terminal",
+                    properties -> com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration
+                            .enabled()
+                            ? com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration
+                                    .createCraftingTerminal()
+                            : new ItemWirelessArcaneCraftingTerminal(
+                                    () -> ItemWirelessArcaneCraftingTerminal.POWER_CAPACITY, properties),
+                    new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
+
+    /**
+     * 无线奥术编码终端：界面与面板版同一套，九格网格与知识核心存在物品组件里。
+     * 升级槽只有 1 格，收能量卡；量子桥卡装不进去，编码菜单没挂奇点槽。
+     */
+    public static final DeferredItem<Item> WIRELESS_ARCANE_ENCODING_TERMINAL =
+            REGISTRY.registerItem("wireless_arcane_encoding_terminal",
+                    properties -> com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration
+                            .enabled()
+                            ? com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration
+                                    .createEncodingTerminal()
+                            : new ItemWirelessArcaneEncodingTerminal(
+                                    () -> ItemWirelessArcaneEncodingTerminal.POWER_CAPACITY, properties),
                     new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
 
     // 两张升级卡都会被读：访问卡开关源质手势，vis 卡把合成中未指定类型的 vis 转到灵气上。

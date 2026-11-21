@@ -639,6 +639,24 @@
         "amount": 4
       }
     ],
+    "thaumicenergistics_ce:arcane_encoding_terminal": [
+      {
+        "aspect": "thaumaturge:cognitio",
+        "amount": 8
+      },
+      {
+        "aspect": "thaumaturge:fabrico",
+        "amount": 6
+      },
+      {
+        "aspect": "thaumaturge:praecantatio",
+        "amount": 4
+      },
+      {
+        "aspect": "thaumaturge:ordo",
+        "amount": 4
+      }
+    ],
     "thaumicenergistics_ce:essentia_terminal": [
       {
         "aspect": "thaumaturge:alkimia",

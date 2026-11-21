@@ -28,6 +28,8 @@ repositories {
     maven { url = 'https://maven.latvian.dev/releases'; content { includeGroupByRegex 'dev\\.latvian\\..*' } }
     maven { url = 'https://jitpack.io'; content { includeGroup 'com.github.rtyley' } }
     maven { url = 'https://maven.shedaniel.me'; content { includeGroup 'me.shedaniel.cloth' } }
+    // AE2WTLib publishes its api artifact here; the mod itself also resolves from Modrinth above.
+    maven { url = 'https://modmaven.dev'; content { includeGroup 'de.mari_023' } }
     mavenLocal()
     mavenCentral()
     // maven { url = '../local-maven' }
@@ -169,6 +171,13 @@ dependencies {
 
     // Thaumaturge, from the CurseForge release pinned above (file 9452543).
     implementation thaumaturgeDependency
+
+    // AE2WTLib: the two wireless arcane terminals are built on its terminal API - the item base
+    // class (ItemWT), the menu host (WTMenuHost), and the AddTerminalEvent registration all come
+    // from ae2wtlib_api. compileOnly because the api is neither jar-in-jar'd nor required: the mod
+    // is optional, and the integration package is only touched when ModList reports it loaded.
+    // Without it the two terminals register with this mod's own base class instead.
+    compileOnly("de.mari_023:ae2wtlib_api:${ae2wtlib_version}") { transitive = false }
     compileOnly("maven.modrinth:advancedae:1.6.12-1.21.1") { transitive = false }
     if (!project.hasProperty('withoutCompatibilityMods')) {
         runtimeOnly fileTree(dir: 'libs/compat', include: ['*.jar'])
@@ -185,9 +194,10 @@ dependencies {
     // Dev-only runtime mods (never shipped). Coordinates, no local jars.
     // Roster mirrors Thaumaturge-Aspect-Tooltip's dev client, minus mods TECE already
     // declares as implementation (AE2 / GuideME / JEI / Jade / Curios / Lithostitched),
-    // minus TECE's own release build (would clash with this source tree), and minus
-    // the four mods that have no public coordinate (ExtendedAE, ae2jeiintegration,
-    // thaumaturge_tinkerer, thaumicbases). See docs/DEV_ENV.md.
+    // minus TECE's own release build (would clash with this source tree). The only TAT dev
+    // mod still skipped for having no public coordinate is ExtendedAE; ae2jeiintegration,
+    // the tinkerer port and thaumicbases all have Curse Maven coordinates and load below.
+    // See docs/DEV_ENV.md.
     // Curse Maven reachability was verified 2026-11-19: all coordinates return 200.
     localRuntime 'curse.maven:ae2-pattern-disk-1698612:9384288'
     localRuntime 'curse.maven:architectury-api-419699:8492726'
@@ -201,8 +211,20 @@ dependencies {
     // bases: TAT's local jar was 3.6.023.5, which is not published; 3.6.024.0 is the closest
     // 1.21.1 NeoForge build. Its mods.toml requires neoforge [21.1.265,), hence the raised
     // neo_version baseline in gradle.properties. Its file id is 9582970.
-    localRuntime 'curse.maven:thaumtinkerer-1793843:9611477'   // thaumaturge_tinkerer 0.3
+    // Tinkerer: the standalone port project replaces the older thaumaturge_tinkerer build.
+    // Project 1774168 ("Thaumaturge Tinkerer: Port of Thaumic Tinkerer"), file 9722509.
+    // Its mods.toml asks for thaumaturge [1.0.11,) and neoforge [21.1.238,), both satisfied
+    // by the pinned Thaumaturge 1.1.0 / neo_version 21.1.265; jei is optional with no range,
+    // so the old [19.64.0.455,20) gate no longer drives the JEI version.
+    localRuntime 'curse.maven:thaumaturge-tinkerer-port-of-thaumic-tinkerer-1774168:9722509'
     localRuntime 'curse.maven:thaumic-bases-unofficial-293406:9582970' // bases 3.6.024.0
+
+    // Two more Thaumaturge addons (POM + JAR verified 2026-11-21, both 200).
+    // Each declares only neoforge + thaumaturge as required; everything else in their
+    // mods.toml (Occultism, Witchery, Twilight Forest, thaumaturgictinkerer, ...) is
+    // optional, so the dev suite does not need those to load them. No jar-in-jar either.
+    localRuntime 'curse.maven:void-inspire-1811959:9714275'     // voidinspire 1.0.1
+    localRuntime 'curse.maven:forsaken-magic-1802941:9721973'   // forsakenmagic 0.13.0
 
     localRuntime 'dev.latvian.mods:kubejs-neoforge:2101.7.2-build.381'
     localRuntime 'dev.latvian.mods:rhino:2101.2.7-build.85'

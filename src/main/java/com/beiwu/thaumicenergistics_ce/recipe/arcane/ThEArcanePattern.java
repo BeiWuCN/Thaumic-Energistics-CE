@@ -36,7 +36,8 @@ public record ThEArcanePattern(
         int baseVis,
         @Nullable ResourceLocation research,
         @Nullable Integer researchStage,
-        List<TagKey<Item>> cellTags) {
+        List<TagKey<Item>> cellTags,
+        boolean fluidSubstitution) {
 
     /** 消耗一个元初晶体得到的 vis，取自 Thaumaturge 的法杖替代比率。 */
     public static final int CRYSTAL_SUBSTITUTE_VIS = 2;
@@ -83,6 +84,29 @@ public record ThEArcanePattern(
             choices.add(display);
         }
         return choices;
+    }
+
+    /**
+     * 按编码终端上的两个开关给样板定型。
+     * 关掉替代品就抹掉格位标签：样板此后只认自己显示的那一个物品，
+     * 配方说的「任意铁锭」不再放行别的成员。流体替代要用在合成那一步，
+     * 光靠格位标签推不出来，所以它跟着样板一起存。
+     */
+    public ThEArcanePattern withEncodingFlags(boolean substitutes, boolean fluidSubstitution) {
+        List<TagKey<Item>> tags =
+                substitutes ? cellTags : new ArrayList<>(Collections.<TagKey<Item>>nCopies(MAX_GRID, null));
+        return new ThEArcanePattern(
+                result,
+                grid,
+                ingredients,
+                gridWidth,
+                gridHeight,
+                crystals,
+                baseVis,
+                research,
+                researchStage,
+                tags,
+                fluidSubstitution);
     }
 
     public int crystalVis() {

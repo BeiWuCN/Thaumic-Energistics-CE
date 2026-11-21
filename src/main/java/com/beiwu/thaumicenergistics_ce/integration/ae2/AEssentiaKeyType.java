@@ -61,6 +61,14 @@ public final class AEssentiaKeyType extends AEKeyType {
         return 1;
     }
 
+    /**
+     * 固定为 1：这是 AE2 里"一份"的定义，{@code formatAmount} 会拿它做除数，
+     * 调大就等于把终端里的存量显示整体除下去（250 变 25，8192 变 819.2）。
+     * 而 {@code AEKeyType.formatAmount} 是 final，改不了显示，只能改语义，所以不能动。
+     * <p>代价是 AE2 的 {@code EMPTY_ITEM} / {@code FILL_ITEM} 一次只请求 1 单位，
+     * 而安瓿是整瓶（10）进出的，容器策略会拒绝这种零碎请求——所以容器交互
+     * 由 {@code ScreenEssentiaTerminalBase} 自己发，不能交给 AE2 原生路径。
+     */
     @Override
     public int getAmountPerUnit() {
         return 1;

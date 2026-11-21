@@ -29,6 +29,9 @@ public final class QuantumTerminalSupport {
         if (!enabled() || card() == null || card() == Items.AIR) return;
         Upgrades.add(card(), TECEItems.WIRELESS_ESSENTIA_TERMINAL.get(), 1);
         Upgrades.add(card(), TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(), 1);
+        // 编码终端也是无线物品，没这张卡就只能站在访问点旁边用。
+        // 漏登的后果是槽位过滤器直接拒收，玩家看到「放不下」。
+        Upgrades.add(card(), TECEItems.WIRELESS_ARCANE_ENCODING_TERMINAL.get(), 1);
     }
 
     public static IUpgradeInventory upgrades(ItemStack stack, appeng.api.upgrades.ItemUpgradesChanged changed) {

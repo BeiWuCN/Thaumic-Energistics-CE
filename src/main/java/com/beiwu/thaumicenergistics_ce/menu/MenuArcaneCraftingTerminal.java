@@ -127,9 +127,6 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     @appeng.menu.guisync.GuiSync(110)
     public int availableAuraVis;
 
-    @appeng.menu.guisync.GuiSync(111)
-    public boolean essentiaAccessEnabled;
-
     /** 付费源模式：true 先用水晶槽的整颗晶体，false 让法杖 6 要素按 2:1 顶水晶。 */
     @appeng.menu.guisync.GuiSync(112)
     public boolean crystalFirst;
@@ -142,7 +139,9 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         super(menuType, id, playerInventory, host, false);
         this.part = host instanceof ArcaneTerminalHost arcane ? arcane.arcaneTerminal() : null;
         this.auraPayer = host instanceof IPortableTerminal portable ? portable : null;
-        var wireless = host instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost w ? w : null;
+        // 只看接口：独立实现（自研量子桥）与 AE2WTLib 实现（WTMenuHost）都满足它，
+        // 菜单不必知道手里是哪种终端。
+        var wireless = host instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingHost w ? w : null;
         this.craftingGrid = wireless != null ? wireless.craftingGrid() : part == null ? gridFallback : part.craftingGrid();
         this.wandInventory = wireless != null ? wireless.wandInventory() : part == null ? wandFallback : part.wandInventory();
         this.crystals = wireless != null ? wireless.crystalInventory() : part == null ? crystalFallback : part.crystalInventory();
@@ -248,8 +247,6 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
             var pos = part == null ? getPlayer().blockPosition() : part.getBlockEntity().getBlockPos();
             availableAuraVis = Math.max(0, (int) com.beiwu.thaumicenergistics_ce.compat.thaumaturge.TcAura.vis(getPlayer().level(), pos));
         }
-        if (!isClientSide()) essentiaAccessEnabled = com.beiwu.thaumicenergistics_ce.config.ThEConfig.ARCANE_ESSENTIA_ACCESS.get();
-        updateUpgradeSlotVisibility();
         super.broadcastChanges();
         if (resultSlot == null) {
             return;
@@ -262,27 +259,6 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
             lastConnected = connected;
             resultSlot.refresh();
         }
-    }
-
-    @Override
-    public boolean isValidForSlot(Slot slot, ItemStack stack) {
-        if (stack.is(TECEItems.ESSENTIA_ACCESS_CARD.get())
-                && getSlots(SlotSemantics.UPGRADE).contains(slot)
-                && !com.beiwu.thaumicenergistics_ce.config.ThEConfig.ARCANE_ESSENTIA_ACCESS.get()) return false;
-        return super.isValidForSlot(slot, stack);
-    }
-
-    public void updateUpgradeSlotVisibility() {
-        var slots = getSlots(SlotSemantics.UPGRADE);
-        int hidden = -1;
-        if (!essentiaAccessEnabled) {
-            int limit = getHost() instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost
-                    ? Math.min(2, slots.size()) : slots.size();
-            for (int i = limit - 1; i >= 0; i--) {
-                if (!slots.get(i).hasItem()) { hidden = i; break; }
-            }
-        }
-        for (int i = 0; i < slots.size(); i++) ((AppEngSlot) slots.get(i)).setSlotEnabled(i != hidden);
     }
 
     private void chargeWand() {
@@ -429,7 +405,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
     public boolean canCraft() {
         return getLinkStatus().connected() && (part != null
-                || getHost() instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost);
+                || getHost() instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingHost);
     }
 
     public @Nullable ArcaneCraftingResultSlot resultSlot() {
@@ -608,12 +584,14 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     }
 
 
-    /** 权限只看终端物品升级槽里那张卡，别处一概不读。 */
+    /**
+     * 源质行的可见性与交互性是两件事：可见性默认就开（见 {@code EssentiaVisibility}），
+     * 交互性只看升级槽里有没有卡。没卡的终端照样看得到源质，只是右键存不进去。
+     */
     @Override
     protected boolean essentiaAccessGranted() {
         // 玩家看到的就是宿主自己的升级栏；AE2 菜单按它构建。
-        return (isClientSide() ? essentiaAccessEnabled : com.beiwu.thaumicenergistics_ce.config.ThEConfig.ARCANE_ESSENTIA_ACCESS.get())
-                && getHost().getUpgrades().isInstalled(TECEItems.ESSENTIA_ACCESS_CARD.get());
+        return getHost().getUpgrades().isInstalled(TECEItems.ESSENTIA_ACCESS_CARD.get());
     }
 
     /** 屏幕问它只为隐藏手势；服务端在动东西之前会再问一次。 */

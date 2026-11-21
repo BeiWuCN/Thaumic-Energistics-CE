@@ -1,3 +1,71 @@
+# Thaumic Energistics CE 2.7.6 / Minecraft 1.21.1 / NeoForge
+
+## 中文
+
+### 新增
+
+- **ME 奥术编码终端**（面板部件 `PartArcaneEncodingTerminal`，物品 `arcane_encoding_terminal`）：在终端内查看并编写奥术合成样板，编码结果写入知识核心。配方只接受奥术工作台的摆法，普通合成台配方会被拒绝并说明原因。它取代知识记录仪——`ItemKnowledgeInscriber` 的方块与配方保留给老存档，但 tooltip 改为标红提示「已被 ME 奥术编码终端取代」。
+- **无线奥术编码终端**，两套实现共用同一物品 id 与配方：装有 AE2WTLib 时使用 `AE2WTArcaneEncodingTerminalItem` 与 `AE2WTArcaneEncodingTerminalMenuHost`（继承 `ItemWT` / `WTMenuHost`，带通用升级卡与量子桥接卡）；未安装时退回本模组自带的 `ItemWirelessArcaneEncodingTerminal` 与 `WirelessArcaneEncodingTerminalMenuHost`。两者都注册物品栏热键与 Curios 饰品栏热键。
+- **无线奥术合成终端的 AE2WTLib 实现**（`AE2WTArcaneCraftingTerminalItem` / `AE2WTArcaneCraftingTerminalMenuHost`），与既有独立实现并列，装 AE2WTLib 时优先使用。
+- **JEI「物品要素来源」类别**（`AspectFromItemCategory`、`AspectFromItemRecipe`、`EssentiaIngredientConverter`、`EssentiaJeiBridge`）：列出哪些物品能扫出哪些要素；`AspectFromItemTransfer` 支持从该类目直接取用。
+- **JEI 奥术编码配方转移**（`ArcaneEncodingRecipeTransfer`）：把奥术合成配方一键转成样板并送进编码终端。
+- **游戏内指南新增「奥术编码」章节**，简体中文、繁体中文、英文、俄文四语齐备（`guide/arcane-encoding.md` 与 `_zh_cn` / `_zh_tw` / `_ru_ru`），并已挂到指南索引。
+- **研究项** `arcane_encoding_terminal` 与 `wireless_arcane_encoding_terminal` 补入神秘能源研究树；新物品的原始要素写进 `data_maps/item/base_aspects.json`。
+
+### 变更
+
+- **源质终端的容器交互重写**（`ScreenEssentiaTerminalBase`）：左键装填与空手取瓶、右键倒空与存放，分工固定；未装访问卡时给出提示而不是静默。命中判定改为按鼠标位置几何现算（`slotAt`，含原版 `isHovering` 的 ±1 松弛），不再读取 `hoveredSlot`。
+- **源质容器改为按能力识别**（`TcRegistry.isEssentiaContainer`）：用 `EssentiaCapabilities.CONTAINER` 判断，不再写死 `instanceof JarItem/PhialItem`，Thaumaturge 以后新增的源质容器会自动被认出。三类共享同一能力但不适合作容器的物品按物品排除：虚空罐（内容被销毁）、要素水晶与魔力豆（写回时数量被硬编码为 1）。新增 `TcRegistry.capacityOf`：安瓿报整瓶容量，罐子经 `BlockItem#getBlock` 取 `IEssentiaJar#jarCapacity`。
+- **奥术合成终端结果槽重构**（`ArcaneCraftingResultSlot`）：合成格固定按 3×3 解释；命中原版合成配方时缓存配方与输入快照，点击扣料使用同一份快照。仅在完全没有配方时回落到原版合成，研究未完成、材料或灵气不足仍报奥术侧的失败原因，避免把已匹配的奥术配方换成不相干的产物。
+- **JEI 转移支持批量填入**：库存与槽位容量允许时，按住 Shift 从 JEI 转移配方会填入多份材料及所需水晶碎片（`CraftingRecipeTransfer`、`ArcaneCraftingRecipeTransfer`）。
+- **开发环境**：新增 AE2WTLib 编译期依赖（`compileOnly de.mari_023:ae2wtlib_api`，未安装该模组时不参与运行）；神秘工匠来源由旧的 `thaumaturge_tinkerer` 换成移植版（Curse Maven 1774168 / 9722509），并补充 `void-inspire` 与 `forsaken-magic`。
+
+### 修复
+
+- 手持安瓿在源质终端的空格子或非源质行上左键时，安瓿会被当作普通物品整叠存进网络；现在拦下并提示「左键不存安瓿」。
+- 源质终端的手势判定读取 `hoveredSlot`，点击落点与判据差一帧时手势整体失效，右键满瓶会直接走 AE2 的原生存入路径，把整只安瓿连源质一起存进网络；改用几何现算后消除。
+- 无线奥术编码终端未登记进 Curios 饰品栏标签（`data/curios/tags/item/curio.json`），无法放进饰品槽。
+- 无线奥术编码终端的研究页缺少四语正文（`tc.research_text.WIRELESSARCANEENCODINGTERMINAL`），此前手册会显示原始键名。
+- 奥术装配室与无线奥术编码终端的研究项都放在 (10,2) 上互相遮挡；装配室移至 (12,2)，保持「终端 → 卡 → 无线终端」的横向排列。
+- 研究名与物品名术语不一致：`ARCANECRAFTINGTERMINAL` 缺少 `ME` 前缀、`MYSTIC_PROCESSOR` 缺少「水晶」，四语一并订正；并补上 `en_us` 缺失的 `tc.research_name.WIRELESSARCANEENCODINGTERMINAL`。
+
+### 移除
+
+- `ArcaneTerminalUpgrades`：升级槽装配逻辑并入 `MenuArcaneCraftingTerminal`，不再单独维护一份。
+
+## English
+
+### Added
+
+- **ME Arcane Encoding Terminal** (part `PartArcaneEncodingTerminal`, item `arcane_encoding_terminal`): browse and write arcane crafting patterns inside the terminal, encoding into a knowledge core. Only arcane workbench arrangements are accepted; an ordinary crafting recipe is refused with a reason. It supersedes the Knowledge Inscriber — the block and its recipe stay for existing saves, but the tooltip now points at the new terminal.
+- **Wireless Arcane Encoding Terminal**, two implementations sharing one item id and recipe: with AE2WTLib installed it uses `AE2WTArcaneEncodingTerminalItem` and `AE2WTArcaneEncodingTerminalMenuHost` (on `ItemWT` / `WTMenuHost`, with generic upgrade and quantum bridge cards); without it the mod's own `ItemWirelessArcaneEncodingTerminal` and `WirelessArcaneEncodingTerminalMenuHost` are used. Both register an inventory hotkey and a Curios slot hotkey.
+- **AE2WTLib implementation of the Wireless Arcane Crafting Terminal** (`AE2WTArcaneCraftingTerminalItem` / `AE2WTArcaneCraftingTerminalMenuHost`), alongside the existing standalone version and preferred when AE2WTLib is present.
+- **JEI "aspects from items" category** (`AspectFromItemCategory`, `AspectFromItemRecipe`, `EssentiaIngredientConverter`, `EssentiaJeiBridge`): shows which items yield which aspects when scanned; `AspectFromItemTransfer` lets recipes be built from that category.
+- **JEI transfer for arcane encoding** (`ArcaneEncodingRecipeTransfer`): turns an arcane recipe into a pattern and sends it to the encoding terminal in one click.
+- **New in-game guide chapter "Arcane Encoding"** in Simplified Chinese, Traditional Chinese, English and Russian (`guide/arcane-encoding.md` plus `_zh_cn` / `_zh_tw` / `_ru_ru`), linked from the guide index.
+- **Research entries** `arcane_encoding_terminal` and `wireless_arcane_encoding_terminal`, with the new items' base aspects recorded in `data_maps/item/base_aspects.json`.
+
+### Changed
+
+- **Essentia terminal container interaction rewritten** (`ScreenEssentiaTerminalBase`): left-click fills or takes a phial, right-click empties or stores; without an access card the terminal explains why nothing happened instead of staying silent. Slot hit-testing now derives the slot from the mouse position (`slotAt`, including vanilla `isHovering`'s one-pixel slack) instead of reading `hoveredSlot`.
+- **Essentia containers are recognised by capability** (`TcRegistry.isEssentiaContainer`): `EssentiaCapabilities.CONTAINER` replaces the hard-coded `instanceof JarItem/PhialItem`, so future Thaumaturge containers are picked up automatically. Three items share the capability but are excluded by item: the void jar (contents are destroyed) and essentia crystals and mana beans (their write-back hard-codes an amount of 1). New `TcRegistry.capacityOf` reports the full phial capacity, and jar capacity through `BlockItem#getBlock` to `IEssentiaJar#jarCapacity`.
+- **Arcane crafting result slot reworked** (`ArcaneCraftingResultSlot`): the grid is always interpreted as 3×3; a matched vanilla recipe caches the recipe and its input snapshot, and consuming uses that same snapshot. Vanilla crafting is only a fallback when no recipe matched at all; research locks and insufficient materials or vis still report the arcane reason, so a matched arcane recipe is never silently replaced by an unrelated output.
+- **JEI transfer can fill in bulk**: holding Shift transfers several sets of ingredients and crystals when inventory and slot capacity allow (`CraftingRecipeTransfer`, `ArcaneCraftingRecipeTransfer`).
+- **Development environment**: added the AE2WTLib compile-only dependency (`compileOnly de.mari_023:ae2wtlib_api`; the mod stays optional at runtime); the Tinkerer source moved to the port project (Curse Maven 1774168 / 9722509), and `void-inspire` plus `forsaken-magic` were added.
+
+### Fixed
+
+- Left-clicking an empty slot or a non-essentia row while holding a phial stored the whole held stack into the network; the click is now blocked with a "left-click does not store phials" hint.
+- Slot hit-testing read `hoveredSlot`, so a click landing between frames made every gesture miss and let a right-click on a full phial fall through to AE2's native store path, putting the phial and its essentia into the network; deriving the slot geometrically removes this.
+- The Wireless Arcane Encoding Terminal was missing from the Curios tag (`data/curios/tags/item/curio.json`) and could not be worn.
+- The Wireless Arcane Encoding Terminal research page had no body text in any language (`tc.research_text.WIRELESSARCANEENCODINGTERMINAL`), so the book showed raw keys.
+- The Arcane Assembler and Wireless Arcane Encoding Terminal research entries both sat on (10,2) and overlapped; the assembler moved to (12,2), keeping the "terminal → card → wireless terminal" row.
+- Research names drifted from item names: `ARCANECRAFTINGTERMINAL` was missing its `ME` prefix and `MYSTIC_PROCESSOR` its "Crystal", now aligned in all four languages; the missing `en_us` key `tc.research_name.WIRELESSARCANEENCODINGTERMINAL` was added.
+
+### Removed
+
+- `ArcaneTerminalUpgrades`: the upgrade slot wiring now lives in `MenuArcaneCraftingTerminal` instead of a separate class.
+
 # Thaumic Energistics CE 2.7.5.5 / Minecraft 1.21.1 / NeoForge
 
 ## 中文

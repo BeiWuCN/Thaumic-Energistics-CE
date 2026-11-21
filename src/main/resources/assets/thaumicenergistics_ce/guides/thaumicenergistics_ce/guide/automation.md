@@ -8,7 +8,7 @@ item_ids:
 - thaumicenergistics_ce:alchemy_provider
 - thaumicenergistics_ce:arcane_assembler
 - thaumicenergistics_ce:knowledge_core
-- thaumicenergistics_ce:knowledge_inscriber
+- thaumicenergistics_ce:arcane_encoding_terminal
 ---
 
 # Essentia and Arcane Automation
@@ -25,4 +25,4 @@ An <ItemLink id="thaumicenergistics_ce:alchemy_provider" /> supplies the essenti
 
 ## Arcane Assembly
 
-Use an <ItemLink id="thaumicenergistics_ce:knowledge_inscriber" /> to record a researched recipe. Put the Knowledge Core in the inscriber, lay out the ingredients as you would at the arcane workbench, and save once the result matches. Bring the core to an <ItemLink id="thaumicenergistics_ce:arcane_assembler" /> and arrange the item and Vis supply before submitting a job.
+Encode the recipe at an <ItemLink id="thaumicenergistics_ce:arcane_encoding_terminal" />. Lay out the ingredients as you would at the arcane workbench, check the preview, then press encode to write the pattern into the Knowledge Core. Bring the core to an <ItemLink id="thaumicenergistics_ce:arcane_assembler" /> and arrange the item and Vis supply before submitting a job.

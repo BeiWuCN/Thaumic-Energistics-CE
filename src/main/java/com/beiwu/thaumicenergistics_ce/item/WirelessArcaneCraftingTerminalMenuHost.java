@@ -12,8 +12,17 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.ItemContainerContents;
 import com.beiwu.thaumicenergistics_ce.registry.TECEDataComponents;
 
+/**
+ * 不走 AE2WTLib 时的无线奥术合成终端宿主：工作台九格、水晶与法杖各占一段，
+ * 全部存在物品自己的数据组件里。
+ *
+ * <p>装了 AE2WTLib 时换用继承 {@code WTMenuHost} 的版本，那边白拿量子桥与升级卡库存；
+ * 两者实现同一个 {@link WirelessArcaneCraftingHost}，菜单不必知道差别。</p>
+ */
 public class WirelessArcaneCraftingTerminalMenuHost
-        extends QuantumWirelessTerminalMenuHost<ItemWirelessArcaneCraftingTerminal> {
+        extends QuantumWirelessTerminalMenuHost<ItemWirelessArcaneCraftingTerminal>
+        implements WirelessArcaneCraftingHost {
+
     private final InternalInventory items;
 
     public WirelessArcaneCraftingTerminalMenuHost(ItemWirelessArcaneCraftingTerminal item, Player player,
@@ -34,7 +43,12 @@ public class WirelessArcaneCraftingTerminalMenuHost
         }));
     }
 
+    @Override
     public InternalInventory craftingGrid() { return items.getSubInventory(0, 9); }
+
+    @Override
     public InternalInventory crystalInventory() { return items.getSubInventory(9, 15); }
+
+    @Override
     public InternalInventory wandInventory() { return items.getSubInventory(15, 16); }
 }

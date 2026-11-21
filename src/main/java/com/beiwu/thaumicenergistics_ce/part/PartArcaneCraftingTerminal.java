@@ -76,8 +76,9 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
 
     private static final IPartModel MODELS_OFF = new PartModel(MODEL_BASE, MODEL_OFF, MODEL_STATUS_OFF);
     private static final IPartModel MODELS_ON = new PartModel(MODEL_BASE, MODEL_ON, MODEL_STATUS_ON);
+    /** 连上网络时换一套 1.5 倍亮度的正面覆盖层，和"通电但没频道"分开。 */
     private static final IPartModel MODELS_HAS_CHANNEL =
-            new PartModel(MODEL_BASE, MODEL_ON, MODEL_STATUS_HAS_CHANNEL);
+            new PartModel(MODEL_BASE, MODEL_HAS_CHANNEL, MODEL_STATUS_HAS_CHANNEL);
 
     public static final int GRID_SIZE = 9;
 

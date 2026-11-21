@@ -1,6 +1,8 @@
 package com.beiwu.thaumicenergistics_ce.registry;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.neoforged.bus.api.IEventBus;
@@ -18,6 +20,21 @@ public final class TECEDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<ItemContainerContents>> WIRELESS_ARCANE_ITEMS =
             REGISTRY.register("wireless_arcane_items", () -> DataComponentType.<ItemContainerContents>builder()
                     .persistent(ItemContainerContents.CODEC).networkSynchronized(ItemContainerContents.STREAM_CODEC).build());
+
+    /** 无线奥术编码终端：九格编码网格。 */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ItemContainerContents>> WIRELESS_ARCANE_ENCODING_GRID =
+            REGISTRY.register("wireless_arcane_encoding_grid", () -> DataComponentType.<ItemContainerContents>builder()
+                    .persistent(ItemContainerContents.CODEC).networkSynchronized(ItemContainerContents.STREAM_CODEC).build());
+
+    /** 无线奥术编码终端：装着样板的那个知识核心。 */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ItemContainerContents>> WIRELESS_ARCANE_ENCODING_CORE =
+            REGISTRY.register("wireless_arcane_encoding_core", () -> DataComponentType.<ItemContainerContents>builder()
+                    .persistent(ItemContainerContents.CODEC).networkSynchronized(ItemContainerContents.STREAM_CODEC).build());
+
+    /** 无线奥术编码终端：选中的样板下标，默认 -1。 */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> WIRELESS_ARCANE_ENCODING_SELECTED =
+            REGISTRY.register("wireless_arcane_encoding_selected", () -> DataComponentType.<Integer>builder()
+                    .persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
 
     private TECEDataComponents() {}
 

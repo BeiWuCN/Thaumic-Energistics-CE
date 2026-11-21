@@ -1,0 +1,29 @@
+{
+  "type": "thaumaturge:arcane_workbench_shapeless",
+  "research": {
+    "entry": "thaumicenergistics_ce:wireless_arcane_encoding_terminal"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:wireless_arcane_encoding_terminal",
+    "count": 1
+  },
+  "crystals": [
+    { "aspect": "thaumaturge:aer" },
+    { "aspect": "thaumaturge:ordo" }
+  ],
+  "ingredients": [
+    {
+      "item": "thaumicenergistics_ce:arcane_encoding_terminal"
+    },
+    {
+      "item": "ae2:wireless_receiver"
+    },
+    {
+      "item": "thaumicenergistics_ce:mystic_processor"
+    },
+    {
+      "item": "thaumaturge:ingot_thaumium"
+    }
+  ],
+  "vis": 60
+}

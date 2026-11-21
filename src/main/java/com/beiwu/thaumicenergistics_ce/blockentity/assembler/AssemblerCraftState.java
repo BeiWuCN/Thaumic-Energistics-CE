@@ -1,5 +1,6 @@
 package com.beiwu.thaumicenergistics_ce.blockentity.assembler;
 
+import appeng.api.stacks.GenericStack;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.HolderLookup;
@@ -32,9 +33,9 @@ final class AssemblerCraftState {
 
     private List<ItemStack> craftCrystals = List.of();
 
-    /** AE2 为被推送的合成提取的原料，只为永不完成时归还而留着。
-     * 本机器用 vis 和晶体制作产物。 */
-    private final List<ItemStack> heldInputs = new ArrayList<>();
+    /** AE2 为被推送的合成提取的原料，只为机器损坏时归还而留着。
+     * 本机器用 vis 和晶体制作产物。存通用 key：流体替代让桶装格位也可能被抽成流体。 */
+    private final List<GenericStack> heldInputs = new ArrayList<>();
 
     private int stalledTicks;
 
@@ -86,7 +87,7 @@ final class AssemblerCraftState {
         this.craftCrystals = craftCrystals;
     }
 
-    List<ItemStack> heldInputs() {
+    List<GenericStack> heldInputs() {
         return heldInputs;
     }
 

@@ -11,6 +11,7 @@ Thaumic Energistics CE connects Thaumaturge's essentia and arcane crafting to an
 - [Getting Started](getting-started.md)
 - [Essentia Storage](essentia-storage.md)
 - [Terminals](terminals.md)
+- [Arcane Encoding](arcane-encoding.md)
 - [Arcane Crafting](arcane-crafting.md)
 - [Automation](automation.md)
 - [Thaumic Crystals](thaumic-crystals.md)
