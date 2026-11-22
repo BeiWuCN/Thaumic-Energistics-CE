@@ -21,6 +21,10 @@ public final class TcArcanePayment {
         return Math.max(1, Mth.ceil(recipe.visCost() * modifier));
     }
 
+    public static int crudeCost(IArcaneRecipe recipe) {
+        return com.leclowndu93150.thaumaturge.content.workbench.WorkbenchPayment.crudeCost(recipe);
+    }
+
     private static float gearModifier(Player player) {
         return Math.max(
                 1.0F - CasterManager.visDiscountOf(player), WandEconomy.MIN_CONSUMPTION_MODIFIER);

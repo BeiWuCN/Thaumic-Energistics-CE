@@ -38,19 +38,19 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:machina",
+      "aspect": "thaumaturge:alkimia",
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:praecantatio",
+      "aspect": "thaumaturge:machina",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:aqua",
       "amount": 1
     },
     {
       "aspect": "thaumaturge:ordo",
-      "amount": 1
-    },
-    {
-      "aspect": "thaumaturge:sensus",
       "amount": 1
     }
   ],

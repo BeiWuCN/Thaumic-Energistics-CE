@@ -77,12 +77,13 @@
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:potentia",
+      "aspect": "thaumaturge:perditio",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:vitreus",
+      "aspect": "thaumaturge:permutatio",
       "amount": 1
     }
-  ]
+  ],
+  "complexity": 1
 }

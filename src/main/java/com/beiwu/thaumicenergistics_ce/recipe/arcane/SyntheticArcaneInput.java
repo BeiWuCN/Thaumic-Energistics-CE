@@ -14,6 +14,7 @@ import org.jspecify.annotations.Nullable;
 
 public final class SyntheticArcaneInput implements IArcaneCraftingInput {
     public static final int GRID_SLOTS = 9;
+    public static final int GRID_SIDE = 3;
     public static final int CRYSTAL_SLOTS = 6;
     public static final int WAND_SLOT = GRID_SLOTS + CRYSTAL_SLOTS;
     public static final int SIZE = WAND_SLOT + 1;
@@ -71,9 +72,14 @@ public final class SyntheticArcaneInput implements IArcaneCraftingInput {
         return index >= 0 && index < items.size() ? items.get(index) : ItemStack.EMPTY;
     }
 
+    /**
+     * 格子按三格宽存放（{@code ThEArcanePattern.grid()} 就是按三格排的），
+     * 而 {@code width()} 报的是配方自己的宽度。用 {@code x + y * width} 取，
+     * 两格宽的配方第二行会读到第一行的第三格上。
+     */
     @Override
     public ItemStack getItem(int x, int y) {
-        return getItem(x + y * width);
+        return getItem(y * GRID_SIDE + x);
     }
 
     @Override

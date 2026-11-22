@@ -183,6 +183,7 @@ public final class ThaumicEnergisticsCE {
                     TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                     WirelessTerminalItem.LINKABLE_HANDLER);
             registerUpgrades();
+            com.beiwu.thaumicenergistics_ce.integration.ae2.EssentiaContainerStrategy.register();
             com.beiwu.thaumicenergistics_ce.item.QuantumTerminalSupport.registerUpgrades();
             EssentiaBusStrategies.register();
             ThELog.LOG.info("ThaumicEnergisticsCE common setup complete");

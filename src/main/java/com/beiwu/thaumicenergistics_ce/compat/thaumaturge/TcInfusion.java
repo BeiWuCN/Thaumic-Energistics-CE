@@ -56,4 +56,12 @@ public final class TcInfusion {
         }
         return null;
     }
+
+    public static boolean hasFixedOutput(InfusionRecipe recipe, net.minecraft.core.HolderLookup.Provider registries) {
+        return InfusionRecipe.MAP_CODEC.codec()
+                .encodeStart(registries.createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE), recipe)
+                .result()
+                .filter(json -> json.isJsonObject() && json.getAsJsonObject().has("result"))
+                .isPresent();
+    }
 }

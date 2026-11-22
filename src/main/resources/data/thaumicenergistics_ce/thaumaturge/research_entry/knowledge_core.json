@@ -55,13 +55,13 @@
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:machina",
+      "aspect": "thaumaturge:vitreus",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:fabrico",
+      "aspect": "thaumaturge:metallum",
       "amount": 1
     }
   ],
-  "complexity": 3
+  "complexity": 2
 }

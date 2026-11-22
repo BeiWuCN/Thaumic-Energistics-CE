@@ -29,6 +29,10 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
 
     private static final ClientActionKey<Void> ACTION_CLEAR = new ClientActionKey<>("clear");
 
+    /** 客户端动作：切换复制模式（换元件时保留分区还是从元件读回）。 */
+    private static final appeng.menu.guisync.ClientActionKey<Void> ACTION_COPY_MODE = new appeng.menu.guisync.ClientActionKey<>("copyMode");
+
+    // 存储元件槽的 x，出自美术图。
     private static final int CELL_X = 152;
     private static final int CELL_Y = 8;
 
@@ -39,6 +43,10 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
     private final CellWorkbenchShiftClick shiftClick;
 
     private Slot cellSlot;
+
+    /** 复制模式：true 换元件时保留工作台分区，false 从元件读回。 */
+    @appeng.menu.guisync.GuiSync(112)
+    public boolean keepOnRemove;
 
     public MenuEssentiaCellWorkbench(
             int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
@@ -52,6 +60,8 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         this.shiftClick = new CellWorkbenchShiftClick(this);
         registerClientAction(ACTION_PARTITION, this::partitionToContents);
         registerClientAction(ACTION_CLEAR, this::clearPartition);
+        registerClientAction(ACTION_COPY_MODE, this::toggleCopyMode);
+        this.keepOnRemove = workbench != null && workbench.keepOnRemove();
     }
 
     @Override
@@ -100,7 +110,8 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         return cellSlot != null && cellSlot.getItem().getItem() instanceof ItemEssentiaCell;
     }
 
-    Slot cellSlot() {
+    /** 元件槽，元件就放这里；shift 点击协作者和屏幕的槽位覆盖层都靠它定位。 */
+    public Slot cellSlot() {
         return getSlots(SlotSemantics.STORAGE_CELL).get(0);
     }
 
@@ -145,6 +156,28 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
         partitionEditor.clearPartition();
     }
 
+    /** 切换复制模式。客户端只发信号，服务端改宿主状态并靠 broadcast 同步回来。 */
+    public void toggleCopyMode() {
+        if (isClientSide()) {
+            sendClientAction(ACTION_COPY_MODE);
+            return;
+        }
+        workbench.setKeepOnRemove(!workbench.keepOnRemove());
+        broadcastChanges();
+    }
+
+    @Override
+    public void broadcastChanges() {
+        if (!isClientSide()) {
+            keepOnRemove = workbench.keepOnRemove();
+        }
+        super.broadcastChanges();
+    }
+
+    /**
+     * 应用客户端发来的井编辑，这是通往服务端的唯一路径：标记一口井，或用
+     * {@code PartitionWellPayload.CLEAR} 清掉。没有元件就拒绝，分区归元件所有。
+     */
     @Override
     public void setPartitionWell(
             int well,

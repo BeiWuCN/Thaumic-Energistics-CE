@@ -1,11 +1,13 @@
 package com.beiwu.thaumicenergistics_ce.client;
 
 import appeng.client.api.AEKeyRendering;
+import appeng.api.client.StorageCellModels;
 import appeng.client.gui.implementations.UpgradeableScreen;
 import appeng.client.gui.style.StyleManager;
 import com.leclowndu93150.thaumaturge.client.model.entity.BrainModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.api.distmarker.Dist;
@@ -28,6 +30,7 @@ import com.beiwu.thaumicenergistics_ce.client.render.ArcaneAssemblerRenderer;
 import com.beiwu.thaumicenergistics_ce.client.render.EssentiaKeyRenderHandler;
 import com.beiwu.thaumicenergistics_ce.client.render.GachaBoxRenderer;
 import com.beiwu.thaumicenergistics_ce.client.render.bubble.OccultMonitorBubbleRenderer;
+import com.beiwu.thaumicenergistics_ce.item.ItemEssentiaCell;
 import com.beiwu.thaumicenergistics_ce.registry.TECEBlockEntities;
 import com.beiwu.thaumicenergistics_ce.registry.TECEMenuTypes;
 import com.beiwu.thaumicenergistics_ce.integration.ae2.AEssentiaKey;
@@ -48,6 +51,16 @@ import com.beiwu.thaumicenergistics_ce.network.InscriberCostPayload;
 public final class ClientSetup {
     private ClientSetup() {}
 
+    @SubscribeEvent
+    public static void registerScanTooltip(
+            net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent event) {
+        event.register(com.beiwu.thaumicenergistics_ce.client.gui.TerminalScanTooltip.Aspects.class, row -> row);
+    }
+
+    /**
+     * 客户端的 AE2 注册，挂在 {@code FMLClientSetupEvent} 上。
+     * 它和界面都要赶在任何绘制之前就位。
+     */
     @SubscribeEvent
     public static void registerKeyRendering(FMLClientSetupEvent event) {
         net.neoforged.fml.ModList.get().getModContainerById(ThEIds.MODID).ifPresent(container ->
@@ -82,6 +95,13 @@ public final class ClientSetup {
         event.enqueueWork(() -> {
             AEKeyRendering.register(
                     AEssentiaKeyType.INSTANCE, AEssentiaKey.class, new EssentiaKeyRenderHandler());
+            var standardCell = ThEIds.id("block/drive/cells/essentia_cell");
+            var megaCell = ThEIds.id("block/drive/cells/mega_essentia_cell");
+            for (var item : BuiltInRegistries.ITEM) {
+                if (item instanceof com.beiwu.thaumicenergistics_ce.item.ItemEssentiaCell cell) {
+                    StorageCellModels.registerModel(cell, cell.tier().endsWith("m") ? megaCell : standardCell);
+                }
+            }
         });
     }
 

@@ -43,7 +43,13 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
                 return;
             }
             BlockEntityEssentiaCellWorkbench.this.setChanged();
-            BlockEntityEssentiaCellWorkbench.this.loadPartitionFromCell();
+            // 复制模式决定换元件时工作台的分区怎么处理：
+            // 清空模式从新元件读回它的分区；保留模式把工作台现有分区写进新元件。
+            if (keepOnRemove) {
+                BlockEntityEssentiaCellWorkbench.this.storePartitionInCell();
+            } else {
+                BlockEntityEssentiaCellWorkbench.this.loadPartitionFromCell();
+            }
         }
 
         @Override
@@ -122,6 +128,9 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
 
     private boolean syncing;
 
+    /** 复制模式：true 保留工作台分区并写入下一颗元件，false 换元件时从元件读回分区。 */
+    private boolean keepOnRemove;
+
     public BlockEntityEssentiaCellWorkbench(BlockPos pos, BlockState state) {
         super(TECEBlockEntities.ESSENTIA_CELL_WORKBENCH.get(), pos, state);
     }
@@ -140,6 +149,21 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
 
     public boolean hasCell() {
         return getCell().getItem() instanceof ItemEssentiaCell;
+    }
+
+    public boolean keepOnRemove() {
+        return keepOnRemove;
+    }
+
+    public void setKeepOnRemove(boolean keep) {
+        if (keepOnRemove == keep) {
+            return;
+        }
+        keepOnRemove = keep;
+        if (!keep && !hasCell()) {
+            loadPartitionFromCell();
+        }
+        setChanged();
     }
 
     private void loadPartitionFromCell() {
@@ -214,6 +238,10 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         ContainerHelper.saveAllItems(output, inventory.getItems());
+        output.putBoolean("KeepOnRemove", keepOnRemove);
+        if (keepOnRemove && !hasCell()) {
+            partition.writeToChildTag(output, "RetainedPartition");
+        }
     }
 
     @Override
@@ -227,7 +255,17 @@ public class BlockEntityEssentiaCellWorkbench extends ThEBaseBlockEntity impleme
                 inventory.setItem(CELL_SLOT, list.get(0));
             }
         }
+        // 放在物品栏之后：存档里的元件回来时屏幕上就带着它的分区。
+        keepOnRemove = input.getBooleanOr("KeepOnRemove", false);
         loadPartitionFromCell();
+        if (keepOnRemove && !hasCell()) {
+            syncing = true;
+            try {
+                partition.readFromChildTag(input, "RetainedPartition");
+            } finally {
+                syncing = false;
+            }
+        }
     }
 
     public void dropContents() {

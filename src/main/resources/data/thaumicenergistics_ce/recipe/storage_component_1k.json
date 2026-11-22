@@ -14,65 +14,7 @@
     "W W"
   ],
   "key": {
-    "E": {
-      "neoforge:ingredient_type": "neoforge:compound",
-      "children": [
-        {
-          "neoforge:ingredient_type": "neoforge:components",
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:aer"
-            }
-          }
-        },
-        {
-          "neoforge:ingredient_type": "neoforge:components",
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:ignis"
-            }
-          }
-        },
-        {
-          "neoforge:ingredient_type": "neoforge:components",
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:aqua"
-            }
-          }
-        },
-        {
-          "neoforge:ingredient_type": "neoforge:components",
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:terra"
-            }
-          }
-        },
-        {
-          "neoforge:ingredient_type": "neoforge:components",
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:ordo"
-            }
-          }
-        },
-        {
-          "neoforge:ingredient_type": "neoforge:components",
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:perditio"
-            }
-          }
-        }
-      ]
-    },
+    "E": "#thaumaturge:vis_crystals",
     "W": "thaumicenergistics_ce:mystic_crystal",
     "P": "ae2:logic_processor",
     "C": "thaumicenergistics_ce:mystic_circuit_board"

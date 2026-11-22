@@ -40,7 +40,7 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:cognitio",
+      "aspect": "thaumaturge:desiderium",
       "amount": 2
     },
     {
@@ -48,9 +48,9 @@
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:vitium",
+      "aspect": "thaumaturge:vacuos",
       "amount": 1
     }
   ],
-  "complexity": 3
+  "complexity": 2
 }

@@ -44,15 +44,15 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:permutatio",
+      "aspect": "thaumaturge:sensus",
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:sensus",
+      "aspect": "thaumaturge:aer",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:aqua",
+      "aspect": "thaumaturge:vacuos",
       "amount": 1
     }
   ],

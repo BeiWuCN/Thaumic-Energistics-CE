@@ -14,65 +14,7 @@
     "LCL"
   ],
   "key": {
-    "E": {
-      "neoforge:ingredient_type": "neoforge:compound",
-      "children": [
-        {
-          "neoforge:ingredient_type": "neoforge:components",
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:aer"
-            }
-          }
-        },
-        {
-          "neoforge:ingredient_type": "neoforge:components",
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:ignis"
-            }
-          }
-        },
-        {
-          "neoforge:ingredient_type": "neoforge:components",
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:aqua"
-            }
-          }
-        },
-        {
-          "neoforge:ingredient_type": "neoforge:components",
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:terra"
-            }
-          }
-        },
-        {
-          "neoforge:ingredient_type": "neoforge:components",
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:ordo"
-            }
-          }
-        },
-        {
-          "neoforge:ingredient_type": "neoforge:components",
-          "items": "thaumaturge:essentia_crystal",
-          "components": {
-            "thaumaturge:crystal_aspect": {
-              "aspect": "thaumaturge:perditio"
-            }
-          }
-        }
-      ]
-    },
+    "E": "#thaumaturge:vis_crystals",
     "P": "ae2:engineering_processor",
     "L": "thaumicenergistics_ce:storage_component_16k",
     "G": "ae2:quartz_glass",

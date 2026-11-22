@@ -106,6 +106,20 @@ public class ItemEssentiaCell extends Item implements IBasicCellItem {
         return true;
     }
 
+    /**
+     * AE2 的元件工作台用这个判断能不能把元件放进它的 WORKBENCH_CELL 槽。
+     * 源质元件只在本 mod 自己的工作台里编辑分区，返回 false 让 AE2 那张工作台拒收，
+     * 免得两种工作台对同一份分区数据各写各的。
+     */
+    @Override
+    public boolean isEditable(ItemStack stack) {
+        return false;
+    }
+
+    /**
+     * 不是源质的一律拒收。驱动器里的元件、接口填充的元件都走同一条路径，
+     * 这个拒收是所有路径唯一必经之处。
+     */
     @Override
     public boolean isBlackListed(ItemStack cellItem, AEKey requestedAddition) {
         return !(requestedAddition instanceof AEssentiaKey);

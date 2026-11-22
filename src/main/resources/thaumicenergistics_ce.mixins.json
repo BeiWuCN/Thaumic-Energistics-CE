@@ -27,10 +27,12 @@
   "client": [
     "ResearchMachineRecipeMixin",
     "TerminalScreenVisibilityMixin",
+    "TerminalInventoryScanMixin",
+    "TECEGuideSidebarMixin",
     "ArcaneUpgradeTooltipMixin",
-    "PatternProviderScreenEssentiaMixin",
+    "ArcaneJeiCrystalLayoutMixin",
+    "ProviderUpgradesScreenMixin",
     "WidgetContainerAccessor",
-    "AdvancedProviderScreenEssentiaMixin",
     "ScreenStyleAccessor"
   ],
   "injectors": {

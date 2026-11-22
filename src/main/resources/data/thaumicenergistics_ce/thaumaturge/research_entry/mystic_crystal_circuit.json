@@ -37,6 +37,7 @@
         "thaumicenergistics_ce:thaumic_processor_press",
         "thaumicenergistics_ce:thaumic_processor_press_copy",
         "thaumicenergistics_ce:mystic_crystal_dust",
+        "thaumicenergistics_ce:mystic_crystal_from_dust",
         "thaumicenergistics_ce:mystic_circuit_board"
       ]
     }
@@ -44,16 +45,16 @@
   "note_aspects": [
     {
       "aspect": "thaumaturge:vitreus",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:metallum",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:machina",
-      "amount": 1
-    },
-    {
-      "aspect": "thaumaturge:fabrico",
+      "aspect": "thaumaturge:ordo",
       "amount": 1
     }
   ],
-  "complexity": 2
+  "complexity": 1
 }

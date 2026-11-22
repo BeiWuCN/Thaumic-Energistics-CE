@@ -37,16 +37,16 @@
   "note_aspects": [
     {
       "aspect": "thaumaturge:vitreus",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:terra",
       "amount": 1
     },
     {
       "aspect": "thaumaturge:praecantatio",
       "amount": 1
-    },
-    {
-      "aspect": "thaumaturge:terra",
-      "amount": 1
     }
   ],
-  "complexity": 2
+  "complexity": 1
 }
