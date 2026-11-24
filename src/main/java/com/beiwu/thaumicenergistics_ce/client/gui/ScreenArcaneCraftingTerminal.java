@@ -180,6 +180,18 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         super.removed();
     }
 
+    /**
+     * 关窗清网格走 AE2 自己的客户端选项，和合成终端同一条语义：勾上就把网格退回网络。
+     * 与 AE2 的 CraftingTermScreen 同在 [onClose] 里发清网格动作，早于容器关闭。
+     */
+    @Override
+    public void onClose() {
+        if (appeng.core.AEConfig.instance().isClearGridOnClose()) {
+            menu.clearCraftingGridToNetwork();
+        }
+        super.onClose();
+    }
+
     @Override
     public void acceptArcaneCraftCost(ArcaneCraftCostPayload payload) {
         acceptCost(payload);

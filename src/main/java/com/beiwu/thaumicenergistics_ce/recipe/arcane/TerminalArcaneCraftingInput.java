@@ -80,6 +80,35 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
         return found;
     }
 
+    /**
+     * 合并本地晶体槽与网络快照。AspectList.add 是「加到现有值」，两边都是
+     * Integer.MAX_VALUE 级别的库存时相加会溢出成负数，AspectInstance 构造直接抛异常，
+     * 服务端 tick 崩掉，表现就是终端死锁。这里用 long 求和并钳制后再一次性构造每项。
+     */
+    private static AspectList mergeCrystals(List<ItemStack> local, List<ItemStack> network) {
+        java.util.Map<Holder<IAspect>, Long> totals = new java.util.LinkedHashMap<>();
+        for (List<ItemStack> source : List.of(local, network)) {
+            for (ItemStack stack : source) {
+                if (stack.isEmpty()) {
+                    continue;
+                }
+                Holder<IAspect> aspect = EssentiaCrystals.aspectOf(stack);
+                if (aspect == null) {
+                    continue;
+                }
+                totals.merge(aspect, (long) stack.getCount(), Long::sum);
+            }
+        }
+        AspectList result = AspectList.EMPTY;
+        for (var entry : totals.entrySet()) {
+            int amount = (int) Math.min(Integer.MAX_VALUE, entry.getValue());
+            if (amount > 0) {
+                result = result.add(entry.getKey(), amount);
+            }
+        }
+        return result;
+    }
+
     public TerminalArcaneCraftingInput(
             List<ItemStack> grid,
             Player player,
@@ -131,10 +160,27 @@ public final class TerminalArcaneCraftingInput implements IArcaneCraftingInput {
             @Nullable IEnergySource payer,
             boolean visConnection,
             boolean crystalFirst) {
+        this(grid, player, wand, crystalSlots, part, payer, visConnection, crystalFirst, List.of());
+    }
+
+    /**
+     * 带网络晶体快照的版本：{@code networkCrystals} 只进 {@link #availableCrystals()} 供成本事件判断，
+     * 不进网格也不进本地槽；实际扣取由 store 负责，避免同一批晶体被算两次。
+     */
+    public TerminalArcaneCraftingInput(
+            List<ItemStack> grid,
+            Player player,
+            ItemStack wand,
+            List<ItemStack> crystalSlots,
+            @Nullable PartArcaneCraftingTerminal part,
+            @Nullable IEnergySource payer,
+            boolean visConnection,
+            boolean crystalFirst,
+            List<ItemStack> networkCrystals) {
         this.grid = List.copyOf(grid);
         this.player = player;
         this.wand = wand == null ? ItemStack.EMPTY : wand;
-        this.crystals = crystalsIn(crystalSlots);
+        this.crystals = mergeCrystals(crystalSlots, networkCrystals);
         this.part = part;
         this.payer = payer;
         this.visConnection = visConnection;

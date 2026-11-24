@@ -131,6 +131,9 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     @appeng.menu.guisync.GuiSync(112)
     public boolean crystalFirst;
 
+    /** 模式的持久化落点：放置式部件或无线终端物品；为 null 时用默认值且不存。 */
+    private final com.beiwu.thaumicenergistics_ce.recipe.arcane.ArcanePaymentPreference paymentPreference;
+
     /** 上次说「替身槽位不收东西」的时刻。初值 -100 让第一次点击就能出声，之后两秒一次。 */
     private int lastPlaceholderRefusal = -100;
 
@@ -139,6 +142,10 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         super(menuType, id, playerInventory, host, false);
         this.part = host instanceof ArcaneTerminalHost arcane ? arcane.arcaneTerminal() : null;
         this.auraPayer = host instanceof IPortableTerminal portable ? portable : null;
+        // 放置式：host 就是部件；无线：host 是无线宿主。两者都实现付费偏好接口。
+        this.paymentPreference = host instanceof com.beiwu.thaumicenergistics_ce.recipe.arcane.ArcanePaymentPreference pref
+                ? pref : null;
+        this.crystalFirst = paymentPreference != null && paymentPreference.crystalFirst();
         // 只看接口：独立实现（自研量子桥）与 AE2WTLib 实现（WTMenuHost）都满足它，
         // 菜单不必知道手里是哪种终端。
         var wireless = host instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingHost w ? w : null;
@@ -370,6 +377,10 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
             return;
         }
         crystalFirst = !crystalFirst;
+        // 写回宿主存档：部件走 NBT，无线走物品数据组件，关掉菜单再开仍是这个模式。
+        if (paymentPreference != null) {
+            paymentPreference.setCrystalFirst(crystalFirst);
+        }
         craftInputSignature = -1;
         broadcastChanges();
     }
@@ -434,18 +445,60 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     }
 
     /**
+     * 成本计算用的网络晶体快照：把 ME 网络里六种元始晶体的数量报给输入，
+     * 让水晶优先时成本事件知道「网络里有晶体可付」，从而生成 crystalsNeeded。
+     * 只参与成本计算，不进晶体槽；实际扣取由 TerminalArcaneCraftingStore 完成。
+     */
+    public List<ItemStack> networkCrystals() {
+        List<ItemStack> found = new ArrayList<>(PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
+        if (isClientSide() || storage == null) {
+            return found;
+        }
+        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
+            Holder<IAspect> aspect = getPlayer().level()
+                    .registryAccess()
+                    .registryOrThrow(IAspect.REGISTRY_KEY)
+                    .getHolder(aspectOf(i))
+                    .orElse(null);
+            if (aspect == null) {
+                continue;
+            }
+            AEItemKey key = AEItemKey.of(EssentiaCrystals.create(aspect, 1));
+            if (key == null) {
+                continue;
+            }
+            long count = storage.extract(key, Long.MAX_VALUE, appeng.api.config.Actionable.SIMULATE,
+                    getActionSource());
+            if (count > 0) {
+                found.add(EssentiaCrystals.create(aspect, (int) Math.min(Integer.MAX_VALUE, count)));
+            }
+        }
+        return found;
+    }
+
+    /**
      * 网格刚摆好时补晶体：把缺的那几颗从 ME 网络拉进六个晶体槽。
      * JEI 转移只认九个格子，晶体槽是终端自己的容器，客户端改不动，只能走服务端。
      * <p>全补或全不补：网络里少一味就把已取出的整笔退回，一颗都不放进去 ——
      * 半补的槽位会让玩家以为合成条件已经满足，点下去才发现还差。
      */
     public void fillCrystalsFromNetwork() {
+        if (ensureNetworkCrystals()) {
+            broadcastChanges();
+        }
+    }
+
+    /**
+     * 补货本体，返回是否动过槽位。广播交给调用方：预览重算那条路径紧接着就会广播，
+     * 这里再广播一次会让客户端收到两份同步包。
+     */
+    private boolean ensureNetworkCrystals() {
         if (isClientSide() || !(getPlayer() instanceof ServerPlayer server)) {
-            return;
+            return false;
         }
         AspectList need = crystalCostOfGrid(server);
         if (need == null || need.isEmpty()) {
-            return;
+            return false;
         }
         // 先全部取到手上，任何一味不够就整笔退回。
         List<ItemStack> pulled = new ArrayList<>();
@@ -458,7 +511,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
             AEItemKey key = AEItemKey.of(crystalsForAspect);
             if (key == null) {
                 refund(pulled);
-                return;
+                return false;
             }
             long got = storage.extract(key, deficit, appeng.api.config.Actionable.MODULATE, getActionSource());
             if (got < deficit) {
@@ -466,7 +519,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
                     storage.insert(key, got, appeng.api.config.Actionable.MODULATE, getActionSource());
                 }
                 refund(pulled);
-                return;
+                return false;
             }
             pulled.add(crystalsForAspect);
         }
@@ -489,7 +542,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
                 crystals.setItemDirect(slot, existing);
             }
         }
-        broadcastChanges();
+        return true;
     }
 
     /** 把已经取出的晶体还回网络；中途放弃时用。 */
@@ -515,6 +568,8 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
             crystalSlots.add(crystals.getStackInSlot(i));
         }
+        // 不传网络快照：这里算的是「要往晶体槽补多少」，网络里有多少与补货量无关。
+        // 传了会让成本事件把网络库存当成已有，少补甚至不补，JEI 转移后槽里空着看着像故障。
         TerminalArcaneCraftingInput input = new TerminalArcaneCraftingInput(
                 cells,
                 server,

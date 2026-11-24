@@ -31,6 +31,11 @@ public final class TECEDataComponents {
             REGISTRY.register("wireless_arcane_encoding_core", () -> DataComponentType.<ItemContainerContents>builder()
                     .persistent(ItemContainerContents.CODEC).networkSynchronized(ItemContainerContents.STREAM_CODEC).build());
 
+    /** 无线奥术合成终端：付费源模式，true = 水晶优先，缺省按法杖优先。 */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> WIRELESS_ARCANE_CRYSTAL_FIRST =
+            REGISTRY.register("wireless_arcane_crystal_first", () -> DataComponentType.<Boolean>builder()
+                    .persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+
     /** 无线奥术编码终端：选中的样板下标，默认 -1。 */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> WIRELESS_ARCANE_ENCODING_SELECTED =
             REGISTRY.register("wireless_arcane_encoding_selected", () -> DataComponentType.<Integer>builder()

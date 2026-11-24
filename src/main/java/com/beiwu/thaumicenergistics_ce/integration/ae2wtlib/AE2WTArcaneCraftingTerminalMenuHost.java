@@ -11,6 +11,7 @@ import java.util.function.BiConsumer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.ItemContainerContents;
 import com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingHost;
+import com.beiwu.thaumicenergistics_ce.recipe.arcane.ArcanePaymentPreference;
 import com.beiwu.thaumicenergistics_ce.registry.TECEDataComponents;
 import de.mari_023.ae2wtlib.api.terminal.ItemWT;
 import de.mari_023.ae2wtlib.api.terminal.WTMenuHost;
@@ -23,7 +24,8 @@ import de.mari_023.ae2wtlib.api.terminal.WTMenuHost;
  * <p>其余一切白拿 AE2WTLib 的 {@link WTMenuHost}：模式切换、升级卡库存、奇点库存、
  * 量子桥连接与充电。本类不重复实现任何一项，否则会出现双库存与重复扣费。
  */
-public class AE2WTArcaneCraftingTerminalMenuHost extends WTMenuHost implements WirelessArcaneCraftingHost {
+public class AE2WTArcaneCraftingTerminalMenuHost extends WTMenuHost
+        implements WirelessArcaneCraftingHost, ArcanePaymentPreference {
 
     private final InternalInventory items;
 
@@ -64,5 +66,15 @@ public class AE2WTArcaneCraftingTerminalMenuHost extends WTMenuHost implements W
     @Override
     public InternalInventory wandInventory() {
         return items.getSubInventory(15, 16);
+    }
+
+    @Override
+    public boolean crystalFirst() {
+        return getItemStack().getOrDefault(TECEDataComponents.WIRELESS_ARCANE_CRYSTAL_FIRST.get(), false);
+    }
+
+    @Override
+    public void setCrystalFirst(boolean value) {
+        getItemStack().set(TECEDataComponents.WIRELESS_ARCANE_CRYSTAL_FIRST.get(), value);
     }
 }

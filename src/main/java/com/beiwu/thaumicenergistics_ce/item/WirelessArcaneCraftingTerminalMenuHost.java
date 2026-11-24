@@ -10,6 +10,7 @@ import appeng.util.inv.SupplierInternalInventory;
 import java.util.function.BiConsumer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.ItemContainerContents;
+import com.beiwu.thaumicenergistics_ce.recipe.arcane.ArcanePaymentPreference;
 import com.beiwu.thaumicenergistics_ce.registry.TECEDataComponents;
 
 /**
@@ -21,7 +22,7 @@ import com.beiwu.thaumicenergistics_ce.registry.TECEDataComponents;
  */
 public class WirelessArcaneCraftingTerminalMenuHost
         extends QuantumWirelessTerminalMenuHost<ItemWirelessArcaneCraftingTerminal>
-        implements WirelessArcaneCraftingHost {
+        implements WirelessArcaneCraftingHost, ArcanePaymentPreference {
 
     private final InternalInventory items;
 
@@ -51,4 +52,14 @@ public class WirelessArcaneCraftingTerminalMenuHost
 
     @Override
     public InternalInventory wandInventory() { return items.getSubInventory(15, 16); }
+
+    @Override
+    public boolean crystalFirst() {
+        return getItemStack().getOrDefault(TECEDataComponents.WIRELESS_ARCANE_CRYSTAL_FIRST.get(), false);
+    }
+
+    @Override
+    public void setCrystalFirst(boolean value) {
+        getItemStack().set(TECEDataComponents.WIRELESS_ARCANE_CRYSTAL_FIRST.get(), value);
+    }
 }

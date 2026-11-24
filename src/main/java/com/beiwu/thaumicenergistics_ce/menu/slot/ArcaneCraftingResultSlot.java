@@ -20,6 +20,7 @@ import java.util.stream.IntStream;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -42,6 +43,11 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
 
     private final @Nullable ServerPlayer serverPlayer;
     private final @Nullable PartArcaneCraftingTerminal part;
+
+    /** 无缝补货的来源：合成材料与碎片优先从 ME 网络抽，网格与晶体槽保持原样。 */
+    private final MEStorage storage;
+    private final IEnergySource energySource;
+    private final IActionSource actionSource;
 
     /** 用具体菜单类型，不写 {@link ICraftingGridMenu}：把 vis 开销发到屏幕靠它。 */
     private final com.beiwu.thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal ownerMenu;
@@ -73,6 +79,9 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         this.serverPlayer = player instanceof ServerPlayer server ? server : null;
         this.part = part;
         this.ownerMenu = ownerMenu;
+        this.storage = storage;
+        this.energySource = energySource;
+        this.actionSource = actionSource;
     }
 
     @Override
@@ -212,14 +221,25 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         if (!ownerMenu.canCraft() || !(who instanceof ServerPlayer server)) {
             return;
         }
+        // 与 AE2 CraftingTermSlot 同一套手势语义：shift 按一叠算，all 按整背包算，
+        // stack 把光标填满；普通点击一次。单次产量可能大于 1，按产物实际数量折算次数。
+        ItemStack preview = this.getItem();
+        int perCraft = Math.max(1, preview.getCount());
+        int stackSize = Math.max(1, preview.getMaxStackSize());
         int attempts = switch (action) {
-            case CRAFT_SHIFT, CRAFT_ALL -> 64;
+            case CRAFT_SHIFT -> Math.max(1, stackSize / perCraft);
+            case CRAFT_ALL -> Math.max(1, stackSize / perCraft * Inventory.INVENTORY_SIZE);
+            case CRAFT_STACK -> Math.max(1, stackSize / perCraft);
             default -> 1;
         };
 
         for (int i = 0; i < attempts; i++) {
             TerminalArcaneCraftingInput input = buildInput();
             if (input == null || input.isEmpty()) {
+                break;
+            }
+            // CRAFT_STACK 只往光标交付，光标先塞满再停；先查余量，免得已经扣了费却没处放。
+            if (action == InventoryAction.CRAFT_STACK && !carriedRoomFor(preview)) {
                 break;
             }
             // 支付来自终端自己的容器：网格、水晶槽、法杖，和 Thaumaturge 工作台一致。
@@ -233,7 +253,10 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
                     input.left(),
                     input.top(),
                     input.width(),
-                    input.height());
+                    input.height(),
+                    storage,
+                    energySource,
+                    actionSource);
             ArcaneCraftingTransaction.Result result;
             try (var transaction = com.leclowndu93150.thaumaturge.api.transaction.Transaction.openRoot()) {
                 result = ArcaneCraftingTransaction.craft(workbenchContext(), server, input, store, transaction);
@@ -330,7 +353,10 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
                 0,
                 0,
                 VANILLA_GRID,
-                VANILLA_GRID);
+                VANILLA_GRID,
+                storage,
+                energySource,
+                actionSource);
         // 原版配方不取晶体，法杖也不变：两栏按「没有」填，仓库便会跳过它们。
         var consumption = new IArcaneCraftingStore.Consumption(
                 input.items(),
@@ -351,14 +377,27 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         return placed ? VanillaCraft.CRAFTED : VanillaCraft.CRAFTED_NOT_PLACED;
     }
 
-    /** 普通点击把产物放到光标上，批量合成填满物品栏；提交时费用已扣。
-     * @param action 手势，shift 点击按玩家预期填满物品栏
-     * @return 产物去了光标还是物品栏；放不下为 {@code false} */
+    /** 光标还能不能收下一次产物；空光标按一叠算。 */
+    private boolean carriedRoomFor(ItemStack output) {
+        var carried = this.getMenu().getCarried();
+        if (carried.isEmpty()) {
+            return true;
+        }
+        return ItemStack.isSameItemSameComponents(carried, output)
+                && carried.getCount() + output.getCount() <= carried.getMaxStackSize();
+    }
+
+    /**
+     * 普通点击把产物放到光标上，shift/all 填满物品栏，stack 只把光标填成一叠；提交时费用已扣。
+     * @param action 手势，决定产物去向
+     * @return 产物交付成功为 {@code true}；放不下为 {@code false}，调用方停手
+     */
     private boolean deliver(ItemStack output, InventoryAction action, Player who) {
         if (output.isEmpty()) {
             return true;
         }
         boolean bulk = action == InventoryAction.CRAFT_SHIFT || action == InventoryAction.CRAFT_ALL;
+        boolean stack = action == InventoryAction.CRAFT_STACK;
         if (!bulk) {
             var carried = this.getMenu().getCarried();
             if (carried.isEmpty()) {
@@ -370,7 +409,13 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
                 carried.grow(output.getCount());
                 return true;
             }
+            // CRAFT_STACK 只进光标；塞不下就落地，不能吞掉已经付费的产物。
+            if (stack) {
+                who.drop(output.copy(), false);
+                return false;
+            }
         }
+        // bulk 与普通点击：光标这一支没接住，就落背包。
         if (who.getInventory().add(output)) {
             return true;
         }
@@ -413,7 +458,7 @@ public class ArcaneCraftingResultSlot extends CraftingTermSlot {
         boolean visConnection = ownerMenu.hasVisConnectionCard();
         return new TerminalArcaneCraftingInput(
                 cells, serverPlayer, wand, crystals, part, ownerMenu.auraPayer(), visConnection,
-                ownerMenu.crystalFirst());
+                ownerMenu.crystalFirst(), ownerMenu.networkCrystals());
     }
 
     /** 归这台机器和这名玩家的虚拟工作台：线缆上的终端没有方块可指。 */

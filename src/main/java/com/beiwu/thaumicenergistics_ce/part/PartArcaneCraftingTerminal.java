@@ -33,6 +33,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import com.beiwu.thaumicenergistics_ce.ThEIds;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.ArcaneTerminalHost;
+import com.beiwu.thaumicenergistics_ce.recipe.arcane.ArcanePaymentPreference;
 import com.beiwu.thaumicenergistics_ce.arcane.ArcaneTerminalLink;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
@@ -46,7 +47,7 @@ import com.beiwu.thaumicenergistics_ce.registry.TECEMenuTypes;
  * 材料从不从网络拉取；填满网格是物品列表和 JEI 转移的活。
  */
 public class PartArcaneCraftingTerminal extends AbstractTerminalPart
-        implements ArcaneTerminalHost {
+        implements ArcaneTerminalHost, ArcanePaymentPreference {
 
     public static final ResourceLocation INV_CRAFTING = AppEng.makeId("arcane_crafting_terminal_crafting");
 
@@ -101,6 +102,9 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
     /** 只有一张卡，vis 连接卡；它插的是 [AE2] 挂在本部件上的那个升级槽。 */
     private final IUpgradeInventory upgrades =
             UpgradeInventories.forMachine(getPartItem(), 2, this::onUpgradesChanged);
+
+    /** 付费源模式，默认法杖优先；随部件存档。 */
+    private boolean crystalFirst;
 
     public PartArcaneCraftingTerminal(IPartItem<?> partItem) {
         super(partItem);
@@ -273,6 +277,8 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         // 旧世界没有这个键，键缺失就留空，升级不会出事。
         crystalInv.readFromNBT(data, "crystalInv", registries);
         upgrades.readFromNBT(data, "upgrades", registries);
+        // 旧部件没有这个键，默认法杖优先。
+        crystalFirst = data.getBoolean("crystalFirst");
     }
 
     @Override
@@ -282,5 +288,20 @@ public class PartArcaneCraftingTerminal extends AbstractTerminalPart
         wandInv.writeToNBT(data, "wandInv", registries);
         crystalInv.writeToNBT(data, "crystalInv", registries);
         upgrades.writeToNBT(data, "upgrades", registries);
+        data.putBoolean("crystalFirst", crystalFirst);
+    }
+
+    @Override
+    public boolean crystalFirst() {
+        return crystalFirst;
+    }
+
+    @Override
+    public void setCrystalFirst(boolean value) {
+        if (crystalFirst == value) {
+            return;
+        }
+        crystalFirst = value;
+        saveChanges();
     }
 }

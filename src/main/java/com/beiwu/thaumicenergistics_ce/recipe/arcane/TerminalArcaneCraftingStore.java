@@ -1,6 +1,12 @@
 package com.beiwu.thaumicenergistics_ce.recipe.arcane;
 
+import appeng.api.config.Actionable;
 import appeng.api.inventories.InternalInventory;
+import appeng.api.networking.energy.IEnergySource;
+import appeng.api.networking.security.IActionSource;
+import appeng.api.stacks.AEItemKey;
+import appeng.api.storage.MEStorage;
+import appeng.util.Platform;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.recipe.IArcaneCraftingStore;
@@ -10,6 +16,7 @@ import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 import com.leclowndu93150.thaumaturge.api.transaction.RootCommitJournal;
 import com.leclowndu93150.thaumaturge.api.transaction.SnapshotJournal;
 import com.leclowndu93150.thaumaturge.api.transaction.TransactionContext;
@@ -26,6 +33,14 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
     private final Player player;
 
     /**
+     * 无缝补货的材料来源：合成时先从 ME 网络抽材料，网格槽保持原样。
+     * 为空时不走网络（例如没有对应存储的纯工作台场景）。
+     */
+    private final MEStorage storage;
+    private final IEnergySource networkEnergy;
+    private final IActionSource actionSource;
+
+    /**
      * 建输入时算出的包围盒。Thaumaturge 交给仓库的消耗表按包围盒打包，
      * 尺寸和偏移必须跟输入报的一致，否则扣费会被当成「材料变了」。
      */
@@ -38,7 +53,7 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
 
     public TerminalArcaneCraftingStore(
             InternalInventory grid, InternalInventory crystals, InternalInventory wand, Player player) {
-        this(grid, crystals, wand, player, 0, 0, GRID_WIDTH, GRID_WIDTH);
+        this(grid, crystals, wand, player, 0, 0, GRID_WIDTH, GRID_WIDTH, null, null, null);
     }
 
     public TerminalArcaneCraftingStore(
@@ -50,6 +65,24 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
             int top,
             int width,
             int height) {
+        this(grid, crystals, wand, player, left, top, width, height, null, null, null);
+    }
+
+    /**
+     * 带无缝补货的版本：storage 非空时，合成材料优先从 ME 网络抽取，网格槽不消耗。
+     */
+    public TerminalArcaneCraftingStore(
+            InternalInventory grid,
+            InternalInventory crystals,
+            InternalInventory wand,
+            Player player,
+            int left,
+            int top,
+            int width,
+            int height,
+            @Nullable MEStorage storage,
+            @Nullable IEnergySource networkEnergy,
+            @Nullable IActionSource actionSource) {
         this.grid = grid;
         this.crystals = crystals;
         this.wand = wand;
@@ -58,6 +91,9 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
         this.top = top;
         this.width = width;
         this.height = height;
+        this.storage = storage;
+        this.networkEnergy = networkEnergy;
+        this.actionSource = actionSource;
         this.journal = new InventoryJournal(grid, crystals, wand);
     }
 
@@ -80,7 +116,24 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
                 int slot = slotAt(x, y);
                 ItemStack current = grid.getStackInSlot(slot);
                 ItemStack remainder = packed < remainders.size() ? remainders.get(packed) : ItemStack.EMPTY;
-                grid.setItemDirect(slot, consumeOne(current, remainder, overflow));
+                if (current.isEmpty()) {
+                    continue;
+                }
+                // 三档优先级：先吃网格里多于一个模板的那份；那份吃完才动 ME 网络；
+                // 网络也供不上时才动模板本身，尽量保住玩家摆好的配方形状。
+                if (current.getCount() > 1) {
+                    // 1) 本地溢出：扣一个后仍留至少一个，形状与库存都在。
+                    grid.setItemDirect(slot, consumeOne(current, remainder, overflow));
+                } else if (withdrawFromNetwork(current)) {
+                    // 2) 恰好一网格且网络有货：扣网络，槽位原样不动。
+                    // 不能写回从网络取的那一个 —— 玩家手动堆的 N 个会被替换成 1 个，吞掉东西。
+                    if (!remainder.isEmpty()) {
+                        overflow.add(remainder);
+                    }
+                } else {
+                    // 3) 恰好一网格且网络备货不足一个：混合，动用网格里这最后一份。
+                    grid.setItemDirect(slot, consumeOne(current, remainder, overflow));
+                }
             }
         }
         consumeCrystals(consumption.crystals());
@@ -90,6 +143,25 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
         if (!overflow.isEmpty()) {
             new RootCommitJournal(() -> overflow.forEach(stack -> giveBack(stack))).updateSnapshots(transaction);
         }
+        return true;
+    }
+
+    /** 从 ME 网络抽走一个与模板相同的物品。抽到返回 {@code true}，没货、断电或没电返回 {@code false}。 */
+    private boolean withdrawFromNetwork(ItemStack template) {
+        if (storage == null || actionSource == null || networkEnergy == null) {
+            return false;
+        }
+        AEItemKey key = AEItemKey.of(template);
+        if (key == null) {
+            return false;
+        }
+        if (networkEnergy.extractAEPower(1, Actionable.SIMULATE, appeng.api.config.PowerMultiplier.CONFIG) < 0.9) {
+            return false;
+        }
+        if (storage.extract(key, 1, Actionable.MODULATE, actionSource) < 1) {
+            return false;
+        }
+        networkEnergy.extractAEPower(1, Actionable.MODULATE, appeng.api.config.PowerMultiplier.CONFIG);
         return true;
     }
 
@@ -103,7 +175,12 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
         }
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                if (!ItemStack.matches(grid.getStackInSlot(slotAt(x, y)), expected.get(x + y * width))) {
+                ItemStack actual = grid.getStackInSlot(slotAt(x, y));
+                ItemStack want = expected.get(x + y * width);
+                if (!ItemStack.matches(actual, want)) {
+                    com.beiwu.thaumicenergistics_ce.util.ThELog.LOG.info(
+                            "[arcane] store mismatch box=({},{},{},{}) cell=({},{}) slot={} want={} actual={}",
+                            left, top, width, height, x, y, slotAt(x, y), want, actual);
                     return false;
                 }
             }
@@ -120,6 +197,8 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
                     found += crystals.getStackInSlot(slot).getCount();
                 }
             }
+            // 晶体优先或只能用碎片时，网络库存也算可供的一部分。
+            found += networkCrystalsAvailable(aspect);
             if (found < needed.amountOf(aspect)) {
                 return false;
             }
@@ -127,19 +206,79 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
         return true;
     }
 
+    /** 网络里这个要素的碎片数量；没网或断电返回 0。 */
+    private int networkCrystalsAvailable(Holder<IAspect> aspect) {
+        if (storage == null || actionSource == null || networkEnergy == null) {
+            return 0;
+        }
+        if (networkEnergy.extractAEPower(1, Actionable.SIMULATE, appeng.api.config.PowerMultiplier.CONFIG) < 0.9) {
+            return 0;
+        }
+        AEItemKey key = AEItemKey.of(EssentiaCrystals.create(aspect, 1));
+        if (key == null) {
+            return 0;
+        }
+        long available = storage.extract(key, Long.MAX_VALUE, Actionable.SIMULATE, actionSource);
+        // 网络库存是 long，直接转 int 在超过 21 亿时会变负数，让可用性判断出错。
+        return (int) Math.min(Integer.MAX_VALUE, available);
+    }
+
     private void consumeCrystals(AspectList needed) {
         for (Holder<IAspect> aspect : needed.aspects()) {
-            int outstanding = needed.amountOf(aspect);
-            for (int slot = 0; slot < PartArcaneCraftingTerminal.CRYSTAL_SLOTS && outstanding > 0; slot++) {
-                ItemStack crystal = crystals.getStackInSlot(slot);
-                Holder<IAspect> carried = EssentiaCrystals.aspectOf(crystal);
-                if (carried == null || !carried.equals(aspect)) {
-                    continue;
-                }
-                int take = Math.min(outstanding, crystal.getCount());
-                crystals.setItemDirect(slot, shrunk(crystal, take));
-                outstanding -= take;
+            int required = needed.amountOf(aspect);
+            int local = countLocalCrystals(aspect);
+            if (local > required) {
+                // 1) 本地溢出：只吃多于一份模板的那部分，留下的仍够摆一格配方。
+                takeLocalCrystals(aspect, required);
+                continue;
             }
+            // 2) 本地恰好一份（或不足）：先吃 ME 网络，槽位原样不动。
+            int fromNetwork = 0;
+            if (storage != null && actionSource != null && networkEnergy != null) {
+                AEItemKey key = AEItemKey.of(EssentiaCrystals.create(aspect, required));
+                if (key != null
+                        && networkEnergy.extractAEPower(1, Actionable.SIMULATE,
+                                appeng.api.config.PowerMultiplier.CONFIG) >= 0.9) {
+                    long got = storage.extract(key, required, Actionable.MODULATE, actionSource);
+                    if (got > 0) {
+                        networkEnergy.extractAEPower(1, Actionable.MODULATE,
+                                appeng.api.config.PowerMultiplier.CONFIG);
+                        fromNetwork = (int) got;
+                    }
+                }
+            }
+            // 3) 网络备货不足一份：差额动用本地这最后一份，和网格材料同一套混合取向。
+            int shortfall = required - fromNetwork;
+            if (shortfall > 0) {
+                takeLocalCrystals(aspect, shortfall);
+            }
+        }
+    }
+
+    /** 六个晶体槽里这个要素一共几颗。 */
+    private int countLocalCrystals(Holder<IAspect> aspect) {
+        int total = 0;
+        for (int slot = 0; slot < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; slot++) {
+            Holder<IAspect> carried = EssentiaCrystals.aspectOf(crystals.getStackInSlot(slot));
+            if (carried != null && carried.equals(aspect)) {
+                total += crystals.getStackInSlot(slot).getCount();
+            }
+        }
+        return total;
+    }
+
+    /** 从晶体槽扣掉至多 {@code amount} 颗，够扣就扣、不够就把槽掏空。 */
+    private void takeLocalCrystals(Holder<IAspect> aspect, int amount) {
+        int outstanding = amount;
+        for (int slot = 0; slot < PartArcaneCraftingTerminal.CRYSTAL_SLOTS && outstanding > 0; slot++) {
+            ItemStack crystal = crystals.getStackInSlot(slot);
+            Holder<IAspect> carried = EssentiaCrystals.aspectOf(crystal);
+            if (carried == null || !carried.equals(aspect)) {
+                continue;
+            }
+            int take = Math.min(outstanding, crystal.getCount());
+            crystals.setItemDirect(slot, shrunk(crystal, take));
+            outstanding -= take;
         }
     }
 
