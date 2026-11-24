@@ -175,12 +175,7 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
         }
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                ItemStack actual = grid.getStackInSlot(slotAt(x, y));
-                ItemStack want = expected.get(x + y * width);
-                if (!ItemStack.matches(actual, want)) {
-                    com.beiwu.thaumicenergistics_ce.util.ThELog.LOG.info(
-                            "[arcane] store mismatch box=({},{},{},{}) cell=({},{}) slot={} want={} actual={}",
-                            left, top, width, height, x, y, slotAt(x, y), want, actual);
+                if (!ItemStack.matches(grid.getStackInSlot(slotAt(x, y)), expected.get(x + y * width))) {
                     return false;
                 }
             }
@@ -190,7 +185,10 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
 
     private boolean hasCrystals(AspectList needed) {
         for (Holder<IAspect> aspect : needed.aspects()) {
-            int found = 0;
+            // 用 long 累加：创造元件报 Integer.MAX_VALUE（2.1G）库存，本地哪怕只有 1 颗，
+            // int 相加就溢出成负数，被误判成「晶体不足」，consume 返回 false
+            // 被 Thaumaturge 报成 INGREDIENTS_CHANGED（材料变化）。
+            long found = 0;
             for (int slot = 0; slot < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; slot++) {
                 Holder<IAspect> carried = EssentiaCrystals.aspectOf(crystals.getStackInSlot(slot));
                 if (carried != null && carried.equals(aspect)) {
@@ -206,7 +204,7 @@ public final class TerminalArcaneCraftingStore implements IArcaneCraftingStore {
         return true;
     }
 
-    /** 网络里这个要素的碎片数量；没网或断电返回 0。 */
+    /** 网络里这个要素的碎片数量；没网或断电返回 0，与成本事件的口径一致。 */
     private int networkCrystalsAvailable(Holder<IAspect> aspect) {
         if (storage == null || actionSource == null || networkEnergy == null) {
             return 0;

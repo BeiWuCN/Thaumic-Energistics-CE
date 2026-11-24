@@ -454,6 +454,12 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         if (isClientSide() || storage == null) {
             return found;
         }
+        // 与 store 的扣取口径一致：没电时不报网络晶体，成本事件便不会把法杖份额转成晶体需求，
+        // 避免批量合成把电扣到阈值以下后成本说付得起、扣费说付不起，误报材料变化。
+        if (energySource != null && energySource.extractAEPower(1, appeng.api.config.Actionable.SIMULATE,
+                appeng.api.config.PowerMultiplier.CONFIG) < 0.9) {
+            return found;
+        }
         for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
             Holder<IAspect> aspect = getPlayer().level()
                     .registryAccess()
