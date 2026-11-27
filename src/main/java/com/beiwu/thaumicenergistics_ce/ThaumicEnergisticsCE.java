@@ -113,6 +113,11 @@ public final class ThaumicEnergisticsCE {
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerItem(Capabilities.EnergyStorage.ITEM,
+                (stack, context) -> new appeng.items.tools.powered.powersink.PoweredItemCapabilities(
+                        stack, (appeng.api.implementations.items.IAEItemPowerStorage) stack.getItem()),
+                TECEItems.WIRELESS_ESSENTIA_TERMINAL.get(),
+                TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get());
         com.beiwu.thaumicenergistics_ce.integration.ae2.patternprovider.PatternProviderAddonCompat.registerBlocks(event);
         event.registerBlockEntity(EssentiaCapabilities.STORAGE,
                 appeng.core.definitions.AEBlockEntities.PATTERN_PROVIDER.get(),

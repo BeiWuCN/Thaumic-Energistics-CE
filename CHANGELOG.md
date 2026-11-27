@@ -1,3 +1,15 @@
+# Thaumic Energistics CE 2.7.6.1 / Minecraft 1.21.1 / NeoForge
+
+## English
+
+- Wireless Essentia and Wireless Arcane Crafting Terminals accept Forge Energy from compatible item chargers, including wireless chargers.
+- Fixed wireless terminal upgrade and singularity slots, restored energy card capacity bonuses for standalone terminals, and isolated optional AE2WTLib classes. (#13)
+
+## 中文
+
+- 无线源质终端与无线奥术合成终端支持使用兼容的FE物品充能设备充电，包括无线充电设备。
+- 修复无线终端的升级槽与奇点槽，恢复独立终端的能量卡扩容，并隔离AE2WTLib可选依赖的类加载。（#13）
+
 # Thaumic Energistics CE 2.7.6 / Minecraft 1.21.1 / NeoForge
 
 ## English
