@@ -170,28 +170,28 @@ public final class ClientSetup {
                                 inventory,
                                 title,
                                 StyleManager.loadStyleDoc("/screens/arcane_crafting_terminal.json")));
-        event.register(
-                TECEMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get(),
-                (MenuEssentiaTerminal menu, Inventory inventory, Component title) ->
-                        net.neoforged.fml.ModList.get().isLoaded("ae2wtlib")
-                        ? new com.beiwu.thaumicenergistics_ce.client.integration.ae2wtlib.AE2WTEssentiaTerminalScreen(
-                                menu, inventory, title, StyleManager.loadStyleDoc("/screens/wireless_essentia_terminal_wt.json"))
-                        : new ScreenEssentiaTerminal(
-                                menu,
-                                inventory,
-                                title,
-                                StyleManager.loadStyleDoc("/screens/terminals/wireless_terminal.json")));
-        // 无线终端画同一个工作台，在那套 style 之上多叠一个标题。
-        event.register(
-                TECEMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
-                (MenuArcaneCraftingTerminal menu, Inventory inventory, Component title) ->
-                        net.neoforged.fml.ModList.get().isLoaded("ae2wtlib")
-                        ? new com.beiwu.thaumicenergistics_ce.client.integration.ae2wtlib.AE2WTArcaneCraftingTerminalScreen(menu, inventory, title, StyleManager.loadStyleDoc("/screens/wireless_arcane_crafting_terminal_wt.json"))
-                        : new ScreenArcaneCraftingTerminal(
-                                menu,
-                                inventory,
-                                title,
-                                StyleManager.loadStyleDoc("/screens/wireless_arcane_crafting_terminal.json")));
+        if (com.beiwu.thaumicenergistics_ce.client.integration.ae2wtlib.AE2WTClientIntegration.enabled()) {
+            com.beiwu.thaumicenergistics_ce.client.integration.ae2wtlib.AE2WTClientIntegration
+                    .registerScreens(event);
+        } else {
+            event.register(
+                    TECEMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get(),
+                    (MenuEssentiaTerminal menu, Inventory inventory, Component title) ->
+                            new ScreenEssentiaTerminal(
+                                    menu,
+                                    inventory,
+                                    title,
+                                    StyleManager.loadStyleDoc("/screens/wireless_essentia_terminal.json")));
+            // 无线终端画同一个工作台，在那套 style 之上多叠一个标题。
+            event.register(
+                    TECEMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
+                    (MenuArcaneCraftingTerminal menu, Inventory inventory, Component title) ->
+                            new ScreenArcaneCraftingTerminal(
+                                    menu,
+                                    inventory,
+                                    title,
+                                    StyleManager.loadStyleDoc("/screens/wireless_arcane_crafting_terminal.json")));
+        }
         event.register(
                 TECEMenuTypes.ESSENTIA_LEVEL_EMITTER.get(),
                 (MenuEssentiaLevelEmitter menu, Inventory inventory, Component title) ->

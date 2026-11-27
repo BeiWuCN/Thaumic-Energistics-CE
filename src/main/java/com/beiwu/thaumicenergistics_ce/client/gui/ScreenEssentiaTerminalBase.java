@@ -58,12 +58,6 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
         super(menu, playerInventory, title, style);
     }
 
-    @Override
-    protected void updateBeforeRender() {
-        menu.updateWirelessEssentiaUpgradeSlots();
-        super.updateBeforeRender();
-    }
-
     /** 本界面有没有罐与药瓶手势；装了卡的终端才有。 */
     protected abstract boolean essentiaGesturesAtAll();
 

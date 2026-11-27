@@ -1,5 +1,4 @@
 package com.beiwu.thaumicenergistics_ce.item;
-import java.util.ArrayList;
 
 import appeng.helpers.WirelessTerminalMenuHost;
 import appeng.items.tools.powered.WirelessTerminalItem;
@@ -35,7 +34,9 @@ public class ItemWirelessEssentiaTerminal extends WirelessTerminalItem {
 
     @Override
     public appeng.api.upgrades.IUpgradeInventory getUpgrades(net.minecraft.world.item.ItemStack stack) {
-        return QuantumTerminalSupport.upgrades(stack, (changed, upgrades) -> {});
+        return QuantumTerminalSupport.upgrades(stack, (changed, upgrades) ->
+                setAEMaxPowerMultiplier(
+                        changed, 1 + appeng.api.upgrades.Upgrades.getEnergyCardMultiplier(upgrades)));
     }
 
     @Override

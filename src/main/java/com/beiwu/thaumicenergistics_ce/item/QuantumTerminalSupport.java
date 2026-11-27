@@ -27,6 +27,9 @@ public final class QuantumTerminalSupport {
 
     public static void registerUpgrades() {
         if (!enabled() || card() == null || card() == Items.AIR) return;
+        // 当 AE2WTLib 在场时，无线源质终端与无线奥术合成终端均已注册进 WTDefinition，
+        // AE2WTLib 的 UpgradeHelper 已自动为其登记 1 张量子桥接卡；再次 Upgrades.add 会导致重复 Tooltip。
+        if (com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.enabled()) return;
         Upgrades.add(card(), TECEItems.WIRELESS_ESSENTIA_TERMINAL.get(), 1);
         Upgrades.add(card(), TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(), 1);
     }
