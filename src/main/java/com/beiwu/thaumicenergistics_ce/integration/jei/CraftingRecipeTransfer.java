@@ -1,17 +1,22 @@
 package com.beiwu.thaumicenergistics_ce.integration.jei;
 
 import appeng.core.network.serverbound.FillCraftingGridFromRecipePacket;
+import appeng.menu.me.common.IClientRepo;
 import appeng.menu.SlotSemantics;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import mezz.jei.api.constants.RecipeTypes;
+import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.recipe.transfer.IRecipeTransferInfo;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
@@ -19,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
 import com.beiwu.thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
@@ -37,6 +43,9 @@ public class CraftingRecipeTransfer
 
     private static final int GRID_WIDTH = 3;
     private static final int GRID_HEIGHT = 3;
+
+    /** JEI 的合成布局总是 3 列，与配方自己的宽度无关。 */
+    private static final int JEI_GRID_WIDTH = 3;
 
     private final IRecipeTransferHandlerHelper helper;
 
@@ -72,7 +81,6 @@ public class CraftingRecipeTransfer
     public boolean canHandle(MenuArcaneCraftingTerminal menu, RecipeHolder<CraftingRecipe> recipe) {
         return recipe.value().canCraftInDimensions(GRID_WIDTH, GRID_HEIGHT);
     }
-
     @Override
     public List<Slot> getRecipeSlots(MenuArcaneCraftingTerminal menu, RecipeHolder<CraftingRecipe> recipe) {
         List<Slot> grid = menu.getSlots(SlotSemantics.CRAFTING_GRID);
@@ -103,6 +111,26 @@ public class CraftingRecipeTransfer
         if (getRecipeSlots(menu, holder).size() != PartArcaneCraftingTerminal.GRID_SIZE) {
             return helper.createInternalError();
         }
+
+        // 先查供给再决定转不转。原版配方由 AE2 的数据包按 id 解析并自己取料，
+        // 缺料时服务端只填它能填的那几格，玩家看到的是半张网格，
+        // 得靠点下去没反应才知道差一味。[ArcaneCraftingRecipeTransfer] 一直是先查后转的，
+        // 这里少了这一步，两个 JEI 页签对同一个缺料配方的表现就不一样。
+        List<Integer> missingCells = missingCellsFor(recipe, menu.getClientRepo(), player);
+        if (!missingCells.isEmpty()) {
+            // 整次拒绝，不部分填充：标出缺的那几格，玩家不用读提示就知道差哪一味。
+            List<IRecipeSlotView> inputs = display.getSlotViews(RecipeIngredientRole.INPUT);
+            List<IRecipeSlotView> highlight = new ArrayList<>(missingCells.size());
+            for (int cell : missingCells) {
+                if (cell < inputs.size()) {
+                    highlight.add(inputs.get(cell));
+                }
+            }
+            Component message = Component.translatable("thaumicenergistics_ce.jei.transfer.missing_ingredients");
+            return highlight.isEmpty()
+                    ? helper.createUserErrorWithTooltip(message)
+                    : helper.createUserErrorForMissingSlots(message, highlight);
+        }
         if (!doTransfer) {
             return null;
         }
@@ -114,5 +142,44 @@ public class CraftingRecipeTransfer
         PacketDistributor.sendToServer(
                 new FillCraftingGridFromRecipePacket(holder.id(), templates, false));
         return null;
+    }
+
+    // 缺料检查
+
+    /**
+     * 哪些格子没有东西能供给。原版配方的 {@code getIngredients()} 对有序配方是
+     * {@code width*height} 大小、行优先、空格子为 {@link Ingredient#EMPTY}，
+     * 所以跳掉 EMPTY 不会把布局里的留白读成缺料。
+     * <p>
+     * 返回的是 <b>JEI 输入槽视图</b>的下标，不是配方自己的下标：
+     * 配方只有 {@code width} 宽，JEI 总是摆成 3 宽，直接传配方下标会让
+     * 2x2 配方第二行的缺料标到右上角。
+     */
+    private static List<Integer> missingCellsFor(
+            CraftingRecipe recipe, @Nullable IClientRepo repo, Player player) {
+        List<Ingredient> ingredients = recipe.getIngredients();
+        // 无序配方没有布局可言，JEI 按列表顺序铺；有序的按自己宽度换算。
+        int width = recipe instanceof ShapedRecipe shaped ? shaped.getWidth() : JEI_GRID_WIDTH;
+        List<Integer> missing = new ArrayList<>();
+        for (int cell = 0; cell < ingredients.size(); cell++) {
+            Ingredient ingredient = ingredients.get(cell);
+            if (ingredient.isEmpty()) {
+                continue;
+            }
+            if (ArcaneCraftingRecipeTransfer
+                    .pickSuppliable(List.of(ingredient.getItems()), repo, player)
+                    .isEmpty()) {
+                missing.add(toJeiIndex(cell, width));
+            }
+        }
+        return missing;
+    }
+
+    /** 配方下标（按 {@code width} 行优先）换算成 JEI 的 3 宽下标。 */
+    private static int toJeiIndex(int cell, int width) {
+        if (width <= 0 || width >= JEI_GRID_WIDTH) {
+            return cell;
+        }
+        return (cell % width) + (cell / width) * JEI_GRID_WIDTH;
     }
 }

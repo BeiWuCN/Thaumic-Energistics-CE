@@ -7,7 +7,9 @@
     "id": "thaumicenergistics_ce:wireless_essentia_terminal",
     "count": 1
   },
-  "crystals": [],
+  "crystals": [
+    { "aspect": "thaumaturge:aer" }
+  ],
   "ingredients": [
     {
       "item": "thaumicenergistics_ce:essentia_terminal"

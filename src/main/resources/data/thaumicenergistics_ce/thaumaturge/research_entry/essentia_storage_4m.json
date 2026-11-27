@@ -43,14 +43,18 @@
   "note_aspects": [
     {
       "aspect": "thaumaturge:vacuos",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:alienis",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:cognitio",
+      "aspect": "thaumaturge:tenebrae",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:vitreus",
+      "aspect": "thaumaturge:lux",
       "amount": 1
     }
   ],

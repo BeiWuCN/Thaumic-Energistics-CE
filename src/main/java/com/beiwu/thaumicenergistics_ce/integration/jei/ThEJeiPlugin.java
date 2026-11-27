@@ -1,20 +1,24 @@
 package com.beiwu.thaumicenergistics_ce.integration.jei;
 import com.beiwu.thaumicenergistics_ce.registry.TECEItems;
 
+import com.leclowndu93150.thaumaturge.compat.jei.category.CrucibleCategory;
+import com.leclowndu93150.thaumaturge.compat.jei.category.InfusionCategory;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
+import mezz.jei.api.recipe.RecipeType;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import net.minecraft.resources.ResourceLocation;
 import com.beiwu.thaumicenergistics_ce.ThEIds;
+import com.beiwu.thaumicenergistics_ce.client.jei.AspectFromItemCategory;
 import com.beiwu.thaumicenergistics_ce.util.ThELog;
 
 /**
  * Thaumic Energistics 的 JEI 插件，配方转移那一半，两侧 JEI 都会向它索取。
  * 这里不写任何界面类，专用服务端也要跑它。
  * 幽灵原料处理器在另一个插件 [client.jei.ThEJeiClientPlugin] 里，有自己的 UID。
- * 两个插件都用 Thaumaturge 的配方分类，铭刻机编码的内容与合成一致。
  */
 @JeiPlugin
 public class ThEJeiPlugin implements IModPlugin {
@@ -38,6 +42,7 @@ public class ThEJeiPlugin implements IModPlugin {
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         registration.addRecipeCatalyst(new net.minecraft.world.item.ItemStack(TECEItems.ARCANE_CRAFTING_TERMINAL.get()), ArcaneJeiRecipeType.arcane());
+        registration.addRecipeCatalyst(new net.minecraft.world.item.ItemStack(TECEItems.ARCANE_ENCODING_TERMINAL.get()), ArcaneJeiRecipeType.arcane());
         registration.addRecipeCatalyst(new net.minecraft.world.item.ItemStack(TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()), ArcaneJeiRecipeType.arcane());
     }
 
@@ -53,16 +58,29 @@ public class ThEJeiPlugin implements IModPlugin {
         registration.addRecipeTransferHandler(
                 new ArcaneCraftingRecipeTransfer(registration.getTransferHelper()),
                 ArcaneJeiRecipeType.arcane());
-        // 普通合成配方也注册：终端网格就是九个普通槽位。
-        // 玩家打开木板配方发现没有转移按钮，会以为终端坏了。
+        // 编码终端：只接奥术配方，把模板填进九格编码网格，不搬运库存。
+        registration.addRecipeTransferHandler(
+                new ArcaneEncodingRecipeTransfer(registration.getTransferHelper()),
+                ArcaneJeiRecipeType.arcane());
         registration.addRecipeTransferHandler(
                 new CraftingRecipeTransfer(registration.getTransferHelper()), RecipeTypes.CRAFTING);
         // 坩埚配方编成处理样板，不从合成分类走：它要的是源质，不是九个格子。
         // 这条也把坩埚配方从 AE2 的通用处理器手里接过来——通用那条会把要素丢掉。
+        for (var category : java.util.List.of(CrucibleCategory.RECIPE_TYPE, InfusionCategory.RECIPE_TYPE)) {
+            var type = holderType(category);
+            registration.addRecipeTransferHandler(
+                    new ThaumaturgeProcessingPatternTransfer(registration.getTransferHelper(), type), type);
+        }
+        // 从物品提取要素：反过来的一条，物品当输入、要素当输出，落进同一个处理编码页。
         registration.addRecipeTransferHandler(
-                new CruciblePatternTransfer(registration.getTransferHelper()),
-                CrucibleJeiRecipeType.crucible());
+                new AspectFromItemTransfer(registration.getTransferHelper()),
+                AspectFromItemCategory.RECIPE_TYPE);
         // 一个配方类型一个处理器就能服务有线和无线终端。
         // 分开注册只会让其中一个把另一个替换掉。
+    }
+
+    @SuppressWarnings("unchecked")
+    private static RecipeType<RecipeHolder<?>> holderType(RecipeType<?> type) {
+        return (RecipeType<RecipeHolder<?>>) type;
     }
 }

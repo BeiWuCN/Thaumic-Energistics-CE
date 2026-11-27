@@ -58,9 +58,19 @@ ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies."${mod_id}"]]
+modId = "ae2wtlib_api"
+type = "optional"
+# AE2WTLib 的 api 构件：通用终端体系（ItemWT / WTMenuHost / AddTerminalEvent）全在它里。
+# optional 且 BEFORE：抢在 api 自己的 RegisterEvent(ITEM) 监听器（执行 AddTerminalEvent.run()）之前
+# 完成 AddTerminalEvent.register，否则回调列表已关闭。真正接入需要完整 ae2wtlib。
+versionRange = "*"
+ordering = "BEFORE"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
 modId = "ae2wtlib"
 type = "optional"
-versionRange = "[19.5.1,)"
+versionRange = "[19.5.1,20)"
 ordering = "AFTER"
 side = "BOTH"
 

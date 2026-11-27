@@ -80,6 +80,7 @@ final class ArcanePatternTags {
         tag.put("Crystals", aspectTag);
 
         tag.putInt("BaseVis", pattern.baseVis());
+        tag.putBoolean("FluidSubstitution", pattern.fluidSubstitution());
         if (pattern.research() != null) {
             tag.putString("Research", pattern.research().toString());
         }
@@ -157,6 +158,9 @@ final class ArcanePatternTags {
                 research,
                 stage,
                 // 标签会保留下来，正是上面那个例外：标签无法从配方反推得到。
-                cellTags);
+                cellTags,
+                // 这个键是后加的：老核心里没有它，缺省按「允许」读，
+                // 免得升级一次就把所有存好的样板都变成拒收桶装替代。
+                !tag.contains("FluidSubstitution") || tag.getBoolean("FluidSubstitution"));
     }
 }

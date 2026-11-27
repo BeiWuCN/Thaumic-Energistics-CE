@@ -38,5 +38,19 @@
       ]
     }
   ],
+  "note_aspects": [
+    {
+      "aspect": "thaumaturge:ordo",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:permutatio",
+      "amount": 1
+    },
+    {
+      "aspect": "thaumaturge:instrumentum",
+      "amount": 1
+    }
+  ],
   "complexity": 1
 }

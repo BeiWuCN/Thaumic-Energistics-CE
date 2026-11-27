@@ -1,0 +1,18 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "thaumicenergistics_ce:block/drive/tece_cell",
+    "cell": "thaumicenergistics_ce:block/drive/tece_cell"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [6, 2, 2],
+      "faces": {
+        "north": { "uv": [0, 0, 6, 2], "texture": "#cell", "cullface": "north" },
+        "up": { "uv": [6, 0, 0, 2], "texture": "#cell", "cullface": "north" },
+        "down": { "uv": [6, 0, 0, 2], "texture": "#cell", "cullface": "north" }
+      }
+    }
+  ]
+}

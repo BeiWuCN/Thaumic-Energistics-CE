@@ -37,11 +37,11 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:fabrico",
+      "aspect": "thaumaturge:alkimia",
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:permutatio",
+      "aspect": "thaumaturge:cognitio",
       "amount": 2
     },
     {
@@ -49,7 +49,7 @@
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:cognitio",
+      "aspect": "thaumaturge:permutatio",
       "amount": 1
     }
   ],

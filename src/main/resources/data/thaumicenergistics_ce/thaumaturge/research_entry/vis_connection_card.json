@@ -45,7 +45,7 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:praecantatio",
+      "aspect": "thaumaturge:vinculum",
       "amount": 2
     },
     {
@@ -53,9 +53,9 @@
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:machina",
+      "aspect": "thaumaturge:aer",
       "amount": 1
     }
   ],
-  "complexity": 2
+  "complexity": 1
 }

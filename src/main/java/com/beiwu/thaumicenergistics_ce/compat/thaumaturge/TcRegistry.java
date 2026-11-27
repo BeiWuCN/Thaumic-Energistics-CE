@@ -3,7 +3,6 @@ package com.beiwu.thaumicenergistics_ce.compat.thaumaturge;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.content.essentia.jar.BlockEntityJar;
-import com.leclowndu93150.thaumaturge.content.essentia.jar.JarItem;
 import com.leclowndu93150.thaumaturge.content.item.PhialItem;
 import com.leclowndu93150.thaumaturge.content.taint.item.EssentiaCrystalFactory;
 import com.leclowndu93150.thaumaturge.content.taint.item.ItemEssentiaCrystal;
@@ -53,10 +52,50 @@ public final class TcRegistry {
 
     // -- 源质容器 -------------------------------------------------
 
-    /** 只认罐子和瓶子，本 mod 会填充的两种容器。 */
+    /**
+     * 能不能装源质，按能力问，不按类识别。
+     * <p>安瓿与罐子在 Thaumaturge 里注册的是同一个 {@code EssentiaCapabilities.CONTAINER}
+     * （{@code TTCapabilities} 把 PHIAL 与 JAR_NORMAL、JAR_VOID 放进同一次 registerItem），
+     * 内容读写都走 {@code IItemEssentia} 的 getAspects / setAspects。
+     * 所以这里按能力判断：以后 Thaumaturge 再加别的源质容器，这里自动认得。
+     * <p>但有三种同能力物品必须按物品排掉：
+     * <ul>
+     *   <li>虚空罐：装进去的源质会被销毁，不保留内容。</li>
+     *   <li>要素水晶与魔力豆：它们也注册了 CONTAINER，但写回时数量被硬编码成 1
+     *       （{@code ComponentEssentia.crystal} 的 writer），拿来当容器会
+     *       抽走一把源质却只记 1 点，而且倒空后的无要素水晶/魔力豆还会被
+     *       {@code inventoryTick} 随机重新赋要素，能反复刷。</li>
+     * </ul>
+     * 创造罐与其余罐类物品（护符、缸中之脑、节点罐）没有注册物品级 CONTAINER，
+     * 天然不在名单里；将来它们若注册，会经能力自动进入——到时再评估是否保留。
+     */
     public static boolean isEssentiaContainer(ItemStack stack) {
-        return !stack.isEmpty()
-                && (stack.getItem() instanceof JarItem || stack.getItem() instanceof PhialItem);
+        if (stack.isEmpty()
+                || stack.is(TTItems.JAR_VOID.get())
+                || stack.is(TTItems.ESSENTIA_CRYSTAL.get())
+                || stack.is(TTItems.MANA_BEAN.get())) {
+            return false;
+        }
+        return stack.getCapability(
+                com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities.CONTAINER) != null;
+    }
+
+    /**
+     * 这只容器能装多少源质。安瓿整瓶 10；罐子按 Thaumaturge 的 {@code IEssentiaJar} 报的容量。
+     * <p>{@code IEssentiaJar} 是方块实现的（{@code AbstractBlockJar implements IEssentiaJar}），
+     * 物品那一侧是 {@code BlockItem}，所以要绕一遭 {@code getBlock()}。
+     */
+    public static int capacityOf(ItemStack stack) {
+        if (stack.getItem() instanceof PhialItem) {
+            return phialCapacity();
+        }
+        if (stack.getItem() instanceof net.minecraft.world.item.BlockItem blockItem
+                && blockItem.getBlock()
+                        instanceof com.leclowndu93150.thaumaturge.api.essentia.IEssentiaJar jar) {
+            return jar.jarCapacity();
+        }
+        // 既不是安瓿也不是罐子：不是容器，容量无意义，报 0 让调用方据 0 拒绝。
+        return 0;
     }
 
     public static boolean isPhial(ItemStack stack) {

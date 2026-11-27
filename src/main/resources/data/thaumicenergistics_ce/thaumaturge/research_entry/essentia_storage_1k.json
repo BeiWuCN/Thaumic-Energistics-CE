@@ -67,12 +67,13 @@
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:potentia",
+      "aspect": "thaumaturge:aer",
       "amount": 1
     },
     {
       "aspect": "thaumaturge:vitreus",
       "amount": 1
     }
-  ]
+  ],
+  "complexity": 1
 }

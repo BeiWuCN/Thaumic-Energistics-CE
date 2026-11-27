@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import com.beiwu.thaumicenergistics_ce.ThEIds;
 import com.beiwu.thaumicenergistics_ce.item.ItemWirelessArcaneCraftingTerminal;
+import com.beiwu.thaumicenergistics_ce.registry.TECEItems;
 
 /**
  * 「忘记这件物品绑的终端，连 AE2 的链接一起下掉」，玩家潜行左键点它时发出。对空气左键只存在于客户端，
@@ -33,8 +34,11 @@ public record ArcaneUnbindPayload() implements CustomPacketPayload {
     /** 清掉手持终端上的配对与 AE2 链接并告知；两样都没绑的物品不出声。 */
     public void handle(Player player) {
         ItemStack held = player.getMainHandItem();
+        // 按注册后的物品实例判定，不按类：合成终端装 AE2WTLib 时是另一个类（通用终端要 ItemWT），
+        // 但它是同一个注册 id、同一份手感。
+        boolean arcane = held.getItem() == TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get();
         if (player.isSecondaryUseActive()
-                && (held.getItem() instanceof ItemWirelessArcaneCraftingTerminal
+                && (arcane
                 || held.getItem() instanceof com.beiwu.thaumicenergistics_ce.item.ItemWirelessEssentiaTerminal)
                 && ItemWirelessArcaneCraftingTerminal.unbind(held)) {
             player.displayClientMessage(

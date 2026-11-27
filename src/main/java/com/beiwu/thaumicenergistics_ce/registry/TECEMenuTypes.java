@@ -13,6 +13,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import com.beiwu.thaumicenergistics_ce.ThEIds;
 import com.beiwu.thaumicenergistics_ce.menu.MenuArcaneAssembler;
 import com.beiwu.thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
+import com.beiwu.thaumicenergistics_ce.menu.MenuArcaneEncodingTerminal;
 import com.beiwu.thaumicenergistics_ce.menu.MenuDistillationEncoder;
 import com.beiwu.thaumicenergistics_ce.menu.MenuEssentiaCellWorkbench;
 import com.beiwu.thaumicenergistics_ce.menu.MenuEssentiaLevelEmitter;
@@ -71,6 +72,21 @@ public final class TECEMenuTypes {
                             .buildUnregistered(ThEIds.id("arcane_crafting_terminal")));
 
     /**
+     * ME 奥术编码终端的界面。与合成终端一样用 {@link MenuTypeBuilder} 构建，
+     * 宿主是线缆上的部件，打开界面时随数据包一起带过去。
+     */
+    public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneEncodingTerminal>>
+            ARCANE_ENCODING_TERMINAL = REGISTRY.register(
+                    "arcane_encoding_terminal",
+                    () -> MenuTypeBuilder.<MenuArcaneEncodingTerminal, ITerminalHost>create(
+                                    (menuType, id, playerInventory, host) ->
+                                            new MenuArcaneEncodingTerminal(menuType, id, playerInventory, host),
+                                    ITerminalHost.class)
+                            .withMenuTitle(host -> Component.translatable(
+                                    "gui.thaumicenergistics_ce.ArcaneEncodingTerminal"))
+                            .buildUnregistered(ThEIds.id("arcane_encoding_terminal")));
+
+    /**
      * 源质终端。构建器把宿主（线缆部件或手中的无线物品）放进打开界面的数据包。
      * 标题显式指定，AE2 的终端样式自带 {@code gui.ae2.Terminal}。
      */
@@ -96,13 +112,37 @@ public final class TECEMenuTypes {
     /**
      * 无线奥术合成终端的界面：与有线终端同一个菜单，只是从手持物品打开，
      * 差别在宿主类，不在另设菜单类。
+     *
+     * <p><b>为什么先建实例、再交给注册器</b>：AE2WTLib 的 {@code AddTerminalEvent.run()}
+     * 在 ITEM 的 {@code RegisterEvent} 里执行，而 MENU 的注册表按 NeoForge 的固定顺序排在其后，
+     * 那一刻 {@code DeferredHolder.get()} 还没绑定、直接抛 NPE。所以实例必须能在注册前就取到：
+     * {@link #WIRELESS_ARCANE_CRAFTING_TERMINAL_TYPE} 是普通字段，注册器只是把同一个实例登进去。
      */
+    public static final MenuType<MenuArcaneCraftingTerminal> WIRELESS_ARCANE_CRAFTING_TERMINAL_TYPE =
+            MenuTypeBuilder.create(MenuArcaneCraftingTerminal::new, IPortableTerminal.class)
+                    .withMenuTitle(host -> Component.translatable(
+                            "gui.thaumicenergistics_ce.wireless_arcane_crafting_terminal"))
+                    .buildUnregistered(ThEIds.id("wireless_arcane_crafting_terminal"));
+
     public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneCraftingTerminal>>
             WIRELESS_ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
                     "wireless_arcane_crafting_terminal",
-                    () -> MenuTypeBuilder.create(MenuArcaneCraftingTerminal::new, IPortableTerminal.class)
-                            .withMenuTitle(host -> Component.translatable("gui.thaumicenergistics_ce.wireless_arcane_crafting_terminal"))
-                            .buildUnregistered(ThEIds.id("wireless_arcane_crafting_terminal")));
+                    () -> WIRELESS_ARCANE_CRAFTING_TERMINAL_TYPE);
+
+    /**
+     * 无线奥术编码终端的界面。与合成终端同理：复用面板版菜单，只换宿主类，
+     * 九格网格、知识核心与选中项存在手持物品的组件里。先建实例的理由同上。
+     */
+    public static final MenuType<MenuArcaneEncodingTerminal> WIRELESS_ARCANE_ENCODING_TERMINAL_TYPE =
+            MenuTypeBuilder.create(MenuArcaneEncodingTerminal::new, IPortableTerminal.class)
+                    .withMenuTitle(host -> Component.translatable(
+                            "gui.thaumicenergistics_ce.wireless_arcane_encoding_terminal"))
+                    .buildUnregistered(ThEIds.id("wireless_arcane_encoding_terminal"));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneEncodingTerminal>>
+            WIRELESS_ARCANE_ENCODING_TERMINAL = REGISTRY.register(
+                    "wireless_arcane_encoding_terminal",
+                    () -> WIRELESS_ARCANE_ENCODING_TERMINAL_TYPE);
 
     /**
      * 源质标准发信器的界面。上报值随初始数据带过去，它是设置，服务端不会一直推：

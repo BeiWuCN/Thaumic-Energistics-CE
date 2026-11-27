@@ -1,0 +1,147 @@
+{
+  "$schema": "schema.json",
+  "includes": [
+    "terminals/terminal.json"
+  ],
+  "slots": {
+    "CRAFTING_GRID": {
+      "left": 15,
+      "bottom": 158,
+      "grid": "BREAK_AFTER_3COLS"
+    },
+    "CRAFTING_RESULT": {
+      "$comment": "产物预览：底板箭头右边的框，只读展示网格解析出的奥术配方产物。",
+      "left": 106,
+      "bottom": 140
+    },
+    "STORAGE": {
+      "left": 147,
+      "bottom": 118
+    },
+    "THAUMICENERGISTICS_CORE_PATTERNS": {
+      "left": 175,
+      "bottom": 132,
+      "grid": "BREAK_AFTER_3COLS"
+    },
+    "TOOLBOX": {
+      "$comment": "网络工具面板：从 AE2 默认的右下角挪到右侧样板面板上。right 是负值表示伸出背景右边，越负越靠右；-37 / bottom 60 即 x=178 y=137。",
+      "right": -37,
+      "bottom": 60,
+      "grid": "BREAK_AFTER_3COLS"
+    }
+  },
+  "images": {
+    "toolbox": {
+      "texture": "guis/extra_panels.png",
+      "textureWidth": 128,
+      "textureHeight": 128,
+      "srcRect": [
+        69,
+        62,
+        59,
+        66
+      ]
+    }
+  },
+  "text": {
+    "dialog_title": {
+      "text": {
+        "translate": "gui.ae2.Terminal"
+      },
+      "position": {
+        "left": 8,
+        "top": 6
+      }
+    },
+    "crafting_grid_title": {
+      "text": {
+        "translate": "gui.thaumicenergistics_ce.ArcaneEncoding"
+      },
+      "position": {
+        "left": 8,
+        "bottom": 177
+      }
+    },
+    "player_inventory_title": {
+      "text": {
+        "translate": "container.inventory"
+      },
+      "position": {
+        "left": 8,
+        "bottom": 94
+      }
+    }
+  },
+  "terminalStyle": {
+    "header": {
+      "texture": "thaumicenergistics_ce:textures/gui/arcane_encoding.png",
+      "srcRect": [
+        0,
+        0,
+        195,
+        17
+      ]
+    },
+    "firstRow": {
+      "texture": "thaumicenergistics_ce:textures/gui/arcane_encoding.png",
+      "srcRect": [
+        0,
+        17,
+        195,
+        18
+      ]
+    },
+    "row": {
+      "texture": "thaumicenergistics_ce:textures/gui/arcane_encoding.png",
+      "srcRect": [
+        0,
+        35,
+        195,
+        18
+      ]
+    },
+    "lastRow": {
+      "texture": "thaumicenergistics_ce:textures/gui/arcane_encoding.png",
+      "srcRect": [
+        0,
+        53,
+        195,
+        18
+      ]
+    },
+    "bottom": {
+      "texture": "thaumicenergistics_ce:textures/gui/arcane_encoding.png",
+      "srcRect": [
+        0,
+        71,
+        195,
+        180
+      ]
+    }
+  },
+  "widgets": {
+    "encodePattern": {
+      "left": 147,
+      "bottom": 145
+    },
+    "craftingClearPattern": {
+      "left": 70,
+      "bottom": 159
+    },
+    "craftingSubstitutions": {
+      "left": 80,
+      "bottom": 159
+    },
+    "craftingFluidSubstitutions": {
+      "left": 90,
+      "bottom": 159
+    },
+    "toolbox": {
+      "$comment": "网络工具面板背景：跟着 TOOLBOX 槽一起右移 53 + 4、下移 23 + 1。",
+      "right": -36,
+      "bottom": 66,
+      "width": 59,
+      "height": 66
+    }
+  }
+}

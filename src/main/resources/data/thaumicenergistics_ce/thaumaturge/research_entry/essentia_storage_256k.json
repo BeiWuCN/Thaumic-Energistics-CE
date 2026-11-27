@@ -44,14 +44,18 @@
   "note_aspects": [
     {
       "aspect": "thaumaturge:vacuos",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:vinculum",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:cognitio",
+      "aspect": "thaumaturge:ordo",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:vitreus",
+      "aspect": "thaumaturge:praecantatio",
       "amount": 1
     }
   ],

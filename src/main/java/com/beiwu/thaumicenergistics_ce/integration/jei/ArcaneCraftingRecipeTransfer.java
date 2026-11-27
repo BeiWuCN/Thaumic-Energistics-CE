@@ -5,9 +5,12 @@ import appeng.core.network.serverbound.FillCraftingGridFromRecipePacket;
 import appeng.menu.SlotSemantics;
 import appeng.menu.me.common.GridInventoryEntry;
 import appeng.menu.me.common.IClientRepo;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
@@ -24,6 +27,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jspecify.annotations.Nullable;
 import com.beiwu.thaumicenergistics_ce.menu.MenuArcaneCraftingTerminal;
+import com.beiwu.thaumicenergistics_ce.network.ArcaneCrystalFillPayload;
 import com.beiwu.thaumicenergistics_ce.part.PartArcaneCraftingTerminal;
 
 /**
@@ -105,20 +109,30 @@ public class ArcaneCraftingRecipeTransfer
         // 数据包的模板路径不认识标签，标签的第一个成员常常正是没库存的那个。
         IClientRepo repo = menu.getClientRepo();
         NonNullList<ItemStack> templates = NonNullList.withSize(PartArcaneCraftingTerminal.GRID_SIZE, ItemStack.EMPTY);
-        boolean missing = false;
+        List<Integer> missingCells = new ArrayList<>();
         for (int cell = 0; cell < PartArcaneCraftingTerminal.GRID_SIZE; cell++) {
             List<ItemStack> variants = cell < cells.size() ? cells.get(cell) : List.of();
             templates.set(cell, pickSuppliable(variants, repo, player));
             if (templates.get(cell).isEmpty() && asksForSomething(variants)) {
-                missing = true;
+                missingCells.add(cell);
             }
         }
 
         // 摆不下就整次拒绝，不部分填充：半填的网格看着像是这个终端合成不了，
-        // 不像是在说缺料。
-        if (missing) {
-            return helper.createUserErrorWithTooltip(
-                    Component.translatable("thaumicenergistics_ce.jei.transfer.missing_ingredients"));
+        // 不像是在说缺料。缺的那几格照 AE2 自己的合成终端那样标红，
+        // 玩家不用读提示就知道是哪一味没凑齐。
+        if (!missingCells.isEmpty()) {
+            List<IRecipeSlotView> inputs = display.getSlotViews(RecipeIngredientRole.INPUT);
+            List<IRecipeSlotView> highlight = new ArrayList<>(missingCells.size());
+            for (int cell : missingCells) {
+                if (cell < inputs.size()) {
+                    highlight.add(inputs.get(cell));
+                }
+            }
+            Component message = Component.translatable("thaumicenergistics_ce.jei.transfer.missing_ingredients");
+            return highlight.isEmpty()
+                    ? helper.createUserErrorWithTooltip(message)
+                    : helper.createUserErrorForMissingSlots(message, highlight);
         }
         if (!doTransfer) {
             return null;
@@ -126,6 +140,9 @@ public class ArcaneCraftingRecipeTransfer
 
         // 不传配方 id：配方不在原版管理器里，只能走数据包的模板路径。
         PacketDistributor.sendToServer(new FillCraftingGridFromRecipePacket(null, templates, false));
+        // 网格摆好后紧跟着补晶体：晶体槽不在转移范围里，客户端也改不动，
+        // 交给服务端照网格反查配方再补。网络不够时那边整笔放弃，网格保持已转移的样子。
+        PacketDistributor.sendToServer(new ArcaneCrystalFillPayload(menu.containerId));
         return null;
     }
 
@@ -134,8 +151,11 @@ public class ArcaneCraftingRecipeTransfer
     /**
      * 一个格子的模板：背后供给最多的变体，标签第一个成员没库存也能转移。
      * 没东西能供给这个格子时为空。
+     * <p>
+     * 包级而非 private：{@link CraftingRecipeTransfer} 处理 JEI 的原版合成页签，
+     * 两个页签对缺料的判定必须是同一套，否则同一个配方在两边表现不一样。
      */
-    private static ItemStack pickSuppliable(List<ItemStack> variants, @Nullable IClientRepo repo, Player player) {
+    static ItemStack pickSuppliable(List<ItemStack> variants, @Nullable IClientRepo repo, Player player) {
         ItemStack best = ItemStack.EMPTY;
         long bestSupply = 0;
         for (ItemStack variant : variants) {

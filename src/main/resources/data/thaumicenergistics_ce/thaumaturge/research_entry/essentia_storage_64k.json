@@ -84,12 +84,17 @@
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:potentia",
+      "aspect": "thaumaturge:permutatio",
       "amount": 2
     },
     {
+      "aspect": "thaumaturge:potentia",
+      "amount": 1
+    },
+    {
       "aspect": "thaumaturge:vitreus",
-      "amount": 2
+      "amount": 1
     }
-  ]
+  ],
+  "complexity": 2
 }

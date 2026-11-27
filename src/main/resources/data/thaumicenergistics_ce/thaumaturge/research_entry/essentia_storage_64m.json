@@ -43,18 +43,22 @@
   "note_aspects": [
     {
       "aspect": "thaumaturge:vacuos",
+      "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:alienis",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:cognitio",
+      "aspect": "thaumaturge:vinculum",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:vitreus",
+      "aspect": "thaumaturge:ordo",
       "amount": 1
     }
   ],
-  "complexity": 2,
+  "complexity": 3,
   "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",

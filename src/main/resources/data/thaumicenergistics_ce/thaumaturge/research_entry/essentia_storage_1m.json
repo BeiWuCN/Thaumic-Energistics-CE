@@ -44,10 +44,10 @@
   "note_aspects": [
     {
       "aspect": "thaumaturge:vacuos",
-      "amount": 1
+      "amount": 2
     },
     {
-      "aspect": "thaumaturge:cognitio",
+      "aspect": "thaumaturge:alienis",
       "amount": 1
     },
     {

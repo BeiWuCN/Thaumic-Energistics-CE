@@ -44,17 +44,17 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:cognitio",
+      "aspect": "thaumaturge:permutatio",
       "amount": 2
     },
     {
-      "aspect": "thaumaturge:permutatio",
+      "aspect": "thaumaturge:motus",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:machina",
+      "aspect": "thaumaturge:ordo",
       "amount": 1
     }
   ],
-  "complexity": 2
+  "complexity": 1
 }

@@ -6,18 +6,26 @@ import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.security.IActionHost;
+import appeng.api.stacks.AEItemKey;
 import appeng.api.storage.ITerminalHost;
+import appeng.api.storage.StorageHelper;
 import appeng.helpers.ICraftingGridMenu;
 import appeng.menu.SlotSemantic;
 import appeng.menu.SlotSemantics;
 import appeng.menu.slot.AppEngSlot;
 import appeng.util.inv.AppEngInternalInventory;
 import appeng.util.inv.InternalInventoryHost;
+import appeng.util.inv.PlayerInternalInventory;
 import appeng.util.inv.filter.IAEItemFilter;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftCost;
+import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftingTransaction;
+import com.leclowndu93150.thaumaturge.api.recipe.ArcaneWorkbenchContext;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,6 +37,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.ArcaneTerminalHost;
+import com.beiwu.thaumicenergistics_ce.recipe.arcane.EssentiaCrystals;
+import com.beiwu.thaumicenergistics_ce.recipe.arcane.TerminalArcaneCraftingInput;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
 import com.beiwu.thaumicenergistics_ce.compat.thaumaturge.TcWorkbench;
 import com.beiwu.thaumicenergistics_ce.registry.TECEItems;
@@ -60,6 +70,15 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     public static final SlotSemantic CRYSTALS_RIGHT =
             SlotSemantics.register("THAUMICENERGISTICS_CRYSTALS_RIGHT", true);
 
+    /** 客户端动作：把合成网格退回 ME 网络。 */
+    private static final String ACTION_CLEAR_TO_NETWORK = "clearToNetwork";
+
+    /** 客户端动作：把合成网格退回玩家背包。 */
+    private static final String ACTION_CLEAR_TO_PLAYER = "clearToPlayer";
+
+    /** 客户端动作：翻转付费源，法杖 6 要素 2:1 顶水晶 ↔ 用水晶槽的整颗晶体先付。 */
+    private static final String ACTION_TOGGLE_PAYMENT = "togglePayment";
+
     // 网格底部锚在 26,158，三列一行，取自屏幕样式。
     private static final int GRID_X = 26;
     private static final int GRID_Y = 96;
@@ -74,6 +93,9 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     private static final int CRYSTALS_RIGHT_X = 80;
 
     private final @Nullable PartArcaneCraftingTerminal part;
+
+    /** 结果槽的刷新签名与节流：vis 卡与绑定 relay 的存量也参与，见 [ArcaneTerminalRuntime]。 */
+    private final ArcaneTerminalRuntime runtime = new ArcaneTerminalRuntime();
 
     /**
      * 终端还没解析出来时的替身容器：只管占住槽位，槽位数量两侧不一致菜单就会错位。
@@ -105,8 +127,12 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
     @appeng.menu.guisync.GuiSync(110)
     public int availableAuraVis;
 
-    @appeng.menu.guisync.GuiSync(111)
-    public boolean essentiaAccessEnabled;
+    /** 付费源模式：true 先用水晶槽的整颗晶体，false 让法杖 6 要素按 2:1 顶水晶。 */
+    @appeng.menu.guisync.GuiSync(112)
+    public boolean crystalFirst;
+
+    /** 模式的持久化落点：放置式部件或无线终端物品；为 null 时用默认值且不存。 */
+    private final com.beiwu.thaumicenergistics_ce.recipe.arcane.ArcanePaymentPreference paymentPreference;
 
     /** 上次说「替身槽位不收东西」的时刻。初值 -100 让第一次点击就能出声，之后两秒一次。 */
     private int lastPlaceholderRefusal = -100;
@@ -116,7 +142,13 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         super(menuType, id, playerInventory, host, false);
         this.part = host instanceof ArcaneTerminalHost arcane ? arcane.arcaneTerminal() : null;
         this.auraPayer = host instanceof IPortableTerminal portable ? portable : null;
-        var wireless = host instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost w ? w : null;
+        // 放置式：host 就是部件；无线：host 是无线宿主。两者都实现付费偏好接口。
+        this.paymentPreference = host instanceof com.beiwu.thaumicenergistics_ce.recipe.arcane.ArcanePaymentPreference pref
+                ? pref : null;
+        this.crystalFirst = paymentPreference != null && paymentPreference.crystalFirst();
+        // 只看接口：独立实现（自研量子桥）与 AE2WTLib 实现（WTMenuHost）都满足它，
+        // 菜单不必知道手里是哪种终端。
+        var wireless = host instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingHost w ? w : null;
         this.craftingGrid = wireless != null ? wireless.craftingGrid() : part == null ? gridFallback : part.craftingGrid();
         this.wandInventory = wireless != null ? wireless.wandInventory() : part == null ? wandFallback : part.wandInventory();
         this.crystals = wireless != null ? wireless.crystalInventory() : part == null ? crystalFallback : part.crystalInventory();
@@ -186,6 +218,10 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
         // 开菜单时刷一次结果，上次留下的网格才显示得出来。
         resultSlot.refresh();
+
+        registerClientAction(ACTION_CLEAR_TO_NETWORK, this::clearCraftingGridToNetwork);
+        registerClientAction(ACTION_CLEAR_TO_PLAYER, this::clearCraftingGridToPlayer);
+        registerClientAction(ACTION_TOGGLE_PAYMENT, this::togglePaymentSource);
     }
 
 
@@ -218,8 +254,6 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
             var pos = part == null ? getPlayer().blockPosition() : part.getBlockEntity().getBlockPos();
             availableAuraVis = Math.max(0, (int) com.beiwu.thaumicenergistics_ce.compat.thaumaturge.TcAura.vis(getPlayer().level(), pos));
         }
-        if (!isClientSide()) essentiaAccessEnabled = com.beiwu.thaumicenergistics_ce.config.ThEConfig.ARCANE_ESSENTIA_ACCESS.get();
-        updateUpgradeSlotVisibility();
         super.broadcastChanges();
         if (resultSlot == null) {
             return;
@@ -232,27 +266,6 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
             lastConnected = connected;
             resultSlot.refresh();
         }
-    }
-
-    @Override
-    public boolean isValidForSlot(Slot slot, ItemStack stack) {
-        if (stack.is(TECEItems.ESSENTIA_ACCESS_CARD.get())
-                && getSlots(SlotSemantics.UPGRADE).contains(slot)
-                && !com.beiwu.thaumicenergistics_ce.config.ThEConfig.ARCANE_ESSENTIA_ACCESS.get()) return false;
-        return super.isValidForSlot(slot, stack);
-    }
-
-    public void updateUpgradeSlotVisibility() {
-        var slots = getSlots(SlotSemantics.UPGRADE);
-        int hidden = -1;
-        if (!essentiaAccessEnabled) {
-            int limit = getHost() instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost
-                    ? Math.min(2, slots.size()) : slots.size();
-            for (int i = limit - 1; i >= 0; i--) {
-                if (!slots.get(i).hasItem()) { hidden = i; break; }
-            }
-        }
-        for (int i = 0; i < slots.size(); i++) ((AppEngSlot) slots.get(i)).setSlotEnabled(i != hidden);
     }
 
     private void chargeWand() {
@@ -282,16 +295,115 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         return moved > 0 ? moved : super.transferStackToMenu(stack);
     }
 
+    /**
+     * 把网格里的东西退回 ME 网络。按钮在客户端，实际搬运只在服务端做。
+     * 每格单独算插入量：网络满、断电或被过滤时插多少扣多少，剩下的留在原格，
+     * 不整个丢掉。走 [setItemDirect] 才会触发部件 NBT 或无线物品组件的存档。
+     */
+    public void clearCraftingGridToNetwork() {
+        if (isClientSide()) {
+            sendClientAction(ACTION_CLEAR_TO_NETWORK);
+            return;
+        }
+        boolean changed = false;
+        for (int i = 0; i < GRID_SIZE; i++) {
+            ItemStack stack = craftingGrid.getStackInSlot(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+            AEItemKey key = AEItemKey.of(stack);
+            if (key == null) {
+                continue;
+            }
+            long moved = StorageHelper.poweredInsert(
+                    energySource, storage, key, stack.getCount(), getActionSource());
+            if (moved <= 0) {
+                continue;
+            }
+            ItemStack left = stack.copy();
+            left.shrink((int) Math.min(moved, left.getCount()));
+            craftingGrid.setItemDirect(i, left);
+            changed = true;
+        }
+        if (changed) {
+            broadcastChanges();
+        }
+    }
+
+    /**
+     * 把网格里的东西退回玩家背包，热键栏优先、两遍填充，先合并已有堆再占空格。
+     * 装不下的部分留在网格：这里没有掉落，也不会像结果槽那样交出费用后丢产物。
+     */
+    public void clearCraftingGridToPlayer() {
+        if (isClientSide()) {
+            sendClientAction(ACTION_CLEAR_TO_PLAYER);
+            return;
+        }
+        PlayerInternalInventory playerInv = new PlayerInternalInventory(getPlayerInventory());
+        boolean changed = false;
+        for (int i = 0; i < GRID_SIZE; i++) {
+            ItemStack stack = craftingGrid.getStackInSlot(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+            ItemStack left = stack.copy();
+            for (int emptyLoop = 0; emptyLoop < 2; emptyLoop++) {
+                boolean allowEmpty = emptyLoop == 1;
+                for (int j = 9; j-- > 0;) {
+                    if (playerInv.getStackInSlot(j).isEmpty() == allowEmpty) {
+                        left = playerInv.getSlotInv(j).addItems(left);
+                    }
+                }
+                for (int j = 9; j < Inventory.INVENTORY_SIZE; j++) {
+                    if (playerInv.getStackInSlot(j).isEmpty() == allowEmpty) {
+                        left = playerInv.getSlotInv(j).addItems(left);
+                    }
+                }
+            }
+            if (left.getCount() != stack.getCount()) {
+                craftingGrid.setItemDirect(i, left);
+                changed = true;
+            }
+        }
+        if (changed) {
+            broadcastChanges();
+        }
+    }
+
+    /** 切换付费源。客户端只发信号，翻转和清签名都在服务端做，下一次 broadcast 重算结果。 */
+    public void togglePaymentSource() {
+        if (isClientSide()) {
+            sendClientAction(ACTION_TOGGLE_PAYMENT);
+            return;
+        }
+        crystalFirst = !crystalFirst;
+        // 写回宿主存档：部件走 NBT，无线走物品数据组件，关掉菜单再开仍是这个模式。
+        if (paymentPreference != null) {
+            paymentPreference.setCrystalFirst(crystalFirst);
+        }
+        craftInputSignature = -1;
+        broadcastChanges();
+    }
+
+    public boolean crystalFirst() {
+        return crystalFirst;
+    }
+
+    /**
+     * 结果槽的重算键。用 [ArcaneTerminalRuntime] 的实现：它把 vis 连接卡和它绑定的 relay
+     * 存量也算进去。原先这里漏了这两项，插卡、换绑定、relay 耗尽时签名不变，
+     * 结果槽就一直显示上一次的「合不了」，直到玩家动一下网格。
+     */
     private int craftInputSignature() {
-        int hash = availableAuraVis;
-        for (ItemStack upgrade : getHost().getUpgrades()) hash = 31 * hash + StackSignatures.of(upgrade);
-        for (int i = 0; i < PartArcaneCraftingTerminal.GRID_SIZE; i++) {
-            hash = 31 * hash + StackSignatures.of(craftingGrid.getStackInSlot(i));
+        ItemStack card = ItemStack.EMPTY;
+        for (ItemStack upgrade : getHost().getUpgrades()) {
+            if (upgrade.is(TECEItems.VIS_CONNECTION_CARD.get())) {
+                card = upgrade;
+                break;
+            }
         }
-        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
-            hash = 31 * hash + StackSignatures.of(crystals.getStackInSlot(i));
-        }
-        return 31 * hash + StackSignatures.of(wandInventory.getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT));
+        return runtime.inputSignature(
+                getPlayer(), craftingGrid, crystals, wandInventory, card, availableAuraVis);
     }
 
     public @Nullable PartArcaneCraftingTerminal part() {
@@ -304,7 +416,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
     public boolean canCraft() {
         return getLinkStatus().connected() && (part != null
-                || getHost() instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost);
+                || getHost() instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingHost);
     }
 
     public @Nullable ArcaneCraftingResultSlot resultSlot() {
@@ -332,22 +444,215 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         return slots.isEmpty() ? null : slots.getFirst();
     }
 
-    public void sendCraftCost(@Nullable ArcaneCraftCost cost) {
+    /**
+     * 成本计算用的网络晶体快照：把 ME 网络里六种元始晶体的数量报给输入，
+     * 让水晶优先时成本事件知道「网络里有晶体可付」，从而生成 crystalsNeeded。
+     * 只参与成本计算，不进晶体槽；实际扣取由 TerminalArcaneCraftingStore 完成。
+     */
+    public List<ItemStack> networkCrystals() {
+        List<ItemStack> found = new ArrayList<>(PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
+        if (isClientSide() || storage == null) {
+            return found;
+        }
+        // 与 store 的扣取口径一致：没电时不报网络晶体，成本事件便不会把法杖份额转成晶体需求，
+        // 避免批量合成把电扣到阈值以下后成本说付得起、扣费说付不起，误报材料变化。
+        if (energySource != null && energySource.extractAEPower(1, appeng.api.config.Actionable.SIMULATE,
+                appeng.api.config.PowerMultiplier.CONFIG) < 0.9) {
+            return found;
+        }
+        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
+            Holder<IAspect> aspect = getPlayer().level()
+                    .registryAccess()
+                    .registryOrThrow(IAspect.REGISTRY_KEY)
+                    .getHolder(aspectOf(i))
+                    .orElse(null);
+            if (aspect == null) {
+                continue;
+            }
+            AEItemKey key = AEItemKey.of(EssentiaCrystals.create(aspect, 1));
+            if (key == null) {
+                continue;
+            }
+            long count = storage.extract(key, Long.MAX_VALUE, appeng.api.config.Actionable.SIMULATE,
+                    getActionSource());
+            if (count > 0) {
+                found.add(EssentiaCrystals.create(aspect, (int) Math.min(Integer.MAX_VALUE, count)));
+            }
+        }
+        return found;
+    }
+
+    /**
+     * 网格刚摆好时补晶体：把缺的那几颗从 ME 网络拉进六个晶体槽。
+     * JEI 转移只认九个格子，晶体槽是终端自己的容器，客户端改不动，只能走服务端。
+     * <p>全补或全不补：网络里少一味就把已取出的整笔退回，一颗都不放进去 ——
+     * 半补的槽位会让玩家以为合成条件已经满足，点下去才发现还差。
+     */
+    public void fillCrystalsFromNetwork() {
+        if (ensureNetworkCrystals()) {
+            broadcastChanges();
+        }
+    }
+
+    /**
+     * 补货本体，返回是否动过槽位。广播交给调用方：预览重算那条路径紧接着就会广播，
+     * 这里再广播一次会让客户端收到两份同步包。
+     */
+    private boolean ensureNetworkCrystals() {
+        if (isClientSide() || !(getPlayer() instanceof ServerPlayer server)) {
+            return false;
+        }
+        AspectList need = crystalCostOfGrid(server);
+        if (need == null || need.isEmpty()) {
+            return false;
+        }
+        // 先全部取到手上，任何一味不够就整笔退回。
+        List<ItemStack> pulled = new ArrayList<>();
+        for (AspectInstance entry : need.entries()) {
+            int deficit = entry.amount() - countCrystals(entry.aspect());
+            if (deficit <= 0) {
+                continue;
+            }
+            ItemStack crystalsForAspect = EssentiaCrystals.create(entry.aspect(), deficit);
+            AEItemKey key = AEItemKey.of(crystalsForAspect);
+            if (key == null) {
+                refund(pulled);
+                return false;
+            }
+            long got = storage.extract(key, deficit, appeng.api.config.Actionable.MODULATE, getActionSource());
+            if (got < deficit) {
+                if (got > 0) {
+                    storage.insert(key, got, appeng.api.config.Actionable.MODULATE, getActionSource());
+                }
+                refund(pulled);
+                return false;
+            }
+            pulled.add(crystalsForAspect);
+        }
+        // 全部到手才落进槽位。
+        for (ItemStack stack : pulled) {
+            int slot = crystalSlotFor(EssentiaCrystals.aspectOf(stack));
+            if (slot < 0) {
+                // 没有绑这个要素的槽位：还回网络，别吞掉玩家的东西。
+                AEItemKey key = AEItemKey.of(stack);
+                if (key != null) {
+                    storage.insert(key, stack.getCount(), appeng.api.config.Actionable.MODULATE, getActionSource());
+                }
+                continue;
+            }
+            ItemStack existing = crystals.getStackInSlot(slot);
+            if (existing.isEmpty()) {
+                crystals.setItemDirect(slot, stack);
+            } else if (ItemStack.isSameItemSameComponents(existing, stack)) {
+                existing.grow(stack.getCount());
+                crystals.setItemDirect(slot, existing);
+            }
+        }
+        return true;
+    }
+
+    /** 把已经取出的晶体还回网络；中途放弃时用。 */
+    private void refund(List<ItemStack> pulled) {
+        for (ItemStack stack : pulled) {
+            AEItemKey key = AEItemKey.of(stack);
+            if (key != null) {
+                storage.insert(key, stack.getCount(), appeng.api.config.Actionable.MODULATE, getActionSource());
+            }
+        }
+    }
+
+    /**
+     * 这个网格背后的配方要几颗什么晶体；没有配方、或研究没解锁时为 {@code null}。
+     * 走 Thaumaturge 自己的匹配，和合成时看到的是同一份需求。
+     */
+    private @Nullable AspectList crystalCostOfGrid(ServerPlayer server) {
+        List<ItemStack> cells = new ArrayList<>(GRID_SIZE);
+        for (int i = 0; i < GRID_SIZE; i++) {
+            cells.add(craftingGrid.getStackInSlot(i));
+        }
+        List<ItemStack> crystalSlots = new ArrayList<>(PartArcaneCraftingTerminal.CRYSTAL_SLOTS);
+        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
+            crystalSlots.add(crystals.getStackInSlot(i));
+        }
+        // 不传网络快照：这里算的是「要往晶体槽补多少」，网络里有多少与补货量无关。
+        // 传了会让成本事件把网络库存当成已有，少补甚至不补，JEI 转移后槽里空着看着像故障。
+        TerminalArcaneCraftingInput input = new TerminalArcaneCraftingInput(
+                cells,
+                server,
+                wandInventory.getStackInSlot(PartArcaneCraftingTerminal.WAND_SLOT),
+                crystalSlots,
+                part,
+                auraPayer,
+                hasVisConnectionCard(),
+                crystalFirst);
+        var inspection = ArcaneCraftingTransaction.inspect(
+                ArcaneWorkbenchContext.virtual(
+                        server, PartArcaneCraftingTerminal.CONTEXT_HOST, server.getUUID()),
+                server,
+                input);
+        if (!inspection.successful() || inspection.requirements() == null) {
+            return null;
+        }
+        return inspection.requirements().crystals();
+    }
+
+    /** 六个槽里这个要素一共有几颗。 */
+    private int countCrystals(Holder<IAspect> aspect) {
+        int total = 0;
+        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
+            ItemStack stack = crystals.getStackInSlot(i);
+            Holder<IAspect> carried = EssentiaCrystals.aspectOf(stack);
+            if (carried != null && carried.equals(aspect)) {
+                total += stack.getCount();
+            }
+        }
+        return total;
+    }
+
+    /** 绑这个要素的晶体槽；没有就是 -1。 */
+    private int crystalSlotFor(@Nullable Holder<IAspect> aspect) {
+        if (aspect == null) {
+            return -1;
+        }
+        ResourceKey<IAspect> key = aspect.unwrapKey().orElse(null);
+        if (key == null) {
+            return -1;
+        }
+        for (int i = 0; i < PartArcaneCraftingTerminal.CRYSTAL_SLOTS; i++) {
+            if (key.equals(aspectOf(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * 把这次合成的开销发给屏幕。
+     * @param discountPercent 灵气减免百分比，0 表示未聚焦；屏幕据此在「（未聚焦）」和「（n% 减免）」之间选
+     */
+    public void sendCraftCost(@Nullable ArcaneCraftCost cost, int discountPercent) {
         if (isClientSide()) {
             return;
         }
         sendPacketToClient(cost == null
                 ? ArcaneCraftCostPayload.none(containerId)
-                : ArcaneCraftCostPayload.of(containerId, cost.wandCentivis(), cost.crystalsNeeded()));
+                : ArcaneCraftCostPayload.of(
+                        containerId,
+                        cost.wandCentivis(),
+                        cost.crystalsNeeded(),
+                        cost.auraVis(),
+                        discountPercent));
     }
 
 
-    /** 权限只看终端物品升级槽里那张卡，别处一概不读。 */
+    /**
+     * 源质行的可见性与交互性是两件事：可见性默认就开（见 {@code EssentiaVisibility}），
+     * 交互性只看升级槽里有没有卡。没卡的终端照样看得到源质，只是右键存不进去。
+     */
     @Override
     protected boolean essentiaAccessGranted() {
         // 玩家看到的就是宿主自己的升级栏；AE2 菜单按它构建。
-        return (isClientSide() ? essentiaAccessEnabled : com.beiwu.thaumicenergistics_ce.config.ThEConfig.ARCANE_ESSENTIA_ACCESS.get())
-                && getHost().getUpgrades().isInstalled(TECEItems.ESSENTIA_ACCESS_CARD.get());
+        return getHost().getUpgrades().isInstalled(TECEItems.ESSENTIA_ACCESS_CARD.get());
     }
 
     /** 屏幕问它只为隐藏手势；服务端在动东西之前会再问一次。 */

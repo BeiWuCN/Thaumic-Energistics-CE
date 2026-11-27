@@ -33,15 +33,15 @@
   ],
   "note_aspects": [
     {
+      "aspect": "thaumaturge:alkimia",
+      "amount": 1
+    },
+    {
       "aspect": "thaumaturge:motus",
       "amount": 1
     },
     {
-      "aspect": "thaumaturge:permutatio",
-      "amount": 1
-    },
-    {
-      "aspect": "thaumaturge:vitreus",
+      "aspect": "thaumaturge:vinculum",
       "amount": 1
     }
   ],

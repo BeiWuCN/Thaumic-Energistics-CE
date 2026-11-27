@@ -196,13 +196,13 @@ final class AssemblerCraftJob {
             noteRefusal(cannotPay(craftCost(details.pattern())));
             return false;
         }
-        // [AE2] 刚抽走的物品。本机器用 vis 和晶体付账，这些只为归还而留。
+        // [AE2] 刚抽走的原料。本机器用 vis 和晶体付账，这些只为机器损坏时归还而留。
+        // 收通用 key 而不是只收物品：流体替代打开时，桶装格位也可能被抽成流体。
         owner.craft.heldInputs().clear();
         for (KeyCounter counter : inputHolder) {
             for (var entry : counter) {
-                if (entry.getKey() instanceof AEItemKey itemKey && entry.getLongValue() > 0) {
-                    owner.craft.heldInputs()
-                            .add(itemKey.toStack((int) Math.min(Integer.MAX_VALUE, entry.getLongValue())));
+                if (entry.getLongValue() > 0) {
+                    owner.craft.heldInputs().add(new GenericStack(entry.getKey(), entry.getLongValue()));
                 }
             }
         }

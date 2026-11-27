@@ -10,6 +10,7 @@ import appeng.api.networking.energy.IEnergyService;
 import appeng.api.networking.storage.IStorageService;
 import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.GenericStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
@@ -152,7 +153,8 @@ final class AssemblerCraftRunner {
         }
     }
 
-    /** 归还已经付过款的投入物，先塞回网络，塞不下再丢地上。 */
+    /** 归还机器损坏时还拿着的投入物：先塞回网络，物品塞不下再丢地上。
+     * 流体没有「丢在地上」这种兜底，网络给不回去就只能记一条日志。 */
     void returnHeldInputs() {
         if (owner.craft.heldInputs().isEmpty()) {
             return;
@@ -162,27 +164,33 @@ final class AssemblerCraftRunner {
         if (grid != null) {
             storage = grid.getService(IStorageService.class);
         }
-        for (ItemStack stack : owner.craft.heldInputs()) {
-            if (stack.isEmpty()) {
+        var held = owner.craft.heldInputs();
+        for (var iterator = held.iterator(); iterator.hasNext(); ) {
+            GenericStack stack = iterator.next();
+            iterator.remove();
+            long left = stack.amount();
+            if (storage != null) {
+                left -= storage.getInventory().insert(stack.what(), left, Actionable.MODULATE, owner.actionSource);
+            }
+            if (left <= 0) {
                 continue;
             }
-            AEItemKey key = AEItemKey.of(stack);
-            long left = stack.getCount();
-            if (storage != null && key != null) {
-                long inserted = storage.getInventory()
-                        .insert(key, stack.getCount(), Actionable.MODULATE, owner.actionSource);
-                left -= inserted;
-            }
-            if (left > 0) {
+            if (stack.what() instanceof AEItemKey itemKey) {
                 Containers.dropItemStack(
                         owner.getLevel(),
                         owner.getBlockPos().getX(),
                         owner.getBlockPos().getY(),
                         owner.getBlockPos().getZ(),
-                        stack.copyWithCount((int) left));
+                        itemKey.toStack((int) Math.min(Integer.MAX_VALUE, left)));
+            } else {
+                ThELog.LOG.warn(
+                        "[assembler] at {} cannot return {} x{} of held input: it is not an item and no storage"
+                                + " takes it back",
+                        owner.getBlockPos(),
+                        stack.what(),
+                        left);
             }
         }
-        owner.craft.heldInputs().clear();
     }
 
     private appeng.api.networking.@Nullable IGrid gridOrNull() {

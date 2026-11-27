@@ -1,6 +1,8 @@
 {
   "type": "thaumaturge:arcane_workbench_shaped",
-  "crystals": [],
+  "crystals": [
+    { "aspect": "thaumaturge:ignis" }
+  ],
   "key": {
     "T": {
       "item": "thaumaturge:ingot_thaumium"

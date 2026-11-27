@@ -1,0 +1,42 @@
+{
+  "type": "thaumaturge:arcane_workbench_shapeless",
+  "research": {
+    "entry": "thaumicenergistics_ce:arcane_encoding_terminal"
+  },
+  "result": {
+    "id": "thaumicenergistics_ce:arcane_encoding_terminal",
+    "count": 1
+  },
+  "crystals": [
+    {
+      "aspect": "thaumaturge:aer"
+    },
+    {
+      "aspect": "thaumaturge:ordo"
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "ae2:pattern_encoding_terminal"
+    },
+    {
+      "item": "thaumicenergistics_ce:knowledge_core"
+    },
+    {
+      "item": "thaumaturge:ingot_thaumium"
+    },
+    {
+      "item": "thaumaturge:ingot_thaumium"
+    },
+    {
+      "item": "thaumicenergistics_ce:mystic_circuit_board"
+    },
+    {
+      "item": "ae2:quartz_glass"
+    },
+    {
+      "item": "ae2:quartz_glass"
+    }
+  ],
+  "vis": 80
+}

@@ -1,0 +1,19 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "extendedae"
+    }
+  ],
+  "type": "extendedae:circuit_cutter",
+  "energy": 8000,
+  "input": {
+    "ingredient": {
+      "item": "thaumicenergistics_ce:mystic_crystal_block"
+    }
+  },
+  "output": {
+    "id": "thaumicenergistics_ce:mystic_circuit_board",
+    "count": 4
+  }
+}

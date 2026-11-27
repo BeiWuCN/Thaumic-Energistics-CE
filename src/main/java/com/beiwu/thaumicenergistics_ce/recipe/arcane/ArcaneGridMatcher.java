@@ -135,7 +135,15 @@ final class ArcaneGridMatcher {
                 }
                 int column = mirrored ? width - localX - 1 : localX;
                 Ingredient ingredient = ingredients.get(localY * width + column);
-                if (ingredient == null || !ingredient.test(cell)) {
+                // 图案里的空洞是「这里必须空着」，不是「任何东西都不收」。
+                // 拿 Ingredient.EMPTY.test(空格) 去问只会得到 false，带空洞的配方就永远对不上。
+                if (ingredient == null || ingredient.isEmpty()) {
+                    if (!cell.isEmpty()) {
+                        return false;
+                    }
+                    continue;
+                }
+                if (!ingredient.test(cell)) {
                     return false;
                 }
             }

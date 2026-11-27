@@ -15,5 +15,11 @@ public interface EssentiaTerminalReceiver extends ThEMenuReceiver {
      */
     boolean fillFromNetwork(Player player, int where, ResourceLocation aspectId, boolean wholeStack);
 
+    /**
+     * 桶同款：光标空着时，从网络取一个空瓶并灌满一整瓶，放到光标上。
+     * 够不够一瓶、有没有空瓶都由服务端重新判；返回有没有交出一瓶。
+     */
+    boolean takeFilledPhial(Player player, ResourceLocation aspectId);
+
     void deposit(Player player, int where);
 }

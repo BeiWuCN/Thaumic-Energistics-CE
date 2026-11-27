@@ -4,13 +4,15 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import com.beiwu.thaumicenergistics_ce.network.ArcaneCraftCostPayload;
+import com.beiwu.thaumicenergistics_ce.network.ArcaneCrystalFillPayload;
+import com.beiwu.thaumicenergistics_ce.network.ArcaneEncodingFillPayload;
 import com.beiwu.thaumicenergistics_ce.network.InscriberCostPayload;
 import com.beiwu.thaumicenergistics_ce.network.ArcaneUnbindPayload;
 import com.beiwu.thaumicenergistics_ce.network.EncoderActionPayload;
 import com.beiwu.thaumicenergistics_ce.network.EncoderSourcePayload;
 import com.beiwu.thaumicenergistics_ce.network.EssentiaDepositPayload;
 import com.beiwu.thaumicenergistics_ce.network.EssentiaFillPayload;
-import com.beiwu.thaumicenergistics_ce.network.EssentiaBusConfigPayload;
+import com.beiwu.thaumicenergistics_ce.network.EssentiaPhialTakePayload;import com.beiwu.thaumicenergistics_ce.network.EssentiaBusConfigPayload;
 import com.beiwu.thaumicenergistics_ce.network.GolemBackpackPayload;
 import com.beiwu.thaumicenergistics_ce.network.InscriberGridFillPayload;
 import com.beiwu.thaumicenergistics_ce.network.InscriberGridPayload;
@@ -45,6 +47,10 @@ public final class TECENetwork {
                 EssentiaFillPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
         registrar.playToServer(
+                EssentiaPhialTakePayload.TYPE,
+                EssentiaPhialTakePayload.CODEC,
+                (payload, context) -> payload.handle(context.player()));
+        registrar.playToServer(
                 EssentiaBusConfigPayload.TYPE,
                 EssentiaBusConfigPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
@@ -63,6 +69,14 @@ public final class TECENetwork {
         registrar.playToClient(GolemBackpackPayload.TYPE, GolemBackpackPayload.CODEC, (payload, context) -> payload.handleOnClient(context.player()));
         registrar.playToClient(ArcaneCraftCostPayload.TYPE, ArcaneCraftCostPayload.CODEC, (payload, context) -> payload.handleOnClient(context.player()));
         registrar.playToClient(InscriberCostPayload.TYPE, InscriberCostPayload.CODEC, (payload, context) -> payload.handleOnClient(context.player()));
+        registrar.playToServer(
+                ArcaneCrystalFillPayload.TYPE,
+                ArcaneCrystalFillPayload.CODEC,
+                (payload, context) -> payload.handle(context.player()));
+        registrar.playToServer(
+                ArcaneEncodingFillPayload.TYPE,
+                ArcaneEncodingFillPayload.CODEC,
+                (payload, context) -> payload.handle(context.player()));
         registrar.playToServer(
                 ArcaneUnbindPayload.TYPE,
                 ArcaneUnbindPayload.CODEC,

@@ -38,17 +38,17 @@
   ],
   "note_aspects": [
     {
-      "aspect": "thaumaturge:ignis",
+      "aspect": "thaumaturge:sensus",
       "amount": 2
+    },
+    {
+      "aspect": "thaumaturge:lux",
+      "amount": 1
     },
     {
       "aspect": "thaumaturge:potentia",
       "amount": 1
-    },
-    {
-      "aspect": "thaumaturge:machina",
-      "amount": 1
     }
   ],
-  "complexity": 2
+  "complexity": 1
 }

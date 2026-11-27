@@ -10,6 +10,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import com.beiwu.thaumicenergistics_ce.ThEIds;
 import com.beiwu.thaumicenergistics_ce.item.ItemWirelessArcaneCraftingTerminal;
+import com.beiwu.thaumicenergistics_ce.registry.TECEItems;
 import com.beiwu.thaumicenergistics_ce.network.ArcaneUnbindPayload;
 
 /**
@@ -26,7 +27,7 @@ public final class WirelessArcaneUnbindClick {
     public static void onLeftClickEmpty(PlayerInteractEvent.LeftClickEmpty event) {
         Player player = event.getEntity();
         ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
-        if (player.isSecondaryUseActive() && (held.getItem() instanceof ItemWirelessArcaneCraftingTerminal
+        if (player.isSecondaryUseActive() && (held.getItem() == TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get()
                 || held.getItem() instanceof com.beiwu.thaumicenergistics_ce.item.ItemWirelessEssentiaTerminal)) {
             PacketDistributor.sendToServer(ArcaneUnbindPayload.INSTANCE);
         }
