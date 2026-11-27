@@ -24,9 +24,9 @@ public class AE2WTArcaneCraftingTerminalItem extends ItemWT {
 
     /**
      * 升级槽数 2，与基类默认值一样，但这里是特意写出来的：终端能装的卡有
-     * 量子桥卡 / 源质访问卡 / 魔力连接卡三张，而只给两个槽——就是要玩家取舍。
-     * 这个 2 必须与 {@code WTDefinition.upgradeCount(2)} 对齐：后者是能量卡与
-     * 源质访问卡的可装上限（由 AE2WTLib 的 UpgradeHelper 登记），两者无关但该一致。
+     * 能量卡 / 量子桥卡 / 源质访问卡 / 魔力连接卡，而只给两个槽——就是要玩家取舍。
+     * 这个 2 与 {@code WTDefinition.upgradeCount(2)} 对齐：后者由 AE2WTLib 的
+     * {@code UpgradeHelper} 登记能量卡上限与量子桥卡，源质访问卡与魔力连接卡单独登记。
      */
     private static final int UPGRADE_SLOTS = 2;
 

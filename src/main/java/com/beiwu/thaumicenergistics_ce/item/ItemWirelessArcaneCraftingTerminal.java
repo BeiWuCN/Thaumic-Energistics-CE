@@ -1,5 +1,4 @@
 package com.beiwu.thaumicenergistics_ce.item;
-import java.util.ArrayList;
 
 import appeng.api.ids.AEComponents;
 import appeng.api.parts.IPart;
@@ -54,7 +53,9 @@ public class ItemWirelessArcaneCraftingTerminal extends WirelessTerminalItem {
 
     @Override
     public appeng.api.upgrades.IUpgradeInventory getUpgrades(ItemStack stack) {
-        return QuantumTerminalSupport.upgrades(stack, (changed, upgrades) -> {});
+        return QuantumTerminalSupport.upgrades(stack, (changed, upgrades) ->
+                setAEMaxPowerMultiplier(
+                        changed, 1 + appeng.api.upgrades.Upgrades.getEnergyCardMultiplier(upgrades)));
     }
 
     /**

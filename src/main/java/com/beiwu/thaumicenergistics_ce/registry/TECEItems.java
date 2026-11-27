@@ -209,8 +209,10 @@ public final class TECEItems {
     public static final DeferredItem<appeng.items.tools.powered.WirelessTerminalItem> WIRELESS_ARCANE_CRAFTING_TERMINAL =
             REGISTRY.registerItem(
                     "wireless_arcane_crafting_terminal",
-                    properties -> com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.enabled() ? (appeng.items.tools.powered.WirelessTerminalItem) com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.createCraftingTerminal() : new ItemWirelessArcaneCraftingTerminal(
-                            () -> ItemWirelessArcaneCraftingTerminal.POWER_CAPACITY, properties),
+                    properties -> com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.enabled()
+                            ? com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.createCraftingTerminal()
+                            : new ItemWirelessArcaneCraftingTerminal(
+                                    () -> ItemWirelessArcaneCraftingTerminal.POWER_CAPACITY, properties),
                     new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
 
     // 两张升级卡都会被读：访问卡开关源质手势，vis 卡把合成中未指定类型的 vis 转到灵气上。

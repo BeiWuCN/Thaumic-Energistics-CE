@@ -277,6 +277,23 @@ public final class ThaumicEnergisticsCE {
                 TECEItems.ARCANE_CRAFTING_TERMINAL.get(),
                 1,
                 ARCANE_TERMINAL_PART_UPGRADE_NAME);
+        // AE2WTLib 在场时，无线源质终端与无线奥术合成终端均已加入 WTDefinition，
+        // 能量卡与量子桥卡由 AE2WTLib 的 UpgradeHelper 自动登记；这里只需补充通用终端（ItemWUT）的专属卡。
+        // 缺 AE2WTLib 时退回独立实现，需自行登记 2 张能量卡。
+        if (com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.enabled()) {
+            com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.registerUniversalTerminalUpgrades();
+        } else {
+            Upgrades.add(
+                    AEItems.ENERGY_CARD,
+                    TECEItems.WIRELESS_ESSENTIA_TERMINAL.get(),
+                    2,
+                    appeng.core.localization.GuiText.WirelessTerminals.getTranslationKey());
+            Upgrades.add(
+                    AEItems.ENERGY_CARD,
+                    TECEItems.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
+                    2,
+                    appeng.core.localization.GuiText.WirelessTerminals.getTranslationKey());
+        }
     }
 
     /** 卡片 [tooltip] 对整本源质存储元件家族的称呼，所有尺寸共用。 */

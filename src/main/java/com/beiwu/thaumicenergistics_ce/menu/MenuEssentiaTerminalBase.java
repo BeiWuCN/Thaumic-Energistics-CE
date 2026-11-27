@@ -34,20 +34,25 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
             net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("ae2wtlib", "singularity");
 
     /**
-     * AE2WTLib 自己的奇点槽语义（它的 {@code ScrollingUpgradesPanel} 只收集这个 id
-     * 和 {@code UPGRADE}）。用字符串取而不是引用 {@code AE2wtlibSlotSemantics}：
-     * 那个类来自可选依赖，写进常量池会让本类在缺 AE2WTLib 时加载失败。
+     * AE2WTLib 自己的奇点槽语义（它的 {@code ScrollingUpgradesPanel} 只收集
+     * {@code AE2wtlibSlotSemantics.SINGULARITY} 与 {@code UPGRADE}，且硬编码把列表首槽视为奇点槽）。
      *
-     * <p>注意 id 是 {@code AE2WTLIB_SINGULARITY}（它的 register 给每个字段拼
-     * {@code AE2WTLIB_} 前缀），不是库存 id {@code ae2wtlib:singularity}，两者名字像但
-     * 属于不同注册表；写错只会静静拿到 null。
-     *
-     * <p>每次现取而不是缓存到 static final：那个语义是 AE2WTLib 静态块里注册的，
-     * 本类可能先于它加载，缓存就会永远拿到 null。取不到时退回本 mod 自己的语义。
+     * <p>经纯净门面 {@code AE2WTIntegration.singularitySlotSemantic()} 主动读取静态字段，
+     * 而不用 {@code SlotSemantics.get("AE2WTLIB_SINGULARITY")} 软查：AE2WTLib 在模组启动时
+     * 不加载 {@code AE2wtlibSlotSemantics}，若玩家先打开本 mod 无线终端，软查会返回 {@code null}
+     * 并回退到 {@link #QUANTUM_SINGULARITY}，导致奇点槽进不了滚动面板、第 1 个升级槽反被误藏。
      */
     private static appeng.menu.SlotSemantic ae2wtlibSingularitySemantic() {
-        var semantic = appeng.menu.SlotSemantics.get("AE2WTLIB_SINGULARITY");
+        var semantic = com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration
+                .singularitySlotSemantic();
         return semantic != null ? semantic : QUANTUM_SINGULARITY;
+    }
+
+    private static boolean hasQuantumBridgeCard(ITerminalHost host) {
+        return com.beiwu.thaumicenergistics_ce.item.QuantumTerminalSupport.enabled()
+                && host instanceof appeng.api.upgrades.IUpgradeableObject upgradeable
+                && upgradeable.getUpgrades().isInstalled(
+                        com.beiwu.thaumicenergistics_ce.item.QuantumTerminalSupport.card());
     }
 
     /**
@@ -62,7 +67,8 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
         var slot = new appeng.menu.slot.AppEngSlot(singularity, 0) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return com.beiwu.thaumicenergistics_ce.item.QuantumTerminalSupport.validSingularity(stack)
+                return hasQuantumBridgeCard(host)
+                        && com.beiwu.thaumicenergistics_ce.item.QuantumTerminalSupport.validSingularity(stack)
                         && super.mayPlace(stack);
             }
 
@@ -72,7 +78,7 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
             }
         };
         slot.setIcon(appeng.client.gui.Icon.BACKGROUND_SINGULARITY);
-        // WT 屏已经把 AE2 自己的 UpgradesPanel 摸掉了，靠它布局的
+        // WT 屏已经把 AE2 自己的 UpgradesPanel 摘掉了，靠它布局的
         // [TerminalScreenVisibilityMixin#joinQuantumSlot] 也一并失效；改用
         // AE2WTLib 的语义，让它的滚动面板把这个槽一起摆。
         addSlot(slot, ae2wtlibSingularitySemantic());
@@ -80,16 +86,29 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
 
     private void addQuantumSlot(ITerminalHost host) {
         // 只管本 mod 自研宿主：AE2WTLib 版宿主（WTMenuHost）不在这个体系里，
-        // 它的奇点槽由基类自己挂，两边都挂会出现两个槽抢同一张卡。
+        // 它的奇点槽由 addAe2wtlibQuantumSlot 单独挂载，两边都挂会出现两个槽抢同一张卡。
         if (!com.beiwu.thaumicenergistics_ce.item.QuantumTerminalSupport.enabled()
                 || !(host instanceof com.beiwu.thaumicenergistics_ce.item.QuantumWirelessTerminalMenuHost<?> quantum)) return;
         var slot = new appeng.menu.slot.AppEngSlot(quantum.singularityInventory(), 0) {
             @Override
-            public boolean mayPlace(ItemStack stack) {
-                return com.beiwu.thaumicenergistics_ce.item.QuantumTerminalSupport.validSingularity(stack) && super.mayPlace(stack);
+            public boolean isSlotEnabled() {
+                // 直接读底层库存而非 hasItem()/getItem()，避免 AppEngSlot.getItem() 回调 isSlotEnabled() 递归。
+                return super.isSlotEnabled()
+                        && (!quantum.singularityInventory().getStackInSlot(0).isEmpty()
+                                || hasQuantumBridgeCard(host));
             }
+
             @Override
-            public int getMaxStackSize() { return 1; }
+            public boolean mayPlace(ItemStack stack) {
+                return hasQuantumBridgeCard(host)
+                        && com.beiwu.thaumicenergistics_ce.item.QuantumTerminalSupport.validSingularity(stack)
+                        && super.mayPlace(stack);
+            }
+
+            @Override
+            public int getMaxStackSize() {
+                return 1;
+            }
         };
         slot.setIcon(appeng.client.gui.Icon.BACKGROUND_SINGULARITY);
         addSlot(slot, QUANTUM_SINGULARITY);
@@ -101,7 +120,6 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
         super(menuType, id, playerInventory, host);
         addQuantumSlot(host);
         addAe2wtlibQuantumSlot(host);
-        updateWirelessEssentiaUpgradeSlots();
     }
 
     protected MenuEssentiaTerminalBase(MenuType<?> menuType, int id, Inventory playerInventory,
@@ -109,42 +127,27 @@ public abstract class MenuEssentiaTerminalBase extends MEStorageMenu implements 
         super(menuType, id, playerInventory, host, bindInventory);
         addQuantumSlot(host);
         addAe2wtlibQuantumSlot(host);
-        updateWirelessEssentiaUpgradeSlots();
-    }
-
-    public void updateWirelessEssentiaUpgradeSlots() {
-        // 只管无线源质终端。它唯一的升级卡是量子桥接卡，没有 ae2wtlib 时那张卡
-        // 根本不存在，所以把空槽藏起来是对的。
-        // 不能泛化到所有 [QuantumWirelessTerminalMenuHost]：无线奥术编码终端也是它的子类，
-        // 但编码终端的源质访问卡不依赖 ae2wtlib，泛化后会出现「默认配置下槽全被禁用、卡插不进」。
-        // 其他终端的升级槽一律照 AE2 原样全可见。
-        if (!(getHost() instanceof com.beiwu.thaumicenergistics_ce.item.WirelessEssentiaTerminalMenuHost)) return;
-        var slots = getSlots(appeng.menu.SlotSemantics.UPGRADE);
-        int remaining = com.beiwu.thaumicenergistics_ce.item.QuantumTerminalSupport.enabled() ? 1 : 0;
-        for (var slot : slots) {
-            if (slot.hasItem()) remaining--;
-        }
-        for (var slot : slots) {
-            boolean visible = slot.hasItem() || remaining-- > 0;
-            ((appeng.menu.slot.AppEngSlot) slot).setSlotEnabled(visible);
-        }
-    }
-
-    @Override
-    public void broadcastChanges() {
-        updateWirelessEssentiaUpgradeSlots();
-        super.broadcastChanges();
     }
 
     @Override
     protected int transferStackToMenu(ItemStack stack) {
-        var slots = getSlots(QUANTUM_SINGULARITY);
-        if (!slots.isEmpty() && com.beiwu.thaumicenergistics_ce.item.QuantumTerminalSupport.validSingularity(stack)) {
-            var remaining = stack.copy();
-            for (var slot : slots) {
-                if (slot.isActive()) remaining = slot.safeInsert(remaining);
+        if (com.beiwu.thaumicenergistics_ce.item.QuantumTerminalSupport.validSingularity(stack)) {
+            var slots = getSlots(QUANTUM_SINGULARITY);
+            if (slots.isEmpty()) {
+                slots = getSlots(ae2wtlibSingularitySemantic());
             }
-            return stack.getCount() - remaining.getCount();
+            if (!slots.isEmpty()) {
+                var remaining = stack.copy();
+                for (var slot : slots) {
+                    if (slot.isActive()) {
+                        remaining = slot.safeInsert(remaining);
+                    }
+                }
+                int transferred = stack.getCount() - remaining.getCount();
+                if (transferred > 0) {
+                    return transferred;
+                }
+            }
         }
         return super.transferStackToMenu(stack);
     }
