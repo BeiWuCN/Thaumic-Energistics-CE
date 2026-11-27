@@ -85,24 +85,28 @@ public final class TECEMenuTypes {
      * 无线源质终端的界面。另设一个菜单类型，不复用有线那个：
      * 构建器把宿主类编进打开界面的数据包，两者宿主不同。
      */
+    public static final MenuType<MenuEssentiaTerminal> WIRELESS_ESSENTIA_TERMINAL_TYPE = MenuTypeBuilder.create(MenuEssentiaTerminal::new, IPortableTerminal.class)
+                            .withMenuTitle(host ->
+                                    Component.translatable("gui.thaumicenergistics_ce.wireless_essentia_terminal"))
+                            .buildUnregistered(ThEIds.id("wireless_essentia_terminal"));
+
     public static final DeferredHolder<MenuType<?>, MenuType<MenuEssentiaTerminal>> WIRELESS_ESSENTIA_TERMINAL =
             REGISTRY.register(
                     "wireless_essentia_terminal",
-                    () -> MenuTypeBuilder.create(MenuEssentiaTerminal::new, IPortableTerminal.class)
-                            .withMenuTitle(host ->
-                                    Component.translatable("gui.thaumicenergistics_ce.wireless_essentia_terminal"))
-                            .buildUnregistered(ThEIds.id("wireless_essentia_terminal")));
+                    () -> WIRELESS_ESSENTIA_TERMINAL_TYPE);
 
     /**
      * 无线奥术合成终端的界面：与有线终端同一个菜单，只是从手持物品打开，
      * 差别在宿主类，不在另设菜单类。
      */
+    public static final MenuType<MenuArcaneCraftingTerminal> WIRELESS_ARCANE_CRAFTING_TERMINAL_TYPE = MenuTypeBuilder.create(MenuArcaneCraftingTerminal::new, IPortableTerminal.class)
+                            .withMenuTitle(host -> Component.translatable("gui.thaumicenergistics_ce.wireless_arcane_crafting_terminal"))
+                            .buildUnregistered(ThEIds.id("wireless_arcane_crafting_terminal"));
+
     public static final DeferredHolder<MenuType<?>, MenuType<MenuArcaneCraftingTerminal>>
             WIRELESS_ARCANE_CRAFTING_TERMINAL = REGISTRY.register(
                     "wireless_arcane_crafting_terminal",
-                    () -> MenuTypeBuilder.create(MenuArcaneCraftingTerminal::new, IPortableTerminal.class)
-                            .withMenuTitle(host -> Component.translatable("gui.thaumicenergistics_ce.wireless_arcane_crafting_terminal"))
-                            .buildUnregistered(ThEIds.id("wireless_arcane_crafting_terminal")));
+                    () -> WIRELESS_ARCANE_CRAFTING_TERMINAL_TYPE);
 
     /**
      * 源质标准发信器的界面。上报值随初始数据带过去，它是设置，服务端不会一直推：

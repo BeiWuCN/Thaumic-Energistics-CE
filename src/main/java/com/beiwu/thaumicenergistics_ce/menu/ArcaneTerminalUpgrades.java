@@ -6,17 +6,17 @@ import java.util.List;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
-import com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost;
+import com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingHost;
 import com.beiwu.thaumicenergistics_ce.recipe.arcane.TerminalAuraPayment;
 import com.beiwu.thaumicenergistics_ce.registry.TECEItems;
 
 final class ArcaneTerminalUpgrades {
     private final ITerminalHost host;
-    private final @Nullable WirelessArcaneCraftingTerminalMenuHost wireless;
+    private final @Nullable WirelessArcaneCraftingHost wireless;
 
     ArcaneTerminalUpgrades(ITerminalHost host) {
         this.host = host;
-        wireless = host instanceof WirelessArcaneCraftingTerminalMenuHost linked ? linked : null;
+        wireless = host instanceof WirelessArcaneCraftingHost linked ? linked : null;
     }
 
     boolean wireless() { return wireless != null; }

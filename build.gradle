@@ -17,6 +17,7 @@ java {
 }
 
 repositories {
+    maven { url = 'https://modmaven.dev'; content { includeGroup 'de.mari_023' } }
     maven { url = 'https://cursemaven.com'; content { includeGroup 'curse.maven' } }
     maven {
         url = 'https://api.modrinth.com/maven'
@@ -137,9 +138,10 @@ if (project.hasProperty('portRuntimeRegression') && !portVerificationDir.isPrese
 // The CF release is the compatibility target. A local JAR can be supplied for diagnostics.
 def thaumaturgeDependency = providers.gradleProperty('thaumaturge_jar').isPresent()
         ? files(providers.gradleProperty('thaumaturge_jar').get())
-        : "curse.maven:thaumaturge-1628024:9452543"
+        : "curse.maven:thaumaturge-1628024:9815157"
 
 dependencies {
+    compileOnly('de.mari_023:ae2wtlib_api:19.5.1') { transitive = false }
     compileOnly "org.jspecify:jspecify:1.0.0"
 
     // Pinned in gradle.properties. Thaumaturge's and AE2's own signatures name GuideME, Curios and Jade

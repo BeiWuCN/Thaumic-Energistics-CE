@@ -50,6 +50,10 @@ public final class TerminalScanTooltip {
         }
     }
 
+    public static boolean isRendering() {
+        return scannedAspects != null;
+    }
+
     @SubscribeEvent
     public static void appendAspects(RenderTooltipEvent.GatherComponents event) {
         if (scannedAspects != null && event.getItemStack() == scannedStack) {

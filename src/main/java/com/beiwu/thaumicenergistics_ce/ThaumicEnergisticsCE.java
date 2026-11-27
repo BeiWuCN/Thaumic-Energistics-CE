@@ -61,6 +61,7 @@ import com.beiwu.thaumicenergistics_ce.util.ThELog;
 @Mod(ThEIds.MODID)
 public final class ThaumicEnergisticsCE {
     public ThaumicEnergisticsCE(IEventBus modBus, ModContainer container) {
+        com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.registerTerminals();
         ThELog.LOG.info("ThaumicEnergisticsCE loading");
         container.registerConfig(net.neoforged.fml.config.ModConfig.Type.SERVER,
                 com.beiwu.thaumicenergistics_ce.config.ThEConfig.SPEC);

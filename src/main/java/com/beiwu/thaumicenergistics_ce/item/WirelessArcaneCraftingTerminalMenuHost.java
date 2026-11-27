@@ -13,7 +13,7 @@ import net.minecraft.world.item.component.ItemContainerContents;
 import com.beiwu.thaumicenergistics_ce.registry.TECEDataComponents;
 
 public class WirelessArcaneCraftingTerminalMenuHost
-        extends QuantumWirelessTerminalMenuHost<ItemWirelessArcaneCraftingTerminal> {
+        extends QuantumWirelessTerminalMenuHost<ItemWirelessArcaneCraftingTerminal> implements WirelessArcaneCraftingHost {
     private final InternalInventory items;
 
     public WirelessArcaneCraftingTerminalMenuHost(ItemWirelessArcaneCraftingTerminal item, Player player,

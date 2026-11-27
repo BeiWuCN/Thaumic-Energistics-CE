@@ -22,7 +22,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = InventoryScanHandler.class, remap = false)
@@ -77,7 +76,36 @@ public abstract class TerminalInventoryScanMixin {
         return null;
     }
 
-    @Redirect(method = "onScreenRender", at = @At(value = "INVOKE",
+    @Inject(method = "renderKnownAspects", at = @At("HEAD"), cancellable = true)
+    private static void tece$renderInventoryStyleTooltip(GuiGraphics graphics, Minecraft minecraft,
+            LocalPlayer player, ItemStack stack, int centreX, int y,
+            org.spongepowered.asm.mixin.injection.callback.CallbackInfo callback) {
+        if (minecraft.screen instanceof MEStorageScreen<?> screen && screen.getSlotUnderMouse() != null) {
+            int left = screen.getGuiLeft();
+            int top = screen.getGuiTop();
+            // Thaumaturge 1.1.1 draws during the container foreground pass.
+            // The tooltip positioner expects screen-space coordinates.
+            graphics.pose().pushPose();
+            try {
+                graphics.pose().translate(-left, -top, 0);
+                TerminalScanTooltip.render(graphics, minecraft.font, stack,
+                        left + centreX, top + y + 28, player);
+            } finally {
+                graphics.pose().popPose();
+            }
+            callback.cancel();
+        }
+    }
+
+    @Inject(method = "onTooltipRender", require = 0, at = @At("HEAD"), cancellable = true)
+    private static void tece$allowScanTooltip(net.neoforged.neoforge.client.event.RenderTooltipEvent.Pre event,
+            org.spongepowered.asm.mixin.injection.callback.CallbackInfo callback) {
+        if (TerminalScanTooltip.isRendering()) {
+            callback.cancel();
+        }
+    }
+
+    @Redirect(method = "onScreenRender", require = 0, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/gui/GuiGraphics;renderTooltip(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;II)V"))
     private static void tece$renderScanTooltip(GuiGraphics graphics, Font font, ItemStack stack, int x, int y) {
         var minecraft = Minecraft.getInstance();
@@ -88,15 +116,7 @@ public abstract class TerminalInventoryScanMixin {
         }
     }
 
-    @Inject(method = "renderKnownAspects", at = @At("HEAD"), cancellable = true)
-    private static void tece$hideFloatingAspects(GuiGraphics graphics, Minecraft minecraft, LocalPlayer player,
-            ItemStack stack, int centreX, int y, CallbackInfo callback) {
-        if (minecraft.screen instanceof MEStorageScreen<?>) {
-            callback.cancel();
-        }
-    }
-
-    @Redirect(method = "onScreenRender", at = @At(value = "INVOKE",
+    @Redirect(method = "onScreenRender", require = 0, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;IIIZ)I"))
     private static int tece$drawScanText(GuiGraphics graphics, Font font, Component text,
             int x, int y, int color, boolean shadow) {

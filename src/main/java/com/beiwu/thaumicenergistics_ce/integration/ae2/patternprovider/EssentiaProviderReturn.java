@@ -59,7 +59,9 @@ public final class EssentiaProviderReturn extends SnapshotJournal<GenericStack[]
             var stack = inventory.getStack(i);
             if (stack != null && stack.what() instanceof AEssentiaKey key) {
                 var aspect = key.resolveAspect();
-                if (aspect != null) result = result.add(aspect, (int) Math.min(stack.amount(), Integer.MAX_VALUE));
+                if (aspect != null && stack.amount() > 0) {
+                    result = result.add(aspect, (int) Math.min(stack.amount(), Integer.MAX_VALUE));
+                }
             }
         }
         return result;

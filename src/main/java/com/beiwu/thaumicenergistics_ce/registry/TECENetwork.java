@@ -9,6 +9,7 @@ import com.beiwu.thaumicenergistics_ce.network.ArcaneUnbindPayload;
 import com.beiwu.thaumicenergistics_ce.network.EncoderActionPayload;
 import com.beiwu.thaumicenergistics_ce.network.EncoderSourcePayload;
 import com.beiwu.thaumicenergistics_ce.network.EssentiaDepositPayload;
+import com.beiwu.thaumicenergistics_ce.network.EssentiaPhialTakePayload;
 import com.beiwu.thaumicenergistics_ce.network.EssentiaFillPayload;
 import com.beiwu.thaumicenergistics_ce.network.EssentiaBusConfigPayload;
 import com.beiwu.thaumicenergistics_ce.network.GolemBackpackPayload;
@@ -29,6 +30,8 @@ public final class TECENetwork {
 
     private static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar(VERSION);
+        registrar.playToServer(EssentiaPhialTakePayload.TYPE, EssentiaPhialTakePayload.CODEC,
+                (payload, context) -> payload.handle(context.player()));
         registrar.playToServer(
                 TerminalScanPayload.TYPE,
                 TerminalScanPayload.CODEC,

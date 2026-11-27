@@ -1,5 +1,6 @@
 package com.beiwu.thaumicenergistics_ce.integration.ae2.essentia;
 
+import appeng.api.stacks.AEItemKey;
 import appeng.api.config.Actionable;
 import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.security.IActionSource;
@@ -28,7 +29,9 @@ import com.beiwu.thaumicenergistics_ce.util.ThELog;
  * 在容器物品与 ME 网络之间搬源质，移植自参考构建的 {@code EssentiaFillHelper}。
  * 先模拟后执行，部分拒绝就回滚，缩小前先复制：防复制也防丢失。
  * 瓶子整瓶填（{@code TcRegistry.phialCapacity()}）或完全不填；罐子按网络允许的量填，不被消耗。
- * 标签、水晶、魔力豆也报源质容器能力，{@link #isSupportedContainer} 是唯一的闸门。
+ * 要素水晶与魔力豆也注册了同一个容器能力，但写回时数量被截断成 1，当容器用会丢源质、
+ * 无要素的魔力豆还会被定时器重新赋要素而能刷，所以已在 {@code TcRegistry.isEssentiaContainer}
+ * 里按物品排除；{@link #isSupportedContainer} 是唯一的闸门。
  */
 public final class EssentiaFillHelper {
 
@@ -42,6 +45,66 @@ public final class EssentiaFillHelper {
     /** 不走源质容器能力：标签、水晶、魔力豆填不了。 */
     public static boolean isSupportedContainer(ItemStack stack) {
         return TcRegistry.isEssentiaContainer(stack);
+    }
+
+    /**
+     * 桶同款：手上没容器时，从网络里取一个空瓶子就地灌满，交回玩家。
+     * <p>AE2 的流体终端点条目就是这么办的——看 {@code MEStorageMenu.tryFillContainerItem}
+     * 头一段：光标空着、要的又是流体时，先从网络抽一个空桶放上去，再灌。这里照做，
+     * 只是换成源质与瓶子。同样要求网络里真的有空瓶：凭空变一个出来不是同款。
+     * <p>源质不到一整瓶，或网络里没有空瓶，都不做；已经抽出的空瓶退回网络，
+     * 不留半个状态。
+     */
+    public static @Nullable ItemStack takeFilledPhial(
+            Level level, MEStorage storage, IActionSource source, Player player, ResourceLocation aspectId) {
+        if (aspectId == null) {
+            return null;
+        }
+        AEssentiaKey key = AEssentiaKey.of(aspectId);
+        Holder<IAspect> aspect = AEssentiaKeyType.aspectOf(level, aspectId);
+        if (key == null || aspect == null) {
+            log("take {} refused: the id resolves to no aspect in this level", aspectId);
+            tell(player, "thaumicenergistics_ce.gui.essentia.no_aspect", aspectId);
+            return null;
+        }
+
+        long available = storage.extract(key, Long.MAX_VALUE, Actionable.SIMULATE, source);
+        if (available < PHIAL_CAPACITY) {
+            log("take {} refused: a phial needs {} and the network holds {}", aspectId,
+                    PHIAL_CAPACITY, available);
+            tell(player, "thaumicenergistics_ce.gui.essentia.phial_needs", PHIAL_CAPACITY, available);
+            return null;
+        }
+
+        AEItemKey emptyPhial = AEItemKey.of(TcRegistry.emptyPhials(1));
+        if (storage.extract(emptyPhial, 1, Actionable.SIMULATE, source) < 1) {
+            log("take {} refused: the network holds no empty phial", aspectId);
+            tell(player, "thaumicenergistics_ce.gui.essentia.no_empty_phial");
+            return null;
+        }
+
+        if (storage.extract(emptyPhial, 1, Actionable.MODULATE, source) < 1) {
+            // 模拟之后又抽不到：网络变了。此刻一点源质都还没扣，直接退出。
+            log("take {} refused: the empty phial vanished between the check and the take", aspectId);
+            tell(player, "thaumicenergistics_ce.gui.essentia.no_empty_phial");
+            return null;
+        }
+        long taken = storage.extract(key, PHIAL_CAPACITY, Actionable.MODULATE, source);
+        if (taken < PHIAL_CAPACITY) {
+            // 先抽后模拟取不平：把空瓶和已抽的源质都放回去，不让部分抽取销毁东西。
+            // 回滚本身失败只能靠日志留痕：这里已经没有更稳的补偿手段。
+            if (storage.insert(emptyPhial, 1, Actionable.MODULATE, source) < 1) {
+                log("take {} rollback lost an empty phial", aspectId);
+            }
+            if (taken > 0 && storage.insert(key, taken, Actionable.MODULATE, source) < taken) {
+                log("take {} rollback lost {} of the {} essentia taken", aspectId, taken, PHIAL_CAPACITY);
+            }
+            log("take {} refused: the network gave {} of the {}", aspectId, taken, PHIAL_CAPACITY);
+            tell(player, "thaumicenergistics_ce.gui.essentia.network_empty", key.getId());
+            return null;
+        }
+        log("take {} ok: {} into a phial", aspectId, PHIAL_CAPACITY);
+        return TcRegistry.filledPhial(aspect, PHIAL_CAPACITY);
     }
 
     public static boolean isContainerEmpty(ItemStack stack) {
@@ -71,7 +134,7 @@ public final class EssentiaFillHelper {
         if (available <= 0) {
             log("fill {} refused: the network reports {} available for {}", aspectId, available, key);
             dumpEssentia(storage);
-            tell(player, "thaumicenergistics_ce.gui.essentia.network_empty", key);
+            tell(player, "thaumicenergistics_ce.gui.essentia.network_empty", key.getId());
             return false;
         }
 
@@ -105,7 +168,7 @@ public final class EssentiaFillHelper {
                 }
                 log("fill {} refused: the network gave {} of the {} a phial needs", aspectId,
                         taken, PHIAL_CAPACITY);
-                tell(player, "thaumicenergistics_ce.gui.essentia.network_empty", key);
+                tell(player, "thaumicenergistics_ce.gui.essentia.network_empty", key.getId());
                 return false;
             }
             carried.shrink(1);
@@ -122,7 +185,7 @@ public final class EssentiaFillHelper {
         long taken = storage.extract(key, wanted, Actionable.MODULATE, source);
         if (taken <= 0) {
             log("fill {} refused: the network gave none of the {} offered", aspectId, wanted);
-            tell(player, "thaumicenergistics_ce.gui.essentia.network_empty", key);
+            tell(player, "thaumicenergistics_ce.gui.essentia.network_empty", key.getId());
             return false;
         }
         Holder<IAspect> aspect = AEssentiaKeyType.aspectOf(level, aspectId);

@@ -197,17 +197,19 @@ public final class TECEItems {
             ItemEssentiaLevelEmitter::new,
             new Item.Properties().stacksTo(64).rarity(Rarity.RARE));
 
-    public static final DeferredItem<ItemWirelessEssentiaTerminal> WIRELESS_ESSENTIA_TERMINAL =
+    public static final DeferredItem<appeng.items.tools.powered.WirelessTerminalItem> WIRELESS_ESSENTIA_TERMINAL =
             REGISTRY.registerItem(
                     "wireless_essentia_terminal",
-                    properties -> new ItemWirelessEssentiaTerminal(
+                    properties -> com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.enabled()
+                            ? com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.createEssentiaTerminal()
+                            : new ItemWirelessEssentiaTerminal(
                             () -> ItemWirelessEssentiaTerminal.POWER_CAPACITY, properties),
                     new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
 
-    public static final DeferredItem<ItemWirelessArcaneCraftingTerminal> WIRELESS_ARCANE_CRAFTING_TERMINAL =
+    public static final DeferredItem<appeng.items.tools.powered.WirelessTerminalItem> WIRELESS_ARCANE_CRAFTING_TERMINAL =
             REGISTRY.registerItem(
                     "wireless_arcane_crafting_terminal",
-                    properties -> new ItemWirelessArcaneCraftingTerminal(
+                    properties -> com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.enabled() ? (appeng.items.tools.powered.WirelessTerminalItem) com.beiwu.thaumicenergistics_ce.integration.ae2wtlib.AE2WTIntegration.createCraftingTerminal() : new ItemWirelessArcaneCraftingTerminal(
                             () -> ItemWirelessArcaneCraftingTerminal.POWER_CAPACITY, properties),
                     new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
 

@@ -1,28 +1,34 @@
-# Thaumic Energistics CE 2.7.5.5 / Minecraft 1.21.1 / NeoForge
+# Thaumic Energistics CE 2.7.6 / Minecraft 1.21.1 / NeoForge
+
+## English
+
+- Wireless Arcane Crafting Terminals and Wireless Essentia Terminals can join AE2WTLib Universal Terminals.
+- Fixed a startup crash in the terminal scan tooltip integration with Thaumaturge 1.1.1. (#12)
+
+- In the Essentia Terminal, left-click an essentia entry to fill a held container or take a filled phial with an empty cursor. Right-click to empty filled containers or store empty ones. The terminal shows a hint when an Essentia Access Card is required.
+- Detect the clicked terminal slot from the pointer position to prevent accidental storage of filled phials.
+- Recognize supported containers through Thaumaturge's essentia capability. Void jars, essentia crystals, and mana beans are excluded from container operations.
+- Align the research titles for the ME Arcane Crafting Terminal and Thaumic Processor with their item names in English, Simplified Chinese, Traditional Chinese, and Russian.
+
+- Skip zero-amount essentia entries when inspecting a pattern provider's return inventory.
+- Keep scan results in an item tooltip beside the cursor with Thaumaturge 1.1.1.
+- Match the AE2 Cell Workbench style for disabled partition slots.
+- Remove extra spaces between Chinese text and Latin letters or digits in research entries.
 
 ## 中文
 
-- 样板供应器界面复用现有升级面板，修复安装 Applied Flux 时重复注册面板的问题。（#8）
-- 奥术合成终端能匹配小于九宫格的有序配方，并从正确的槽位消耗材料。无法支付时仍显示配方开销，并提示合成失败的原因。已绑定中继器的 Vis 变化时，终端会刷新合成结果。
-- JEI 会标出奥术配方缺少的材料。神秘能源 CE 配方所需的原始要素水晶碎片从顶部连续排列。普通工作台配方也可一键转入奥术合成终端，合成时无需消耗 Vis。
-- 可用只含一种要素的安瓿标记源质存储元件的分区槽，标记时不会消耗安瓿。
-- 源质元件工作台的禁用分区槽不会再遮挡工具栏提示。
-- 研究笔记的要素与设备功能对应。入门研究的谜题较简单，高级存储与自动化研究的笔记更复杂。
-- 标准源质存储元件与 MEGA 源质存储元件装入 ME 驱动器时使用不同的贴图。
-- 奥术合成终端会记住每位玩家选择的是水晶优先还是法杖优先。
-- 源质存储元件在专用的源质元件工作台配置。工作台采用 AE2 的布局，并可保留分区设置供下一个元件使用。
-- 模组名称和创造模式物品栏标签去掉了冒号。奥术合成终端、源质终端、源质输入与输出总线以及源质发信器的名称和界面标题统一使用 ME 前缀。
-- 源质存储组件的配方接受任意要素的魔力水晶碎片。在源质元件工作台用安瓿标记时，标记对象是瓶内的源质。
-- 在 ME 终端用鼠标拿着魔导透镜时，可按 Thaumaturge 的物品栏扫描规则逐个扫描网络里的物品。已发现的要素显示在物品提示中。
-- 奥术合成终端新增两个按钮，可将合成材料和水晶退回 ME 网络或玩家背包。放不下的物品留在原槽位。
-- 部分机器、无线终端和水晶生长相关配方使用了与其功能对应的原始要素水晶碎片。
-- JEI 可从 ME 网络或玩家背包补入配方所需的水晶碎片。法杖优先时，只补支付预览仍需要的水晶碎片。
-- 游戏内指南提供简体中文、繁体中文、英文和俄文，涵盖入门、源质存储、终端、奥术合成、自动化和水晶生长，并演示如何用 ME 网络为注魔供料及接收完成信号。
-- 库存和槽位容量允许时，按住 Shift 从 JEI 转移配方，会向奥术合成终端填入多份材料及所需的水晶碎片。
-- JEI 可将坩埚配方与产物固定的注魔配方转为处理样板。输入依次为被转化的物品、其他材料，以及各类源质及其用量。
-- 闪电科技的水晶催化器和过载处理工厂支持神秘水晶生产链。ExtendedAE 与 ExtendedAE Plus 的对应机器可切出神秘电路板并装配神秘处理器。
-- 奥术工作台可消耗 5 Vis，将 2 份神秘水晶粉重新凝成 1 颗神秘水晶。
-- 奥术合成终端放大了可用 Vis 读数。灵气不足以完成当前配方时，下方以红字显示「可用vis不足」。终端还会显示当前配方所需的 Vis 和减免比例，悬停费用图标可查看对应要素及消耗量。
+- 无线奥术合成终端和无线源质终端可加入 AE2WTLib 通用终端。
+- 修复与 Thaumaturge 1.1.1 一起加载时的终端扫描提示崩溃。（#12）
+- 源质终端左键装填容器，光标为空时可左键从源质条目取出装好的安瓿。右键倒空已装填的容器或存放空容器。需要源质访问卡时会显示提示。
+- 按点击时的鼠标位置判断终端槽位，避免装有源质的安瓿被误当普通物品存入网络。
+- 通过 Thaumaturge 的源质能力识别容器。虚空罐、要素水晶和魔力豆不参与容器操作。
+- 统一 ME 奥术合成终端和神秘水晶处理器的研究标题与物品名称，覆盖英文、简中、繁中和俄文。
+- 样板供应器读取回流库存时跳过零数量源质条目。
+- 适配Thaumaturge 1.1.1的扫描提示，已发现的要素显示在鼠标旁的物品提示框内。
+- 源质元件工作台的禁用分区槽沿用AE2元件工作台的样式。
+- 去掉中文研究文案中汉字与英文字母或数字之间的多余空格。
+
+# Thaumic Energistics CE 2.7.5.5 / Minecraft 1.21.1 / NeoForge
 
 ## English
 
@@ -48,6 +54,30 @@
 - The Arcane Workbench reforms two Thaumic Crystal Dust into one Thaumic Crystal for 5 Vis.
 - The Arcane Crafting Terminal displays the available Vis more prominently and shows a red warning when there is too little aura to craft. It also shows the required Vis and any discount, and each cost icon has a tooltip with its aspect and amount.
 
+## 中文
+
+- 样板供应器界面复用现有升级面板，修复安装 Applied Flux 时重复注册面板的问题。（#8）
+- 奥术合成终端能匹配小于九宫格的有序配方，并从正确的槽位消耗材料。无法支付时仍显示配方开销，并提示合成失败的原因。已绑定中继器的 Vis 变化时，终端会刷新合成结果。
+- JEI 会标出奥术配方缺少的材料。神秘能源 CE 配方所需的原始要素水晶碎片从顶部连续排列。普通工作台配方也可一键转入奥术合成终端，合成时无需消耗 Vis。
+- 可用只含一种要素的安瓿标记源质存储元件的分区槽，标记时不会消耗安瓿。
+- 源质元件工作台的禁用分区槽不会再遮挡工具栏提示。
+- 研究笔记的要素与设备功能对应。入门研究的谜题较简单，高级存储与自动化研究的笔记更复杂。
+- 标准源质存储元件与 MEGA 源质存储元件装入 ME 驱动器时使用不同的贴图。
+- 奥术合成终端会记住每位玩家选择的是水晶优先还是法杖优先。
+- 源质存储元件在专用的源质元件工作台配置。工作台采用 AE2 的布局，并可保留分区设置供下一个元件使用。
+- 模组名称和创造模式物品栏标签去掉了冒号。奥术合成终端、源质终端、源质输入与输出总线以及源质发信器的名称和界面标题统一使用 ME 前缀。
+- 源质存储组件的配方接受任意要素的魔力水晶碎片。在源质元件工作台用安瓿标记时，标记对象是瓶内的源质。
+- 在 ME 终端用鼠标拿着魔导透镜时，可按 Thaumaturge 的物品栏扫描规则逐个扫描网络里的物品。已发现的要素显示在物品提示中。
+- 奥术合成终端新增两个按钮，可将合成材料和水晶退回 ME 网络或玩家背包。放不下的物品留在原槽位。
+- 部分机器、无线终端和水晶生长相关配方使用了与其功能对应的原始要素水晶碎片。
+- JEI 可从 ME 网络或玩家背包补入配方所需的水晶碎片。法杖优先时，只补支付预览仍需要的水晶碎片。
+- 游戏内指南提供简体中文、繁体中文、英文和俄文，涵盖入门、源质存储、终端、奥术合成、自动化和水晶生长，并演示如何用 ME 网络为注魔供料及接收完成信号。
+- 库存和槽位容量允许时，按住 Shift 从 JEI 转移配方，会向奥术合成终端填入多份材料及所需的水晶碎片。
+- JEI 可将坩埚配方与产物固定的注魔配方转为处理样板。输入依次为被转化的物品、其他材料，以及各类源质及其用量。
+- 闪电科技的水晶催化器和过载处理工厂支持神秘水晶生产链。ExtendedAE 与 ExtendedAE Plus 的对应机器可切出神秘电路板并装配神秘处理器。
+- 奥术工作台可消耗 5 Vis，将 2 份神秘水晶粉重新凝成 1 颗神秘水晶。
+- 奥术合成终端放大了可用 Vis 读数。灵气不足以完成当前配方时，下方以红字显示「可用vis不足」。终端还会显示当前配方所需的 Vis 和减免比例，悬停费用图标可查看对应要素及消耗量。
+
 # Thaumic Energistics CE 2.7.5.4-hotfix1 / Minecraft 1.21.1 / NeoForge
 
 - AE2 Crystal Growth Accelerators recognize all four budding Thaumic Crystal blocks. (#7)
@@ -55,13 +85,6 @@
 ---
 
 # Thaumic Energistics: CE 2.7.5.4 / MC 1.21.1 / NeoForge
-
-## 中文
-
-- 修复拆卸样板供应器时丢失待回流源质的问题。缓冲中的源质会装进安瓿随供应器掉落，保留原有要素和数量，包括不足一整瓶的余量。
-- 修复覆盖 AE2、ExtendedAE、ExtendedAE Plus、AdvancedAE 和 AE2 Lightning Tech 的样板供应器联动路径。
-
-验证：在 AE2 原版供应器上验证了 12 点退料的掉落与清空流程。安装可选联动模组的环境通过 14 项回归测试。
 
 ## English
 
@@ -71,6 +94,13 @@
 Validation: Verified the drop and clear sequence with 12 essentia on a standard AE2 Pattern Provider. All 14 regression tests passed with optional integrations installed.
 
 ---
+
+## 中文
+
+- 修复拆卸样板供应器时丢失待回流源质的问题。缓冲中的源质会装进安瓿随供应器掉落，保留原有要素和数量，包括不足一整瓶的余量。
+- 修复覆盖 AE2、ExtendedAE、ExtendedAE Plus、AdvancedAE 和 AE2 Lightning Tech 的样板供应器联动路径。
+
+验证：在 AE2 原版供应器上验证了 12 点退料的掉落与清空流程。安装可选联动模组的环境通过 14 项回归测试。
 
 # TECE 2.7.5.2 — Minecraft 1.21.1 / NeoForge
 

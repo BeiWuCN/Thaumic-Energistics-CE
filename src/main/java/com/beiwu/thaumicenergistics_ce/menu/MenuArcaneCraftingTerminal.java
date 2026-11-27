@@ -139,7 +139,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         super(menuType, id, playerInventory, host, false);
         this.part = host instanceof ArcaneTerminalHost arcane ? arcane.arcaneTerminal() : null;
         this.auraPayer = host instanceof IPortableTerminal portable ? portable : null;
-        var wireless = host instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost w ? w : null;
+        var wireless = host instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingHost w ? w : null;
         this.craftingGrid = wireless != null ? wireless.craftingGrid() : part == null ? gridFallback : part.craftingGrid();
         this.wandInventory = wireless != null ? wireless.wandInventory() : part == null ? wandFallback : part.wandInventory();
         this.crystals = wireless != null ? wireless.crystalInventory() : part == null ? crystalFallback : part.crystalInventory();
@@ -279,7 +279,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
         var slots = getSlots(SlotSemantics.UPGRADE);
         int hidden = -1;
         if (!essentiaAccessEnabled) {
-            int limit = getHost() instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost
+            int limit = getHost() instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingHost
                     ? Math.min(2, slots.size()) : slots.size();
             for (int i = limit - 1; i >= 0; i--) {
                 if (!slots.get(i).hasItem()) { hidden = i; break; }
@@ -540,7 +540,7 @@ public class MenuArcaneCraftingTerminal extends MenuEssentiaTerminalBase
 
     public boolean canCraft() {
         return getLinkStatus().connected() && (part != null
-                || getHost() instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingTerminalMenuHost);
+                || getHost() instanceof com.beiwu.thaumicenergistics_ce.item.WirelessArcaneCraftingHost);
     }
 
     public @Nullable ArcaneCraftingResultSlot resultSlot() {

@@ -1,0 +1,13 @@
+{
+  "type": "ae2wtlib:upgrade",
+  "terminal": {
+    "item": "thaumicenergistics_ce:wireless_arcane_crafting_terminal"
+  },
+  "terminalName": "thaumicenergistics_arcane_crafting",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "ae2wtlib"
+    }
+  ]
+}

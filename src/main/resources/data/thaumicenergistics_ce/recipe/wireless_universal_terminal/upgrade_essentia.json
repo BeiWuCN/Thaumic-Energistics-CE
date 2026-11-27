@@ -1,0 +1,13 @@
+{
+  "type": "ae2wtlib:upgrade",
+  "terminal": {
+    "item": "thaumicenergistics_ce:wireless_essentia_terminal"
+  },
+  "terminalName": "thaumicenergistics_essentia",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "ae2wtlib"
+    }
+  ]
+}

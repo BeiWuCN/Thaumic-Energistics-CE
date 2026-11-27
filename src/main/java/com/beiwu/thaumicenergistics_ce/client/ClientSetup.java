@@ -173,7 +173,10 @@ public final class ClientSetup {
         event.register(
                 TECEMenuTypes.WIRELESS_ESSENTIA_TERMINAL.get(),
                 (MenuEssentiaTerminal menu, Inventory inventory, Component title) ->
-                        new ScreenEssentiaTerminal(
+                        net.neoforged.fml.ModList.get().isLoaded("ae2wtlib")
+                        ? new com.beiwu.thaumicenergistics_ce.client.integration.ae2wtlib.AE2WTEssentiaTerminalScreen(
+                                menu, inventory, title, StyleManager.loadStyleDoc("/screens/wireless_essentia_terminal_wt.json"))
+                        : new ScreenEssentiaTerminal(
                                 menu,
                                 inventory,
                                 title,
@@ -182,7 +185,9 @@ public final class ClientSetup {
         event.register(
                 TECEMenuTypes.WIRELESS_ARCANE_CRAFTING_TERMINAL.get(),
                 (MenuArcaneCraftingTerminal menu, Inventory inventory, Component title) ->
-                        new ScreenArcaneCraftingTerminal(
+                        net.neoforged.fml.ModList.get().isLoaded("ae2wtlib")
+                        ? new com.beiwu.thaumicenergistics_ce.client.integration.ae2wtlib.AE2WTArcaneCraftingTerminalScreen(menu, inventory, title, StyleManager.loadStyleDoc("/screens/wireless_arcane_crafting_terminal_wt.json"))
+                        : new ScreenArcaneCraftingTerminal(
                                 menu,
                                 inventory,
                                 title,

@@ -58,6 +58,13 @@ ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies."${mod_id}"]]
+modId = "ae2wtlib_api"
+type = "optional"
+versionRange = "[19.5.1,20)"
+ordering = "BEFORE"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
 modId = "ae2wtlib"
 type = "optional"
 versionRange = "[19.5.1,)"
