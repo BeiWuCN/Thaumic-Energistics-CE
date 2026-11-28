@@ -3,7 +3,6 @@ package com.beiwu.thaumicenergistics_ce.mixin;
 import appeng.api.upgrades.IUpgradeableObject;
 import appeng.api.upgrades.Upgrades;
 import appeng.client.gui.widgets.UpgradesPanel;
-import appeng.core.localization.GuiText;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -43,13 +42,13 @@ public abstract class ArcaneUpgradeTooltipMixin implements com.beiwu.thaumicener
         if (!arcane && machine != TECEItems.WIRELESS_ESSENTIA_TERMINAL.get()) return;
         tooltipSupplier = () -> {
             var lines = new ArrayList<>(Upgrades.getTooltipLinesForMachine(machine));
-            if (arcane && !ThEConfig.ARCANE_ESSENTIA_ACCESS.get()) {
-                var hidden = GuiText.CompatibleUpgrade.text(
-                        TECEItems.ESSENTIA_ACCESS_CARD.get().getDefaultInstance().getHoverName(), 1).getString();
-                lines.removeIf(line -> line.getString().equals(hidden));
-            }
             if (!lines.isEmpty()) {
                 lines.addFirst(Component.translatable("gui.ae2.CompatibleUpgrades"));
+            }
+            if (arcane && !ThEConfig.ARCANE_ESSENTIA_ACCESS.get()) {
+                lines.add(Component.translatable(
+                        "tooltip.thaumicenergistics_ce.essentia_access_card.arcane_disabled")
+                        .withStyle(net.minecraft.ChatFormatting.GRAY));
             }
             return lines;
         };

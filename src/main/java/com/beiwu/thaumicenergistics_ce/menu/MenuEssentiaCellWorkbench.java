@@ -141,7 +141,9 @@ public class MenuEssentiaCellWorkbench extends UpgradeableMenu<BlockEntityEssent
      */
     @Override
     public boolean isPartitionSlotEnabled(int well) {
-        return hasCellInMenu();
+        // 保留模式下没有元件也要让井保持启用：一旦禁用，CellPartitionSlot 会
+        // 在下一次读槽时把井清空，正好抹掉要留给下一颗元件的那份分区。
+        return hasCellInMenu() || keepOnRemove;
     }
 
     public static int partitionSlotCount() {

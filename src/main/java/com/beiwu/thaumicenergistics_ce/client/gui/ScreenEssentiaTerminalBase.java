@@ -3,6 +3,7 @@ package com.beiwu.thaumicenergistics_ce.client.gui;
 import appeng.client.gui.me.common.MEStorageScreen;
 import appeng.client.gui.me.common.RepoSlot;
 import appeng.client.gui.style.ScreenStyle;
+import appeng.helpers.InventoryAction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -35,6 +36,9 @@ import com.beiwu.thaumicenergistics_ce.util.ThELog;
  *           那么多单位，那个值固定为 1（调大要把全部存量显示除下去，不能动），
  *           而容器策略要整瓶才肯换，于是它报 0 空转。这一支只能自己发。</li>
  *       <li>玩家槽位上 shift 右键，在容器所在处倒空。</li>
+ *       <li>空手点可合成的源质行：自己发 AUTO_CRAFT 下单。AE2 的点击分发里
+ *           容器策略排在合成判断前面（MEStorageScreen 第 183 行），源质注册了容器策略，
+ *           所以放回去只会变成装填请求，合成永远发不出去。</li>
  *     </ul></li>
  *   <li><b>不拦的</b>：右键空安瓿存进网络。那是存放路径的第二步——
  *       空瓶的 {@code getEmptyingAction} 返回 null，AE2 于是发 SPLIT_OR_PLACE_SINGLE，
@@ -209,10 +213,19 @@ public abstract class ScreenEssentiaTerminalBase<M extends MenuEssentiaTerminalB
             return false;
         }
         if (container == null) {
+            AEssentiaKey key = (AEssentiaKey) entry.getWhat();
+            // 源质注册了容器策略，AE2 的点击分发会先把这一手当成装填（FILL_ITEM），
+            // 走不到它自己的合成判断：不在这儿发单，合成请求永远发不出去。
+            // 判据与 MEStorageScreen#shouldCraftOnClick 一致，只差光标为空这一条——
+            // heldContainer 先看光标，能走到这里光标一定是空的。
+            if (isViewOnlyCraftable() || (entry.getStoredAmount() == 0L && entry.isCraftable())) {
+                log("craft click: {} requested from the terminal", key.getId());
+                menu.handleInteraction(entry.getSerial(), InventoryAction.AUTO_CRAFT);
+                return true;
+            }
             // 桶同款：空手点源质行，直接从网络取一个空瓶灌满。
             // 装不出来时服务端只回一句提示，不扣源质。
             // shift 不参与：AE2 的桶路径也是一次一瓶，不因为按了 shift 就连抽一背包。
-            AEssentiaKey key = (AEssentiaKey) entry.getWhat();
             log("phial take requested: {}", key.getId());
             PacketDistributor.sendToServer(new EssentiaPhialTakePayload(menu.containerId, key.getId()));
             return true;

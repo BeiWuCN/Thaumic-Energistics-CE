@@ -80,9 +80,10 @@ public class BlockEntityInfusionProvider extends AENetworkedBlockEntity implemen
         return false;
     }
 
+    /** 收下 0：本方块不存源质（{@link #accepts} 恒 false），说全收会替调用方把源质删掉。 */
     @Override
     public int fill(Holder<IAspect> aspect, int amount) {
-        return amount;
+        return 0;
     }
 
     @Override

@@ -251,7 +251,8 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         Slot slot = slots.get(index);
-        if (!slot.hasItem()) {
+        // AE2 的 MOVE_REGION 直接调这里，绕过基类那道守卫；只读槽与预览槽不搬。
+        if (!slot.mayPickup(player) || !slot.hasItem()) {
             return ItemStack.EMPTY;
         }
         ItemStack stack = slot.getItem();
@@ -265,9 +266,6 @@ public class MenuArcaneAssembler extends AbstractContainerMenu {
             }
             if (!merged && AEItems.SPEED_CARD.is(stack)) {
                 merged = moveItemStackTo(stack, IDX_UPGRADE_START, IDX_UPGRADE_END, false);
-            }
-            if (!merged && !GearSlots.isGear(stack)) {
-                // 落到常规的物品栏搬移。
             }
             if (!merged) {
                 merged = moveItemStackTo(stack, IDX_GEAR_START, IDX_GEAR_END, false);

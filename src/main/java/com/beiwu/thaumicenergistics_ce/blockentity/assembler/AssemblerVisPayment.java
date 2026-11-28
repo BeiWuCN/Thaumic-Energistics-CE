@@ -25,10 +25,7 @@ final class AssemblerVisPayment {
             if ((long) direct + split > availableAura) continue;
             int[] remaining = new int[6];
             for (int i = 0; i < 6; i++) {
-                int deficit = Math.max(0, required[i] - stored[i]);
-                int afterRecipe = Math.max(0, stored[i] - required[i]);
-                int generatedForSets = split - deficit;
-                remaining[i] = afterRecipe - Math.max(0, sets - generatedForSets);
+                remaining[i] = Math.max(0, stored[i] + split - sets - required[i]);
             }
             return new Plan(direct + split, remaining);
         }

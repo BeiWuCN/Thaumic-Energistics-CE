@@ -35,17 +35,6 @@ public abstract class LightningProviderEssentiaMixin implements EssentiaPatternP
         }
     }
 
-    @Inject(method = "addDrops", at = @At("TAIL"))
-    private void tce$dropOverflowReturns(java.util.List<net.minecraft.world.item.ItemStack> drops,
-            CallbackInfo ci) {
-        // The superclass drop hook already collects the internal return inventory.
-        var overflow = getReturnInv();
-        if (overflow != getInternalReturnInv()) {
-            com.beiwu.thaumicenergistics_ce.integration.ae2.patternprovider.EssentiaProviderReturn
-                    .addEssentiaDrops(overflow, drops);
-        }
-    }
-
     @org.spongepowered.asm.mixin.Unique
     private boolean tce$refuses(KeyCounter[] inputs) {
         if (inputs == null || essentiaEnabled()) return false;

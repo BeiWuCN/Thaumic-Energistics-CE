@@ -39,6 +39,7 @@ public abstract class PigmeeProviderEssentiaMixin extends AENetworkedBlockEntity
     @Unique private AppEngInternalInventory tce$card;
     @Unique private GenericStackInv tce$buffer;
     @Unique private EssentiaProviderReturn tce$return;
+    @Unique private boolean tce$bufferReady;
 
     protected PigmeeProviderEssentiaMixin(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -46,17 +47,27 @@ public abstract class PigmeeProviderEssentiaMixin extends AENetworkedBlockEntity
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void tce$initialize(CallbackInfo ci) {
+        // 反射拿不到就关掉整个功能：方块实体构造期抛异常等于这个方块放不下去、存档加载即崩。
         try {
-            tce$buffer = (GenericStackInv) getClass().getMethod("getReturnInventory").invoke(this);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("Pigmee return inventory is unavailable", e);
+            Object inventory = getClass().getMethod("getReturnInventory").invoke(this);
+            if (inventory instanceof GenericStackInv buffer) {
+                tce$buffer = buffer;
+            }
+        } catch (ReflectiveOperationException | RuntimeException unavailable) {
+            tce$buffer = null;
+        }
+        tce$bufferReady = tce$buffer instanceof EssentiaReturnGate;
+        if (!tce$bufferReady) {
+            return;
         }
         var gate = (EssentiaReturnGate) tce$buffer;
         gate.setEssentiaGate(this::essentiaEnabled);
         gate.setEssentiaChangeListener(() -> ((EssentiaProviderReturn) essentiaReturnStorage()).inventoryChanged());
     }
     @Override public GenericStackInv essentiaBuffer() { return tce$buffer; }
-    @Override public boolean essentiaSupportEnabled() { return ThEConfig.PATTERN_PROVIDER_LIGHTNING.get(); }
+    @Override public boolean essentiaSupportEnabled() {
+        return tce$bufferReady && ThEConfig.PATTERN_PROVIDER_LIGHTNING.get();
+    }
     @Override public boolean essentiaEnabled() {
         return !isRemoved() && essentiaSupportEnabled()
                 && essentiaCardInventory().getStackInSlot(0).is(TECEItems.ESSENTIA_ACCESS_CARD.get());
@@ -88,7 +99,6 @@ public abstract class PigmeeProviderEssentiaMixin extends AENetworkedBlockEntity
     private void tce$drop(Level level, BlockPos pos, List<ItemStack> drops, CallbackInfo ci) {
         var card = essentiaCardInventory().getStackInSlot(0);
         if (!card.isEmpty()) drops.add(card.copy());
-        EssentiaProviderReturn.addEssentiaDrops(essentiaBuffer(), drops);
     }
     @Inject(method = "clearContent", at = @At("TAIL"))
     private void tce$clear(CallbackInfo ci) { essentiaCardInventory().clear(); }

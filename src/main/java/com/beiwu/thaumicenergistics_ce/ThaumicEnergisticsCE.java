@@ -65,6 +65,10 @@ public final class ThaumicEnergisticsCE {
         ThELog.LOG.info("ThaumicEnergisticsCE loading");
         container.registerConfig(net.neoforged.fml.config.ModConfig.Type.SERVER,
                 com.beiwu.thaumicenergistics_ce.config.ThEConfig.SPEC);
+        // Guarded so the dedicated server never resolves NeoForge's client-only screen class.
+        if (net.neoforged.fml.loading.FMLEnvironment.dist == net.neoforged.api.distmarker.Dist.CLIENT) {
+            com.beiwu.thaumicenergistics_ce.client.ThEConfigScreens.register(container);
+        }
 
         TECEBlocks.register(modBus);
         TECEItems.register(modBus);

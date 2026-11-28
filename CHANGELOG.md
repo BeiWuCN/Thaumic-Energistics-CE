@@ -1,3 +1,41 @@
+# Thaumic Energistics CE 2.7.6.2 / Minecraft 1.21.1 / NeoForge
+
+## English
+
+- Fixed the ME Essentia Terminal treating a craft click as a phial fill request.
+- Added missing refusal messages for craft failures, filled containers, insufficient cell capacity, the Box of Probability structure check and the legacy wireless terminal binding, in English, Simplified Chinese, Traditional Chinese and Russian.
+- ME Pattern Providers no longer drop buffered essentia as filled phials when broken.
+- Fixed a recipe parse error logged without ExtendedAE.
+- Added a filter screen to the ME Essentia Level Emitter, opened by right-click.
+- Fixed quick-move and shift-click extracting items from read-only slots in the Arcane Assembly Chamber and Distillation Encoder.
+- Fixed the Essentia Cell Workbench clearing its partition when swapping cells in keep-on-remove mode.
+- Registered the missing JEI aspect drag handler for ME Interfaces with an Essentia Access Card.
+- Fixed the Arcane Assembly Chamber staying busy after a chunk unload interrupted a craft, and vis left over after paying from the aura.
+- Fixed the Essentia Vibration Chamber burning the wrong aspect type, essentia loss on failed Flux Transfer Interface pulls, the Alchemy Provider losing its per-aspect buffer on chunk unload, and the Infusion Provider voiding essentia.
+- Fixed the Golem Wireless Backpack skin swap not consuming the block, an Arcane Assembly Chamber tooltip crash with the fallback layout, the missing Box of Probability creative tab entry, and a stale upgrade slot on the client with essentia access disabled.
+- Guarded crystal payment against a non-positive vis-per-crystal constant.
+- Added an in-game config screen, reachable from the Mods list.
+- Essentia access in arcane terminals and hiding essentia in ordinary terminals now default to on.
+- The Essentia Access Card tooltip and the arcane terminal upgrade panel now explain when essentia access is disabled in the config.
+
+## 中文
+
+- 修复ME源质终端把合成点击当成装填安瓿。
+- 补全合成失败、容器已有源质、元件容量不足、概率之箱结构检查、无线终端旧绑定等提示的英、简中、繁中、俄文翻译。
+- ME样板供应器被破坏时不再把缓冲源质作为装满的安瓿掉落。
+- 修复未安装 ExtendedAE 时记录的配方解析报错。
+- ME源质发信器增加右键打开的过滤界面。
+- 修复奥术装配室与蒸馏编码台的只读槽可被快速移动和 shift 点击取出物品。
+- 修复源质元件工作台在保留分区模式下更换元件时清空分区。
+- 为带源质访问卡的ME接口补上缺失的 JEI 要素拖拽处理。
+- 修复区块卸载打断合成后奥术装配室持续忙碌，以及从灵气付款后剩余 vis 丢失。
+- 修复源质谐振仓烧错要素种类、咒波传输接口抽取失败丢失源质、炼金供应器区块卸载丢失每要素缓冲、注魔供应器丢弃源质。
+- 修复傀儡无线背包更换外观不消耗方块、兜底布局下奥术装配室提示框崩溃、概率之箱缺创造模式物品栏条目、关闭源质访问后客户端残留升级槽。
+- 水晶替代步骤增加常量非正时的保护。
+- 增加游戏内配置界面，可从模组列表打开。
+- 奥术终端源质访问、普通终端隐藏源质改为默认开启。
+- 配置关闭奥术终端源质访问时，源质访问卡与奥术终端升级槽提示会说明原因。
+
 # Thaumic Energistics CE 2.7.6.1 / Minecraft 1.21.1 / NeoForge
 
 ## English

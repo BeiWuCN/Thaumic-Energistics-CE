@@ -85,6 +85,7 @@ public final class TECECreativeTab {
                         output.accept(com.beiwu.thaumicenergistics_ce.item.ItemFocusAEWrench.assembledStack());
                         output.accept(TECEItems.GOLEM_WIFI_BACKPACK.get());
                         output.accept(TECEItems.GACHA_BOX.get());
+                        output.accept(TECEItems.GACHA_BOX_AGGREGATOR.get());
                         com.beiwu.thaumicenergistics_ce.integration.megacells.MegaEssentiaCells.display(output);
                     })
                     .build());

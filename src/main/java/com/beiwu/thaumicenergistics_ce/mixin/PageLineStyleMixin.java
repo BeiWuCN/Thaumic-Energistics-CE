@@ -15,6 +15,10 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
  * 粗体字符步进比换行时量出的更宽，会被画到文本栏之外。
  * 本 mod 的行把格式写成文本里的代码，把那个样式改写成等价代码再清空它，
  * {@code §r} 就重置为无，分页器为该栏量出的宽度也回来了。
+ *
+ * <p><b>故意未登记</b>：Thaumaturge 1.1 起 {@code Paginator.appendLine} 改成收
+ * {@code PageParser$StyledLine}，本类注入的 {@code (String, Style)} 签名已不存在，
+ * 登记进 mixins.json 会因注入点缺失在启动时报错。
  */
 @Mixin(targets = "com.leclowndu93150.thaumaturge.client.render.research.PageParser$Paginator")
 public abstract class PageLineStyleMixin {

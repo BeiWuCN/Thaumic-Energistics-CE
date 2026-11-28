@@ -154,7 +154,7 @@ public final class EssentiaFillHelper {
                 return false;
             }
             if (available < PHIAL_CAPACITY) {
-                // 最常见的拒绝：瓶子要整瓶，网络里不到 8 就填不了。
+                // 最常见的拒绝：瓶子要整瓶，差一点也不填。
                 log("fill {} refused: a phial needs {} and the network holds {}", aspectId,
                         PHIAL_CAPACITY, available);
                 tell(player, "thaumicenergistics_ce.gui.essentia.phial_needs", PHIAL_CAPACITY, available);

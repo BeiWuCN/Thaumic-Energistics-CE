@@ -5,10 +5,10 @@ import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.CompoundTag;
 import com.beiwu.thaumicenergistics_ce.compat.thaumaturge.TcAura;
+import com.beiwu.thaumicenergistics_ce.recipe.arcane.ThEArcanePattern;
 import com.beiwu.thaumicenergistics_ce.part.PartVisInterface;
 import com.beiwu.thaumicenergistics_ce.part.VisReservation;
 
@@ -58,7 +58,15 @@ final class AssemblerVisSource {
     void readSync(CompoundTag input) { pool.readSync(input); }
 
     private int[] requirements() {
-        var pattern = owner.craft.currentPattern();
+        int[] stored = owner.craft.craftRequired();
+        if (stored.length == BlockEntityArcaneAssembler.PRIMALS.size()) {
+            return stored;
+        }
+        return requiredOf(owner.craft.currentPattern());
+    }
+
+    /** 从样板读六要素需求；读不出（无样板、非六要素晶体）时为 {@code null}。 */
+    static int[] requiredOf(@Nullable ThEArcanePattern pattern) {
         if (pattern == null) return null;
         int[] required = new int[BlockEntityArcaneAssembler.PRIMALS.size()];
         for (AspectInstance crystal : pattern.primalCrystals().entries()) {

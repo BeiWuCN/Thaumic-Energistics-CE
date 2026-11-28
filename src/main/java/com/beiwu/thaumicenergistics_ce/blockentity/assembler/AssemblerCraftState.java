@@ -20,6 +20,10 @@ final class AssemblerCraftState {
     /** 运行中的合成仍欠的 vis 和晶体；存下来，重载后还能完成。 */
     private static final String TAG_CRAFT_PRICE = "CraftPrice";
     private static final String TAG_CRAFT_CRYSTALS = "CraftCrystals";
+    /** 合成开始时定下的六要素需求。核心可在合成中途被移除，只靠核心读需求会永远付不出这一单。 */
+    private static final String TAG_CRAFT_REQUIRED = "CraftRequired";
+    /** 合成 CPU 已从网络抽走的原料，重载后仍要能归还。 */
+    private static final String TAG_HELD_INPUTS = "HeldInputs";
 
     private boolean crafting;
     private int craftTicks;
@@ -31,6 +35,8 @@ final class AssemblerCraftState {
     private int craftPrice;
 
     private List<ItemStack> craftCrystals = List.of();
+
+    private int[] craftRequired = new int[0];
 
     /** AE2 为被推送的合成提取的原料，只为永不完成时归还而留着。
      * 本机器用 vis 和晶体制作产物。 */
@@ -86,6 +92,10 @@ final class AssemblerCraftState {
         this.craftCrystals = craftCrystals;
     }
 
+    int[] craftRequired() {
+        return craftRequired;
+    }
+
     List<ItemStack> heldInputs() {
         return heldInputs;
     }
@@ -121,11 +131,12 @@ final class AssemblerCraftState {
         currentPattern = null;
         craftPrice = 0;
         craftCrystals = List.of();
+        craftRequired = new int[0];
         lastWait = null;
         heldInputs.clear();
     }
 
-    void begin(ThEArcanePattern pattern, int price, List<ItemStack> crystals) {
+    void begin(ThEArcanePattern pattern, int price, List<ItemStack> crystals, int[] required) {
         crafting = true;
         lastRefusal = null;
         lastWait = null;
@@ -134,13 +145,17 @@ final class AssemblerCraftState {
         currentPattern = pattern;
         craftPrice = price;
         craftCrystals = crystals;
+        craftRequired = required == null ? new int[0] : required;
     }
 
     void readNbt(CompoundTag tag, HolderLookup.Provider registries) {
         crafting = tag.getBoolean("Crafting");
         craftTicks = tag.getInt("CraftTicks");
         craftPrice = tag.getInt(TAG_CRAFT_PRICE);
-        craftCrystals = readCrystalStacks(tag, registries);
+        craftCrystals = readStacks(tag, TAG_CRAFT_CRYSTALS, registries);
+        craftRequired = tag.getIntArray(TAG_CRAFT_REQUIRED);
+        heldInputs.clear();
+        heldInputs.addAll(readStacks(tag, TAG_HELD_INPUTS, registries));
     }
 
     void writeNbt(CompoundTag tag, HolderLookup.Provider registries) {
@@ -153,10 +168,16 @@ final class AssemblerCraftState {
             crystals.add(stack.save(registries));
         }
         tag.put(TAG_CRAFT_CRYSTALS, crystals);
+        tag.putIntArray(TAG_CRAFT_REQUIRED, craftRequired);
+        ListTag inputs = new ListTag();
+        for (ItemStack stack : heldInputs) {
+            inputs.add(stack.save(registries));
+        }
+        tag.put(TAG_HELD_INPUTS, inputs);
     }
 
-    private static List<ItemStack> readCrystalStacks(CompoundTag tag, HolderLookup.Provider registries) {
-        ListTag saved = tag.getList(TAG_CRAFT_CRYSTALS, Tag.TAG_COMPOUND);
+    private static List<ItemStack> readStacks(CompoundTag tag, String key, HolderLookup.Provider registries) {
+        ListTag saved = tag.getList(key, Tag.TAG_COMPOUND);
         if (saved.isEmpty()) {
             return List.of();
         }

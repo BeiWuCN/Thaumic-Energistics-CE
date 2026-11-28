@@ -213,7 +213,8 @@ public class MenuDistillationEncoder extends AbstractContainerMenu implements Di
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         Slot slot = slots.get(index);
-        if (!slot.hasItem()) {
+        // MOVE_REGION 绕过基类守卫，模板槽里的东西不能这样搬出去。
+        if (!slot.mayPickup(player) || !slot.hasItem()) {
             return ItemStack.EMPTY;
         }
         ItemStack stack = slot.getItem();

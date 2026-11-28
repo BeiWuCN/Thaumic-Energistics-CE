@@ -7,10 +7,7 @@ import appeng.helpers.patternprovider.PatternProviderLogic;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
-import com.beiwu.thaumicenergistics_ce.compat.thaumaturge.TcRegistry;
-import java.util.List;
 import net.minecraft.core.Holder;
-import net.minecraft.world.item.ItemStack;
 import com.leclowndu93150.thaumaturge.api.transaction.SnapshotJournal;
 import com.leclowndu93150.thaumaturge.api.transaction.TransactionContext;
 import com.beiwu.thaumicenergistics_ce.integration.ae2.AEssentiaKey;
@@ -24,23 +21,6 @@ public final class EssentiaProviderReturn extends SnapshotJournal<GenericStack[]
     public EssentiaProviderReturn(EssentiaPatternProvider provider) {
         inventory = provider.essentiaBuffer();
         enabled = provider::essentiaEnabled;
-    }
-
-    /** Copy pending returns into drops. AE2 clears the inventory separately after collecting drops. */
-    public static void addEssentiaDrops(appeng.helpers.externalstorage.GenericStackInv inventory,
-            List<ItemStack> drops) {
-        for (int slot = 0; slot < inventory.size(); slot++) {
-            var stack = inventory.getStack(slot);
-            if (stack == null || !(stack.what() instanceof AEssentiaKey key)) continue;
-            var aspect = key.resolveAspect();
-            if (aspect == null) continue;
-            long remaining = stack.amount();
-            while (remaining > 0) {
-                int amount = (int) Math.min(remaining, TcRegistry.phialCapacity());
-                drops.add(TcRegistry.filledPhial(aspect, amount));
-                remaining -= amount;
-            }
-        }
     }
 
     @Override public int insert(Holder<IAspect> aspect, int amount, boolean simulate) {

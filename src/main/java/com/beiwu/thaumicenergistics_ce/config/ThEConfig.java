@@ -28,10 +28,10 @@ public final class ThEConfig {
         b.translation("thaumicenergistics_ce.config.terminals").push("terminals");
         RESTRICT_ESSENTIA_VISIBILITY = b.comment("Hide essentia in ordinary ME terminals. Dedicated Essentia Terminals remain available. Arcane terminals use their own access setting.")
                 .translation("thaumicenergistics_ce.config.terminals.restrictEssentiaVisibility")
-                .define("restrictEssentiaVisibility", false);
-        ARCANE_ESSENTIA_ACCESS = b.comment("Allow wired and wireless arcane crafting terminals to display and transfer essentia when an Essentia Access Card is installed. Disabled by default.")
+                .define("restrictEssentiaVisibility", true);
+        ARCANE_ESSENTIA_ACCESS = b.comment("Allow wired and wireless arcane crafting terminals to display and transfer essentia when an Essentia Access Card is installed.")
                 .translation("thaumicenergistics_ce.config.terminals.arcaneEssentiaAccess")
-                .define("arcaneEssentiaAccess", false);
+                .define("arcaneEssentiaAccess", true);
         b.pop().translation("thaumicenergistics_ce.config.patternProviders").push("patternProviders");
         PATTERN_PROVIDER_AE2 = b.comment("Allow AE2 pattern providers to install Essentia Access Cards and send/receive essentia. Disabling preserves installed cards and buffered essentia; cards remain removable. Does not affect other mods\u2019 providers.")
                 .translation("thaumicenergistics_ce.config.patternProviders.ae2Enabled")

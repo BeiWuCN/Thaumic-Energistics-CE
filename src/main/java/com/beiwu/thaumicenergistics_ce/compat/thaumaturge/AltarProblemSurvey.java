@@ -9,6 +9,8 @@ final class AltarProblemSurvey {
     private AltarProblemSurvey() {}
 
     static List<BlockPos> find(Level level, BlockPos matrix) {
-        return InfusionStabilitySurvey.survey(level, matrix).problemBlocks();
+        // 祭坛没建成时 Thaumaturge 给 null，和 TcInfusion 一样要接住。
+        var survey = InfusionStabilitySurvey.survey(level, matrix);
+        return survey == null ? List.of() : survey.problemBlocks();
     }
 }

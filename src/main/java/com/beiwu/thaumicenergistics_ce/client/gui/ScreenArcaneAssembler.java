@@ -165,7 +165,9 @@ public class ScreenArcaneAssembler extends AbstractContainerScreen<MenuArcaneAss
     @Override
     protected void renderTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
         if (layout != null) {
-            for (int i = 0; i < GuiLayout.PRIMAL_COLUMNS; i++) {
+            // 兜底布局没有 vis 栏：按实际栏数走，别让资源缺失变成开界面即崩。
+            int columns = Math.min(GuiLayout.PRIMAL_COLUMNS, layout.visBars().count());
+            for (int i = 0; i < columns; i++) {
                 var column = layout.visBars().column(i);
                 int x = leftPos + column.x(), y = topPos + column.y();
                 if (mouseX >= x && mouseX < x + GuiLayout.BAR_WIDTH

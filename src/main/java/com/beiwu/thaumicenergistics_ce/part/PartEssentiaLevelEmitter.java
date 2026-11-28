@@ -8,13 +8,19 @@ import appeng.api.parts.IPartModel;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.KeyCounter;
 import appeng.items.parts.PartModels;
+import appeng.menu.MenuOpener;
+import appeng.menu.locator.MenuLocators;
 import appeng.parts.PartModel;
 import appeng.parts.automation.AbstractLevelEmitterPart;
 import appeng.util.ConfigInventory;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.phys.Vec3;
 import com.beiwu.thaumicenergistics_ce.ThEIds;
+import com.beiwu.thaumicenergistics_ce.registry.TECEMenuTypes;
 import com.beiwu.thaumicenergistics_ce.integration.ae2.AEssentiaKey;
 import com.beiwu.thaumicenergistics_ce.integration.ae2.AEssentiaKeyType;
 
@@ -129,6 +135,20 @@ public class PartEssentiaLevelEmitter extends AbstractLevelEmitterPart {
     @Override
     protected boolean getDirectOutput() {
         return false;
+    }
+
+    // AE2 的部件基类不声明这个方法，只有终端那一支有：这里不是重写。
+    public MenuType<?> getMenuType(Player player) {
+        return TECEMenuTypes.ESSENTIA_LEVEL_EMITTER.get();
+    }
+
+    // 配置项只能在这个界面里填：没有它，阈值永远是空、上报值永远是 0。
+    @Override
+    public boolean onUseWithoutItem(Player player, Vec3 pos) {
+        if (!super.onUseWithoutItem(player, pos) && !player.level().isClientSide) {
+            MenuOpener.open(getMenuType(player), player, MenuLocators.forPart(this));
+        }
+        return true;
     }
 
     @Override

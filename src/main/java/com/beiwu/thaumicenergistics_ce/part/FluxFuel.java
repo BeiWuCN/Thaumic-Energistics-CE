@@ -29,13 +29,16 @@ final class FluxFuel {
             energy.injectPower(paid, Actionable.MODULATE);
             return false;
         }
-        if (storage.extract(auram, points, Actionable.MODULATE, source) < points) {
-            energy.injectPower(paid, Actionable.MODULATE);
-            return false;
-        }
-        if (storage.extract(ordo, points, Actionable.MODULATE, source) < points) {
-            // [auram] 已经取出：放回去，别白烧掉。
-            storage.insert(auram, points, Actionable.MODULATE, source);
+        long aus = storage.extract(auram, points, Actionable.MODULATE, source);
+        long ordos = storage.extract(ordo, points, Actionable.MODULATE, source);
+        if (aus < points || ordos < points) {
+            // 差一点也不成交：两种源质按实际抽到的量放回，电也退。只退整额会吞掉差额。
+            if (aus > 0) {
+                storage.insert(auram, aus, Actionable.MODULATE, source);
+            }
+            if (ordos > 0) {
+                storage.insert(ordo, ordos, Actionable.MODULATE, source);
+            }
             energy.injectPower(paid, Actionable.MODULATE);
             return false;
         }

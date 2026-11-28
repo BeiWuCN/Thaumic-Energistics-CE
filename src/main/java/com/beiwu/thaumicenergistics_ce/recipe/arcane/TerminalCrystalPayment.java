@@ -43,6 +43,10 @@ public final class TerminalCrystalPayment {
             return;
         }
         int perCrystal = TcArcanePayment.centivisPerCrystal();
+        if (perCrystal <= 0) {
+            // 上游常量改了就会除零；这时按「水晶顶不了法杖」处理，让原路径付款。
+            return;
+        }
         Map<ResourceKey<IAspect>, Integer> wandCentivis = new LinkedHashMap<>(cost.wandCentivis());
         AspectList crystalsNeeded = cost.crystalsNeeded();
         boolean moved = false;

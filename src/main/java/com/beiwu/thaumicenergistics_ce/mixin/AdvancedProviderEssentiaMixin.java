@@ -118,7 +118,6 @@ public abstract class AdvancedProviderEssentiaMixin implements EssentiaPatternPr
     private void tce$drop(List<ItemStack> drops, CallbackInfo ci) {
         var card = essentiaCardInventory().getStackInSlot(0);
         if (!card.isEmpty()) drops.add(card.copy());
-        EssentiaProviderReturn.addEssentiaDrops(essentiaBuffer(), drops);
     }
 
     @Inject(method = "clearContent", at = @At("TAIL"))

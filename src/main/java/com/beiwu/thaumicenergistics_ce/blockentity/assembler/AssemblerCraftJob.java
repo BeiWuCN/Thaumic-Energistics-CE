@@ -112,7 +112,7 @@ final class AssemblerCraftJob {
 
     boolean beginCraft(ThEArcanePattern pattern) {
         // 现在就固定，不在完成时重算：合成存档后不靠核心也能继续，价格和晶体随样板一并交付。
-        owner.craft.begin(pattern, craftCost(pattern), crystalStacksOf(pattern));
+        owner.craft.begin(pattern, craftCost(pattern), crystalStacksOf(pattern), AssemblerVisSource.requiredOf(pattern));
         owner.displaySync.refreshDisplaySlots(pattern.result().copy(), pattern.grid());
         owner.setChanged();
         owner.displaySync.markForUpdate();

@@ -69,6 +69,14 @@ public class ScreenArcaneCraftingTerminal extends ScreenEssentiaTerminalBase<Men
         terminalName = title;
     }
 
+    @Override
+    public void containerTick() {
+        super.containerTick();
+        // 客户端菜单不跑 broadcastChanges：源质访问卡配置关掉时，
+        // 升级槽的启用状态要在这里自己算一遍，否则会留下一个点了没用的槽。
+        menu.updateUpgradeSlotVisibility();
+    }
+
     /** 没有这张卡时终端就是普通终端，手势全落到 AE2 自己的实现上。 */
     @Override
     protected boolean essentiaGesturesAtAll() {

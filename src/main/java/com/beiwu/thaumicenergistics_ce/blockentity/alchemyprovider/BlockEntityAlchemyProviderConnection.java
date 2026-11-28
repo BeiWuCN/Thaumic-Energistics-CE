@@ -2,6 +2,7 @@ package com.beiwu.thaumicenergistics_ce.blockentity.alchemyprovider;
 
 import com.leclowndu93150.thaumaturge.api.aspect.AspectInstance;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
+import com.leclowndu93150.thaumaturge.api.aspect.Aspects;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
 import java.util.ArrayList;
@@ -12,6 +13,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -317,7 +322,19 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
         if (providerPos != null) {
             tag.putLong("ProviderPos", providerPos.asLong());
         }
-        // 缓冲区不写入：它只装进行中的传输，不累积。
+        // 缓冲要落盘：供应器暂时收不下时源质会停在这里，区块卸载时它已经在手里了。
+        ListTag saved = new ListTag();
+        buffer.forEach((aspect, amount) -> {
+            ResourceKey<IAspect> key = aspect.unwrapKey().orElse(null);
+            if (key == null || amount <= 0) {
+                return;
+            }
+            CompoundTag entry = new CompoundTag();
+            entry.putString("Aspect", key.location().toString());
+            entry.putInt("Amount", amount);
+            saved.add(entry);
+        });
+        tag.put("Buffer", saved);
     }
 
     @Override
@@ -325,6 +342,24 @@ public class BlockEntityAlchemyProviderConnection extends ThEBaseBlockEntity imp
         super.loadAdditional(tag, registries);
         providerPos = tag.contains("ProviderPos") ? BlockPos.of(tag.getLong("ProviderPos")) : null;
         buffer.clear();
+        for (Tag element : tag.getList("Buffer", Tag.TAG_COMPOUND)) {
+            CompoundTag entry = (CompoundTag) element;
+            int amount = entry.getInt("Amount");
+            ResourceLocation id = ResourceLocation.tryParse(entry.getString("Aspect"));
+            if (id == null || amount <= 0) {
+                continue;
+            }
+            Holder<IAspect> aspect;
+            try {
+                aspect = Aspects.resolve(registries, ResourceKey.create(IAspect.REGISTRY_KEY, id));
+            } catch (RuntimeException missing) {
+                // 存档里的要素已被数据包删掉：丢这一条，别让整个方块实体加载失败。
+                continue;
+            }
+            if (aspect != null) {
+                buffer.put(aspect, amount);
+            }
+        }
     }
 
     @Override

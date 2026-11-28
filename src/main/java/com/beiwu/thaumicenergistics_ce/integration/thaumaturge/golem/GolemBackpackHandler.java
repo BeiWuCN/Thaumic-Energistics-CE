@@ -199,6 +199,11 @@ public final class GolemBackpackHandler {
             golem.spawnAtLocation(previous);
         }
         golem.getPersistentData().remove(KEY_FACADE);
+        // 换上的方块是花掉的物品：留一份外观，取下背包时按它退回，不能白拿。
+        setFacade(golem, held.copyWithCount(1));
+        if (!player.isCreative()) {
+            held.shrink(1);
+        }
         setSkin(golem, skin);
         GolemBackpackTickHandler.syncNow(golem);
         trace("repainted golem " + golem.getId() + " as " + skin);

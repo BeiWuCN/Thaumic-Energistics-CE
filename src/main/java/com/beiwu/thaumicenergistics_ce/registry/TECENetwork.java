@@ -11,6 +11,7 @@ import com.beiwu.thaumicenergistics_ce.network.EncoderSourcePayload;
 import com.beiwu.thaumicenergistics_ce.network.EssentiaDepositPayload;
 import com.beiwu.thaumicenergistics_ce.network.EssentiaPhialTakePayload;
 import com.beiwu.thaumicenergistics_ce.network.EssentiaFillPayload;
+import com.beiwu.thaumicenergistics_ce.network.EssentiaInterfaceMarkPayload;
 import com.beiwu.thaumicenergistics_ce.network.EssentiaBusConfigPayload;
 import com.beiwu.thaumicenergistics_ce.network.GolemBackpackPayload;
 import com.beiwu.thaumicenergistics_ce.network.InscriberGridFillPayload;
@@ -74,6 +75,11 @@ public final class TECENetwork {
         registrar.playToServer(
                 ArcaneUnbindPayload.TYPE,
                 ArcaneUnbindPayload.CODEC,
+                (payload, context) -> payload.handle(context.player()));
+        // JEI 把要素拖到源质接口上时走这条；漏登记时客户端发出去的包没人接。
+        registrar.playToServer(
+                EssentiaInterfaceMarkPayload.TYPE,
+                EssentiaInterfaceMarkPayload.CODEC,
                 (payload, context) -> payload.handle(context.player()));
     }
 }

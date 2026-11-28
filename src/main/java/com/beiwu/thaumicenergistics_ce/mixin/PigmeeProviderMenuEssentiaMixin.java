@@ -24,7 +24,10 @@ public abstract class PigmeeProviderMenuEssentiaMixin extends AEBaseMenu impleme
     }
     @Override public boolean essentiaSupportEnabled() { return tce$essentiaSupportEnabled; }
     @Override public void broadcastChanges() {
-        if (!isClientSide()) tce$essentiaSupportEnabled = PatternProviderAddonCompat.provider(getTarget()).essentiaSupportEnabled();
+        if (!isClientSide()) {
+            var provider = PatternProviderAddonCompat.provider(getTarget());
+            tce$essentiaSupportEnabled = provider != null && provider.essentiaSupportEnabled();
+        }
         super.broadcastChanges();
     }
     @Override protected boolean isValidQuickMoveDestination(net.minecraft.world.inventory.Slot slot,
@@ -36,6 +39,10 @@ public abstract class PigmeeProviderMenuEssentiaMixin extends AEBaseMenu impleme
     @Inject(method = "<init>", at = @At("TAIL"))
     private void tce$slot(CallbackInfo ci) {
         var provider = PatternProviderAddonCompat.provider(getTarget());
+        if (provider == null) {
+            // 宿主不是 Pigmee 时两端都不加槽，索引才不会错位。
+            return;
+        }
         if (!isClientSide()) tce$essentiaSupportEnabled = provider.essentiaSupportEnabled();
         var slot = new AppEngSlot(provider.essentiaCardInventory(), 0);
         slot.setIcon(appeng.client.gui.Icon.BACKGROUND_UPGRADE);

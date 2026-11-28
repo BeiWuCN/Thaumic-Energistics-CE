@@ -119,7 +119,7 @@ final class ChamberEssentiaTank {
         }
         for (AspectInstance entry : storage.contents().entries()) {
             Holder<IAspect> aspect = entry.aspect();
-            if (entry.amount() <= 0) {
+            if (entry.amount() <= 0 || !holdsOnly(aspect)) {
                 continue;
             }
             int taken = storage.extract(aspect, 1, false);
@@ -149,7 +149,7 @@ final class ChamberEssentiaTank {
             return false;
         }
         Holder<IAspect> aspect = tube.getEssentiaType(facing);
-        if (aspect == null) {
+        if (aspect == null || !holdsOnly(aspect)) {
             return false;
         }
         int taken = tube.takeEssentia(aspect, 1, facing);
@@ -158,6 +158,11 @@ final class ChamberEssentiaTank {
             return true;
         }
         return false;
+    }
+
+    /** 缓冲只有一个计数，装的是哪种要素由 {@link #currentAspect} 单独记；混装会让燃烧速率按另一种要素算。 */
+    boolean holdsOnly(Holder<IAspect> aspect) {
+        return storedEssentia <= 0 || currentAspect == null || currentAspect.equals(aspect);
     }
 
     /** 按给定要素取走装得下的量；缓冲仍按最后放入的要素读。 */
@@ -178,7 +183,7 @@ final class ChamberEssentiaTank {
     /** 一次填充能取走多少，已封顶；只有非模拟时才真正落账。 */
     int insert(Holder<IAspect> aspect, int amount, boolean simulate, boolean paused) {
         // 和抽取、吸力同一条规则：满槽什么都不收，不管从哪条路径来。
-        if (aspect == null || amount <= 0 || paused) {
+        if (aspect == null || amount <= 0 || paused || !holdsOnly(aspect)) {
             return 0;
         }
         // 下限取 0：保存的计数超过上限会算出负数，被读成「什么都没取」。

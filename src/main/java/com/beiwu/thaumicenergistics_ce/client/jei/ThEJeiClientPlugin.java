@@ -1,6 +1,8 @@
 package com.beiwu.thaumicenergistics_ce.client.jei;
 
+import appeng.client.gui.implementations.IOBusScreen;
 import appeng.client.gui.implementations.InterfaceScreen;
+import appeng.client.gui.implementations.StorageBusScreen;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
@@ -41,5 +43,10 @@ public class ThEJeiClientPlugin implements IModPlugin {
         // 这一行就覆盖了方块和线缆部件。
         registration.addGhostIngredientHandler(
                 InterfaceScreen.class, new EssentiaInterfaceGhostIngredientHandler());
+        // 存储总线与导入导出总线的配置槽：拖一个要素进去就设成过滤条件，省得从终端手动摆。
+        registration.addGhostIngredientHandler(
+                StorageBusScreen.class, new EssentiaBusGhostIngredientHandler<StorageBusScreen>());
+        registration.addGhostIngredientHandler(
+                IOBusScreen.class, new EssentiaBusGhostIngredientHandler<IOBusScreen>());
     }
 }
