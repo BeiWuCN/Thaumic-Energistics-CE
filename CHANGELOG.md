@@ -1,3 +1,17 @@
+# Thaumic Energistics CE 2.7.6.3 / Minecraft 1.21.1 / NeoForge
+
+## English
+
+- The ME Essentia Level Emitter now has a threshold input and a redstone mode toggle instead of an empty screen.
+- Its config slot accepts filled phials and essentia jars; clicking it with an empty hand clears it.
+- Essentia can be dragged from JEI into the config slot.
+
+## 中文
+
+- ME源质发信器补上阈值输入框与红石模式按钮，不再是空界面。
+- 配置槽接受装满源质的安瓿与源质罐，空手点击可清空。
+- 配置槽支持从 JEI 拖入要素。
+
 # Thaumic Energistics CE 2.7.6.2 / Minecraft 1.21.1 / NeoForge
 
 ## English

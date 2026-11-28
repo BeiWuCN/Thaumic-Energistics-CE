@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import com.beiwu.thaumicenergistics_ce.ThEIds;
 import com.beiwu.thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
 import com.beiwu.thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
+import com.beiwu.thaumicenergistics_ce.client.gui.ScreenEssentiaLevelEmitter;
 import com.beiwu.thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
 
 /**
@@ -48,5 +49,8 @@ public class ThEJeiClientPlugin implements IModPlugin {
                 StorageBusScreen.class, new EssentiaBusGhostIngredientHandler<StorageBusScreen>());
         registration.addGhostIngredientHandler(
                 IOBusScreen.class, new EssentiaBusGhostIngredientHandler<IOBusScreen>());
+        // 源质发信器的配置槽同理：槽里存的是要素，拖一个要素进去就设成它。
+        registration.addGhostIngredientHandler(
+                ScreenEssentiaLevelEmitter.class, new EssentiaLevelEmitterGhostIngredientHandler());
     }
 }

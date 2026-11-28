@@ -2,7 +2,6 @@ package com.beiwu.thaumicenergistics_ce.client;
 
 import appeng.api.client.AEKeyRendering;
 import appeng.api.client.StorageCellModels;
-import appeng.client.gui.implementations.UpgradeableScreen;
 import appeng.client.gui.style.StyleManager;
 import com.leclowndu93150.thaumaturge.client.model.entity.BrainModel;
 import net.minecraft.client.Minecraft;
@@ -22,6 +21,7 @@ import com.beiwu.thaumicenergistics_ce.client.gui.ScreenArcaneAssembler;
 import com.beiwu.thaumicenergistics_ce.client.gui.ScreenArcaneCraftingTerminal;
 import com.beiwu.thaumicenergistics_ce.client.gui.ScreenDistillationEncoder;
 import com.beiwu.thaumicenergistics_ce.client.gui.ScreenEssentiaCellWorkbench;
+import com.beiwu.thaumicenergistics_ce.client.gui.ScreenEssentiaLevelEmitter;
 import com.beiwu.thaumicenergistics_ce.client.gui.ScreenEssentiaTerminal;
 import com.beiwu.thaumicenergistics_ce.client.gui.ScreenEssentiaResonanceChamber;
 import com.beiwu.thaumicenergistics_ce.client.gui.ScreenKnowledgeInscriber;
@@ -195,7 +195,7 @@ public final class ClientSetup {
         event.register(
                 TECEMenuTypes.ESSENTIA_LEVEL_EMITTER.get(),
                 (MenuEssentiaLevelEmitter menu, Inventory inventory, Component title) ->
-                        new UpgradeableScreen<>(
-                                menu, inventory, title, StyleManager.loadStyleDoc("/screens/level_emitter.json")));
+                        new ScreenEssentiaLevelEmitter(
+                                menu, inventory, title, StyleManager.loadStyleDoc("/screens/essentia_level_emitter.json")));
     }
 }
